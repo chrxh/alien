@@ -17,7 +17,7 @@ public:
         auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
         for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
             auto const& cell = cluster->cellPointers[cellIndex];
-            atomicAdd_block(&result, cell->energy);
+            atomicAdd_block(&result, cell->getEnergy());
         }
         auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
@@ -57,12 +57,12 @@ public:
                 }
             }
 
-            if (cell->energy < 0) {
-                printf("negative cell energy: %f\n", cell->energy);
+            if (cell->getEnergy() < 0) {
+                printf("negative cell energy: %f\n", cell->getEnergy());
                 STOP(a, b)
             }
-            if (cell->energy > 100000000) {
-                printf("cell energy too high: %f\n", cell->energy);
+            if (cell->getEnergy() > 100000000) {
+                printf("cell energy too high: %f\n", cell->getEnergy());
                 STOP(a, b)
             }
             if (cell->numConnections > cell->maxConnections) {

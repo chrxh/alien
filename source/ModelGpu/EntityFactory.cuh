@@ -98,7 +98,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         _map.mapDisplacementCorrection(r);
         cell.vel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
 
-        cell.energy = cellTO.energy;
+        cell.setEnergy(cellTO.energy);
         cell.branchNumber = cellTO.branchNumber;
         cell.tokenBlocked = cellTO.tokenBlocked;
         cell.maxConnections = cellTO.maxConnections;
@@ -225,7 +225,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->absPos = pos;
     cell->relPos = {0.0f, 0.0f};
     cell->vel = vel;
-    cell->energy = energy;
+    cell->setEnergy(energy);
     cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
     cell->cluster = cluster;
     cell->branchNumber = _data->numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);

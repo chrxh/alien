@@ -75,7 +75,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 CellAccessTO& cellTO = cellTOs[cellIndex];
                 cellTO.id = cell.id;
                 cellTO.pos = cell.absPos;
-                cellTO.energy = cell.energy;
+                cellTO.energy = cell.getEnergy();
                 cellTO.maxConnections = cell.maxConnections;
                 cellTO.numConnections = cell.numConnections;
                 cellTO.branchNumber = cell.branchNumber;

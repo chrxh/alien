@@ -34,11 +34,11 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
             }
             if (otherCell->tryLock()) {
                 auto const energyToTransfer =
-                    otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
-                if (otherCell->energy > energyToTransfer) {
-                    otherCell->energy -= energyToTransfer;
+                    otherCell->getEnergy() * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+                if (otherCell->getEnergy() > energyToTransfer) {
+                    otherCell->changeEnergy(-energyToTransfer);
                     token->energy += energyToTransfer / 2.0f;
-                    cell->energy += energyToTransfer / 2.0f;
+                    cell->changeEnergy(energyToTransfer / 2.0f);
                     token->memory[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                 }
                 otherCell->releaseLock();
