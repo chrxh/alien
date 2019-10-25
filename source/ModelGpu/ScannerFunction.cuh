@@ -16,11 +16,11 @@ private:
     struct SpiralLookupResult
     {
         bool finish;
-        Cell const* cell;
-        Cell const* prevCell;
-        Cell const* prevPrevCell;
+        Cell * cell;
+        Cell * prevCell;
+        Cell * prevPrevCell;
     };
-    __device__ static SpiralLookupResult spiralLookupAlgorithm(int depth, Cell const* cell, Cell const* sourceCell);
+    __device__ static SpiralLookupResult spiralLookupAlgorithm(int depth, Cell * cell, Cell * sourceCell);
 };
 
 /************************************************************************/
@@ -114,13 +114,13 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
 
 }
 
-__device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell const* cell, Cell const* sourceCell)
+__device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell * cell, Cell * sourceCell)
     -> SpiralLookupResult
 {
     SpiralLookupResult result;
 
-    Cell const* visitedCellData[256*2];
-    HashSet<Cell const*> visitedCell(depth*2, visitedCellData);
+    Cell * visitedCellData[256*2];
+    HashSet<Cell *> visitedCell(depth*2, visitedCellData);
 
     result.cell = cell;
     result.prevCell = sourceCell;
