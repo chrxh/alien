@@ -71,7 +71,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
             cluster->tagCellByIndex_blockCall(cellBlock);
 
             for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-                Cell const& cell = *cluster->cellPointers[cellIndex];
+                Cell& cell = *cluster->cellPointers[cellIndex];
                 CellAccessTO& cellTO = cellTOs[cellIndex];
                 cellTO.id = cell.id;
                 cellTO.pos = cell.absPos;
