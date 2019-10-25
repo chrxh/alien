@@ -196,8 +196,8 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
                 connectingCell->getLock();
             }
 
-            auto const availableTokenEnergyForCell = token->getEnergy() / numFreePlaces;
             auto const tokenEnergy = token->getEnergy();
+            auto const sharedEnergyFromPrevToken = tokenEnergy / numFreePlaces;
             auto remainingTokenEnergyForCell = tokenEnergy;
             auto tokenRecycled = false;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
@@ -229,14 +229,14 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
                 }
                 newTokenPointers[tokenIndex] = newToken;
 
-                if (connectingCell->getEnergy() > cudaSimulationParameters.cellMinEnergy + tokenEnergy - availableTokenEnergyForCell) {
+                if (connectingCell->getEnergy() > cudaSimulationParameters.cellMinEnergy + tokenEnergy - sharedEnergyFromPrevToken) {
                     newToken->setEnergy(tokenEnergy);
-                    connectingCell->changeEnergy(-(tokenEnergy - availableTokenEnergyForCell));
+                    connectingCell->changeEnergy(-(tokenEnergy - sharedEnergyFromPrevToken));
                 }
                 else {
-                    newToken->setEnergy(availableTokenEnergyForCell);
+                    newToken->setEnergy(sharedEnergyFromPrevToken);
                 }
-                remainingTokenEnergyForCell -= availableTokenEnergyForCell;
+                remainingTokenEnergyForCell -= sharedEnergyFromPrevToken;
             }
             if (remainingTokenEnergyForCell > 0) {
                 cell->changeEnergy(remainingTokenEnergyForCell);
