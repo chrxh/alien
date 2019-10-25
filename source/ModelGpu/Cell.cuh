@@ -34,19 +34,19 @@ struct Cell
     int alive;  //0 = dead, 1 == alive
     int tag;
 
-    __device__ __inline__ void changeEnergy(float changeValue)
-    {
-        atomicAdd(&_energy, changeValue);
-    }
-
     __device__ __inline__ void setEnergy(float value)
     {
         atomicExch(&_energy, value);
     }
 
-    __device__ __inline__ float getEnergy() const
+    __device__ __inline__ void changeEnergy(float changeValue, int parameter, float parameterFloat = 0)
     {
-        return _energy;
+        atomicAdd(&_energy, changeValue);
+    }
+
+    __device__ __inline__ float getEnergy()
+    {
+        return atomicAdd(&_energy, 0);
     }
 
     __device__ __inline__ void getLock()
