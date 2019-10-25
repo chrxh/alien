@@ -9,7 +9,8 @@ class WeaponGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    WeaponGpuTests() : IntegrationGpuTestFramework({ 50, 50 })
+    WeaponGpuTests(IntVector2D const& universeSize = {50, 50}, optional<ModelGpuData> const& modelData = boost::none)
+        : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
     virtual ~WeaponGpuTests() = default;
@@ -31,7 +32,6 @@ protected:
     //creates 2x2 clusters, maxBonds should be 4
     ClusterDescription createRectangularWeaponCluster(QVector2D const& pos, QVector2D const& vel);
 };
-
 
 void WeaponGpuTests::SetUp()
 {
@@ -145,7 +145,7 @@ TEST_F(WeaponGpuTests, testDoubleStrike)
 TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
 {
     _parameters.cellFusionVelocity = 100;    //exclude fusion
-    _parameters.cellMaxBonds = 4;
+    _parameters.cellMaxTokenBranchNumber = 4;
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;
@@ -162,4 +162,3 @@ TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
 
     checkEnergy(origData, newData);
 }
-
