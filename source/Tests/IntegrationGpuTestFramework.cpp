@@ -123,7 +123,8 @@ double IntegrationGpuTestFramework::calcEnergy(DataDescription const & data) con
 	}
 	if (data.particles) {
 		for (auto const& particle : *data.particles) {
-			result += *particle.energy;
+            EXPECT_LE(0, *particle.energy);
+            result += *particle.energy;
 		}
 	}
 
@@ -135,9 +136,11 @@ double IntegrationGpuTestFramework::calcEnergy(ClusterDescription const & cluste
 	auto result = calcKineticEnergy(cluster);
 	if (cluster.cells) {
         for (CellDescription const& cell : *cluster.cells) {
+            EXPECT_LE(0, *cell.energy);
             result += *cell.energy;
             if (cell.tokens) {
                 for (TokenDescription const& token : *cell.tokens) {
+                    EXPECT_LE(0, *token.energy);
                     result += *token.energy;
                 }
             }
