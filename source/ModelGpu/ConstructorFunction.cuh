@@ -1421,6 +1421,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
             && isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
             establishConnection(cell, newCell, adaptMaxConnections);
         }
+        __threadfence_block();
         newCell->releaseBlockLock();
     }
 }
