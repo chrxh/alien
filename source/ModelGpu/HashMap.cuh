@@ -22,7 +22,9 @@ public:
         for (int i = threadBlock.startIndex; i <= threadBlock.endIndex; ++i) {
             _entries[i].setFree(0);
             _entries[i].initLock();
+/*
             _entries[i]._who = -1;
+*/
         }
         __syncthreads();
     }
@@ -78,11 +80,15 @@ public:
     __device__ __inline__ Value at(Key const& key)
     {
         int index = _hash(key) % _size;
+/*
         int dummy = 0;
+*/
         do {
+/*
             if (++dummy == _size) {
                 printf("OHHHH at!: %d\n", _size); while (true) {}
             }
+*/
             auto& entry = _entries[index];
             entry.getLock(3);
             if (0 == entry.getFree()) {
@@ -149,26 +155,34 @@ private:
 
         __device__ __inline__ void getLock(int parameter)
         {
+/*
             int i = 0;
+*/
             while (1 == atomicExch_block(&_locked, 1)) {
-
+/*
                 if (++i == 100) {
                     printf("wait: %d\n", atomicAdd_block(&_who,0));
                 }
-
+*/
             }
+/*
             _who = parameter;
+*/
             __threadfence_block();
         }
 
         __device__ __inline__ void releaseLock()
         {
+/*
             _who = 0;
+*/
             __threadfence_block();
             atomicExch_block(&_locked, 0);
         }
 
+/*
         int _who;
+*/
     private:
         int _free;   //0 = free, 1 = used
         int _locked;	//0 = unlocked, 1 = locked
