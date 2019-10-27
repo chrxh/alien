@@ -65,6 +65,10 @@ public:
                 printf("cell energy too high: %f\n", cell->getEnergy());
                 STOP(a, b)
             }
+            if (isnan(cell->getEnergy())) {
+                printf("nan cell energy: %f\n", cell->getEnergy());
+                STOP(a, b)
+            }
             if (cell->numConnections > cell->maxConnections) {
                 printf("numConnections > maxConnections\n");
                 STOP(a, b)
@@ -123,15 +127,17 @@ public:
                 printf("negative token energy: %f\n", token->getEnergy());
                 STOP(a, b)
             }
-
             if (token->getEnergy() > 100000000) {
                 printf("token energy too high: %f\n", token->getEnergy());
+                STOP(a, b)
+            }
+            if (isnan(token->getEnergy())) {
+                printf("nan token energy: %f\n", token->getEnergy());
                 STOP(a, b)
             }
         }
     }
 
-private:
     template<typename T>
     __inline__ __device__ static bool checkPointer(T* pointer, Array<T> array)
     {
