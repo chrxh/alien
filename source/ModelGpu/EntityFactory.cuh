@@ -25,7 +25,7 @@ public:
     __inline__ __device__ Particle* createParticleFromTO(
         ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
     __inline__ __device__ Particle*
-    createParticle(float energy, float2 const& pos, float2 const& vel);  //TODO: not adding to simulation!
+    createParticle(float energy, float2 const& pos, float2 const& vel, int parameter);  //TODO: not adding to simulation!
     __inline__ __device__ void createClusterFromTO_blockCall(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
@@ -190,7 +190,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     particle->absPos = particleTO.pos;
     _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
-    particle->energy = particleTO.energy;
+    particle->setEnergy(particleTO.energy, 2);
     particle->locked = 0;
     particle->alive = 1;
     return particle;
@@ -259,7 +259,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->age = 0;
 }
 
-__inline__ __device__ Particle* EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Particle* EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int parameter)
 {
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
@@ -267,7 +267,7 @@ __inline__ __device__ Particle* EntityFactory::createParticle(float energy, floa
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
     particle->alive = 1;
-    particle->energy = energy;
+    particle->setEnergy(energy, parameter);
     particle->absPos = pos;
     particle->vel = vel;
     return particle;
