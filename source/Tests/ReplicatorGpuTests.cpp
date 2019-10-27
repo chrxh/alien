@@ -47,8 +47,9 @@ void ReplicatorGpuTests::SetUp()
 /**
 * Situation: many advanced replicators
 * Expected result: no crash
-* Fixed error: energy is never negative in cells (is not checked here but can be checked in Cell::changeEnergy)
-* Todo: crash in Constructor occurrs in rare cases
+* Fixed errors:
+*   - energy is never negative in cells (is not checked here but can be checked in Cell::changeEnergy)
+*   - constructor accessed connections of cells from other clusters with no locking
 */
 TEST_F(ReplicatorGpuTests, regressionTestNoCrash)
 {
