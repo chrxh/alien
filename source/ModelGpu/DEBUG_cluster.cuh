@@ -104,6 +104,12 @@ public:
                     if (connectingConnectingCell == cell) {
                         found = true;
                     }
+
+                    if (!checkPointer(connectingConnectingCell, data->entities.cells)) {
+                        printf("wrong cell pointer pointer\n");
+                        STOP(a, b);
+                    }
+
                 }
                 if (!found) {
                     printf("cells are only connected in one way\n");
@@ -141,6 +147,17 @@ public:
     template<typename T>
     __inline__ __device__ static bool checkPointer(T* pointer, Array<T> array)
     {
-        return array.getEntireArray() <= pointer && pointer < (array.getEntireArray() + array.getNumEntries());
+        if (array.getEntireArray() <= pointer && pointer < (array.getEntireArray() + array.getNumEntries())) {
+            return true;
+        }
+        else {
+            printf(
+                "boundary check failed. pointer %llu not in interval [%llu, %llu). Array size: %d\n",
+                (uintptr_t)(pointer),
+                (uintptr_t)(array.getEntireArray()),
+                (uintptr_t)(array.getEntireArray() + array.getNumEntries()),
+                array.getNumEntries());
+            return false;
+        }
     }
 };

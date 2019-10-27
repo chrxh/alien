@@ -135,28 +135,18 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.particleMap.reset();
     data.arrays.reset();
 
-     printf("STEP 1\n");
     MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-     printf("STEP 2\n");
     MULTI_CALL(tokenProcessingStep1, data);
-     printf("STEP 3\n");
     MULTI_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-     printf("STEP 4\n");
     MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-     printf("STEP 5\n");
     MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-     printf("STEP 6\n");
     MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-     printf("STEP 7\n");
     particleProcessingStep1 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
-     printf("STEP 8\n");
     particleProcessingStep2 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
-     printf("STEP 9\n");
     particleProcessingStep3 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
-     printf("STEP 10\n");
 
     cleanup << <1, 1 >> > (data);
     cudaDeviceSynchronize();
