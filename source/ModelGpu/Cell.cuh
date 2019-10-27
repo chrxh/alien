@@ -86,7 +86,6 @@ struct Cell
 
     __device__ __inline__ void releaseLock()
     {
-        __threadfence();
         atomicExch(&locked, 0);
     }
 
@@ -102,7 +101,6 @@ struct Cell
 
     __device__ __inline__ void releaseBlockLock()
     {
-        __threadfence_block();
         atomicExch_block(&locked, 0);
     }
 
