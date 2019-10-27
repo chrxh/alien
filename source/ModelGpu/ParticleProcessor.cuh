@@ -70,11 +70,12 @@ __inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
                     continue;
                 }
 
-                float factor1 = particle->energy / (particle->energy + otherParticle->energy);
+                auto const particleEnergy = particle->getEnergy();
+                float factor1 = particleEnergy / (particleEnergy + otherParticle->getEnergy());
                 float factor2 = 1.0f - factor1;
                 particle->vel = particle->vel * factor1 + otherParticle->vel * factor2;
-                particle->energy += otherParticle->energy;
-                otherParticle->energy = 0;
+                particle->changeEnergy(otherParticle->getEnergy());
+                otherParticle->setEnergy(0, 1);
                 atomicExch(&otherParticle->alive, 0);
 
                 lock.releaseLock();
@@ -88,7 +89,7 @@ __inline__ __device__ void ParticleProcessor::processingTransformation_gridCall(
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
             Particle* particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
-            auto innerEnergy = particle->energy - Physics::linearKineticEnergy(1.0f, particle->vel);
+            auto innerEnergy = particle->getEnergy()- Physics::linearKineticEnergy(1.0f, particle->vel);
             if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {
                 EntityFactory factory;
                 factory.init(_data);
@@ -109,7 +110,7 @@ __inline__ __device__ void ParticleProcessor::processingDataCopy_gridCall()
 		}
         if (auto cell = _data->cellMap.get(particle->absPos)) {
 			if (1 == cell->alive) {
-                cell->changeEnergy(particle->energy);
+                cell->changeEnergy(particle->getEnergy(), 1);
                 particle = nullptr;
 			}
 		}

@@ -109,7 +109,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     Math::normalize(impulse);
     auto particlePos = cell->absPos - impulse;
     auto particleVel = tangVel - impulse / 4.0f;
-    factory.createParticle(abs(energyDiff), particlePos, particleVel);
+    factory.createParticle(abs(energyDiff), particlePos, particleVel, 33);
 
     token->changeEnergy(-(energyDiff + abs(energyDiff)));
     tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
