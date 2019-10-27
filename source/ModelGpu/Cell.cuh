@@ -36,17 +36,42 @@ struct Cell
 
     __device__ __inline__ void setEnergy(float value)
     {
+        if (value < 0) {
+            printf("Cell::setEnergy negative, value: %f\n", value);
+            while (true) {}
+        }
+        if (isnan(value)) {
+            printf("Cell::setEnergy nan, value: %f\n", value);
+            while (true) {}
+        }
         atomicExch(&_energy, value);
     }
 
-    __device__ __inline__ void changeEnergy(float changeValue)
+    __device__ __inline__ void changeEnergy(float changeValue, int parameter = -1)
     {
-        atomicAdd(&_energy, changeValue);
+        auto const origValue = atomicAdd(&_energy, changeValue);
+        if (getEnergy() < 0) {
+            printf("Cell::changeEnergy negative, before: %f, after: %f, change: %f, parameter: %d\n", origValue, getEnergy(), changeValue, parameter);
+            while (true) {}
+        }
+        if (isnan(getEnergy())) {
+            printf("Cell::changeEnergy nan, before: %f, after: %f, change: %f, parameter: %d\n", origValue, getEnergy(), changeValue, parameter);
+            while (true) {}
+        }
     }
 
     __device__ __inline__ float getEnergy()
     {
-        return atomicAdd(&_energy, 0);
+        auto const value = atomicAdd(&_energy, 0);
+        if (value < 0) {
+            printf("Cell::getEnergy negative, value: %f, parameter: \n", value);
+            while (true) {}
+        }
+        if (isnan(value)) {
+            printf("Cell::getEnergy nan, value: %f, parameter: \n", value);
+            while (true) {}
+        }
+        return value;
     }
 
     __device__ __inline__ void getLock()
