@@ -76,7 +76,7 @@ private:
         RotationMatrices const& rotationMatrices,
         float2 const& displacementOfConstructionSite,
         float& result);
-    __inline__ __device__ void calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell, float& result);
+    __inline__ __device__ void calcAngularMassAfterAddingCell(float2 const& relPosOfNewCell, float& result);
     __inline__ __device__ EnergyForNewEntities adaptEnergies(Token* token, float energyLoss);
 
 
@@ -146,6 +146,16 @@ private:
     __inline__ __device__ void establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConnections adaptMaxConnections);
 
 private:
+    __inline__ __device__ Cell*& check(Cell*& entity, int p);
+    __inline__ __device__ Cell* check(Cell*&& entity);
+    __inline__ __device__ Cell**& check(Cell**& entity);
+    __inline__ __device__ Cell** check(Cell**&& entity);
+    __inline__ __device__ Cluster* check(Cluster* entity);
+    __inline__ __device__ Token*& check(Token*& entity);
+    __inline__ __device__ Token**& check(Token**& entity);
+    __inline__ __device__ Token** check(Token**&& entity);
+    __inline__ __device__ int check(int index, int arraySize);
+
     SimulationData* _data;
     Token* _token;
     Cluster* _cluster;
@@ -207,6 +217,7 @@ __inline__ __device__ void ConstructorFunction::init_blockCall(Token* token, Sim
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
 }
 
+
 __inline__ __device__ void ConstructorFunction::checkMaxRadius(bool& result)
 {
     __shared__ float maxRadius;
@@ -216,7 +227,7 @@ __inline__ __device__ void ConstructorFunction::checkMaxRadius(bool& result)
     }
     __syncthreads();
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex], 1);
         if (Math::length(cell->relPos) >= maxRadius - FP_PRECISION) {
             result = false;
             return;
@@ -232,9 +243,9 @@ __inline__ __device__ bool ConstructorFunction::checkDistance(float distance)
 __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite()
 {
     Cell* result = nullptr;
-    auto const& cell = _token->cell;
+    auto const& cell = check(_token->cell, 2);
     for (int i = 0; i < cell->numConnections; ++i) {
-        auto const& connectingCell = cell->connections[i];
+        auto const& connectingCell = check(cell->connections[check(i, MAX_CELL_BONDS)],48);
         if (connectingCell->tokenBlocked) {
             result = connectingCell;
         }
@@ -244,7 +255,7 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
 
 __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* firstCellOfConstructionSite)
 {
-    auto const& cell = _token->cell;
+    auto const& cell = check(_token->cell, 3);
     tagConstructionSite(cell, firstCellOfConstructionSite);
     __syncthreads();
 
@@ -304,7 +315,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(Cell* first
 
 __inline__ __device__ void ConstructorFunction::startNewConstruction()
 {
-    auto const& cell = _token->cell;
+    auto const& cell = check(_token->cell,4);
     auto const adaptMaxConnections = isAdaptMaxConnections(_token);
 
     if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)) {
@@ -359,7 +370,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
     }
     __syncthreads();
 
-    calcAngularMassAfterAddingCell(_cluster, relPosOfNewCell, angularMassAfterRotation);
+    calcAngularMassAfterAddingCell(relPosOfNewCell, angularMassAfterRotation);
     __syncthreads();
 
     if (0 == threadIdx.x) {
@@ -384,7 +395,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
 
     __shared__ Cell** newCellPointers;
     if (0 == threadIdx.x) {
-        newCellPointers = _data->entities.cellPointers.getNewSubarray(_cluster->numCellPointers + 1);
+        newCellPointers = check(_data->entities.cellPointers.getNewSubarray(_cluster->numCellPointers + 1));
     }
     __syncthreads();
 
@@ -424,7 +435,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
             
         __shared__ Token** newTokenPointers;
         if (0 == threadIdx.x) {
-            newTokenPointers = _data->entities.tokenPointers.getNewSubarray(_cluster->numTokenPointers + 1);
+            newTokenPointers = check(_data->entities.tokenPointers.getNewSubarray(_cluster->numTokenPointers + 1));
         }
         __syncthreads();
 
@@ -516,7 +527,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     Angles const& anglesToRotate,
     float desiredAngle)
 {
-    auto const& cell = _token->cell;
+    auto const& cell = check(_token->cell,5);
 
     auto const adaptMaxConnections = isAdaptMaxConnections(_token);
     if (1 == _token->getMaxConnectionsForConstructor()) {
@@ -616,7 +627,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     __shared__ Cell** newCellPointers;
     if (0 == threadIdx.x) {
-        newCellPointers = _data->entities.cellPointers.getNewSubarray(_cluster->numCellPointers + 1);
+        newCellPointers = check(_data->entities.cellPointers.getNewSubarray(_cluster->numCellPointers + 1));
     }
     __syncthreads();
 
@@ -656,11 +667,12 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
         __shared__ Token** newTokenPointers;
         if (0 == threadIdx.x) {
-            newTokenPointers = _data->entities.tokenPointers.getNewSubarray(_cluster->numTokenPointers + 1);
+            newTokenPointers = check(_data->entities.tokenPointers.getNewSubarray(_cluster->numTokenPointers + 1));
         }
         __syncthreads();
 
         addTokenToCluster(newToken, newTokenPointers);
+        __syncthreads();
     }
 
     if (0 == threadIdx.x) {
@@ -676,7 +688,7 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, floa
     result.token = 0.0f;
     result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
 
-    auto const& cell = token->cell;
+    auto const& cell = check(token->cell,6);
     auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
 
     if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
@@ -704,7 +716,7 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, floa
 __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCell, Cell* firstCellOfConstructionSite)
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto& cell = _cluster->cellPointers[cellIndex];
+        auto& cell = check(_cluster->cellPointers[cellIndex],7);
         cell->tag = ClusterComponent::Constructor;
     }
     __syncthreads();
@@ -723,7 +735,7 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
 */
         do {
             for (int i = 0; i < currentCell->numConnections; ++i) {
-                auto const& connectingCell = currentCell->connections[i];
+                auto const& connectingCell = check(currentCell->connections[check(i, MAX_CELL_BONDS)],8);
                 if (connectingCell != baseCell) {
                     auto const origTag = atomicExch_block(&connectingCell->tag, ClusterComponent::ConstructionSite);
                     if (ClusterComponent::Constructor == origTag) {
@@ -738,15 +750,15 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
                 break;
             }
             int connectingCellIndex = threadIdx.x % currentCell->numConnections;
-            if (currentCell->connections[connectingCellIndex] == baseCell) {
+            if (check(currentCell->connections[check(connectingCellIndex, MAX_CELL_BONDS)],9) == baseCell) {
                 connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
             }
-            if (currentCell->connections[connectingCellIndex] == prevCell) {
+            if (check(currentCell->connections[check(connectingCellIndex, MAX_CELL_BONDS)], 10) == prevCell) {
                 connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
             }
-            if (currentCell->connections[connectingCellIndex] != baseCell) {
-                prevCell = currentCell;
-                currentCell = currentCell->connections[connectingCellIndex];
+            if (check(currentCell->connections[check(connectingCellIndex, MAX_CELL_BONDS)],11) != baseCell) {
+                prevCell = check(currentCell,12);
+                currentCell = check(currentCell->connections[check(connectingCellIndex, MAX_CELL_BONDS)],13);
             }
             else {
                 break;
@@ -764,9 +776,9 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
         __syncthreads();
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto& cell = _cluster->cellPointers[cellIndex];
+            auto& cell = check(_cluster->cellPointers[cellIndex],14);
             for (int i = 0; i < cell->numConnections; ++i) {
-                auto& otherCell = cell->connections[i];
+                auto& otherCell = check(cell->connections[check(i, MAX_CELL_BONDS)],49);
                 if (otherCell->tag > cell->tag) {
                     if ((cell == firstCellOfConstructionSite && otherCell == baseCell)
                         || (cell == baseCell && otherCell == firstCellOfConstructionSite)) {
@@ -788,7 +800,7 @@ __inline__ __device__ void ConstructorFunction::calcMaxAngles(Cell* construction
     }
     __syncthreads();
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],15);
         auto const r = Math::length(cell->relPos - constructionCell->relPos);
 
         if (cudaSimulationParameters.cellMaxDistance < 2 * r) {
@@ -811,7 +823,7 @@ __inline__ __device__ void ConstructorFunction::calcAngularMasses(Cluster* clust
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const& cell = check(cluster->cellPointers[cellIndex],16);
         auto const angularMassElement = Math::lengthSquared(cell->relPos - firstCellOfConstructionSite->relPos);
         if (ClusterComponent::Constructor == cell->tag) {
             atomicAdd_block(&result.constructor, angularMassElement);
@@ -835,24 +847,24 @@ __inline__ __device__ float ConstructorFunction::calcFreeAngle(Cell* cell)
     auto const numConnections = cell->numConnections;
     float angles[MAX_CELL_BONDS];
     for (int i = 0; i < numConnections; ++i) {
-        auto const displacement = cell->connections[i]->relPos - cell->relPos;
+        auto const displacement = check(cell->connections[check(i, MAX_CELL_BONDS)],17)->relPos - cell->relPos;
         auto const angleToAdd = Math::angleOfVector(displacement);
         auto indexToAdd = 0;
         for (; indexToAdd < i; ++indexToAdd) {
-            if (angles[indexToAdd] > angleToAdd) {
+            if (angles[check(indexToAdd, MAX_CELL_BONDS)] > angleToAdd) {
                 break;
             }
         }
         for (int j = indexToAdd; j < numConnections - 1; ++j) {
-            angles[j + 1] = angles[j];
+            angles[check(j + 1, MAX_CELL_BONDS)] = angles[j];
         }
-        angles[indexToAdd] = angleToAdd;
+        angles[check(indexToAdd, MAX_CELL_BONDS)] = angleToAdd;
     }
 
     auto largestAnglesDiff = 0.0f;
     auto result = 0.0f;
     for (int i = 0; i < numConnections; ++i) {
-        auto angleDiff = angles[(i + 1) % numConnections] - angles[i];
+        auto angleDiff = angles[check((i + 1) % numConnections, MAX_CELL_BONDS)] - angles[i];
         if (angleDiff <= 0.0f) {
             angleDiff += 360.0f;
         }
@@ -861,7 +873,7 @@ __inline__ __device__ float ConstructorFunction::calcFreeAngle(Cell* cell)
         }
         if (angleDiff > largestAnglesDiff) {
             largestAnglesDiff = angleDiff;
-            result = angles[i] + angleDiff / 2;
+            result = angles[check(i, MAX_CELL_BONDS)] + angleDiff / 2;
         }
     }
 
@@ -920,7 +932,7 @@ __inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformati
     __syncthreads();
 
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],18);
         auto cellRelPosTransformed =
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         atomicAdd_block(&center.x, cellRelPosTransformed.x);
@@ -935,7 +947,7 @@ __inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformati
     __syncthreads();
 
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],19);
         auto cellRelPosTransformed =
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         atomicAdd_block(&result, Math::lengthSquared(cellRelPosTransformed - center));
@@ -944,7 +956,7 @@ __inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformati
 }
 
 __inline__ __device__ void
-ConstructorFunction::calcAngularMassAfterAddingCell(Cluster* cluster, float2 const& relPosOfNewCell, float& result)
+ConstructorFunction::calcAngularMassAfterAddingCell(float2 const& relPosOfNewCell, float& result)
 {
     __shared__ float2 center;
     if (0 == threadIdx.x) {
@@ -953,20 +965,20 @@ ConstructorFunction::calcAngularMassAfterAddingCell(Cluster* cluster, float2 con
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],20);
         atomicAdd_block(&center.x, cell->relPos.x);
         atomicAdd_block(&center.y, cell->relPos.y);
     }
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        center = center / cluster->numCellPointers;
+        center = center / _cluster->numCellPointers;
         result = Math::lengthSquared(relPosOfNewCell - center);
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],21);
         result += Math::lengthSquared(cell->relPos - center);
     }
 }
@@ -979,7 +991,7 @@ __inline__ __device__ void ConstructorFunction::transformClusterComponents(
     float rotMatrix[2][2];
     Math::rotationMatrix(_cluster->angle, rotMatrix);
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex;  ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],22);
         cell->relPos =
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementForConstructionSite);
         cell->absPos = Math::applyMatrix(cell->relPos, rotMatrix) + _cluster->pos;
@@ -995,7 +1007,7 @@ __inline__ __device__ void ConstructorFunction::adaptRelPositions()
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],23);
         atomicAdd_block(&newCenter.x, cell->relPos.x);
         atomicAdd_block(&newCenter.y, cell->relPos.y);
     }
@@ -1007,7 +1019,7 @@ __inline__ __device__ void ConstructorFunction::adaptRelPositions()
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],24);
         cell->relPos = cell->relPos - newCenter;
     }
 }
@@ -1016,7 +1028,7 @@ __inline__ __device__ void ConstructorFunction::completeCellAbsPosAndVel()
 {
     Math::Matrix rotationMatrix;
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto& cell = _cluster->cellPointers[cellIndex];
+        auto& cell = check(_cluster->cellPointers[cellIndex],25);
         Math::rotationMatrix(_cluster->angle, rotationMatrix);
         cell->absPos = Math::applyMatrix(cell->relPos, rotationMatrix) + _cluster->pos;
 
@@ -1059,7 +1071,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],26);
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
         atomicAdd_block(&newCenter.x, relPos.x);
         atomicAdd_block(&newCenter.y, relPos.y);
@@ -1075,7 +1087,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
 
     if (!ignoreOwnCluster) {
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = _cluster->cellPointers[cellIndex];
+            auto const& cell = check(_cluster->cellPointers[cellIndex],27);
             auto relPos =
                 getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
             relPos = relPos - newCenter;
@@ -1086,7 +1098,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],28);
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
         relPos = relPos - newCenter;
         auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
@@ -1117,7 +1129,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],29);
         auto relPos =
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         atomicAdd_block(&newCenter.x, relPos.x);
@@ -1134,7 +1146,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
 
     if (!ignoreOwnCluster) {
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = _cluster->cellPointers[cellIndex];
+            auto const& cell = check(_cluster->cellPointers[cellIndex],30);
             auto relPos =
                 getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
             relPos = relPos - newCenter;
@@ -1145,7 +1157,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],31);
         auto relPos =
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
         relPos = relPos - newCenter;
@@ -1174,7 +1186,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     __syncthreads();
 
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],32);
         atomicAdd_block(&newCenter.x, cell->relPos.x);
         atomicAdd_block(&newCenter.y, cell->relPos.y);
     }
@@ -1189,7 +1201,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
 
     if (!ignoreOwnCluster) {
         for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = _cluster->cellPointers[cellIndex];
+            auto const& cell = check(_cluster->cellPointers[cellIndex],33);
             auto const relPos = cell->relPos - newCenter;
             auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
             tempCellMap.insertOrAssign(toInt2(absPos), CellAndNewAbsPos{ cell, absPos });
@@ -1198,7 +1210,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     __syncthreads();
 
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],34);
         auto const relPos = cell->relPos - newCenter;
         auto const absPos = _cluster->pos + Math::applyMatrix(relPos, clusterMatrix);
         if (isObstaclePresent_helper(ignoreOwnCluster, cell, absPos, tempCellMap)) {
@@ -1227,28 +1239,36 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
             float2 const lookupPos = {absPos.x + dx, absPos.y + dy};
-            if (auto const otherCell = map.get(lookupPos)) {
-                if (_cluster != otherCell->cluster) {
+            if (auto otherCell = map.get(lookupPos)) {
+                check(otherCell,35);
+                if (_cluster != check(otherCell->cluster)) {
                     if (map.mapDistance(otherCell->absPos, absPos) < cudaSimulationParameters.cellMinDistance) {
                         return true;
                     }
 
                     //check also connected cells
-                    for (int i = 0; i < otherCell->numConnections; ++i) {
-                        auto const connectedOtherCell = otherCell->connections[i];
-                        if (map.mapDistance(connectedOtherCell->absPos, absPos)
-                            < cudaSimulationParameters.cellMinDistance) {
-                            return true;
+                    if (otherCell->tryLock()) {
+                        __threadfence();
+                        for (int i = 0; i < otherCell->numConnections; ++i) {
+                            auto const connectedOtherCell = check(otherCell->connections[check(i, MAX_CELL_BONDS)], 36);
+                            if (map.mapDistance(connectedOtherCell->absPos, absPos)
+                                < cudaSimulationParameters.cellMinDistance) {
+                                __threadfence();
+                                otherCell->releaseLock();
+                                return true;
+                            }
                         }
+                        __threadfence();
+                        otherCell->releaseLock();
                     }
                 }
             }
             if (!ignoreOwnCluster) {
                 auto const lookupPosInt = toInt2(lookupPos);
                 if (tempMap.contains(lookupPosInt)) {
-                    auto const otherCellAndNewPos = tempMap.at(lookupPosInt);
+                    auto otherCellAndNewPos = tempMap.at(lookupPosInt);
 
-                    if (cell != otherCellAndNewPos.cell) {
+                    if (cell != check(otherCellAndNewPos.cell,37)) {
                         if (map.mapDistance(otherCellAndNewPos.newAbsPos, absPos)
                             < cudaSimulationParameters.cellMinDistance) {
                             return true;
@@ -1268,7 +1288,7 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
     if (0 == threadIdx.x) {
         EntityFactory factory;
         factory.init(_data);
-        result = factory.createCell(_cluster);
+        result = check(factory.createCell(_cluster));
         result->setEnergy(energyOfNewCell);
         result->relPos = relPosOfNewCell;
         float rotMatrix[2][2];
@@ -1291,11 +1311,11 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
 
     auto const staticDataBlock = calcPartition(result->numStaticBytes, threadIdx.x, blockDim.x);
     for (int i = staticDataBlock.startIndex; i <= staticDataBlock.endIndex; ++i) {
-        result->staticData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1) % MAX_TOKEN_MEM_SIZE];
+        result->staticData[i] = _token->memory[check((Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1) % MAX_TOKEN_MEM_SIZE, MAX_TOKEN_MEM_SIZE)];
     }
     auto const mutableDataBlock = calcPartition(result->numMutableBytes, threadIdx.x, blockDim.x);
     for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
-        result->mutableData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
+        result->mutableData[i] = _token->memory[check((Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE, MAX_TOKEN_MEM_SIZE)];
     }
 }
 
@@ -1311,7 +1331,8 @@ __inline__ __device__ void ConstructorFunction::constructNewToken(
         factory.init(_data);
 
         result = factory.createToken(cellOfNewToken);
-        result->sourceCell = sourceCellOfNewToken;
+        check(result);
+        result->sourceCell = check(sourceCellOfNewToken,38);
         result->setEnergy(energyOfNewToken);
     }
     __syncthreads();
@@ -1320,12 +1341,12 @@ __inline__ __device__ void ConstructorFunction::constructNewToken(
     if (duplicate) {
         for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex;
              ++i) {  //do not copy branchnumber (at address 0)
-            result->memory[i] = _token->memory[i];
+            result->memory[check(i, MAX_TOKEN_MEM_SIZE)] = _token->memory[check(i, MAX_TOKEN_MEM_SIZE)];
         }
     } else {
         for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex;
              ++i) {  //do not copy branchnumber (at address 0)
-            result->memory[i] = 0;
+            result->memory[check(i, MAX_TOKEN_MEM_SIZE)] = 0;
         }
     }
 }
@@ -1334,13 +1355,13 @@ __inline__ __device__ void
 ConstructorFunction::addCellToCluster(Cell* newCell, Cell** newCellPointers)
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        newCellPointers[cellIndex] = _cluster->cellPointers[cellIndex];
+        newCellPointers[cellIndex] = check(_cluster->cellPointers[cellIndex],39);
     }
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        newCellPointers[_cluster->numCellPointers] = newCell;
-        _cluster->cellPointers = newCellPointers;
+        newCellPointers[_cluster->numCellPointers] = check(newCell,42);
+        check(_cluster->cellPointers) = check(newCellPointers);
         ++_cluster->numCellPointers;
     }
 }
@@ -1350,20 +1371,20 @@ ConstructorFunction::addTokenToCluster(Token* token, Token** newTokenPointers)
 {
     auto const tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
     for (int i = tokenBlock.startIndex; i <= tokenBlock.endIndex; ++i) {
-        newTokenPointers[i] = _cluster->tokenPointers[i];
+        newTokenPointers[i] = check(_cluster->tokenPointers[i]);
     }
     __syncthreads();
 
     if (0 == threadIdx.x) {
         newTokenPointers[_cluster->numTokenPointers] = token;
-        _cluster->tokenPointers = newTokenPointers;
+        check(_cluster->tokenPointers) = check(newTokenPointers);
         ++_cluster->numTokenPointers;
     }
 }
 
 __inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished(Cell* newCell)
 {
-    auto const& cell = _token->cell;
+    auto const& cell = check(_token->cell,43);
     auto const option = _token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
 
     if (Enums::ConstrInOption::FINISH_NO_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP == option
@@ -1389,14 +1410,16 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     Cell* cellOfConstructionSite)
 {
     __shared__ AdaptMaxConnections adaptMaxConnections;
+    __shared__ int blockLock;
     if (0 == threadIdx.x) {
-        Cell* cellOfConstructor = _token->cell;
+        Cell* cellOfConstructor = check(_token->cell,44);
 
         adaptMaxConnections = isAdaptMaxConnections(_token);
 
         removeConnection(cellOfConstructionSite, cellOfConstructor);
         establishConnection(newCell, cellOfConstructionSite, adaptMaxConnections);
         establishConnection(newCell, cellOfConstructor, adaptMaxConnections);
+        blockLock = 0;
     }
     __syncthreads();
 
@@ -1405,7 +1428,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
     }
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto const& cell = check(_cluster->cellPointers[cellIndex],45);
         if (ClusterComponent::ConstructionSite != cell->tag) {
             continue;
         }
@@ -1416,28 +1439,34 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
             continue;
         }
 
-        newCell->getBlockLock();
+        while (1 == atomicExch_block(&blockLock, 1)) {}
+
         if (isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
             && isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
             establishConnection(cell, newCell, adaptMaxConnections);
         }
+
         __threadfence_block();
-        newCell->releaseBlockLock();
+        atomicExch(&blockLock, 0);
     }
 }
 
 __inline__ __device__ void ConstructorFunction::removeConnection(Cell* cell1, Cell* cell2)
 {
-    auto remove = [](Cell* cell, Cell* connectionToRemove) {
+    cell1->getLock();
+    cell2->getLock();
+    __threadfence();
+
+    auto remove = [&](Cell* cell, Cell* connectionToRemove) {
         bool connectionFound = false;
         for (int i = 0; i < cell->numConnections; ++i) {
-            auto& connectingCell = cell->connections[i];
+            auto& connectingCell = check(cell->connections[check(i, MAX_CELL_BONDS)],46);
             if (!connectionFound) {
                 if (connectingCell == connectionToRemove) {
                     connectionFound = true;
                 }
             } else {
-                cell->connections[i - 1] = connectingCell;
+                check(cell->connections[check(i - 1, MAX_CELL_BONDS)],47) = connectingCell;
             }
         }
         --cell->numConnections;
@@ -1445,6 +1474,10 @@ __inline__ __device__ void ConstructorFunction::removeConnection(Cell* cell1, Ce
 
     remove(cell1, cell2);
     remove(cell2, cell1);
+
+    __threadfence();
+    cell1->releaseLock();
+    cell2->releaseLock();
 }
 
 __inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(Token* token) -> AdaptMaxConnections
@@ -1471,11 +1504,100 @@ ConstructorFunction::isConnectable(int numConnections, int maxConnections, Adapt
 __inline__ __device__ void
 ConstructorFunction::establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConnections adaptMaxConnections)
 {
-    cell1->connections[cell1->numConnections++] = cell2;
-    cell2->connections[cell2->numConnections++] = cell1;
+    cell1->getLock();
+    cell2->getLock();
+    __threadfence();
+
+    cell1->connections[check(cell1->numConnections++, MAX_CELL_BONDS)] = cell2;
+    cell2->connections[check(cell2->numConnections++, MAX_CELL_BONDS)] = cell1;
 
     if (adaptMaxConnections == AdaptMaxConnections::Yes) {
         cell1->maxConnections = cell1->numConnections;
         cell2->maxConnections = cell2->numConnections;
     }
+
+    __threadfence();
+    cell1->releaseLock();
+    cell2->releaseLock();
+}
+
+__inline__ __device__ Cell*& ConstructorFunction::check(Cell *& entity, int p)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.cells)) {
+        printf("check(Cell*&) failed: %llu, parameter: %d\n", (uintptr_t)(entity), p);
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Cell * ConstructorFunction::check(Cell *&& entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.cells)) {
+        printf("check(Cell*&&) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Cell**& ConstructorFunction::check(Cell **& entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.cellPointers)) {
+        printf("check(Cell**&) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Cell ** ConstructorFunction::check(Cell **&& entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.cellPointers)) {
+        printf("check(Cell**&&) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Cluster * ConstructorFunction::check(Cluster * entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.clusters)) {
+        printf("check(Cluster*) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Token*& ConstructorFunction::check(Token *& entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.tokens)) {
+        printf("check(Token*&) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Token**& ConstructorFunction::check(Token **& entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.tokenPointers)) {
+        printf("check(Token**&) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ Token ** ConstructorFunction::check(Token **&& entity)
+{
+    if (!DEBUG_cluster::checkPointer(entity, _data->entities.tokenPointers)) {
+        printf("check(Token**&&) failed\n");
+        while (true) {}
+    }
+    return entity;
+}
+
+__inline__ __device__ int ConstructorFunction::check(int index, int arraySize)
+{
+    if (index < 0 || index > arraySize - 1) {
+        printf("Wrong array index. index: %d, size: %d\n", index, arraySize);
+        while (true) {}
+    }
+    return index;
 }
