@@ -1416,17 +1416,12 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
             continue;
         }
 
-        int isLocked;
-        do {
-            isLocked = atomicExch_block(&newCell->locked, 1);
-            if (0 == isLocked) {
-                if (isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
-                    && isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
-                    establishConnection(cell, newCell, adaptMaxConnections);
-                }
-            }
-        } while (1 == isLocked);
-        atomicExch_block(&newCell->locked, 0);
+        newCell->getBlockLock();
+        if (isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
+            && isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
+            establishConnection(cell, newCell, adaptMaxConnections);
+        }
+        newCell->releaseBlockLock();
     }
 }
 
