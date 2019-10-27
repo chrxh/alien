@@ -272,7 +272,6 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridC
 
 __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_blockCall()
 {
-    DEBUG_cluster::check_blockCall(_data, _cluster, 1);
     __syncthreads();
 
     auto const numTokenPointers = _cluster->numTokenPointers;
