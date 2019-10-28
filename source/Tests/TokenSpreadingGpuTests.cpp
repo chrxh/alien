@@ -240,6 +240,32 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers)
     checkEnergy(origData, newData);
 }
 
+TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers_negativeValue)
+{
+    DataDescription origData;
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 5;
+    secondCell.tokenBranchNumber = 4;
+
+    QByteArray memory(_parameters.tokenMemorySize, 0);
+    memory[0] = 0xa9;
+    firstCell.addToken(TokenDescription().setEnergy(30).setData(memory));
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    auto const newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const newSecondCell = newCellByCellId.at(secondCell.id);
+    EXPECT_TRUE(!newSecondCell.tokens || (0 == newSecondCell.tokens->size()));
+}
+
 /**
 * Situation: - one horizontal cluster with 10 cells and ascending branch numbers
 *			 - first cell has a token

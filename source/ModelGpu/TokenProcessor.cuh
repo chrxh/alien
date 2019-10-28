@@ -89,7 +89,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
                 continue;
             }
 
-            int tokenBranchNumber = token->memory[0];
+            int tokenBranchNumber = token->getTokenBranchNumber();
             int numCandidateCellsForEnergyAveraging = 1;
             candidateCellsForEnergyAveraging[0] = cell;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
@@ -165,7 +165,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
                 continue;
             }
 
-            int tokenBranchNumber = token->memory[0];
+            int tokenBranchNumber = token->getTokenBranchNumber();
 
             int numFreePlaces = 0;
             for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
@@ -303,7 +303,7 @@ __inline__ __device__ int TokenProcessor::calcAnticipatedTokens(Cluster* cluster
             continue;
         }
 
-        int tokenBranchNumber = token->memory[0];
+        int tokenBranchNumber = token->getTokenBranchNumber();
         for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
             auto connectingCell = cell.connections[connectionIndex];
             if (0 == connectingCell->alive) {
