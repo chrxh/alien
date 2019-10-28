@@ -43,7 +43,7 @@ TokenDescription TokenImpl::getDescription() const
 
 int TokenImpl::getTokenAccessNumber() const
 {
-	return _memory[0] % _context->getSimulationParameters().cellMaxTokenBranchNumber;
+	return static_cast<unsigned char>(_memory[0]) % _context->getSimulationParameters().cellMaxTokenBranchNumber;
 }
 
 void TokenImpl::setTokenAccessNumber(int i)

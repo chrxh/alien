@@ -171,7 +171,12 @@ __inline__ __device__ void Physics::calcImpulseIncrement(float2 const & impulse,
 {
     Math::rotateQuarterCounterClockwise(rAPp);
     velInc = impulse / mass;
-    angularVelInc = -Math::dot(rAPp, impulse) / angularMass * RAD_TO_DEG;
+    if (abs(angularMass) < FP_PRECISION) {
+        angularVelInc = 0;
+    }
+    else {
+        angularVelInc = -Math::dot(rAPp, impulse) / angularMass * RAD_TO_DEG;
+    }
 }
 
 __inline__ __device__ float Physics::kineticEnergy(float mass, float2 const& vel, float angularMass, float angularVel)

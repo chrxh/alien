@@ -66,6 +66,10 @@ __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 
 __inline__ __device__ float Math::angleOfVector(float2 const & v)
 {
+    if (length(v) < FP_PRECISION) {
+        return 0;
+    }
+
     float angleSin = asinf(-v.y / length(v)) * RAD_TO_DEG;
     if (v.x >= 0.0f) {
         return 90.0f - angleSin;
