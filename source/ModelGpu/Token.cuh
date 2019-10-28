@@ -15,6 +15,11 @@ struct Token
             % (cudaSimulationParameters.cellMaxBonds + 1);
     }
 
+    __inline__ __device__ int getTokenBranchNumber()
+    {
+        return static_cast<unsigned char>(memory[0]) % cudaSimulationParameters.cellMaxTokenBranchNumber;
+    }
+
     __device__ __inline__ void setEnergy(float value)
     {
         if (value < 0) {
