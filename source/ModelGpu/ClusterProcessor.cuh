@@ -348,7 +348,7 @@ __inline__ __device__ void ClusterProcessor::processingMutation_blockCall()
 
     auto const tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
     for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellMutationProb) {
+        if (_data->numberGen.random() < (cudaSimulationParameters.cellMutationProb)*10) {
             auto token = _cluster->tokenPointers[tokenIndex];
             auto const index = static_cast<int>(_data->numberGen.random(MAX_TOKEN_MEM_SIZE - 1));
             token->memory[index] = _data->numberGen.random(255);
