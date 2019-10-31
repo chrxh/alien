@@ -306,6 +306,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
 
     auto& firstCell = cluster.cells->at(0);
     firstCell.tokenBranchNumber = 0;
+    firstCell.maxConnections = 1;
     firstCell.addToken(parameters._token);
 
     auto& secondCell = cluster.cells->at(1);
@@ -351,6 +352,8 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -457,6 +460,8 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     auto const& newCluster = newData.clusters->at(0);
 
@@ -564,6 +569,8 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     EXPECT_EQ(1, newData.clusters->size());
     auto const& newCluster = newData.clusters->at(0);
@@ -631,7 +638,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
                           .setConnectingCells({cellId2})
                           .setEnergy(cellEnergy)
                           .setPos(refPos + relPos3)
-                          .setMaxConnections(0)
+                          .setMaxConnections(1)
                           .setTokenBranchNumber(1)
                           .setFlagTokenBlocked(true)
                           .setCellFeature(CellFeatureDescription())});
@@ -685,6 +692,8 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -808,6 +817,8 @@ auto ConstructorGpuTests::runSecondCellConstructionOnSelfTouchingClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     auto const& newCluster = newData.clusters->at(0);
 
@@ -856,7 +867,8 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     auto const refPos = QVector2D{ 10.5f, 10.5f };
     auto const cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
     for (int i = 0; i < parameters._additionalCellsOnConstructor; ++i) {
-        list<uint64_t> connectingCells{ cellIds[i + 1] };
+        list<uint64_t> connectingCells;
+        connectingCells.push_back(cellIds[i + 1]);
         if (i > 0) {
             connectingCells.push_back(cellIds[i - 1]);
         }
@@ -869,12 +881,18 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
             .setCellFeature(CellFeatureDescription()));
     }
     int offset = parameters._additionalCellsOnConstructor;
+
+    list<uint64_t> connectingCellsOfNextCell;
+    connectingCellsOfNextCell.push_back(cellIds[offset + 1]);
+    if (parameters._additionalCellsOnConstructor > 0) {
+        connectingCellsOfNextCell.push_back(cellIds[offset - 1]);
+    }
     cluster.addCells({CellDescription()
                           .setId(cellIds[offset])
-                          .setConnectingCells({cellIds[offset+ 1]})
+                          .setConnectingCells(connectingCellsOfNextCell)
                           .setEnergy(cellEnergy)
                           .setPos(refPos + QVector2D{ static_cast<float>(offset), 0 })
-                          .setMaxConnections(1)
+                          .setMaxConnections(connectingCellsOfNextCell.size())
                           .setTokenBranchNumber(0)
                           .setCellFeature(CellFeatureDescription())
                           .addToken(parameters._tokenOnSourceCell),
@@ -943,6 +961,8 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -1014,6 +1034,8 @@ auto ConstructorGpuTests::runConstructionSiteConnectedToConstructorTwiceTest(Tok
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
     auto const newConstructorCell = newCellByCellId.at(constructorCell.id);
@@ -1096,6 +1118,8 @@ auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClusters
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
     checkEnergy(origData, newData);
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
 
     MassiveParallelClustersTestResult result;
     for (auto const& newCluster : *newData.clusters) {

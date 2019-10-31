@@ -33,7 +33,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     float angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
     float power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
-    auto clusterMass = cluster->numCellPointers / cudaSimulationParameters.cellMass_Reciprocal;
+    float const clusterMass = cluster->numCellPointers / cudaSimulationParameters.cellMass_Reciprocal;
     auto const& angularVel = cluster->angularVel;
     auto const& vel = cluster->vel;
     auto const& angularMass = cluster->angularMass;
