@@ -351,7 +351,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -459,7 +459,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -568,7 +568,7 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -691,7 +691,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -816,7 +816,7 @@ auto ConstructorGpuTests::runSecondCellConstructionOnSelfTouchingClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -960,7 +960,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -1033,7 +1033,7 @@ auto ConstructorGpuTests::runConstructionSiteConnectedToConstructorTwiceTest(Tok
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -1117,7 +1117,7 @@ auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClusters
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     checkCellAttributes(newData);
     checkCellConnections(newData);
 
@@ -2842,7 +2842,7 @@ TEST_F(ConstructorGpuTests, testMultipleConnectedConstructionSites_errorConnecti
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 
     EXPECT_EQ(1, newData.clusters->size());
 

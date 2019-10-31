@@ -61,10 +61,10 @@ void IntegrationGpuTestFramework::checkCellAttributes(DataDescription const & da
 
 }
 
-void IntegrationGpuTestFramework::checkEnergy(DataDescription const& origData, DataDescription const& newData) const
+void IntegrationGpuTestFramework::checkEnergies(DataDescription const& origData, DataDescription const& newData) const
 {
-	auto energyBefore = calcEnergy(origData);
-	auto energyAfter = calcEnergy(newData);
+	auto energyBefore = calcAndCheckEnergy(origData);
+	auto energyAfter = calcAndCheckEnergy(newData);
 
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
@@ -133,17 +133,17 @@ Physics::Velocities IntegrationGpuTestFramework::calcVelocitiesOfFusion(ClusterD
 		*cluster2.pos, { *cluster2.vel, *cluster2.angularVel }, relPositionOfMasses2);
 }
 
-double IntegrationGpuTestFramework::calcEnergy(DataDescription const & data) const
+double IntegrationGpuTestFramework::calcAndCheckEnergy(DataDescription const & data) const
 {
 	auto result = 0.0;
 	if (data.clusters) {
 		for (auto const& cluster : *data.clusters) {
-			result += calcEnergy(cluster);
+			result += calcAndCheckEnergy(cluster);
 		}
 	}
 	if (data.particles) {
 		for (auto const& particle : *data.particles) {
-            EXPECT_LE(0, *particle.energy);
+            checkEnergyValue(*particle.energy);
             result += *particle.energy;
 		}
 	}
@@ -151,16 +151,16 @@ double IntegrationGpuTestFramework::calcEnergy(DataDescription const & data) con
 	return result;
 }
 
-double IntegrationGpuTestFramework::calcEnergy(ClusterDescription const & cluster) const
+double IntegrationGpuTestFramework::calcAndCheckEnergy(ClusterDescription const & cluster) const
 {
 	auto result = calcKineticEnergy(cluster);
 	if (cluster.cells) {
         for (CellDescription const& cell : *cluster.cells) {
-            EXPECT_LE(0, *cell.energy);
+            checkEnergyValue(*cell.energy);
             result += *cell.energy;
             if (cell.tokens) {
                 for (TokenDescription const& token : *cell.tokens) {
-                    EXPECT_LE(0, *token.energy);
+                    checkEnergyValue(*token.energy);
                     result += *token.energy;
                 }
             }
@@ -192,6 +192,12 @@ double IntegrationGpuTestFramework::calcKineticEnergy(ClusterDescription const& 
 	auto angularMass = Physics::angularMass(relPositions);
 	auto angularVel = *cluster.angularVel;
 	return Physics::kineticEnergy(mass, vel, angularMass, angularVel);
+}
+
+void IntegrationGpuTestFramework::checkEnergyValue(double value) const
+{
+    EXPECT_LE(0, value);
+    EXPECT_FALSE(std::isnan(value));
 }
 
 void IntegrationGpuTestFramework::setMaxConnections(ClusterDescription& cluster, int maxConnections) const

@@ -714,8 +714,33 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         }
         __syncthreads();
 
+        __shared__ float regainedEnergyPerCell;
         if (0 == threadIdx.x) {
             newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
+
+            auto const origKineticEnergies =
+                Physics::kineticEnergy(
+                    _cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel)
+                + Physics::kineticEnergy(
+                    otherCluster->numCellPointers,
+                    otherCluster->vel,
+                    otherCluster->angularMass,
+                    otherCluster->angularVel);
+
+            auto const newKineticEnergy =
+                Physics::kineticEnergy(
+                    newCluster->numCellPointers, newCluster->vel, newCluster->angularMass, newCluster->angularVel);
+
+            auto const energyDiff = newKineticEnergy - origKineticEnergies;    //is negative for fusion
+            regainedEnergyPerCell = -energyDiff / newCluster->numCellPointers;
+        }
+        __syncthreads();
+
+        auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
+
+        for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
+            auto& cell = newCluster->cellPointers[index];
+            cell->changeEnergy(regainedEnergyPerCell);
         }
 
         copyTokenPointers_blockCall(_cluster, _cluster->clusterToFuse, newCluster);
