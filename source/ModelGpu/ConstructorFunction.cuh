@@ -10,8 +10,8 @@
 class ConstructorFunction
 {
 public:
-    __inline__ __device__ void init_blockCall(Token* token, SimulationData* data);
-    __inline__ __device__ void processing_blockCall();
+    __inline__ __device__ void init_blockCall(Cluster* cluster, SimulationData* data);
+    __inline__ __device__ void processing_blockCall(Token* token);
 
 private:
     struct ClusterComponent
@@ -60,6 +60,8 @@ private:
         float desiredAngle);
 
     __inline__ __device__ void tagConstructionSite(Cell* baseCell, Cell* firstCellOfConstructionSite);
+    __inline__ __device__ void tagConstructionSite_optimizedForSmallCluster(Cell* baseCell, Cell* firstCellOfConstructionSite);
+    __inline__ __device__ void tagConstructionSite_optimizedForLargeCluster(Cell* baseCell, Cell* firstCellOfConstructionSite);
 
     __inline__ __device__ void calcMaxAngles(Cell* constructionCell, Angles& result);
     __inline__ __device__ void calcAngularMasses(Cluster* cluster, Cell* constructionCell, AngularMasses& result);
@@ -160,14 +162,25 @@ private:
     Token* _token;
     Cluster* _cluster;
     PartitionData _cellBlock;
+
+    struct DynamicMemory
+    {
+        Cell** cellPointerArray1;
+        Cell** cellPointerArray2;
+        HashMap<Cell*, int> cellPointerMap;
+        HashMap<int2, CellAndNewAbsPos> cellPosMap;
+    };
+    DynamicMemory _dynamicMemory;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void ConstructorFunction::processing_blockCall()
+__inline__ __device__ void ConstructorFunction::processing_blockCall(Token* token)
 {
+    _token = token;
+
     auto const command = _token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
     if (Enums::ConstrIn::DO_NOTHING == command) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
@@ -209,12 +222,25 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ConstructorFunction::init_blockCall(Token* token, SimulationData* data)
+__inline__ __device__ void ConstructorFunction::init_blockCall(Cluster* cluster, SimulationData* data)
 {
     _data = data;
-    _cluster = token->cell->cluster;
-    _token = token;
+    _cluster = cluster;
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
+    
+    __shared__ Cell** cellPointerArray1;
+    __shared__ Cell** cellPointerArray2;
+    if (0 == threadIdx.x) {
+        cellPointerArray1 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+        cellPointerArray2 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+    }
+    _dynamicMemory.cellPointerMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    _dynamicMemory.cellPosMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+
+    __syncthreads();
+
+    _dynamicMemory.cellPointerArray1 = cellPointerArray1;
+    _dynamicMemory.cellPointerArray2 = cellPointerArray2;
 }
 
 
@@ -715,6 +741,16 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, floa
 
 __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCell, Cell* firstCellOfConstructionSite)
 {
+    if (_cluster->numCellPointers > 100) {
+        tagConstructionSite_optimizedForLargeCluster(baseCell, firstCellOfConstructionSite);
+    }
+    else {
+        tagConstructionSite_optimizedForSmallCluster(baseCell, firstCellOfConstructionSite);
+    }
+}
+
+__inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedForSmallCluster(Cell * baseCell, Cell * firstCellOfConstructionSite)
+{
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto& cell = _cluster->cellPointers[cellIndex];
         cell->tag = ClusterComponent::Constructor;
@@ -730,44 +766,38 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
     auto prevCell = firstCellOfConstructionSite;
     auto currentCell = firstCellOfConstructionSite;
     int numFail = 0;
-/*
-    if (currentCell->numConnections > 0) {
-*/
-        do {
-            for (int i = 0; i < currentCell->numConnections; ++i) {
-                auto const& connectingCell = currentCell->connections[i];
-                if (connectingCell != baseCell) {
-                    auto const origTag = atomicExch_block(&connectingCell->tag, ClusterComponent::ConstructionSite);
-                    if (ClusterComponent::Constructor == origTag) {
-                        prevCell = currentCell;
-                        currentCell = connectingCell;
-                        numFail = 0;
-                        break;
-                    }
+    do {
+        for (int i = 0; i < currentCell->numConnections; ++i) {
+            auto const& connectingCell = currentCell->connections[i];
+            if (connectingCell != baseCell) {
+                auto const origTag = atomicExch_block(&connectingCell->tag, ClusterComponent::ConstructionSite);
+                if (ClusterComponent::Constructor == origTag) {
+                    prevCell = currentCell;
+                    currentCell = connectingCell;
+                    numFail = 0;
+                    break;
                 }
             }
-            if (5 == ++numFail) {
-                break;
-            }
-            int connectingCellIndex = threadIdx.x % currentCell->numConnections;
-            if (currentCell->connections[connectingCellIndex] == baseCell) {
-                connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
-            }
-            if (currentCell->connections[connectingCellIndex] == prevCell) {
-                connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
-            }
-            if (currentCell->connections[connectingCellIndex] != baseCell) {
-                prevCell = currentCell;
-                currentCell = currentCell->connections[connectingCellIndex];
-            }
-            else {
-                break;
-            }
+        }
+        if (5 == ++numFail) {
+            break;
+        }
+        int connectingCellIndex = threadIdx.x % currentCell->numConnections;
+        if (currentCell->connections[connectingCellIndex] == baseCell) {
+            connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
+        }
+        if (currentCell->connections[connectingCellIndex] == prevCell) {
+            connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
+        }
+        if (currentCell->connections[connectingCellIndex] != baseCell) {
+            prevCell = currentCell;
+            currentCell = currentCell->connections[connectingCellIndex];
+        }
+        else {
+            break;
+        }
 
-        } while (true);
-/*
-    }
-*/
+    } while (true);
 
     //step 1: slow algorithm but complete
     __shared__ bool changes;
@@ -791,6 +821,69 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
         }
         __syncthreads();
     } while (changes);
+}
+
+__inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedForLargeCluster(Cell * baseCell, Cell * firstCellOfConstructionSite)
+{
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto& cell = _cluster->cellPointers[cellIndex];
+        cell->tag = ClusterComponent::Constructor;
+    }
+    __syncthreads();
+
+    __shared__ Cell** cellsToEvaluate;
+    __shared__ Cell** cellsToEvaluateNextRound;
+    __shared__ int numCellsToEvaluate;
+    __shared__ int numCellsToEvaluateNextRound;
+
+    __shared__ HashMap<Cell*, int> cellsEvaluated;
+    if (0 == threadIdx.x) {
+        cellsEvaluated = _dynamicMemory.cellPointerMap;
+    }
+    __syncthreads();
+
+    cellsEvaluated.init_blockCall();
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        cellsToEvaluate = _dynamicMemory.cellPointerArray1;
+        cellsToEvaluateNextRound = _dynamicMemory.cellPointerArray2;
+        numCellsToEvaluate = 1;
+        numCellsToEvaluateNextRound = 0;
+        cellsToEvaluate[0] = firstCellOfConstructionSite;
+        cellsEvaluated.insertOrAssign(firstCellOfConstructionSite, 0);
+        firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
+    }
+    __syncthreads();
+
+    while (numCellsToEvaluate > 0) {
+
+        auto const partition = calcPartition(numCellsToEvaluate, threadIdx.x, blockDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+
+            auto const& cellToEvaluate = cellsToEvaluate[index];
+            auto const numConnections = cellToEvaluate->numConnections;
+            for (int i = 0; i < numConnections; ++i) {
+                auto const& candidate = cellToEvaluate->connections[i];
+                if (cellToEvaluate == firstCellOfConstructionSite && candidate == baseCell) {
+                    continue;
+                }
+                if (!cellsEvaluated.insertOrAssign(candidate, 0)) {
+                    int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);
+                    cellsToEvaluateNextRound[origEvaluateIndex] = candidate;
+                    candidate->tag = ClusterComponent::ConstructionSite;
+                }
+            }
+        }
+        __syncthreads();
+
+        if (0 == threadIdx.x) {
+            numCellsToEvaluate = numCellsToEvaluateNextRound;
+            numCellsToEvaluateNextRound = 0;
+            swap(cellsToEvaluate, cellsToEvaluateNextRound);
+        }
+        __syncthreads();
+    }
 }
 
 __inline__ __device__ void ConstructorFunction::calcMaxAngles(Cell* constructionCell, Angles& result)
@@ -1060,7 +1153,12 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     bool& result)
 {
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
-    tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    if (0 == threadIdx.x) {
+        tempCellMap = _dynamicMemory.cellPosMap;
+    }
+    __syncthreads();
+
+    tempCellMap.init_blockCall();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1117,8 +1215,14 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     float2 const& displacementOfConstructionSite,
     bool& result)
 {
+
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
-    tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    if (0 == threadIdx.x) {
+        tempCellMap = _dynamicMemory.cellPosMap;
+    }
+    __syncthreads();
+
+    tempCellMap.init_blockCall();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1175,7 +1279,12 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     bool& result)
 {
     __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
-    tempCellMap.init_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    if (0 == threadIdx.x) {
+        tempCellMap = _dynamicMemory.cellPosMap;
+    }
+    __syncthreads();
+
+    tempCellMap.init_blockCall();
     __syncthreads();
 
     __shared__ float2 newCenter;
