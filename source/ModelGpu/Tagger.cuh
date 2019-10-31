@@ -16,8 +16,6 @@ public:
     __inline__ __device__ static void tagComponent_blockCall(
         Cluster* cluster,
         Cell* startCell,
-        int newTag,
-        int emptyTag,
         DynamicMemory& dynamicMemory    //expect shared memory
     );
 };
@@ -25,8 +23,6 @@ public:
 __inline__ __device__ void Tagger::tagComponent_blockCall(
     Cluster* cluster,
     Cell* startCell,
-    int cellTag,
-    int emptyTag,
     DynamicMemory& dynamicMemory)
 {
     __shared__ int numCellsToEvaluate;
@@ -40,7 +36,9 @@ __inline__ __device__ void Tagger::tagComponent_blockCall(
         numCellsToEvaluateNextRound = 0;
         dynamicMemory.cellsToEvaluate[0] = startCell;
         dynamicMemory.cellsEvaluated.insertOrAssign(startCell, 0);
+/*
         startCell->tag = cellTag;
+*/
     }
     __syncthreads();
 
@@ -53,13 +51,12 @@ __inline__ __device__ void Tagger::tagComponent_blockCall(
             auto const numConnections = cellToEvaluate->numConnections;
             for (int i = 0; i < numConnections; ++i) {
                 auto const& candidate = cellToEvaluate->connections[i];
-                if (candidate->tag == cellTag) {
-                    continue;
-                }
-                if (!dynamicMemory.cellsEvaluated.insertOrAssign(candidate, 0)) {
-                    int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);
-                    dynamicMemory.cellsToEvaluateNextRound[origEvaluateIndex] = candidate;
-                    candidate->tag = cellTag;
+                auto const origTag = atomicMax_block(&candidate->tag, cellToEvaluate->tag);
+                if (origTag < cellToEvaluate->tag) {
+                    if (!dynamicMemory.cellsEvaluated.insertOrAssign(candidate, 0)) {
+                        int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);
+                        dynamicMemory.cellsToEvaluateNextRound[origEvaluateIndex] = candidate;
+                    }
                 }
             }
         }
