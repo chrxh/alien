@@ -242,6 +242,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\PropulsionFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ScannerFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\Tagger.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Token.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\TokenProcessor.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\WeaponFunction.cuh" />

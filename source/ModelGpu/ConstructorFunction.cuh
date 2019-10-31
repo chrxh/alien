@@ -5,6 +5,7 @@
 #include "Math.cuh"
 #include "QuantityConverter.cuh"
 #include "SimulationData.cuh"
+#include "Tagger.cuh"
 #include "DEBUG_cluster.cuh"
 
 class ConstructorFunction
@@ -831,58 +832,16 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedFor
     }
     __syncthreads();
 
-    __shared__ Cell** cellsToEvaluate;
-    __shared__ Cell** cellsToEvaluateNextRound;
-    __shared__ int numCellsToEvaluate;
-    __shared__ int numCellsToEvaluateNextRound;
-
-    __shared__ HashMap<Cell*, int> cellsEvaluated;
+    __shared__ Tagger::DynamicMemory tagMemory;
     if (0 == threadIdx.x) {
-        cellsEvaluated = _dynamicMemory.cellPointerMap;
+        tagMemory = {_dynamicMemory.cellPointerArray1, _dynamicMemory.cellPointerArray2, _dynamicMemory.cellPointerMap };
+        baseCell->tag = ClusterComponent::ConstructionSite;     //only temporary to avoid tagging constructor
     }
     __syncthreads();
-
-    cellsEvaluated.init_blockCall();
-    __syncthreads();
+    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
 
     if (0 == threadIdx.x) {
-        cellsToEvaluate = _dynamicMemory.cellPointerArray1;
-        cellsToEvaluateNextRound = _dynamicMemory.cellPointerArray2;
-        numCellsToEvaluate = 1;
-        numCellsToEvaluateNextRound = 0;
-        cellsToEvaluate[0] = firstCellOfConstructionSite;
-        cellsEvaluated.insertOrAssign(firstCellOfConstructionSite, 0);
-        firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
-    }
-    __syncthreads();
-
-    while (numCellsToEvaluate > 0) {
-
-        auto const partition = calcPartition(numCellsToEvaluate, threadIdx.x, blockDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-
-            auto const& cellToEvaluate = cellsToEvaluate[index];
-            auto const numConnections = cellToEvaluate->numConnections;
-            for (int i = 0; i < numConnections; ++i) {
-                auto const& candidate = cellToEvaluate->connections[i];
-                if (cellToEvaluate == firstCellOfConstructionSite && candidate == baseCell) {
-                    continue;
-                }
-                if (!cellsEvaluated.insertOrAssign(candidate, 0)) {
-                    int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);
-                    cellsToEvaluateNextRound[origEvaluateIndex] = candidate;
-                    candidate->tag = ClusterComponent::ConstructionSite;
-                }
-            }
-        }
-        __syncthreads();
-
-        if (0 == threadIdx.x) {
-            numCellsToEvaluate = numCellsToEvaluateNextRound;
-            numCellsToEvaluateNextRound = 0;
-            swap(cellsToEvaluate, cellsToEvaluateNextRound);
-        }
-        __syncthreads();
+        baseCell->tag = ClusterComponent::Constructor;     //restore
     }
 }
 
