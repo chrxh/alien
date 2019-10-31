@@ -8,6 +8,7 @@
 #include "Physics.cuh"
 #include "Map.cuh"
 #include "EntityFactory.cuh"
+#include "Tagger.cuh"
 #include "DEBUG_cluster.cuh"
 
 class ClusterProcessor
@@ -362,12 +363,16 @@ __inline__ __device__ void ClusterProcessor::processingMutation_blockCall()
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
 {
-    if (_cluster->numCellPointers < 20) {
+    if (0 == _cluster->decompositionRequired || _cluster->clusterToFuse) {
+        return;
+    }
+
+    if (_cluster->numCellPointers < 1000) {
         processingDecomposition_optimizedForSmallCluster_blockCall();
     }
     else {
-        processingDecomposition_optimizedForSmallCluster_blockCall();
-//        processingDecomposition_optimizedForLargeCluster_blockCall();
+//        processingDecomposition_optimizedForSmallCluster_blockCall();
+        processingDecomposition_optimizedForLargeCluster_blockCall();
     }
 }
 
@@ -893,46 +898,65 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForSmallCluster_blockCall()
 {
-    if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
-        __shared__ bool changes;
+    __shared__ bool changes;
 
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        _cluster->cellPointers[cellIndex]->tag = cellIndex;
+    }
+    do {
+        changes = false;
+        __syncthreads();
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            _cluster->cellPointers[cellIndex]->tag = cellIndex;
-        }
-        do {
-            changes = false;
-            __syncthreads();
-            for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-                Cell* cell = _cluster->cellPointers[cellIndex];
-                if (1 == cell->alive) {
-                    for (int i = 0; i < cell->numConnections; ++i) {
-                        Cell& otherCell = *cell->connections[i];
-                        if (1 == otherCell.alive) {
-                            if (otherCell.tag < cell->tag) {
-                                cell->tag = otherCell.tag;
-                                changes = true;
-                            }
-                        }
-                        else {
-                            for (int j = i + 1; j < cell->numConnections; ++j) {
-                                cell->connections[j - 1] = cell->connections[j];
-                            }
-                            --cell->numConnections;
-                            --i;
+            Cell* cell = _cluster->cellPointers[cellIndex];
+            if (1 == cell->alive) {
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    Cell& otherCell = *cell->connections[i];
+                    if (1 == otherCell.alive) {
+                        if (otherCell.tag < cell->tag) {
+                            cell->tag = otherCell.tag;
+                            changes = true;
                         }
                     }
-                }
-                else {
-                    cell->numConnections = 0;
+                    else {
+                        for (int j = i + 1; j < cell->numConnections; ++j) {
+                            cell->connections[j - 1] = cell->connections[j];
+                        }
+                        --cell->numConnections;
+                        --i;
+                    }
                 }
             }
-            __syncthreads();
-        } while (changes);
-    }
+            else {
+                cell->numConnections = 0;
+            }
+        }
+        __syncthreads();
+    } while (changes);
 }
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForLargeCluster_blockCall()
 {
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto& cell = _cluster->cellPointers[cellIndex];
+        if (1 == cell->alive) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto& otherCell = cell->connections[i];
+                if (1 != otherCell->alive) {
+                    for (int j = i + 1; j < cell->numConnections; ++j) {
+                        cell->connections[j - 1] = cell->connections[j];
+                    }
+                    --cell->numConnections;
+                    --i;
+                }
+            }
+        }
+        else {
+            cell->numConnections = 0;
+        }
+    }
+    __syncthreads();
+
+
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto& cell = _cluster->cellPointers[cellIndex];
         cell->tag = 0;
@@ -944,23 +968,51 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
         currentTag = 1;
     }
     __syncthreads();
-    {
-        __shared__ int startCellMarked; // 0 = no, 1 = yes
+
+    __shared__ Tagger::DynamicMemory dynamicMemory;
+    if (0 == threadIdx.x) {
+        dynamicMemory.cellsToEvaluate = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+        dynamicMemory.cellsToEvaluateNextRound = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+    }
+    dynamicMemory.cellsEvaluated.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    __syncthreads();
+
+    __shared__ int startCellFound; // 0 = no, 1 = yes
+    __shared__ Cell* startCell;
+
+    do {
+        __syncthreads();
         if (0 == threadIdx.x) {
-            startCellMarked = 0;
+            startCellFound = 0;
         }
         __syncthreads();
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto& cell = _cluster->cellPointers[cellIndex];
             if (0 == cell->tag) {
-                int orig = atomicExch_block(&startCellMarked, 1);
+                int orig = atomicExch_block(&startCellFound, 1);
                 if (0 == orig) {
-                    cell->tag = currentTag;
+                    startCell = cell;
+                    startCell->tag = currentTag;
+                    break;
                 }
-                break;
             }
         }
         __syncthreads();
-    }
+
+        if (1 == startCellFound) {
+            if (startCell->alive) {
+                Tagger::tagComponent_blockCall(_cluster, startCell, currentTag, 0, dynamicMemory);
+            }
+            __syncthreads();
+
+            if (0 == threadIdx.x) {
+                ++currentTag;
+            }
+        }
+        __syncthreads();
+
+    } while (1 == startCellFound);
+
+    __syncthreads();
 }
