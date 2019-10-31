@@ -29,6 +29,9 @@ public:
     __inline__ __device__ void processingClusterCopy_blockCall();
 
 private:
+    __inline__ __device__ void processingDecomposition_optimizedForSmallCluster_blockCall();
+    __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_blockCall();
+
     __inline__ __device__ void updateCellVelocity_blockCall(Cluster* cluster);
     __inline__ __device__ void cellAging(Cell* cell);
     __inline__ __device__ void destroyCloseCell(Cell* cell);
@@ -355,6 +358,17 @@ __inline__ __device__ void ClusterProcessor::processingMutation_blockCall()
         }
     }
     __syncthreads();
+}
+
+__inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
+{
+    if (_cluster->numCellPointers < 20) {
+        processingDecomposition_optimizedForSmallCluster_blockCall();
+    }
+    else {
+        processingDecomposition_optimizedForSmallCluster_blockCall();
+//        processingDecomposition_optimizedForLargeCluster_blockCall();
+    }
 }
 
 __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
@@ -733,6 +747,11 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
 
             auto const energyDiff = newKineticEnergy - origKineticEnergies;    //is negative for fusion
             regainedEnergyPerCell = -energyDiff / newCluster->numCellPointers;
+
+            //DEBUG code
+            if (regainedEnergyPerCell < 0) {
+                printf("regainedEnergyPerCell negative\n");
+            }
         }
         __syncthreads();
 
@@ -872,7 +891,7 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
     }
 }
 
-__inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
+__inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForSmallCluster_blockCall()
 {
     if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
         __shared__ bool changes;
@@ -909,5 +928,39 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
             }
             __syncthreads();
         } while (changes);
+    }
+}
+
+__inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForLargeCluster_blockCall()
+{
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto& cell = _cluster->cellPointers[cellIndex];
+        cell->tag = 0;
+    }
+    __syncthreads();
+
+    __shared__ int currentTag;
+    if (0 == threadIdx.x) {
+        currentTag = 1;
+    }
+    __syncthreads();
+    {
+        __shared__ int startCellMarked; // 0 = no, 1 = yes
+        if (0 == threadIdx.x) {
+            startCellMarked = 0;
+        }
+        __syncthreads();
+
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+            auto& cell = _cluster->cellPointers[cellIndex];
+            if (0 == cell->tag) {
+                int orig = atomicExch_block(&startCellMarked, 1);
+                if (0 == orig) {
+                    cell->tag = currentTag;
+                }
+                break;
+            }
+        }
+        __syncthreads();
     }
 }
