@@ -275,17 +275,21 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
     __syncthreads();
 
     auto const numTokenPointers = _cluster->numTokenPointers;
+    ConstructorFunction constructor;
+    if (numTokenPointers > 0) {
+        constructor.init_blockCall(_cluster, _data);
+    }
+    __syncthreads();
+
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
         auto const& token = _cluster->tokenPointers[tokenIndex];
 
         auto const type = static_cast<Enums::CellFunction::Type>(token->cell->cellFunctionType % Enums::CellFunction::_COUNTER);
         switch (type) {
         case Enums::CellFunction::CONSTRUCTOR: {
-            ConstructorFunction constructor;
-            constructor.init_blockCall(token, _data);
             __syncthreads();
 
-            constructor.processing_blockCall();
+            constructor.processing_blockCall(token);
             __syncthreads();
         } break;
         }
@@ -336,13 +340,6 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
     targetToken->memory[0] = targetCell->branchNumber;
     targetToken->sourceCell = sourceToken->cell;
     targetToken->cell = targetCell;
-}
-
-__global__ void constructorLauncher(Token* token, SimulationData data)
-{
-    ConstructorFunction constructor;
-    constructor.init_blockCall(token, &data);
-    constructor.processing_blockCall();
 }
 
 __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)

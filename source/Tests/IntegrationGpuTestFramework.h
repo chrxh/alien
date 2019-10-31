@@ -30,8 +30,9 @@ public:
 	virtual ~IntegrationGpuTestFramework();
 
 protected:
+    void checkCellAttributes(DataDescription const& data) const;
+    void checkCellConnections(DataDescription const& data) const;
 	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
-	void checkDistancesToConnectingCells(DataDescription const& data) const;
 	void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
 	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
 	Physics::Velocities calcVelocitiesOfFusion(ClusterDescription const& cluster1, ClusterDescription const& cluster2) const;
