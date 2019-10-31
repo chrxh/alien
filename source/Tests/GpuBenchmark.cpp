@@ -67,15 +67,15 @@ namespace
     ModelGpuData getModelGpuDataWithOneBlock()
     {
         ModelGpuData result;
-        result.setNumThreadsPerBlock(16);
+        result.setNumThreadsPerBlock(32);
         result.setNumBlocks(1);
         result.setNumClusterPointerArrays(1);
-        result.setMaxClusters(100000);
-        result.setMaxCells(500000);
+        result.setMaxClusters(100);
+        result.setMaxCells(1500000);
         result.setMaxParticles(500000);
         result.setMaxTokens(50000);
         result.setMaxCellPointers(500000 * 10);
-        result.setMaxClusterPointers(100000 * 10);
+        result.setMaxClusterPointers(100 * 10);
         result.setMaxParticlePointers(500000 * 10);
         result.setMaxTokenPointers(50000 * 10);
         result.setDynamicMemorySize(100000000);
@@ -87,7 +87,7 @@ class GpuBenchmarkForClusterDecomposition
     : public GpuBenchmark
 {
 public:
-    GpuBenchmarkForClusterDecomposition() : GpuBenchmark({ 2010, 500 }, getModelGpuDataWithOneBlock())
+    GpuBenchmarkForClusterDecomposition() : GpuBenchmark({ 2010, 1000 }, getModelGpuDataWithOneBlock())
     {}
 
     virtual ~GpuBenchmarkForClusterDecomposition() = default;
@@ -97,11 +97,11 @@ TEST_F(GpuBenchmarkForClusterDecomposition, testClusterDecomposition)
 {
     auto const lowEnergy = _parameters.cellMinEnergy / 2;
     DataDescription origData;
-    for (int i = 0; i < 400; ++i) {
-        auto cluster = createRectangularCluster({ 1000, 1 }, QVector2D{ 0, static_cast<float>(i) }, QVector2D{});
-        cluster.cells->at(10).energy = lowEnergy;
-        origData.addCluster(cluster);
-    }
+    auto cluster = createRectangularCluster({ 1000, 400 }, QVector2D{ 0, 0 }, QVector2D{});
+    cluster.cells->at(10).energy = lowEnergy;
+    cluster.cells->at(120).energy = lowEnergy;
+    cluster.cells->at(5020).energy = lowEnergy;
+    origData.addCluster(cluster);
     IntegrationTestHelper::updateData(_access, origData);
 
     QElapsedTimer timer;
