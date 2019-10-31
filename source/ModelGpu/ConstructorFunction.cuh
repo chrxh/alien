@@ -839,7 +839,7 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedFor
         baseCell->tag = ClusterComponent::ConstructionSite;     //only temporary to avoid tagging constructor
     }
     __syncthreads();
-    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, tagMemory);
+    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
 
     if (0 == threadIdx.x) {
         baseCell->tag = ClusterComponent::Constructor;     //restore

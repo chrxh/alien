@@ -16,6 +16,8 @@ public:
     __inline__ __device__ static void tagComponent_blockCall(
         Cluster* cluster,
         Cell* startCell,
+        int newTag,
+        int freeTag,
         DynamicMemory& dynamicMemory    //expect shared memory
     );
 };
@@ -23,6 +25,8 @@ public:
 __inline__ __device__ void Tagger::tagComponent_blockCall(
     Cluster* cluster,
     Cell* startCell,
+    int cellTag,
+    int freeTag,
     DynamicMemory& dynamicMemory)
 {
     __shared__ int numCellsToEvaluate;
@@ -36,14 +40,10 @@ __inline__ __device__ void Tagger::tagComponent_blockCall(
         numCellsToEvaluateNextRound = 0;
         dynamicMemory.cellsToEvaluate[0] = startCell;
         dynamicMemory.cellsEvaluated.insertOrAssign(startCell, 0);
-/*
-        startCell->tag = cellTag;
-*/
     }
     __syncthreads();
 
     while (numCellsToEvaluate > 0) {
-
         auto const partition = calcPartition(numCellsToEvaluate, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
 
@@ -51,13 +51,18 @@ __inline__ __device__ void Tagger::tagComponent_blockCall(
             auto const numConnections = cellToEvaluate->numConnections;
             for (int i = 0; i < numConnections; ++i) {
                 auto const& candidate = cellToEvaluate->connections[i];
-                auto const origTag = atomicMax_block(&candidate->tag, cellToEvaluate->tag);
-                if (origTag < cellToEvaluate->tag) {
-                    if (!dynamicMemory.cellsEvaluated.insertOrAssign(candidate, 0)) {
-                        int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);
-                        dynamicMemory.cellsToEvaluateNextRound[origEvaluateIndex] = candidate;
-                    }
+
+                if (candidate->tag != freeTag) {
+                    continue;
                 }
+
+                if (!dynamicMemory.cellsEvaluated.insertOrAssign(candidate, 0)) {
+                    int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);
+                    dynamicMemory.cellsToEvaluateNextRound[origEvaluateIndex] = candidate;
+                    candidate->tag = cellTag;
+                    __threadfence_block();
+                }
+
             }
         }
         __syncthreads();
