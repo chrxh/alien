@@ -32,15 +32,11 @@ public:
 protected:
     void checkCellAttributes(DataDescription const& data) const;
     void checkCellConnections(DataDescription const& data) const;
-	void checkEnergy(DataDescription const& origData, DataDescription const& newData) const;
-	void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
-	Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
-	Physics::Velocities calcVelocitiesOfFusion(ClusterDescription const& cluster1, ClusterDescription const& cluster2) const;
-	double calcEnergy(DataDescription const& data) const;
-	double calcEnergy(ClusterDescription const& cluster) const;
-	double calcKineticEnergy(DataDescription const& data) const;
-	double calcKineticEnergy(ClusterDescription const& cluster) const;
-	void setMaxConnections(ClusterDescription& cluster, int maxConnections) const;
+	void checkEnergies(DataDescription const& origData, DataDescription const& newData) const;
+    
+    Physics::Velocities calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const;
+    Physics::Velocities calcVelocitiesOfFusion(ClusterDescription const& cluster1, ClusterDescription const& cluster2) const;
+    void setMaxConnections(ClusterDescription& cluster, int maxConnections) const;
     void setCenterPos(ClusterDescription& cluster, QVector2D const& centerPos) const;
 
 protected:
@@ -51,4 +47,12 @@ protected:
 	SpaceProperties* _spaceProp = nullptr;
     SimulationAccessGpu* _access = nullptr;
     DescriptionHelper* _descHelper = nullptr;
+
+private:
+    double calcAndCheckEnergy(DataDescription const& data) const;
+    double calcAndCheckEnergy(ClusterDescription const& cluster) const;
+    double calcKineticEnergy(DataDescription const& data) const;
+    double calcKineticEnergy(ClusterDescription const& cluster) const;
+    void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
+    void checkEnergyValue(double value) const;
 };
