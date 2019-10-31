@@ -237,7 +237,7 @@ TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -276,7 +276,7 @@ TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUn
 		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
 	}
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 
@@ -318,7 +318,7 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 
@@ -360,7 +360,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfParallelLineClusters)
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -399,7 +399,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters)
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -430,7 +430,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters_withAngularVelo
 	ASSERT_EQ(2, newData.clusters->size());
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -472,7 +472,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -515,7 +515,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters)
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -559,7 +559,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters_waitUntilSe
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -596,7 +596,7 @@ TEST_F(ClusterGpuTests, DISABLED_testSidewiseCollisionOfTraversalLineClusters_wa
 	}
 
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -668,7 +668,7 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy)
 		}
 	}
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -716,7 +716,7 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
 	}
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -741,7 +741,7 @@ TEST_F(ClusterGpuTests, testDestructionOfTooCloseCells)
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(5, newData.clusters->at(0).cells->size());
     checkEnergy(origData, newData);
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -765,7 +765,7 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -788,7 +788,7 @@ TEST_F(ClusterGpuTests, testNoFusionOfHorizontalClusters)
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
 	ASSERT_EQ(2, newData.clusters->size());
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -820,7 +820,7 @@ TEST_F(ClusterGpuTests, testFusionOfLineClusters_duringRotation)
 	EXPECT_EQ(22, fusedCluster.cells->size());
 	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
 	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -852,7 +852,7 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_partialContact)
 	EXPECT_EQ(22, fusedCluster.cells->size());
 	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
 	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -875,7 +875,7 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_atUniverseBoundary)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(22, newData.clusters->at(0).cells->size());
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -894,7 +894,7 @@ TEST_F(ClusterGpuTests, testFastMovingCluster)
 
 	ASSERT_EQ(1, newData.clusters->size());
 	EXPECT_EQ(100, newData.clusters->at(0).cells->size());
-    checkDistancesToConnectingCells(newData);
+    checkCellConnections(newData);
 }
 
 /**
@@ -917,7 +917,7 @@ TEST_F(ClusterGpuTests, testFastRotatingCluster)
 		}
 	}
 	EXPECT_LE(2, newData.clusters->size());
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -976,7 +976,7 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_manyThreadsPerBlock
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(300, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**
@@ -998,7 +998,7 @@ TEST_F(ClusterGpuTests, regressionTest_manyRectangleClusters_concentratedAtUnive
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(50, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-	checkDistancesToConnectingCells(newData);
+	checkCellConnections(newData);
 }
 
 /**

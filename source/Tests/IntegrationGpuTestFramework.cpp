@@ -46,6 +46,21 @@ IntegrationGpuTestFramework::~IntegrationGpuTestFramework()
     delete _descHelper;
 }
 
+void IntegrationGpuTestFramework::checkCellAttributes(DataDescription const & data) const
+{
+    if (data.clusters) {
+        for (auto const& cluster : *data.clusters) {
+            if (cluster.cells) {
+                for (auto const& cell : *cluster.cells) {
+                    EXPECT_LE(cell.connectingCells->size(), *cell.maxConnections);
+                    EXPECT_LE(*cell.maxConnections, _parameters.cellMaxBonds);
+                }
+            }
+        }
+    }
+
+}
+
 void IntegrationGpuTestFramework::checkEnergy(DataDescription const& origData, DataDescription const& newData) const
 {
 	auto energyBefore = calcEnergy(origData);
@@ -54,7 +69,7 @@ void IntegrationGpuTestFramework::checkEnergy(DataDescription const& origData, D
 	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
 }
 
-void IntegrationGpuTestFramework::checkDistancesToConnectingCells(DataDescription const & data) const
+void IntegrationGpuTestFramework::checkCellConnections(DataDescription const & data) const
 {
 	if (!data.clusters) {
 		return;
@@ -69,7 +84,12 @@ void IntegrationGpuTestFramework::checkDistancesToConnectingCells(DataDescriptio
 			for (auto const& connectingCellId : *cell.connectingCells) {
 				CellDescription const& connectingCell = cellByCellId.at(connectingCellId);
 				ASSERT_GE(cellMaxDistance, (*connectingCell.pos - *cell.pos).length());
-			}
+
+                ASSERT_TRUE(
+                    connectingCell.connectingCells->end()
+                    != std::find(
+                        connectingCell.connectingCells->begin(), connectingCell.connectingCells->end(), cell.id));
+            }
 		}
 	}
 }

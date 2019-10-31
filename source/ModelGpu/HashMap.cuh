@@ -7,7 +7,7 @@ template <typename Key, typename Value, typename Hash = HashFunctor<Key>>
 class HashMap
 {
 public:
-    __device__ __inline__ void init_blockCall(int size, ArrayController& arrays)
+    __device__ __inline__ void reserveMemory_blockCall(int size, ArrayController& arrays)
     {
         __shared__ Entry* entries;
         if (0 == threadIdx.x) {
@@ -17,8 +17,11 @@ public:
 
         _size = size;
         _entries = entries;
+    }
 
-        auto const threadBlock = calcPartition(size, threadIdx.x, blockDim.x);
+    __device__ __inline__ void init_blockCall()
+    {
+        auto const threadBlock = calcPartition(_size, threadIdx.x, blockDim.x);
         for (int i = threadBlock.startIndex; i <= threadBlock.endIndex; ++i) {
             _entries[i].setFree(0);
             _entries[i].initLock();
@@ -26,11 +29,11 @@ public:
         __syncthreads();
     }
 
-    __device__ __inline__ void insertOrAssign(Key const& key, Value const& value)
+    //return true if key was present
+    __device__ __inline__ bool insertOrAssign(Key const& key, Value const& value)
     {
         int index = _hash(key) % _size;
         int wasFree;
-        int dummy = 0;
         do {
             auto& entry = _entries[index];
             entry.getLock(1);
@@ -39,7 +42,7 @@ public:
                 if (entry.getKey() == key) {
                     entry.setValue(value);
                     entry.releaseLock();
-                    return;
+                    return true;
                 }
                 entry.releaseLock();
                 index = (++index) % _size;
@@ -50,6 +53,7 @@ public:
         newEntry.setKey(key);
         newEntry.setValue(value);
         newEntry.releaseLock();
+        return false;
     }
 
     __device__ __inline__ bool contains(Key const& key) const
