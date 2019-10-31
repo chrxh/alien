@@ -367,13 +367,16 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
         return;
     }
 
-    if (_cluster->numCellPointers < 1000) {
+    processingDecomposition_optimizedForSmallCluster_blockCall();
+
+/*
+    if (_cluster->numCellPointers < 100) {
         processingDecomposition_optimizedForSmallCluster_blockCall();
     }
     else {
-//        processingDecomposition_optimizedForSmallCluster_blockCall();
         processingDecomposition_optimizedForLargeCluster_blockCall();
     }
+*/
 }
 
 __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
@@ -752,19 +755,16 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
 
             auto const energyDiff = newKineticEnergy - origKineticEnergies;    //is negative for fusion
             regainedEnergyPerCell = -energyDiff / newCluster->numCellPointers;
-
-            //DEBUG code
-            if (regainedEnergyPerCell < 0) {
-                printf("regainedEnergyPerCell negative\n");
-            }
         }
         __syncthreads();
 
-        auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
+        if (regainedEnergyPerCell >= 0) {    //TODO: handle < 0 case
+            auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
 
-        for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
-            auto& cell = newCluster->cellPointers[index];
-            cell->changeEnergy(regainedEnergyPerCell);
+            for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
+                auto& cell = newCluster->cellPointers[index];
+                cell->changeEnergy(regainedEnergyPerCell);
+            }
         }
 
         copyTokenPointers_blockCall(_cluster, _cluster->clusterToFuse, newCluster);
