@@ -168,7 +168,6 @@ private:
     {
         Cell** cellPointerArray1;
         Cell** cellPointerArray2;
-        HashMap<Cell*, int> cellPointerMap;
         HashMap<int2, CellAndNewAbsPos> cellPosMap;
     };
     DynamicMemory _dynamicMemory;
@@ -235,7 +234,6 @@ __inline__ __device__ void ConstructorFunction::init_blockCall(Cluster* cluster,
         cellPointerArray1 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
         cellPointerArray2 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
     }
-    _dynamicMemory.cellPointerMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     _dynamicMemory.cellPosMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
 
     __syncthreads();
@@ -834,7 +832,7 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedFor
 
     __shared__ Tagger::DynamicMemory tagMemory;
     if (0 == threadIdx.x) {
-        tagMemory = {_dynamicMemory.cellPointerArray1, _dynamicMemory.cellPointerArray2, _dynamicMemory.cellPointerMap };
+        tagMemory = {_dynamicMemory.cellPointerArray1, _dynamicMemory.cellPointerArray2 };
         firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
         baseCell->tag = ClusterComponent::ConstructionSite;     //only temporary to avoid tagging constructor
     }

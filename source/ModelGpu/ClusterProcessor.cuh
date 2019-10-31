@@ -367,16 +367,12 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
         return;
     }
 
-    processingDecomposition_optimizedForSmallCluster_blockCall();
-
-/*
     if (_cluster->numCellPointers < 100) {
         processingDecomposition_optimizedForSmallCluster_blockCall();
     }
     else {
         processingDecomposition_optimizedForLargeCluster_blockCall();
     }
-*/
 }
 
 __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
@@ -974,7 +970,6 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
         dynamicMemory.cellsToEvaluate = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
         dynamicMemory.cellsToEvaluateNextRound = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
     }
-    dynamicMemory.cellsEvaluated.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
     __syncthreads();
 
     __shared__ int startCellFound; // 0 = no, 1 = yes
@@ -989,7 +984,7 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto& cell = _cluster->cellPointers[cellIndex];
-            if (0 == cell->tag) {
+            if (0 == cell->tag && 0 == startCellFound) {
                 int orig = atomicExch_block(&startCellFound, 1);
                 if (0 == orig) {
                     startCell = cell;
