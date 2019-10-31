@@ -64,7 +64,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -111,7 +111,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -154,7 +154,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -201,7 +201,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -248,7 +248,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowC
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -295,7 +295,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highC
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -338,7 +338,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -381,7 +381,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -427,5 +427,5 @@ TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken2.energy);
     EXPECT_EQ(*secondCell.energy + 2*tokenTransferEnergyAmount, *newCell.energy);
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }

@@ -75,7 +75,7 @@ DataDescription PropulsionGpuTests::runStandardPropulsionTest(Enums::PropIn::Typ
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
     return newData;
 }
 
@@ -261,7 +261,7 @@ TEST_F(PropulsionGpuTests, testPowerControl)
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 
     auto clusterByClusterId = IntegrationTestHelper::getClusterByClusterId(newData);
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
@@ -306,7 +306,7 @@ TEST_F(PropulsionGpuTests, testParallelization1)
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 
     auto clusterByClusterId = IntegrationTestHelper::getClusterByClusterId(newData);
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
@@ -369,7 +369,7 @@ TEST_F(PropulsionGpuTests, testParallelization2)
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 
     auto clusterByClusterId = IntegrationTestHelper::getClusterByClusterId(newData);
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);

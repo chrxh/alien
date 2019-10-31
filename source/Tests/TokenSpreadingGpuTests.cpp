@@ -90,7 +90,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -147,7 +147,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_manyLargeClu
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -198,7 +198,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithEncounter)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 
@@ -237,7 +237,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers_negativeValue)
@@ -307,7 +307,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementBlocked)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 
@@ -354,7 +354,7 @@ TEST_F(TokenSpreadingGpuTests, testForking)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -409,7 +409,7 @@ TEST_F(TokenSpreadingGpuTests, testForking_lowCellEnergies)
         }
     }
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -472,7 +472,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -574,7 +574,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithTooManyTokens)
 		}
 	}
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -614,7 +614,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementAveragingCellEnergies)
     for (auto const& newCell : *newCluster.cells) {
         EXPECT_EQ(cellMinEnergy * 3, *newCell.energy);
     }
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -651,7 +651,7 @@ TEST_F(TokenSpreadingGpuTests, testMassiveMovements)
     auto const& newCluster = newData.clusters->at(0);
 
     EXPECT_EQ(100*100, newCluster.cells->size());
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -691,7 +691,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_lowEnergy)
     auto const& newCell = newCluster.cells->at(0);
     EXPECT_TRUE(newCell.tokens->empty());
 
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
@@ -763,7 +763,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
         }
 
     }
-    checkEnergy(origData, newData);
+    checkEnergies(origData, newData);
 }
 
 /**
