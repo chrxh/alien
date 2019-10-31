@@ -835,10 +835,11 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedFor
     __shared__ Tagger::DynamicMemory tagMemory;
     if (0 == threadIdx.x) {
         tagMemory = {_dynamicMemory.cellPointerArray1, _dynamicMemory.cellPointerArray2, _dynamicMemory.cellPointerMap };
+        firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
         baseCell->tag = ClusterComponent::ConstructionSite;     //only temporary to avoid tagging constructor
     }
     __syncthreads();
-    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
+    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, tagMemory);
 
     if (0 == threadIdx.x) {
         baseCell->tag = ClusterComponent::Constructor;     //restore
