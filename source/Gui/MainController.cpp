@@ -38,6 +38,7 @@
 #include "DataRepository.h"
 #include "Notifier.h"
 #include "SimulationConfig.h"
+#include "DataAnalyzer.h"
 
 MainController::MainController(QObject * parent)
 	: QObject(parent)
@@ -51,101 +52,103 @@ MainController::~MainController()
 
 void MainController::init()
 {
-	_model = new MainModel(this);
-	_view = new MainView();
+    _model = new MainModel(this);
+    _view = new MainView();
 
-	_controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
-		SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
-	{
-		if (ModelComputationType(typeId) == ModelComputationType::Cpu) {
-			auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-			ModelCpuData data(typeSpecificData);
-			return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
-		}
-		else if (ModelComputationType(typeId) == ModelComputationType::Gpu) {
-			auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-			ModelGpuData data(typeSpecificData);
-			return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
-		}
-		else {
-			THROW_NOT_IMPLEMENTED();
-		}
-	};
-	_accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
-	{
-		if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
-			auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-			SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
-			access->init(controllerCpu);
-			return access;
-		}
-		else if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
-			auto modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-			SimulationAccessGpu* access = modelGpuFacade->buildSimulationAccess();
-			access->init(controllerGpu);
-			return access;
-		}
-		else {
-			THROW_NOT_IMPLEMENTED();
-		}
-	};
-	_monitorBuildFunc = [](SimulationController* controller) -> SimulationMonitor*
-	{
-		if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
-			auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-			SimulationMonitorCpu* moni = facade->buildSimulationMonitor();
-			moni->init(controllerCpu);
-			return moni;
-		}
-		else if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
-			auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-			SimulationMonitorGpu* moni = facade->buildSimulationMonitor();
-			moni->init(controllerGpu);
-			return moni;
-		}
-		else {
-			THROW_NOT_IMPLEMENTED();
-		}
-	};
+    _controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
+        SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
+    {
+        if (ModelComputationType(typeId) == ModelComputationType::Cpu) {
+            auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+            ModelCpuData data(typeSpecificData);
+            return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+        }
+        else if (ModelComputationType(typeId) == ModelComputationType::Gpu) {
+            auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            ModelGpuData data(typeSpecificData);
+            return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+        }
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
+    _accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
+    {
+        if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
+            auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+            SimulationAccessCpu* access = modelCpuFacade->buildSimulationAccess();
+            access->init(controllerCpu);
+            return access;
+        }
+        else if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
+            auto modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            SimulationAccessGpu* access = modelGpuFacade->buildSimulationAccess();
+            access->init(controllerGpu);
+            return access;
+        }
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
+    _monitorBuildFunc = [](SimulationController* controller) -> SimulationMonitor*
+    {
+        if (auto controllerCpu = dynamic_cast<SimulationControllerCpu*>(controller)) {
+            auto facade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+            SimulationMonitorCpu* moni = facade->buildSimulationMonitor();
+            moni->init(controllerCpu);
+            return moni;
+        }
+        else if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
+            auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            SimulationMonitorGpu* moni = facade->buildSimulationMonitor();
+            moni->init(controllerGpu);
+            return moni;
+        }
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
 
-	auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-	auto serializer = modelBasicFacade->buildSerializer();
-	auto simAccessForDataController = modelCpuFacade->buildSimulationAccess();
-	auto descHelper = modelBasicFacade->buildDescriptionHelper();
-	auto versionController = new VersionController();
-	SET_CHILD(_serializer, serializer);
-	SET_CHILD(_simAccess, simAccessForDataController);
-	SET_CHILD(_descHelper, descHelper);
-	SET_CHILD(_versionController, versionController);
-	_repository = new DataRepository(this);
-	_notifier = new Notifier(this);
+    auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto modelCpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
+    auto serializer = modelBasicFacade->buildSerializer();
+    auto simAccessForDataController = modelCpuFacade->buildSimulationAccess();
+    auto descHelper = modelBasicFacade->buildDescriptionHelper();
+    auto versionController = new VersionController();
+    SET_CHILD(_serializer, serializer);
+    SET_CHILD(_simAccess, simAccessForDataController);
+    SET_CHILD(_descHelper, descHelper);
+    SET_CHILD(_versionController, versionController);
+    _repository = new DataRepository(this);
+    _notifier = new Notifier(this);
+    _dataAnalyzer = new DataAnalyzer(this);
 
-	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
+    connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
 
-	_serializer->init(_controllerBuildFunc, _accessBuildFunc);
-	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
+    _serializer->init(_controllerBuildFunc, _accessBuildFunc);
+    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
 
-	if (!onLoadSimulation("autosave.sim")) {
+    if (!onLoadSimulation("autosave.sim")) {
 
-		//default simulation
-		auto config = boost::make_shared<_SimulationConfigCpu>();
-		config->maxThreads = 8;
-		config->gridSize = IntVector2D({ 12, 6 });
-		config->universeSize = IntVector2D({ 12 * 33 * 2 , 12 * 17 * 2 });
-		config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
-		config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
-		onNewSimulation(config, 0);
-	}
+        //default simulation
+        auto config = boost::make_shared<_SimulationConfigCpu>();
+        config->maxThreads = 8;
+        config->gridSize = IntVector2D({ 12, 6 });
+        config->universeSize = IntVector2D({ 12 * 33 * 2 , 12 * 17 * 2 });
+        config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
+        config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
+        onNewSimulation(config, 0);
+    }
 
-	auto config = getSimulationConfig();
-	if (boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
-		_view->getInfoController()->setDevice(InfoController::Device::CPU);
-	}
-	else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-		_view->getInfoController()->setDevice(InfoController::Device::GPU);
-	}
+    auto config = getSimulationConfig();
+    if (boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+        _view->getInfoController()->setDevice(InfoController::Device::CPU);
+    }
+    else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+        _view->getInfoController()->setDevice(InfoController::Device::GPU);
+    }
 }
+
 
 namespace
 {
@@ -205,6 +208,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_descHelper->init(context);
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _simAccess, _descHelper, context);
+    _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier);
 
 	auto simMonitor = _monitorBuildFunc(_simController);
 	SET_CHILD(_simMonitor, simMonitor);
@@ -310,6 +314,11 @@ void MainController::onUpdateSimulationParametersForRunningSimulation()
 void MainController::onRestrictTPS(optional<int> const& tps)
 {
 	_simController->setRestrictTimestepsPerSecond(tps);
+}
+
+void MainController::onAddMostFrequentClusterToSimulation()
+{
+    _dataAnalyzer->addMostFrequenceClusterRepresentantToSimulation();
 }
 
 int MainController::getTimestep() const

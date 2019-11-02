@@ -17,7 +17,8 @@ public:
 
 	virtual void clear() override;
 	virtual void updateData(DataChangeDescription const &dataToUpdate) override;
-	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
+    virtual void requireData(ResolveDescription const& resolveDesc) override;
+    virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	virtual void requireImage(IntRect rect, QImagePtr const& target) override;
 	virtual DataDescription const& retrieveData() override;
 

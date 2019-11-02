@@ -65,6 +65,8 @@ private:
 	Q_SLOT void onRandomMultiplier();
 	Q_SLOT void onGridMultiplier();
 
+    Q_SLOT void onMostFrequentCluster();
+
 	Q_SLOT void onShowAbout();
 	Q_SLOT void onShowDocumentation(bool show);
 

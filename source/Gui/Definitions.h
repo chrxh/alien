@@ -80,3 +80,5 @@ enum class ModelComputationType
 	Cpu,
 	Gpu
 };
+
+class DataAnalyzer;
