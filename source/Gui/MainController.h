@@ -28,6 +28,7 @@ public:
 	void onRecreateSimulation(SimulationConfig const& config);
 	void onUpdateSimulationParametersForRunningSimulation();
 	void onRestrictTPS(optional<int> const& tps);
+    void onAddMostFrequentClusterToSimulation();
 
 	int getTimestep() const;
 	SimulationConfig getSimulationConfig() const;
@@ -90,6 +91,7 @@ private:
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
+    DataAnalyzer* _dataAnalyzer = nullptr;
 
 	SimulationControllerBuildFunc _controllerBuildFunc;
 	SimulationAccessBuildFunc _accessBuildFunc;

@@ -64,6 +64,12 @@ void SimulationAccessCpuImpl::requireData(IntRect rect, ResolveDescription const
 	}
 }
 
+void SimulationAccessCpuImpl::requireData(ResolveDescription const & resolveDesc)
+{
+    auto const space = _context->getSpaceProperties();
+    requireData(IntRect{ {0, 0}, space->getSize() }, resolveDesc);
+}
+
 void SimulationAccessCpuImpl::requireImage(IntRect rect, QImagePtr const& target)
 {
 	_imageRequired = true;

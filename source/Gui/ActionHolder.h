@@ -62,6 +62,8 @@ public:
 	QAction* actionRandomMultiplier = nullptr;
 	QAction* actionGridMultiplier = nullptr;
 
+    QAction* actionMostFrequentCluster = nullptr;
+
 	QAction* actionAbout = nullptr;
 	QAction* actionDocumentation = nullptr;
 
