@@ -184,6 +184,8 @@ void MainView::setupMenu()
 	ui->menuCollection->addAction(actions->actionRandomMultiplier);
 	ui->menuCollection->addAction(actions->actionGridMultiplier);
 
+    ui->menuAnalysis->addAction(actions->actionMostFrequentCluster);
+
 	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();
 	ui->menuHelp->addAction(actions->actionDocumentation);

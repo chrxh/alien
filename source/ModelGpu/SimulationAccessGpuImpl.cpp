@@ -62,6 +62,12 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 	_updateInProgress = true;
 }
 
+void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc)
+{
+    auto const space = _context->getSpaceProperties();
+    requireData(IntRect{ {0, 0}, space->getSize() }, resolveDesc);
+}
+
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
 	auto worker = _context->getCudaController()->getCudaWorker();

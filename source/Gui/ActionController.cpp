@@ -46,12 +46,21 @@ ActionController::ActionController(QObject * parent)
 	_model = new ActionModel(this);
 }
 
-void ActionController::init(MainController * mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
-	, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-	, MonitorController* monitor, DataRepository* repository, Notifier* notifier)
+void ActionController::init(
+    MainController* mainController,
+    MainModel* mainModel,
+    MainView* mainView,
+    VisualEditController* visualEditor,
+    Serializer* serializer,
+    InfoController* infoController,
+    DataEditController* dataEditor,
+    ToolbarController* toolbar,
+    MonitorController* monitor,
+    DataRepository* repository,
+    Notifier* notifier)
 {
-	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto numberGenerator = factory->buildRandomNumberGenerator();
+    auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+    auto numberGenerator = factory->buildRandomNumberGenerator();
 	numberGenerator->init();
 
 	_mainController = mainController;
@@ -117,6 +126,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
 	connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
+
+    connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
 	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
@@ -589,6 +600,11 @@ void ActionController::onGridMultiplier()
 			Receiver::ActionController
 		}, UpdateDescription::All);
 	}
+}
+
+void ActionController::onMostFrequentCluster()
+{
+    _mainController->onAddMostFrequentClusterToSimulation();
 }
 
 void ActionController::onDeleteEntity()
