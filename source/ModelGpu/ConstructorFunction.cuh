@@ -206,6 +206,19 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall(Token* toke
     }
     __syncthreads();
 
+    __shared__ Cell** cellPointerArray1;
+    __shared__ Cell** cellPointerArray2;
+    if (0 == threadIdx.x) {
+        cellPointerArray1 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+        cellPointerArray2 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+    }
+    _dynamicMemory.cellPosMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    __syncthreads();
+
+    _dynamicMemory.cellPointerArray1 = cellPointerArray1;
+    _dynamicMemory.cellPointerArray2 = cellPointerArray2;
+    __syncthreads();
+
     if (firstCellOfConstructionSite) {
         auto const distance = QuantityConverter::convertDataToDistance(_token->memory[Enums::Constr::IN_DIST]);
         if (!checkDistance(distance)) {
@@ -227,19 +240,6 @@ __inline__ __device__ void ConstructorFunction::init_blockCall(Cluster* cluster,
     _data = data;
     _cluster = cluster;
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
-    
-    __shared__ Cell** cellPointerArray1;
-    __shared__ Cell** cellPointerArray2;
-    if (0 == threadIdx.x) {
-        cellPointerArray1 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
-        cellPointerArray2 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
-    }
-    _dynamicMemory.cellPosMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
-
-    __syncthreads();
-
-    _dynamicMemory.cellPointerArray1 = cellPointerArray1;
-    _dynamicMemory.cellPointerArray2 = cellPointerArray2;
 }
 
 

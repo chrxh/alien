@@ -793,11 +793,17 @@
     <addaction name="menuSimulationParameters"/>
     <addaction name="menuSymbolMap"/>
    </widget>
+   <widget class="QMenu" name="menuAnalysis">
+    <property name="title">
+     <string>Analysis</string>
+    </property>
+   </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuSettings"/>
    <addaction name="menuView"/>
    <addaction name="menuEntity"/>
    <addaction name="menuCollection"/>
+   <addaction name="menuAnalysis"/>
    <addaction name="menuHelp"/>
   </widget>
  </widget>
