@@ -284,7 +284,7 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
         auto const& token = _cluster->tokenPointers[tokenIndex];
 
-        auto const type = static_cast<Enums::CellFunction::Type>(token->cell->cellFunctionType % Enums::CellFunction::_COUNTER);
+        auto const type = static_cast<unsigned char>(token->cell->cellFunctionType) % Enums::CellFunction::_COUNTER;
         switch (type) {
         case Enums::CellFunction::CONSTRUCTOR: {
             __syncthreads();
@@ -347,7 +347,7 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
     auto cell = token->cell;
     cell->getLock();
     EnergyGuidance::processing(token);
-    auto type = static_cast<Enums::CellFunction::Type>(cell->cellFunctionType % Enums::CellFunction::_COUNTER);
+    auto type = static_cast<unsigned char>(cell->cellFunctionType) % Enums::CellFunction::_COUNTER;
     switch (type) {
     case Enums::CellFunction::COMPUTER: {
         CellComputerFunction::processing(token);

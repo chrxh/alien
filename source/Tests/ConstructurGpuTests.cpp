@@ -237,6 +237,9 @@ protected:
             float constructor;
         };
         AngularMasses calcAngularMasses(TestResult const& testResult) const;
+
+        Enums::ConstrIn::Type getConstrIn(TokenDescription const& token) const;
+        Enums::ConstrOut::Type getConstrOut(TokenDescription const& token) const;
     private:
         SimulationParameters _parameters;
         SpaceProperties* _spaceProp;
@@ -1228,9 +1231,9 @@ void ConstructorGpuTests::_ResultChecker::checkIfDestruction(
 {
     auto const& token = testResult.token;
 
-    EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
+    EXPECT_EQ(expectations._tokenOutput, getConstrOut(token));
 
-    if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
+    if (Enums::ConstrIn::DO_NOTHING == getConstrIn(token)) {
         EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
         return;
     }
@@ -1242,7 +1245,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
 {
     auto const& token = testResult.token;
 
-    EXPECT_EQ(expectations._tokenOutput, token.data->at(Enums::Constr::OUT));
+    EXPECT_EQ(expectations._tokenOutput, getConstrOut(token));
     auto movementOfCenter = testResult.movementOfCenter;
     if (!isCompatible(movementOfCenter, QVector2D{})) {
         _spaceProp->correctPosition(movementOfCenter);
@@ -1251,7 +1254,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
     
     checkTokenMovement(testResult);
 
-    if (Enums::ConstrIn::DO_NOTHING == token.data->at(Enums::Constr::IN)) {
+    if (Enums::ConstrIn::DO_NOTHING == getConstrIn(token)) {
         EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
         return;
     }
@@ -1621,9 +1624,20 @@ auto ConstructorGpuTests::_ResultChecker::calcAngularMasses(TestResult const & t
     return result;
 }
 
+Enums::ConstrIn::Type ConstructorGpuTests::_ResultChecker::getConstrIn(TokenDescription const & token) const
+{
+    return static_cast<Enums::ConstrIn::Type>(
+        static_cast<unsigned char>(token.data->at(Enums::Constr::IN)) % Enums::ConstrIn::_COUNTER);
+}
+
+Enums::ConstrOut::Type ConstructorGpuTests::_ResultChecker::getConstrOut(TokenDescription const & token) const
+{
+    return static_cast<Enums::ConstrOut::Type>(token.data->at(Enums::Constr::OUT));
+}
+
 bool ConstructorGpuTests::isFinished(TokenDescription const& token)
 {
-    auto const option = token.data->at(Enums::Constr::IN_OPTION);
+    auto const option = static_cast<unsigned char>(token.data->at(Enums::Constr::IN_OPTION) % Enums::ConstrInOption::_COUNTER);
     return Enums::ConstrInOption::FINISH_NO_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
@@ -1631,14 +1645,14 @@ bool ConstructorGpuTests::isFinished(TokenDescription const& token)
 
 bool ConstructorGpuTests::isReduced(TokenDescription const& token)
 {
-    auto const option = token.data->at(Enums::Constr::IN_OPTION);
+    auto const option = static_cast<unsigned char>(token.data->at(Enums::Constr::IN_OPTION) % Enums::ConstrInOption::_COUNTER);
     return Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
 }
 
 bool ConstructorGpuTests::isSeparated(TokenDescription const& token)
 {
-    auto const option = token.data->at(Enums::Constr::IN_OPTION);
+    auto const option = static_cast<unsigned char>(token.data->at(Enums::Constr::IN_OPTION) % Enums::ConstrInOption::_COUNTER);
     return Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
 }
@@ -2896,4 +2910,15 @@ TEST_F(ConstructorGpuTests, testLargeConstructionSiteAndConstructor)
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
             constructionSiteProperties).additionalCellsOnConstructor(140));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_DIST));
+}
+
+TEST_F(ConstructorGpuTests, regressionTest_negativeValueForCommand)
+{
+    int command = Enums::ConstrIn::DO_NOTHING;
+    command += (256 / Enums::ConstrIn::_COUNTER - 1) * Enums::ConstrIn::_COUNTER;
+    auto const token = createTokenForConstruction(
+        TokenForConstructionParameters().constructionInput(static_cast<Enums::ConstrIn::Type>(command)));
+    auto result =
+        runStartConstructionOnHorizontalClusterTest(StartConstructionOnHorizontalClusterTestParameters().token(token));
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }

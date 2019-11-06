@@ -15,6 +15,7 @@ public:
     __inline__ __device__ static void tagComponent_blockCall(
         Cluster* cluster,
         Cell* startCell,
+        Cell* forbiddingConnectingCell,
         int newTag,
         int freeTag,
         DynamicMemory& dynamicMemory    //expect shared memory
@@ -24,6 +25,7 @@ public:
 __inline__ __device__ void Tagger::tagComponent_blockCall(
     Cluster* cluster,
     Cell* startCell,
+    Cell* forbiddingConnectingCell,
     int cellTag,
     int freeTag,
     DynamicMemory& dynamicMemory)
@@ -48,6 +50,9 @@ __inline__ __device__ void Tagger::tagComponent_blockCall(
             auto const numConnections = cellToEvaluate->numConnections;
             for (int i = 0; i < numConnections; ++i) {
                 auto const& candidate = cellToEvaluate->connections[i];
+                if (forbiddingConnectingCell == candidate && startCell == cellToEvaluate) {
+                    continue;
+                }
                 auto origTag = atomicExch_block(&candidate->tag, cellTag);
                 if (origTag == freeTag) {
                     int origEvaluateIndex = atomicAdd(&numCellsToEvaluateNextRound, 1);

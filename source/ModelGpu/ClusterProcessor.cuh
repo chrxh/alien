@@ -754,11 +754,11 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         }
         __syncthreads();
 
-        if (regainedEnergyPerCell >= 0) {    //TODO: handle < 0 case
-            auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
+        auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
 
-            for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
-                auto& cell = newCluster->cellPointers[index];
+        for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
+            auto& cell = newCluster->cellPointers[index];
+            if (cell->getEnergy() + regainedEnergyPerCell > 0) {
                 cell->changeEnergy(regainedEnergyPerCell);
             }
         }
@@ -997,7 +997,7 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
 
         if (1 == startCellFound) {
             if (startCell->alive) {
-                Tagger::tagComponent_blockCall(_cluster, startCell, currentTag, 0, dynamicMemory);
+                Tagger::tagComponent_blockCall(_cluster, startCell, nullptr, currentTag, 0, dynamicMemory);
             }
             __syncthreads();
 

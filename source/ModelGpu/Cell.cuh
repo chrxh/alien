@@ -62,16 +62,7 @@ struct Cell
 
     __device__ __inline__ float getEnergy()
     {
-        auto const value = atomicAdd(&_energy, 0);
-        if (value < 0) {
-            printf("Cell::getEnergy negative, value: %f, parameter: \n", value);
-            while (true) {}
-        }
-        if (isnan(value)) {
-            printf("Cell::getEnergy nan, value: %f, parameter: \n", value);
-            while (true) {}
-        }
-        return value;
+        return atomicAdd(&_energy, 0);
     }
 
     __device__ __inline__ void getLock()

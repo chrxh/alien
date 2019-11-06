@@ -61,8 +61,6 @@ private:
         float desiredAngle);
 
     __inline__ __device__ void tagConstructionSite(Cell* baseCell, Cell* firstCellOfConstructionSite);
-    __inline__ __device__ void tagConstructionSite_optimizedForSmallCluster(Cell* baseCell, Cell* firstCellOfConstructionSite);
-    __inline__ __device__ void tagConstructionSite_optimizedForLargeCluster(Cell* baseCell, Cell* firstCellOfConstructionSite);
 
     __inline__ __device__ void calcMaxAngles(Cell* constructionCell, Angles& result);
     __inline__ __device__ void calcAngularMasses(Cluster* cluster, Cell* constructionCell, AngularMasses& result);
@@ -80,7 +78,7 @@ private:
         float2 const& displacementOfConstructionSite,
         float& result);
     __inline__ __device__ void calcAngularMassAfterAddingCell(float2 const& relPosOfNewCell, float& result);
-    __inline__ __device__ EnergyForNewEntities adaptEnergies(Token* token, float energyLoss);
+    __inline__ __device__ EnergyForNewEntities adaptEnergies(float energyLoss);
 
 
     __inline__ __device__ void transformClusterComponents(
@@ -148,6 +146,9 @@ private:
     __inline__ __device__ bool isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections);
     __inline__ __device__ void establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConnections adaptMaxConnections);
 
+    __inline__ __device__ Enums::ConstrIn::Type getCommand(Token* token) const;
+    __inline__ __device__ Enums::ConstrInOption::Type getOption(Token* token) const;
+
 private:
     __inline__ __device__ Cell*& check(Cell*& entity, int p);
     __inline__ __device__ Cell* check(Cell*&& entity);
@@ -181,7 +182,7 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall(Token* toke
 {
     _token = token;
 
-    auto const command = _token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
+    auto const command = getCommand(token);
     if (Enums::ConstrIn::DO_NOTHING == command) {
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
         __syncthreads();
@@ -356,9 +357,8 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
         auto const newCellAngle =
             QuantityConverter::convertDataToAngle(_token->memory[Enums::Constr::INOUT_ANGLE]) + freeAngle;
 
-        command = static_cast<Enums::ConstrIn::Type>(_token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER);
-        option = static_cast<Enums::ConstrInOption::Type>(
-            _token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER);
+        command = getCommand(_token);
+        option = getOption(_token);
         bool const separation = Enums::ConstrInOption::FINISH_WITH_SEP == option
             || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
@@ -405,7 +405,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
             _cluster->numCellPointers, _cluster->vel, angularMassAfterRotation, angularVelAfterRotation);
         auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeRotation;
 
-        energyForNewEntities = adaptEnergies(_token, kineticEnergyDiff);
+        energyForNewEntities = adaptEnergies(kineticEnergyDiff);
     }
     __syncthreads();
 
@@ -512,7 +512,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         return;
     }
 
-    auto const command = _token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER;
+    auto const command = getCommand(_token);
     if (Enums::ConstrIn::SAFE == command || Enums::ConstrIn::UNSAFE == command) {
         auto const ignoreOwnCluster = (Enums::ConstrIn::UNSAFE == command);
         
@@ -578,15 +578,14 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
  
         displacementForConstructionSite =
             Math::normalized(firstCellOfConstructionSite->relPos - cellRelPos_transformed) * distance;
-        option = static_cast<Enums::ConstrInOption::Type>(
-            _token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER);
+        option = getOption(_token);
         if (Enums::ConstrInOption::FINISH_WITH_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
 
             relPosOfNewCell = relPosOfNewCell + displacementForConstructionSite;
             displacementForConstructionSite = displacementForConstructionSite * 2;
         }
-        command = static_cast<Enums::ConstrIn::Type>(_token->memory[Enums::Constr::IN] % Enums::ConstrIn::_COUNTER);
+        command = getCommand(_token);
     }
     __syncthreads();
 
@@ -634,7 +633,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
             _cluster->numCellPointers, _cluster->vel, angularMassAfterRotation, angularVelAfterRotation);
         auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeRotation;
-        energyForNewEntities = adaptEnergies(_token, kineticEnergyDiff);
+        energyForNewEntities = adaptEnergies(kineticEnergyDiff);
     }
     __syncthreads();
 
@@ -706,28 +705,28 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     }
 }
 
-__inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, float energyLoss) -> EnergyForNewEntities
+__inline__ __device__ auto ConstructorFunction::adaptEnergies(float energyLoss) -> EnergyForNewEntities
 {
     EnergyForNewEntities result;
     result.energyAvailable = true;
     result.token = 0.0f;
     result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
 
-    auto const& cell = token->cell;
-    auto const option = token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
+    auto const& cell = _token->cell;
+    auto const option = getOption(_token);
 
     if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
         result.token = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
     }
 
-    if (token->getEnergy() <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss
+    if (_token->getEnergy() <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss
             + cudaSimulationParameters.tokenMinEnergy) {
         result.energyAvailable = false;
         return result;
     }
 
-    token->changeEnergy(-(cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss));
+    _token->changeEnergy(-(cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss));
     if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
         auto const averageEnergy = (cell->getEnergy() + result.cell) / 2;
@@ -740,90 +739,6 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, floa
 
 __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCell, Cell* firstCellOfConstructionSite)
 {
-    if (_cluster->numCellPointers > 100) {
-        tagConstructionSite_optimizedForLargeCluster(baseCell, firstCellOfConstructionSite);
-    }
-    else {
-        tagConstructionSite_optimizedForSmallCluster(baseCell, firstCellOfConstructionSite);
-    }
-}
-
-__inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedForSmallCluster(Cell * baseCell, Cell * firstCellOfConstructionSite)
-{
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto& cell = _cluster->cellPointers[cellIndex];
-        cell->tag = ClusterComponent::Constructor;
-    }
-    __syncthreads();
-
-    if (0 == threadIdx.x) {
-        firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
-    }
-    __syncthreads();
-
-    //step 1: fast algorithm but possibly incomplete
-    auto prevCell = firstCellOfConstructionSite;
-    auto currentCell = firstCellOfConstructionSite;
-    int numFail = 0;
-    do {
-        for (int i = 0; i < currentCell->numConnections; ++i) {
-            auto const& connectingCell = currentCell->connections[i];
-            if (connectingCell != baseCell) {
-                auto const origTag = atomicExch_block(&connectingCell->tag, ClusterComponent::ConstructionSite);
-                if (ClusterComponent::Constructor == origTag) {
-                    prevCell = currentCell;
-                    currentCell = connectingCell;
-                    numFail = 0;
-                    break;
-                }
-            }
-        }
-        if (5 == ++numFail) {
-            break;
-        }
-        int connectingCellIndex = threadIdx.x % currentCell->numConnections;
-        if (currentCell->connections[connectingCellIndex] == baseCell) {
-            connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
-        }
-        if (currentCell->connections[connectingCellIndex] == prevCell) {
-            connectingCellIndex = (connectingCellIndex + 1) % currentCell->numConnections;
-        }
-        if (currentCell->connections[connectingCellIndex] != baseCell) {
-            prevCell = currentCell;
-            currentCell = currentCell->connections[connectingCellIndex];
-        }
-        else {
-            break;
-        }
-
-    } while (true);
-
-    //step 1: slow algorithm but complete
-    __shared__ bool changes;
-    do {
-        changes = false;
-        __syncthreads();
-
-        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-            auto& cell = _cluster->cellPointers[cellIndex];
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto& otherCell = cell->connections[i];
-                if (otherCell->tag > cell->tag) {
-                    if ((cell == firstCellOfConstructionSite && otherCell == baseCell)
-                        || (cell == baseCell && otherCell == firstCellOfConstructionSite)) {
-                        continue;
-                    }
-                    cell->tag = otherCell->tag;
-                    changes = true;
-                }
-            }
-        }
-        __syncthreads();
-    } while (changes);
-}
-
-__inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedForLargeCluster(Cell * baseCell, Cell * firstCellOfConstructionSite)
-{
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto& cell = _cluster->cellPointers[cellIndex];
         cell->tag = ClusterComponent::Constructor;
@@ -832,16 +747,11 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite_optimizedFor
 
     __shared__ Tagger::DynamicMemory tagMemory;
     if (0 == threadIdx.x) {
-        tagMemory = {_dynamicMemory.cellPointerArray1, _dynamicMemory.cellPointerArray2 };
+        tagMemory = { _dynamicMemory.cellPointerArray1, _dynamicMemory.cellPointerArray2 };
         firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
-        baseCell->tag = ClusterComponent::ConstructionSite;     //only temporary to avoid tagging constructor
     }
     __syncthreads();
-    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
-
-    if (0 == threadIdx.x) {
-        baseCell->tag = ClusterComponent::Constructor;     //restore
-    }
+    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, baseCell, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
 }
 
 __inline__ __device__ void ConstructorFunction::calcMaxAngles(Cell* constructionCell, Angles& result)
@@ -1450,7 +1360,7 @@ ConstructorFunction::addTokenToCluster(Token* token, Token** newTokenPointers)
 __inline__ __device__ void ConstructorFunction::separateConstructionWhenFinished(Cell* newCell)
 {
     auto const& cell = _token->cell;
-    auto const option = _token->memory[Enums::Constr::IN_OPTION] % Enums::ConstrInOption::_COUNTER;
+    auto const option = getOption(_token);
 
     if (Enums::ConstrInOption::FINISH_NO_SEP == option || Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
@@ -1584,6 +1494,18 @@ ConstructorFunction::establishConnection(Cell* cell1, Cell* cell2, AdaptMaxConne
     __threadfence();
     cell1->releaseLock();
     cell2->releaseLock();
+}
+
+__inline__ __device__ Enums::ConstrIn::Type ConstructorFunction::getCommand(Token * token) const
+{
+    return static_cast<Enums::ConstrIn::Type>(
+        static_cast<unsigned char>(token->memory[Enums::Constr::IN]) % Enums::ConstrIn::_COUNTER);
+}
+
+__inline__ __device__ Enums::ConstrInOption::Type ConstructorFunction::getOption(Token * token) const
+{
+    return static_cast<Enums::ConstrInOption::Type>(
+        static_cast<unsigned char>(token->memory[Enums::Constr::IN_OPTION]) % Enums::ConstrInOption::_COUNTER);
 }
 
 __inline__ __device__ Cell*& ConstructorFunction::check(Cell *& entity, int p)
