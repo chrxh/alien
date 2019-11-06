@@ -377,3 +377,16 @@ TEST_F(PropulsionGpuTests, testParallelization2)
 
     EXPECT_TRUE(isCompatible(2.0, *newCluster1.angularVel / *newCluster2.angularVel));
 }
+
+TEST_F(PropulsionGpuTests, regressionTest_negativeValueForCommand)
+{
+    int command = Enums::PropIn::TOWARD_CENTER;
+    command += (256 / Enums::PropIn::_COUNTER - 1) * Enums::PropIn::_COUNTER;
+    auto data = runStandardPropulsionTest(static_cast<Enums::PropIn::Type>(command), 0, 100, QVector2D{ 0.3f, 0 });
+    auto result = extractResult(data);
+    auto const& velocities = result.first;
+    auto const& propOut = result.second;
+
+    EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
+    EXPECT_GT(0.3f - SmallVelocity, velocities.linear.length());
+}

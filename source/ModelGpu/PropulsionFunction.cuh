@@ -23,7 +23,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     auto const& sourceCell = token->sourceCell;
     auto const& cluster = cell->cluster;
     auto& tokenMem = token->memory;
-    auto const& command = tokenMem[Enums::Prop::IN] % Enums::PropIn::_COUNTER;
+    auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::IN]) % Enums::PropIn::_COUNTER;
 
     if (Enums::PropIn::DO_NOTHING == command) {
         tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
@@ -49,6 +49,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
         auto thrustAngle =
             (Math::angleOfVector(sourceCell->relPos - cell->relPos) + cluster->angle + angle);
         impulse = Math::unitVectorOfAngle(thrustAngle) * power;
+
     }
     if (Enums::PropIn::FROM_CENTER == command) {
         impulse = Math::normalized(cellRelPos) * power;
