@@ -2,7 +2,7 @@
 
 #include "SimulationMonitorGpu.h"
 #include "DefinitionsImpl.h"
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 
 class SimulationMonitorGpuImpl
 	: public SimulationMonitorGpu
@@ -20,7 +20,6 @@ public:
 private:
 	Q_SLOT void jobsFinished();
 
-	void calcMonitorData(DataAccessTO const& dataTO);
 	string getObjectId() const;
 
 private:
@@ -28,6 +27,5 @@ private:
 
 	SimulationContextGpuImpl* _context = nullptr;
 	MonitorData _monitorData;
-	DataAccessTO _dataTO;
 };
 

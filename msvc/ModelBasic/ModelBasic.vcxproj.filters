@@ -257,5 +257,8 @@
     <ClInclude Include="..\..\source\ModelBasic\QuantityConverter.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\MonitorData.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

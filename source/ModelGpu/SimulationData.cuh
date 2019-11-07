@@ -18,9 +18,9 @@ struct SimulationData
 
     CudaNumberGenerator numberGen;
 
-    void init(int2 size_, CudaConstants const& cudaConstants)
+    void init(int2 universeSize, CudaConstants const& cudaConstants)
     {
-        size = size_;
+        size = universeSize;
 
         entities.init(cudaConstants);
         entitiesForCleanup.init(cudaConstants);

@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "ModelBasic/ChangeDescriptions.h"
 
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "DefinitionsImpl.h"
 
 class _CudaJob
@@ -26,6 +26,29 @@ protected:
 private:
 	string _originId;
 	bool _notifyFinish = false;
+};
+
+class _GetMonitorDataJob
+    : public _CudaJob
+{
+public:
+    _GetMonitorDataJob(string const& originId)
+        : _CudaJob(originId, true) { }
+
+    virtual ~_GetMonitorDataJob() = default;
+
+    void setMonitorData(MonitorData const& monitorData)
+    {
+        _monitorData = monitorData;
+    }
+
+    MonitorData getMonitorData()
+    {
+        return _monitorData;
+    }
+
+private:
+    MonitorData _monitorData;
 };
 
 class _GetDataJob 
