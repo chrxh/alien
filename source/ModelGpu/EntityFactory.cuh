@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.cuh"
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "Map.cuh"
 #include "Math.cuh"
 #include "ModelBasic/ElementaryTypes.h"

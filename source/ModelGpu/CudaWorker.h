@@ -4,7 +4,7 @@
 #include <QThread>
 
 #include "ModelBasic/ChangeDescriptions.h"
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "DefinitionsImpl.h"
 
 class CudaWorker

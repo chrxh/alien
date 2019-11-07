@@ -6,7 +6,7 @@
 #include "ModelBasic/ElementaryTypes.h"
 
 #include "Base.cuh"
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "EnergyGuidance.cuh"
