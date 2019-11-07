@@ -5,7 +5,7 @@
 
 #include "ModelBasic/SpaceProperties.h"
 
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "CudaJob.h"
 #include "CudaWorker.h"
 #include "ModelGpuData.h"
@@ -63,7 +63,7 @@ void CudaWorker::run()
 		processJobs();
 
 		if (isSimulationRunning()) {
-			_cudaSimulation->calcNextTimestep();
+			_cudaSimulation->calcCudaTimestep();
 			if (_tpsRestriction) {
 				int remainingTime = 1000000 / (*_tpsRestriction) - timer.nsecsElapsed() / 1000;
 				if (remainingTime > 0) {
@@ -113,7 +113,7 @@ void CudaWorker::processJobs()
 		}
 
 		if (auto calcSingleTimestepJob = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
-			_cudaSimulation->calcNextTimestep();
+			_cudaSimulation->calcCudaTimestep();
 			Q_EMIT timestepCalculated();
 		}
 
@@ -124,6 +124,10 @@ void CudaWorker::processJobs()
 		if (auto setSimulationParametersJob = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
 			_cudaSimulation->setSimulationParameters(setSimulationParametersJob->getSimulationParameters());
 		}
+
+        if (auto getMonitorDataJob = boost::dynamic_pointer_cast<_GetMonitorDataJob>(job)) {
+            getMonitorDataJob->setMonitorData(_cudaSimulation->getMonitorData());
+        }
 
 		if (job->isNotifyFinish()) {
 			notify = true;

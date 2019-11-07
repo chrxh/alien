@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <vector_types.h>
 
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"

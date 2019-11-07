@@ -207,6 +207,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cell.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cluster.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\DebugKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DEBUG_cluster.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessor.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CellComputerFunction.cuh" />
@@ -224,10 +225,12 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\HashSet.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Math.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterPointerMultiArrayController.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CudaMonitorData.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\MonitorKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Particle.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessor.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaSimulation.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\CudaAccessTOs.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\AccessTOs.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h" />
     <ClInclude Include="..\..\source\ModelGpu\Definitions.h" />
     <ClInclude Include="..\..\source\ModelGpu\DefinitionsImpl.h" />

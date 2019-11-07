@@ -10,12 +10,14 @@
 #include "CudaSimulation.cuh"
 #include "CudaConstants.h"
 #include "ConstantMemory.cuh"
-#include "CudaAccessTOs.cuh"
+#include "AccessTOs.cuh"
 #include "SimulationKernels.cuh"
 #include "AccessKernels.cuh"
 #include "CleanupKernels.cuh"
+#include "MonitorKernels.cuh"
 #include "Entities.cuh"
 #include "CudaMemoryManager.cuh"
+#include "CudaMonitorData.cuh"
 
 #include "SimulationData.cuh"
 #include "Map.cuh"
@@ -61,12 +63,14 @@ CudaSimulation::CudaSimulation(
     setSimulationParameters(parameters);
     setCudaConstants(cudaConstants);
 
-    _internalData = new SimulationData();
+    _cudaSimulationData = new SimulationData();
     _cudaAccessTO = new DataAccessTO();
+    _cudaMonitorData = new CudaMonitorData();
 
     auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    _internalData->init(size, cudaConstants);
+    _cudaSimulationData->init(size, cudaConstants);
+    _cudaMonitorData->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numClusters);
@@ -84,7 +88,8 @@ CudaSimulation::CudaSimulation(
 
 CudaSimulation::~CudaSimulation()
 {
-    _internalData->free();
+    _cudaSimulationData->free();
+    _cudaMonitorData->free();
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numClusters);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
@@ -97,30 +102,31 @@ CudaSimulation::~CudaSimulation()
     std::cout << "[CUDA] memory released" << std::endl;
 
     delete _cudaAccessTO;
-    delete _internalData;
+    delete _cudaSimulationData;
+    delete _cudaMonitorData;
 
 }
 
-void CudaSimulation::calcNextTimestep()
+void CudaSimulation::calcCudaTimestep()
 {
-    GPU_FUNCTION(calcSimulationTimestep, *_internalData);
+    GPU_FUNCTION(calcSimulationTimestep, *_cudaSimulationData);
 }
 
 void CudaSimulation::DEBUG_printNumEntries()
 {
     std::cout
-        << "Particles: " << _internalData->entities.particles.retrieveNumEntries() << "; "
-        << "Cells: " << _internalData->entities.cells.retrieveNumEntries() << "; "
-        << "Clusters: " << _internalData->entities.clusters.retrieveNumEntries() << "; "
-        << "CellPointers: " << _internalData->entities.cellPointers.retrieveNumEntries() << "; "
-        << "Tokens: " << _internalData->entities.tokens.retrieveNumEntries() << "; "
-        << "TokenPointers: " << _internalData->entities.tokenPointers.retrieveNumEntries() << "; "
+        << "Particles: " << _cudaSimulationData->entities.particles.retrieveNumEntries() << "; "
+        << "Cells: " << _cudaSimulationData->entities.cells.retrieveNumEntries() << "; "
+        << "Clusters: " << _cudaSimulationData->entities.clusters.retrieveNumEntries() << "; "
+        << "CellPointers: " << _cudaSimulationData->entities.cellPointers.retrieveNumEntries() << "; "
+        << "Tokens: " << _cudaSimulationData->entities.tokens.retrieveNumEntries() << "; "
+        << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; "
         << std::endl;
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    GPU_FUNCTION(getSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
+    GPU_FUNCTION(getSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
     checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
@@ -143,7 +149,13 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
 
-    GPU_FUNCTION(setSimulationAccessData, rectUpperLeft, rectLowerRight, *_internalData, *_cudaAccessTO);
+    GPU_FUNCTION(setSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+}
+
+MonitorData CudaSimulation::getMonitorData()
+{
+    GPU_FUNCTION(getCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
+    return _cudaMonitorData->getMonitorData();
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
