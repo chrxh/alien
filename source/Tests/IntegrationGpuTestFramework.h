@@ -30,6 +30,8 @@ public:
 	virtual ~IntegrationGpuTestFramework();
 
 protected:
+    void check(DataDescription const& origData, DataDescription const& newData) const;
+
     void checkCellAttributes(DataDescription const& data) const;
     void checkCellConnections(DataDescription const& data) const;
 	void checkEnergies(DataDescription const& origData, DataDescription const& newData) const;

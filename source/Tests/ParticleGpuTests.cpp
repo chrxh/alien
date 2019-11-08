@@ -73,7 +73,7 @@ TEST_F(ParticleGpuTests, testFusionOfTwoParticles)
 	auto newParticle = newData.particles->front();
 	EXPECT_TRUE(isCompatible(QVector2D(0, 0), *newParticle.vel));
 
-	checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -94,7 +94,7 @@ TEST_F(ParticleGpuTests, testFusionOfManyParticles)
 	IntegrationTestHelper::runSimulation(300, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -115,7 +115,7 @@ TEST_F(ParticleGpuTests, testTransformationParticleToCell)
     ASSERT_EQ(1, newData.clusters->size());
     EXPECT_EQ(1, newData.clusters->at(0).cells->size());
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -150,5 +150,5 @@ TEST_F(ParticleGpuWithOneBlockTests, regressionTestFusionOfManyParticles)
     IntRect rect = {{0, 0}, {_universeSize.x, _universeSize.y}};
     DataDescription newData = IntegrationTestHelper::getContent(_access, rect);
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }

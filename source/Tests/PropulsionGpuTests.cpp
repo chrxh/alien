@@ -75,7 +75,7 @@ DataDescription PropulsionGpuTests::runStandardPropulsionTest(Enums::PropIn::Typ
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
     return newData;
 }
 
@@ -261,7 +261,7 @@ TEST_F(PropulsionGpuTests, testPowerControl)
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
+    check(origData, newData);
 
     auto clusterByClusterId = IntegrationTestHelper::getClusterByClusterId(newData);
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
@@ -306,7 +306,7 @@ TEST_F(PropulsionGpuTests, testParallelization1)
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
+    check(origData, newData);
 
     auto clusterByClusterId = IntegrationTestHelper::getClusterByClusterId(newData);
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
@@ -369,7 +369,7 @@ TEST_F(PropulsionGpuTests, testParallelization2)
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
+    check(origData, newData);
 
     auto clusterByClusterId = IntegrationTestHelper::getClusterByClusterId(newData);
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
@@ -378,7 +378,7 @@ TEST_F(PropulsionGpuTests, testParallelization2)
     EXPECT_TRUE(isCompatible(2.0, *newCluster1.angularVel / *newCluster2.angularVel));
 }
 
-TEST_F(PropulsionGpuTests, regressionTest_negativeValueForCommand)
+TEST_F(PropulsionGpuTests, regressionTestNegativeValueForCommand)
 {
     int command = Enums::PropIn::TOWARD_CENTER;
     command += (256 / Enums::PropIn::_COUNTER - 1) * Enums::PropIn::_COUNTER;

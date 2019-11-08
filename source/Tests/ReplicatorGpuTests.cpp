@@ -37,11 +37,37 @@ public:
     virtual ~ReplicatorGpuTests() = default;
 
 protected:
-    virtual void SetUp();
+    virtual void SetUp() {}
 };
 
-void ReplicatorGpuTests::SetUp()
+/**
+* Situation: - many concentrated replicator clusters
+*			 - simulating 100 time steps
+* Expected result: no crash
+*/
+TEST_F(ReplicatorGpuTests, regressionTestManyConcentratedReplicators)
 {
+    DataDescription loadData;
+    auto serializer = _basicFacade->buildSerializer();
+    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
+    SerializationHelper::loadFromFile<DataDescription>(
+        filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
+
+    auto& replicator = loadData.clusters->at(0);
+
+    DataDescription origData;
+    for (int i = 0; i < 400; ++i) {
+        setCenterPos(replicator, QVector2D{ static_cast<float>(_numberGen->getRandomReal(0, 30)),
+            static_cast<float>(_numberGen->getRandomReal(0, 30)) });
+        replicator.vel = QVector2D{ static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9)),
+            static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9f)) };
+        replicator.angularVel = _numberGen->getRandomReal(-1, 1);
+        _descHelper->makeValid(replicator);
+        origData.addCluster(replicator);
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(100, _controller);
 }
 
 /**
@@ -51,7 +77,7 @@ void ReplicatorGpuTests::SetUp()
 *   - energy is never negative in cells (is not checked here but can be checked in Cell::changeEnergy)
 *   - constructor accessed connections of cells from other clusters with no locking
 */
-TEST_F(ReplicatorGpuTests, regressionTestNoCrash)
+TEST_F(ReplicatorGpuTests, regressionTestManyAdvancedReplicators)
 {
     DataDescription loadData;
     auto serializer = _basicFacade->buildSerializer();
