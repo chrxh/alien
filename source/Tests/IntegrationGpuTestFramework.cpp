@@ -46,6 +46,13 @@ IntegrationGpuTestFramework::~IntegrationGpuTestFramework()
     delete _descHelper;
 }
 
+void IntegrationGpuTestFramework::check(DataDescription const & origData, DataDescription const & newData) const
+{
+    checkCellAttributes(newData);
+    checkCellConnections(newData);
+    checkEnergies(origData, newData);
+}
+
 void IntegrationGpuTestFramework::checkCellAttributes(DataDescription const & data) const
 {
     if (data.clusters) {
