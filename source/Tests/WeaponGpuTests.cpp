@@ -72,7 +72,7 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 
     auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
     auto const& newSecondCell = newCellByCellId.at(secondCell.id);
@@ -160,5 +160,5 @@ TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }

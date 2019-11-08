@@ -51,25 +51,7 @@ public:
 
 		_space->correctPosition(pos);
         auto const color = EntityRenderer::calcParticleColor(energy);
-		_image->setPixel(pos.x, pos.y, color);
-
-        --pos.x;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x60);
-
-        pos.x += 2;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x60);
-
-        --pos.x;
-        --pos.y;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x60);
-
-        pos.y += 2;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x60);
-
+        EntityRenderer::colorPixel(pos, color, 0x80);
 	}
 
 	void renderToken(IntVector2D pos)

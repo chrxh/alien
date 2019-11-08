@@ -90,7 +90,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -147,7 +147,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_manyLargeClu
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -198,7 +198,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithEncounter)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 
@@ -237,7 +237,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers_negativeValue)
@@ -307,7 +307,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementBlocked)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 
@@ -354,7 +354,7 @@ TEST_F(TokenSpreadingGpuTests, testForking)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -409,7 +409,7 @@ TEST_F(TokenSpreadingGpuTests, testForking_lowCellEnergies)
         }
     }
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -472,7 +472,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -574,7 +574,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithTooManyTokens)
 		}
 	}
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -614,7 +614,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementAveragingCellEnergies)
     for (auto const& newCell : *newCluster.cells) {
         EXPECT_EQ(cellMinEnergy * 3, *newCell.energy);
     }
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -651,7 +651,7 @@ TEST_F(TokenSpreadingGpuTests, testMassiveMovements)
     auto const& newCluster = newData.clusters->at(0);
 
     EXPECT_EQ(100*100, newCluster.cells->size());
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -691,7 +691,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_lowEnergy)
     auto const& newCell = newCluster.cells->at(0);
     EXPECT_TRUE(newCell.tokens->empty());
 
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -763,7 +763,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
         }
 
     }
-    checkEnergies(origData, newData);
+    check(origData, newData);
 }
 
 /**
@@ -772,7 +772,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
 *			 - simulating 100 time steps
 * Expected result: no crash
 */
-TEST_F(TokenSpreadingGpuTests, regressionTest_manyStickyRotatingTokenClusters)
+TEST_F(TokenSpreadingGpuTests, regressionTestManyStickyRotatingTokenClusters)
 {
     auto highVel = _parameters.cellFusionVelocity*2;
 
@@ -787,36 +787,6 @@ TEST_F(TokenSpreadingGpuTests, regressionTest_manyStickyRotatingTokenClusters)
             QVector2D{static_cast<float>(_numberGen->getRandomReal(-highVel, highVel)),
                       static_cast<float>(_numberGen->getRandomReal(-highVel, highVel))});
         origData.addCluster(cluster);
-    }
-
-    IntegrationTestHelper::updateData(_access, origData);
-    IntegrationTestHelper::runSimulation(100, _controller);
-}
-
-/**
-* Situation: - many concentrated replicator clusters
-*			 - simulating 100 time steps
-* Expected result: no crash
-*/
-TEST_F(TokenSpreadingGpuTests, regressionTest_manyReplicators)
-{
-    DataDescription loadData;
-    auto serializer = _basicFacade->buildSerializer();
-    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
-    SerializationHelper::loadFromFile<DataDescription>(
-        filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
-
-    auto& replicator = loadData.clusters->at(0);
-
-    DataDescription origData;
-    for (int i = 0; i < 400; ++i) {
-        setCenterPos(replicator, QVector2D{ static_cast<float>(_numberGen->getRandomReal(0, 30)),
-            static_cast<float>(_numberGen->getRandomReal(0, 30)) });
-        replicator.vel = QVector2D{ static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9)),
-            static_cast<float>(_numberGen->getRandomReal(-0.9, 0.9f)) };
-        replicator.angularVel = _numberGen->getRandomReal(-1, 1);
-        _descHelper->makeValid(replicator);
-        origData.addCluster(replicator);
     }
 
     IntegrationTestHelper::updateData(_access, origData);

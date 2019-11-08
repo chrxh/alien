@@ -301,7 +301,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateDataOutsideBoundaries)
 * Fixed error: crash after moving cells in a cluster in item view
 * Expected result: no crash
 */
-TEST_F(DataDescriptionTransferGpuTests, regressionTest_changeData)
+TEST_F(DataDescriptionTransferGpuTests, regressionTestChangeData)
 {
 	auto descHelper = _basicFacade->buildDescriptionHelper();
 	descHelper->init(_context);
@@ -334,7 +334,7 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTest_changeData)
 * Fixed error: token was removed in DataConverter::processModifications
 * Expected result: token is still there
 */
-TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken)
+TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken)
 {
     DataDescription origData;
     auto cluster = createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0);
@@ -368,7 +368,7 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken)
 * Fixed error: tokens were not correctly filtered in AccessKernel
 * Expected result: changes are correctly transferred to simulation
 */
-TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken_partialUpdate)
+TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken_partialUpdate)
 {
     auto token = createSimpleToken();
 
@@ -405,7 +405,7 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTest_moveCellWithToken_partial
 * Situation: partial update and running simulation several times
 * Fixed error: particles with same id emerged (due to particles array swap in setSimulationAccessData)
 */
-TEST_F(DataDescriptionTransferGpuTests, regressionTest_repeatingPartialUpdateAndRun)
+TEST_F(DataDescriptionTransferGpuTests, regressionTestRepeatingPartialUpdateAndRun)
 {
     DataDescription origData;
     origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{}));

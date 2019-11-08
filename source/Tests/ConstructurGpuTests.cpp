@@ -354,9 +354,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -462,9 +460,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     auto const& newCluster = newData.clusters->at(0);
 
@@ -571,9 +567,7 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     EXPECT_EQ(1, newData.clusters->size());
     auto const& newCluster = newData.clusters->at(0);
@@ -694,9 +688,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -819,9 +811,7 @@ auto ConstructorGpuTests::runSecondCellConstructionOnSelfTouchingClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     auto const& newCluster = newData.clusters->at(0);
 
@@ -963,9 +953,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     auto newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
@@ -1036,9 +1024,7 @@ auto ConstructorGpuTests::runConstructionSiteConnectedToConstructorTwiceTest(Tok
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
     auto const newConstructorCell = newCellByCellId.at(constructorCell.id);
@@ -1120,9 +1106,7 @@ auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClusters
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
-    checkCellAttributes(newData);
-    checkCellConnections(newData);
+    check(origData, newData);
 
     MassiveParallelClustersTestResult result;
     for (auto const& newCluster : *newData.clusters) {
@@ -2856,7 +2840,7 @@ TEST_F(ConstructorGpuTests, testMultipleConnectedConstructionSites_errorConnecti
 
     //check results
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-    checkEnergies(origData, newData);
+    check(origData, newData);
 
     EXPECT_EQ(1, newData.clusters->size());
 
@@ -2912,7 +2896,7 @@ TEST_F(ConstructorGpuTests, testLargeConstructionSiteAndConstructor)
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::ERROR_DIST));
 }
 
-TEST_F(ConstructorGpuTests, regressionTest_negativeValueForCommand)
+TEST_F(ConstructorGpuTests, regressionTestNegativeValueForCommand)
 {
     int command = Enums::ConstrIn::DO_NOTHING;
     command += (256 / Enums::ConstrIn::_COUNTER - 1) * Enums::ConstrIn::_COUNTER;
