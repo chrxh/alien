@@ -233,7 +233,6 @@ __inline__ __device__ float2 Physics::transformVelocity(float massOld, float mas
 __inline__ __device__ float Physics::transformAngularVelocity(float angularMassOld, float angularMassNew, float angularVelOld)
 {
     angularVelOld = angularVelOld*DEG_TO_RAD;
-    float rotEnergy = angularMassOld*angularVelOld*angularVelOld;
-    double angularVelNew = sqrtf(rotEnergy / angularMassNew);
+    float angularVelNew = angularVelOld * sqrtf(angularMassOld / angularMassNew);
     return angularVelNew*RAD_TO_DEG;
 }
