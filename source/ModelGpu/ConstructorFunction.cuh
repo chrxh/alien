@@ -404,9 +404,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
         velocityAfterConstruction = Physics::transformVelocity(mass, mass + 1, _cluster->vel);
         angularVelAfterConstruction =
             Physics::transformAngularVelocity(_cluster->angularMass, angularMassAfterConstruction, _cluster->angularVel);
-        auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
-            _cluster->numCellPointers, _cluster->vel, angularMassAfterConstruction, angularVelAfterConstruction);
-        auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeConstruction;
+        auto const kineticEnergyAfterConstruction = Physics::kineticEnergy(
+            mass + 1, velocityAfterConstruction, angularMassAfterConstruction, angularVelAfterConstruction);
+        auto const kineticEnergyDiff = kineticEnergyAfterConstruction - kineticEnergyBeforeConstruction;
 
         energyForNewEntities = adaptEnergies(kineticEnergyDiff);
     }
@@ -638,7 +638,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         angularVelAfterConstruction =
             Physics::transformAngularVelocity(_cluster->angularMass, angularMassAfterConstruction, _cluster->angularVel);
         auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
-            _cluster->numCellPointers, _cluster->vel, angularMassAfterConstruction, angularVelAfterConstruction);
+            mass + 1, velocityAfterConstruction, angularMassAfterConstruction, angularVelAfterConstruction);
         auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeConstruction;
         energyForNewEntities = adaptEnergies(kineticEnergyDiff);
     }
