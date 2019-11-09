@@ -62,39 +62,25 @@ public:
         }
 
 		auto const color = EntityRenderer::calcTokenColor();
-        {
-            IntVector2D posMod{ pos.x, pos.y };
-            _space->correctPosition(posMod);
-            EntityRenderer::colorPixel(posMod, color, 100);
-        }
-        {
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x, pos.y - i };
-				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
-			}
-		}
-		{
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x + i, pos.y };
-				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
-			}
-		}
-		{
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x, pos.y + i };
-				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
-			}
-		}
-		{
-			for (int i = 1; i < 4; ++i) {
-				IntVector2D posMod{ pos.x - i, pos.y };
-				_space->correctPosition(posMod);
-				EntityRenderer::colorPixel(posMod, color, std::max(0, 150 - i * 120 / 3));
-			}
-		}
+        _space->correctPosition(pos);
+        EntityRenderer::colorPixel(pos, color, 0x64);
+
+        --pos.x;
+        _space->correctPosition(pos);
+        EntityRenderer::colorPixel(pos, color, 0x25);
+
+        pos.x += 2;
+        _space->correctPosition(pos);
+        EntityRenderer::colorPixel(pos, color, 0x25);
+
+        --pos.x;
+        --pos.y;
+        _space->correctPosition(pos);
+        EntityRenderer::colorPixel(pos, color, 0x25);
+
+        pos.y += 2;
+        _space->correctPosition(pos);
+        EntityRenderer::colorPixel(pos, color, 0x25);
 	}
 
 private:
@@ -117,7 +103,7 @@ private:
 		uint8_t r = 0;
 		uint8_t g = 0;
 		uint8_t b = 0;
-		switch (colorCode)
+		switch (colorCode % 7)
 		{
 		case 0: {
 			r = Const::IndividualCellColor1.red();
