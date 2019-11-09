@@ -97,6 +97,16 @@ protected:
             token,
             TokenDescription());
         MEMBER_DECLARATION(StartConstructionOnHorizontalClusterTestParameters, int, maxConnectionsOfConstructor, 2);
+        MEMBER_DECLARATION(
+            StartConstructionOnHorizontalClusterTestParameters,
+            QVector2D,
+            velocity,
+            QVector2D());
+        MEMBER_DECLARATION(
+            StartConstructionOnHorizontalClusterTestParameters,
+            float,
+            angularVel,
+            0.0f);
     };
     TestResult runStartConstructionOnHorizontalClusterTest(
         StartConstructionOnHorizontalClusterTestParameters const& parameters) const;
@@ -305,7 +315,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     StartConstructionOnHorizontalClusterTestParameters const& parameters) const -> TestResult
 {
     DataDescription origData;
-    auto cluster = createHorizontalCluster(2, QVector2D{10.5, 10.5}, QVector2D{}, 0);
+    auto cluster = createHorizontalCluster(2, QVector2D{10.5, 10.5}, parameters._velocity, parameters._angularVel);
 
     auto& firstCell = cluster.cells->at(0);
     firstCell.tokenBranchNumber = 0;
@@ -1800,6 +1810,18 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_setAutomat
     auto const result = runStartConstructionOnHorizontalClusterTest(
         StartConstructionOnHorizontalClusterTestParameters().token(token).maxConnectionsOfConstructor(1));
 
+    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+    _resultChecker->check(
+        result,
+        Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
+}
+
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_duringMovement)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto result = runStartConstructionOnHorizontalClusterTest(
+        StartConstructionOnHorizontalClusterTestParameters().token(token).velocity(QVector2D{1, 1}).angularVel(10));
     auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
     _resultChecker->check(
         result,
