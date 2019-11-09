@@ -77,6 +77,10 @@ private:
         RotationMatrices const& rotationMatrices,
         float2 const& displacementOfConstructionSite,
         float& result);
+    __inline__ __device__ void calcAngularMassAfterTransformation(
+        float2 const& centerOfRotation,
+        RotationMatrices const& rotationMatrices,
+        float& result);
     __inline__ __device__ void calcAngularMassAfterAddingCell(float2 const& relPosOfNewCell, float& result);
     __inline__ __device__ EnergyForNewEntities adaptEnergies(float energyLoss);
 
@@ -493,8 +497,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __syncthreads();
 
     __shared__ float angularMassAfterRotation;
-    calcAngularMassAfterTransformationAndAddingCell(
-        {0, 0}, firstCellOfConstructionSite->relPos, rotationMatrices, {0, 0}, angularMassAfterRotation);
+    calcAngularMassAfterTransformation(firstCellOfConstructionSite->relPos, rotationMatrices, angularMassAfterRotation);
     __syncthreads();
 
     __shared__ float angularVelAfterRotation;
@@ -911,7 +914,7 @@ __inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformati
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        center = center / _cluster->numCellPointers;
+        center = center / (_cluster->numCellPointers + 1);
         result = Math::lengthSquared(relPosOfNewCell - center);
     }
     __syncthreads();
@@ -920,6 +923,41 @@ __inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformati
         auto const& cell = _cluster->cellPointers[cellIndex];
         auto cellRelPosTransformed =
             getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, displacementOfConstructionSite);
+        atomicAdd_block(&result, Math::lengthSquared(cellRelPosTransformed - center));
+    }
+    __syncthreads();
+}
+
+__inline__ __device__ void ConstructorFunction::calcAngularMassAfterTransformation(
+    float2 const& centerOfRotation,
+    RotationMatrices const& rotationMatrices,
+    float& result)
+{
+    __shared__ float2 center;
+    if (0 == threadIdx.x) {
+        center = { 0,0 };
+    }
+    __syncthreads();
+
+    for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto cellRelPosTransformed =
+            getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
+        atomicAdd_block(&center.x, cellRelPosTransformed.x);
+        atomicAdd_block(&center.y, cellRelPosTransformed.y);
+    }
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        center = center / _cluster->numCellPointers;
+        result = 0;
+    }
+    __syncthreads();
+
+    for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
+        auto cellRelPosTransformed =
+            getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, { 0,0 });
         atomicAdd_block(&result, Math::lengthSquared(cellRelPosTransformed - center));
     }
     __syncthreads();
@@ -942,14 +980,14 @@ ConstructorFunction::calcAngularMassAfterAddingCell(float2 const& relPosOfNewCel
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        center = center / _cluster->numCellPointers;
+        center = center / (_cluster->numCellPointers + 1);
         result = Math::lengthSquared(relPosOfNewCell - center);
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = _cluster->cellPointers[cellIndex];
-        result += Math::lengthSquared(cell->relPos - center);
+        atomicAdd_block(&result, Math::lengthSquared(cell->relPos - center));
     }
 }
 
