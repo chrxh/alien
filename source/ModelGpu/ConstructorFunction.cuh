@@ -440,9 +440,6 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
     adaptRelPositions();
     __syncthreads();
 
-    completeCellAbsPosAndVel();
-    __syncthreads();
-
     __shared__ bool createEmptyToken;
     __shared__ bool createDuplicateToken;
     if (0 == threadIdx.x) {
@@ -454,6 +451,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
         createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
     }
+    __syncthreads();
+
+    completeCellAbsPosAndVel();
     __syncthreads();
 
     if (createEmptyToken || createDuplicateToken) {
@@ -538,9 +538,6 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     adaptRelPositions();
     __syncthreads();
 
-    completeCellAbsPosAndVel();
-    __syncthreads();
-
     if (0 == threadIdx.x) {
         _cluster->angularVel = angularVelAfterRotation;
         _cluster->angularMass = angularMassAfterRotation;
@@ -549,6 +546,10 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         _token->memory[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(
             desiredAngle - (anglesToRotate.constructionSite - anglesToRotate.constructor));
     }
+    __syncthreads();
+
+    completeCellAbsPosAndVel();
+    __syncthreads();
 }
 
 __inline__ __device__ void ConstructorFunction::continueConstructionWithRotationAndCreation(
@@ -673,9 +674,6 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     adaptRelPositions();
     __syncthreads();
 
-    completeCellAbsPosAndVel();
-    __syncthreads();
-
     __shared__ bool createEmptyToken;
     __shared__ bool createDuplicateToken;
     if (0 == threadIdx.x) {
@@ -690,6 +688,9 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
         createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
     }
+    __syncthreads();
+
+    completeCellAbsPosAndVel();
     __syncthreads();
 
     if (createEmptyToken || createDuplicateToken) {
