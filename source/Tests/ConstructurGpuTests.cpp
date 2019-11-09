@@ -157,6 +157,16 @@ protected:
             float,
             angleOfConstructionSite,
             180.0f);
+        MEMBER_DECLARATION(
+            SecondCellConstructionOnLineClusterTestParameters,
+            QVector2D,
+            velocity,
+            QVector2D());
+        MEMBER_DECLARATION(
+            SecondCellConstructionOnLineClusterTestParameters,
+            float,
+            angularVel,
+            0.0f);
     };
     TestResult runSecondConstructionOnLineClusterTest(SecondCellConstructionOnLineClusterTestParameters const& parameters) const;
     
@@ -382,7 +392,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
     newCenter /= newCellsWithoutObstacleByCellId.size();
 
     TestResult result;
-    result.movementOfCenter = newCenter - *cluster.pos;
+    result.movementOfCenter = newCenter - *cluster.pos - *cluster.vel;
 
     auto const& newSecondCell = newCellByCellId.at(secondCell.id);
     auto const& newToken = newSecondCell.tokens->at(0);
@@ -613,7 +623,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     SecondCellConstructionOnLineClusterTestParameters const& parameters) const -> TestResult
 {
     ClusterDescription cluster;
-    cluster.setId(_numberGen->getId()).setVel(QVector2D{}).setAngle(0).setAngularVel(0);
+    cluster.setId(_numberGen->getId()).setVel(parameters._velocity).setAngle(parameters._angularVel).setAngularVel(0);
 
     auto const refPos = QVector2D{ 10.5f, 10.5f };
     auto const cellEnergy = _parameters.cellFunctionConstructorOffspringCellEnergy;
@@ -716,7 +726,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
     newCenter /= newCellsWithoutObstacleByCellId.size();
 
     TestResult result;
-    result.movementOfCenter = newCenter - *cluster.pos;
+    result.movementOfCenter = newCenter - *cluster.pos - *cluster.vel;
 
     auto const& newCell2 = newCellByCellId.at(cell2.id);
     auto const& newToken = newCell2.tokens->at(0);
@@ -1816,13 +1826,13 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_setAutomat
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
 }
 
-TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_duringMovement)
+TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_duringMovementAndRotation)
 {
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
     auto result = runStartConstructionOnHorizontalClusterTest(
-        StartConstructionOnHorizontalClusterTestParameters().token(token).velocity(QVector2D{1, 1}).angularVel(10));
-    auto const expectedCellPos = QVector2D{ _offspringDistance, 0 };
+        StartConstructionOnHorizontalClusterTestParameters().token(token).velocity(QVector2D{1, 0.5}).angularVel(10));
+    auto const expectedCellPos = Physics::rotateClockwise(QVector2D{ _offspringDistance, 0 }, 10);
     _resultChecker->check(
         result,
         Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).relPosOfFirstCellOfConstructionSite(expectedCellPos));
@@ -2291,6 +2301,17 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnLShapeCluster_leftHandSide)
     auto const result = runSecondConstructionOnLineClusterTest(
         SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).angleOfConstructionSite(90));
 
+    _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_duringMovementAndRotation)
+{
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
+    auto result = runSecondConstructionOnLineClusterTest(SecondCellConstructionOnLineClusterTestParameters()
+                                                             .tokenOnSourceCell(token)
+                                                             .velocity(QVector2D{1, 1})
+                                                             .angularVel(10));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
