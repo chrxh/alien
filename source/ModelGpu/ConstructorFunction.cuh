@@ -632,6 +632,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         rotationMatrices,
         displacementForConstructionSite,
         angularMassAfterConstruction);
+    __syncthreads();
 
     __shared__ float2 velocityAfterConstruction;
     __shared__ float angularVelAfterConstruction;
@@ -989,6 +990,7 @@ ConstructorFunction::calcAngularMassAfterAddingCell(float2 const& relPosOfNewCel
         auto const& cell = _cluster->cellPointers[cellIndex];
         atomicAdd_block(&result, Math::lengthSquared(cell->relPos - center));
     }
+    __syncthreads();
 }
 
 __inline__ __device__ void ConstructorFunction::transformClusterComponents(
