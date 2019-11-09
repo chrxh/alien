@@ -15,10 +15,12 @@
 class Physics
 {
 public:
-	__inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
+
 	__inline__ __device__ static float angularMomentum(float2 const& positionFromCenter, float2 const& velocityOfCenter);
 	__inline__ __device__ static float angularVelocity(float angularMomentum, float angularMass);
-    __inline__ __device__ static float angularVelocity(float angularMassOld, float angularMassNew, float angularVelOld);
+    __inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
+    __inline__ __device__ static float2 transformVelocity(float massOld, float massNew, float2 const& velOld);
+    __inline__ __device__ static float transformAngularVelocity(float angularMassOld, float angularMassNew, float angularVelOld);
     __inline__ __device__ static float2 calcNormalToCell(Cell *cell, float2 outward);
 	__inline__ __device__ static void calcCollision(float2 const& vA1, float2 const& vB1, float2 const& rAPp, float2 const& rBPp,
 		float angularVelA1, float angularVelB1, float2 const& n, float angularMassA, float angularMassB, float massA, float massB,
@@ -223,7 +225,12 @@ __inline__ __device__ float Physics::angularVelocity(float angularMomentum, floa
 		return angularMomentum / angularMass * RAD_TO_DEG;
 }
 
-__inline__ __device__ float Physics::angularVelocity(float angularMassOld, float angularMassNew, float angularVelOld)
+__inline__ __device__ float2 Physics::transformVelocity(float massOld, float massNew, float2 const& velOld)
+{
+    return velOld * sqrtf(massOld / massNew);
+}
+
+__inline__ __device__ float Physics::transformAngularVelocity(float angularMassOld, float angularMassNew, float angularVelOld)
 {
     angularVelOld = angularVelOld*DEG_TO_RAD;
     float rotEnergy = angularMassOld*angularVelOld*angularVelOld;
