@@ -22,37 +22,6 @@ void ClusterGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-namespace
-{
-    ModelGpuData getModelGpuDataWithOneBlock()
-    {
-        ModelGpuData result;
-        result.setNumThreadsPerBlock(16);
-        result.setNumBlocks(1);
-        result.setNumClusterPointerArrays(1);
-        result.setMaxClusters(100000);
-        result.setMaxCells(500000);
-        result.setMaxParticles(500000);
-        result.setMaxTokens(50000);
-        result.setMaxCellPointers(500000 * 10);
-        result.setMaxClusterPointers(100000 * 10);
-        result.setMaxParticlePointers(500000 * 10);
-        result.setMaxTokenPointers(50000 * 10);
-        result.setDynamicMemorySize(100000000);
-        return result;
-    }
-}
-
-class ClusterGpuWithOneBlockTests : public ClusterGpuTests
-{
-public:
-    ClusterGpuWithOneBlockTests()
-        : ClusterGpuTests({ 100, 100 }, getModelGpuDataWithOneBlock())
-    { }
-
-    virtual ~ClusterGpuWithOneBlockTests() = default;
-};
-
 /**
 * Situation: horizontal collision of two cells where both move such that no pixel overlapping occurs
 * Expected result: direction of movement of both cells changed
@@ -946,6 +915,38 @@ TEST_F(ClusterGpuTests, regressionTestManyOverlappingRectangleClusters)
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(300, _controller));
 }
 
+namespace
+{
+    ModelGpuData getModelGpuDataWithManyThreadsPerBlock()
+    {
+        ModelGpuData result;
+        result.setNumThreadsPerBlock(256);
+        result.setNumBlocks(32);
+        result.setNumClusterPointerArrays(1);
+        result.setMaxClusters(100000);
+        result.setMaxCells(500000);
+        result.setMaxParticles(500000);
+        result.setMaxTokens(50000);
+        result.setMaxCellPointers(500000 * 10);
+        result.setMaxClusterPointers(100000 * 10);
+        result.setMaxParticlePointers(500000 * 10);
+        result.setMaxTokenPointers(50000 * 10);
+        result.setDynamicMemorySize(100000000);
+        return result;
+    }
+}
+
+class ClusterGpuWithManyThreadsPerBlockTests : public ClusterGpuTests
+{
+public:
+    ClusterGpuWithManyThreadsPerBlockTests()
+        : ClusterGpuTests({ 900, 600 }, getModelGpuDataWithManyThreadsPerBlock())
+    { }
+
+    virtual ~ClusterGpuWithManyThreadsPerBlockTests() = default;
+};
+
+
 /**
 * Situation:
 *	- many moving rectangular clusters
@@ -953,7 +954,7 @@ TEST_F(ClusterGpuTests, regressionTestManyOverlappingRectangleClusters)
 * Expected result: distance to connecting cells are admissible
 * Fixed error: distance to connecting cells are too large (calculation of invRotMatrix in processingDataCopyWithDecomposition)
 */
-TEST_F(ClusterGpuTests, regressionTestManyRectangleClusters_manyThreadsPerBlocks)
+TEST_F(ClusterGpuWithManyThreadsPerBlockTests, regressionTestManyRectangleClusters)
 {
 	DataDescription origData;
 	for (int i = 0; i < 20; ++i) {
@@ -1009,6 +1010,37 @@ TEST_F(ClusterGpuTests, regressionTestEnergyBalanceDuringCollisionAndDecompositi
 
     check(origData, newData);
 }
+
+namespace
+{
+    ModelGpuData getModelGpuDataWithOneBlock()
+    {
+        ModelGpuData result;
+        result.setNumThreadsPerBlock(16);
+        result.setNumBlocks(1);
+        result.setNumClusterPointerArrays(1);
+        result.setMaxClusters(100000);
+        result.setMaxCells(500000);
+        result.setMaxParticles(500000);
+        result.setMaxTokens(50000);
+        result.setMaxCellPointers(500000 * 10);
+        result.setMaxClusterPointers(100000 * 10);
+        result.setMaxParticlePointers(500000 * 10);
+        result.setMaxTokenPointers(50000 * 10);
+        result.setDynamicMemorySize(100000000);
+        return result;
+    }
+}
+
+class ClusterGpuWithOneBlockTests : public ClusterGpuTests
+{
+public:
+    ClusterGpuWithOneBlockTests()
+        : ClusterGpuTests({ 100, 100 }, getModelGpuDataWithOneBlock())
+    { }
+
+    virtual ~ClusterGpuWithOneBlockTests() = default;
+};
 
 /**
 * Situation: three overlapping clusters with high velocity differences
