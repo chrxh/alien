@@ -81,9 +81,6 @@
     <ClCompile Include="..\..\source\ModelBasic\ChangeDescriptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelBasic\DescriptionHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_DescriptionHelperImpl.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -207,6 +204,12 @@
     <ClCompile Include="..\..\source\ModelBasic\QuantityConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelBasic\DescriptionHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelBasic\DescriptionFactoryImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelBasic\ChangeDescriptions.h">
@@ -259,6 +262,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\MonitorData.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\DescriptionFactory.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\DescriptionFactoryImpl.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
