@@ -260,6 +260,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelBasic\CellComputerCompilerImpl.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\ChangeDescriptions.cpp" />
+    <ClCompile Include="..\..\source\ModelBasic\DescriptionFactoryImpl.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\DescriptionHelper.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\DescriptionHelperImpl.cpp" />
     <ClCompile Include="..\..\source\ModelBasic\Descriptions.cpp" />
@@ -422,6 +423,8 @@
     <ClInclude Include="..\..\source\ModelBasic\ChangeDescriptions.h" />
     <ClInclude Include="..\..\source\ModelBasic\CompilerHelper.h" />
     <ClInclude Include="..\..\source\ModelBasic\Definitions.h" />
+    <ClInclude Include="..\..\source\ModelBasic\DescriptionFactory.h" />
+    <ClInclude Include="..\..\source\ModelBasic\DescriptionFactoryImpl.h" />
     <ClInclude Include="..\..\source\ModelBasic\DescriptionHelper.h" />
     <ClInclude Include="..\..\source\ModelBasic\Descriptions.h" />
     <ClInclude Include="..\..\source\ModelBasic\DllExport.h" />

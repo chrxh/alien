@@ -1,5 +1,6 @@
 #include "Base/ServiceLocator.h"
 #include "ModelBasic/QuantityConverter.h"
+#include "ModelBasic/DescriptionFactory.h"
 
 #include "IntegrationGpuTestFramework.h"
 
@@ -43,15 +44,18 @@ void ScannerGpuTests::checkScannedCellWithToken(
     EXPECT_EQ(*cell.tokenBranchNumber, token.data->at(Enums::Scanner::OUT_CELL_BRANCH_NO));
     EXPECT_EQ(cell.cellFeature->type, token.data->at(Enums::Scanner::OUT_CELL_FUNCTION));
     EXPECT_EQ(static_cast<int>(*cell.energy), token.data->at(Enums::Scanner::OUT_ENERGY));
-    EXPECT_EQ(
-        QuantityConverter::convertDistanceToData((*cell.pos - *prevCell.pos).length()),
-        token.data->at(Enums::Scanner::OUT_DISTANCE));
+
+    auto const expectedDistanceData = QuantityConverter::convertDistanceToData((*cell.pos - *prevCell.pos).length());
+    auto const actualDistanceData = token.data->at(Enums::Scanner::OUT_DISTANCE);
+    EXPECT_TRUE(std::abs(expectedDistanceData - actualDistanceData) < 2);
 
     if (prevCell.pos != prevPrevCell.pos) {
-        auto a1 = Physics::angleOfVector(*prevPrevCell.pos - *prevCell.pos);
-        auto a2 = Physics::angleOfVector(*prevCell.pos - *cell.pos);
-        auto angle = a1 - a2;
-        EXPECT_EQ(QuantityConverter::convertAngleToData(angle), token.data->at(Enums::Scanner::OUT_ANGLE));
+        auto const a1 = Physics::angleOfVector(*prevPrevCell.pos - *prevCell.pos);
+        auto const a2 = Physics::angleOfVector(*prevCell.pos - *cell.pos);
+        auto const angle = a1 - a2;
+        auto const expectedAngleData = QuantityConverter::convertAngleToData(angle);
+        auto const actualAngleData = token.data->at(Enums::Scanner::OUT_ANGLE);
+        EXPECT_TRUE(std::abs(expectedAngleData - actualAngleData) < 2);
     }
     else {
         EXPECT_EQ(0, token.data->at(Enums::Scanner::OUT_ANGLE));
@@ -95,7 +99,7 @@ TEST_F(ScannerGpuTests, testScanOriginCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 1
-* Expected result: correct cell (at (1, 2)-position of the cluster) should be scanned
+* Expected result: correct cell (at (2, 3)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanSecondCell)
 {
@@ -134,7 +138,7 @@ TEST_F(ScannerGpuTests, testScanSecondCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 2
-* Expected result: correct cell (at (1, 3)-position of the cluster) should be scanned
+* Expected result: correct cell (at (2, 4)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanThirdCell)
 {
@@ -174,12 +178,60 @@ TEST_F(ScannerGpuTests, testScanThirdCell)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
+/**
+* Situation: - hexagon cluster with 3 layers (edge length) with scanner function at middle cell
+*            - token coming from left
+*            - scanning cell number is 3
+* Expected result: correct cell (at (3, 4)-position of the hexagon) should be scanned
+*/
+TEST_F(ScannerGpuTests, testScanFourthCell_onHexagon)
+{
+    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+    auto hexagon = factory->createHexagon(
+        DescriptionFactory::CreateHexagonParameters().layers(3).cellEnergy(_parameters.cellMinEnergy * 2).angle(23.4));
+
+    auto& tokenSourceCell = hexagon.cells->at(7);
+    tokenSourceCell.tokenBranchNumber = 0;
+    auto token = createSimpleToken();
+    (*token.data)[Enums::Scanner::INOUT_CELL_NUMBER] = 3;
+    tokenSourceCell.addToken(token);
+
+    auto& middleCell = hexagon.cells->at(12);
+    middleCell.tokenBranchNumber = 1;
+    middleCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::SCANNER);
+
+    auto& scanCell = hexagon.cells->at(13);
+    scanCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+    scanCell.tokenBranchNumber = 2;
+    scanCell.energy = _parameters.cellMinEnergy + 10.5f;
+
+    auto& prevScanCell = hexagon.cells->at(8);
+
+    DataDescription origData;
+    origData.addCluster(hexagon);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const& newMiddleCell = cellByCellId.at(middleCell.id);
+    auto const& newScanCell = cellByCellId.at(scanCell.id);
+    auto const& newPrevScanCell = cellByCellId.at(prevScanCell.id);
+    auto const& newTokenSourceCell = cellByCellId.at(tokenSourceCell.id);
+    auto const& newToken = newMiddleCell.tokens->at(0);
+
+    checkScannedCellWithToken(newScanCell, newPrevScanCell, newTokenSourceCell, newToken);
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(4, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
+    EXPECT_EQ(19, newToken.data->at(Enums::Scanner::OUT_MASS));
+}
 
 /**
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 9
-* Expected result: correct cell (at (0, 1)-position of the cluster) should be scanned
+* Expected result: correct cell (at (1, 2)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanDistantCell)
 {
@@ -227,7 +279,7 @@ TEST_F(ScannerGpuTests, testScanDistantCell)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 24
-* Expected result: correct cell (at (0, 0)-position of the cluster) should be scanned
+* Expected result: correct cell (at (1, 1)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanFinished)
 {
@@ -275,7 +327,7 @@ TEST_F(ScannerGpuTests, testScanFinished)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 25
-* Expected result: correct cell (at (2, 2)-position of the cluster) should be scanned
+* Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanRestart1)
 {
@@ -313,7 +365,7 @@ TEST_F(ScannerGpuTests, testScanRestart1)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 180
-* Expected result: correct cell (at (2, 2)-position of the cluster) should be scanned
+* Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanRestart2)
 {
@@ -351,7 +403,7 @@ TEST_F(ScannerGpuTests, testScanRestart2)
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 255
-* Expected result: correct cell (at (2, 2)-position of the cluster) should be scanned
+* Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanMaxCellNumber)
 {
@@ -389,7 +441,7 @@ TEST_F(ScannerGpuTests, testScanMaxCellNumber)
 * Situation: - 260 cluster with scanner function at first cell
 *            - token coming from second cell
 *            - scanning cell number is 255
-* Expected result: correct cell (at 256-position of the cluster) should be scanned
+* Expected result: correct cell (at 257-position of the cluster) should be scanned
 */
 TEST_F(ScannerGpuTests, testScanMaxCellNumber_largeCluster)
 {
