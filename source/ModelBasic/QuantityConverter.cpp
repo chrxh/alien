@@ -12,6 +12,8 @@ qreal QuantityConverter::convertDataToAngle(quint8 b)
 		return (-256.0 - 0.5 + static_cast<qreal>(b))*(180.0 / 128.0);
 }
 
+#include <iostream>
+
 quint8 QuantityConverter::convertAngleToData(qreal a)
 {
 	//0 to 180 degree => 0 to 128
@@ -20,8 +22,8 @@ quint8 QuantityConverter::convertAngleToData(qreal a)
 		a = a - 360.0;
 	if (a <= -180.0)
 		a = a + 360.0;
-	int intA = static_cast<int>(a*128.0 / 180.0);
-	return static_cast<quint8>(intA);
+    int intA = static_cast<int>(a*128.0 / 180.0);
+    return static_cast<quint8>(intA);
 }
 
 qreal QuantityConverter::convertDataToDistance(quint8 b)

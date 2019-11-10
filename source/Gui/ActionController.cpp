@@ -12,6 +12,7 @@
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/Physics.h"
 #include "ModelBasic/SerializationHelper.h"
+#include "ModelBasic/DescriptionFactory.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -736,20 +737,6 @@ void ActionController::onNewRectangle()
 
 namespace
 {
-	void addConnection(CellDescription& cell1, CellDescription& cell2)
-	{
-		cell1.addConnection(cell2.id);
-		cell2.addConnection(cell1.id);
-	}
-
-	QVector2D calcCenter(list<CellDescription> const& cells)
-	{
-		QVector2D center;
-		for (auto const& cell : cells) {
-			center += *cell.pos;
-		}
-		return center / cells.size();
-	}
 }
 
 void ActionController::onNewHexagon()
@@ -760,75 +747,12 @@ void ActionController::onNewHexagon()
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
 		double energy = dialog.getCellEnergy();
-		std::vector<std::vector<CellDescription>> cellMatrix(2 * layers - 1, std::vector<CellDescription>(2 * layers - 1));
-		list<CellDescription> cells;
 
-		int maxCon = 6;
-		uint64_t id = 0;
-		double incY = std::sqrt(3.0)*dist / 2.0;
-		for (int j = 0; j < layers; ++j) {
-			for (int i = -(layers - 1); i < layers - j; ++i) {
+        auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+        auto hexagon = factory->createHexagon(
+            DescriptionFactory::CreateHexagonParameters().layers(layers).cellDistance(dist).cellEnergy(energy));
 
-				//check if cell is on boundary
-				if (((i == -(layers - 1)) || (i == layers - j - 1)) && ((j == 0) || (j == layers - 1))) {
-					maxCon = 3;
-				}
-				else if ((i == -(layers - 1)) || (i == layers - j - 1) || (j == layers - 1)) {
-					maxCon = 4;
-				}
-				else {
-					maxCon = 6;
-				}
-
-				//create cell: upper layer
-				cellMatrix[layers - 1 + i][layers - 1 - j] =
-					CellDescription().setId(++id).setEnergy(energy)
-					.setPos({ static_cast<float>(i*dist + j*dist / 2.0), static_cast<float>(-j*incY) })
-					.setMaxConnections(maxCon).setFlagTokenBlocked(false)
-					.setTokenBranchNumber(0).setMetadata(CellMetadata())
-					.setCellFeature(CellFeatureDescription());
-				
-				if (layers - 1 + i > 0) {
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i - 1][layers - 1 - j]);
-				}
-				if (j > 0) {
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i][layers - 1 - j + 1]);
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i + 1][layers - 1 - j + 1]);
-				}
-
-				//create cell: under layer (except for 0-layer)
-				if (j > 0) {
-					cellMatrix[layers - 1 + i][layers - 1 + j] =
-						CellDescription().setId(++id).setEnergy(energy)
-						.setPos({ static_cast<float>(i*dist + j*dist / 2.0), static_cast<float>(+j*incY) })
-						.setMaxConnections(maxCon).setFlagTokenBlocked(false)
-						.setTokenBranchNumber(0).setMetadata(CellMetadata())
-						.setCellFeature(CellFeatureDescription());
-						
-					if (layers - 1 + i > 0) {
-						addConnection(cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i - 1][layers - 1 + j]);
-					}
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i][layers - 1 + j - 1]);
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i + 1][layers - 1 + j - 1]);
-				}
-			}
-		}
-
-		for (auto const& cellRow : cellMatrix) {
-			for (auto const& cell : cellRow) {
-				if (cell.id > 0) {
-					cells.push_back(cell);
-				}
-			}
-		}
-
-		auto center = calcCenter(cells);
-		auto cluster = ClusterDescription().setPos(center)
-			.setVel({ 0, 0 })
-			.setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata())
-			.addCells(cells);
-
-		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
+		_repository->addAndSelectData(DataDescription().addCluster(hexagon), { 0, 0 });
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
