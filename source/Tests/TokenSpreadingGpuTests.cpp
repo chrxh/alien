@@ -792,3 +792,44 @@ TEST_F(TokenSpreadingGpuTests, regressionTestManyStickyRotatingTokenClusters)
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 }
+
+/**
+* Situation: - one horizontal cluster with 2 cells and ascending branch numbers
+*			 - first cell has a token with low energy
+*			 - simulating 1 time step
+* Expected result: energy balance fulfilled
+*/
+TEST_F(TokenSpreadingGpuTests, regressionTestLowTokenEnergy)
+{
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto& firstCell = cluster.cells->at(0);
+    firstCell.tokenBranchNumber = 0;
+    auto token = createSimpleToken();
+    token.energy = _parameters.tokenMinEnergy / 2;
+    (*token.data)[0] = 1;
+    firstCell.addToken(token);
+
+    auto& secondCell = cluster.cells->at(1);
+    secondCell.tokenBranchNumber = 1;
+
+    DataDescription origData;
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto const& newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(2, newCluster.cells->size());
+
+    for (auto const& newCell : *newCluster.cells) {
+        EXPECT_TRUE(!newCell.tokens || newCell.tokens->empty());
+    }
+
+    check(origData, newData);
+}

@@ -161,7 +161,10 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
         for (int tokenIndex = 0; tokenIndex < cluster->numTokenPointers; ++tokenIndex) {
             auto& token = cluster->tokenPointers[tokenIndex];
             auto cell = token->cell;
-            if (token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
+            if (0 == cell->alive || token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
+                cell->getLock();
+                cell->changeEnergy(token->getEnergy(), 12);
+                cell->releaseLock();
                 continue;
             }
 
