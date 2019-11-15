@@ -39,21 +39,30 @@ void DataAnalyzer::dataFromAccessAvailable()
     auto const partitionDataByDescription = calcPartitionData(data);
 
     PartitionData mostFrequentClusterData;
-    for (auto const& partitionData : partitionDataByDescription | boost::adaptors::map_values) {
-        if (partitionData.numberOfElements > mostFrequentClusterData.numberOfElements) {
+    for (auto const& descAndPartitionData : partitionDataByDescription ) {
+        auto const& desc = descAndPartitionData.first;
+        auto const& partitionData = descAndPartitionData.second;
+        if (partitionData.numberOfElements > mostFrequentClusterData.numberOfElements && desc.hasToken) {
             mostFrequentClusterData = partitionData;
         }
     }
+    
+    if (mostFrequentClusterData.numberOfElements > 0) {
+        _repository->addAndSelectData(DataDescription().addCluster(mostFrequentClusterData.representant), { 0, 0 });
 
-    _repository->addAndSelectData(DataDescription().addCluster(mostFrequentClusterData.representant), {0, 0});
+        Q_EMIT _notifier->notifyDataRepositoryChanged({
+            Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
+        }, UpdateDescription::All);
 
-    Q_EMIT _notifier->notifyDataRepositoryChanged({
-        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
-    }, UpdateDescription::All);
-
-    QMessageBox msgBox;
-    msgBox.setText(QString("%1 exemplars found.").arg(mostFrequentClusterData.numberOfElements));
-    msgBox.exec();
+        QMessageBox msgBox;
+        msgBox.setText(QString("%1 exemplars found.").arg(mostFrequentClusterData.numberOfElements));
+        msgBox.exec();
+    }
+    else {
+        QMessageBox msgBox;
+        msgBox.setText(QString("No exemplars found."));
+        msgBox.exec();
+    }
 }
 
 auto DataAnalyzer::calcPartitionData(DataDescription const& data) const
