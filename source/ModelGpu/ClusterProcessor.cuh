@@ -322,6 +322,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
             auto token = _cluster->tokenPointers[tokenIndex];
             if (0 == token->cell->alive) {
                 token->cell->changeEnergy(token->getEnergy(), 2);
+                token->setEnergy(0);
             }
         }
         __syncthreads();
@@ -333,6 +334,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
                 _data->cellMap.mapPosCorrection(pos);
                 auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
                 _factory.createParticle(cell->getEnergy() + kineticEnergy, pos, cell->vel, 31);
+                cell->setEnergy(0);
             }
         }
     }
@@ -762,7 +764,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
                 cell->changeEnergy(regainedEnergyPerCell);
             }
         }
-
+        updateCellVelocity_blockCall(newCluster);
         copyTokenPointers_blockCall(_cluster, _cluster->clusterToFuse, newCluster);
     }
     else {
@@ -795,9 +797,6 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto& token = sourceCluster->tokenPointers[tokenIndex];
         auto& cell = token->cell;
-        if (0 == cell->alive) {
-            continue;
-        }
         if (cell->cluster == targetCluster) {
             int prevTokenCopyIndex = atomicAdd(&tokenCopyIndex, 1);
             targetCluster->tokenPointers[prevTokenCopyIndex] = token;
@@ -832,9 +831,6 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
     for (int tokenIndex = tokenBlock1.startIndex; tokenIndex <= tokenBlock1.endIndex; ++tokenIndex) {
         auto& token = sourceCluster1->tokenPointers[tokenIndex];
         auto& cell = token->cell;
-        if (0 == cell->alive) {
-            continue;
-        }
         if (cell->cluster == targetCluster) {
             int prevTokenCopyIndex = atomicAdd(&tokenCopyIndex, 1);
             targetCluster->tokenPointers[prevTokenCopyIndex] = token;
@@ -845,9 +841,6 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
     for (int tokenIndex = tokenBlock2.startIndex; tokenIndex <= tokenBlock2.endIndex; ++tokenIndex) {
         auto& token = sourceCluster2->tokenPointers[tokenIndex];
         auto& cell = token->cell;
-        if (0 == cell->alive) {
-            continue;
-        }
         if (cell->cluster == targetCluster) {
             int prevTokenCopyIndex = atomicAdd(&tokenCopyIndex, 1);
             targetCluster->tokenPointers[prevTokenCopyIndex] = token;
@@ -864,9 +857,6 @@ ClusterProcessor::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Clus
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
         auto const& token = sourceCluster->tokenPointers[tokenIndex];
         auto const& cell = token->cell;
-        if (0 == cell->alive) {
-            continue;
-        }
         if (cell->cluster == targetCluster) {
             atomicAdd(&counter, 1);
         }
