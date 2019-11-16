@@ -370,7 +370,8 @@ void CellEditTab::updateDisplay ()
         text += colorDataStart+"n"+colorEnd+parEnd;
         text += parStart+colorTextStartInactive+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd+parEnd;
     }
-    text += generateFormattedCellFunctionString(cell.cellFeature->type);
+    auto const& cellFunctionType = static_cast<Enums::CellFunction::Type>(static_cast<unsigned char>(cell.cellFeature->type) % Enums::CellFunction::_COUNTER);
+    text += generateFormattedCellFunctionString(cellFunctionType);
 
     QTextEdit::setText(text);
 
