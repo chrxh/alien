@@ -30,7 +30,8 @@ protected:
 	ClusterDescription createHorizontalCluster(int numCells,
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none,
-		optional<double> const& angularVel = boost::none) const;	
+		optional<double> const& angularVel = boost::none,
+        Boundary boundary = Boundary::NonSticky) const;
 	ClusterDescription createVerticalCluster(int numCells,
 		optional<QVector2D> const& centerPos = boost::none,
 		optional<QVector2D> const& centerVel = boost::none) const;	

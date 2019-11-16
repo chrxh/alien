@@ -833,3 +833,43 @@ TEST_F(TokenSpreadingGpuTests, regressionTestLowTokenEnergy)
 
     check(origData, newData);
 }
+
+/**
+* Situation: - one horizontal cluster with ascending branch numbers
+*            - first cell has token
+*			 - first and second cell have low energy
+*            - cluster approaches other cluster with fusion velocity
+*			 - simulating 1 time step
+* Expected result: energy balance fulfilled
+*/
+TEST_F(TokenSpreadingGpuTests, regressionTestMovementOnLowEnergyCellWithSimultaneousFusion)
+{
+    auto const cellMinEnergy = _parameters.cellMinEnergy;
+    auto const fusionVel = _parameters.cellFusionVelocity * 1.5f;
+
+    auto cluster =
+        createHorizontalCluster(3, QVector2D{}, QVector2D{fusionVel, 0}, 0, IntegrationTestFramework::Boundary::Sticky);
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    firstCell.energy = cellMinEnergy / 2;
+    secondCell.energy = cellMinEnergy / 2;
+    auto token = createSimpleToken();
+    firstCell.addToken(token);
+
+    auto otherCluster =
+        createHorizontalCluster(3, QVector2D{3, 0}, QVector2D{}, 0, IntegrationTestFramework::Boundary::Sticky);
+
+    DataDescription origData;
+    origData.addCluster(cluster);
+    origData.addCluster(otherCluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    check(origData, newData);
+}
