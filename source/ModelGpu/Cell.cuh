@@ -36,28 +36,12 @@ struct Cell
 
     __device__ __inline__ void setEnergy(float value)
     {
-        if (value < 0) {
-            printf("Cell::setEnergy negative, value: %f\n", value);
-            while (true) {}
-        }
-        if (isnan(value)) {
-            printf("Cell::setEnergy nan, value: %f\n", value);
-            while (true) {}
-        }
         atomicExch(&_energy, value);
     }
 
     __device__ __inline__ void changeEnergy(float changeValue, int parameter = -1)
     {
-        auto const origValue = atomicAdd(&_energy, changeValue);
-        if (getEnergy() < 0) {
-            printf("Cell::changeEnergy negative, before: %f, after: %f, change: %f, parameter: %d\n", origValue, getEnergy(), changeValue, parameter);
-            while (true) {}
-        }
-        if (isnan(getEnergy())) {
-            printf("Cell::changeEnergy nan, before: %f, after: %f, change: %f, parameter: %d\n", origValue, getEnergy(), changeValue, parameter);
-            while (true) {}
-        }
+        atomicAdd(&_energy, changeValue);
     }
 
     __device__ __inline__ float getEnergy()
