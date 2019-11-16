@@ -155,8 +155,12 @@ ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, opt
 	return cluster;
 }
 
-ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCells, optional<QVector2D> const& centerPos,
-	optional<QVector2D> const& centerVel, optional<double> const& optAngularVel) const
+ClusterDescription IntegrationTestFramework::createHorizontalCluster(
+    int numCells,
+    optional<QVector2D> const& centerPos,
+    optional<QVector2D> const& centerVel,
+    optional<double> const& optAngularVel,
+    Boundary boundary /*= Boundary::NonSticky*/) const
 {
 	QVector2D pos = centerPos ? * centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
 	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
@@ -165,10 +169,16 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(int numCell
 	ClusterDescription cluster;
 	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(angularVel);
 	for (int j = 0; j < numCells; ++j) {
+        int maxConnection = 2;
+        if (boundary == Boundary::NonSticky) {
+            if (0 == j || numCells - 1 == j) {
+                maxConnection = 1;
+            }
+        }
 		cluster.addCell(
 			CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
 			.setPos(pos + QVector2D(-static_cast<float>(numCells - 1) / 2.0 + j, 0))
-			.setMaxConnections(2).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
+			.setMaxConnections(maxConnection).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
 		);
 	}
 	for (int j = 0; j < numCells; ++j) {
