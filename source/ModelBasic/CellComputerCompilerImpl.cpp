@@ -319,8 +319,8 @@ std::string CellComputerCompilerImpl::decompileSourceCode(QByteArray const & dat
 	QString text;
 	QString textOp1, textOp2;
 	int conditionLevel = 0;
-	CHECK((data.size() % 3) == 0);
-	for (int instructionPointer = 0; instructionPointer < data.size(); ) {
+    auto const dataSize = (data.size() / 3) * 3;
+	for (int instructionPointer = 0; instructionPointer < dataSize; ) {
 
 		//decode instruction data
 		InstructionCoded instruction;
@@ -396,7 +396,7 @@ std::string CellComputerCompilerImpl::decompileSourceCode(QByteArray const & dat
 			text += " " + textOp1 + " <= " + textOp2;
 		if (instruction.operation == Enums::ComputerOperation::IFL)
 			text += " " + textOp1 + " < " + textOp2;
-		if (instructionPointer < data.size())
+		if (instructionPointer < dataSize)
 			text += "\n";
 	}
 	return text.toStdString();
