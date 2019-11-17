@@ -346,9 +346,21 @@ __inline__ __device__ void ClusterProcessor::processingMutation_blockCall()
 {
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellMutationProb) {
-            Cell* cell = _cluster->cellPointers[cellIndex];
-            auto const index = static_cast<int>(_data->numberGen.random(MAX_CELL_STATIC_BYTES - 1));
-            cell->staticData[index] = _data->numberGen.random(255);
+            auto const kindOfMutation = _data->numberGen.random(2);
+            auto cell = _cluster->cellPointers[cellIndex];
+            if (0 == kindOfMutation) {
+                auto const index = static_cast<int>(_data->numberGen.random(MAX_CELL_STATIC_BYTES - 1));
+                cell->staticData[index] = _data->numberGen.random(255);
+            }
+            if (1 == kindOfMutation) {
+                if (Enums::CellFunction::COMPUTER == cell->cellFunctionType) {
+                    cell->numStaticBytes =
+                        _data->numberGen.random(cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3);
+                }
+            }
+            if (2 == kindOfMutation) {
+                cell->cellFunctionType = _data->numberGen.random(Enums::CellFunction::_COUNTER - 1);
+            }
         }
     }
 
