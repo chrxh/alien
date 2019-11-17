@@ -52,7 +52,8 @@ public:
         checkCudaErrors(cudaMemcpy(_array, randomNumbers.data(), sizeof(int)*size, cudaMemcpyHostToDevice));
     }
 
-    __device__ __inline__ float random(int maxVal)
+
+    __device__ __inline__ int random(int maxVal)
     {
         int number = getRandomNumber();
         return number % (maxVal + 1);

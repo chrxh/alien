@@ -95,14 +95,20 @@ DataDescription DataConverter::getDataDescription() const
             auto feature = CellFeatureDescription().setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
                 .setConstData(convertToQByteArray(cellTO.staticData, cellTO.numStaticBytes)).setVolatileData(convertToQByteArray(cellTO.mutableData, cellTO.numMutableBytes));
 
-            clusterDesc.addCell(
-				CellDescription().setPos({ pos.x, pos.y }).setMetadata(CellMetadata())
-				.setEnergy(cellTO.energy).setId(id).setCellFeature(CellFeatureDescription().setType(Enums::CellFunction::COMPUTER))
-				.setConnectingCells(connectingCellIds).setMaxConnections(cellTO.maxConnections).setFlagTokenBlocked(false)
-				.setTokenBranchNumber(0).setMetadata(CellMetadata().setColor(cellTO.metadata.color)).setTokens(vector<TokenDescription>{}).setTokenBranchNumber(cellTO.branchNumber)
-				.setFlagTokenBlocked(cellTO.tokenBlocked).setCellFeature(feature)
-			);
-		}
+            clusterDesc.addCell(CellDescription()
+                                    .setPos({pos.x, pos.y})
+                                    .setMetadata(CellMetadata())
+                                    .setEnergy(cellTO.energy)
+                                    .setId(id)
+                                    .setConnectingCells(connectingCellIds)
+                                    .setMaxConnections(cellTO.maxConnections)
+                                    .setTokenBranchNumber(0)
+                                    .setMetadata(CellMetadata().setColor(cellTO.metadata.color))
+                                    .setTokens(vector<TokenDescription>{})
+                                    .setTokenBranchNumber(cellTO.branchNumber)
+                                    .setFlagTokenBlocked(cellTO.tokenBlocked)
+                                    .setCellFeature(feature));
+        }
 		result.addCluster(clusterDesc);
 	}
 
