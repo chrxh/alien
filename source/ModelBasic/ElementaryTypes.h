@@ -190,7 +190,8 @@ namespace Enums
             SEARCH_VICINITY,
             SEARCH_BY_ANGLE,
             SEARCH_FROM_CENTER,
-            SEARCH_TOWARD_CENTER
+            SEARCH_TOWARD_CENTER,
+            _COUNTER
         };
     };
     struct SensorOut {

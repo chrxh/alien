@@ -180,6 +180,9 @@
     <ClInclude Include="..\..\source\ModelGpu\CudaMonitorData.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\SensorFunction.cuh">
+      <Filter>Source Files\Impl\Device</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
