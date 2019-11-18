@@ -15,6 +15,7 @@
 #include "ScannerFunction.cuh"
 #include "ConstructorFunction.cuh"
 #include "WeaponFunction.cuh"
+#include "SensorFunction.cuh"
 
 class TokenProcessor
 {
@@ -278,10 +279,14 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
     __syncthreads();
 
     auto const numTokenPointers = _cluster->numTokenPointers;
-    ConstructorFunction constructor;
-    if (numTokenPointers > 0) {
-        constructor.init_blockCall(_cluster, _data);
+    if (0 == numTokenPointers) {
+        return;
     }
+    ConstructorFunction constructor;
+    constructor.init_blockCall(_cluster, _data);
+
+    SensorFunction sensor;
+    sensor.init_blockCall(_cluster, _data);
     __syncthreads();
 
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
@@ -293,6 +298,10 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
             __syncthreads();
 
             constructor.processing_blockCall(token);
+            __syncthreads();
+        } break;
+        case Enums::CellFunction::SENSOR: {
+            sensor.processing_blockCall(token);
             __syncthreads();
         } break;
         }
