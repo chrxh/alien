@@ -1464,6 +1464,7 @@ __inline__ __device__ void ConstructorFunction::connectNewCell(
         }
 
         while (1 == atomicExch_block(&blockLock, 1)) {}
+        __threadfence_block();
 
         if (isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)
             && isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
