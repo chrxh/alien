@@ -1,12 +1,11 @@
+#include "IntegrationGpuTestFramework.h"
 #include "ModelBasic/QuantityConverter.h"
 
-#include "IntegrationGpuTestFramework.h"
-
-class SensorGpuTests
-    : public IntegrationGpuTestFramework
+class SensorGpuTests : public IntegrationGpuTestFramework
 {
 public:
-    SensorGpuTests() : IntegrationGpuTestFramework({ 300, 300 })
+    SensorGpuTests()
+        : IntegrationGpuTestFramework({300, 300})
     {}
 
     virtual ~SensorGpuTests() = default;
@@ -14,7 +13,8 @@ public:
 protected:
     virtual void SetUp();
 
-    struct TestParameters {
+    struct TestParameters
+    {
         MEMBER_DECLARATION(TestParameters, Enums::SensorIn::Type, command, Enums::SensorIn::DO_NOTHING);
         MEMBER_DECLARATION(TestParameters, boost::optional<float>, angle, boost::none);
         MEMBER_DECLARATION(TestParameters, int, minSize, 0);
@@ -23,8 +23,10 @@ protected:
         MEMBER_DECLARATION(TestParameters, IntVector2D, sizeOfCluster, IntVector2D{});
         MEMBER_DECLARATION(TestParameters, IntVector2D, repetitionOfCluster, (IntVector2D{1, 1}));
     };
-    struct Expectations {
+    struct Expectations
+    {
         MEMBER_DECLARATION(Expectations, Enums::SensorOut::Type, command, Enums::SensorOut::NOTHING_FOUND);
+        MEMBER_DECLARATION(Expectations, float, approxAngle, 0);
     };
     void runStandardSensorTest(TestParameters const& testParameters, Expectations const& expectations) const;
 };
@@ -40,9 +42,10 @@ void SensorGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-void SensorGpuTests::runStandardSensorTest(TestParameters const & testParameters, Expectations const & expectations) const
+void SensorGpuTests::runStandardSensorTest(TestParameters const& testParameters, Expectations const& expectations) const
 {
     auto origCluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    origCluster.angle = 30;
     auto& origFirstCell = origCluster.cells->at(0);
     origFirstCell.tokenBranchNumber = 0;
     auto& origSecondCell = origCluster.cells->at(1);
@@ -73,28 +76,43 @@ void SensorGpuTests::runStandardSensorTest(TestParameters const & testParameters
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
-    auto const data = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto const data = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
     check(origData, data);
 
     auto const cellByCellId = IntegrationTestHelper::getCellByCellId(data);
     auto const& secondCell = cellByCellId.at(origSecondCell.id);
 
     EXPECT_EQ(1, secondCell.tokens->size());
-    
+
     auto const& token = secondCell.tokens->at(0);
     EXPECT_EQ(expectations._command, token.data->at(Enums::Sensor::OUT));
+
+    auto const expectedMass = testParameters._sizeOfCluster.x * testParameters._sizeOfCluster.y;
+    if (Enums::SensorOut::CLUSTER_FOUND == token.data->at(Enums::Sensor::OUT)) {
+        EXPECT_EQ(expectedMass, static_cast<unsigned char>(token.data->at(Enums::Sensor::OUT_MASS)));
+
+        auto actualAngle = QuantityConverter::convertDataToAngle(token.data->at(Enums::Sensor::INOUT_ANGLE));
+        auto angleDiff = expectations._approxAngle - actualAngle;
+        if (angleDiff >= 360) {
+            angleDiff -= 360;
+        }
+        if (angleDiff <= -360) {
+            angleDiff += 360;
+        }
+        EXPECT_TRUE(abs(angleDiff) < 30);
+    }
 }
 
 TEST_F(SensorGpuTests, testSearchVicinity_success)
 {
     runStandardSensorTest(
         TestParameters()
-        .command(Enums::SensorIn::SEARCH_VICINITY)
-        .minSize(9)
-        .relPositionOfCluster({ 20, 0 })
-        .sizeOfCluster({ 3, 3 })
-        .repetitionOfCluster({ 10, 10 }),
-        Expectations().command(Enums::SensorOut::CLUSTER_FOUND));
+            .command(Enums::SensorIn::SEARCH_VICINITY)
+            .minSize(9)
+            .relPositionOfCluster({20, 20})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::CLUSTER_FOUND).approxAngle(-135));
 }
 
 TEST_F(SensorGpuTests, testSearchVicinity_scanMassTooSmall)
@@ -113,11 +131,11 @@ TEST_F(SensorGpuTests, testSearchVicinity_scanMassTooLarge)
 {
     runStandardSensorTest(
         TestParameters()
-        .command(Enums::SensorIn::SEARCH_VICINITY)
-        .maxSize(8)
-        .relPositionOfCluster({ 20, 0 })
-        .sizeOfCluster({ 3, 3 })
-        .repetitionOfCluster({ 10, 10 }),
+            .command(Enums::SensorIn::SEARCH_VICINITY)
+            .maxSize(8)
+            .relPositionOfCluster({20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
         Expectations().command(Enums::SensorOut::NOTHING_FOUND));
 }
 
@@ -125,6 +143,140 @@ TEST_F(SensorGpuTests, testSearchVicinity_scanMassToFar)
 {
     auto const sensorRange = _parameters.cellFunctionSensorRange;
     runStandardSensorTest(
-        TestParameters().command(Enums::SensorIn::SEARCH_VICINITY).relPositionOfCluster({ sensorRange + 20, 0 }).sizeOfCluster({ 10, 10 }),
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_VICINITY)
+            .relPositionOfCluster({sensorRange + 20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchByAngle_success)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_BY_ANGLE)
+            .angle(-135)
+            .minSize(9)
+            .relPositionOfCluster({20, 20})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::CLUSTER_FOUND).approxAngle(-135));
+}
+
+TEST_F(SensorGpuTests, testSearchByAngle_wrongAngle)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_BY_ANGLE)
+            .angle(170)
+            .minSize(9)
+            .relPositionOfCluster({20, 20})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchByAngle_scanMassTooLarge)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_BY_ANGLE)
+            .angle(-135)
+            .maxSize(8)
+            .relPositionOfCluster({20, 20})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchByAngle_scanMassToFar)
+{
+    auto const sensorRange = _parameters.cellFunctionSensorRange;
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_BY_ANGLE)
+            .angle(-135)
+            .relPositionOfCluster({sensorRange + 20, sensorRange + 20})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchFromCenter_success)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_FROM_CENTER)
+            .angle(-135)  //should be ignored
+            .minSize(9)
+            .relPositionOfCluster({20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::CLUSTER_FOUND).approxAngle(180));
+}
+
+TEST_F(SensorGpuTests, testSearchFromCenter_scanMassTooLarge)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_FROM_CENTER)
+            .angle(-135)    //should be ignored
+            .maxSize(8)
+            .relPositionOfCluster({20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchFromCenter_scanMassToFar)
+{
+    auto const sensorRange = _parameters.cellFunctionSensorRange;
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_FROM_CENTER)
+            .angle(-135)    //should be ignored
+            .relPositionOfCluster({sensorRange + 20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchTowardCenter_success)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_TOWARD_CENTER)
+            .angle(-135)  //should be ignored
+            .minSize(9)
+            .relPositionOfCluster({-20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::CLUSTER_FOUND).approxAngle(0));
+}
+
+TEST_F(SensorGpuTests, testSearchTowardCenter_scanMassTooLarge)
+{
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_TOWARD_CENTER)
+            .angle(-135)    //should be ignored
+            .maxSize(8)
+            .relPositionOfCluster({-20, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
+TEST_F(SensorGpuTests, testSearchTowardCenter_scanMassToFar)
+{
+    auto const sensorRange = _parameters.cellFunctionSensorRange;
+    runStandardSensorTest(
+        TestParameters()
+            .command(Enums::SensorIn::SEARCH_TOWARD_CENTER)
+            .angle(-135)    //should be ignored
+            .relPositionOfCluster({-sensorRange - 40, 0})
+            .sizeOfCluster({3, 3})
+            .repetitionOfCluster({10, 10}),
         Expectations().command(Enums::SensorOut::NOTHING_FOUND));
 }

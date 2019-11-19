@@ -138,7 +138,7 @@ SensorFunction::searchFromCenter(Token* token, int const& minSize, int const& ma
     __shared__ float angle;
 
     if (0 == threadIdx.x) {
-        angle = Math::angleOfVector(_cluster->pos - cell->absPos);
+        angle = Math::angleOfVector(cell->absPos -_cluster->pos);
     }
     __syncthreads();
 
@@ -153,7 +153,7 @@ SensorFunction::searchTowardCenter(Token* token, int const& minSize, int const& 
     __shared__ float angle;
 
     if (0 == threadIdx.x) {
-        angle = Math::angleOfVector(cell->absPos - _cluster->pos);
+        angle = Math::angleOfVector(_cluster->pos - cell->absPos);
     }
     __syncthreads();
 
@@ -270,8 +270,9 @@ __device__ __inline__ auto SensorFunction::getAngleAndDistance(Cell* cell, Cell*
     result.distance = Math::length(directionOfScanCell);
 
     Math::normalize(directionOfScanCell);
-    auto const cellOrientationAngle = Math::angleOfVector(sourceCell->relPos - cell->relPos);
-    result.angle = Math::angleOfVector(directionOfScanCell) - cellOrientationAngle - _cluster->angle;
+    auto const sourceCellAngle = Math::angleOfVector(sourceCell->relPos - cell->relPos);
+    auto const scanCellAngle = Math::angleOfVector(directionOfScanCell);
+    result.angle = scanCellAngle - sourceCellAngle - _cluster->angle;
 
     return result;
 }
