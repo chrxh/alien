@@ -24,12 +24,15 @@ public:
     __inline__ __device__ Token* createToken(Cell* cell);
     __inline__ __device__ Particle* createParticleFromTO(
         ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
-    __inline__ __device__ Particle*
-    createParticle(float energy, float2 const& pos, float2 const& vel, int parameter);  //TODO: not adding to simulation!
+    __inline__ __device__ Particle* createParticle(
+        float energy,
+        float2 const& pos,
+        float2 const& vel,
+        ParticleMetadata const& metadata);  //TODO: not adding to simulation!
     __inline__ __device__ void createClusterFromTO_blockCall(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
-    __inline__ __device__ void createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
+    __inline__ __device__ Cluster* createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
 };
 
 /************************************************************************/
@@ -190,13 +193,14 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     particle->absPos = particleTO.pos;
     _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
-    particle->setEnergy(particleTO.energy, 2);
+    particle->setEnergy(particleTO.energy);
     particle->locked = 0;
     particle->alive = 1;
+    particle->metadata.color = particleTO.metadata.color;
     return particle;
 }
 
-__inline__ __device__ void
+__inline__ __device__ Cluster*
 EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
     auto clusterPointer = _data->entities.clusterPointerArrays.getNewClusterPointer(1);
@@ -257,9 +261,11 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
         cell->mutableData[i] = _data->numberGen.random(255);
     }
     cell->age = 0;
+    return cluster;
 }
 
-__inline__ __device__ Particle* EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int parameter)
+__inline__ __device__ Particle*
+EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, ParticleMetadata const& metadata)
 {
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
@@ -267,8 +273,9 @@ __inline__ __device__ Particle* EntityFactory::createParticle(float energy, floa
     particle->id = _data->numberGen.createNewId_kernel();
     particle->locked = 0;
     particle->alive = 1;
-    particle->setEnergy(energy, parameter);
+    particle->setEnergy(energy);
     particle->absPos = pos;
     particle->vel = vel;
+    particle->metadata = metadata;
     return particle;
 }

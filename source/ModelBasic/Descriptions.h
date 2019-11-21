@@ -119,6 +119,7 @@ struct MODELBASIC_EXPORT ParticleDescription
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ParticleDescription& setEnergy(double value) { energy = value; return *this; }
+    ParticleDescription& setMetadata(ParticleMetadata const& value) { metadata = value; return *this; }
 };
 
 struct MODELBASIC_EXPORT DataDescription

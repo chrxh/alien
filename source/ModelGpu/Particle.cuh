@@ -2,11 +2,17 @@
 
 #include "Base.cuh"
 
+struct ParticleMetadata
+{
+    unsigned char color;
+};
+
 struct Particle
 {
     uint64_t id;
     float2 absPos;
     float2 vel;
+    ParticleMetadata metadata;
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
@@ -17,12 +23,12 @@ struct Particle
         return atomicAdd(&_energy, 0);
     }
 
-    __device__ __inline__ void setEnergy(float value, int parameter)
+    __device__ __inline__ void setEnergy(float value)
     {
         atomicExch(&_energy, value);
     }
 
-    __device__ __inline__ void changeEnergy(float changeValue, int parameter = -1)
+    __device__ __inline__ void changeEnergy(float changeValue)
     {
         atomicAdd(&_energy, changeValue);
     }

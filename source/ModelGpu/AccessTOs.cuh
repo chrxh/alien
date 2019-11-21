@@ -16,12 +16,18 @@ struct TokenAccessTO
 	int cellIndex;
 };
 
+struct ParticleMetadataAccessTO
+{
+    unsigned char color;
+};
+
 struct ParticleAccessTO
 {
 	uint64_t id;
 	float energy;
 	float2 pos;
 	float2 vel;
+    ParticleMetadataAccessTO metadata;
 };
 
 struct CellMetadataAccessTO
