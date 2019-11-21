@@ -39,7 +39,7 @@ struct Cell
         atomicExch(&_energy, value);
     }
 
-    __device__ __inline__ void changeEnergy(float changeValue, int parameter = -1)
+    __device__ __inline__ void changeEnergy(float changeValue)
     {
         atomicAdd(&_energy, changeValue);
     }
