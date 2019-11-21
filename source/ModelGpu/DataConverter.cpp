@@ -115,7 +115,7 @@ DataDescription DataConverter::getDataDescription() const
 	for (int i = 0; i < *_dataTO.numParticles; ++i) {
 		ParticleAccessTO const& particle = _dataTO.particles[i];
 		result.addParticle(ParticleDescription().setId(particle.id).setPos({ particle.pos.x, particle.pos.y })
-			.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy));
+			.setVel({ particle.vel.x, particle.vel.y }).setEnergy(particle.energy).setMetadata(ParticleMetadata().setColor(particle.metadata.color)));
 	}
 
 	for (int i = 0; i < *_dataTO.numTokens; ++i) {
@@ -171,6 +171,12 @@ void DataConverter::addParticle(ParticleDescription const & particleDesc)
 	particleTO.pos = { particleDesc.pos->x(), particleDesc.pos->y() };
 	particleTO.vel = { particleDesc.vel->x(), particleDesc.vel->y() };
 	particleTO.energy = *particleDesc.energy;
+    if (auto const& metadata = particleDesc.metadata) {
+        particleTO.metadata.color = metadata->color;
+    }
+    else {
+        particleTO.metadata.color = 0;
+    }
 }
 
 void DataConverter::markDelCluster(uint64_t clusterId)
@@ -449,6 +455,9 @@ void DataConverter::applyChangeDescription(ParticleChangeDescription const& part
 	if (particleChanges.energy) {
 		particle.energy = particleChanges.energy.getValue();
 	}
+    if (particleChanges.metadata) {
+        particle.metadata.color = particleChanges.metadata->color;
+    }
 }
 
 void DataConverter::applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& cluster)

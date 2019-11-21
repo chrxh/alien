@@ -37,6 +37,8 @@ struct ParticleMetadata
 		return color == other.color;
 	}
 	bool operator!=(ParticleMetadata const& other) const { return !operator==(other); }
+
+    ParticleMetadata& setColor(quint8 const& value) { color = value; return *this; }
 };
 
 
