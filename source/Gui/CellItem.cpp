@@ -65,7 +65,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     //set brush color
 	QColor brushColor;
-	uint8_t colorCode = getColorCode();
+	uint8_t colorCode = getColorCode() % 7;
     if( colorCode == 0 )
        brushColor = Const::IndividualCellColor1;
     if( colorCode == 1 )
@@ -78,7 +78,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
         brushColor = Const::IndividualCellColor5;
     if( colorCode == 5 )
         brushColor = Const::IndividualCellColor6;
-    if( colorCode >= 6 )
+    if( colorCode == 6 )
         brushColor = Const::IndividualCellColor7;
 	if (!isConnectable()) {
 		brushColor.setHsl(brushColor.hslHue(), brushColor.hslSaturation(), qMax(0, brushColor.lightness() - 60), brushColor.alpha());
