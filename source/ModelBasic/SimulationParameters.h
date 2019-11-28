@@ -4,7 +4,6 @@ struct SimulationParameters
 {
 	float clusterMaxRadius = 0.0;
 
-	float cellMutationProb = 0.0;
 	float cellMinDistance = 0.0;
 	float cellMaxDistance = 0.0;
 	float cellMass_Reciprocal = 0.0; //related to 1/mass
@@ -23,10 +22,12 @@ struct SimulationParameters
 	int cellFunctionComputerMaxInstructions = 0;
 	int cellFunctionComputerCellMemorySize = 0;
 	float cellFunctionWeaponStrength = 0.0;
+    float cellFunctionWeaponEnergyCost = 0.0;
 	float cellFunctionConstructorOffspringCellEnergy = 0.0;
 	float cellFunctionConstructorOffspringCellDistance = 0.0;
 	float cellFunctionConstructorOffspringTokenEnergy = 0.0;
-	float cellFunctionSensorRange = 0.0;
+    float cellFunctionConstructorMutationProb = 0.0;
+    float cellFunctionSensorRange = 0.0;
 	float cellFunctionCommunicatorRange = 0.0;
 
 	int tokenMemorySize = 0;

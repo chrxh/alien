@@ -25,7 +25,6 @@ public:
     __inline__ __device__ void processingRadiation_blockCall();
 
     __inline__ __device__ void processingCellDeath_blockCall();
-    __inline__ __device__ void processingMutation_blockCall();
     __inline__ __device__ void processingDecomposition_blockCall();
     __inline__ __device__ void processingClusterCopy_blockCall();
 
@@ -339,39 +338,6 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
         }
     }
 
-    __syncthreads();
-}
-
-__inline__ __device__ void ClusterProcessor::processingMutation_blockCall()
-{
-    for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellMutationProb) {
-            auto const kindOfMutation = _data->numberGen.random(2);
-            auto cell = _cluster->cellPointers[cellIndex];
-            if (0 == kindOfMutation) {
-                auto const index = static_cast<int>(_data->numberGen.random(MAX_CELL_STATIC_BYTES - 1));
-                cell->staticData[index] = _data->numberGen.random(255);
-            }
-            if (1 == kindOfMutation) {
-                if (Enums::CellFunction::COMPUTER == cell->cellFunctionType) {
-                    cell->numStaticBytes =
-                        _data->numberGen.random(cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3);
-                }
-            }
-            if (2 == kindOfMutation) {
-                cell->cellFunctionType = _data->numberGen.random(Enums::CellFunction::_COUNTER - 1);
-            }
-        }
-    }
-
-    auto const tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
-    for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-        if (_data->numberGen.random() < (cudaSimulationParameters.cellMutationProb)*10) {
-            auto token = _cluster->tokenPointers[tokenIndex];
-            auto const index = static_cast<int>(_data->numberGen.random(MAX_TOKEN_MEM_SIZE - 1));
-            token->memory[index] = _data->numberGen.random(255);
-        }
-    }
     __syncthreads();
 }
 
