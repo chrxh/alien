@@ -121,3 +121,4 @@ __inline__ __device__ float PropulsionFunction::convertDataToThrustPower(unsigne
 {
     return 1.0f / 10000.0f*(static_cast<float>(data) + 10.0f);
 }
+ 

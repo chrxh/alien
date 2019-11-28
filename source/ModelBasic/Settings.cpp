@@ -151,7 +151,6 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 	SimulationParameters parameters;
 	parameters.clusterMaxRadius = 40.0f;
 
-	parameters.cellMutationProb = 0.00001f;
 	parameters.cellMinDistance = 0.3f;
 	parameters.cellMaxDistance = 1.3f;
 	parameters.cellMass_Reciprocal = 1;
@@ -161,7 +160,6 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
     parameters.cellMaxBonds = 6;
 	parameters.cellMaxToken = 3;
 	parameters.cellMaxTokenBranchNumber = 6;
-	parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
 	parameters.cellCreationMaxConnection = 4;
 	parameters.cellCreationTokenAccessNumber = 0;
 	parameters.cellMinEnergy = 50.0f;
@@ -169,14 +167,17 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 	parameters.cellFusionVelocity = 0.4f;
 
 	parameters.cellFunctionWeaponStrength = 0.1f;
-	parameters.cellFunctionComputerMaxInstructions = 15;
+    parameters.cellFunctionWeaponEnergyCost = 0.5f;
+    parameters.cellFunctionComputerMaxInstructions = 15;
 	parameters.cellFunctionComputerCellMemorySize = 8;
+    parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
 	parameters.cellFunctionConstructorOffspringCellDistance = 1.0f;
-	parameters.cellFunctionSensorRange = 50.0f;
+    parameters.cellFunctionConstructorOffspringTokenEnergy = 60.0f;
+    parameters.cellFunctionConstructorMutationProb = 0.00001f;
+    parameters.cellFunctionSensorRange = 50.0f;
 	parameters.cellFunctionCommunicatorRange = 50.0f;
 
 	parameters.tokenMemorySize = 256;
-	parameters.cellFunctionConstructorOffspringTokenEnergy = 60.0f;
 	parameters.tokenMinEnergy = 3.0f;
 
 	parameters.radiationExponent = 1;
