@@ -54,25 +54,25 @@ QString MonitorView::generateString() const
 
 	//generate formatted string
 	text += parStart + colorTextStart + "number of clusters:" + StringHelper::ws(5) + colorEnd;
-	text += " " + StringHelper::generateFormattedIntString(_model->numClusters)+ " " + parEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numClusters, true)+ " " + parEnd;
 	text += parStart + colorTextStart + "number of cells:" + StringHelper::ws(8) + colorEnd;
-	text += " " + StringHelper::generateFormattedIntString(_model->numCells) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numCells, true) + " " + parEnd;
 	text += parStart + colorTextStart + "number of particles:" + StringHelper::ws(4) + colorEnd;
-	text += " " + StringHelper::generateFormattedIntString(_model->numParticles) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numParticles, true) + " " + parEnd;
 	text += parStart + colorTextStart + "number of tokens:" + StringHelper::ws(7) + colorEnd;
-	text += " " + StringHelper::generateFormattedIntString(_model->numTokens) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedIntString(_model->numTokens, true) + " " + parEnd;
 	text += parStart + colorTextStart + "total internal energy:" + StringHelper::ws(2) + colorEnd;
-	text += " " + StringHelper::generateFormattedRealString(_model->totalInternalEnergy) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalInternalEnergy, true) + " " + parEnd;
 	text += parStart + colorTextStart + "total kinetic energy:" + StringHelper::ws(3) + colorEnd;
 	double totalKineticEnergy = _model->totalLinearKineticEnergy + _model->totalRotationalKineticEnergy;
-	text += " " + StringHelper::generateFormattedRealString(totalKineticEnergy) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedRealString(totalKineticEnergy, true) + " " + parEnd;
 	text += parStart + colorTextStart + "&#47;linear part:" + StringHelper::ws(11) + colorEnd;
-	text += " " + StringHelper::generateFormattedRealString(_model->totalLinearKineticEnergy) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalLinearKineticEnergy, true) + " " + parEnd;
 	text += parStart + colorTextStart + "&#47;rotational part:" + StringHelper::ws(7) + colorEnd;
-	text += " " + StringHelper::generateFormattedRealString(_model->totalRotationalKineticEnergy) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedRealString(_model->totalRotationalKineticEnergy, true) + " " + parEnd;
 	text += parStart + colorTextStart + "overall energy:" + StringHelper::ws(9) + colorEnd;
 	double totalEnergy = _model->totalInternalEnergy + totalKineticEnergy;
-	text += " " + StringHelper::generateFormattedRealString(totalEnergy) + " " + parEnd;
+	text += " " + StringHelper::generateFormattedRealString(totalEnergy, true) + " " + parEnd;
 	return text;
 }
 
