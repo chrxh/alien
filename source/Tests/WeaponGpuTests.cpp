@@ -20,6 +20,7 @@ protected:
 
     struct WeaponTestResult {
         Enums::WeaponOut::Type tokenOutput;
+        optional<float> energyDiffOfWeapon;
         optional<float> energyDiffOfTarget1;
         optional<float> energyDiffOfTarget2;
     };
@@ -88,8 +89,9 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
         auto const& newTarget2 = newCellByCellId.at(targetCell2->id);
         result.energyDiffOfTarget2 = *newTarget2.energy - *targetCell2->energy;
     }
-    return result;
+    result.energyDiffOfWeapon = *newSecondCell.energy - *secondCell.energy;
 
+    return result;
 }
 
 ClusterDescription WeaponGpuTests::createRectangularWeaponCluster(QVector2D const & pos, QVector2D const & vel)
@@ -114,6 +116,7 @@ TEST_F(WeaponGpuTests, testNoTarget)
 {
     auto const result = runWeaponTest(WeaponTestParameters().target1(QVector2D{ 3, 0 }));
     EXPECT_EQ(Enums::WeaponOut::NO_TARGET, result.tokenOutput);
+    EXPECT_EQ(-_parameters.cellFunctionWeaponEnergyCost, result.energyDiffOfWeapon);
 }
 
 TEST_F(WeaponGpuTests, testStrike)
