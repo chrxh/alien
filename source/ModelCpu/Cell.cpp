@@ -490,7 +490,7 @@ Token* Cell::takeTokenFromStack ()
 
 void Cell::mutationByChance()
 {
-	if (_context->getNumberGenerator()->getRandomReal() < _context->getSimulationParameters().cellMutationProb) {
+	if (_context->getNumberGenerator()->getRandomReal() < _context->getSimulationParameters().cellFunctionConstructorMutationProb) {
 		_features->mutate();
 	}
 }
