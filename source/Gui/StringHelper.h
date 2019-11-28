@@ -16,30 +16,35 @@ public:
 		return QString("%1").arg(value);// QString::fromStdString(std::to_string(value));
 	}
 
-	static QString generateFormattedIntString(int integer)
+	static QString generateFormattedIntString(int value, bool withComma = false)
 	{
 		QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
 		QString colorEnd = "</span>";
-        QString integerAsString;
+        if (!withComma) {
+            return colorDataStart + QString("%1").arg(value) + colorEnd;
+        }
+        else {
+            QString valueAsString;
 
-        do {
-            if (!integerAsString.isEmpty()) {
-                integerAsString = QString(",") + integerAsString;
-            }
-            if (integer >= 1000) {
-                integerAsString = QString("%1").arg(integer % 1000, 3) + integerAsString;
-            }
-            else {
-                integerAsString = QString("%1").arg(integer % 1000) + integerAsString;
-            }
-            integer = integer / 1000;
-        } while (integer > 0);
-        integerAsString.replace(" ", "0");
+            do {
+                if (!valueAsString.isEmpty()) {
+                    valueAsString = QString(",") + valueAsString;
+                }
+                if (value >= 1000) {
+                    valueAsString = QString("%1").arg(value % 1000, 3) + valueAsString;
+                }
+                else {
+                    valueAsString = QString("%1").arg(value % 1000) + valueAsString;
+                }
+                value = value / 1000;
+            } while (value > 0);
+            valueAsString.replace(" ", "0");
 
-        return colorDataStart + integerAsString + colorEnd;
+            return colorDataStart + valueAsString + colorEnd;
+        }
 	}
 
-	static QString generateFormattedRealString(qreal r)
+	static QString generateFormattedRealString(qreal r, bool withComma = false)
 	{
 		QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
 		QString colorData2Start = "<span style=\"color:" + Const::CellEditDataColor2.name() + "\">";
@@ -51,7 +56,7 @@ public:
 		}
 		int i = qFloor(r);
 		int re = (r - qFloor(r))*10000.0;
-		QString iS = generateFormattedIntString(i);
+		QString iS = generateFormattedIntString(i, withComma);
 		QString reS = QString("%1").arg(re, 4);
 		reS.replace(" ", "0");
 		if (negativeSign)
