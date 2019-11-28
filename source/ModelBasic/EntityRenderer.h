@@ -8,7 +8,7 @@ class EntityRenderer
 {
 public:
 	EntityRenderer(QImagePtr const& image, IntVector2D const& positionOfImage, SpaceProperties const* space)
-        : _image(image), _positionOfImage(positionOfImage), _space(space), _imageRect{ {3, 3}, {_image->width() - 4, _image->height() - 4} }
+        : _image(image), _positionOfImage(positionOfImage), _space(space), _imageRect{ {2, 2}, {_image->width() - 3, _image->height() - 3} }
 	{
         _space->truncatePosition(_positionOfImage);
     }
