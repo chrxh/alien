@@ -206,6 +206,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\Array.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cell.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\CellFunctionData.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Cluster.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DebugKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\DEBUG_cluster.cuh" />
@@ -223,6 +224,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\CleanupKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\HashMap.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\HashSet.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ClustersByMapSection.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\List.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Math.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterPointerMultiArrayController.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\CudaMonitorData.cuh" />

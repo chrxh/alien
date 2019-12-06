@@ -94,7 +94,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     auto const& color = lookupResult.cell->metadata.color;
     tokenMem[Enums::Scanner::OUT_CELL_METADATA] = color;
 
-    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<char>(lookupResult.cell->cellFunctionType);
+    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = lookupResult.cell->getCellFunctionType();
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = lookupResult.cell->numStaticBytes;
     for (int i = 0; i < lookupResult.cell->numStaticBytes; ++i) {
         tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA + 1 + i] = lookupResult.cell->staticData[i];

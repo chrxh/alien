@@ -65,6 +65,10 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
 /************************************************************************/
 /* Helpers for tokens													*/
 /************************************************************************/
+__global__ void resetCellFunctionData(SimulationData data)
+{
+    data.cellFunctionData.clustersByMapSection.reset_gridCall();
+}
 
 __global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
 {
@@ -76,6 +80,16 @@ __global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
 }
 
 __global__ void tokenProcessingStep2(SimulationData data, int numClusters, int clusterArrayIndex)
+{
+    auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
+        TokenProcessor tokenProcessor;
+        tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        tokenProcessor.createCellFunctionData_blockCall();
+    }
+}
+
+__global__ void tokenProcessingStep3(SimulationData data, int numClusters, int clusterArrayIndex)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
@@ -118,24 +132,26 @@ __global__ void particleProcessingStep3(SimulationData data)
 
 __global__ void calcSimulationTimestep(SimulationData data)
 {
-        data.cellMap.reset();
-        data.particleMap.reset();
-        data.arrays.reset();
+    data.cellMap.reset();
+    data.particleMap.reset();
+    data.dynamicMemory.reset();
+    resetCellFunctionData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
 
-        MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-        MULTI_CALL(tokenProcessingStep1, data);
-        MULTI_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-        MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-        MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-        MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-        particleProcessingStep1 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-        cudaDeviceSynchronize();
-        particleProcessingStep2 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-        cudaDeviceSynchronize();
-        particleProcessingStep3 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-        cudaDeviceSynchronize();
+    MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(tokenProcessingStep1, data);
+    MULTI_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(tokenProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    particleProcessingStep1 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    particleProcessingStep2 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    particleProcessingStep3 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
 
-        cleanup << <1, 1 >> > (data);
-        cudaDeviceSynchronize();
+    cleanup << <1, 1 >> > (data);
+    cudaDeviceSynchronize();
 }
 

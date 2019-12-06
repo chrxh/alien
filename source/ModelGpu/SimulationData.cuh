@@ -3,6 +3,7 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 #include "Entities.cuh"
+#include "CellFunctionData.cuh"
 
 struct SimulationData
 {
@@ -10,23 +11,25 @@ struct SimulationData
 
     Map<Cell> cellMap;
     Map<Particle> particleMap;
+    CellFunctionData cellFunctionData;
 
     Entities entities;
     Entities entitiesForCleanup;
 
-    ArrayController arrays;
+    DynamicMemory dynamicMemory;
 
     CudaNumberGenerator numberGen;
 
-    void init(int2 universeSize, CudaConstants const& cudaConstants)
+    void init(int2 const& universeSize, CudaConstants const& cudaConstants)
     {
         size = universeSize;
 
         entities.init(cudaConstants);
         entitiesForCleanup.init(cudaConstants);
+        cellFunctionData.init(universeSize);
         cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
-        arrays.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
+        dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
     }
 
@@ -34,10 +37,11 @@ struct SimulationData
     {
         entities.free();
         entitiesForCleanup.free();
+        cellFunctionData.free();
         cellMap.free();
         particleMap.free();
         numberGen.free();
-        arrays.free();
+        dynamicMemory.free();
     }
 };
 
