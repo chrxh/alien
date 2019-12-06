@@ -88,7 +88,7 @@ public:
 
 };
 
-class ArrayController
+class DynamicMemory
 {
 private:
     int _size;
@@ -96,7 +96,7 @@ private:
     unsigned char** _data;
 
 public:
-    ArrayController()
+    DynamicMemory()
         : _size(0)
     {}
 
@@ -126,7 +126,7 @@ public:
     __device__ __inline__ T* getArray (int numElements)
     {
         int newBytesToOccupy = numElements * sizeof(T);
-        newBytesToOccupy = newBytesToOccupy + 8 - (newBytesToOccupy % 8);
+        newBytesToOccupy = newBytesToOccupy + 16 - (newBytesToOccupy % 16);
         int oldIndex = atomicAdd(_bytesOccupied, newBytesToOccupy);
         if (oldIndex + newBytesToOccupy - 1 >= _size) {
             atomicAdd(_bytesOccupied, -newBytesToOccupy);
