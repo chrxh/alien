@@ -111,9 +111,9 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
             cell.connections[i] = cells + index;
         }
 
-        cell.cellFunctionType = cellTO.cellFunctionType;
+        cell.setCellFunctionType(cellTO.cellFunctionType);
 
-        switch (static_cast<Enums::CellFunction::Type>(cell.cellFunctionType)) {
+        switch (cell.getCellFunctionType()) {
         case Enums::CellFunction::COMPUTER: {
             cell.numStaticBytes = cellTO.numStaticBytes;
             cell.numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
@@ -239,8 +239,8 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->protectionCounter = 0;
     cell->locked = 0;
     cell->metadata.color = 0;
-    cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
-    switch (static_cast<Enums::CellFunction::Type>(cell->cellFunctionType)) {
+    cell->setCellFunctionType(_data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1));
+    switch (cell->getCellFunctionType()) {
     case Enums::CellFunction::COMPUTER: {
         cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
         cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;

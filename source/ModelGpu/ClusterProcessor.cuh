@@ -935,8 +935,8 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
 
     __shared__ Tagger::DynamicMemory dynamicMemory;
     if (0 == threadIdx.x) {
-        dynamicMemory.cellsToEvaluate = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
-        dynamicMemory.cellsToEvaluateNextRound = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+        dynamicMemory.cellsToEvaluate = _data->dynamicMemory.getArray<Cell*>(_cluster->numCellPointers);
+        dynamicMemory.cellsToEvaluateNextRound = _data->dynamicMemory.getArray<Cell*>(_cluster->numCellPointers);
     }
     __syncthreads();
 

@@ -216,10 +216,10 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall(Token* toke
     __shared__ Cell** cellPointerArray1;
     __shared__ Cell** cellPointerArray2;
     if (0 == threadIdx.x) {
-        cellPointerArray1 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
-        cellPointerArray2 = _data->arrays.getArray<Cell*>(_cluster->numCellPointers);
+        cellPointerArray1 = _data->dynamicMemory.getArray<Cell*>(_cluster->numCellPointers);
+        cellPointerArray2 = _data->dynamicMemory.getArray<Cell*>(_cluster->numCellPointers);
     }
-    _dynamicMemory.cellPosMap.reserveMemory_blockCall(_cluster->numCellPointers * 2, _data->arrays);
+    _dynamicMemory.cellPosMap.init_blockCall(_cluster->numCellPointers * 2, _data->dynamicMemory);
     __syncthreads();
 
     _dynamicMemory.cellPointerArray1 = cellPointerArray1;
@@ -291,25 +291,25 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
 __inline__ __device__ void ConstructorFunction::mutation()
 {
     if (0 == threadIdx.x) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*5) {
             _token->memory[Enums::Constr::IN_OPTION] = _data->numberGen.random(255);
         }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*15) {
             _token->memory[Enums::Constr::INOUT_ANGLE] = _data->numberGen.random(255);
         }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*15) {
             _token->memory[Enums::Constr::IN_DIST] = _data->numberGen.random(255);
         }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*5) {
             _token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = _data->numberGen.random(255);
         }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*5) {
             _token->memory[Enums::Constr::IN_CELL_BRANCH_NO] = _data->numberGen.random(255);
         }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*5) {
             _token->memory[Enums::Constr::IN_CELL_METADATA] = _data->numberGen.random(255);
         }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorMutationProb*5) {
             _token->memory[Enums::Constr::IN_CELL_FUNCTION] = _data->numberGen.random(255);
         }
     }
@@ -1113,7 +1113,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     }
     __syncthreads();
 
-    tempCellMap.init_blockCall();
+    tempCellMap.reset_blockCall();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1177,7 +1177,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     }
     __syncthreads();
 
-    tempCellMap.init_blockCall();
+    tempCellMap.reset_blockCall();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1239,7 +1239,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     }
     __syncthreads();
 
-    tempCellMap.init_blockCall();
+    tempCellMap.reset_blockCall();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1362,7 +1362,7 @@ ConstructorFunction::constructNewCell(float2 const& relPosOfNewCell, float const
         result->branchNumber =
             static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_BRANCH_NO]) % cudaSimulationParameters.cellMaxTokenBranchNumber;
         result->tokenBlocked = true;
-        result->cellFunctionType = _token->memory[Enums::Constr::IN_CELL_FUNCTION];
+        result->setCellFunctionType(_token->memory[Enums::Constr::IN_CELL_FUNCTION]);
         result->numStaticBytes = static_cast<unsigned char>(_token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA])
             % (MAX_CELL_STATIC_BYTES + 1);
         offset = result->numStaticBytes + 1;

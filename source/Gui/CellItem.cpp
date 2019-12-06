@@ -13,19 +13,20 @@ namespace
 {
 	QString getTypeString(Enums::CellFunction::Type type)
 	{
-		if (type == Enums::CellFunction::Type::COMPUTER)
+        type = static_cast<Enums::CellFunction::Type>(type % Enums::CellFunction::_COUNTER);
+		if (type == Enums::CellFunction::COMPUTER)
 			return "Computer";
-		else if (type == Enums::CellFunction::Type::PROPULSION)
+		else if (type == Enums::CellFunction::PROPULSION)
 			return "Propulsion";
-		else if (type == Enums::CellFunction::Type::SCANNER)
+		else if (type == Enums::CellFunction::SCANNER)
 			return "Scanner";
-		else if (type == Enums::CellFunction::Type::WEAPON)
+		else if (type == Enums::CellFunction::WEAPON)
 			return "Weapon";
-		else if (type == Enums::CellFunction::Type::CONSTRUCTOR)
+		else if (type == Enums::CellFunction::CONSTRUCTOR)
 			return "Constructor";
-		else if (type == Enums::CellFunction::Type::SENSOR)
+		else if (type == Enums::CellFunction::SENSOR)
 			return "Sensor";
-		else if (type == Enums::CellFunction::Type::COMMUNICATOR)
+		else if (type == Enums::CellFunction::COMMUNICATOR)
 			return "Communicator";
 		else
 			return QString();
