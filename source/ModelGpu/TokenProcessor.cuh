@@ -28,6 +28,8 @@ public:
     __inline__ __device__ void processingLightWeigthedFeatures_gridCall();
     __inline__ __device__ void processingHeavyWeightedFeatures_blockCall();
 
+    __inline__ __device__ void createCellFunctionData_blockCall();
+
 private:
     __inline__ __device__ int calcAnticipatedTokens(Cluster* cluster);
     __inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
@@ -39,8 +41,7 @@ private:
     SimulationData* _data;
     int _clusterArrayIndex;
     Cluster* _cluster;
-    PartitionData _clusterBlock;
-    PartitionData _cellBlock;
+    PartitionData _clusterPartition;
 };
 
 /************************************************************************/
@@ -51,7 +52,7 @@ __inline__ __device__ void TokenProcessor::init_gridCall(SimulationData& data, i
     _data = &data;
     _clusterArrayIndex = clusterArrayIndex;
     auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
-    _clusterBlock =
+    _clusterPartition =
         calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
@@ -59,16 +60,13 @@ __inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, 
 {
     _data = &data;
     _clusterArrayIndex = clusterArrayIndex;
-
-    auto const clusterPointer = &data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
-    _cluster = *clusterPointer;
-    _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
+    _cluster = data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
 }
 
 __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 {
     auto const& clusters = _data->entities.clusterPointerArrays.getArray(_clusterArrayIndex);
-    for (int clusterIndex = _clusterBlock.startIndex; clusterIndex <= _clusterBlock.endIndex; ++clusterIndex) {
+    for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
         if (0 == cluster->numTokenPointers) {
             continue;
@@ -142,7 +140,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
 {
     auto const& clusters = _data->entities.clusterPointerArrays.getArray(_clusterArrayIndex);
-    for (int clusterIndex = _clusterBlock.startIndex; clusterIndex <= _clusterBlock.endIndex; ++clusterIndex) {
+    for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
         if (0 == cluster->numTokenPointers) {
             continue;
@@ -263,7 +261,7 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridC
     factory.init(_data);
 
     auto const& clusters = _data->entities.clusterPointerArrays.getArray(_clusterArrayIndex);
-    for (int clusterIndex = _clusterBlock.startIndex; clusterIndex <= _clusterBlock.endIndex; ++clusterIndex) {
+    for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
 
         auto const numTokenPointers = cluster->numTokenPointers;
@@ -292,7 +290,7 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
         auto const& token = _cluster->tokenPointers[tokenIndex];
 
-        auto const type = static_cast<unsigned char>(token->cell->cellFunctionType) % Enums::CellFunction::_COUNTER;
+        auto const type = token->cell->getCellFunctionType();
         switch (type) {
         case Enums::CellFunction::CONSTRUCTOR: {
             __syncthreads();
@@ -304,6 +302,32 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
             sensor.processing_blockCall(token);
             __syncthreads();
         } break;
+        }
+    }
+}
+
+__inline__ __device__ void TokenProcessor::createCellFunctionData_blockCall()
+{
+    auto const cellPartition = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
+    __shared__ bool hasToken;
+    __shared__ bool hasCommunicator;
+    if (0 == threadIdx.x) {
+        hasToken = _cluster->numTokenPointers > 0;
+        hasCommunicator = false;
+    }
+    __syncthreads();
+
+    for (int cellIndex = cellPartition.startIndex; cellIndex <= cellPartition.endIndex; ++cellIndex) {
+        auto const& cell = _cluster->cellPointers[cellIndex];
+        if (Enums::CellFunction::COMMUNICATOR == cell->getCellFunctionType()) {
+            hasCommunicator = true;
+        }
+    }
+    __syncthreads();
+
+    if (0 == threadIdx.x) {
+        if (hasToken && hasCommunicator) {
+            _data->cellFunctionData.clustersByMapSection.insert(_cluster, &_data->dynamicMemory);
         }
     }
 }
@@ -359,8 +383,7 @@ __inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token,
     auto cell = token->cell;
     cell->getLock();
     EnergyGuidance::processing(token);
-    auto type = static_cast<unsigned char>(cell->cellFunctionType) % Enums::CellFunction::_COUNTER;
-    switch (type) {
+    switch (cell->getCellFunctionType()) {
     case Enums::CellFunction::COMPUTER: {
         CellComputerFunction::processing(token);
     } break;

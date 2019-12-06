@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ModelBasic/ElementaryTypes.h"
+
 #include "Base.cuh"
 #include "Definitions.cuh"
 
@@ -20,7 +22,6 @@ struct Cell
     int maxConnections;
     int numConnections;
     Cell* connections[MAX_CELL_BONDS];
-    int cellFunctionType;
     unsigned char numStaticBytes;
     char staticData[MAX_CELL_STATIC_BYTES];
     unsigned char numMutableBytes;
@@ -33,6 +34,17 @@ struct Cell
     int protectionCounter;
     int alive;  //0 = dead, 1 == alive
     int tag;
+
+    __inline__ __device__ Enums::CellFunction::Type getCellFunctionType() const
+    {
+        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned int>(_cellFunctionType)
+            % Enums::CellFunction::_COUNTER);
+    }
+
+    __inline__ __device__ void setCellFunctionType(int value)
+    {
+        _cellFunctionType = value;
+    }
 
     __device__ __inline__ void setEnergy(float value)
     {
@@ -65,6 +77,7 @@ struct Cell
     }
 
 private:
+    int _cellFunctionType;
     float _energy;
 };
 
