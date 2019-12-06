@@ -2,6 +2,8 @@
 #include <fstream>
 
 #include <QTime>
+#include <QTimer>
+#include <QProgressDialog>
 #include <QCoreApplication>
 
 #include "Base/GlobalFactory.h"
@@ -147,6 +149,11 @@ void MainController::init()
     else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
         _view->getInfoController()->setDevice(InfoController::Device::GPU);
     }
+
+    //auto save every hour
+    _timer = new QTimer(this);
+    connect(_timer, &QTimer::timeout, this, &MainController::autoSave);
+    _timer->start(1000 * 60 * 60);
 }
 
 
@@ -164,8 +171,16 @@ namespace
 
 void MainController::autoSave()
 {
+
+    QProgressDialog* progress = new QProgressDialog("Autosave...", QString(), 0, 0, _view);
+
+    progress->setModal(false);
+    progress->show();
+
 	onSaveSimulation("autosave.sim");
-	processEventsForMilliSec(200);
+	processEventsForMilliSec(500);
+
+    delete progress;
 }
 
 void MainController::onRunSimulation(bool run)
