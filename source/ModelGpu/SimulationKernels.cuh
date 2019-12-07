@@ -21,7 +21,7 @@ __global__ void clusterProcessingStep1(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, 0, clusterIndex);
+        clusterProcessor.init_blockCall(data, clusterIndex);
         clusterProcessor.processingMovement_blockCall();
         clusterProcessor.updateMap_blockCall();
     }
@@ -32,7 +32,7 @@ __global__ void clusterProcessingStep2(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, 0, clusterIndex);
+        clusterProcessor.init_blockCall(data, clusterIndex);
         clusterProcessor.destroyCell_blockCall();
     }
 }
@@ -42,7 +42,7 @@ __global__ void clusterProcessingStep3(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, 0, clusterIndex);
+        clusterProcessor.init_blockCall(data, clusterIndex);
         clusterProcessor
             .processingCollision_blockCall();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
         clusterProcessor.processingRadiation_blockCall();
@@ -54,7 +54,7 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, 0, clusterIndex);
+        clusterProcessor.init_blockCall(data, clusterIndex);
         clusterProcessor.processingCellDeath_blockCall();
         clusterProcessor.processingDecomposition_blockCall();
         clusterProcessor.processingClusterCopy_blockCall();
@@ -73,7 +73,7 @@ __global__ void resetCellFunctionData(SimulationData data)
 __global__ void tokenProcessingStep1(SimulationData data)
 {
     TokenProcessor tokenProcessor;
-    tokenProcessor.init_gridCall(data, 0);
+    tokenProcessor.init_gridCall(data);
     tokenProcessor.processingEnergyAveraging_gridCall();
     tokenProcessor.processingSpreading_gridCall();
     tokenProcessor.processingLightWeigthedFeatures_gridCall();
@@ -84,7 +84,7 @@ __global__ void tokenProcessingStep2(SimulationData data, int numClusters)
     auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, 0, clusterIndex);
+        tokenProcessor.init_blockCall(data, clusterIndex);
         tokenProcessor.createCellFunctionData_blockCall();
     }
 }
@@ -94,7 +94,7 @@ __global__ void tokenProcessingStep3(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, 0, clusterIndex);
+        tokenProcessor.init_blockCall(data, clusterIndex);
         tokenProcessor.processingHeavyWeightedFeatures_blockCall();
     }
 }
