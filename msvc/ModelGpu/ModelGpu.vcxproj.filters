@@ -186,10 +186,10 @@
     <ClInclude Include="..\..\source\ModelGpu\List.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClustersByMapSection.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\CellFunctionData.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CellFunctionData.cuh">
+    <ClInclude Include="..\..\source\ModelGpu\MapSectionCollector.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
   </ItemGroup>

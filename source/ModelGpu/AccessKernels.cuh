@@ -229,8 +229,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numParticles = 0;
     *access.numTokens = 0;
 
-    MULTI_CALL(getClusterAccessData, rectUpperLeft, rectLowerRight, data, access);
-    cudaDeviceSynchronize();
+    KERNEL_CALL(getClusterAccessData, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, rectUpperLeft, rectLowerRight, data, access);
     getParticleAccessData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> >(rectUpperLeft, rectLowerRight, data, access);
     cudaDeviceSynchronize();
 }
@@ -238,7 +237,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
-    MULTI_CALL(filterClusters, rectUpperLeft, rectLowerRight, data);
+    KERNEL_CALL(filterClusters, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, rectUpperLeft, rectLowerRight, data);
     filterParticles<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (rectUpperLeft, rectLowerRight, data);
     cudaDeviceSynchronize();
     convertData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data, access);

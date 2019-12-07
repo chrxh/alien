@@ -1,18 +1,18 @@
 #pragma once
 
-#include "ClustersByMapSection.cuh"
+#include "MapSectionCollector.cuh"
 
 struct CellFunctionData
 {
-    ClustersByMapSection clustersByMapSection;
+    MapSectionCollector mapSectionCollector;
 
-    void init(int2 const& universeSize)
+    __host__ __inline__ void init(int2 const& universeSize)
     {
-        clustersByMapSection.init(universeSize, { 50,50 });
+        mapSectionCollector.init(universeSize, { 50,50 });
     }
 
-    void free()
+    __host__ __inline__ void free()
     {
-        clustersByMapSection.free();
+        mapSectionCollector.free();
     }
 };

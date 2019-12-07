@@ -80,7 +80,7 @@ __global__ void getCudaMonitorData(SimulationData data, CudaMonitorData monitorD
 {
     monitorData.reset();
 
-    MULTI_CALL(getMonitorDataForClusters, data, monitorData, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
+    KERNEL_CALL(getMonitorDataForClusters, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, monitorData, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
     getMonitorDataForParticles << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data, monitorData);
 }
 
