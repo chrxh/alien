@@ -42,7 +42,7 @@ void ScannerGpuTests::checkScannedCellWithToken(
 {
     EXPECT_EQ(*cell.maxConnections, token.data->at(Enums::Scanner::OUT_CELL_MAX_CONNECTIONS));
     EXPECT_EQ(*cell.tokenBranchNumber, token.data->at(Enums::Scanner::OUT_CELL_BRANCH_NO));
-    EXPECT_EQ(cell.cellFeature->type, token.data->at(Enums::Scanner::OUT_CELL_FUNCTION));
+    EXPECT_EQ(cell.cellFeature->getType(), token.data->at(Enums::Scanner::OUT_CELL_FUNCTION));
     EXPECT_EQ(static_cast<int>(*cell.energy), token.data->at(Enums::Scanner::OUT_ENERGY));
 
     auto const expectedDistanceData = QuantityConverter::convertDistanceToData((*cell.pos - *prevCell.pos).length());

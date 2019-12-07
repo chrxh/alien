@@ -387,7 +387,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cellTO.branchNumber = cellDesc.tokenBranchNumber.get_value_or(0);
 	cellTO.tokenBlocked = cellDesc.tokenBlocked.get_value_or(false);
     auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
-    cellTO.cellFunctionType = static_cast<int>(cellFunction.type);
+    cellTO.cellFunctionType = cellFunction.getType();
     cellTO.numStaticBytes = std::min(cellFunction.constData.size(), MAX_CELL_STATIC_BYTES);
     cellTO.numMutableBytes = std::min(cellFunction.volatileData.size(), MAX_CELL_MUTABLE_BYTES);
     convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
@@ -492,7 +492,7 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
 	}
     if (cellChanges.cellFeatures) {
         auto cellFunction = *cellChanges.cellFeatures;
-        cellTO.cellFunctionType = static_cast<int>(cellFunction.type);
+        cellTO.cellFunctionType = cellFunction.getType();
         cellTO.numStaticBytes = std::min(cellFunction.constData.size(), MAX_CELL_STATIC_BYTES);
         cellTO.numMutableBytes = std::min(cellFunction.volatileData.size(), MAX_CELL_MUTABLE_BYTES);
         convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);

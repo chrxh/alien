@@ -295,23 +295,23 @@ void CellEditTab::mousePressEvent(QMouseEvent* e)
     //cursor at cell function?
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
 		if (row == 7) {
-			cell.cellFeature->type = Enums::CellFunction::COMPUTER;
+			cell.cellFeature->setType(Enums::CellFunction::COMPUTER);
 			auto parameters = _model->getSimulationParameters();
 			int memorySize = parameters.cellFunctionComputerCellMemorySize;
 			cell.cellFeature->setVolatileData(QByteArray(memorySize, 0));
 		}
         if( row == 8 )
-			cell.cellFeature->type = Enums::CellFunction::PROPULSION;
+			cell.cellFeature->setType(Enums::CellFunction::PROPULSION);
         if( row == 9 )
-			cell.cellFeature->type = Enums::CellFunction::SCANNER;
+			cell.cellFeature->setType(Enums::CellFunction::SCANNER);
         if( row == 10 )
-			cell.cellFeature->type = Enums::CellFunction::WEAPON;
+			cell.cellFeature->setType(Enums::CellFunction::WEAPON);
         if( row == 11 )
-			cell.cellFeature->type = Enums::CellFunction::CONSTRUCTOR;
+			cell.cellFeature->setType(Enums::CellFunction::CONSTRUCTOR);
         if( row == 12 )
-			cell.cellFeature->type = Enums::CellFunction::SENSOR;
+			cell.cellFeature->setType(Enums::CellFunction::SENSOR);
         if( row == 13 )
-			cell.cellFeature->type = Enums::CellFunction::COMMUNICATOR;
+			cell.cellFeature->setType(Enums::CellFunction::COMMUNICATOR);
         updateDisplay();
 		_controller->notificationFromCellTab();
     }
@@ -370,7 +370,7 @@ void CellEditTab::updateDisplay ()
         text += colorDataStart+"n"+colorEnd+parEnd;
         text += parStart+colorTextStartInactive+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd+parEnd;
     }
-    auto const& cellFunctionType = static_cast<Enums::CellFunction::Type>(static_cast<unsigned char>(cell.cellFeature->type) % Enums::CellFunction::_COUNTER);
+    auto const& cellFunctionType = cell.cellFeature->getType();
     text += generateFormattedCellFunctionString(cellFunctionType);
 
     QTextEdit::setText(text);

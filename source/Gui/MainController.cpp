@@ -172,7 +172,7 @@ namespace
 void MainController::autoSave()
 {
 
-    QProgressDialog* progress = new QProgressDialog("Autosave...", QString(), 0, 0, _view);
+    QProgressDialog* progress = new QProgressDialog("Autosaving...", QString(), 0, 0, _view);
 
     progress->setModal(false);
     progress->show();

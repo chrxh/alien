@@ -95,7 +95,7 @@ auto DataAnalyzer::getAnalysisDescription(ClusterDescription const& cluster) con
             cellAnalysisData.tokenBranchNumber = *cell.tokenBranchNumber;
 
             CellFeatureAnalysisDescription featureAnalysisData;
-            featureAnalysisData.cellFunction = cell.cellFeature->type;
+            featureAnalysisData.cellFunction = cell.cellFeature->getType();
             cellAnalysisData.feature = featureAnalysisData;
 
             result.cells.emplace_back(cellAnalysisData);
