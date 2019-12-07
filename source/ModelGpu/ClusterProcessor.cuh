@@ -396,12 +396,11 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
         if (_data->numberGen.random() < cudaSimulationParameters.radiationProb) {
             auto const cellEnergy = cell->getEnergy();
             auto &pos = cell->absPos;
-            float2 particlePos = { static_cast<int>(pos.x) + _data->numberGen.random(3) - 1.5f,
-                static_cast<int>(pos.y) + _data->numberGen.random(3) - 1.5f };
-            _data->cellMap.mapPosCorrection(particlePos);
             float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
                 + float2{(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                          (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+            float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+            _data->cellMap.mapPosCorrection(particlePos);
 
             particlePos = particlePos - particleVel;	//because particle will still be moved in current time step
             float radiationEnergy = powf(cellEnergy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
