@@ -20,8 +20,8 @@
 class TokenProcessor
 {
 public:
-    __inline__ __device__ void init_gridCall(SimulationData& data, int clusterArrayIndex);
-    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex);
+    __inline__ __device__ void init_gridCall(SimulationData& data);
+    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
 
     __inline__ __device__ void processingEnergyAveraging_gridCall();
     __inline__ __device__ void processingSpreading_gridCall();
@@ -39,7 +39,6 @@ private:
 
 private:
     SimulationData* _data;
-    int _clusterArrayIndex;
     Cluster* _cluster;
     PartitionData _clusterPartition;
 };
@@ -47,19 +46,17 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void TokenProcessor::init_gridCall(SimulationData& data, int clusterArrayIndex)
+__inline__ __device__ void TokenProcessor::init_gridCall(SimulationData& data)
 {
     _data = &data;
-    _clusterArrayIndex = clusterArrayIndex;
     auto const& clusters = data.entities.clusterPointers;
     _clusterPartition =
         calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
-__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex)
+__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
-    _clusterArrayIndex = clusterArrayIndex;
     _cluster = data.entities.clusterPointers.at(clusterIndex);
 }
 

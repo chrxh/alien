@@ -137,7 +137,7 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 }
 
 __device__ void filterCluster(int2 const& rectUpperLeft, int2 const& rectLowerRight,
-    SimulationData& data, int clusterArrayIndex, int clusterIndex)
+    SimulationData& data, int clusterIndex)
 {
     auto& clusters = data.entities.clusterPointers;
     auto& cluster = clusters.at(clusterIndex);
@@ -180,7 +180,7 @@ __global__ void filterClusters(int2 rectUpperLeft, int2 rectLowerRight, Simulati
 
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        filterCluster(rectUpperLeft, rectLowerRight, data, 0, clusterIndex);
+        filterCluster(rectUpperLeft, rectLowerRight, data, clusterIndex);
     }
     __syncthreads();
 }
