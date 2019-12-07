@@ -72,8 +72,8 @@ __global__ void cleanupParticles(SimulationData data)
 
 __global__ void cleanupClusterPointers(SimulationData data, int clusterArrayIndex)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
-    auto& newClusters = data.entitiesForCleanup.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto& clusters = data.entities.clusterPointers;
+    auto& newClusters = data.entitiesForCleanup.clusterPointers;
     PartitionData pointerBlock = calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     __shared__ int numClusterPointers;
@@ -108,7 +108,7 @@ __global__ void cleanupClusterPointers(SimulationData data, int clusterArrayInde
 
 __global__ void cleanupClusters(SimulationData data, int clusterArrayIndex)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto& clusters = data.entities.clusterPointers;
     PartitionData pointerBlock = calcPartition(clusters.getNumEntries(), 
         threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -134,7 +134,7 @@ __global__ void cleanupClusters(SimulationData data, int clusterArrayIndex)
 
 __global__ void cleanupCellPointers(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
+    auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -163,7 +163,7 @@ __global__ void cleanupCellPointers(SimulationData data)
 
 __global__ void cleanupCells(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
+    auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -205,7 +205,7 @@ __global__ void cleanupCells(SimulationData data)
 
 __global__ void cleanupTokenPointers(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
+    auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -232,7 +232,7 @@ __global__ void cleanupTokenPointers(SimulationData data)
 
 __global__ void cleanupTokens(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
+    auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -271,9 +271,9 @@ __global__ void cleanupParticleMap(SimulationData data)
 
 __global__ void cleanup(SimulationData data)
 {
-    data.entitiesForCleanup.clusterPointerArrays.reset();
+    data.entitiesForCleanup.clusterPointers.reset();
     KERNEL_CALL(cleanupClusterPointers, data, 0);
-    data.entities.clusterPointerArrays.swapArrays(data.entitiesForCleanup.clusterPointerArrays);
+    data.entities.clusterPointers.swapArray(data.entitiesForCleanup.clusterPointers);
 
     data.entitiesForCleanup.particlePointers.reset();
     KERNEL_CALL(cleanupParticlePointers, data);

@@ -2,11 +2,10 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "ClusterPointerMultiArrayController.cuh"
 
 struct Entities
 {
-    ClusterPointerMultiArrayController<Cluster*> clusterPointerArrays;
+    Array<Cluster*> clusterPointers;
     Array<Cell*> cellPointers;
     Array<Token*> tokenPointers;
     Array<Particle*> particlePointers;
@@ -18,13 +17,7 @@ struct Entities
 
     void init(CudaConstants const& cudaConstants)
     {
-        int* sizes = new int[cudaConstants.NUM_CLUSTERPOINTERARRAYS];
-        for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) {
-            sizes[i] = cudaConstants.MAX_CLUSTERPOINTERS / cudaConstants.NUM_CLUSTERPOINTERARRAYS;
-        }
-        clusterPointerArrays.init(cudaConstants.NUM_CLUSTERPOINTERARRAYS, sizes);
-        delete[] sizes;
-
+        clusterPointers.init(cudaConstants.MAX_CLUSTERPOINTERS);
         clusters.init(cudaConstants.MAX_CLUSTERS);
         cellPointers.init(cudaConstants.MAX_CELLPOINTERS);
         cells.init(cudaConstants.MAX_CELLS);
@@ -36,7 +29,7 @@ struct Entities
 
     void free()
     {
-        clusterPointerArrays.free();
+        clusterPointers.free();
         clusters.free();
         cellPointers.free();
         cells.free();

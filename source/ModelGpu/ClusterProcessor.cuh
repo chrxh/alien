@@ -498,7 +498,7 @@ __inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data
 
     _factory.init(_data);
 
-    _clusterPointer = &data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
+    _clusterPointer = &data.entities.clusterPointers.at(clusterIndex);
     _cluster = *_clusterPointer;
 
     _cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
@@ -591,7 +591,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto newClusterPointer = _data->entities.clusterPointerArrays.getNewClusterPointer(numCells);
+        auto newClusterPointer = _data->entities.clusterPointers.getNewElement();
         auto newCluster = _data->entities.clusters.getNewElement();
         *newClusterPointer = newCluster;
 

@@ -57,7 +57,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
     __shared__ float2 posCorrection;
 
     if (0 == threadIdx.x) {
-        auto clusterPointer = _data->entities.clusterPointerArrays.getNewClusterPointer(clusterTO.numCells);
+        auto clusterPointer = _data->entities.clusterPointers.getNewElement();
         cluster = _data->entities.clusters.getNewElement();
         *clusterPointer = cluster;
         cluster->id = clusterTO.id;
@@ -203,7 +203,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
 __inline__ __device__ Cluster*
 EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto clusterPointer = _data->entities.clusterPointerArrays.getNewClusterPointer(1);
+    auto clusterPointer = _data->entities.clusterPointers.getNewElement();
     auto cluster = _data->entities.clusters.getNewElement();
     *clusterPointer = cluster;
 

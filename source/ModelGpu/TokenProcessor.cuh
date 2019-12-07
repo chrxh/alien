@@ -51,7 +51,7 @@ __inline__ __device__ void TokenProcessor::init_gridCall(SimulationData& data, i
 {
     _data = &data;
     _clusterArrayIndex = clusterArrayIndex;
-    auto const& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto const& clusters = data.entities.clusterPointers;
     _clusterPartition =
         calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
@@ -60,12 +60,12 @@ __inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, 
 {
     _data = &data;
     _clusterArrayIndex = clusterArrayIndex;
-    _cluster = data.entities.clusterPointerArrays.getArray(clusterArrayIndex).at(clusterIndex);
+    _cluster = data.entities.clusterPointers.at(clusterIndex);
 }
 
 __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 {
-    auto const& clusters = _data->entities.clusterPointerArrays.getArray(_clusterArrayIndex);
+    auto const& clusters = _data->entities.clusterPointers;
     for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
         if (0 == cluster->numTokenPointers) {
@@ -139,7 +139,7 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
 
 __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
 {
-    auto const& clusters = _data->entities.clusterPointerArrays.getArray(_clusterArrayIndex);
+    auto const& clusters = _data->entities.clusterPointers;
     for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
         if (0 == cluster->numTokenPointers) {
@@ -260,7 +260,7 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridC
     EntityFactory factory;
     factory.init(_data);
 
-    auto const& clusters = _data->entities.clusterPointerArrays.getArray(_clusterArrayIndex);
+    auto const& clusters = _data->entities.clusterPointers;
     for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
 
