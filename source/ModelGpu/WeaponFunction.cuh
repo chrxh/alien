@@ -48,12 +48,11 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
     if (cudaSimulationParameters.cellFunctionWeaponEnergyCost > 0) {
         auto const cellEnergy = cell->getEnergy();
         auto &pos = cell->absPos;
-        float2 particlePos = { static_cast<int>(pos.x) + data->numberGen.random(3) - 1.5f,
-            static_cast<int>(pos.y) + data->numberGen.random(3) - 1.5f };
-        data->cellMap.mapPosCorrection(particlePos);
         float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
             + float2{ (data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
             (data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
+        float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+        data->cellMap.mapPosCorrection(particlePos);
 
         particlePos = particlePos - particleVel;	//because particle will still be moved in current time step
         auto const radiationEnergy = min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
