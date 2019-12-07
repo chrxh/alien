@@ -305,7 +305,7 @@ bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellF
     removeZerosAtEnd(feature1.constData);
 	removeZerosAtEnd(feature2.volatileData);
     removeZerosAtEnd(feature2.constData);
-    return isCompatible(feature1.type, feature2.type)
+    return isCompatible(feature1.getType(), feature2.getType())
 		&& isCompatible(feature1.constData, feature2.constData)
 		&& isCompatible(feature1.volatileData, feature2.volatileData)
 		;

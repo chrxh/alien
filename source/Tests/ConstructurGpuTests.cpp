@@ -1412,7 +1412,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellAttributesAfterCreation(TestR
     auto const expectedMutableData = token.data->mid(mutableDataIndex + 1, expectedMutableDataLength);
 
     EXPECT_EQ(expectedBranchNumber, *constructedCell.tokenBranchNumber);
-    EXPECT_EQ(expectedCellFunctionType, constructedCell.cellFeature->type);
+    EXPECT_EQ(expectedCellFunctionType, constructedCell.cellFeature->getType());
     EXPECT_EQ(expectedStaticData, constructedCell.cellFeature->constData);
     EXPECT_EQ(expectedMutableData, constructedCell.cellFeature->volatileData);
 
