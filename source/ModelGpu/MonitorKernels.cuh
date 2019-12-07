@@ -20,7 +20,7 @@ getMonitorDataForClusters(SimulationData data, CudaMonitorData monitorData, int 
     auto const clusterPartition =
         calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        auto const cluster = data.entities.clusterPointerArrays.getArray(0).at(clusterIndex);
+        auto const cluster = data.entities.clusterPointers.at(clusterIndex);
         auto const mass = static_cast<float>(cluster->numCellPointers);
         if (0 == threadIdx.x) {
             monitorData.incLinearKineticEnergy(Physics::linearKineticEnergy(mass, cluster->vel));
@@ -80,7 +80,7 @@ __global__ void getCudaMonitorData(SimulationData data, CudaMonitorData monitorD
 {
     monitorData.reset();
 
-    KERNEL_CALL(getMonitorDataForClusters, data, monitorData, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(getMonitorDataForClusters, data, monitorData, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(getMonitorDataForParticles, data, monitorData);
 }
 

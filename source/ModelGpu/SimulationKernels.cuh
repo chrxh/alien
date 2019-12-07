@@ -136,13 +136,13 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.particleMap.reset();
     data.dynamicMemory.reset();
     KERNEL_CALL(resetCellFunctionData, data);
-    KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep1, data);
-    KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
+    KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
+    KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
+    KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
+    KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
 
     KERNEL_CALL(particleProcessingStep1, data);
     KERNEL_CALL(particleProcessingStep2, data);
