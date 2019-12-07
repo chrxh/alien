@@ -13,7 +13,6 @@ namespace
 {
 	QString getTypeString(Enums::CellFunction::Type type)
 	{
-        type = static_cast<Enums::CellFunction::Type>(type % Enums::CellFunction::_COUNTER);
 		if (type == Enums::CellFunction::COMPUTER)
 			return "Computer";
 		else if (type == Enums::CellFunction::PROPULSION)
@@ -45,7 +44,7 @@ void CellItem::update(CellDescription const &desc)
 	_desc = desc;
 	auto pos = CoordinateSystem::modelToScene(*desc.pos);
 	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
-	_displayString = getTypeString(_desc.cellFeature->type);
+	_displayString = getTypeString(_desc.cellFeature->getType());
 }
 
 QRectF CellItem::boundingRect () const

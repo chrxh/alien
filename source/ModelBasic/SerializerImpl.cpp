@@ -85,11 +85,24 @@ namespace boost {
 		}
 
 
-		template<class Archive>
-		inline void serialize(Archive & ar, CellFeatureDescription& data, const unsigned int /*version*/)
-		{
-			ar & data.type & data.volatileData & data.constData;
-		}
+        template<class Archive>
+        inline void save(Archive& ar, CellFeatureDescription const& data, const unsigned int /*version*/)
+        {
+            ar << data.getType() << data.volatileData << data.constData;
+        }
+        template<class Archive>
+        inline void load(Archive& ar, CellFeatureDescription& data, const unsigned int /*version*/)
+        {
+            Enums::CellFunction::Type type;
+            ar >> type >> data.volatileData >> data.constData;
+            data.setType(type);
+        }
+        template<class Archive>
+        inline void serialize(Archive & ar, CellFeatureDescription& data, const unsigned int version)
+        {
+            boost::serialization::split_free(ar, data, version);
+        }
+
 		template<class Archive>
 		inline void serialize(Archive & ar, TokenDescription& data, const unsigned int /*version*/)
 		{
@@ -272,10 +285,10 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 
     //use following code for old simulation formats
-/*
+    /*
+    specificData.insert_or_assign("maxClusters", 800000);
     specificData.insert_or_assign("numThreadsPerBlock", 16);
     specificData.insert_or_assign("numBlocks", 64*8);
-
     specificData.insert_or_assign("numClusterPointerArrays", 1);
     specificData.insert_or_assign("maxClusters", 500000);
     specificData.insert_or_assign("maxCells", 2000000);
