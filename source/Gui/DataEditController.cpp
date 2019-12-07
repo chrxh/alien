@@ -189,7 +189,7 @@ void DataEditController::receivedExternalNotifications(set<Receiver> const& targ
 
 void DataEditController::switchToCellEditor(CellDescription const& cell, UpdateDescription update)
 {
-	bool computerActive = cell.cellFeature->type == Enums::CellFunction::COMPUTER;
+	auto const computerActive = (Enums::CellFunction::COMPUTER == cell.cellFeature->getType());
 	bool tokenActive = cell.tokens && !cell.tokens->empty();
 	if (computerActive && tokenActive) {
 		_view->switchToCellEditorWithComputerWithToken(update);
