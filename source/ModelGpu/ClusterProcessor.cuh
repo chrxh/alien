@@ -14,7 +14,7 @@
 class ClusterProcessor
 {
 public:
-    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterArrayIndex, int clusterIndex);
+    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
 
     __inline__ __device__ void processingMovement_blockCall();
     __inline__ __device__ void updateMap_blockCall();
@@ -491,8 +491,7 @@ __inline__ __device__ bool ClusterProcessor::areConnectable(Cell * cell1, Cell *
     return cell1->numConnections < cell1->maxConnections && cell2->numConnections < cell2->maxConnections;
 }
 
-__inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data,
-    int clusterArrayIndex, int clusterIndex)
+__inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data, int clusterIndex)
 {
     _data = &data;
 
