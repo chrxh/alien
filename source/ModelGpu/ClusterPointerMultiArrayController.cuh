@@ -60,24 +60,3 @@ private:
     Array<T> _arrays; //using 1 array currently
 };
 
-#define MULTI_CALL(func, ...) for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) { \
-        auto numEntries = data.entities.clusterPointerArrays.getArray(i).getNumEntries(); \
-        if (numEntries > 0) { \
-            int threadsPerBlock = cudaConstants.NUM_THREADS_PER_BLOCK/*i * 48 + 16*/; \
-            int numBlocks = cudaConstants.NUM_BLOCKS /*min(64*64*2/threadsPerBlock, 256)*/; \
-            func<<<numBlocks, threadsPerBlock>>>(##__VA_ARGS__, i); \
-        } \
-    } \
-            cudaDeviceSynchronize();
-
-#define MULTI_CALL_DEBUG(func, ...) for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) { \
-        auto numEntries = data.entities.clusterPointerArrays.getArray(i).getNumEntries(); \
-        if (numEntries > 0) { \
-            printf("i: %d, numEntries: %d\n", i, numEntries);\
-            int threadsPerBlock = cudaConstants.NUM_THREADS_PER_BLOCK/*i * 48 + 16*/; \
-            int numBlocks = cudaConstants.NUM_BLOCKS /*min(64*64*2/threadsPerBlock, 256)*/; \
-            func<<<numBlocks, threadsPerBlock>>>(##__VA_ARGS__, i); \
-        } \
-    } \
-            cudaDeviceSynchronize();
-
