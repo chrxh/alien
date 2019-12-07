@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\source\ModelGpu\Entities.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\ClusterPointerMultiArrayController.cuh">
-      <Filter>Source Files\Impl\Device</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessor.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
