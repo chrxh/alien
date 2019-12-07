@@ -224,7 +224,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\CleanupKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\HashMap.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\HashSet.cuh" />
-    <ClInclude Include="..\..\source\ModelGpu\ClustersByMapSection.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\MapSectionCollector.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\List.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Math.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ClusterPointerMultiArrayController.cuh" />

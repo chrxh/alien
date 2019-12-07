@@ -67,7 +67,7 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters, int
 /************************************************************************/
 __global__ void resetCellFunctionData(SimulationData data)
 {
-    data.cellFunctionData.clustersByMapSection.reset_gridCall();
+    data.cellFunctionData.mapSectionCollector.reset_gridCall();
 }
 
 __global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
@@ -136,14 +136,15 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.particleMap.reset();
     data.dynamicMemory.reset();
     resetCellFunctionData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
+    cudaDeviceSynchronize();
+    KERNEL_CALL(clusterProcessingStep1, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(tokenProcessingStep1, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
+    KERNEL_CALL(tokenProcessingStep2, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(tokenProcessingStep3, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep2, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep3, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep4, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
 
-    MULTI_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(tokenProcessingStep1, data);
-    MULTI_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(tokenProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
-    MULTI_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(i).getNumEntries());
     particleProcessingStep1 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
     cudaDeviceSynchronize();
     particleProcessingStep2 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
@@ -153,5 +154,6 @@ __global__ void calcSimulationTimestep(SimulationData data)
 
     cleanup << <1, 1 >> > (data);
     cudaDeviceSynchronize();
+
 }
 

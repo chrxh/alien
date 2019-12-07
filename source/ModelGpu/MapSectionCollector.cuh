@@ -8,7 +8,7 @@
 
 #include "Cluster.cuh"
 
-class ClustersByMapSection
+class MapSectionCollector
 {
 public:
     __host__ __inline__ void
@@ -37,6 +37,12 @@ public:
     {
         auto const intPos = toInt2(cluster->pos);
         auto const section = int2{ intPos.x / _sectionSize.x, intPos.y / _sectionSize.y };
+
+        //DEBUG CODE
+        if (section.x + section.y * _numSections.x < 0 || section.x + section.y * _numSections.x >= _numSections.x *_numSections.y) {
+            printf("Section out of Map. x: %d, x: %d", section.x, section.y);
+        }
+
         auto& clusterList = _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
         clusterList.pushBack(cluster, dynamicMemory);
     }
