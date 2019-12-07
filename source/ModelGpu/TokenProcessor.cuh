@@ -327,7 +327,7 @@ __inline__ __device__ void TokenProcessor::createCellFunctionData_blockCall()
 
     if (0 == threadIdx.x) {
         if (hasToken && hasCommunicator) {
-            _data->cellFunctionData.clustersByMapSection.insert(_cluster, &_data->dynamicMemory);
+            _data->cellFunctionData.mapSectionCollector.insert(_cluster, &_data->dynamicMemory);
         }
     }
 }

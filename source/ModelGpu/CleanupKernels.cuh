@@ -301,25 +301,25 @@ __global__ void cleanup(SimulationData data)
 
     if (data.entities.cellPointers.getNumEntries() > cudaConstants.MAX_CELLPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.cellPointers.reset();
-        MULTI_CALL(cleanupCellPointers, data);
+        KERNEL_CALL(cleanupCellPointers, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
         data.entities.cellPointers.swapArray(data.entitiesForCleanup.cellPointers);
     }
 
     if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
         data.entitiesForCleanup.cells.reset();
-        MULTI_CALL(cleanupCells, data);
+        KERNEL_CALL(cleanupCells, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
         data.entities.cells.swapArray(data.entitiesForCleanup.cells);
     }
 
     if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.tokenPointers.reset();
-        MULTI_CALL(cleanupTokenPointers, data);
+        KERNEL_CALL(cleanupTokenPointers, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
         data.entities.tokenPointers.swapArray(data.entitiesForCleanup.tokenPointers);
     }
 
     if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
         data.entitiesForCleanup.tokens.reset();
-        MULTI_CALL(cleanupTokens, data);
+        KERNEL_CALL(cleanupTokens, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
         data.entities.tokens.swapArray(data.entitiesForCleanup.tokens);
     }
 
