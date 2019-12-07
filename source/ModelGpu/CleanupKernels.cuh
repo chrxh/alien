@@ -132,9 +132,9 @@ __global__ void cleanupClusters(SimulationData data, int clusterArrayIndex)
     }
 }
 
-__global__ void cleanupCellPointers(SimulationData data, int clusterArrayIndex)
+__global__ void cleanupCellPointers(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -161,9 +161,9 @@ __global__ void cleanupCellPointers(SimulationData data, int clusterArrayIndex)
     }
 }
 
-__global__ void cleanupCells(SimulationData data, int clusterArrayIndex)
+__global__ void cleanupCells(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -203,9 +203,9 @@ __global__ void cleanupCells(SimulationData data, int clusterArrayIndex)
     }
 }
 
-__global__ void cleanupTokenPointers(SimulationData data, int clusterArrayIndex)
+__global__ void cleanupTokenPointers(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -230,9 +230,9 @@ __global__ void cleanupTokenPointers(SimulationData data, int clusterArrayIndex)
     }
 }
 
-__global__ void cleanupTokens(SimulationData data, int clusterArrayIndex)
+__global__ void cleanupTokens(SimulationData data)
 {
-    auto& clusters = data.entities.clusterPointerArrays.getArray(clusterArrayIndex);
+    auto& clusters = data.entities.clusterPointerArrays.getArray(0);
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto& cluster = clusters.at(clusterIndex);
@@ -272,58 +272,49 @@ __global__ void cleanupParticleMap(SimulationData data)
 __global__ void cleanup(SimulationData data)
 {
     data.entitiesForCleanup.clusterPointerArrays.reset();
-    for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) {
-        cleanupClusterPointers<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK>>>(data, i);
-    }
-    cudaDeviceSynchronize();
+    KERNEL_CALL(cleanupClusterPointers, data, 0);
     data.entities.clusterPointerArrays.swapArrays(data.entitiesForCleanup.clusterPointerArrays);
 
     data.entitiesForCleanup.particlePointers.reset();
-    cleanupParticlePointers << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
+    KERNEL_CALL(cleanupParticlePointers, data);
     data.entities.particlePointers.swapArray(data.entitiesForCleanup.particlePointers);
 
     if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
-        cleanupParticles << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-        cudaDeviceSynchronize();
+        KERNEL_CALL(cleanupParticles, data);
         data.entities.particles.swapArray(data.entitiesForCleanup.particles);
     }
 
     if (data.entities.clusters.getNumEntries() > cudaConstants.MAX_CLUSTERS * FillLevelFactor) {
         data.entitiesForCleanup.clusters.reset();
-        for (int i = 0; i < cudaConstants.NUM_CLUSTERPOINTERARRAYS; ++i) {
-            cleanupClusters << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> >(data, i);
-        }
-        cudaDeviceSynchronize();
+        KERNEL_CALL(cleanupClusters, data, 0);
         data.entities.clusters.swapArray(data.entitiesForCleanup.clusters);
     }
 
     if (data.entities.cellPointers.getNumEntries() > cudaConstants.MAX_CELLPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.cellPointers.reset();
-        KERNEL_CALL(cleanupCellPointers, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
+        KERNEL_CALL(cleanupCellPointers, data);
         data.entities.cellPointers.swapArray(data.entitiesForCleanup.cellPointers);
     }
 
     if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
         data.entitiesForCleanup.cells.reset();
-        KERNEL_CALL(cleanupCells, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
+        KERNEL_CALL(cleanupCells, data);
         data.entities.cells.swapArray(data.entitiesForCleanup.cells);
     }
 
     if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.tokenPointers.reset();
-        KERNEL_CALL(cleanupTokenPointers, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
+        KERNEL_CALL(cleanupTokenPointers, data);
         data.entities.tokenPointers.swapArray(data.entitiesForCleanup.tokenPointers);
     }
 
     if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
         data.entitiesForCleanup.tokens.reset();
-        KERNEL_CALL(cleanupTokens, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
+        KERNEL_CALL(cleanupTokens, data);
         data.entities.tokens.swapArray(data.entitiesForCleanup.tokens);
     }
 
-    cleanupCellMap<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cleanupParticleMap<< <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
+    KERNEL_CALL(cleanupCellMap, data);
+    KERNEL_CALL(cleanupParticleMap, data);
 }
