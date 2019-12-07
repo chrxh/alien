@@ -16,45 +16,45 @@
 /* Helpers for clusters													*/
 /************************************************************************/
 
-__global__ void clusterProcessingStep1(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void clusterProcessingStep1(SimulationData data, int numClusters)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        clusterProcessor.init_blockCall(data, 0, clusterIndex);
         clusterProcessor.processingMovement_blockCall();
         clusterProcessor.updateMap_blockCall();
     }
 }
 
-__global__ void clusterProcessingStep2(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void clusterProcessingStep2(SimulationData data, int numClusters)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        clusterProcessor.init_blockCall(data, 0, clusterIndex);
         clusterProcessor.destroyCell_blockCall();
     }
 }
 
-__global__ void clusterProcessingStep3(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void clusterProcessingStep3(SimulationData data, int numClusters)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        clusterProcessor.init_blockCall(data, 0, clusterIndex);
         clusterProcessor
             .processingCollision_blockCall();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
         clusterProcessor.processingRadiation_blockCall();
     }
 }
 
-__global__ void clusterProcessingStep4(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void clusterProcessingStep4(SimulationData data, int numClusters)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        clusterProcessor.init_blockCall(data, 0, clusterIndex);
         clusterProcessor.processingCellDeath_blockCall();
         clusterProcessor.processingDecomposition_blockCall();
         clusterProcessor.processingClusterCopy_blockCall();
@@ -70,31 +70,31 @@ __global__ void resetCellFunctionData(SimulationData data)
     data.cellFunctionData.mapSectionCollector.reset_gridCall();
 }
 
-__global__ void tokenProcessingStep1(SimulationData data, int clusterArrayIndex)
+__global__ void tokenProcessingStep1(SimulationData data)
 {
     TokenProcessor tokenProcessor;
-    tokenProcessor.init_gridCall(data, clusterArrayIndex);
+    tokenProcessor.init_gridCall(data, 0);
     tokenProcessor.processingEnergyAveraging_gridCall();
     tokenProcessor.processingSpreading_gridCall();
     tokenProcessor.processingLightWeigthedFeatures_gridCall();
 }
 
-__global__ void tokenProcessingStep2(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void tokenProcessingStep2(SimulationData data, int numClusters)
 {
     auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        tokenProcessor.init_blockCall(data, 0, clusterIndex);
         tokenProcessor.createCellFunctionData_blockCall();
     }
 }
 
-__global__ void tokenProcessingStep3(SimulationData data, int numClusters, int clusterArrayIndex)
+__global__ void tokenProcessingStep3(SimulationData data, int numClusters)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, clusterArrayIndex, clusterIndex);
+        tokenProcessor.init_blockCall(data, 0, clusterIndex);
         tokenProcessor.processingHeavyWeightedFeatures_blockCall();
     }
 }
@@ -135,22 +135,18 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.cellMap.reset();
     data.particleMap.reset();
     data.dynamicMemory.reset();
-    resetCellFunctionData << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
-    KERNEL_CALL(clusterProcessingStep1, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(tokenProcessingStep1, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data);
-    KERNEL_CALL(tokenProcessingStep2, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(tokenProcessingStep3, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(clusterProcessingStep2, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(clusterProcessingStep3, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
-    KERNEL_CALL(clusterProcessingStep4, cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(resetCellFunctionData, data);
+    KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(tokenProcessingStep1, data);
+    KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
+    KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointerArrays.getArray(0).getNumEntries());
 
-    particleProcessingStep1 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
-    particleProcessingStep2 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
-    particleProcessingStep3 << <cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >> > (data);
-    cudaDeviceSynchronize();
+    KERNEL_CALL(particleProcessingStep1, data);
+    KERNEL_CALL(particleProcessingStep2, data);
+    KERNEL_CALL(particleProcessingStep3, data);
 
     cleanup << <1, 1 >> > (data);
     cudaDeviceSynchronize();
