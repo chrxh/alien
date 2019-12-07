@@ -9,8 +9,7 @@ struct CellFeatureDescription
 
     Enums::CellFunction::Type getType() const
     {
-        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned int>(_type)
-            % Enums::CellFunction::_COUNTER);
+        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned char>(_type) % Enums::CellFunction::_COUNTER);
     }
 	CellFeatureDescription& setType(Enums::CellFunction::Type value) { _type = value; return *this; }
 	CellFeatureDescription& setVolatileData(QByteArray const &value) { volatileData = value; return *this; }
