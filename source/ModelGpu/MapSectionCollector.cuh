@@ -35,13 +35,7 @@ public:
 
     __device__ __inline__ void insert(Cluster* cluster, DynamicMemory* dynamicMemory)
     {
-        auto const intPos = toInt2(cluster->pos);
-        auto const section = int2{ intPos.x / _sectionSize.x, intPos.y / _sectionSize.y };
-
-        //DEBUG CODE
-        if (section.x + section.y * _numSections.x < 0 || section.x + section.y * _numSections.x >= _numSections.x *_numSections.y) {
-            printf("Section out of Map. x: %d, x: %d", section.x, section.y);
-        }
+        auto const section = getSection(cluster->pos);
 
         auto& clusterList = _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
         clusterList.pushBack(cluster, dynamicMemory);
@@ -50,6 +44,17 @@ public:
     __device__ __inline__ List<Cluster*> const& getClusters(int2 const& section)
     {
         return _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
+    }
+
+private:
+    __device__ __inline__ int2 getSection(float2 const& pos)
+    {
+        auto const intPos = toInt2(pos);
+        auto section = int2{ intPos.x / _sectionSize.x, intPos.y / _sectionSize.y };
+        return { 
+            ((section.x % _sectionSize.x) + _sectionSize.x) % _sectionSize.x, 
+            ((section.y % _sectionSize.y) + _sectionSize.y) % _sectionSize.y };
+       
     }
 
 private:
