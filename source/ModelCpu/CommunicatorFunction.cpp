@@ -35,7 +35,7 @@ CommunicatorFunction::CommunicatorFunction (QByteArray data, UnitContext* contex
 CellFeatureChain::ProcessingResult CommunicatorFunction::processImpl (Token* token, Cell* cell, Cell* previousCell)
 {
     ProcessingResult processingResult {false, 0};
-    Enums::CommunicatorIn::Type cmd = readCommandFromToken(token);
+    Enums::CommunicatorIn::Type cmd = getCommand(token);
     if( cmd == Enums::CommunicatorIn::SET_LISTENING_CHANNEL )
         setListeningChannel(token);
     if( cmd == Enums::CommunicatorIn::SEND_MESSAGE )
@@ -56,7 +56,7 @@ QByteArray CommunicatorFunction::getInternalData () const
 	return data;
 }
 
-Enums::CommunicatorIn::Type CommunicatorFunction::readCommandFromToken (Token* token) const
+Enums::CommunicatorIn::Type CommunicatorFunction::getCommand (Token* token) const
 {
     return static_cast<Enums::CommunicatorIn::Type>(token->getMemoryRef()[Enums::Communicator::IN] % 4);
 }

@@ -14,15 +14,17 @@ public:
     __inline__ __device__ static void rotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static void inverseRotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
-    __inline__ __device__ static void angleCorrection(float &angle);
-    __inline__ __device__ static void rotateQuarterCounterClockwise(float2 &v);
+    __inline__ __device__ static void angleCorrection(float& angle);
+    __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);   //0 DEG corresponds to (0,-1)
     __inline__ __device__ static float2 unitVectorOfAngle(float angle);
-    __inline__ __device__ static void normalize(float2 &vec);
+    __inline__ __device__ static void normalize(float2& vec);
     __inline__ __device__ static float2 normalized(float2 vec);
-    __inline__ __device__ static float dot(float2 const &p, float2 const &q);
-    __inline__ __device__ static float length(float2 const & v);
-    __inline__ __device__ static float lengthSquared(float2 const & v);
+    __inline__ __device__ static float dot(float2 const& p, float2 const& q);
+    __inline__ __device__ static float length(float2 const& v);
+    __inline__ __device__ static float lengthSquared(float2 const& v);
+    __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
+    __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
 
 private:
     __inline__ __device__ static void angleCorrection(int &angle);
@@ -154,4 +156,23 @@ __device__ __inline__ float Math::length(float2 const & v)
 __device__ __inline__ float Math::lengthSquared(float2 const & v)
 {
     return v.x * v.x + v.y * v.y;
+}
+
+__inline__ __device__ float2 Math::rotateClockwise(float2 const & v, float angle)
+{
+    Matrix rotMatrix;
+    rotationMatrix(angle, rotMatrix);
+    return applyMatrix(v, rotMatrix);
+}
+
+__inline__ __device__ float Math::subtractAngle(float angleMinuend, float angleSubtrahend)
+{
+    auto angleDiff = angleMinuend - angleSubtrahend;
+    if (angleDiff > 360.0f) {
+        angleDiff -= 360.0;
+    }
+    if (angleDiff < 0.0) {
+        angleDiff += 360.0;
+    }
+    return angleDiff;
 }
