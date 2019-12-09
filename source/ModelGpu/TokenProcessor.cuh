@@ -282,6 +282,9 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
 
     SensorFunction sensor;
     sensor.init_blockCall(_cluster, _data);
+
+    CommunicatorFunction communicator;
+    communicator.init_blockCall(_data);
     __syncthreads();
 
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
@@ -297,6 +300,10 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
         } break;
         case Enums::CellFunction::SENSOR: {
             sensor.processing_blockCall(token);
+            __syncthreads();
+        } break;
+        case Enums::CellFunction::COMMUNICATOR: {
+            communicator.processing_blockCall(token);
             __syncthreads();
         } break;
         }

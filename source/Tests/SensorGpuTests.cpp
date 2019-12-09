@@ -28,7 +28,7 @@ protected:
         MEMBER_DECLARATION(Expectations, Enums::SensorOut::Type, command, Enums::SensorOut::NOTHING_FOUND);
         MEMBER_DECLARATION(Expectations, float, approxAngle, 0);
     };
-    void runStandardSensorTest(TestParameters const& testParameters, Expectations const& expectations) const;
+    void runStandardTest(TestParameters const& testParameters, Expectations const& expectations) const;
 };
 
 /************************************************************************/
@@ -42,7 +42,7 @@ void SensorGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-void SensorGpuTests::runStandardSensorTest(TestParameters const& testParameters, Expectations const& expectations) const
+void SensorGpuTests::runStandardTest(TestParameters const& testParameters, Expectations const& expectations) const
 {
     auto origCluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
     origCluster.angle = 30;
@@ -103,9 +103,21 @@ void SensorGpuTests::runStandardSensorTest(TestParameters const& testParameters,
     }
 }
 
+TEST_F(SensorGpuTests, testDoNothing)
+{
+    runStandardTest(
+        TestParameters()
+        .command(Enums::SensorIn::DO_NOTHING)
+        .minSize(9)
+        .relPositionOfCluster({ 20, 20 })
+        .sizeOfCluster({ 3, 3 })
+        .repetitionOfCluster({ 10, 10 }),
+        Expectations().command(Enums::SensorOut::NOTHING_FOUND));
+}
+
 TEST_F(SensorGpuTests, testSearchVicinity_success)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_VICINITY)
             .minSize(9)
@@ -117,7 +129,7 @@ TEST_F(SensorGpuTests, testSearchVicinity_success)
 
 TEST_F(SensorGpuTests, testSearchVicinity_scanMassTooSmall)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_VICINITY)
             .minSize(10)
@@ -129,7 +141,7 @@ TEST_F(SensorGpuTests, testSearchVicinity_scanMassTooSmall)
 
 TEST_F(SensorGpuTests, testSearchVicinity_scanMassTooLarge)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_VICINITY)
             .maxSize(8)
@@ -142,7 +154,7 @@ TEST_F(SensorGpuTests, testSearchVicinity_scanMassTooLarge)
 TEST_F(SensorGpuTests, testSearchVicinity_scanMassToFar)
 {
     auto const sensorRange = _parameters.cellFunctionSensorRange;
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_VICINITY)
             .relPositionOfCluster({sensorRange + 20, 0})
@@ -153,7 +165,7 @@ TEST_F(SensorGpuTests, testSearchVicinity_scanMassToFar)
 
 TEST_F(SensorGpuTests, testSearchByAngle_success)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_BY_ANGLE)
             .angle(-135)
@@ -166,7 +178,7 @@ TEST_F(SensorGpuTests, testSearchByAngle_success)
 
 TEST_F(SensorGpuTests, testSearchByAngle_wrongAngle)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_BY_ANGLE)
             .angle(170)
@@ -179,7 +191,7 @@ TEST_F(SensorGpuTests, testSearchByAngle_wrongAngle)
 
 TEST_F(SensorGpuTests, testSearchByAngle_scanMassTooLarge)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_BY_ANGLE)
             .angle(-135)
@@ -193,7 +205,7 @@ TEST_F(SensorGpuTests, testSearchByAngle_scanMassTooLarge)
 TEST_F(SensorGpuTests, testSearchByAngle_scanMassToFar)
 {
     auto const sensorRange = _parameters.cellFunctionSensorRange;
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_BY_ANGLE)
             .angle(-135)
@@ -205,7 +217,7 @@ TEST_F(SensorGpuTests, testSearchByAngle_scanMassToFar)
 
 TEST_F(SensorGpuTests, testSearchFromCenter_success)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_FROM_CENTER)
             .angle(-135)  //should be ignored
@@ -218,7 +230,7 @@ TEST_F(SensorGpuTests, testSearchFromCenter_success)
 
 TEST_F(SensorGpuTests, testSearchFromCenter_scanMassTooLarge)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_FROM_CENTER)
             .angle(-135)    //should be ignored
@@ -232,7 +244,7 @@ TEST_F(SensorGpuTests, testSearchFromCenter_scanMassTooLarge)
 TEST_F(SensorGpuTests, testSearchFromCenter_scanMassToFar)
 {
     auto const sensorRange = _parameters.cellFunctionSensorRange;
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_FROM_CENTER)
             .angle(-135)    //should be ignored
@@ -244,7 +256,7 @@ TEST_F(SensorGpuTests, testSearchFromCenter_scanMassToFar)
 
 TEST_F(SensorGpuTests, testSearchTowardCenter_success)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_TOWARD_CENTER)
             .angle(-135)  //should be ignored
@@ -257,7 +269,7 @@ TEST_F(SensorGpuTests, testSearchTowardCenter_success)
 
 TEST_F(SensorGpuTests, testSearchTowardCenter_scanMassTooLarge)
 {
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_TOWARD_CENTER)
             .angle(-135)    //should be ignored
@@ -271,7 +283,7 @@ TEST_F(SensorGpuTests, testSearchTowardCenter_scanMassTooLarge)
 TEST_F(SensorGpuTests, testSearchTowardCenter_scanMassToFar)
 {
     auto const sensorRange = _parameters.cellFunctionSensorRange;
-    runStandardSensorTest(
+    runStandardTest(
         TestParameters()
             .command(Enums::SensorIn::SEARCH_TOWARD_CENTER)
             .angle(-135)    //should be ignored
