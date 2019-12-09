@@ -54,7 +54,8 @@ namespace Enums
             DO_NOTHING,
             SET_LISTENING_CHANNEL,
             SEND_MESSAGE,
-            RECEIVE_MESSAGE
+            RECEIVE_MESSAGE,
+            _COUNTER
         };
     };
     struct CommunicatorOutReceivedNewMessage {

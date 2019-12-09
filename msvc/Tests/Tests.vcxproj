@@ -262,6 +262,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Tests\CleanupGpuTests.cpp" />
+    <ClCompile Include="..\..\source\Tests\CommunicatorGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\ConstructurGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\CpuBenchmarks.cpp" />
     <ClCompile Include="..\..\source\Tests\GpuBenchmark.cpp" />
