@@ -16,6 +16,7 @@
 #include "ConstructorFunction.cuh"
 #include "WeaponFunction.cuh"
 #include "SensorFunction.cuh"
+#include "CommunicatorFunction.cuh"
 
 class TokenProcessor
 {
