@@ -41,14 +41,14 @@ public:
         clusterList.pushBack(cluster, dynamicMemory);
     }
 
-    __device__ __inline__ void getClusters__blockCall(float2 const& pos, float radius, MapInfo const& map, 
+    __device__ __inline__ void getClusters_blockCall(float2 const& pos, float radius, MapInfo const& map, 
         DynamicMemory* dynamicMemory, List<Cluster*>& result)
     {
         __shared__ int2 sectionCenter;
         __shared__ int sectionLength;
         if (0 == threadIdx.x) {
             sectionCenter = getSection(pos);
-            sectionLength = getSection(radius) + 1;
+            sectionLength = getSection(radius, false) + 1;
         }
         __syncthreads();
 
@@ -64,12 +64,14 @@ public:
                 }
                 __syncthreads();
 
-                auto const& partition = calcPartition(numClusters, threadIdx.x, blockDim.x);
-                for(int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                    auto const& cluster = clusterArray[index];
-                    auto const distance = map.mapDistance(cluster->pos, pos);
-                    if (distance < radius) {
-                        result.pushBack(cluster, dynamicMemory);
+                if (numClusters > 0) {
+                    auto const& partition = calcPartition(numClusters, threadIdx.x, blockDim.x);
+                    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+                        auto const& cluster = clusterArray[index];
+                        auto const distance = map.mapDistance(cluster->pos, pos);
+                        if (distance < radius) {
+                            result.pushBack(cluster, dynamicMemory);
+                        }
                     }
                 }
                 __syncthreads();
@@ -84,16 +86,31 @@ private:
 
     }
 
-    __device__ __inline__ int getSection(float pos)
+    __device__ __inline__ int getSection(float pos, bool correction = true)
     {
         auto const intPos = floorInt(pos);
         auto section = intPos / _sectionSize;
-        return ((section % _sectionSize) + _sectionSize) % _sectionSize;
+        if (correction) {
+            correctedSection(section);
+        }
+        return section;
        
     }
 
-    __device__ __inline__ List<Cluster*> const& getClusters(int2 const& section)
+    __device__ __inline__ void correctedSection(int2& section)
     {
+        correctedSection(section.x);
+        correctedSection(section.y);
+    }
+
+    __device__ __inline__ void correctedSection(int& section)
+    {
+        section = ((section % _sectionSize) + _sectionSize) % _sectionSize;
+    }
+
+    __device__ __inline__ List<Cluster*> const& getClusters(int2 section)
+    {
+        correctedSection(section);
         return _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
     }
 
