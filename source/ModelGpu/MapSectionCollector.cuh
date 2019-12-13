@@ -48,7 +48,8 @@ public:
         __shared__ int sectionLength;
         if (0 == threadIdx.x) {
             sectionCenter = getSection(pos);
-            sectionLength = getSection(radius, false) + 1;
+            sectionLength = floorInt(radius) / _sectionSize + 1;
+
         }
         __syncthreads();
 
@@ -61,6 +62,8 @@ public:
                     auto const& clusterList = getClusters(section);
                     numClusters = clusterList.getSize();
                     clusterArray = clusterList.asArray(dynamicMemory);
+                    auto temp = section;
+                    correctSection(temp);
                 }
                 __syncthreads();
 
@@ -82,36 +85,23 @@ public:
 private:
     __device__ __inline__ int2 getSection(float2 const& pos)
     {
-        return{ getSection(pos.x), getSection(pos.y) };
-
-    }
-
-    __device__ __inline__ int getSection(float pos, bool correction = true)
-    {
-        auto const intPos = floorInt(pos);
-        auto section = intPos / _sectionSize;
-        if (correction) {
-            correctedSection(section);
-        }
+        auto const intPos = toInt2(pos);
+        auto section = int2{ intPos.x / _sectionSize, intPos.y / _sectionSize };
+        correctSection(section);
         return section;
-       
-    }
 
-    __device__ __inline__ void correctedSection(int2& section)
-    {
-        correctedSection(section.x);
-        correctedSection(section.y);
-    }
-
-    __device__ __inline__ void correctedSection(int& section)
-    {
-        section = ((section % _sectionSize) + _sectionSize) % _sectionSize;
     }
 
     __device__ __inline__ List<Cluster*> const& getClusters(int2 section)
     {
-        correctedSection(section);
+        correctSection(section);
         return _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
+    }
+
+    __device__ __inline__ void correctSection(int2& section)
+    {
+        section.x = ((section.x % _numSections.x) + _numSections.x) % _numSections.x;
+        section.y = ((section.y % _numSections.y) + _numSections.y) % _numSections.y;
     }
 
 private:

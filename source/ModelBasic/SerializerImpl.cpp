@@ -286,7 +286,7 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 
     //use following code for old simulation formats
     /*
-    specificData.insert_or_assign("maxClusters", 800000);
+    specificData.insert_or_assign("maxClusters", 1200000);
     specificData.insert_or_assign("numThreadsPerBlock", 16);
     specificData.insert_or_assign("numBlocks", 64*8);
     specificData.insert_or_assign("numClusterPointerArrays", 1);
