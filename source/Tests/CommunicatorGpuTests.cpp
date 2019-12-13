@@ -42,6 +42,9 @@ protected:
         MEMBER_DECLARATION(TestParameters, int, cellIndexOfToken1, 0);
         MEMBER_DECLARATION(TestParameters, int, cellIndexOfToken2, 0);
         MEMBER_DECLARATION(TestParameters, int, cellIndexOfToken3, 0);
+        MEMBER_DECLARATION(TestParameters, QVector2D, pos1, QVector2D());
+        MEMBER_DECLARATION(TestParameters, QVector2D, pos2, QVector2D(25, 0));
+        MEMBER_DECLARATION(TestParameters, QVector2D, pos3, QVector2D(-25, 25));
     };
     struct Expectations
     {
@@ -84,9 +87,9 @@ void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters,
         return cluster;
     };
     auto const comRange = _parameters.cellFunctionCommunicatorRange / 2;
-    auto const origCluster1 = createComCluster({0, 0}, testParameters._command1, testParameters._cellIndexOfToken1);
-    auto const origCluster2 = createComCluster({comRange, 0}, testParameters._command2, testParameters._cellIndexOfToken2);
-    auto const origCluster3 = createComCluster({0, comRange}, testParameters._command3, testParameters._cellIndexOfToken3);
+    auto const origCluster1 = createComCluster(testParameters._pos1, testParameters._command1, testParameters._cellIndexOfToken1);
+    auto const origCluster2 = createComCluster(testParameters._pos2, testParameters._command2, testParameters._cellIndexOfToken2);
+    auto const origCluster3 = createComCluster(testParameters._pos3, testParameters._command3, testParameters._cellIndexOfToken3);
 
     DataDescription origData;
     origData.addCluster(origCluster1);
