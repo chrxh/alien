@@ -34,26 +34,29 @@ protected:
 
     virtual void SetUp();
 
+    struct Communicator
+    {
+        MEMBER_DECLARATION(Communicator, QVector2D, pos, QVector2D());
+        MEMBER_DECLARATION(Communicator, Enums::CommunicatorIn::Type, command, Enums::CommunicatorIn::DO_NOTHING);
+        MEMBER_DECLARATION(Communicator, int, cellIndexWithToken, 0);
+    };
+    struct CommunicatorResult
+    {
+        MEMBER_DECLARATION(CommunicatorResult, int, messagesSent, 0);
+        MEMBER_DECLARATION(
+            CommunicatorResult,
+            Enums::CommunicatorOutReceivedNewMessage::Type,
+            messageReceived,
+            Enums::CommunicatorOutReceivedNewMessage::NO);
+    };
+
     struct TestParameters
     {
-        MEMBER_DECLARATION(TestParameters, Enums::CommunicatorIn::Type, command1, Enums::CommunicatorIn::DO_NOTHING);
-        MEMBER_DECLARATION(TestParameters, Enums::CommunicatorIn::Type, command2, Enums::CommunicatorIn::DO_NOTHING);
-        MEMBER_DECLARATION(TestParameters, Enums::CommunicatorIn::Type, command3, Enums::CommunicatorIn::DO_NOTHING);
-        MEMBER_DECLARATION(TestParameters, int, cellIndexOfToken1, 0);
-        MEMBER_DECLARATION(TestParameters, int, cellIndexOfToken2, 0);
-        MEMBER_DECLARATION(TestParameters, int, cellIndexOfToken3, 0);
-        MEMBER_DECLARATION(TestParameters, QVector2D, pos1, QVector2D());
-        MEMBER_DECLARATION(TestParameters, QVector2D, pos2, QVector2D(25, 0));
-        MEMBER_DECLARATION(TestParameters, QVector2D, pos3, QVector2D(-25, 25));
+        MEMBER_DECLARATION(TestParameters, vector<Communicator>, communicators, vector<Communicator>());
     };
     struct Expectations
     {
-        MEMBER_DECLARATION(Expectations, int, sendMessages1, 0);
-        MEMBER_DECLARATION(Expectations, int, sendMessages2, 0);
-        MEMBER_DECLARATION(Expectations, int, sendMessages3, 0);
-        MEMBER_DECLARATION(Expectations, Enums::CommunicatorOutReceivedNewMessage::Type, messageReceived1, Enums::CommunicatorOutReceivedNewMessage::NO);
-        MEMBER_DECLARATION(Expectations, Enums::CommunicatorOutReceivedNewMessage::Type, messageReceived2, Enums::CommunicatorOutReceivedNewMessage::NO);
-        MEMBER_DECLARATION(Expectations, Enums::CommunicatorOutReceivedNewMessage::Type, messageReceived3, Enums::CommunicatorOutReceivedNewMessage::NO);
+        MEMBER_DECLARATION(Expectations, vector<CommunicatorResult>, communicatorResult, vector<CommunicatorResult>());
     };
     void runStandardTest(TestParameters const& testParameters, Expectations const& expectations) const;
 };
@@ -71,7 +74,7 @@ void CommunicatorGpuTests::SetUp()
 }
 
 void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters, Expectations const& expectations)
-    const
+const
 {
     auto const createComCluster = [this](QVector2D const pos, Enums::CommunicatorIn::Type command, int cellIndexOfToken) {
         auto cluster = createHorizontalCluster(4, pos, QVector2D{}, 0);
@@ -86,72 +89,57 @@ void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters,
         cluster.cells->at(cellIndexOfToken).addToken(token);
         return cluster;
     };
-    auto const comRange = _parameters.cellFunctionCommunicatorRange / 2;
-    auto const origCluster1 = createComCluster(testParameters._pos1, testParameters._command1, testParameters._cellIndexOfToken1);
-    auto const origCluster2 = createComCluster(testParameters._pos2, testParameters._command2, testParameters._cellIndexOfToken2);
-    auto const origCluster3 = createComCluster(testParameters._pos3, testParameters._command3, testParameters._cellIndexOfToken3);
-
     DataDescription origData;
-    origData.addCluster(origCluster1);
-    origData.addCluster(origCluster2);
-    origData.addCluster(origCluster3);
+    for (auto const& communicator : testParameters._communicators) {
+        auto const origCommunicator = createComCluster(communicator._pos, communicator._command, communicator._cellIndexWithToken);
+        origData.addCluster(origCommunicator);
+    }
 
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(2, _controller);
 
-    auto const data = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+    auto const data = IntegrationTestHelper::getContent(_access, { {0, 0}, {_universeSize.x, _universeSize.y} });
     check(origData, data);
 
     auto const cellByCellId = IntegrationTestHelper::getCellByCellId(data);
 
-    auto const& origTokenCell1 = origCluster1.cells->at(testParameters._cellIndexOfToken1 + 2);
-    auto const& origTokenCell2 = origCluster2.cells->at(testParameters._cellIndexOfToken2 + 2);
-    auto const& origTokenCell3 = origCluster3.cells->at(testParameters._cellIndexOfToken3 + 2);
+    int clusterIndex = 0;
+    auto comIter = testParameters._communicators.begin();
+    auto expectIter = expectations._communicatorResult.begin();
+    for (; comIter != testParameters._communicators.end(); ++comIter, ++expectIter, ++clusterIndex) {
+        auto const& communicator = *comIter;
+        auto const& expectation = *expectIter;
 
-    auto const& tokenCell1 = cellByCellId.at(origTokenCell1.id);
-    auto const& tokenCell2 = cellByCellId.at(origTokenCell2.id);
-    auto const& tokenCell3 = cellByCellId.at(origTokenCell3.id);
-
-    EXPECT_EQ(1, tokenCell1.tokens->size());
-    EXPECT_EQ(1, tokenCell2.tokens->size());
-    EXPECT_EQ(1, tokenCell3.tokens->size());
-
-    auto const& token1 = tokenCell1.tokens->at(0);
-    auto const& token2 = tokenCell2.tokens->at(0);
-    auto const& token3 = tokenCell3.tokens->at(0);
-    EXPECT_EQ(expectations._sendMessages1, token1.data->at(Enums::Communicator::OUT_SENT_NUM_MESSAGE));
-    EXPECT_EQ(expectations._sendMessages2, token2.data->at(Enums::Communicator::OUT_SENT_NUM_MESSAGE));
-    EXPECT_EQ(expectations._sendMessages3, token3.data->at(Enums::Communicator::OUT_SENT_NUM_MESSAGE));
-    EXPECT_EQ(expectations._messageReceived1, token1.data->at(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE));
-    EXPECT_EQ(expectations._messageReceived2, token2.data->at(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE));
-    EXPECT_EQ(expectations._messageReceived3, token3.data->at(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE));
+        auto const& origCluster = origData.clusters->at(clusterIndex);
+        auto const& origTokenCell = origCluster.cells->at(communicator._cellIndexWithToken + 2);
+        auto const& tokenCell = cellByCellId.at(origTokenCell.id);
+        EXPECT_EQ(1, tokenCell.tokens->size());
+        auto const& token = tokenCell.tokens->at(0);
+        EXPECT_EQ(expectation._messagesSent, token.data->at(Enums::Communicator::OUT_SENT_NUM_MESSAGE));
+        EXPECT_EQ(expectation._messageReceived, token.data->at(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE));
+    }
 }
 
 TEST_F(CommunicatorGpuTests, testDoNothing)
 {
     runStandardTest(
-        TestParameters()
-            .command1(Enums::CommunicatorIn::DO_NOTHING)
-            .command2(Enums::CommunicatorIn::DO_NOTHING)
-            .command3(Enums::CommunicatorIn::DO_NOTHING),
-        Expectations()
-            .sendMessages1(0)
-            .sendMessages2(0)
-            .sendMessages3(0)
-            .messageReceived1(Enums::CommunicatorOutReceivedNewMessage::NO)
-            .messageReceived2(Enums::CommunicatorOutReceivedNewMessage::NO)
-            .messageReceived3(Enums::CommunicatorOutReceivedNewMessage::NO));
+        TestParameters().communicators(
+            {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::DO_NOTHING),
+             Communicator().pos({25, 0}).command(Enums::CommunicatorIn::DO_NOTHING)}),
+        Expectations().communicatorResult(
+            {CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
 }
 
 TEST_F(CommunicatorGpuTests, testSendAndReceive)
 {
     runStandardTest(
-        TestParameters()
-            .command1(Enums::CommunicatorIn::SEND_MESSAGE).cellIndexOfToken1(1)
-            .command2(Enums::CommunicatorIn::RECEIVE_MESSAGE).cellIndexOfToken2(0)
-            .command3(Enums::CommunicatorIn::RECEIVE_MESSAGE).cellIndexOfToken3(0),
-        Expectations()
-            .sendMessages1(2)
-            .messageReceived2(Enums::CommunicatorOutReceivedNewMessage::YES)
-            .messageReceived3(Enums::CommunicatorOutReceivedNewMessage::YES));
+        TestParameters().communicators(
+            {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::SEND_MESSAGE).cellIndexWithToken(1),
+             Communicator().pos({25, 0}).command(Enums::CommunicatorIn::RECEIVE_MESSAGE).cellIndexWithToken(0),
+             Communicator().pos({-25, -25}).command(Enums::CommunicatorIn::RECEIVE_MESSAGE).cellIndexWithToken(0)}),
+        Expectations().communicatorResult(
+            {CommunicatorResult().messagesSent(2).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES),
+             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)}));
 }
