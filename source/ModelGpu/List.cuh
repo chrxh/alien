@@ -33,9 +33,9 @@ public:
     {
         Value* result = dynamicMemory->getArray<Value>(_numElements);
         auto index = 0;
-        auto entry = _endListEntry;
+        auto entry = _startListEntry;
         while (entry) {
-            result[index] = entry->value;
+            result[index++] = entry->value;
             entry = entry->nextListEntry;
         }
         return result;

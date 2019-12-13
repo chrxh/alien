@@ -115,7 +115,7 @@ __inline__ __device__ void CommunicatorFunction::processing_blockCall(Token * to
 __inline__ __device__ Enums::CommunicatorIn::Type CommunicatorFunction::getCommand(Token * token)
 {
     return static_cast<Enums::CommunicatorIn::Type>(
-        static_cast<unsigned char>(token->memory[Enums::Constr::IN]) % Enums::CommunicatorIn::_COUNTER);
+        static_cast<unsigned char>(token->memory[Enums::Communicator::IN]) % Enums::CommunicatorIn::_COUNTER);
 }
 
 __inline__ __device__ void CommunicatorFunction::setListeningChannel(Cell* cell, unsigned char channel) const
@@ -209,9 +209,9 @@ __inline__ __device__ void CommunicatorFunction::receiveMessage(Token * token) c
 
 __inline__ __device__ void CommunicatorFunction::sendMessageToNearbyCommunicators(MessageData const & messageDataToSend, 
     Cell * senderCell, Cell * senderPreviousCell, int & numMessages) const
-{
+{ 
     __shared__ List<Cluster*> clusterList;
-    _data->cellFunctionData.mapSectionCollector.getClusters__blockCall(senderCell->absPos,
+    _data->cellFunctionData.mapSectionCollector.getClusters_blockCall(senderCell->absPos,
         cudaSimulationParameters.cellFunctionCommunicatorRange, _data->cellMap, &_data->dynamicMemory, clusterList);
 
     if (0 == threadIdx.x) {
