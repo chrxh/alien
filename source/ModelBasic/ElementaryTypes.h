@@ -2,6 +2,12 @@
 
 namespace Enums
 {
+    struct Branching {
+        enum Type {
+            TOKEN_BRANCH_NUMBER = 0
+        };
+    };
+
     struct CellFunction {
         enum Type {
             COMPUTER,
