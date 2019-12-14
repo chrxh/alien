@@ -38,11 +38,18 @@ protected:
         MEMBER_DECLARATION(Communicator, QVector2D, pos, QVector2D());
         MEMBER_DECLARATION(Communicator, Enums::CommunicatorIn::Type, command, Enums::CommunicatorIn::DO_NOTHING);
         MEMBER_DECLARATION(Communicator, int, cellIndexWithToken, 0);
-        MEMBER_DECLARATION(Communicator, int, listeningChannel, 0);
+        MEMBER_DECLARATION(Communicator, char, sendingMessage, 0);
+        MEMBER_DECLARATION(Communicator, float, sendingAngle, 0);
+        MEMBER_DECLARATION(Communicator, float, sendingDistance, 0);
+        MEMBER_DECLARATION(Communicator, char, sendingChannel, 0);
+        MEMBER_DECLARATION(Communicator, char, listeningChannel, 0);
     };
     struct CommunicatorResult
     {
-        MEMBER_DECLARATION(CommunicatorResult, int, messagesSent, 0);
+        MEMBER_DECLARATION(CommunicatorResult, int, numMessagesSent, 0);
+        MEMBER_DECLARATION(CommunicatorResult, optional<char>, message, boost::none);
+        MEMBER_DECLARATION(CommunicatorResult, optional<float>, angle, boost::none);
+        MEMBER_DECLARATION(CommunicatorResult, optional<float>, distance, boost::none);
         MEMBER_DECLARATION(
             CommunicatorResult,
             Enums::CommunicatorOutReceivedNewMessage::Type,
@@ -75,31 +82,37 @@ void CommunicatorGpuTests::SetUp()
 
 void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters, Expectations const& expectations) const
 {
-    auto const createComCluster =
-        [this](Communicator const& com) {
-            auto cluster = createHorizontalCluster(5, com._pos, QVector2D{}, 0);
-            for (int i = 0; i < 5; ++i) {
-                cluster.cells->at(i).tokenBranchNumber = i;
-            }
-            cluster.cells->at(3).cellFeature = CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR);
+    auto const createComCluster = [this](Communicator const& com) {
+        auto cluster = createHorizontalCluster(5, com._pos, QVector2D{}, 0);
+        for (int i = 0; i < 5; ++i) {
+            cluster.cells->at(i).tokenBranchNumber = i;
+        }
+        cluster.cells->at(3).cellFeature = CellFeatureDescription().setType(Enums::CellFunction::COMMUNICATOR);
 
-            {
-                auto token = createSimpleToken();
-                auto& tokenData = *token.data;
-                tokenData[Enums::Communicator::IN] = com._command;
-                tokenData[Enums::Branching::TOKEN_BRANCH_NUMBER] = com._cellIndexWithToken;
-                cluster.cells->at(com._cellIndexWithToken).addToken(token);
+        {
+            auto token = createSimpleToken();
+            auto& tokenData = *token.data;
+            tokenData[Enums::Communicator::IN] = com._command;
+            if (Enums::CommunicatorIn::SEND_MESSAGE == com._command) {
+                tokenData[Enums::Communicator::IN_MESSAGE] = com._sendingMessage;
+                tokenData[Enums::Communicator::IN_ANGLE] = QuantityConverter::convertAngleToData(com._sendingAngle);
+                tokenData[Enums::Communicator::IN_DISTANCE] =
+                    QuantityConverter::convertURealToData(com._sendingDistance);
+                tokenData[Enums::Communicator::IN_CHANNEL] = com._sendingChannel;
             }
-            {
-                auto token = createSimpleToken();
-                auto& tokenData = *token.data;
-                tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SET_LISTENING_CHANNEL;
-                tokenData[Enums::Communicator::IN_CHANNEL] = com._listeningChannel;
-                tokenData[Enums::Branching::TOKEN_BRANCH_NUMBER] = 2;
-                cluster.cells->at(2).addToken(token);
-            }
-            return cluster;
-        };
+            tokenData[Enums::Branching::TOKEN_BRANCH_NUMBER] = com._cellIndexWithToken;
+            cluster.cells->at(com._cellIndexWithToken).addToken(token);
+        }
+        {
+            auto token = createSimpleToken();
+            auto& tokenData = *token.data;
+            tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SET_LISTENING_CHANNEL;
+            tokenData[Enums::Communicator::IN_CHANNEL] = com._listeningChannel;
+            tokenData[Enums::Branching::TOKEN_BRANCH_NUMBER] = 2;
+            cluster.cells->at(2).addToken(token);
+        }
+        return cluster;
+    };
     DataDescription origData;
     for (auto const& communicator : testParameters._communicators) {
         auto const origCommunicator = createComCluster(communicator);
@@ -126,8 +139,26 @@ void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters,
         auto const& tokenCell = cellByCellId.at(origTokenCell.id);
         EXPECT_EQ(1, tokenCell.tokens->size());
         auto const& token = tokenCell.tokens->at(0);
-        EXPECT_EQ(expectation._messagesSent, token.data->at(Enums::Communicator::OUT_SENT_NUM_MESSAGE));
+        EXPECT_EQ(expectation._numMessagesSent, token.data->at(Enums::Communicator::OUT_SENT_NUM_MESSAGE));
         EXPECT_EQ(expectation._messageReceived, token.data->at(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE));
+        if (Enums::CommunicatorIn::RECEIVE_MESSAGE == communicator._command
+            && Enums::CommunicatorOutReceivedNewMessage::YES == expectation._messageReceived) {
+            if (expectation._message) {
+                EXPECT_EQ(*expectation._message, token.data->at(Enums::Communicator::OUT_RECEIVED_MESSAGE));
+            }
+
+            if (expectation._angle) {
+                auto const actualAngle =
+                    QuantityConverter::convertDataToAngle(token.data->at(Enums::Communicator::OUT_RECEIVED_ANGLE));
+                EXPECT_TRUE(std::abs(*expectation._angle - actualAngle) < 5);
+            }
+
+            if (expectation._distance) {
+                auto const actualDistance =
+                    QuantityConverter::convertURealToData(token.data->at(Enums::Communicator::OUT_RECEIVED_DISTANCE));
+                EXPECT_TRUE(std::abs(*expectation._distance - actualDistance) < 3);
+            }
+        }
     }
 }
 
@@ -139,28 +170,104 @@ TEST_F(CommunicatorGpuTests, testDoNothing)
             {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::DO_NOTHING),
              Communicator().pos({withinComRange, 0}).command(Enums::CommunicatorIn::DO_NOTHING)}),
         Expectations().communicatorResult(
-            {CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
+            {CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
 }
 
-TEST_F(CommunicatorGpuTests, testSendAndBothReceive)
+TEST_F(CommunicatorGpuTests, testSendAndReceive)
 {
     auto const withinComRange = _parameters.cellFunctionCommunicatorRange / 2;
     runStandardTest(
         TestParameters().communicators(
-            {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::SEND_MESSAGE).cellIndexWithToken(1),
-             Communicator().pos({withinComRange, 0}).command(Enums::CommunicatorIn::RECEIVE_MESSAGE).cellIndexWithToken(0),
+            {Communicator()
+                 .pos({0, 0})
+                 .command(Enums::CommunicatorIn::SEND_MESSAGE)
+                 .cellIndexWithToken(1)
+                 .sendingMessage(123),
              Communicator()
                  .pos({-withinComRange, -withinComRange})
                  .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
                  .cellIndexWithToken(0)}),
         Expectations().communicatorResult(
-            {CommunicatorResult().messagesSent(2).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)}));
+            {CommunicatorResult().numMessagesSent(1).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult()
+                 .numMessagesSent(0)
+                 .messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)
+                 .message(123)
+                 .angle(-135)
+                 .distance(withinComRange * sqrt(2))}));
 }
 
-TEST_F(CommunicatorGpuTests, testSendAndOneReceive_outOfRange)
+TEST_F(CommunicatorGpuTests, testSendAndNoReceive_outOfRange)
+{
+    auto const outOfComRange = _parameters.cellFunctionCommunicatorRange + 10;
+    runStandardTest(
+        TestParameters().communicators(
+            {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::SEND_MESSAGE).cellIndexWithToken(1),
+             Communicator()
+                 .pos({outOfComRange, 0})
+                 .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .cellIndexWithToken(0)}),
+        Expectations().communicatorResult(
+            {CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
+}
+
+TEST_F(CommunicatorGpuTests, testSendAndNoReceive_wrongChannel)
+{
+    auto const withinComRange = _parameters.cellFunctionCommunicatorRange - 10;
+    runStandardTest(
+        TestParameters().communicators(
+            {Communicator()
+                 .pos({0, 0})
+                 .command(Enums::CommunicatorIn::SEND_MESSAGE)
+                 .sendingChannel(5)
+                 .cellIndexWithToken(1),
+             Communicator()
+                 .pos({0, withinComRange})
+                 .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .listeningChannel(1)
+                 .cellIndexWithToken(0)}),
+        Expectations().communicatorResult(
+            {CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
+}
+
+TEST_F(CommunicatorGpuTests, testSendAndReceiveTwice)
+{
+    auto const withinComRange = _parameters.cellFunctionCommunicatorRange / 2;
+    runStandardTest(
+        TestParameters().communicators(
+            {Communicator()
+                 .pos({0, 0})
+                 .command(Enums::CommunicatorIn::SEND_MESSAGE)
+                 .cellIndexWithToken(1)
+                 .sendingMessage(123),
+             Communicator()
+                 .pos({withinComRange, 0})
+                 .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .cellIndexWithToken(0),
+             Communicator()
+                 .pos({-withinComRange, -withinComRange})
+                 .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .cellIndexWithToken(0)}),
+        Expectations().communicatorResult(
+            {CommunicatorResult().numMessagesSent(2).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult()
+                 .numMessagesSent(0)
+                 .messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)
+                 .message(123)
+                 .angle(0)
+                 .distance(withinComRange),
+             CommunicatorResult()
+                 .numMessagesSent(0)
+                 .messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)
+                 .message(123)
+                 .angle(-135)
+                 .distance(withinComRange * sqrt(2))}));
+}
+
+TEST_F(CommunicatorGpuTests, testSendAndMixedReceive_outOfRange)
 {
     auto const withinComRange = _parameters.cellFunctionCommunicatorRange - 10;
     auto const outOfComRange = _parameters.cellFunctionCommunicatorRange + 10;
@@ -170,34 +277,51 @@ TEST_F(CommunicatorGpuTests, testSendAndOneReceive_outOfRange)
              Communicator()
                  .pos({withinComRange, 0})
                  .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .sendingMessage(123)
                  .cellIndexWithToken(0),
              Communicator()
                  .pos({outOfComRange, 0})
                  .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
                  .cellIndexWithToken(0)}),
         Expectations().communicatorResult(
-            {CommunicatorResult().messagesSent(1).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
+            {CommunicatorResult().numMessagesSent(1).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult()
+                 .numMessagesSent(0)
+                 .messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)
+                 .message(123)
+                 .angle(0)
+                 .distance(withinComRange),
+             CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
 }
 
-TEST_F(CommunicatorGpuTests, testSendAndOneReceive_wrongChannel)
+TEST_F(CommunicatorGpuTests, testSendAndMixedReceive_wrongChannel)
 {
     auto const withinComRange = _parameters.cellFunctionCommunicatorRange - 10;
     runStandardTest(
         TestParameters().communicators(
-            {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::SEND_MESSAGE).cellIndexWithToken(1),
+            {Communicator()
+                 .pos({0, 0})
+                 .command(Enums::CommunicatorIn::SEND_MESSAGE)
+                 .sendingChannel(5)
+                 .sendingMessage(123)
+                 .cellIndexWithToken(1),
              Communicator()
                  .pos({withinComRange, 0})
                  .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .listeningChannel(5)
                  .cellIndexWithToken(0),
              Communicator()
                  .pos({0, withinComRange})
-                 .listeningChannel(1)
                  .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
+                 .listeningChannel(1)
                  .cellIndexWithToken(0)}),
         Expectations().communicatorResult(
-            {CommunicatorResult().messagesSent(1).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES),
-             CommunicatorResult().messagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
+            {CommunicatorResult().numMessagesSent(1).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO),
+             CommunicatorResult()
+                 .numMessagesSent(0)
+                 .messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES)
+                 .message(123)
+                 .angle(0)
+                 .distance(withinComRange),
+             CommunicatorResult().numMessagesSent(0).messageReceived(Enums::CommunicatorOutReceivedNewMessage::NO)}));
 }
