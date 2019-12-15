@@ -273,11 +273,14 @@ TEST_F(CommunicatorGpuTests, testSendAndMixedReceive_outOfRange)
     auto const outOfComRange = _parameters.cellFunctionCommunicatorRange + 10;
     runStandardTest(
         TestParameters().communicators(
-            {Communicator().pos({0, 0}).command(Enums::CommunicatorIn::SEND_MESSAGE).cellIndexWithToken(1),
+            {Communicator()
+                 .pos({0, 0})
+                 .command(Enums::CommunicatorIn::SEND_MESSAGE)
+                 .cellIndexWithToken(1)
+                 .sendingMessage(123),
              Communicator()
                  .pos({withinComRange, 0})
                  .command(Enums::CommunicatorIn::RECEIVE_MESSAGE)
-                 .sendingMessage(123)
                  .cellIndexWithToken(0),
              Communicator()
                  .pos({outOfComRange, 0})
