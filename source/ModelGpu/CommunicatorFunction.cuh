@@ -180,7 +180,14 @@ __inline__ __device__ void CommunicatorFunction::sendMessage_blockCall(Token * t
     __syncthreads();
 
     __shared__ int numMessages;
-    sendMessageToNearbyCommunicators(messageDataToSend, token->cell, token->sourceCell, numMessages);
+    if (token->sourceCell) {
+        sendMessageToNearbyCommunicators(messageDataToSend, token->cell, token->sourceCell, numMessages);
+    }
+    else {
+        if (0 == threadIdx.x) {
+            numMessages = 0;
+        }
+    }
 
     __syncthreads();
     if (0 == threadIdx.x) {
