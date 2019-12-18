@@ -79,19 +79,21 @@ __inline__ __device__ void CommunicatorFunction::processing_blockCall(Token * to
 {
     __syncthreads();
 
-    auto const command = getCommand(token);
+    __shared__ Enums::CommunicatorIn::Type command;
+    if (0 == threadIdx.x) {
+        command = getCommand(token);
+    }
+    __syncthreads();
+
     if (Enums::CommunicatorIn::DO_NOTHING == command) {
         return;
     }
 
-    if (0 == threadIdx.x) {
-        token->cell->getLock();
-    }
-    __syncthreads();
-
     if (Enums::CommunicatorIn::SET_LISTENING_CHANNEL == command) {
         if (0 == threadIdx.x) {
+            token->cell->getLock();
             setListeningChannel(token->cell, token->memory[Enums::Communicator::IN_CHANNEL]);
+            token->cell->releaseLock();
         }
     }
 
@@ -101,14 +103,12 @@ __inline__ __device__ void CommunicatorFunction::processing_blockCall(Token * to
 
     if (Enums::CommunicatorIn::RECEIVE_MESSAGE == command) {
         if (0 == threadIdx.x) {
+            token->cell->getLock();
             receiveMessage(token);
+            token->cell->releaseLock();
         }
     }
 
-    __syncthreads();
-    if (0 == threadIdx.x) {
-        token->cell->releaseLock();
-    }
     __syncthreads();
 }
 
