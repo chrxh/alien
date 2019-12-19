@@ -57,7 +57,7 @@ MainController::MainController(QObject * parent)
 
 MainController::~MainController()
 {
-	delete _view;
+    delete _view;
 }
 
 void MainController::init()
@@ -226,7 +226,8 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 	connectSimController();
 
-	_simAccess = _accessBuildFunc(_simController);
+	auto simAccess = _accessBuildFunc(_simController);
+    SET_CHILD(_simAccess, simAccess);
 	auto context = _simController->getContext();
 	_descHelper->init(context);
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
@@ -311,7 +312,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     }
 	delete _simController;
 
-    auto const progress = MessageHelper::getProgress("Loading...", _view);
+//    auto const progress = MessageHelper::getProgress("Loading...", _view);
 
     if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
 
@@ -320,14 +321,14 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
             Const::AutoSaveForLoadingFilename,
             [&](string const& data) { return _serializer->deserializeSimulation(data); },
             _simController));
-        delete progress;
+//        delete progress;
         return false;
 	}
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
 
 	_view->refresh();
-    delete progress;
+//    delete progress;
     return true;
 }
 

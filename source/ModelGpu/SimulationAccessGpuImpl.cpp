@@ -245,11 +245,11 @@ DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getDataTO()
 
 void SimulationAccessGpuImpl::_DataTOCache::releaseDataTO(DataAccessTO const & dataTO)
 {
-	auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
+    auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
 		return usedDataTO == dataTO;
 	});
 	if (usedDataTO != _usedDataTOs.end()) {
-		_freeDataTOs.push_back(*usedDataTO);
+        _freeDataTOs.emplace_back(*usedDataTO);
 		_usedDataTOs.erase(usedDataTO);
 	}
 }
