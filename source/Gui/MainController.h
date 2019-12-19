@@ -15,7 +15,8 @@ public:
 
 	void init();
 
-	void autoSave();
+    void autoSave();
+    void autoSave(std::string const& filename);
 
 	void onRunSimulation(bool run);
 	void onStepForward();
@@ -24,7 +25,8 @@ public:
 	void onRestoreSnapshot();
 	void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
 	void onSaveSimulation(string const& filename);
-	bool onLoadSimulation(string const& filename);
+    enum class LoadOption { Non, SaveOldSim };
+	bool onLoadSimulation(string const& filename, LoadOption option);
 	void onRecreateSimulation(SimulationConfig const& config);
 	void onUpdateSimulationParametersForRunningSimulation();
 	void onRestrictTPS(optional<int> const& tps);

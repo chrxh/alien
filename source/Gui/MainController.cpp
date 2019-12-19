@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QProgressDialog>
 #include <QCoreApplication>
+#include <QMessageBox>
 
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
@@ -32,6 +33,7 @@
 #include "ModelGpu/ModelGpuData.h"
 #include "ModelGpu/SimulationMonitorGpu.h"
 
+#include "MessageHelper.h"
 #include "VersionController.h"
 #include "InfoController.h"
 #include "MainController.h"
@@ -41,6 +43,12 @@
 #include "Notifier.h"
 #include "SimulationConfig.h"
 #include "DataAnalyzer.h"
+
+namespace Const
+{
+    std::string const AutoSaveFilename = "autosave.sim";
+    std::string const AutoSaveForLoadingFilename = "autosave_load.sim";
+}
 
 MainController::MainController(QObject * parent)
 	: QObject(parent)
@@ -130,7 +138,7 @@ void MainController::init()
     _serializer->init(_controllerBuildFunc, _accessBuildFunc);
     _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
 
-    if (!onLoadSimulation("autosave.sim")) {
+    if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
         auto config = boost::make_shared<_SimulationConfigCpu>();
@@ -152,10 +160,9 @@ void MainController::init()
 
     //auto save every hour
     _timer = new QTimer(this);
-    connect(_timer, &QTimer::timeout, this, &MainController::autoSave);
+    connect(_timer, &QTimer::timeout, this, (void(MainController::*)())(&MainController::autoSave));
     _timer->start(1000 * 60 * 20);
 }
-
 
 namespace
 {
@@ -171,14 +178,15 @@ namespace
 
 void MainController::autoSave()
 {
+    autoSave(Const::AutoSaveFilename);
+}
 
-    QProgressDialog* progress = new QProgressDialog("Autosaving...", QString(), 0, 0, _view);
+void MainController::autoSave(std::string const& filename)
+{
+    auto progress = MessageHelper::getProgress("Autosaving...", _view);
 
-    progress->setModal(false);
-    progress->show();
-
-	onSaveSimulation("autosave.sim");
-	processEventsForMilliSec(500);
+    onSaveSimulation(filename);
+	processEventsForMilliSec(1000);
 
     delete progress;
 }
@@ -296,18 +304,31 @@ void MainController::onSaveSimulation(string const& filename)
 	}
 }
 
-bool MainController::onLoadSimulation(string const & filename)
+bool MainController::onLoadSimulation(string const & filename, LoadOption option)
 {
-	auto origSimController = _simController;	//delete later if loading failed
-	if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
-		return false;
+    if (LoadOption::SaveOldSim == option) {
+        autoSave(Const::AutoSaveForLoadingFilename);
+    }
+	delete _simController;
+
+    auto const progress = MessageHelper::getProgress("Loading...", _view);
+
+    if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
+
+        //load old simulation
+        CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+            Const::AutoSaveForLoadingFilename,
+            [&](string const& data) { return _serializer->deserializeSimulation(data); },
+            _simController));
+        delete progress;
+        return false;
 	}
-	delete origSimController;
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
 
 	_view->refresh();
-	return true;
+    delete progress;
+    return true;
 }
 
 void MainController::onRecreateSimulation(SimulationConfig const& config)
