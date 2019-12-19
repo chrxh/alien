@@ -253,7 +253,7 @@ void ActionController::onLoadSimulation()
 {
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!filename.isEmpty()) {
-		if (_mainController->onLoadSimulation(filename.toStdString())) {
+		if (_mainController->onLoadSimulation(filename.toStdString(), MainController::LoadOption::SaveOldSim)) {
 			settingUpNewSimulation(_mainController->getSimulationConfig());
 		}
 		else {
