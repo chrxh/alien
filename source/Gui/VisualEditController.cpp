@@ -23,6 +23,9 @@ VisualEditController::VisualEditController(QWidget *parent)
 
     ui->simulationView->horizontalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
+    auto emptyScene = new QGraphicsScene(this);
+    emptyScene->setBackgroundBrush(QBrush(Const::BackgroundColor));
+    ui->simulationView->setScene(emptyScene);
 }
 
 VisualEditController::~VisualEditController()
