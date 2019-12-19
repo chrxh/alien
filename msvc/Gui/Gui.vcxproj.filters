@@ -558,6 +558,9 @@
     <ClCompile Include="Release\moc_DataAnalyzer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MessageHelper.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -982,6 +985,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\ImageSectionItem.h">
       <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MessageHelper.h">
+      <Filter>Source Files\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
