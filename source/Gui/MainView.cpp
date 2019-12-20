@@ -8,7 +8,6 @@
 #include "Gui/ActionController.h"
 #include "Gui/ActionHolder.h"
 #include "Gui/DocumentationWindow.h"
-#include "Gui/StartScreenController.h"
 #include "Gui/MonitorController.h"
 
 #include "InfoController.h"
@@ -34,12 +33,10 @@ MainView::MainView(QWidget * parent)
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
-	_startScreen = new StartScreenController(this);
 	_documentationWindow = new DocumentationWindow(this);
 	_monitor = new MonitorController(this);
 	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
-
 }
 
 MainView::~MainView()
@@ -66,7 +63,6 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	setupFullScreen();
 	show();
 
-	_startScreen->start();
 	_initialied = true;
 }
 
