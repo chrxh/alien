@@ -36,8 +36,6 @@ private:
     __inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
     __inline__ __device__ void moveToken(Token* sourceToken, Token*& targetToken, Cell* targetCell);
 
-    __inline__ __device__ void processingCellFeatures(Token* token, EntityFactory& factory);
-
 private:
     SimulationData* _data;
     Cluster* _cluster;
@@ -265,7 +263,24 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridC
         auto const numTokenPointers = cluster->numTokenPointers;
         for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
             auto& token = cluster->tokenPointers[tokenIndex];
-            processingCellFeatures(token, factory);
+            auto cell = token->cell;
+            cell->getLock();
+            EnergyGuidance::processing(token);
+            switch (cell->getCellFunctionType()) {
+            case Enums::CellFunction::COMPUTER: {
+                CellComputerFunction::processing(token);
+            } break;
+            case Enums::CellFunction::PROPULSION: {
+                PropulsionFunction::processing(token, factory);
+            } break;
+            case Enums::CellFunction::SCANNER: {
+                ScannerFunction::processing(token);
+            } break;
+            case Enums::CellFunction::WEAPON: {
+                WeaponFunction::processing(token, _data);
+            } break;
+            }
+            cell->releaseLock();
         }
     }
 }
@@ -381,26 +396,4 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
     targetToken->memory[0] = targetCell->branchNumber;
     targetToken->sourceCell = sourceToken->cell;
     targetToken->cell = targetCell;
-}
-
-__inline__ __device__ void TokenProcessor::processingCellFeatures(Token * token, EntityFactory& factory)
-{
-    auto cell = token->cell;
-    cell->getLock();
-    EnergyGuidance::processing(token);
-    switch (cell->getCellFunctionType()) {
-    case Enums::CellFunction::COMPUTER: {
-        CellComputerFunction::processing(token);
-    } break;
-    case Enums::CellFunction::PROPULSION: {
-        PropulsionFunction::processing(token, factory);
-    } break;
-    case Enums::CellFunction::SCANNER: {
-        ScannerFunction::processing(token);
-    } break;
-    case Enums::CellFunction::WEAPON: {
-        WeaponFunction::processing(token, _data);
-    } break;
-    }
-    cell->releaseLock();
 }
