@@ -24,7 +24,7 @@ VisualEditController::VisualEditController(QWidget *parent)
     ui->simulationView->horizontalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     auto emptyScene = new QGraphicsScene(this);
-    emptyScene->setBackgroundBrush(QBrush(Const::BackgroundColor));
+    emptyScene->setBackgroundBrush(QBrush(Const::UniverseColor));
 
     QPixmap startScreenPixmap("://Tutorial/logo.png");
     emptyScene->addPixmap(startScreenPixmap);
