@@ -35,9 +35,6 @@
     <Filter Include="Source Files\Actions">
       <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\StartScreen">
-      <UniqueIdentifier>{8e45d07f-5a3b-4c3f-a104-52836c1dfeca}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h</Extensions>
@@ -381,24 +378,6 @@
     <ClCompile Include="Release\moc_SymbolTableDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\StartScreenController.cpp">
-      <Filter>Source Files\StartScreen</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_StartScreenController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_StartScreenController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\StartScreenWidget.cpp">
-      <Filter>Source Files\StartScreen</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_StartScreenWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_StartScreenWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\MonitorController.cpp">
       <Filter>Source Files\Monitoring</Filter>
     </ClCompile>
@@ -736,15 +715,6 @@
     <CustomBuild Include="..\..\source\Gui\SymbolTableDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartScreenController.h">
-      <Filter>Source Files\StartScreen</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartScreenWidget.h">
-      <Filter>Source Files\StartScreen</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartScreenWidget.ui">
-      <Filter>Source Files\StartScreen</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MonitorController.h">
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
@@ -944,9 +914,6 @@
     <ClInclude Include="ui_SymbolTableDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_StartScreenWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\MonitorModel.h">
       <Filter>Source Files\Monitoring</Filter>
     </ClInclude>
@@ -988,6 +955,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\MessageHelper.h">
       <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\QtHelper.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
