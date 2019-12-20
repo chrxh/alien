@@ -16,7 +16,6 @@ public:
 	void init();
 
     void autoSave();
-    void autoSave(std::string const& filename);
 
 	void onRunSimulation(bool run);
 	void onStepForward();
@@ -41,6 +40,9 @@ private:
 	void recreateSimulation(string const& serializedSimulation);
 	void connectSimController() const;
 	void addRandomEnergy(double amount);
+
+    void autoSaveIntern(std::string const& filename);
+    void saveSimulationIntern(string const& filename);
 
 	class _AsyncJob
 	{
