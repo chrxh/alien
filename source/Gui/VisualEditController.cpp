@@ -7,6 +7,7 @@
 #include "PixelUniverseView.h"
 #include "ItemUniverseView.h"
 #include "ViewportController.h"
+#include "QtHelper.h"
 
 #include "VisualEditController.h"
 #include "ui_VisualEditController.h"
@@ -25,7 +26,11 @@ VisualEditController::VisualEditController(QWidget *parent)
     ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     auto emptyScene = new QGraphicsScene(this);
     emptyScene->setBackgroundBrush(QBrush(Const::BackgroundColor));
+
+    QPixmap startScreenPixmap("://Tutorial/logo.png");
+    emptyScene->addPixmap(startScreenPixmap);
     ui->simulationView->setScene(emptyScene);
+    QtHelper::processEventsForMilliSec(1000);
 }
 
 VisualEditController::~VisualEditController()
