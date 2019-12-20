@@ -325,10 +325,12 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
 
         //load old simulation
-        CHECK(SerializationHelper::loadFromFile<SimulationController*>(
-            Const::AutoSaveForLoadingFilename,
-            [&](string const& data) { return _serializer->deserializeSimulation(data); },
-            _simController));
+        if (LoadOption::SaveOldSim == option) {
+            CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+                Const::AutoSaveForLoadingFilename,
+                [&](string const& data) { return _serializer->deserializeSimulation(data); },
+                _simController));
+        }
         delete progress;
         return false;
 	}
