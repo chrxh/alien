@@ -224,6 +224,8 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 	connectSimController();
 
+    delete _simAccess;  //for minimal memory usage deleting old object first
+    _simAccess = nullptr;
 	auto simAccess = _accessBuildFunc(_simController);
     SET_CHILD(_simAccess, simAccess);
 	auto context = _simController->getContext();

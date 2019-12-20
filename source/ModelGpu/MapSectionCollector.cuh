@@ -49,7 +49,7 @@ public:
         if (0 == threadIdx.x) {
             sectionCenter = getSection(pos);
             sectionLength = floorInt(radius) / _sectionSize + 1;
-
+            result.init();
         }
         __syncthreads();
 
@@ -62,8 +62,6 @@ public:
                     auto const& clusterList = getClusters(section);
                     numClusters = clusterList.getSize();
                     clusterArray = clusterList.asArray(dynamicMemory);
-                    auto temp = section;
-                    correctSection(temp);
                 }
                 __syncthreads();
 
