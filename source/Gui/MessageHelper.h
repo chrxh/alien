@@ -4,5 +4,5 @@
 class MessageHelper
 {
 public:
-    static QWidget* getProgress(std::string message, QWidget* parent);
+    static QWidget* createProgressDialog(std::string message, QWidget* parent);
 };

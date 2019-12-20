@@ -178,17 +178,26 @@ namespace
 
 void MainController::autoSave()
 {
-    autoSave(Const::AutoSaveFilename);
+    auto progress = MessageHelper::createProgressDialog("Autosaving...", _view);
+    autoSaveIntern(Const::AutoSaveFilename);
+    delete progress;
 }
 
-void MainController::autoSave(std::string const& filename)
+void MainController::autoSaveIntern(std::string const& filename)
 {
-    auto progress = MessageHelper::getProgress("Autosaving...", _view);
-
-    onSaveSimulation(filename);
+    saveSimulationIntern(filename);
 	processEventsForMilliSec(1000);
+}
 
-    delete progress;
+void MainController::saveSimulationIntern(string const & filename)
+{
+    _jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
+    if (dynamic_cast<SimulationControllerCpu*>(_simController)) {
+        _serializer->serialize(_simController, int(ModelComputationType::Cpu));
+    }
+    else if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
+        _serializer->serialize(_simController, int(ModelComputationType::Gpu));
+    }
 }
 
 void MainController::onRunSimulation(bool run)
@@ -296,23 +305,22 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 
 void MainController::onSaveSimulation(string const& filename)
 {
-	_jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
-	if (dynamic_cast<SimulationControllerCpu*>(_simController)) {
-		_serializer->serialize(_simController, int(ModelComputationType::Cpu));
-	}
-	else if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
-		_serializer->serialize(_simController, int(ModelComputationType::Gpu));
-	}
+    auto progress = MessageHelper::createProgressDialog("Saving...", _view);
+
+    saveSimulationIntern(filename);
+
+    processEventsForMilliSec(1000);
+    delete progress;
 }
 
 bool MainController::onLoadSimulation(string const & filename, LoadOption option)
 {
+    auto progress = MessageHelper::createProgressDialog("Loading...", _view);
+
     if (LoadOption::SaveOldSim == option) {
-        autoSave(Const::AutoSaveForLoadingFilename);
+        autoSaveIntern(Const::AutoSaveForLoadingFilename);
     }
 	delete _simController;
-
-//    auto const progress = MessageHelper::getProgress("Loading...", _view);
 
     if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
 
@@ -321,14 +329,14 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
             Const::AutoSaveForLoadingFilename,
             [&](string const& data) { return _serializer->deserializeSimulation(data); },
             _simController));
-//        delete progress;
+        delete progress;
         return false;
 	}
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
-
 	_view->refresh();
-//    delete progress;
+
+    delete progress;
     return true;
 }
 
@@ -345,7 +353,13 @@ void MainController::onRecreateSimulation(SimulationConfig const& config)
 
 void MainController::onUpdateSimulationParametersForRunningSimulation()
 {
+    auto progress = MessageHelper::createProgressDialog("Updating simulation parameters...", _view);
+
 	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
+
+    processEventsForMilliSec(500);
+    delete progress;
+
 }
 
 void MainController::onRestrictTPS(optional<int> const& tps)
