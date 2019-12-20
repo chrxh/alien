@@ -202,6 +202,7 @@ void MainView::setupFontsAndColors()
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
 	ui->menuSymbolMap->setFont(GuiSettings::getGlobalFont());
+    ui->menuAnalysis->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
