@@ -43,6 +43,7 @@
 #include "Notifier.h"
 #include "SimulationConfig.h"
 #include "DataAnalyzer.h"
+#include "QtHelper.h"
 
 namespace Const
 {
@@ -164,18 +165,6 @@ void MainController::init()
     _timer->start(1000 * 60 * 20);
 }
 
-namespace
-{
-	void processEventsForMilliSec(int millisec)
-	{
-		QTime dieTime = QTime::currentTime().addMSecs(millisec);
-		while (QTime::currentTime() < dieTime)
-		{
-			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-		}
-	}
-}
-
 void MainController::autoSave()
 {
     auto progress = MessageHelper::createProgressDialog("Autosaving...", _view);
@@ -186,7 +175,7 @@ void MainController::autoSave()
 void MainController::autoSaveIntern(std::string const& filename)
 {
     saveSimulationIntern(filename);
-	processEventsForMilliSec(1000);
+	QtHelper::processEventsForMilliSec(1000);
 }
 
 void MainController::saveSimulationIntern(string const & filename)
@@ -309,7 +298,7 @@ void MainController::onSaveSimulation(string const& filename)
 
     saveSimulationIntern(filename);
 
-    processEventsForMilliSec(1000);
+    QtHelper::processEventsForMilliSec(1000);
     delete progress;
 }
 
@@ -359,7 +348,7 @@ void MainController::onUpdateSimulationParametersForRunningSimulation()
 
 	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
 
-    processEventsForMilliSec(500);
+    QtHelper::processEventsForMilliSec(500);
     delete progress;
 
 }
