@@ -540,6 +540,15 @@
     <ClCompile Include="..\..\source\Gui\MessageHelper.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_ComputationSettingsWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ComputationSettingsWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ComputationSettingsWidget.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -772,6 +781,12 @@
     <CustomBuild Include="..\..\source\Gui\DataAnalyzer.h">
       <Filter>Source Files\Analysis</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationSettingsWidget.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationSettingsWidget.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\Gui\resources\tutorial\angle.png">
@@ -958,6 +973,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\QtHelper.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_ComputationSettingsWidget.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

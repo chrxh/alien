@@ -25,26 +25,12 @@ public:
 	double getEnergy() const;
 
 private:
-	IntVector2D getUniverseSizeForModelCpu() const;
-	IntVector2D getUniverseSizeForModelGpu() const;
-	IntVector2D getGridSize() const;
-	uint getMaxThreads() const;
 	SymbolTable* getSymbolTable() const;
 	SimulationParameters const& getSimulationParameters() const;
-	IntVector2D getUnitSize() const;
-    ModelComputationType getModelType() const;
-    uint getNumBlocks() const;
-    uint getNumThreadsPerBlock() const;
-    uint getMaxClusters() const;
-    uint getMaxCells() const;
-    uint getMaxTokens() const;
-    uint getMaxParticles() const;
-    uint getDynamicMemorySize() const;
 
 private:
 	Q_SLOT void simulationParametersButtonClicked();
 	Q_SLOT void symbolTableButtonClicked();
-	Q_SLOT void updateLabels();
 	Q_SLOT void okClicked();
 
 private:
