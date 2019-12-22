@@ -355,7 +355,7 @@ void MainController::onRecreateSimulation(SimulationConfig const& config)
         data.setDynamicMemorySize(configGpu->dynamicMemorySize);
 
         Serializer::Settings settings{ configGpu->universeSize, data.getData() };
-        _serializer->serialize(_simController, int(ModelComputationType::Cpu), settings);
+        _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
     }
 }
 
