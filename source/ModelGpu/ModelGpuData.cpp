@@ -7,7 +7,6 @@ namespace
     string const numThreadsPerBlock_key = "numThreadsPerBlock";
     string const numBlocks_key = "numBlocks";
 
-    string const numClusterPointerArrays_key = "numClusterPointerArrays";
     string const maxClusters_key = "maxClusters";
     string const maxCells_key = "maxCells";
     string const maxParticles_key = "maxParticles";
@@ -34,7 +33,6 @@ CudaConstants ModelGpuData::getCudaConstants() const
     CudaConstants result;
     result.NUM_THREADS_PER_BLOCK = _data.at(numThreadsPerBlock_key);
     result.NUM_BLOCKS = _data.at(numBlocks_key);
-    result.NUM_CLUSTERPOINTERARRAYS = _data.at(numClusterPointerArrays_key);
     result.MAX_CLUSTERS = _data.at(maxClusters_key);
     result.MAX_CELLS = _data.at(maxCells_key);
     result.MAX_PARTICLES = _data.at(maxParticles_key);
@@ -47,9 +45,19 @@ CudaConstants ModelGpuData::getCudaConstants() const
     return result;
 }
 
+int ModelGpuData::getNumThreadsPerBlock()
+{
+    return _data.at(numThreadsPerBlock_key);
+}
+
 void ModelGpuData::setNumThreadsPerBlock(int value)
 {
     _data.insert_or_assign(numThreadsPerBlock_key, value);
+}
+
+int ModelGpuData::getNumBlocks()
+{
+    return _data.at(numBlocks_key);
 }
 
 void ModelGpuData::setNumBlocks(int value)
@@ -57,9 +65,9 @@ void ModelGpuData::setNumBlocks(int value)
     _data.insert_or_assign(numBlocks_key, value);
 }
 
-void ModelGpuData::setNumClusterPointerArrays(int value)
+int ModelGpuData::getMaxClusters()
 {
-    _data.insert_or_assign(numClusterPointerArrays_key, value);
+    return _data.at(maxClusters_key);
 }
 
 void ModelGpuData::setMaxClusters(int value)
@@ -67,9 +75,19 @@ void ModelGpuData::setMaxClusters(int value)
     _data.insert_or_assign(maxClusters_key, value);
 }
 
+int ModelGpuData::getMaxCells()
+{
+    return _data.at(maxCells_key);
+}
+
 void ModelGpuData::setMaxCells(int value)
 {
     _data.insert_or_assign(maxCells_key, value);
+}
+
+int ModelGpuData::getMaxParticles()
+{
+    return _data.at(maxParticles_key);
 }
 
 void ModelGpuData::setMaxParticles(int value)
@@ -77,9 +95,24 @@ void ModelGpuData::setMaxParticles(int value)
     _data.insert_or_assign(maxParticles_key, value);
 }
 
+int ModelGpuData::getMaxTokens()
+{
+    return _data.at(maxTokens_key);
+}
+
 void ModelGpuData::setMaxTokens(int value)
 {
     _data.insert_or_assign(maxTokens_key, value);
+}
+
+int ModelGpuData::getDynamicMemorySize()
+{
+    return _data.at(dynamicMemorySize_key);
+}
+
+void ModelGpuData::setDynamicMemorySize(int value)
+{
+    _data.insert_or_assign(dynamicMemorySize_key, value);
 }
 
 void ModelGpuData::setMaxCellPointers(int value)
@@ -100,11 +133,6 @@ void ModelGpuData::setMaxParticlePointers(int value)
 void ModelGpuData::setMaxTokenPointers(int value)
 {
     _data.insert_or_assign(maxTokenPointers_key, value);
-}
-
-void ModelGpuData::setDynamicMemorySize(int value)
-{
-    _data.insert_or_assign(dynamicMemorySize_key, value);
 }
 
 map<string, int> ModelGpuData::getData() const
