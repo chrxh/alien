@@ -269,8 +269,6 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
         ModelGpuData data;
         data.setNumBlocks(configGpu->numBlocks);
         data.setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
-
-        data.setNumClusterPointerArrays(1);
         data.setMaxClusters(configGpu->maxClusters);
         data.setMaxCells(configGpu->maxCells);
         data.setMaxParticles(configGpu->maxParticles);
@@ -337,11 +335,28 @@ void MainController::onRecreateSimulation(SimulationConfig const& config)
 {
 	_jobsAfterSerialization.push_back(boost::make_shared<_RecreateJob>());
 
-	if (auto configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+	if (auto const configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
 		ModelCpuData data(configCpu->maxThreads, configCpu->gridSize);
 		Serializer::Settings settings{ configCpu->universeSize, data.getData() };
 		_serializer->serialize(_simController, int(ModelComputationType::Cpu), settings);
 	}
+    if (auto const configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+        ModelGpuData data;
+        data.setNumBlocks(configGpu->numBlocks);
+        data.setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
+        data.setMaxClusters(configGpu->maxClusters);
+        data.setMaxCells(configGpu->maxCells);
+        data.setMaxParticles(configGpu->maxParticles);
+        data.setMaxTokens(configGpu->maxTokens);
+        data.setMaxClusterPointers(configGpu->maxClusters * 10);
+        data.setMaxCellPointers(configGpu->maxCells * 10);
+        data.setMaxParticlePointers(configGpu->maxParticles * 10);
+        data.setMaxTokenPointers(configGpu->maxTokens*10);
+        data.setDynamicMemorySize(configGpu->dynamicMemorySize);
+
+        Serializer::Settings settings{ configGpu->universeSize, data.getData() };
+        _serializer->serialize(_simController, int(ModelComputationType::Cpu), settings);
+    }
 }
 
 void MainController::onUpdateSimulationParametersForRunningSimulation()
@@ -385,8 +400,17 @@ SimulationConfig MainController::getSimulationConfig() const
 		return result;
 	}
 	else if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
-		auto result = boost::make_shared<_SimulationConfigGpu>();
-		result->universeSize = context->getSpaceProperties()->getSize();
+        ModelGpuData data(context->getSpecificData());
+        auto result = boost::make_shared<_SimulationConfigGpu>();
+        result->numBlocks = data.getNumBlocks();
+        result->numThreadsPerBlock = data.getNumThreadsPerBlock();
+        result->maxClusters = data.getMaxClusters();
+        result->maxCells = data.getMaxCells();
+        result->maxTokens = data.getMaxTokens();
+        result->maxParticles = data.getMaxParticles();
+        result->dynamicMemorySize = data.getDynamicMemorySize();
+
+        result->universeSize = context->getSpaceProperties()->getSize();
 		result->symbolTable = context->getSymbolTable();
 		result->parameters = context->getSimulationParameters();
 		return result;

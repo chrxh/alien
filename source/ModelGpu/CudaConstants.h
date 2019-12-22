@@ -5,7 +5,6 @@ struct CudaConstants
     int NUM_THREADS_PER_BLOCK = 0;/* = 64*/
     int NUM_BLOCKS = 0;/* 64*/
 
-    int NUM_CLUSTERPOINTERARRAYS = 0; /*1*/
     int MAX_CLUSTERS = 0; /*500000*/
     int MAX_CELLS = 0;/* 2000000*/
     int MAX_PARTICLES = 0;/* 2000000*/
