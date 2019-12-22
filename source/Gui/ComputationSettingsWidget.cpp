@@ -58,9 +58,20 @@ IntVector2D ComputationSettingsWidget::getUniverseSize() const
     return result;
 }
 
+void ComputationSettingsWidget::setUniverseSize(IntVector2D const & value) const
+{
+    ui.gpuUniverseSizeXEdit->setText(QString::number(value.x));
+    ui.gpuUniverseSizeYEdit->setText(QString::number(value.y));
+}
+
 uint ComputationSettingsWidget::getNumBlocks() const
 {
     return getUIntOrZero(ui.gpuNumBlocksEdit->text());
+}
+
+void ComputationSettingsWidget::setNumBlocks(uint value) const
+{
+    ui.gpuNumBlocksEdit->setText(QString::number(value));
 }
 
 uint ComputationSettingsWidget::getNumThreadsPerBlock() const
@@ -68,9 +79,19 @@ uint ComputationSettingsWidget::getNumThreadsPerBlock() const
     return getUIntOrZero(ui.gpuNumThreadsPerBlockEdit->text());
 }
 
+void ComputationSettingsWidget::setNumThreadsPerBlock(uint value) const
+{
+    ui.gpuNumThreadsPerBlockEdit->setText(QString::number(value));
+}
+
 uint ComputationSettingsWidget::getMaxClusters() const
 {
     return getUIntOrZero(ui.gpuMaxClustersEdit->text());
+}
+
+void ComputationSettingsWidget::setMaxClusters(uint value) const
+{
+    ui.gpuMaxClustersEdit->setText(QString::number(value));
 }
 
 uint ComputationSettingsWidget::getMaxCells() const
@@ -78,9 +99,19 @@ uint ComputationSettingsWidget::getMaxCells() const
     return getUIntOrZero(ui.gpuMaxCellsEdit->text());
 }
 
+void ComputationSettingsWidget::setMaxCells(uint value) const
+{
+    ui.gpuMaxCellsEdit->setText(QString::number(value));
+}
+
 uint ComputationSettingsWidget::getMaxTokens() const
 {
     return getUIntOrZero(ui.gpuMaxTokensEdit->text());
+}
+
+void ComputationSettingsWidget::setMaxTokens(uint value) const
+{
+    ui.gpuMaxTokensEdit->setText(QString::number(value));
 }
 
 uint ComputationSettingsWidget::getMaxParticles() const
@@ -88,9 +119,19 @@ uint ComputationSettingsWidget::getMaxParticles() const
     return getUIntOrZero(ui.gpuMaxParticlesEdit->text());
 }
 
+void ComputationSettingsWidget::setMaxParticles(uint value) const
+{
+    ui.gpuMaxParticlesEdit->setText(QString::number(value));
+}
+
 uint ComputationSettingsWidget::getDynamicMemorySize() const
 {
     return getUIntOrZero(ui.gpuDynamicMemorySizeEdit->text());
+}
+
+void ComputationSettingsWidget::setDynamicMemorySize(uint value) const
+{
+    ui.gpuDynamicMemorySizeEdit->setText(QString::number(value));
 }
 
 void ComputationSettingsWidget::saveSettings()

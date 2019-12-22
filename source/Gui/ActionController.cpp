@@ -266,17 +266,22 @@ void ActionController::onLoadSimulation()
 void ActionController::onConfigureGrid()
 {
 	ComputationSettingsDialog dialog(_mainController->getSimulationConfig(), _mainView);
-	if (dialog.exec()) {
-		optional<uint> maxThreads = dialog.getMaxThreads();
-		optional<IntVector2D> gridSize = dialog.getGridSize();
-		optional<IntVector2D> universeSize = dialog.getUniverseSize();
+    if (dialog.exec()) {
 
-		auto config = boost::make_shared<_SimulationConfigCpu>();
-		config->maxThreads = *maxThreads;
-		config->gridSize = *gridSize;
-		config->universeSize = *universeSize;
-		_mainController->onRecreateSimulation(config);
-		settingUpNewSimulation(config);
+        if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(_mainController->getSimulationConfig())) {
+
+            configGpu->universeSize = dialog.getUniverseSize();
+            configGpu->numBlocks = dialog.getNumBlocks();
+            configGpu->numThreadsPerBlock = dialog.getNumThreadsPerBlock();
+            configGpu->maxClusters = dialog.getMaxClusters();
+            configGpu->maxCells = dialog.getMaxCells();
+            configGpu->maxTokens = dialog.getMaxTokens();
+            configGpu->maxParticles = dialog.getMaxParticles();
+            configGpu->dynamicMemorySize = dialog.getDynamicMemorySize();
+
+            _mainController->onRecreateSimulation(configGpu);
+            settingUpNewSimulation(configGpu);
+        }
 	}
 }
 
