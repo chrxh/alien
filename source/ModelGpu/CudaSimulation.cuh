@@ -19,6 +19,8 @@ public:
 
     void setSimulationParameters(SimulationParameters const& parameters);
 
+    void clear();
+
 private:
     void setCudaConstants(CudaConstants const& cudaConstants);
     void DEBUG_printNumEntries();

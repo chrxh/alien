@@ -129,6 +129,10 @@ void CudaWorker::processJobs()
             getMonitorDataJob->setMonitorData(_cudaSimulation->getMonitorData());
         }
 
+        if (auto clearDataJob = boost::dynamic_pointer_cast<_ClearDataJob>(job)) {
+            _cudaSimulation->clear();
+        }
+
 		if (job->isNotifyFinish()) {
 			notify = true;
 		}
