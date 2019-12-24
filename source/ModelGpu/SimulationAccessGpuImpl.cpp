@@ -44,6 +44,10 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 
 void SimulationAccessGpuImpl::clear()
 {
+    auto cudaWorker = _context->getCudaController()->getCudaWorker();
+
+    CudaJob job = boost::make_shared<_ClearDataJob>(getObjectId());
+    cudaWorker->addJob(job);
 }
 
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc)
