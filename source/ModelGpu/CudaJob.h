@@ -28,6 +28,16 @@ private:
 	bool _notifyFinish = false;
 };
 
+class _ClearDataJob
+    : public _CudaJob
+{
+public:
+    _ClearDataJob(string const& originId)
+        : _CudaJob(originId, false) { }
+
+    virtual ~_ClearDataJob() = default;
+};
+
 class _GetMonitorDataJob
     : public _CudaJob
 {

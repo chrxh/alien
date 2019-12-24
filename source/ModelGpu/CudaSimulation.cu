@@ -163,6 +163,11 @@ void CudaSimulation::setSimulationParameters(SimulationParameters const & parame
     checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
+void CudaSimulation::clear()
+{
+    GPU_FUNCTION(clearData, *_cudaSimulationData);
+}
+
 void CudaSimulation::setCudaConstants(CudaConstants const & cudaConstants_)
 {
     checkCudaErrors(cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));

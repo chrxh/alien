@@ -243,3 +243,15 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     cleanup<<<1, 1>>>(data);
     cudaDeviceSynchronize();
 }
+
+__global__ void clearData(SimulationData data)
+{
+    data.entities.clusterPointers.reset();
+    data.entities.cellPointers.reset();
+    data.entities.tokenPointers.reset();
+    data.entities.particlePointers.reset();
+    data.entities.clusters.reset();
+    data.entities.cells.reset();
+    data.entities.tokens.reset();
+    data.entities.particles.reset();
+}
