@@ -43,7 +43,7 @@
 #include "Notifier.h"
 #include "SimulationConfig.h"
 #include "DataAnalyzer.h"
-#include "QtHelper.h"
+#include "QApplicationHelper.h"
 
 namespace Const
 {
@@ -175,7 +175,7 @@ void MainController::autoSave()
 void MainController::autoSaveIntern(std::string const& filename)
 {
     saveSimulationIntern(filename);
-	QtHelper::processEventsForMilliSec(1000);
+	QApplicationHelper::processEventsForMilliSec(1000);
 }
 
 void MainController::saveSimulationIntern(string const & filename)
@@ -304,7 +304,7 @@ void MainController::onSaveSimulation(string const& filename)
 
     saveSimulationIntern(filename);
 
-    QtHelper::processEventsForMilliSec(1000);
+    QApplicationHelper::processEventsForMilliSec(1000);
     delete progress;
 }
 
@@ -371,7 +371,7 @@ void MainController::onUpdateSimulationParametersForRunningSimulation()
 
 	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
 
-    QtHelper::processEventsForMilliSec(500);
+    QApplicationHelper::processEventsForMilliSec(500);
     delete progress;
 
 }
