@@ -3,7 +3,7 @@
 #include <QTime>
 #include <QCoreApplication>
 
-class QtHelper
+class QApplicationHelper
 {
 public:
     static void processEventsForMilliSec(int millisec)

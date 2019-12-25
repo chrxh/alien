@@ -1117,7 +1117,7 @@
     </CustomBuild>
     <ClInclude Include="..\..\source\Gui\ImageSectionItem.h" />
     <ClInclude Include="..\..\source\Gui\MessageHelper.h" />
-    <ClInclude Include="..\..\source\Gui\QtHelper.h" />
+    <ClInclude Include="..\..\source\Gui\QApplicationHelper.h" />
     <ClInclude Include="..\..\source\Gui\SimulationConfig.h" />
     <CustomBuild Include="..\..\source\Gui\ComputationSettingsWidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
