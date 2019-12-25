@@ -971,11 +971,11 @@
     <ClInclude Include="..\..\source\Gui\MessageHelper.h">
       <Filter>Source Files\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\QtHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="ui_ComputationSettingsWidget.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\QApplicationHelper.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
