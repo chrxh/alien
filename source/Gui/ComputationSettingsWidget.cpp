@@ -136,6 +136,8 @@ void ComputationSettingsWidget::setDynamicMemorySize(uint value) const
 
 void ComputationSettingsWidget::saveSettings()
 {
+    GuiSettings::setSettingsValue(Const::GpuUniverseSizeXKey, getUniverseSize().x);
+    GuiSettings::setSettingsValue(Const::GpuUniverseSizeYKey, getUniverseSize().y);
     GuiSettings::setSettingsValue(Const::GpuNumBlocksKey, getNumBlocks());
     GuiSettings::setSettingsValue(Const::GpuNumThreadsPerBlockKey, getNumThreadsPerBlock());
     GuiSettings::setSettingsValue(Const::GpuMaxClustersKey, getMaxClusters());
