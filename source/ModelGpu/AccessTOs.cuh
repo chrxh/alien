@@ -33,6 +33,9 @@ struct ParticleAccessTO
 struct CellMetadataAccessTO
 {
     unsigned char color;
+
+    int sourceCodeLen;
+    int sourceCodeStringIndex;
 };
 
 struct CellAccessTO
@@ -77,6 +80,8 @@ struct DataAccessTO
 	ParticleAccessTO* particles = nullptr;
 	int* numTokens = nullptr;
 	TokenAccessTO* tokens = nullptr;
+    int* numStringBytes = nullptr;
+    char* stringBytes = nullptr;
 
 	bool operator==(DataAccessTO const& other) const
 	{
@@ -87,7 +92,9 @@ struct DataAccessTO
 			&& numParticles == other.numParticles
 			&& particles == other.particles
 			&& numTokens == other.numTokens
-			&& tokens == other.tokens;
+			&& tokens == other.tokens
+            && numStringBytes == other.numStringBytes
+            && stringBytes == other.stringBytes;
 	}
 };
 
