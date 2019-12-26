@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DynamicMemory.cuh"
+
 template <typename Value>
 class List
 {

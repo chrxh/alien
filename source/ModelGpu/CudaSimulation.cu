@@ -76,10 +76,12 @@ CudaSimulation::CudaSimulation(
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numClusters);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
     CudaMemoryManager::getInstance().acquireMemory<ClusterAccessTO>(cudaConstants.MAX_CLUSTERS, _cudaAccessTO->clusters);
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cudaConstants.MAX_CELLS, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cudaConstants.MAX_PARTICLES, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(cudaConstants.MAX_TOKENS, _cudaAccessTO->tokens);
+    CudaMemoryManager::getInstance().acquireMemory<char>(cudaConstants.MAX_STRINGBYTES, _cudaAccessTO->stringBytes);
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
@@ -94,10 +96,13 @@ CudaSimulation::~CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numClusters);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numTokens);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->clusters);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
     std::cout << "[CUDA] memory released" << std::endl;
 
@@ -132,10 +137,12 @@ void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.tokens, _cudaAccessTO->tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(dataTO.stringBytes, _cudaAccessTO->stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
@@ -144,10 +151,12 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->clusters, dataTO.clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(_cudaAccessTO->stringBytes, dataTO.stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyHostToDevice));
 
     GPU_FUNCTION(setSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 }
