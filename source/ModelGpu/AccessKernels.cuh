@@ -84,6 +84,15 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 cellTO.numStaticBytes = cell.numStaticBytes;
                 cellTO.age = cell.age;
                 cellTO.metadata.color = cell.metadata.color;
+                auto const& sourceCodeLen = cell.metadata.sourceCodeLen;
+                cellTO.metadata.sourceCodeLen = sourceCodeLen;
+                if (cellTO.metadata.sourceCodeLen > 0) {
+                    auto const& sourceCodeStringIndex = atomicAdd(simulationTO.numStringBytes, sourceCodeLen);
+                    for (int i = 0; i < sourceCodeLen; ++i) {
+                        simulationTO.stringBytes[sourceCodeStringIndex + i] = cell.metadata.sourceCode[i];
+                    }
+                }
+
                 for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
                     cellTO.staticData[i] = cell.staticData[i];
                 }
@@ -228,6 +237,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numCells = 0;
     *access.numParticles = 0;
     *access.numTokens = 0;
+    *access.numStringBytes = 0;
 
     KERNEL_CALL(getClusterAccessData, rectUpperLeft, rectLowerRight, data, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);

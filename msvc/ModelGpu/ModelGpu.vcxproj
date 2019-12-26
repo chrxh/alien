@@ -219,6 +219,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\CudaJob.h" />
     <ClInclude Include="..\..\source\ModelGpu\CudaMemoryManager.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Definitions.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\DynamicMemory.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\EnergyGuidance.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Entities.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\EntityFactory.cuh" />
