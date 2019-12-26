@@ -95,6 +95,13 @@ DataDescription DataConverter::getDataDescription() const
             auto feature = CellFeatureDescription().setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
                 .setConstData(convertToQByteArray(cellTO.staticData, cellTO.numStaticBytes)).setVolatileData(convertToQByteArray(cellTO.mutableData, cellTO.numMutableBytes));
 
+            auto const metadataTO = cellTO.metadata;
+            auto metadata = CellMetadata().setColor(metadataTO.color);
+            if (metadataTO.sourceCodeLen > 0) {
+                auto const sourceCode = QString::fromLatin1(&_dataTO.stringBytes[metadataTO.sourceCodeStringIndex], metadataTO.sourceCodeLen);
+                metadata.setSourceCode(sourceCode);
+            }
+
             clusterDesc.addCell(CellDescription()
                                     .setPos({pos.x, pos.y})
                                     .setMetadata(CellMetadata())
@@ -103,7 +110,7 @@ DataDescription DataConverter::getDataDescription() const
                                     .setConnectingCells(connectingCellIds)
                                     .setMaxConnections(cellTO.maxConnections)
                                     .setTokenBranchNumber(0)
-                                    .setMetadata(CellMetadata().setColor(cellTO.metadata.color))
+                                    .setMetadata(metadata)
                                     .setTokens(vector<TokenDescription>{})
                                     .setTokenBranchNumber(cellTO.branchNumber)
                                     .setFlagTokenBlocked(cellTO.tokenBlocked)
@@ -375,6 +382,17 @@ void DataConverter::processModifications()
 	}
 }
 
+int DataConverter::convertStringAndReturnStringIndex(QString const& s)
+{
+    auto const result = *_dataTO.numStringBytes;
+    auto const len = s.size();
+    for (int i = 0; i < len; ++i) {
+        _dataTO.stringBytes[result + i] = s.at(i).toLatin1();
+    }
+    (*_dataTO.numStringBytes) += len;
+    return result;
+}
+
 void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterAccessTO& clusterTO
 	, unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
@@ -400,7 +418,12 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	}
     cellTO.age = 0;
     if (cellDesc.metadata) {
-        cellTO.metadata.color = cellDesc.metadata->color;
+        auto& metadataTO = cellTO.metadata;
+        metadataTO.color = cellDesc.metadata->color;
+        metadataTO.sourceCodeLen = cellDesc.metadata->computerSourcecode.size();
+        if (metadataTO.sourceCodeLen > 0) {
+            metadataTO.sourceCodeStringIndex = convertStringAndReturnStringIndex(cellDesc.metadata->computerSourcecode);
+        }
     }
     else {
         cellTO.metadata.color = 0;
@@ -499,7 +522,13 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
         convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
     }
     if (cellChanges.metadata) {
-        cellTO.metadata.color = cellChanges.metadata->color;
+        auto& metadataTO = cellTO.metadata;
+        metadataTO.color = cellChanges.metadata->color;
+        metadataTO.sourceCodeLen = cellChanges.metadata->computerSourcecode.size();
+        if (metadataTO.sourceCodeLen > 0) {
+            metadataTO.sourceCodeStringIndex = convertStringAndReturnStringIndex(cellChanges.metadata->computerSourcecode);
+        }
+
     }
 }
 

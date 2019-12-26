@@ -19,6 +19,7 @@ struct CellMetadata
 
 	CellMetadata& setName(QString const& value) { name = value; return *this; }
     CellMetadata& setColor(quint8 value) { color = value; return *this; }
+    CellMetadata& setSourceCode(QString const& value) { computerSourcecode = value; return *this; }
 };
 
 struct ClusterMetadata

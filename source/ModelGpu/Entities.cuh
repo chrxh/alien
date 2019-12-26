@@ -2,6 +2,7 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
+#include "DynamicMemory.cuh"
 
 struct Entities
 {
@@ -15,6 +16,8 @@ struct Entities
     Array<Token> tokens;
     Array<Particle> particles;
 
+    DynamicMemory strings;
+
     void init(CudaConstants const& cudaConstants)
     {
         clusterPointers.init(cudaConstants.MAX_CLUSTERPOINTERS);
@@ -25,6 +28,7 @@ struct Entities
         tokens.init(cudaConstants.MAX_TOKENS);
         particles.init(cudaConstants.MAX_PARTICLES);
         particlePointers.init(cudaConstants.MAX_PARTICLEPOINTERS);
+        strings.init(cudaConstants.MAX_STRINGBYTES);
     }
 
     void free()
@@ -37,6 +41,7 @@ struct Entities
         tokens.free();
         particles.free();
         particlePointers.free();
+        strings.free();
     }
 };
 

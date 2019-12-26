@@ -33,6 +33,8 @@ private:
 	void applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& cluster);
 	void applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell);
 
+    int convertStringAndReturnStringIndex(QString const& s);
+
 private:
 	DataAccessTO& _dataTO;
 	NumberGenerator* _numberGen;
