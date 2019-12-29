@@ -9,6 +9,12 @@ struct CellMetadata
 {
     unsigned char color;
 
+    int nameLen;
+    char* name;
+
+    int descriptionLen;
+    char* description;
+
     int sourceCodeLen;
     char* sourceCode;
 };

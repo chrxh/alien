@@ -3,6 +3,12 @@
 #include "Base.cuh"
 #include "Cell.cuh"
 
+struct ClusterMetadata
+{
+    int nameLen;
+    char* name;
+};
+
 struct Cluster
 {
     uint64_t id;
@@ -15,6 +21,7 @@ struct Cluster
     Cell** cellPointers;
     int numTokenPointers;
     Token** tokenPointers;
+    ClusterMetadata metadata;
 
     //auxiliary data
     int decompositionRequired;  //0 = false, 1 = true

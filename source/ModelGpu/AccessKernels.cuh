@@ -11,8 +11,25 @@
 
 #include "SimulationData.cuh"
 
+__device__ void copyString(
+    int& targetLen,
+    int& targetStringIndex,
+    int sourceLen,
+    char* sourceString,
+    int& numStringBytes,
+    char*& stringBytes)
+{
+    targetLen = sourceLen;
+    if (sourceLen > 0) {
+        auto const& sourceCodeStringIndex = atomicAdd(&numStringBytes, sourceLen);
+        for (int i = 0; i < sourceLen; ++i) {
+            stringBytes[sourceCodeStringIndex + i] = sourceString[i];
+        }
+    }
+}
+
 __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
-    SimulationData data, DataAccessTO simulationTO)
+    SimulationData data, DataAccessTO dataTO)
 {
     auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock =
@@ -48,14 +65,14 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
             __shared__ TokenAccessTO* tokenTOs;
 
             if (0 == threadIdx.x) {
-                int clusterAccessIndex = atomicAdd(simulationTO.numClusters, 1);
-                cellTOIndex = atomicAdd(simulationTO.numCells, cluster->numCellPointers);
-                cellTOs = &simulationTO.cells[cellTOIndex];
+                int clusterAccessIndex = atomicAdd(dataTO.numClusters, 1);
+                cellTOIndex = atomicAdd(dataTO.numCells, cluster->numCellPointers);
+                cellTOs = &dataTO.cells[cellTOIndex];
 
-                tokenTOIndex = atomicAdd(simulationTO.numTokens, cluster->numTokenPointers);
-                tokenTOs = &simulationTO.tokens[tokenTOIndex];
+                tokenTOIndex = atomicAdd(dataTO.numTokens, cluster->numTokenPointers);
+                tokenTOs = &dataTO.tokens[tokenTOIndex];
 
-                ClusterAccessTO& clusterTO = simulationTO.clusters[clusterAccessIndex];
+                ClusterAccessTO& clusterTO = dataTO.clusters[clusterAccessIndex];
                 clusterTO.id = cluster->id;
                 clusterTO.pos = cluster->pos;
                 clusterTO.vel = cluster->vel;
@@ -65,6 +82,14 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 clusterTO.numTokens = cluster->numTokenPointers;
                 clusterTO.cellStartIndex = cellTOIndex;
                 clusterTO.tokenStartIndex = tokenTOIndex;
+
+                copyString(
+                    clusterTO.metadata.nameLen,
+                    clusterTO.metadata.nameStringIndex,
+                    cluster->metadata.nameLen,
+                    cluster->metadata.name,
+                    *dataTO.numStringBytes,
+                    dataTO.stringBytes);
             }
             __syncthreads();
 
@@ -84,14 +109,28 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 cellTO.numStaticBytes = cell.numStaticBytes;
                 cellTO.age = cell.age;
                 cellTO.metadata.color = cell.metadata.color;
-                auto const& sourceCodeLen = cell.metadata.sourceCodeLen;
-                cellTO.metadata.sourceCodeLen = sourceCodeLen;
-                if (cellTO.metadata.sourceCodeLen > 0) {
-                    auto const& sourceCodeStringIndex = atomicAdd(simulationTO.numStringBytes, sourceCodeLen);
-                    for (int i = 0; i < sourceCodeLen; ++i) {
-                        simulationTO.stringBytes[sourceCodeStringIndex + i] = cell.metadata.sourceCode[i];
-                    }
-                }
+
+                copyString(
+                    cellTO.metadata.nameLen,
+                    cellTO.metadata.nameStringIndex,
+                    cell.metadata.nameLen,
+                    cell.metadata.name,
+                    *dataTO.numStringBytes,
+                    dataTO.stringBytes);
+                copyString(
+                    cellTO.metadata.descriptionLen,
+                    cellTO.metadata.descriptionStringIndex,
+                    cell.metadata.descriptionLen,
+                    cell.metadata.description,
+                    *dataTO.numStringBytes,
+                    dataTO.stringBytes);
+                copyString(
+                    cellTO.metadata.sourceCodeLen,
+                    cellTO.metadata.sourceCodeStringIndex,
+                    cell.metadata.sourceCodeLen,
+                    cell.metadata.sourceCode,
+                    *dataTO.numStringBytes,
+                    dataTO.stringBytes);
 
                 for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
                     cellTO.staticData[i] = cell.staticData[i];

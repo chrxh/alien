@@ -48,16 +48,28 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 	cellMetadata.computerSourcecode = "code";
 	cellMetadata.description = "desc";
 	ClusterMetadata clusterMetadata;
-	clusterMetadata.name = "name2";
+    clusterMetadata.name = "name2";
 
-	return ClusterDescription().addCell(
-		CellDescription().setCellFeature(
-			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setConstData(code).setVolatileData(cellMemory)
-		).setId(cellId).setPos({ 1, 2 }).setEnergy(_parameters.cellMinEnergy*2).setFlagTokenBlocked(true).setMaxConnections(3).setMetadata(cellMetadata)
-		.setTokenBranchNumber(2).setTokens({
-			TokenDescription().setData(tokenMemory).setEnergy(89)
-	})
-	).setId(clusterId).setPos({ 1, 2 }).setVel({ -1, 1 }).setAngle(23).setAngularVel(1.2).setMetadata(clusterMetadata);
+    return ClusterDescription()
+        .addCell(CellDescription()
+            .setCellFeature(CellFeatureDescription()
+                .setType(Enums::CellFunction::COMPUTER)
+                .setConstData(code)
+                .setVolatileData(cellMemory))
+            .setId(cellId)
+            .setPos({ 1, 2 })
+            .setEnergy(_parameters.cellMinEnergy * 2)
+            .setFlagTokenBlocked(true)
+            .setMaxConnections(3)
+            .setMetadata(cellMetadata)
+            .setTokenBranchNumber(2)
+            .setTokens({ TokenDescription().setData(tokenMemory).setEnergy(89) }))
+        .setId(clusterId)
+        .setPos({ 1, 2 })
+        .setVel({ -1, 1 })
+        .setAngle(23)
+        .setAngularVel(1.2)
+        .setMetadata(clusterMetadata);
 }
 
 TokenDescription IntegrationTestFramework::createSimpleToken() const
