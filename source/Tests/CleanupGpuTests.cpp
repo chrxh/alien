@@ -31,7 +31,6 @@ ModelGpuData CleanupGpuTests::getModelDataForCleanup()
         ModelGpuData result;
         result.setNumThreadsPerBlock(64);
         result.setNumBlocks(64);
-        result.setNumClusterPointerArrays(1);
         result.setMaxClusters(1000);
         result.setMaxCells(1000);
         result.setMaxParticles(10000);

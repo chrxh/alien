@@ -75,28 +75,44 @@ DataDescription DataConverter::getDataDescription() const
 	unordered_map<int, int> cellIndexByCellTOIndex;
 	unordered_map<int, int> clusterIndexByCellTOIndex;
 	for (int i = 0; i < *_dataTO.numClusters; ++i) {
-		ClusterAccessTO const& cluster = _dataTO.clusters[i];
-		auto clusterDesc = ClusterDescription().setId(cluster.id).setPos({ cluster.pos.x, cluster.pos.y })
-			.setVel({ cluster.vel.x, cluster.vel.y })
-			.setAngle(cluster.angle)
-			.setAngularVel(cluster.angularVel).setMetadata(ClusterMetadata());
+		ClusterAccessTO const& clusterTO = _dataTO.clusters[i];
 
-		for (int j = 0; j < cluster.numCells; ++j) {
-			CellAccessTO const& cellTO = _dataTO.cells[cluster.cellStartIndex + j];
+        auto metadata = ClusterMetadata();
+        auto const metadataTO = clusterTO.metadata;
+        if (metadataTO.nameLen > 0) {
+            auto const name = QString::fromLatin1(&_dataTO.stringBytes[metadataTO.nameStringIndex], metadataTO.nameLen);
+            metadata.setName(name);
+        }
+
+		auto clusterDesc = ClusterDescription().setId(clusterTO.id).setPos({ clusterTO.pos.x, clusterTO.pos.y })
+			.setVel({ clusterTO.vel.x, clusterTO.vel.y })
+			.setAngle(clusterTO.angle)
+			.setAngularVel(clusterTO.angularVel).setMetadata(metadata);
+
+		for (int j = 0; j < clusterTO.numCells; ++j) {
+			CellAccessTO const& cellTO = _dataTO.cells[clusterTO.cellStartIndex + j];
 			auto pos = cellTO.pos;
 			auto id = cellTO.id;
 			connectingCellIds.clear();
 			for (int i = 0; i < cellTO.numConnections; ++i) {
 				connectingCellIds.emplace_back(_dataTO.cells[cellTO.connectionIndices[i]].id);
 			}
-			cellIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, j);
-			clusterIndexByCellTOIndex.insert_or_assign(cluster.cellStartIndex + j, i);
+			cellIndexByCellTOIndex.insert_or_assign(clusterTO.cellStartIndex + j, j);
+			clusterIndexByCellTOIndex.insert_or_assign(clusterTO.cellStartIndex + j, i);
 
             auto feature = CellFeatureDescription().setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
                 .setConstData(convertToQByteArray(cellTO.staticData, cellTO.numStaticBytes)).setVolatileData(convertToQByteArray(cellTO.mutableData, cellTO.numMutableBytes));
 
-            auto const metadataTO = cellTO.metadata;
+            auto const& metadataTO = cellTO.metadata;
             auto metadata = CellMetadata().setColor(metadataTO.color);
+            if (metadataTO.nameLen > 0) {
+                auto const name = QString::fromLatin1(&_dataTO.stringBytes[metadataTO.nameStringIndex], metadataTO.nameLen);
+                metadata.setName(name);
+            }
+            if (metadataTO.descriptionLen > 0) {
+                auto const description = QString::fromLatin1(&_dataTO.stringBytes[metadataTO.descriptionStringIndex], metadataTO.descriptionLen);
+                metadata.setDescription(description);
+            }
             if (metadataTO.sourceCodeLen > 0) {
                 auto const sourceCode = QString::fromLatin1(&_dataTO.stringBytes[metadataTO.sourceCodeStringIndex], metadataTO.sourceCodeLen);
                 metadata.setSourceCode(sourceCode);
@@ -155,7 +171,14 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 	clusterTO.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
 	clusterTO.numTokens = 0;	//will be incremented in addCell
 	clusterTO.tokenStartIndex = *_dataTO.numTokens;
-	unordered_map<uint64_t, int> cellIndexByIds;
+    if (clusterDesc.metadata) {
+        auto& metadataTO = clusterTO.metadata;
+        metadataTO.nameLen = clusterDesc.metadata->name.size();
+        if (metadataTO.nameLen > 0) {
+            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(clusterDesc.metadata->name);
+        }
+    }
+    unordered_map<uint64_t, int> cellIndexByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
 		addCell(cellDesc, clusterDesc, clusterTO, cellIndexByIds);
@@ -420,6 +443,14 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
     if (cellDesc.metadata) {
         auto& metadataTO = cellTO.metadata;
         metadataTO.color = cellDesc.metadata->color;
+        metadataTO.nameLen = cellDesc.metadata->name.size();
+        if (metadataTO.nameLen > 0) {
+            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(cellDesc.metadata->name);
+        }
+        metadataTO.descriptionLen = cellDesc.metadata->description.size();
+        if (metadataTO.descriptionLen > 0) {
+            metadataTO.descriptionStringIndex = convertStringAndReturnStringIndex(cellDesc.metadata->description);
+        }
         metadataTO.sourceCodeLen = cellDesc.metadata->computerSourcecode.size();
         if (metadataTO.sourceCodeLen > 0) {
             metadataTO.sourceCodeStringIndex = convertStringAndReturnStringIndex(cellDesc.metadata->computerSourcecode);
@@ -483,22 +514,29 @@ void DataConverter::applyChangeDescription(ParticleChangeDescription const& part
     }
 }
 
-void DataConverter::applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& cluster)
+void DataConverter::applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& clusterTO)
 {
 	if (clusterChanges.pos) {
 		QVector2D newPos = clusterChanges.pos.getValue();
-		convert(newPos, cluster.pos);
+		convert(newPos, clusterTO.pos);
 	}
 	if (clusterChanges.vel) {
 		QVector2D newVel = clusterChanges.vel.getValue();
-		convert(newVel, cluster.vel);
+		convert(newVel, clusterTO.vel);
 	}
 	if (clusterChanges.angle) {
-		cluster.angle = clusterChanges.angle.getValue();
+		clusterTO.angle = clusterChanges.angle.getValue();
 	}
 	if (clusterChanges.angularVel) {
-		cluster.angularVel = clusterChanges.angularVel.getValue();
+		clusterTO.angularVel = clusterChanges.angularVel.getValue();
 	}
+    if (clusterChanges.metadata) {
+        auto& metadataTO = clusterTO.metadata;
+        metadataTO.nameLen = clusterChanges.metadata->name.size();
+        if (metadataTO.nameLen > 0) {
+            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(clusterChanges.metadata->name);
+        }
+    }
 }
 
 void DataConverter::applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cellTO)
@@ -524,6 +562,14 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
     if (cellChanges.metadata) {
         auto& metadataTO = cellTO.metadata;
         metadataTO.color = cellChanges.metadata->color;
+        metadataTO.nameLen = cellChanges.metadata->name.size();
+        if (metadataTO.nameLen > 0) {
+            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(cellChanges.metadata->name);
+        }
+        metadataTO.descriptionLen = cellChanges.metadata->description.size();
+        if (metadataTO.descriptionLen > 0) {
+            metadataTO.descriptionStringIndex = convertStringAndReturnStringIndex(cellChanges.metadata->description);
+        }
         metadataTO.sourceCodeLen = cellChanges.metadata->computerSourcecode.size();
         if (metadataTO.sourceCodeLen > 0) {
             metadataTO.sourceCodeStringIndex = convertStringAndReturnStringIndex(cellChanges.metadata->computerSourcecode);

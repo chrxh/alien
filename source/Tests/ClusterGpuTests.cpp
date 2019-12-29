@@ -922,7 +922,6 @@ namespace
         ModelGpuData result;
         result.setNumThreadsPerBlock(256);
         result.setNumBlocks(32);
-        result.setNumClusterPointerArrays(1);
         result.setMaxClusters(100000);
         result.setMaxCells(500000);
         result.setMaxParticles(500000);
@@ -1018,7 +1017,6 @@ namespace
         ModelGpuData result;
         result.setNumThreadsPerBlock(16);
         result.setNumBlocks(1);
-        result.setNumClusterPointerArrays(1);
         result.setMaxClusters(100000);
         result.setMaxCells(500000);
         result.setMaxParticles(500000);
