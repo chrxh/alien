@@ -178,6 +178,9 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
             metadataTO.nameStringIndex = convertStringAndReturnStringIndex(clusterDesc.metadata->name);
         }
     }
+    else {
+        clusterTO.metadata.nameLen = 0;
+    }
     unordered_map<uint64_t, int> cellIndexByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
@@ -458,6 +461,9 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
     }
     else {
         cellTO.metadata.color = 0;
+        cellTO.metadata.nameLen = 0;
+        cellTO.metadata.descriptionLen = 0;
+        cellTO.metadata.sourceCodeLen= 0;
     }
 
 	if (cellDesc.tokens) {
@@ -574,7 +580,6 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
         if (metadataTO.sourceCodeLen > 0) {
             metadataTO.sourceCodeStringIndex = convertStringAndReturnStringIndex(cellChanges.metadata->computerSourcecode);
         }
-
     }
 }
 

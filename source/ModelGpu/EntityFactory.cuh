@@ -29,7 +29,7 @@ public:
         float2 const& pos,
         float2 const& vel,
         ParticleMetadata const& metadata);  //TODO: not adding to simulation!
-    __inline__ __device__ Cluster* createCluster();
+    __inline__ __device__ Cluster* createCluster(Cluster** clusterPointerToReuse = nullptr);
     __inline__ __device__ void createClusterFromTO_blockCall(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
@@ -50,10 +50,13 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
     _map.init(data->size);
 }
 
-__inline__ __device__ Cluster * EntityFactory::createCluster()
+__inline__ __device__ Cluster * EntityFactory::createCluster(Cluster** clusterPointerToReuse)
 {
     auto result = _data->entities.clusters.getNewElement();
     result->metadata.nameLen = 0;
+
+    auto newClusterPointer = clusterPointerToReuse ? clusterPointerToReuse : _data->entities.clusterPointers.getNewElement();
+    *newClusterPointer = result;
     return result;
 }
 
@@ -316,6 +319,7 @@ EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, in
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
+        printf("len: %d\n", sourceLen);
         targetString = _data->entities.strings.getArray<char>(sourceLen);
         for (int i = 0; i < sourceLen; ++i) {
             targetString[i] = stringBytes[sourceStringIndex + i];
