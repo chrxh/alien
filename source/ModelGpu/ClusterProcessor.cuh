@@ -596,9 +596,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto newClusterPointer = _data->entities.clusterPointers.getNewElement();
         auto const newCluster = factory.createCluster();;
-        *newClusterPointer = newCluster;
 
         newClusters[index] = newCluster;
         *newClusters[index] = entries[index].cluster;
@@ -654,9 +652,10 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         __shared__ Cluster* otherCluster;
         __shared__ float2 correction;
         if (0 == threadIdx.x) {
+            EntityFactory factory;
+            factory.init(_data);
             otherCluster = _cluster->clusterToFuse;
-            newCluster = _data->entities.clusters.getNewElement();
-            *_clusterPointer = newCluster;
+            newCluster = factory.createCluster(_clusterPointer);
 
             newCluster->id = _cluster->id;
             newCluster->angle = 0.0f;
