@@ -18,7 +18,6 @@ protected:
         ModelGpuData data;
         data.setNumThreadsPerBlock(64 * 2);
         data.setNumBlocks(64);
-        data.setNumClusterPointerArrays(1);
         data.setMaxClusters(100);
         data.setMaxCells(500);
         data.setMaxParticles(500);

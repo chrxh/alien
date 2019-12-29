@@ -29,10 +29,15 @@ public:
         float2 const& pos,
         float2 const& vel,
         ParticleMetadata const& metadata);  //TODO: not adding to simulation!
+    __inline__ __device__ Cluster* createCluster();
     __inline__ __device__ void createClusterFromTO_blockCall(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
     __inline__ __device__ Cluster* createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
+
+private:
+    __inline__ __device__ void
+    copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes);
 };
 
 /************************************************************************/
@@ -43,6 +48,13 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
 {
     _data = data;
     _map.init(data->size);
+}
+
+__inline__ __device__ Cluster * EntityFactory::createCluster()
+{
+    auto result = _data->entities.clusters.getNewElement();
+    result->metadata.nameLen = 0;
+    return result;
 }
 
 __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
@@ -73,6 +85,13 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         cluster->numTokenPointers = clusterTO.numTokens;
         cluster->tokenPointers = _data->entities.tokenPointers.getNewSubarray(cluster->numTokenPointers);
         tokens = _data->entities.tokens.getNewSubarray(cluster->numTokenPointers);
+
+        copyString(
+            cluster->metadata.nameLen,
+            cluster->metadata.name,
+            clusterTO.metadata.nameLen,
+            clusterTO.metadata.nameStringIndex,
+            simulationTO->stringBytes);
 
         cluster->decompositionRequired = 0;
         cluster->locked = 0;
@@ -135,15 +154,27 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         }
         cell.age = cellTO.age;
         cell.metadata.color = cellTO.metadata.color;
-        auto const sourceCodeLen = cellTO.metadata.sourceCodeLen;
-        cell.metadata.sourceCodeLen = sourceCodeLen;
-        if (cell.metadata.sourceCodeLen > 0) {
-            auto const& sourceCodeStringIndex = cellTO.metadata.sourceCodeStringIndex;
-            cell.metadata.sourceCode = _data->entities.strings.getArray<char>(sourceCodeLen);
-            for (int i = 0; i < sourceCodeLen; ++i) {
-                cell.metadata.sourceCode[i] = simulationTO->stringBytes[sourceCodeStringIndex + i];
-            }
-        }
+
+        copyString(
+            cell.metadata.nameLen,
+            cell.metadata.name,
+            cellTO.metadata.nameLen,
+            cellTO.metadata.nameStringIndex,
+            simulationTO->stringBytes);
+
+        copyString(
+            cell.metadata.descriptionLen,
+            cell.metadata.description,
+            cellTO.metadata.descriptionLen,
+            cellTO.metadata.descriptionStringIndex,
+            simulationTO->stringBytes);
+
+        copyString(
+            cell.metadata.sourceCodeLen,
+            cell.metadata.sourceCode,
+            cellTO.metadata.sourceCodeLen,
+            cellTO.metadata.sourceCodeStringIndex,
+            simulationTO->stringBytes);
 
         cell.protectionCounter = 0;
         cell.alive = 1;
@@ -182,6 +213,8 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->protectionCounter = 0;
     result->alive = 1;
     result->metadata.color = 0;
+    result->metadata.nameLen = 0;
+    result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
     return result;
 }
@@ -230,6 +263,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cluster->cellPointers = cellPointers;
     *cellPointers = cell;
     cluster->numTokenPointers = 0;
+    cluster->metadata.nameLen = 0;
 
     cluster->clusterToFuse = nullptr;
     cluster->locked = 0;
@@ -249,6 +283,8 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->protectionCounter = 0;
     cell->locked = 0;
     cell->metadata.color = 0;
+    cell->metadata.nameLen = 0;
+    cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
     cell->setCellFunctionType(_data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1));
     switch (cell->getCellFunctionType()) {
@@ -273,6 +309,18 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     }
     cell->age = 0;
     return cluster;
+}
+
+__inline__ __device__ void
+EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes)
+{
+    targetLen = sourceLen;
+    if (sourceLen > 0) {
+        targetString = _data->entities.strings.getArray<char>(sourceLen);
+        for (int i = 0; i < sourceLen; ++i) {
+            targetString[i] = stringBytes[sourceStringIndex + i];
+        }
+    }
 }
 
 __inline__ __device__ Particle*

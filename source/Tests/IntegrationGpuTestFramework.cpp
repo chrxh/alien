@@ -15,7 +15,6 @@ IntegrationGpuTestFramework::IntegrationGpuTestFramework(
     else {
         data.setNumThreadsPerBlock(64*2);
         data.setNumBlocks(64);
-        data.setNumClusterPointerArrays(1);
         data.setMaxClusters(100000);
         data.setMaxCells(500000);
         data.setMaxParticles(500000);

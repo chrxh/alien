@@ -34,6 +34,12 @@ struct CellMetadataAccessTO
 {
     unsigned char color;
 
+    int nameLen;
+    int nameStringIndex;
+
+    int descriptionLen;
+    int descriptionStringIndex;
+
     int sourceCodeLen;
     int sourceCodeStringIndex;
 };
@@ -57,6 +63,12 @@ struct CellAccessTO
     CellMetadataAccessTO metadata;
 };
 
+struct ClusterMetadataAccessTO
+{
+    int nameLen;
+    int nameStringIndex;
+};
+
 struct ClusterAccessTO
 {
 	uint64_t id;
@@ -68,6 +80,7 @@ struct ClusterAccessTO
 	int cellStartIndex;
 	int numTokens;
 	int tokenStartIndex;
+    ClusterMetadataAccessTO metadata;
 };
 
 struct DataAccessTO

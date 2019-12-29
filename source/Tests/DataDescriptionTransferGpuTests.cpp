@@ -37,7 +37,7 @@ DataDescriptionTransferGpuTests::DataDescriptionTransferGpuTests()
 {
 }
 
-TEST_F(DataDescriptionTransferGpuTests, DISABLED_testCreateClusterWithCompleteCell)
+TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
