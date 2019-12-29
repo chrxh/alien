@@ -579,7 +579,13 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
     __syncthreads();
 
     __shared__ Cluster* newClusters[MAX_DECOMPOSITIONS];
-    PartitionData decompositionBlock = 
+    __shared__ EntityFactory factory;
+    if (0 == threadIdx.x) {
+        factory.init(_data);
+    }
+    __syncthreads();
+
+    PartitionData decompositionBlock =
         calcPartition(numDecompositions, threadIdx.x, blockDim.x);
     for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
         auto numCells = entries[index].cluster.numCellPointers;
@@ -591,7 +597,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         entries[index].cluster.numCellPointers = 0;
         
         auto newClusterPointer = _data->entities.clusterPointers.getNewElement();
-        auto newCluster = _data->entities.clusters.getNewElement();
+        auto const newCluster = factory.createCluster();;
         *newClusterPointer = newCluster;
 
         newClusters[index] = newCluster;
