@@ -265,6 +265,53 @@ __global__ void cleanupParticleMap(SimulationData data)
     data.particleMap.cleanup_gridCall();
 }
 
+__global__ void cleanupMetadata(SimulationData data)
+{
+    auto& clusters = data.entities.clusterPointers;
+    auto const clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        auto& cluster = clusters.at(clusterIndex);
+
+        if (0 == threadIdx.x) {
+            auto const len = cluster->metadata.nameLen;
+            auto newName = data.entitiesForCleanup.strings.getArray<char>(len);
+            for(int i = 0; i < len; ++i) {
+                newName[i] = cluster->metadata.name[i];
+            }
+            cluster->metadata.name = newName;
+        }
+
+        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+        for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
+            auto& cell = cluster->cellPointers[cellIndex];
+            {
+                auto const len = cell->metadata.nameLen;
+                auto newName = data.entitiesForCleanup.strings.getArray<char>(len);
+                for (int i = 0; i < len; ++i) {
+                    newName[i] = cell->metadata.name[i];
+                }
+                cell->metadata.name = newName;
+            }
+            {
+                auto const len = cell->metadata.descriptionLen;
+                auto newDescription = data.entitiesForCleanup.strings.getArray<char>(len);
+                for (int i = 0; i < len; ++i) {
+                    newDescription[i] = cell->metadata.description[i];
+                }
+                cell->metadata.description = newDescription;
+            }
+            {
+                auto const len = cell->metadata.sourceCodeLen;
+                auto newSourceCode = data.entitiesForCleanup.strings.getArray<char>(len);
+                for (int i = 0; i < len; ++i) {
+                    newSourceCode[i] = cell->metadata.sourceCode[i];
+                }
+                cell->metadata.sourceCode = newSourceCode;
+            }
+        }
+    }
+}
+
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
@@ -273,46 +320,52 @@ __global__ void cleanup(SimulationData data)
 {
     data.entitiesForCleanup.clusterPointers.reset();
     KERNEL_CALL(cleanupClusterPointers, data);
-    data.entities.clusterPointers.swapArray(data.entitiesForCleanup.clusterPointers);
+    data.entities.clusterPointers.swapContent(data.entitiesForCleanup.clusterPointers);
 
     data.entitiesForCleanup.particlePointers.reset();
     KERNEL_CALL(cleanupParticlePointers, data);
-    data.entities.particlePointers.swapArray(data.entitiesForCleanup.particlePointers);
+    data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
     if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
         KERNEL_CALL(cleanupParticles, data);
-        data.entities.particles.swapArray(data.entitiesForCleanup.particles);
+        data.entities.particles.swapContent(data.entitiesForCleanup.particles);
     }
 
     if (data.entities.clusters.getNumEntries() > cudaConstants.MAX_CLUSTERS * FillLevelFactor) {
         data.entitiesForCleanup.clusters.reset();
         KERNEL_CALL(cleanupClusters, data);
-        data.entities.clusters.swapArray(data.entitiesForCleanup.clusters);
+        data.entities.clusters.swapContent(data.entitiesForCleanup.clusters);
     }
 
     if (data.entities.cellPointers.getNumEntries() > cudaConstants.MAX_CELLPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.cellPointers.reset();
         KERNEL_CALL(cleanupCellPointers, data);
-        data.entities.cellPointers.swapArray(data.entitiesForCleanup.cellPointers);
+        data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
     }
 
     if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
         data.entitiesForCleanup.cells.reset();
         KERNEL_CALL(cleanupCells, data);
-        data.entities.cells.swapArray(data.entitiesForCleanup.cells);
+        data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     }
 
     if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.tokenPointers.reset();
         KERNEL_CALL(cleanupTokenPointers, data);
-        data.entities.tokenPointers.swapArray(data.entitiesForCleanup.tokenPointers);
+        data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
     }
 
     if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
         data.entitiesForCleanup.tokens.reset();
         KERNEL_CALL(cleanupTokens, data);
-        data.entities.tokens.swapArray(data.entitiesForCleanup.tokens);
+        data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
+    }
+
+    if (data.entities.strings.getNumBytes() > cudaConstants.MAX_STRINGBYTES * FillLevelFactor) {
+        data.entitiesForCleanup.strings.reset();
+        KERNEL_CALL(cleanupMetadata, data);
+        data.entities.strings.swapContent(data.entitiesForCleanup.strings);
     }
 
     KERNEL_CALL(cleanupCellMap, data);

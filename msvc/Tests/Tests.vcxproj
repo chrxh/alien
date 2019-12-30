@@ -277,6 +277,7 @@
     <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTests.cpp" />
     <ClCompile Include="..\..\source\Tests\IntegrationTestFramework.cpp" />
+    <ClCompile Include="..\..\source\Tests\IntegrationTestHelper.cpp" />
     <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp" />
     <ClCompile Include="..\..\source\Tests\MultithreadingTests.cpp" />
     <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp" />
