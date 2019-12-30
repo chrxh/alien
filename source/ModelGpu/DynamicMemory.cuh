@@ -54,5 +54,14 @@ public:
         return reinterpret_cast<T*>(&(*_data)[oldIndex]);
     }
 
+    __device__ __inline__ int getNumBytes() { return *_bytesOccupied; }
+
     __device__ __inline__ void reset() { *_bytesOccupied = 0; }
+
+    __device__ __inline__ void swapContent(DynamicMemory& other)
+    {
+        swap(*_bytesOccupied, *other._bytesOccupied);
+        swap(*_data, *other._data);
+    }
+
 };
