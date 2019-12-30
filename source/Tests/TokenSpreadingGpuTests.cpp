@@ -490,14 +490,14 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 	DataDescription origData;
 	auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
 
-	auto firstCluster = createHorizontalCluster(2, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }, 0.0);
+	auto firstCluster = createHorizontalCluster(2, QVector2D{ 100, 100.5 }, QVector2D{ 0, 0 }, 0.0);
 	firstCluster.cells->at(0).tokenBranchNumber = 0;
 	firstCluster.cells->at(1).tokenBranchNumber = 1;
 	firstCluster.cells->at(0).addToken(createSimpleToken());
 	setMaxConnections(firstCluster, 2);
 	origData.addCluster(firstCluster);
 
-	auto secondCluster = createHorizontalCluster(2, QVector2D{ 102, 100 }, QVector2D{ 0, -velocity }, 0.0);
+	auto secondCluster = createHorizontalCluster(2, QVector2D{ 102, 100.5 }, QVector2D{ 0, -velocity }, 0.0);
 	secondCluster.cells->at(0).tokenBranchNumber = 0;
 	secondCluster.cells->at(1).tokenBranchNumber = 1;
 	secondCluster.cells->at(0).addToken(createSimpleToken());
