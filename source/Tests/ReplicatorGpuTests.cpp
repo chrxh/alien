@@ -21,6 +21,7 @@ namespace
         result.setMaxParticlePointers(2000000 * 10);
         result.setMaxTokenPointers(500000 * 10);
         result.setDynamicMemorySize(200000000);
+        result.setStringByteSize(10000000);
         return result;
     }
 }

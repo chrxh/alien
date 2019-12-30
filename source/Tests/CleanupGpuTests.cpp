@@ -40,6 +40,7 @@ ModelGpuData CleanupGpuTests::getModelDataForCleanup()
         result.setMaxParticlePointers(10000);
         result.setMaxTokenPointers(1000);
         result.setDynamicMemorySize(1000000);
+        result.setStringByteSize(10000);
         return result;
     }
 }
@@ -223,14 +224,14 @@ TEST_F(CleanupGpuTests, testCleanupMetadata)
     data.addCluster(createSingleCellCluster(_numberGen->getId(), _numberGen->getId()));
 
     DataDescription dataRead;
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataRead, data)));
         dataRead = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
         isCompatible(data, dataRead);
 
         //generate new metadata
         data.clusters->at(0).cells->at(0).setMetadata(
-            CellMetadata().setSourceCode(QString(1000, QChar('d')) + QString("%1").arg(i)));
+            CellMetadata().setSourceCode(QString(100, QChar('d')) + QString("%1").arg(i)));
         *data.clusters->at(0).cells->at(0).energy = i;
     }
 }

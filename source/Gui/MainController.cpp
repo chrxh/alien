@@ -284,6 +284,7 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
         data.setMaxParticlePointers(configGpu->maxParticles * 10);
         data.setMaxTokenPointers(configGpu->maxTokens * 10);
         data.setDynamicMemorySize(configGpu->dynamicMemorySize);
+        data.setStringByteSize(1000000);
 
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}
@@ -359,6 +360,7 @@ void MainController::onRecreateSimulation(SimulationConfig const& config)
         data.setMaxParticlePointers(configGpu->maxParticles * 10);
         data.setMaxTokenPointers(configGpu->maxTokens*10);
         data.setDynamicMemorySize(configGpu->dynamicMemorySize);
+        data.setStringByteSize(1000000);
 
         Serializer::Settings settings{ configGpu->universeSize, data.getData() };
         _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
