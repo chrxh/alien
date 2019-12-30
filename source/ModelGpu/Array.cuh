@@ -41,7 +41,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_numEntries);
     }
 
-    __device__ __inline__ void swapArray(Array& other)
+    __device__ __inline__ void swapContent(Array& other)
     {
         swap(*_numEntries, *other._numEntries);
         swap(*_data, *other._data);
