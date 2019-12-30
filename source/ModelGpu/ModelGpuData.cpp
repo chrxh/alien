@@ -16,6 +16,7 @@ namespace
     string const maxParticlePointers_key = "maxParticlePointers";
     string const maxTokenPointers_key = "maxTokenPointers";
     string const dynamicMemorySize_key = "dynamicMemorySize";
+    string const stringByteSize_key = "stringByteSize";
 }
 
 
@@ -42,6 +43,7 @@ CudaConstants ModelGpuData::getCudaConstants() const
     result.MAX_PARTICLEPOINTERS = _data.at(maxParticlePointers_key);
     result.MAX_TOKENPOINTERS = _data.at(maxTokenPointers_key);
     result.DYNAMIC_MEMORY_SIZE = _data.at(dynamicMemorySize_key);
+    result.MAX_STRINGBYTES = _data.at(stringByteSize_key);
     return result;
 }
 
@@ -133,6 +135,11 @@ void ModelGpuData::setMaxParticlePointers(int value)
 void ModelGpuData::setMaxTokenPointers(int value)
 {
     _data.insert_or_assign(maxTokenPointers_key, value);
+}
+
+void ModelGpuData::setStringByteSize(int value)
+{
+    _data.insert_or_assign(stringByteSize_key, value);
 }
 
 map<string, int> ModelGpuData::getData() const
