@@ -529,6 +529,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
             entries[i].cluster.decompositionRequired = 0;
             entries[i].cluster.clusterToFuse = nullptr;
             entries[i].cluster.locked = 0;
+            entries[i].cluster.metadata.nameLen = 0;
         }
     }
     __syncthreads();
