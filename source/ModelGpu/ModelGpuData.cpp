@@ -16,7 +16,7 @@ namespace
     string const maxParticlePointers_key = "maxParticlePointers";
     string const maxTokenPointers_key = "maxTokenPointers";
     string const dynamicMemorySize_key = "dynamicMemorySize";
-    string const stringByteSize_key = "stringByteSize";
+    string const stringByteSize_key = "stringByteSize";     //not contained in old simulation files
 }
 
 
