@@ -4,7 +4,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/Physics.h"
-#include "PhysicalQuantityConverter.h"
+#include "ModelBasic/QuantityConverter.h"
 #include "Cell.h"
 #include "Cluster.h"
 #include "Token.h"
@@ -92,7 +92,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
 	ProcessingResult processingResult{ false, 0 };
 	auto& tokenMem = token->getMemoryRef();
 	int n = tokenMem[Enums::Scanner::INOUT_CELL_NUMBER];
-    quint64 tag(numberGen->getTag());
+    quint64 tag(numberGen->getId());
     Cell* scanCellPre1 = previousCell;
     Cell* scanCellPre2 = previousCell;
     Cell* scanCell = cell;
@@ -112,7 +112,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
         tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
 
         //prove whether finished or not
-        tag = numberGen->getTag();
+        tag = numberGen->getId();
         Cell* scanCellPreTemp1 = previousCell;
         Cell* scanCellPreTemp2 = previousCell;
         Cell* scanCellTemp = cell;
@@ -132,7 +132,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPosition() - scanCellPre1->getRelPosition()).length();
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = PhysicalQuantityConverter::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
     //further cell
@@ -142,12 +142,12 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
         qreal a1 = Physics::angleOfVector(scanCellPre2->getRelPosition() - scanCellPre1->getRelPosition());
         qreal a2 = Physics::angleOfVector(-scanCell->getRelPosition() + scanCellPre1->getRelPosition());
         qreal angle = a1 - a2;
-        tokenMem[Enums::Scanner::OUT_ANGLE] = PhysicalQuantityConverter::convertAngleToData(angle);
+        tokenMem[Enums::Scanner::OUT_ANGLE] = QuantityConverter::convertAngleToData(angle);
 //        qDebug("-> v: %f, n: %f", -angle, convertDataToAngle(convertAngleToData(-angle)));
 
         //calc dist from cell n to cell n-1
         qreal len = (scanCell->getRelPosition() - scanCellPre1->getRelPosition()).length();
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = PhysicalQuantityConverter::convertShiftLenToData(len);
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
     }
 
     //scan cell
@@ -164,7 +164,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
     QByteArray data = scanCellFunction->getInternalData();
 	tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = data.size();
 	tokenMem.replace(Enums::Scanner::OUT_CELL_FUNCTION_DATA + 1, data.size(), data);
-	tokenMem.left(_context->getSimulationParameters()->tokenMemorySize);
+	tokenMem.left(_context->getSimulationParameters().tokenMemorySize);
 
     //scan cluster
     quint32 mass = qFloor(cell->getCluster()->getMass());

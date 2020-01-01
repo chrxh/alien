@@ -12,19 +12,20 @@ public:
 	MonitorController(QWidget* parent = nullptr);
 	virtual ~MonitorController() = default;
 
-	virtual void init(SimulationMonitor* simMonitor);
+	virtual void init(MainController* mainController);
 
 	virtual void onShow(bool show);
 
 	Q_SIGNAL void closed();
 
 private:
+	Q_SLOT void timerTimeout();
 	Q_SLOT void dataReadyToRetrieve();
 
 	MonitorView* _view = nullptr;
 	QTimer* _updateTimer = nullptr;
 	MonitorModel _model;
-	SimulationMonitor* _simMonitor = nullptr;
+	MainController* _mainController = nullptr;
 
-	list<QMetaObject::Connection> _connections;
+	list<QMetaObject::Connection> _monitorConnections;
 };

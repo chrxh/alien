@@ -13,7 +13,7 @@ public:
 
 	virtual void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-		, MonitorController* monitor, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator);
+		, MonitorController* monitor, DataRepository* repository, Notifier* notifier);
 
 	virtual ActionHolder* getActionHolder();
 
@@ -65,6 +65,8 @@ private:
 	Q_SLOT void onRandomMultiplier();
 	Q_SLOT void onGridMultiplier();
 
+    Q_SLOT void onMostFrequentCluster();
+
 	Q_SLOT void onShowAbout();
 	Q_SLOT void onShowDocumentation(bool show);
 
@@ -73,7 +75,7 @@ private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 
 private:
-	void settingUpNewSimulation();
+	void settingUpNewSimulation(SimulationConfig const& config);
 	void updateZoomFactor();
 	void updateActionsEnableState();
 

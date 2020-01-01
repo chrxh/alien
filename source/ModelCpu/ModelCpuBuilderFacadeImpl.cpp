@@ -2,6 +2,7 @@
 #include "Base/NumberGenerator.h"
 #include "Base/ServiceLocator.h"
 
+#include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/Settings.h"
@@ -29,9 +30,8 @@
 #include "AccessPortFactory.h"
 #include "ModelCpuData.h"
 
-#include "SimulationMonitorImpl.h"
+#include "SimulationMonitorCpuImpl.h"
 #include "SimulationControllerCpuImpl.h"
-#include "CellComputerCompilerImpl.h"
 #include "ModelCpuBuilderFacadeImpl.h"
 
 namespace
@@ -43,11 +43,13 @@ SimulationControllerCpu * ModelCpuBuilderFacadeImpl::buildSimulationController(C
 	, ModelCpuData const& specificData
 	, uint timestepAtBeginning) const
 {
-	ContextFactory* contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
-	GlobalFactory* globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto contextFactory = ServiceLocator::getInstance().getService<ContextFactory>();
+	auto globalFactory = ServiceLocator::getInstance().getService<GlobalFactory>();
+	auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	SimulationContextCpuImpl* context = contextFactory->buildSimulationContext();
 
-	auto compiler = contextFactory->buildCellComputerCompiler();
+
+	auto compiler = basicFacade->buildCellComputerCompiler(config.symbolTable, config.parameters);
 	auto threads = contextFactory->buildSimulationThreads();
 	auto grid = contextFactory->buildSimulationGrid();
 	auto spaceProp = new SpaceProperties();
@@ -56,7 +58,6 @@ SimulationControllerCpu * ModelCpuBuilderFacadeImpl::buildSimulationController(C
 	spaceProp->init(config.universeSize);
 	threads->init(specificData.getMaxRunningThreads());
 	grid->init(gridSize, spaceProp);
-	compiler->init(config.symbolTable, config.parameters);
 	context->init(spaceProp, grid, threads, config.symbolTable, config.parameters, compiler);
 
 	for (int x = 0; x < gridSize.x; ++x) {
@@ -97,9 +98,9 @@ SimulationAccessCpu * ModelCpuBuilderFacadeImpl::buildSimulationAccess() const
 	return factory->buildSimulationAccess();;
 }
 
-SimulationMonitor * ModelCpuBuilderFacadeImpl::buildSimulationMonitor() const
+SimulationMonitorCpu * ModelCpuBuilderFacadeImpl::buildSimulationMonitor() const
 {
-	return new SimulationMonitorImpl();
+	return new SimulationMonitorCpuImpl();
 }
 
 Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, SimulationContextCpuImpl* context) const
@@ -116,7 +117,7 @@ Unit * ModelCpuBuilderFacadeImpl::buildSimulationUnit(IntVector2D gridPos, Simul
 	auto compartment = contextFactory->buildMapCompartment();
 	auto cellMap = contextFactory->buildCellMap();
 	auto energyMap = contextFactory->buildEnergyParticleMap();
-	auto parameters = context->getSimulationParameters()->clone();
+	auto parameters = context->getSimulationParameters();
 	uint16_t threadId = gridPos.x + gridPos.y * grid->getSize().x + 1;
 	numberGen->init(ARRAY_SIZE_FOR_RANDOM_NUMBERS, threadId);
 	compartment->init(grid->calcCompartmentRect(gridPos));

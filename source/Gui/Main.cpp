@@ -12,7 +12,10 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/ModelBasicServices.h"
+
 #include "ModelCpu/ModelCpuServices.h"
+
+#include "ModelGpu/ModelGpuServices.h"
 
 #include "Gui/MainController.h"
 
@@ -42,7 +45,8 @@ int main(int argc, char *argv[])
 
 	ModelBasicServices modelBasicServices;
 	ModelCpuServices modelCpuServices;
-/*
+	ModelGpuServices modelGpuServices;
+	/*
 	ModelBuilderFacade* cpuFacade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
 	auto symbols = cpuFacade->buildDefaultSymbolTable();
 	auto parameters = cpuFacade->buildDefaultSimulationParameters();

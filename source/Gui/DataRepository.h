@@ -13,7 +13,7 @@ public:
 	virtual ~DataRepository() = default;
 
 	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector
-		, SimulationContext* context, NumberGenerator* numberGenerator);
+		, SimulationContext* context);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
@@ -28,7 +28,11 @@ public:
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
-	virtual void addDataAtFixedPosition(DataDescription data, optional<double> rotationAngle = boost::none);
+	struct DataAndAngle {
+		DataDescription data;
+		optional<double> angle;
+	};
+	virtual void addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles);
 	virtual void addRandomParticles(double totalEnergy, double maxEnergyPerParticle);
 	virtual void deleteSelection();
 	virtual void deleteExtendedSelection();
@@ -52,11 +56,13 @@ public:
 	virtual unordered_set<uint64_t> getSelectedCellIds() const;
 	virtual unordered_set<uint64_t> getSelectedParticleIds() const;
 	virtual DataDescription getExtendedSelection() const;
+	virtual bool isCellPresent(uint64_t cellId);
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
-	virtual void requireImageFromSimulation(IntRect const& rect, QImage* target);
+	virtual void requireImageFromSimulation(IntRect const& rect, QImagePtr const& target);
 
 	Q_SIGNAL void imageReady();
+
 
 private:
 	Q_SLOT void dataFromSimulationAvailable();
@@ -64,7 +70,6 @@ private:
 
 	void updateAfterCellReconnections();
 	void updateInternals(DataDescription const &data);
-	bool isCellPresent(uint64_t cellId);
 	bool isParticlePresent(uint64_t particleId);
 
 	list<QMetaObject::Connection> _connections;
@@ -72,7 +77,7 @@ private:
 	Notifier* _notifier = nullptr;
 	SimulationAccess* _access = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
-	SimulationParameters const* _parameters = nullptr;
+	SimulationParameters _parameters;
 	NumberGenerator* _numberGenerator = nullptr;
 	DataDescription _data;
 	DataDescription _unchangedData;

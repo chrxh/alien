@@ -17,7 +17,9 @@ void TokenEditTabWidget::init(DataEditModel * model, DataEditController * contro
 	deleteAllTabs();
 
 	connect(this, &TokenEditTabWidget::currentChanged, [this](int index) {
-		_model->setSelectedTokenIndex(index);
+		if (-1 != index) {
+			_model->setSelectedTokenIndex(index);
+		}
 	});
 }
 

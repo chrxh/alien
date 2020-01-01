@@ -41,12 +41,17 @@ bool IntVector2D::operator==(IntVector2D const & vec)
 	return x == vec.x && y == vec.y;
 }
 
+void IntVector2D::operator-=(IntVector2D const & vec)
+{
+    x -= vec.x;
+    y -= vec.y;
+}
+
 std::ostream& operator << (std::ostream& os, const IntVector2D& vec)
 {
 	os << "(" << vec.x << ", " << vec.y << ")";
 	return os;
 }
-
 
 IntRect::IntRect(std::initializer_list<IntVector2D> l)
 {

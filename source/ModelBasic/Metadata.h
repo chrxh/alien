@@ -18,6 +18,9 @@ struct CellMetadata
 	bool operator!=(CellMetadata const& other) const { return !operator==(other); }
 
 	CellMetadata& setName(QString const& value) { name = value; return *this; }
+    CellMetadata& setDescription(QString const& value) { description = value; return *this; }
+    CellMetadata& setColor(quint8 value) { color = value; return *this; }
+    CellMetadata& setSourceCode(QString const& value) { computerSourcecode = value; return *this; }
 };
 
 struct ClusterMetadata
@@ -27,6 +30,8 @@ struct ClusterMetadata
 		return name == other.name;
 	}
 	bool operator!=(ClusterMetadata const& other) const { return !operator==(other); }
+
+    ClusterMetadata& setName(QString const& value) { name = value; return *this; }
 };
 
 struct ParticleMetadata
@@ -36,6 +41,8 @@ struct ParticleMetadata
 		return color == other.color;
 	}
 	bool operator!=(ParticleMetadata const& other) const { return !operator==(other); }
+
+    ParticleMetadata& setColor(quint8 const& value) { color = value; return *this; }
 };
 
 

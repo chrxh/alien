@@ -1,5 +1,4 @@
-#ifndef SERVICELOCATOR_H
-#define SERVICELOCATOR_H
+#pragma once
 
 #include <QString>
 #include <mutex>
@@ -49,5 +48,3 @@ T* ServiceLocator::getService ()
 	}
     return static_cast<T*>(nullptr);
 }
-
-#endif // SERVICELOCATOR_H

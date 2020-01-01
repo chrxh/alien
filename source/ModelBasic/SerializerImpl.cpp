@@ -18,6 +18,7 @@
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/DescriptionHelper.h"
 
 #include "SerializerImpl.h"
 
@@ -84,11 +85,24 @@ namespace boost {
 		}
 
 
-		template<class Archive>
-		inline void serialize(Archive & ar, CellFeatureDescription& data, const unsigned int /*version*/)
-		{
-			ar & data.type & data.volatileData & data.constData;
-		}
+        template<class Archive>
+        inline void save(Archive& ar, CellFeatureDescription const& data, const unsigned int /*version*/)
+        {
+            ar << data.getType() << data.volatileData << data.constData;
+        }
+        template<class Archive>
+        inline void load(Archive& ar, CellFeatureDescription& data, const unsigned int /*version*/)
+        {
+            Enums::CellFunction::Type type;
+            ar >> type >> data.volatileData >> data.constData;
+            data.setType(type);
+        }
+        template<class Archive>
+        inline void serialize(Archive & ar, CellFeatureDescription& data, const unsigned int version)
+        {
+            boost::serialization::split_free(ar, data, version);
+        }
+
 		template<class Archive>
 		inline void serialize(Archive & ar, TokenDescription& data, const unsigned int /*version*/)
 		{
@@ -135,11 +149,11 @@ namespace boost {
 		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
 		{
 			ar & data.clusterMaxRadius;
-			ar & data.cellMutationProb;
+			ar & data.cellFunctionConstructorMutationProb;
 			ar & data.cellMinDistance;
 			ar & data.cellMaxDistance;
 			ar & data.cellMass_Reciprocal;
-			ar & data.callMaxForce;
+			ar & data.cellMaxForce;
 			ar & data.cellMaxForceDecayProb;
 			ar & data.cellMaxBonds;
 			ar & data.cellMaxToken;
@@ -164,9 +178,12 @@ namespace boost {
 			ar & data.radiationProb;
 			ar & data.radiationVelocityMultiplier;
 			ar & data.radiationVelocityPerturbation;
-			int fillInt = 0;
+            ar & data.cellMinAge;
+            ar & data.cellFunctionWeaponEnergyCost;
+
+            int fillInt = 0;
 			double fillDouble = 0.0;
-			for (int i = 0; i < 50; ++i) {
+			for (int i = 0; i < 48; ++i) {
 				ar & fillInt;
 			}
 			for (int i = 0; i < 50; ++i) {
@@ -207,6 +224,10 @@ void SerializerImpl::init(SimulationControllerBuildFunc const& controllerBuilder
 {
 	_controllerBuilder = controllerBuilder;
 	_accessBuilder = accessBuilder;
+
+    auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto descHelper = facade->buildDescriptionHelper();
+    SET_CHILD(_descHelper, descHelper);
 }
 
 void SerializerImpl::serialize(SimulationController * simController, int typeId, optional<Settings> newSettings /*= boost::none*/)
@@ -253,18 +274,38 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	boost::archive::binary_iarchive ia(stream);
 
 	DataDescription data;
-	SimulationParameters* parameters = new SimulationParameters(this);
+	SimulationParameters parameters;
 	SymbolTable* symbolTable = new SymbolTable(this);
 	IntVector2D universeSize;
 	uint timestep;
 	int typeId;
 	map<string, int> specificData;
-	ia >> data >> universeSize >> typeId >> specificData >> *parameters >> *symbolTable >> timestep;
+	ia >> data >> universeSize >> typeId >> specificData >> parameters >> *symbolTable >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
+
+    //use following code for old simulation formats
+/*
+    specificData.insert_or_assign("maxClusters", 1200000);
+    specificData.insert_or_assign("numThreadsPerBlock", 16);
+    specificData.insert_or_assign("numBlocks", 64*8);
+    specificData.insert_or_assign("numClusterPointerArrays", 1);
+    specificData.insert_or_assign("maxClusters", 500000);
+    specificData.insert_or_assign("maxCells", 2000000);
+    specificData.insert_or_assign("maxParticles", 2000000);
+    specificData.insert_or_assign("maxTokens", 500000);
+    specificData.insert_or_assign("maxCellPointers", 2000000 * 10);
+    specificData.insert_or_assign("maxClusterPointers", 500000 * 10);
+    specificData.insert_or_assign("maxParticlePointers", 2000000 * 10);
+    specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
+    specificData.insert_or_assign("dynamicMemorySize", 100000000);
+*/
+    auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
 	simController->setParent(this);
+
+    _descHelper->init(simController->getContext());
+    _descHelper->makeValid(data);
 
 	buildAccess(simController);
 	_access->clear();
@@ -310,22 +351,22 @@ SymbolTable * SerializerImpl::deserializeSymbolTable(string const & data)
 	return symbolTable;
 }
 
-string SerializerImpl::serializeSimulationParameters(SimulationParameters const* parameters) const
+string SerializerImpl::serializeSimulationParameters(SimulationParameters const& parameters) const
 {
 	ostringstream stream;
 	boost::archive::binary_oarchive archive(stream);
 
-	archive << *parameters;
+	archive << parameters;
 	return stream.str();
 }
 
-SimulationParameters * SerializerImpl::deserializeSimulationParameters(string const & data)
+SimulationParameters SerializerImpl::deserializeSimulationParameters(string const & data)
 {
 	istringstream stream(data);
 	boost::archive::binary_iarchive ia(stream);
 
-	SimulationParameters* parameters = new SimulationParameters(this);
-	ia >> *parameters;
+	SimulationParameters parameters;
+	ia >> parameters;
 	return parameters;
 }
 
@@ -336,7 +377,7 @@ void SerializerImpl::dataReadyToRetrieve()
 
 	auto content = _access->retrieveData();
 	archive << content
-		<< _configToSerialize.universeSize << _configToSerialize.typeId << _configToSerialize.typeSpecificData << *_configToSerialize.parameters
+		<< _configToSerialize.universeSize << _configToSerialize.typeId << _configToSerialize.typeSpecificData << _configToSerialize.parameters
 		<< *_configToSerialize.symbolTable << _configToSerialize.timestep;
 	_serializedSimulation = stream.str();
 

@@ -115,7 +115,7 @@ CellClusterSet CellMapImpl::getNearbyClusters(QVector2D const& pos, qreal r) con
 	int rc = qCeil(r);
 	for (int rx = pos.x() - rc; rx < pos.x() + rc + 1; ++rx)
 		for (int ry = pos.y() - rc; ry < pos.y() + rc + 1; ++ry) {
-			if (QVector2D(static_cast<qreal>(rx) - pos.x(), static_cast<qreal>(ry) - pos.y()).length() < r + Const::AlienPrecision) {
+			if (QVector2D(static_cast<qreal>(rx) - pos.x(), static_cast<qreal>(ry) - pos.y()).length() < r + FLOATINGPOINT_HIGH_PRECISION) {
 				Cell* cell = getCell(QVector2D(rx, ry));
 				if (cell) {
 					clusters.insert(cell->getCluster());
@@ -127,9 +127,9 @@ CellClusterSet CellMapImpl::getNearbyClusters(QVector2D const& pos, qreal r) con
 
 Cluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qreal minMass, qreal maxMass, Cluster * exclude) const
 {
-	int step = qCeil(qSqrt(minMass + Const::AlienPrecision)) + 3;  //horizontal or vertical length of cell cluster >= minDim
+	int step = qCeil(qSqrt(minMass + FLOATINGPOINT_HIGH_PRECISION)) + 3;  //horizontal or vertical length of cell cluster >= minDim
 	int rc = qCeil(r);
-	qreal rs = r*r + Const::AlienPrecision;
+	qreal rs = r*r + FLOATINGPOINT_HIGH_PRECISION;
 
 	//grid scan
 	Cluster* closestCluster = 0;
@@ -146,7 +146,7 @@ Cluster * CellMapImpl::getNearbyClusterFast(const QVector2D & pos, qreal r, qrea
 
 						//compare masses
 						qreal mass = cluster->getMass();
-						if (mass >= (minMass - Const::AlienPrecision) && mass <= (maxMass + Const::AlienPrecision)) {
+						if (mass >= (minMass - FLOATINGPOINT_HIGH_PRECISION) && mass <= (maxMass + FLOATINGPOINT_HIGH_PRECISION)) {
 
 							//calc and compare dist
 							qreal dist = _spaceProp->displacement(cell->calcPosition(), pos).length();
@@ -166,7 +166,7 @@ QList<Cell*> CellMapImpl::getNearbySpecificCells(const QVector2D & pos, qreal r,
 {
 	QList< Cell* > cells;
 	int rCeil = qCeil(r);
-	qreal rs = r*r + Const::AlienPrecision;
+	qreal rs = r*r + FLOATINGPOINT_HIGH_PRECISION;
 	IntVector2D intPos = _spaceProp->correctPositionAndConvertToIntVector(pos);
 	for (int rx = -rCeil; rx <= rCeil; ++rx)
 		for (int ry = -rCeil; ry <= rCeil; ++ry)

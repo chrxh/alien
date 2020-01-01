@@ -210,6 +210,9 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		list<uint64_t> cellIds;
 		list<uint64_t> particleIds;
 		auto selection = getSelectionFromItems(itemsWithinMarker);
+		if (!selection.particleIds.empty()) {
+			int dummy = 0;
+		}
 		_repository->setSelection(selection.cellIds, selection.particleIds);
 		_itemManager->update(_repository);
 	}
