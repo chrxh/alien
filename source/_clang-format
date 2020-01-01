@@ -1,0 +1,160 @@
+---
+Language: Cpp
+ColumnLimit: 120
+AccessModifierOffset: -4
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: DontAlign
+AlignOperands: false
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass:      true
+  AfterControlStatement: false
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: false
+  BeforeCatch:     false
+  BeforeElse:      false
+  IndentBraces:    false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeInheritanceComma: true
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakAfterJavaFieldAnnotations: false
+BreakStringLiterals: true
+CommentPragmas:  '^ IWYU pragma:'
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+DisableFormat:   false
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: false
+ForEachMacros:   
+  - foreach
+  - Q_FOREACH
+  - BOOST_FOREACH
+IncludeBlocks: Regroup
+IncludeIsMainRegex:  '(Test|Tests)?$'
+IncludeCategories:
+  - Regex:           '(stdafx|bif_config)'
+    Priority:        -100
+  - Regex:           '^(<(afx|atl))'
+    Priority:        2
+  - Regex:           '^(<boost/)'
+    Priority:        3
+  - Regex:           '^(<Qt)'
+    Priority:        5
+# all remaining third party libraries in external/sinstall/inc
+  - Regex:           '^(<(adobe|AtlServer|dbghelp|gdal|geos|gmock|Grid|gsl|gtest|hacon|idm|java)/)'
+    Priority:        7
+  - Regex:           '^(<(libmb2|mb2|mockitopp|oci|openssl|proj4|python|t1lib|tbb|TreeListCtrl|xercesc|zlib)/)'
+    Priority:        7
+  - Regex:           '^(("|<)configurations/)'
+    Priority:        100
+  - Regex:           '^(("|<)common/)'
+    Priority:        101
+  - Regex:           '^(("|<)core/)'
+    Priority:        102
+  - Regex:           '^(("|<)opm/)'
+    Priority:        103
+  - Regex:           '^(("|<)cal/)'
+    Priority:        104
+  - Regex:           '^(("|<)tnw/)'
+    Priority:        105
+  - Regex:           '^(("|<)ttp/)'
+    Priority:        106
+  - Regex:           '^(("|<)vws/)'
+    Priority:        107
+  - Regex:           '^(("|<)ds/)'
+    Priority:        108
+  - Regex:           '^(("|<)vd/)'
+    Priority:        109
+  - Regex:           '^(("|<)pdp/)'
+    Priority:        110
+  - Regex:           '^(("|<)rl/)'
+    Priority:        111
+  - Regex:           '^(("|<)pry/)'
+    Priority:        112
+  - Regex:           '^(("|<)intf/)'
+    Priority:        113
+  - Regex:           '^(("|<)statistics/)'
+    Priority:        114
+  - Regex:           '^(("|<)printing/)'
+    Priority:        115
+  - Regex:           '^(<((experimental/)?[[:alpha:]_]+)>)$'
+    Priority:        1
+# remaining files at the root of external/sinstall/inc
+  - Regex:           '^(<.+/)'
+    Priority:        6
+  - Regex:           '^(<)'
+    Priority:        4
+  - Regex:           '^(")'
+    Priority:        200
+IndentCaseLabels: false
+IndentPPDirectives: None
+IndentWidth:     4
+IndentWrappedFunctionNames: false
+JavaScriptQuotes: Leave
+JavaScriptWrapImports: true
+KeepEmptyLinesAtTheStartOfBlocks: true
+MacroBlockBegin: ''
+MacroBlockEnd:   ''
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: All
+ObjCBinPackProtocolList: Auto
+ObjCBlockIndentWidth: 2
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 300
+PenaltyReturnTypeOnItsOwnLine: 200
+PointerAlignment: Left
+ReflowComments:  false
+SortIncludes:    true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles:  false
+SpacesInContainerLiterals: true
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard:        Cpp11
+TabWidth:        4
+UseTab:          Never
+...
+

@@ -385,6 +385,8 @@ D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\system_error
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\cerrno
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\share.h
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\string
+D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\list
+D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\xmemory
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\functional
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\xfunctional
 D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\tuple
@@ -397,10 +399,17 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Simulation.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Map.cuh
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\BlockProcessorForCluster.cuh
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\sm_60_atomic_functions.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Physics.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\vector_types.h
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\Map.cuh
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_functions.h
 f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationData.cuh
-f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\HostHelper.cuh
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\CollisionData.cuh
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\vector_types.h
+f:\alle wichtigen dateien\artificial life\alien\source\modelgpu\SimulationDataManager.cuh
+D:\Programme (x86)\Microsoft Visual Studio 14.0\VC\include\iostream

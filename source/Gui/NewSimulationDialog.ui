@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>550</width>
-    <height>412</height>
+    <height>332</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -38,6 +38,29 @@
    <property name="spacing">
     <number>16</number>
    </property>
+   <item row="5" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
@@ -53,208 +76,16 @@
       </size>
      </property>
      <property name="title">
-      <string>grid</string>
+      <string>computation settings</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0" columnminimumwidth="220,0,0,0">
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="gridSizeXEdit">
-        <property name="text">
-         <string>12</string>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>x</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="label_8">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>x</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="gridSizeYEdit">
-        <property name="text">
-         <string>6</string>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>x</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="minimumSize">
-         <size>
-          <width>180</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>resulting universe size</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLineEdit" name="unitSizeYEdit">
-        <property name="text">
-         <string>120</string>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>unit size</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QLabel" name="universeSizeYLabel">
-        <property name="text">
-         <string>720</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="universeSizeXLabel">
-        <property name="text">
-         <string>1440</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="unitSizeXEdit">
-        <property name="text">
-         <string>120</string>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>grid size</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="3">
-       <widget class="QLabel" name="totalThreadsLabel">
-        <property name="text">
-         <string>72 (total)</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>/</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLabel" name="activeThreadsLabel">
-        <property name="text">
-         <string>8 (active)</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="minimumSize">
-         <size>
-          <width>180</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>limit active threads</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="maxThreadsEdit">
-        <property name="text">
-         <string>8</string>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>120</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>resulting threads</string>
+       <widget class="ComputationSettingsWidget" name="computationSettings" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
        </widget>
       </item>
@@ -272,12 +103,25 @@
      <property name="title">
       <string>initial configuration</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3" columnminimumwidth="220,0,0">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="2">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>120</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_3">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>200</width>
           <height>0</height>
          </size>
         </property>
@@ -299,19 +143,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>120</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
      </layout>
     </widget>
    </item>
@@ -330,7 +161,7 @@
       </size>
      </property>
      <property name="title">
-      <string>parameters</string>
+      <string>simulation parameters</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
@@ -350,37 +181,16 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ComputationSettingsWidget</class>
+   <extends>QWidget</extends>
+   <header>computationsettingswidget.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
-  <tabstop>gridSizeXEdit</tabstop>
-  <tabstop>gridSizeYEdit</tabstop>
-  <tabstop>unitSizeXEdit</tabstop>
-  <tabstop>unitSizeYEdit</tabstop>
-  <tabstop>maxThreadsEdit</tabstop>
   <tabstop>energyEdit</tabstop>
   <tabstop>simulationParametersButton</tabstop>
   <tabstop>symbolTableButton</tabstop>
@@ -394,8 +204,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>396</y>
+     <x>348</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

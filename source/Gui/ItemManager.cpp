@@ -12,7 +12,7 @@
 #include "CoordinateSystem.h"
 #include "MarkerItem.h"
 
-void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters const* parameters)
+void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, SimulationParameters const& parameters)
 {
 	auto config = new ItemConfig();
 
@@ -106,9 +106,9 @@ void ItemManager::updateParticles(DataRepository* manipulator)
 	_particlesByIds = newParticlesByIds;
 }
 
-void ItemManager::updateConnections(DataRepository* visualDesc)
+void ItemManager::updateConnections(DataRepository* repository)
 {
-	auto const &data = visualDesc->getDataRef();
+	auto const &data = repository->getDataRef();
 	if (!data.clusters) {
 		return;
 	}
@@ -120,7 +120,10 @@ void ItemManager::updateConnections(DataRepository* visualDesc)
 				continue;
 			}
 			for (uint64_t connectingCellId : *cell.connectingCells) {
-				auto &connectingCellD = visualDesc->getCellDescRef(connectingCellId);
+				if (!repository->isCellPresent(connectingCellId)) {
+					continue;
+				}
+				auto &connectingCellD = repository->getCellDescRef(connectingCellId);
 				set<uint64_t> connectionId;
 				connectionId.insert(cell.id);
 				connectionId.insert(connectingCellId);
@@ -153,13 +156,13 @@ void ItemManager::updateConnections(DataRepository* visualDesc)
 	_connectionsByIds = newConnectionsByIds;
 }
 
-void ItemManager::update(DataRepository* visualDesc)
+void ItemManager::update(DataRepository* repository)
 {
 	_viewport->setModeToNoUpdate();
 
-	updateCells(visualDesc);
-	updateConnections(visualDesc);
-	updateParticles(visualDesc);
+	updateCells(repository);
+	updateConnections(repository);
+	updateParticles(repository);
 
 	_viewport->setModeToUpdate();
 	_scene->update();

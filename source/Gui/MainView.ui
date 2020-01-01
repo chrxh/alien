@@ -304,7 +304,7 @@
           </palette>
          </property>
          <property name="text">
-          <string>Timestep: 000000001  TPS: 00000  Zoom factor: 2x</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -682,7 +682,7 @@
      <x>0</x>
      <y>0</y>
      <width>1240</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="palette">
@@ -793,11 +793,17 @@
     <addaction name="menuSimulationParameters"/>
     <addaction name="menuSymbolMap"/>
    </widget>
+   <widget class="QMenu" name="menuAnalysis">
+    <property name="title">
+     <string>Analysis</string>
+    </property>
+   </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuSettings"/>
    <addaction name="menuView"/>
    <addaction name="menuEntity"/>
    <addaction name="menuCollection"/>
+   <addaction name="menuAnalysis"/>
    <addaction name="menuHelp"/>
   </widget>
  </widget>

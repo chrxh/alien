@@ -15,9 +15,6 @@ public:
 
 	virtual QByteArray getInternalData () const override;
 
-	static CompilationResult compileSourceCode(std::string const& code, SymbolTable const* symbols);
-	static std::string decompileSourceCode(QByteArray const& data, SimulationParameters const* parameters);
-
 	virtual void mutateImpl() override;
 
 protected:

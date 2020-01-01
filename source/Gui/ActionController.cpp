@@ -2,6 +2,8 @@
 #include <QMessageBox>
 #include <QAction>
 
+#include "Base/ServiceLocator.h"
+#include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 
 #include "ModelBasic/Descriptions.h"
@@ -9,6 +11,8 @@
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/SerializationHelper.h"
+#include "ModelBasic/DescriptionFactory.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -18,7 +22,7 @@
 #include "Gui/NewSimulationDialog.h"
 #include "Gui/SimulationParametersDialog.h"
 #include "Gui/SymbolTableDialog.h"
-#include "Gui/ComputationGridDialog.h"
+#include "Gui/ComputationSettingsDialog.h"
 #include "Gui/NewRectangleDialog.h"
 #include "Gui/NewHexagonDialog.h"
 #include "Gui/NewParticlesDialog.h"
@@ -26,7 +30,6 @@
 #include "Gui/GridMultiplierDialog.h"
 #include "Gui/MonitorController.h"
 #include "Gui/Settings.h"
-#include "Gui/SerializationHelper.h"
 #include "Gui/InfoController.h"
 #include "Gui/MainController.h"
 #include "Gui/MainModel.h"
@@ -44,10 +47,23 @@ ActionController::ActionController(QObject * parent)
 	_model = new ActionModel(this);
 }
 
-void ActionController::init(MainController * mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
-	, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-	, MonitorController* monitor, DataRepository* repository, Notifier* notifier, NumberGenerator* numberGenerator)
+void ActionController::init(
+    MainController* mainController,
+    MainModel* mainModel,
+    MainView* mainView,
+    VisualEditController* visualEditor,
+    Serializer* serializer,
+    InfoController* infoController,
+    DataEditController* dataEditor,
+    ToolbarController* toolbar,
+    MonitorController* monitor,
+    DataRepository* repository,
+    Notifier* notifier)
 {
+    auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+    auto numberGenerator = factory->buildRandomNumberGenerator();
+	numberGenerator->init();
+
 	_mainController = mainController;
 	_mainModel = mainModel;
 	_mainView = mainView;
@@ -59,7 +75,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	_monitor = monitor;
 	_repository = repository;
 	_notifier = notifier;
-	_numberGenerator = numberGenerator;
+	SET_CHILD(_numberGenerator, numberGenerator);
 
 	connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ActionController::receivedNotifications);
 
@@ -67,7 +83,7 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
 	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
-	connect(actions->actionConfigureGrid, &QAction::triggered, this, &ActionController::onConfigureGrid);
+	connect(actions->actionComputationSettings, &QAction::triggered, this, &ActionController::onConfigureGrid);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
 	connect(actions->actionRunStepForward, &QAction::triggered, this, &ActionController::onStepForward);
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
@@ -111,6 +127,8 @@ void ActionController::init(MainController * mainController, MainModel* mainMode
 	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
 	connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
+
+    connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
 	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
@@ -217,15 +235,9 @@ void ActionController::onNewSimulation()
 {
 	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
 	if (dialog.exec()) {
-		auto config = boost::make_shared<_SimulationConfigCpu>();
-		config->maxThreads = dialog.getMaxThreads();
-		config->gridSize = dialog.getGridSize();
-		config->universeSize = dialog.getUniverseSize();
-		config->symbolTable = dialog.getSymbolTable();
-		config->parameters = dialog.getSimulationParameters();
-		_mainController->onNewSimulation(config, dialog.getEnergy());
+		_mainController->onNewSimulation(dialog.getConfig(), dialog.getEnergy());
 
-		settingUpNewSimulation();
+		settingUpNewSimulation(_mainController->getSimulationConfig());
 	}
 }
 
@@ -241,8 +253,8 @@ void ActionController::onLoadSimulation()
 {
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation", "", "Alien Simulation (*.sim)");
 	if (!filename.isEmpty()) {
-		if (_mainController->onLoadSimulation(filename.toStdString())) {
-			settingUpNewSimulation();
+		if (_mainController->onLoadSimulation(filename.toStdString(), MainController::LoadOption::SaveOldSim)) {
+			settingUpNewSimulation(_mainController->getSimulationConfig());
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");
@@ -253,18 +265,23 @@ void ActionController::onLoadSimulation()
 
 void ActionController::onConfigureGrid()
 {
-	ComputationGridDialog dialog(_mainController->getSimulationConfig(), _mainView);
-	if (dialog.exec()) {
-		optional<uint> maxThreads = dialog.getMaxThreads();
-		optional<IntVector2D> gridSize = dialog.getGridSize();
-		optional<IntVector2D> universeSize = dialog.getUniverseSize();
+	ComputationSettingsDialog dialog(_mainController->getSimulationConfig(), _mainView);
+    if (dialog.exec()) {
 
-		auto config = boost::make_shared<_SimulationConfigCpu>();
-		config->maxThreads = *maxThreads;
-		config->gridSize = *gridSize;
-		config->universeSize = *universeSize;
-		_mainController->onRecreateSimulation(config);
-		settingUpNewSimulation();
+        if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(_mainController->getSimulationConfig())) {
+
+            configGpu->universeSize = dialog.getUniverseSize();
+            configGpu->numBlocks = dialog.getNumBlocks();
+            configGpu->numThreadsPerBlock = dialog.getNumThreadsPerBlock();
+            configGpu->maxClusters = dialog.getMaxClusters();
+            configGpu->maxCells = dialog.getMaxCells();
+            configGpu->maxTokens = dialog.getMaxTokens();
+            configGpu->maxParticles = dialog.getMaxParticles();
+            configGpu->dynamicMemorySize = dialog.getDynamicMemorySize();
+
+            _mainController->onRecreateSimulation(configGpu);
+            settingUpNewSimulation(configGpu);
+        }
 	}
 }
 
@@ -282,8 +299,8 @@ void ActionController::onLoadSimulationParameters()
 {
 	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
 	if (!filename.isEmpty()) {
-		SimulationParameters* parameters;
-		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
+		SimulationParameters parameters;
+		if (SerializationHelper::loadFromFile<SimulationParameters>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
 			auto config = _mainController->getSimulationConfig();
 			config->parameters = parameters;
 			string errorMsg;
@@ -389,7 +406,7 @@ void ActionController::onCopyEntity()
 		CHECK(selectedParticleIds.empty());
 		auto const& cell = _repository->getCellDescRef(*selectedCellIds.begin());
 		auto const& cluster = _repository->getClusterDescRef(*selectedCellIds.begin());
-		QVector2D vel = Physics::tangentialVelocity(*cell.pos - *cluster.pos, *cluster.vel, *cluster.angularVel);
+		QVector2D vel = Physics::tangentialVelocity(*cell.pos - *cluster.pos, { *cluster.vel, *cluster.angularVel });
 		_model->setCellCopied(cell, vel);
 	}
 	if (!selectedParticleIds.empty()) {
@@ -509,6 +526,7 @@ void ActionController::onRandomMultiplier()
 	if (dialog.exec()) {
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig()->universeSize;
+		vector<DataRepository::DataAndAngle> addedData;
 		for (int i = 0; i < dialog.getNumberOfCopies(); ++i) {
 			DataDescription dataCopied = data;
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
@@ -529,8 +547,9 @@ void ActionController::onRandomMultiplier()
 				angularVelocity = _numberGenerator->getRandomReal(dialog.getAngVelMin(), dialog.getAngVelMax());
 			}
 			modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
-			_repository->addDataAtFixedPosition(dataCopied, angle);
+			addedData.emplace_back(DataRepository::DataAndAngle{ dataCopied, angle });
 		}
+		_repository->addDataAtFixedPosition(addedData);
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
@@ -548,6 +567,7 @@ void ActionController::onGridMultiplier()
 	if (dialog.exec()) {
 		QVector2D initialDelta(dialog.getInitialPosX(), dialog.getInitialPosY());
 		initialDelta -= center;
+		vector<DataRepository::DataAndAngle> addedData;
 		for (int i = 0; i < dialog.getHorizontalNumber(); ++i) {
 			for (int j = 0; j < dialog.getVerticalNumber(); ++j) {
 				if (i == 0 && j == 0 && initialDelta.lengthSquared() < FLOATINGPOINT_MEDIUM_PRECISION) {
@@ -575,9 +595,10 @@ void ActionController::onGridMultiplier()
 				posDelta += initialDelta;
 
 				modifyDescription(dataCopied, posDelta, velocityX, velocityY, angularVelocity);
-				_repository->addDataAtFixedPosition(dataCopied, angle);
+				addedData.emplace_back(DataRepository::DataAndAngle{ dataCopied, angle });
 			}
 		}
+		_repository->addDataAtFixedPosition(addedData);
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
@@ -585,6 +606,11 @@ void ActionController::onGridMultiplier()
 			Receiver::ActionController
 		}, UpdateDescription::All);
 	}
+}
+
+void ActionController::onMostFrequentCluster()
+{
+    _mainController->onAddMostFrequentClusterToSimulation();
 }
 
 void ActionController::onDeleteEntity()
@@ -716,20 +742,6 @@ void ActionController::onNewRectangle()
 
 namespace
 {
-	void addConnection(CellDescription& cell1, CellDescription& cell2)
-	{
-		cell1.addConnection(cell2.id);
-		cell2.addConnection(cell1.id);
-	}
-
-	QVector2D calcCenter(list<CellDescription> const& cells)
-	{
-		QVector2D center;
-		for (auto const& cell : cells) {
-			center += *cell.pos;
-		}
-		return center / cells.size();
-	}
 }
 
 void ActionController::onNewHexagon()
@@ -740,75 +752,12 @@ void ActionController::onNewHexagon()
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
 		double energy = dialog.getCellEnergy();
-		std::vector<std::vector<CellDescription>> cellMatrix(2 * layers - 1, std::vector<CellDescription>(2 * layers - 1));
-		list<CellDescription> cells;
 
-		int maxCon = 6;
-		uint64_t id = 0;
-		double incY = std::sqrt(3.0)*dist / 2.0;
-		for (int j = 0; j < layers; ++j) {
-			for (int i = -(layers - 1); i < layers - j; ++i) {
+        auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+        auto hexagon = factory->createHexagon(
+            DescriptionFactory::CreateHexagonParameters().layers(layers).cellDistance(dist).cellEnergy(energy));
 
-				//check if cell is on boundary
-				if (((i == -(layers - 1)) || (i == layers - j - 1)) && ((j == 0) || (j == layers - 1))) {
-					maxCon = 3;
-				}
-				else if ((i == -(layers - 1)) || (i == layers - j - 1) || (j == layers - 1)) {
-					maxCon = 4;
-				}
-				else {
-					maxCon = 6;
-				}
-
-				//create cell: upper layer
-				cellMatrix[layers - 1 + i][layers - 1 - j] =
-					CellDescription().setId(++id).setEnergy(energy)
-					.setPos({ static_cast<float>(i*dist + j*dist / 2.0), static_cast<float>(-j*incY) })
-					.setMaxConnections(maxCon).setFlagTokenBlocked(false)
-					.setTokenBranchNumber(0).setMetadata(CellMetadata())
-					.setCellFeature(CellFeatureDescription());
-				
-				if (layers - 1 + i > 0) {
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i - 1][layers - 1 - j]);
-				}
-				if (j > 0) {
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i][layers - 1 - j + 1]);
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i + 1][layers - 1 - j + 1]);
-				}
-
-				//create cell: under layer (except for 0-layer)
-				if (j > 0) {
-					cellMatrix[layers - 1 + i][layers - 1 + j] =
-						CellDescription().setId(++id).setEnergy(energy)
-						.setPos({ static_cast<float>(i*dist + j*dist / 2.0), static_cast<float>(+j*incY) })
-						.setMaxConnections(maxCon).setFlagTokenBlocked(false)
-						.setTokenBranchNumber(0).setMetadata(CellMetadata())
-						.setCellFeature(CellFeatureDescription());
-						
-					if (layers - 1 + i > 0) {
-						addConnection(cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i - 1][layers - 1 + j]);
-					}
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i][layers - 1 + j - 1]);
-					addConnection(cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i + 1][layers - 1 + j - 1]);
-				}
-			}
-		}
-
-		for (auto const& cellRow : cellMatrix) {
-			for (auto const& cell : cellRow) {
-				if (cell.id > 0) {
-					cells.push_back(cell);
-				}
-			}
-		}
-
-		auto center = calcCenter(cells);
-		auto cluster = ClusterDescription().setPos(center)
-			.setVel({ 0, 0 })
-			.setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata())
-			.addCells(cells);
-
-		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
+		_repository->addAndSelectData(DataDescription().addCluster(hexagon), { 0, 0 });
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
@@ -871,7 +820,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 		uint64_t selectedCellId = *_repository->getSelectedCellIds().begin();
 		if (auto tokens = _repository->getCellDescRef(selectedCellId).tokens) {
 			tokenOfSelectedCell = tokens->size();
-			freeTokenOfSelectedCell = _mainModel->getSimulationParameters()->cellMaxToken - tokenOfSelectedCell;
+			freeTokenOfSelectedCell = _mainModel->getSimulationParameters().cellMaxToken - tokenOfSelectedCell;
 		}
 	}
 
@@ -883,7 +832,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 	updateActionsEnableState();
 }
 
-void ActionController::settingUpNewSimulation()
+void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
 	updateZoomFactor();
 	auto actions = _model->getActionHolder();
@@ -893,6 +842,13 @@ void ActionController::settingUpNewSimulation()
 	onRunClicked(false);
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
+
+	if (boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
+		_infoController->setDevice(InfoController::Device::CPU);
+	}
+	else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+		_infoController->setDevice(InfoController::Device::GPU);
+	}
 }
 
 void ActionController::updateZoomFactor()
@@ -915,8 +871,8 @@ void ActionController::updateActionsEnableState()
 	actions->actionShowCellInfo->setEnabled(editMode);
 	actions->actionCenterSelection->setEnabled(editMode);
 
-	actions->actionNewCell->setEnabled(editMode);
-	actions->actionNewParticle->setEnabled(editMode);
+	actions->actionNewCell->setEnabled(true);
+	actions->actionNewParticle->setEnabled(true);
 	actions->actionCopyEntity->setEnabled(editMode && entitySelected);
 	actions->actionPasteEntity->setEnabled(editMode && entityCopied);
 	actions->actionDeleteEntity->setEnabled(editMode && entitySelected);

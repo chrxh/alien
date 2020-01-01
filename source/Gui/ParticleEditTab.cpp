@@ -173,11 +173,6 @@ void ParticleEditTab::keyPressEvent (QKeyEvent* e)
     if( e->key() == Qt::Key_Up )
         if( row > 0 )
             QTextEdit::keyPressEvent(e);
-
-    //update data?
-    if( (e->key() == Qt::Key_Down) || (e->key() == Qt::Key_Up) || (e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) {
-    	updateModelAndNotifyController();
-	}
 }
 
 void ParticleEditTab::mousePressEvent(QMouseEvent* e)

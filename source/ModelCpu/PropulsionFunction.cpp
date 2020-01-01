@@ -4,12 +4,12 @@
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/QuantityConverter.h"
 
 #include "Cluster.h"
 #include "Particle.h"
 #include "Token.h"
 #include "EntityFactory.h"
-#include "PhysicalQuantityConverter.h"
 #include "UnitContext.h"
 
 #include "Cell.h"
@@ -34,7 +34,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
     quint8 cmd = tokenMem[Enums::Prop::IN] % 7;
-    qreal angle = PhysicalQuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
+    qreal angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
     qreal power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
     if( cmd == Enums::PropIn::DO_NOTHING ) {
@@ -47,7 +47,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
 
     //calc old tangential velocity
     QVector2D cellRelPos(cluster->calcPosition(cell)-cluster->getPosition());
-    QVector2D tangVel(Physics::tangentialVelocity(cellRelPos, cluster->getVelocity(), cluster->getAngularVel()));
+	QVector2D tangVel(Physics::tangentialVelocity(cellRelPos, { cluster->getVelocity(), cluster->getAngularVel() }));
 
     //calc impulse angle
     QVector2D impulse;
@@ -98,10 +98,10 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     //calc new kinetic energy
 	auto parameters = _context->getSimulationParameters();
     qreal eKinNew(Physics::kineticEnergy(cluster->getMass(), newVel, cluster->getAngularMass(), newAngularVel));
-    qreal energyDiff((eKinNew-eKinOld)/ parameters->cellMass_Reciprocal);
+    qreal energyDiff((eKinNew-eKinOld)/ parameters.cellMass_Reciprocal);
 
     //has token enough energy?
-    if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + parameters->tokenMinEnergy + Const::AlienPrecision) ) {
+    if( token->getEnergy() >= (energyDiff + qAbs(energyDiff) + parameters.tokenMinEnergy + FLOATINGPOINT_HIGH_PRECISION) ) {
 
         //create energy particle with difference energy
 		auto factory = ServiceLocator::getInstance().getService<EntityFactory>();

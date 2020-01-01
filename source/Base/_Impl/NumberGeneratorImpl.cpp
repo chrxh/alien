@@ -52,7 +52,7 @@ QByteArray NumberGeneratorImpl::getRandomArray(int length)
 	return std::move(bytes);
 }
 
-uint64_t NumberGeneratorImpl::getTag()
+uint64_t NumberGeneratorImpl::getId()
 {
 	return _threadId | ++_runningNumber;
 }

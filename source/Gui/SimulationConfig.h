@@ -16,7 +16,7 @@ public:
 
 	IntVector2D universeSize;
 	SymbolTable* symbolTable;
-	SimulationParameters* parameters;
+	SimulationParameters parameters;
 };
 
 
@@ -35,4 +35,12 @@ class _SimulationConfigGpu
 {
 public:
 	virtual ValidationResult validate(string& errorMsg) const override;
+
+    uint numBlocks = 0;
+    uint numThreadsPerBlock = 0;
+    uint maxClusters = 0;
+    uint maxCells = 0;
+    uint maxTokens = 0;
+    uint maxParticles = 0;
+    uint dynamicMemorySize = 0;
 };

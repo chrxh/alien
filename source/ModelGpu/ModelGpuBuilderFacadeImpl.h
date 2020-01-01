@@ -12,5 +12,5 @@ public:
 		, ModelGpuData const& specificData
 		, uint timestepAtBeginning) const override;
 	virtual SimulationAccessGpu* buildSimulationAccess() const override;
-
+	virtual SimulationMonitorGpu* buildSimulationMonitor() const override;
 };

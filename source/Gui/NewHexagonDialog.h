@@ -14,7 +14,7 @@ class NewHexagonDialog
     Q_OBJECT
     
 public:
-    NewHexagonDialog(SimulationParameters const* simulationParameters, QWidget *parent = nullptr);
+    NewHexagonDialog(SimulationParameters const& simulationParameters, QWidget *parent = nullptr);
     virtual ~NewHexagonDialog();
 
     int getLayers () const;
