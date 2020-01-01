@@ -1,8 +1,11 @@
 #include <QMatrix4x4>
 
+#include "Base/ServiceLocator.h"
+
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
 
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
@@ -25,7 +28,9 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditModel(this);
 	_model->init(manipulator, context->getSimulationParameters(), context->getSymbolTable());
-	_view->init(upperLeftPosition, _model, this, context->getCellComputerCompiler());
+	ModelBasicBuilderFacade* basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	CellComputerCompiler* compiler = basicFacade->buildCellComputerCompiler(context->getSymbolTable(), context->getSimulationParameters());
+	_view->init(upperLeftPosition, _model, this, compiler);
 	_repository = manipulator;
 
 	for (auto const& connection : _connections) {
@@ -184,7 +189,7 @@ void DataEditController::receivedExternalNotifications(set<Receiver> const& targ
 
 void DataEditController::switchToCellEditor(CellDescription const& cell, UpdateDescription update)
 {
-	bool computerActive = cell.cellFeature->type == Enums::CellFunction::COMPUTER;
+	auto const computerActive = (Enums::CellFunction::COMPUTER == cell.cellFeature->getType());
 	bool tokenActive = cell.tokens && !cell.tokens->empty();
 	if (computerActive && tokenActive) {
 		_view->switchToCellEditorWithComputerWithToken(update);

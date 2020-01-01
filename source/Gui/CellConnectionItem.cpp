@@ -26,7 +26,7 @@ void CellConnectionItem::update(CellDescription const & cell1, CellDescription c
 
 	auto branchNumber1 = cell1.tokenBranchNumber.get_value_or(0);
 	auto branchNumber2 = cell2.tokenBranchNumber.get_value_or(0);
-	auto maxBranchNumber = _config->getSimulationParameters()->cellMaxTokenBranchNumber;
+	auto maxBranchNumber = _config->getSimulationParameters().cellMaxTokenBranchNumber;
 	if (branchNumber1 == (branchNumber2 + 1) % maxBranchNumber) {
 		_connectionState = ConnectionState::B_TO_A_CONNECTION;
 	}
@@ -50,9 +50,9 @@ QRectF CellConnectionItem::boundingRect () const
 void CellConnectionItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if( _connectionState == NO_DIR_CONNECTION )
-        painter->setPen(QPen(QBrush(Const::LineInactiveColor), CoordinateSystem::modelToScene(0.03)));
+        painter->setPen(QPen(QBrush(Const::LineInactiveColor), CoordinateSystem::modelToScene(0.06)));
     else
-        painter->setPen(QPen(QBrush(Const::LineActiveColor), CoordinateSystem::modelToScene(0.03)));
+        painter->setPen(QPen(QBrush(Const::LineActiveColor), CoordinateSystem::modelToScene(0.06)));
     painter->drawLine(QPointF(0.0, 0.0), QPointF(_dx, _dy));
 
     if( (_connectionState == A_TO_B_CONNECTION) || (_connectionState == B_TO_A_CONNECTION) ) {

@@ -18,7 +18,8 @@ public:
 	virtual void clear() override;
 	virtual void updateData(DataChangeDescription const &desc) override;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
-	virtual void requireImage(IntRect rect, QImage* target) override;
+    virtual void requireData(ResolveDescription const& resolveDesc) override;
+    virtual void requireImage(IntRect rect, QImagePtr const& target) override;
 	virtual DataDescription const& retrieveData() override;
 	 
 	//from UnitObserver
@@ -50,7 +51,7 @@ private:
 	ResolveDescription _resolveDesc;
 
 	bool _imageRequired = false;
-	QImage* _requiredImage = nullptr;
+	QImagePtr _requiredImage;
 
 	DataDescription _dataCollected;
 	DataChangeDescription _dataToUpdate;

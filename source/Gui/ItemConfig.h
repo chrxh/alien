@@ -12,15 +12,15 @@ public:
 	ItemConfig(QObject* parent = nullptr) : QObject(parent) {}
 	~ItemConfig() = default;
 
-	void init(SimulationParameters const* parameters);
+	void init(SimulationParameters const& parameters);
 
 	bool isShowCellInfo() const;
 	void setShowCellInfo(bool value);
 
-	SimulationParameters const* getSimulationParameters() const;
+	SimulationParameters const& getSimulationParameters() const;
 
 private:
 	bool _showCellInfo = false;
-	SimulationParameters const* _parameters = nullptr;
+	SimulationParameters _parameters;
 };
 

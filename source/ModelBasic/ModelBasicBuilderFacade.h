@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CellFeatureEnums.h"
 #include "ChangeDescriptions.h"
 
 #include "Definitions.h"
@@ -12,7 +11,8 @@ public:
 	
 	virtual Serializer* buildSerializer() const = 0;
 	virtual SymbolTable* buildDefaultSymbolTable() const = 0;
-	virtual SimulationParameters* buildDefaultSimulationParameters() const = 0;
+	virtual SimulationParameters buildDefaultSimulationParameters() const = 0;
 	virtual DescriptionHelper* buildDescriptionHelper() const = 0;
+	virtual CellComputerCompiler* buildCellComputerCompiler(SymbolTable* symbolTable, SimulationParameters const& parameters) const = 0;
 };
 

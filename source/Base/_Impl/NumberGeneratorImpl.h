@@ -1,5 +1,4 @@
-#ifndef NUMBERGENERATORIMPL_H
-#define NUMBERGENERATORIMPL_H
+#pragma once
 
 #include "Base/NumberGenerator.h"
 
@@ -19,7 +18,7 @@ public:
 	virtual double getRandomReal() override;
 	virtual QByteArray getRandomArray(int length) override;
 
-	virtual uint64_t getTag() override;
+	virtual uint64_t getId() override;
 
 private:
 	quint32 getNumberFromArray();
@@ -30,4 +29,3 @@ private:
 	uint64_t _threadId = 0;
 };
 
-#endif // NUMBERGENERATORIMPL_H

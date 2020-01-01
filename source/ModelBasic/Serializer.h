@@ -31,6 +31,6 @@ public:
 	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const = 0;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) = 0;
 
-	virtual string serializeSimulationParameters(SimulationParameters const* parameters) const = 0;
-	virtual SimulationParameters* deserializeSimulationParameters(string const& data) = 0;
+	virtual string serializeSimulationParameters(SimulationParameters const& parameters) const = 0;
+	virtual SimulationParameters deserializeSimulationParameters(string const& data) = 0;
 };

@@ -18,11 +18,15 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository
-		, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator);
+    virtual void init(
+        MainModel* model,
+        MainController* controller,
+        Serializer* serializer,
+        DataRepository* repository,
+        SimulationMonitor* simMonitor,
+        Notifier* notifier);
 
-
-	virtual void refresh();
+    virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
 	virtual InfoController* getInfoController() const;
@@ -59,6 +63,5 @@ private:
 	InfoController* _infoController = nullptr;
 	MonitorController* _monitor = nullptr;
 
-	StartScreenController* _startScreen = nullptr;
 	bool _initialied = false;
 };

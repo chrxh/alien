@@ -56,5 +56,5 @@ private:
 
 	FRIEND_TEST(UnitThreadControllerImplTest, testStates);
 	FRIEND_TEST(UnitThreadControllerImplTest, testStatesWithFinished);
-	FRIEND_TEST(MultithreadingTest, testThreads);
+	FRIEND_TEST(MultithreadingTests, testThreads);
 };

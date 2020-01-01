@@ -17,7 +17,6 @@ class CellConnectionItem;
 class ItemConfig;
 class MonitorView;
 class DocumentationWindow;
-class StartScreenController;
 class MetadataManager;
 class PixelUniverseView;
 class ItemUniverseView;
@@ -54,10 +53,9 @@ class VersionController;
 class VisualEditController;
 class ActionHolder;
 class ActionController;
-class StartScreenWidget;
-class StartScreenController;
 class Manipulator;
 class MonitorController;
+class ImageSectionItem;
 
 struct _MonitorModel;
 using MonitorModel = shared_ptr<_MonitorModel>;
@@ -79,3 +77,5 @@ enum class ModelComputationType
 	Cpu,
 	Gpu
 };
+
+class DataAnalyzer;

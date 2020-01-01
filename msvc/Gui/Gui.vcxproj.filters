@@ -15,9 +15,6 @@
     <Filter Include="Source Files\Dialogs">
       <UniqueIdentifier>{d16cdb26-d3e1-445a-b5cc-92d808304c2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Misc">
-      <UniqueIdentifier>{8e45d07f-5a3b-4c3f-a104-52836c1dfeca}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Monitoring">
       <UniqueIdentifier>{c62b95c0-4b02-4878-98cd-a7abedefec11}</UniqueIdentifier>
     </Filter>
@@ -37,6 +34,14 @@
     </Filter>
     <Filter Include="Source Files\Actions">
       <UniqueIdentifier>{97a890a7-fca7-4ade-a2a1-05c0522170f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files\Analysis">
+      <UniqueIdentifier>{c77b97a8-1d92-47ec-98ae-873b0c92d3e5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -301,15 +306,6 @@
     <ClCompile Include="Release\moc_TokenEditWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ComputationGridDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ComputationGridDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ComputationGridDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\GridMultiplierDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -380,24 +376,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SymbolTableDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\StartScreenController.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_StartScreenController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_StartScreenController.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\StartScreenWidget.cpp">
-      <Filter>Source Files\Misc</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_StartScreenWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_StartScreenWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\MonitorController.cpp">
@@ -538,6 +516,39 @@
     <ClCompile Include="..\..\source\Gui\SimulationConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ComputationSettingsDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ComputationSettingsDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ComputationSettingsDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ImageSectionItem.cpp">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DataAnalyzer.cpp">
+      <Filter>Source Files\Analysis</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DataAnalyzer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DataAnalyzer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MessageHelper.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ComputationSettingsWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ComputationSettingsWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ComputationSettingsWidget.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -665,12 +676,6 @@
     <CustomBuild Include="..\..\source\Gui\TokenEditWidget.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ComputationGridDialog.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ComputationGridDialog.ui">
-      <Filter>Source Files\Dialogs</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\GridMultiplierDialog.h">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
@@ -719,15 +724,6 @@
     <CustomBuild Include="..\..\source\Gui\SymbolTableDialog.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartScreenController.h">
-      <Filter>Source Files\Misc</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartScreenWidget.h">
-      <Filter>Source Files\Misc</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartScreenWidget.ui">
-      <Filter>Source Files\Misc</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\MonitorController.h">
       <Filter>Source Files\Monitoring</Filter>
     </CustomBuild>
@@ -775,6 +771,21 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\VisualEditController.ui">
       <Filter>Source Files\VisualEditor</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationSettingsDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationSettingsDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\DataAnalyzer.h">
+      <Filter>Source Files\Analysis</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationSettingsWidget.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ComputationSettingsWidget.ui">
+      <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -873,9 +884,6 @@
     <ClInclude Include="ui_MainView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\SerializationHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\StringHelper.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -895,9 +903,6 @@
       <Filter>Source Files\DataEditor</Filter>
     </ClInclude>
     <ClInclude Include="ui_TokenEditTab.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_ComputationGridDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_GridMultiplierDialog.h">
@@ -922,9 +927,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_SymbolTableDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_StartScreenWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\MonitorModel.h">
@@ -958,6 +960,21 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\SimulationConfig.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_ComputationSettingsDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ImageSectionItem.h">
+      <Filter>Source Files\VisualEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MessageHelper.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_ComputationSettingsWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\QApplicationHelper.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

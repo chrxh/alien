@@ -1,12 +1,12 @@
 #include <QTimer>
 
-#include "ThreadController.h"
+#include "CudaController.h"
 #include "SimulationContextGpuImpl.h"
 #include "SimulationControllerGpuImpl.h"
 
 namespace
 {
-	const int updateFrameInMilliSec = 50.0;
+	const int updateFrameInMilliSec = 30.0;
 }
 
 SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nullptr*/)
@@ -21,12 +21,14 @@ SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nul
 	_frameTimer->start(updateFrameInMilliSec);
 }
 
-void SimulationControllerGpuImpl::init(SimulationContext * context)
+void SimulationControllerGpuImpl::init(SimulationContext * context, uint timestep)
 {
+	_timestep = timestep;
 	SET_CHILD(_context, static_cast<SimulationContextGpuImpl*>(context));
-	connect(_context->getGpuThreadController(), &ThreadController::timestepCalculated, [this]() {
+	connect(_context->getCudaController(), &CudaController::timestepCalculated, [this]() {
 		Q_EMIT nextTimestepCalculated();
 		++_timestepsPerSecond;
+		++_timestep;
 		if (_mode == RunningMode::OpenEndedSimulation) {
 			if (_timeSinceLastStart.elapsed() > updateFrameInMilliSec*_displayedFramesSinceLastStart) {
 				++_displayedFramesSinceLastStart;
@@ -51,14 +53,14 @@ void SimulationControllerGpuImpl::setRun(bool run)
 	else {
 		_mode = RunningMode::DoNothing;
 	}
-	_context->getGpuThreadController()->calculate(_mode);
+	_context->getCudaController()->calculate(_mode);
 }
 
 void SimulationControllerGpuImpl::calculateSingleTimestep()
 {
 	_mode = RunningMode::CalcSingleTimestep;
 	_timeSinceLastStart.restart();
-	_context->getGpuThreadController()->calculate(_mode);
+	_context->getCudaController()->calculate(_mode);
 }
 
 SimulationContext * SimulationControllerGpuImpl::getContext() const
@@ -68,11 +70,12 @@ SimulationContext * SimulationControllerGpuImpl::getContext() const
 
 uint SimulationControllerGpuImpl::getTimestep() const
 {
-	return 0;
+	return _timestep;
 }
 
-void SimulationControllerGpuImpl::setRestrictTimestepsPreSecond(optional<int> tps)
+void SimulationControllerGpuImpl::setRestrictTimestepsPerSecond(optional<int> tps)
 {
+	_context->getCudaController()->restrictTimestepsPerSecond(tps);
 }
 
 void SimulationControllerGpuImpl::oneSecondTimerTimeout()

@@ -12,7 +12,7 @@ class NewRectangleDialog : public QDialog
     Q_OBJECT
     
 public:
-    NewRectangleDialog(SimulationParameters const* simulationParameters, QWidget *parent = nullptr);
+    NewRectangleDialog(SimulationParameters const& simulationParameters, QWidget *parent = nullptr);
     virtual ~NewRectangleDialog();
 
 	IntVector2D getBlockSize() const;

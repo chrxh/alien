@@ -14,9 +14,11 @@ public:
 	SerializerImpl(QObject *parent = nullptr);
 	virtual ~SerializerImpl() = default;
 
-	virtual void init(SimulationControllerBuildFunc const& controllerBuilder, SimulationAccessBuildFunc const& accessBuilder) override;
+    virtual void init(
+        SimulationControllerBuildFunc const& controllerBuilder,
+        SimulationAccessBuildFunc const& accessBuilder) override;   //only for (de)serialization of entire simulation necessary
 
-	virtual void serialize(SimulationController* simController, int typeId, optional<Settings> newSettings = boost::none) override;
+    virtual void serialize(SimulationController* simController, int typeId, optional<Settings> newSettings = boost::none) override;
 	virtual string const& retrieveSerializedSimulation() override;
 	virtual SimulationController* deserializeSimulation(string const& content) override;
 
@@ -26,8 +28,8 @@ public:
 	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const override;
 	virtual SymbolTable* deserializeSymbolTable(string const& data) override;
 
-	virtual string serializeSimulationParameters(SimulationParameters const* parameters) const override;
-	virtual SimulationParameters* deserializeSimulationParameters(string const& data) override;
+	virtual string serializeSimulationParameters(SimulationParameters const& parameters) const override;
+	virtual SimulationParameters deserializeSimulationParameters(string const& data) override;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();
@@ -37,9 +39,10 @@ private:
 	SimulationControllerBuildFunc _controllerBuilder;
 	SimulationAccessBuildFunc _accessBuilder;
 	SimulationAccess* _access = nullptr;
+    DescriptionHelper* _descHelper = nullptr;
 
 	struct ConfigToSerialize {
-		SimulationParameters const* parameters;
+		SimulationParameters parameters;
 		SymbolTable const* symbolTable;
 		IntVector2D universeSize;
 		int typeId;
