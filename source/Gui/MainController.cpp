@@ -142,9 +142,14 @@ void MainController::init()
     if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
-        auto config = boost::make_shared<_SimulationConfigCpu>();
-        config->maxThreads = 8;
-        config->gridSize = IntVector2D({ 12, 6 });
+        auto config = boost::make_shared<_SimulationConfigGpu>();
+        config->numThreadsPerBlock = 32;
+        config->numBlocks = 512;
+        config->maxClusters = 10000;
+        config->maxCells = 1000000;
+        config->maxTokens = 10000;
+        config->maxParticles = 1000000;
+        config->dynamicMemorySize = 100000000;
         config->universeSize = IntVector2D({ 12 * 33 * 2 , 12 * 17 * 2 });
         config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
         config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
