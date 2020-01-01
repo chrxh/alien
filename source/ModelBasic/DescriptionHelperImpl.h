@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DescriptionHelper.h"
+#include "ModelBasic/Physics.h"
 
 class DescriptionHelperImpl
 	: public DescriptionHelper
@@ -10,11 +11,12 @@ public:
 	DescriptionHelperImpl(QObject *parent = nullptr) : DescriptionHelper(parent) { }
 	virtual ~DescriptionHelperImpl() = default;
 
-	virtual void init(SimulationContext* context, NumberGenerator* numberGen) override;
+	virtual void init(SimulationContext* context) override;
 
 	virtual void reconnect(DataDescription& data, DataDescription& orgData, unordered_set<uint64_t> const& idsOfChangedCells) override;
 	virtual void recluster(DataDescription& data, unordered_set<uint64_t> const& idsOfChangedClusters) override;
-	virtual void makeValid(ClusterDescription& cluster) override;
+    virtual void makeValid(DataDescription& data) override;
+    virtual void makeValid(ClusterDescription& cluster) override;
 	virtual void makeValid(ParticleDescription& particle) override;
 
 private:
@@ -36,15 +38,11 @@ private:
 
 	void setClusterAttributes(ClusterDescription& cluster);
 	double calcAngleBasedOnOrigClusters(vector<CellDescription> const & cells) const;
-	struct ClusterVelocities {
-		QVector2D linearVel;
-		double angularVel = 0.0;
-	};
-	ClusterVelocities calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const;
+	Physics::Velocities calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const;
 	optional<ClusterMetadata> calcMetadataBasedOnOrigClusters(vector<CellDescription> const & cells) const;
 
 	SpaceProperties* _metric = nullptr;
-	SimulationParameters const* _parameters = nullptr;
+	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;
 
 	DataDescription* _data = nullptr;

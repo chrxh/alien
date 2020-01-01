@@ -6,12 +6,12 @@
 #include "ui_NewRectangleDialog.h"
 
 
-NewRectangleDialog::NewRectangleDialog(SimulationParameters const* simulationParameters, QWidget *parent)
+NewRectangleDialog::NewRectangleDialog(SimulationParameters const& simulationParameters, QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewRectangleDialog)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
-    ui->energyEdit->setText(QString("%1").arg(simulationParameters->cellFunctionConstructorOffspringCellEnergy));
+    ui->energyEdit->setText(QString("%1").arg(simulationParameters.cellFunctionConstructorOffspringCellEnergy));
 
 	ui->sizeXEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::NewRectangleSizeXKey, Const::NewRectangleSizeXDefault)));

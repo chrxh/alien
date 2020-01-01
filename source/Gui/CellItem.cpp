@@ -9,6 +9,30 @@
 #include "CellItem.h"
 #include "CoordinateSystem.h"
 
+namespace
+{
+	QString getTypeString(Enums::CellFunction::Type type)
+	{
+		if (type == Enums::CellFunction::COMPUTER)
+			return "Computer";
+		else if (type == Enums::CellFunction::PROPULSION)
+			return "Propulsion";
+		else if (type == Enums::CellFunction::SCANNER)
+			return "Scanner";
+		else if (type == Enums::CellFunction::WEAPON)
+			return "Weapon";
+		else if (type == Enums::CellFunction::CONSTRUCTOR)
+			return "Constructor";
+		else if (type == Enums::CellFunction::SENSOR)
+			return "Sensor";
+		else if (type == Enums::CellFunction::COMMUNICATOR)
+			return "Communicator";
+		else
+			return QString();
+	}
+
+}
+
 CellItem::CellItem (ItemConfig* config, CellDescription const& desc, QGraphicsItem* parent /*= nullptr*/)
     : AbstractItem(parent), _config(config)
 {
@@ -20,7 +44,7 @@ void CellItem::update(CellDescription const &desc)
 	_desc = desc;
 	auto pos = CoordinateSystem::modelToScene(*desc.pos);
 	QGraphicsItem::setPos(QPointF(pos.x(), pos.y()));
-	_displayString = getTypeString(_desc.cellFeature->type);
+	_displayString = getTypeString(_desc.cellFeature->getType());
 }
 
 QRectF CellItem::boundingRect () const
@@ -41,7 +65,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     //set brush color
 	QColor brushColor;
-	uint8_t colorCode = getColorCode();
+	uint8_t colorCode = getColorCode() % 7;
     if( colorCode == 0 )
        brushColor = Const::IndividualCellColor1;
     if( colorCode == 1 )
@@ -54,7 +78,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
         brushColor = Const::IndividualCellColor5;
     if( colorCode == 5 )
         brushColor = Const::IndividualCellColor6;
-    if( colorCode >= 6 )
+    if( colorCode == 6 )
         brushColor = Const::IndividualCellColor7;
 	if (!isConnectable()) {
 		brushColor.setHsl(brushColor.hslHue(), brushColor.hslSaturation(), qMax(0, brushColor.lightness() - 60), brushColor.alpha());

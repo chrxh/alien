@@ -37,12 +37,12 @@ protected:
 
 private:
 
-	SimulationParameters* _parameters = nullptr;
+	SimulationParameters _parameters;
 
     bool _newMessageReceived = false;
     MessageData _receivedMessage;
 
-    Enums::CommunicatorIn::Type readCommandFromToken (Token* token) const;
+    Enums::CommunicatorIn::Type getCommand (Token* token) const;
     void setListeningChannel (Token* token);
 
     void sendMessageToNearbyCommunicatorsAndUpdateToken (Token* token, Cell* cell, Cell* previousCell) const;

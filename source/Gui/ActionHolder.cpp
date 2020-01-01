@@ -49,8 +49,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionExit = new QAction("Exit", this);
 	actionExit->setEnabled(true);
 
-	actionConfigureGrid = new QAction("Configure grid", this);
-	actionConfigureGrid->setEnabled(true);
+	actionComputationSettings = new QAction("Computation", this);
+	actionComputationSettings->setEnabled(true);
 
 	actionEditSimParameters = new QAction("Edit", this);
 	actionEditSimParameters->setEnabled(true);
@@ -228,6 +228,9 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionGridMultiplier = new QAction("Grid multiplier", this);
 	actionGridMultiplier->setEnabled(false);
+
+    actionMostFrequentCluster = new QAction("Most frequent cluster with token", this);
+    actionMostFrequentCluster->setEnabled(true);
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);
 	actionAbout->setEnabled(true);

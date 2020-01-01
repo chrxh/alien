@@ -38,7 +38,7 @@ void CellEditTab::updateModelAndNotifyController ()
 		cell.maxConnections = qRound(generateNumberFromFormattedString(currentText));
 	if ((row == 6) && !(*cell.tokenBlocked)) {
 		auto parameters = _model->getSimulationParameters();
-		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText)) % parameters->cellMaxTokenBranchNumber;
+		cell.tokenBranchNumber = qRound(generateNumberFromFormattedString(currentText)) % parameters.cellMaxTokenBranchNumber;
 	}
 	_controller->notificationFromCellTab();
 }
@@ -295,23 +295,23 @@ void CellEditTab::mousePressEvent(QMouseEvent* e)
     //cursor at cell function?
     if( (row >= 7) && (col >= 18) && (col <= 36)) {
 		if (row == 7) {
-			cell.cellFeature->type = Enums::CellFunction::COMPUTER;
+			cell.cellFeature->setType(Enums::CellFunction::COMPUTER);
 			auto parameters = _model->getSimulationParameters();
-			int memorySize = parameters->cellFunctionComputerCellMemorySize;
+			int memorySize = parameters.cellFunctionComputerCellMemorySize;
 			cell.cellFeature->setVolatileData(QByteArray(memorySize, 0));
 		}
         if( row == 8 )
-			cell.cellFeature->type = Enums::CellFunction::PROPULSION;
+			cell.cellFeature->setType(Enums::CellFunction::PROPULSION);
         if( row == 9 )
-			cell.cellFeature->type = Enums::CellFunction::SCANNER;
+			cell.cellFeature->setType(Enums::CellFunction::SCANNER);
         if( row == 10 )
-			cell.cellFeature->type = Enums::CellFunction::WEAPON;
+			cell.cellFeature->setType(Enums::CellFunction::WEAPON);
         if( row == 11 )
-			cell.cellFeature->type = Enums::CellFunction::CONSTRUCTOR;
+			cell.cellFeature->setType(Enums::CellFunction::CONSTRUCTOR);
         if( row == 12 )
-			cell.cellFeature->type = Enums::CellFunction::SENSOR;
+			cell.cellFeature->setType(Enums::CellFunction::SENSOR);
         if( row == 13 )
-			cell.cellFeature->type = Enums::CellFunction::COMMUNICATOR;
+			cell.cellFeature->setType(Enums::CellFunction::COMMUNICATOR);
         updateDisplay();
 		_controller->notificationFromCellTab();
     }
@@ -357,7 +357,7 @@ void CellEditTab::updateDisplay ()
     text += parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += StringHelper::generateFormattedRealString(*cell.energy)+parEnd;
     text += parStart+colorTextStart+ "current bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+QString("%1").arg(cell.connectingCells->size())+colorEnd+parEnd;
+    text += colorDataStart+QString("%1").arg(cell.connectingCells ? cell.connectingCells->size() : 0)+colorEnd+parEnd;
     text += parStart+colorTextStart+ "max bonds: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += colorDataStart+QString("%1").arg(*cell.maxConnections)+colorEnd+parEnd;
     text += parStart+colorTextStart+ "allow token: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
@@ -370,7 +370,8 @@ void CellEditTab::updateDisplay ()
         text += colorDataStart+"n"+colorEnd+parEnd;
         text += parStart+colorTextStartInactive+ "branch number: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd+parEnd;
     }
-    text += generateFormattedCellFunctionString(cell.cellFeature->type);
+    auto const& cellFunctionType = cell.cellFeature->getType();
+    text += generateFormattedCellFunctionString(cellFunctionType);
 
     QTextEdit::setText(text);
 

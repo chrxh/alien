@@ -8,7 +8,7 @@ DataEditModel::DataEditModel(QObject *parent)
 {
 }
 
-void DataEditModel::init(DataRepository* manipulator, SimulationParameters const* parameters, SymbolTable* symbols)
+void DataEditModel::init(DataRepository* manipulator, SimulationParameters const& parameters, SymbolTable* symbols)
 {
 	_manipulator = manipulator;
 	_parameters = parameters;
@@ -102,7 +102,7 @@ int DataEditModel::getNumParticles() const
 	return _selectedParticleIds.size();
 }
 
-SimulationParameters const* DataEditModel::getSimulationParameters() const
+SimulationParameters const& DataEditModel::getSimulationParameters() const
 {
 	return _parameters;
 }

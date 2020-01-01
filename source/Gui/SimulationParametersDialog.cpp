@@ -2,25 +2,41 @@
 #include <fstream>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QStyledItemDelegate>
 
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/Serializer.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "Settings.h"
-#include "SerializationHelper.h"
 #include "SimulationParametersDialog.h"
 #include "SimulationConfig.h"
 #include "ui_simulationparametersdialog.h"
 
+namespace {
+    class NoEditDelegate : public QStyledItemDelegate {
+    public:
+        NoEditDelegate(QObject* parent = 0)
+            : QStyledItemDelegate(parent)
+        {}
+        virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index)
+            const
+        {
+            return 0;
+        }
+    };
+}
+
 SimulationParametersDialog::SimulationParametersDialog(SimulationConfig const& config, Serializer* serializer, QWidget *parent)
-	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(config->parameters->clone(parent))
+	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(config->parameters)
 	, _serializer(serializer), _config(config)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
     ui->treeWidget->expandAll();
 	ui->treeWidget->setColumnWidth(0, 270);
+    ui->treeWidget->setItemDelegateForColumn(0, new NoEditDelegate(this));
 
     updateWidgetsFromSimulationParameters ();
 
@@ -37,7 +53,7 @@ SimulationParametersDialog::~SimulationParametersDialog()
     delete ui;
 }
 
-SimulationParameters* SimulationParametersDialog::getSimulationParameters ()
+SimulationParameters const& SimulationParametersDialog::getSimulationParameters () const
 {
     return _simulationParameters;
 }
@@ -60,74 +76,78 @@ void SimulationParametersDialog::okClicked()
 
 void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 {
-	setItem("max radius", 0, _simulationParameters->clusterMaxRadius);
+	setItem("max radius", 0, _simulationParameters.clusterMaxRadius);
 
-	setItem("mutation probability", 0, _simulationParameters->cellMutationProb);
-	setItem("min distance", 0, _simulationParameters->cellMinDistance);
-	setItem("max distance", 0, _simulationParameters->cellMaxDistance);
-	setItem("mass", 0, 1.0/_simulationParameters->cellMass_Reciprocal);
-	setItem("max force", 0, _simulationParameters->callMaxForce);
-    setItem("max force decay probability", 0, _simulationParameters->cellMaxForceDecayProb);
-    setItem("max bonds", 0, _simulationParameters->cellMaxBonds);
-    setItem("max token", 0, _simulationParameters->cellMaxToken);
-    setItem("max token branch number", 0, _simulationParameters->cellMaxTokenBranchNumber);
-    setItem("min energy", 0, _simulationParameters->cellMinEnergy);
-    setItem("transformation probability", 0, _simulationParameters->cellTransformationProb);
-    setItem("fusion velocity", 0, _simulationParameters->cellFusionVelocity);
+    setItem("min age", 0, _simulationParameters.cellMinAge);
+    setItem("min distance", 0, _simulationParameters.cellMinDistance);
+	setItem("max distance", 0, _simulationParameters.cellMaxDistance);
+	setItem("mass", 0, 1.0/_simulationParameters.cellMass_Reciprocal);
+	setItem("max force", 0, _simulationParameters.cellMaxForce);
+    setItem("max force decay probability", 0, _simulationParameters.cellMaxForceDecayProb);
+    setItem("max bonds", 0, _simulationParameters.cellMaxBonds);
+    setItem("max token", 0, _simulationParameters.cellMaxToken);
+    setItem("max token branch number", 0, _simulationParameters.cellMaxTokenBranchNumber);
+    setItem("min energy", 0, _simulationParameters.cellMinEnergy);
+    setItem("transformation probability", 0, _simulationParameters.cellTransformationProb);
+    setItem("fusion velocity", 0, _simulationParameters.cellFusionVelocity);
 
-    setItem("max instructions", 0, _simulationParameters->cellFunctionComputerMaxInstructions);
-    setItem("memory size", 0, _simulationParameters->cellFunctionComputerCellMemorySize);
-    setItem("offspring cell energy", 0, _simulationParameters->cellFunctionConstructorOffspringCellEnergy);
-    setItem("offspring cell distance", 0, _simulationParameters->cellFunctionConstructorOffspringCellDistance);
-	setItem("offspring token energy", 0, _simulationParameters->cellFunctionConstructorOffspringTokenEnergy);
-    setItem("range", 0, _simulationParameters->cellFunctionSensorRange);
-    setItem("strength", 0, _simulationParameters->cellFunctionWeaponStrength);
-    setItem("range", 1, _simulationParameters->cellFunctionCommunicatorRange);
+    setItem("strength", 0, _simulationParameters.cellFunctionWeaponStrength);
+    setItem("energy cost", 0, _simulationParameters.cellFunctionWeaponEnergyCost);
+    setItem("max instructions", 0, _simulationParameters.cellFunctionComputerMaxInstructions);
+    setItem("memory size", 0, _simulationParameters.cellFunctionComputerCellMemorySize);
+    setItem("offspring cell energy", 0, _simulationParameters.cellFunctionConstructorOffspringCellEnergy);
+    setItem("offspring cell distance", 0, _simulationParameters.cellFunctionConstructorOffspringCellDistance);
+	setItem("offspring token energy", 0, _simulationParameters.cellFunctionConstructorOffspringTokenEnergy);
+    setItem("mutation probability", 0, _simulationParameters.cellFunctionConstructorMutationProb);
+    setItem("range", 0, _simulationParameters.cellFunctionSensorRange);
+    setItem("range", 1, _simulationParameters.cellFunctionCommunicatorRange);
 
-	setItem("memory size", 1, _simulationParameters->tokenMemorySize);
-	setItem("min energy", 1, _simulationParameters->tokenMinEnergy);
+	setItem("memory size", 1, _simulationParameters.tokenMemorySize);
+	setItem("min energy", 1, _simulationParameters.tokenMinEnergy);
 
-    setItem("exponent", 0, _simulationParameters->radiationExponent);
-    setItem("factor", 0, _simulationParameters->radiationFactor);
-    setItem("probability", 0, _simulationParameters->radiationProb);
-    setItem("velocity multiplier", 0, _simulationParameters->radiationVelocityMultiplier);
-    setItem("velocity perturbation", 0, _simulationParameters->radiationVelocityPerturbation);
+    setItem("exponent", 0, _simulationParameters.radiationExponent);
+    setItem("factor", 0, _simulationParameters.radiationFactor);
+    setItem("probability", 0, _simulationParameters.radiationProb);
+    setItem("velocity multiplier", 0, _simulationParameters.radiationVelocityMultiplier);
+    setItem("velocity perturbation", 0, _simulationParameters.radiationVelocityPerturbation);
 }
 
 void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 {
-	_simulationParameters->clusterMaxRadius = getItemReal("max radius", 0);
+	_simulationParameters.clusterMaxRadius = getItemReal("max radius", 0);
 	
-	_simulationParameters->cellMutationProb = getItemReal("mutation probability", 0);
-	_simulationParameters->cellMinDistance = getItemReal("min distance", 0);
-	_simulationParameters->cellMaxDistance = getItemReal("max distance", 0);
-    _simulationParameters->cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);
-    _simulationParameters->callMaxForce = getItemReal("max force", 0);
-    _simulationParameters->cellMaxForceDecayProb = getItemReal("max force decay probability", 0);
-    _simulationParameters->cellMaxBonds = getItemInt("max bonds", 0);
-    _simulationParameters->cellMaxToken = getItemInt("max token", 0);
-    _simulationParameters->cellMaxTokenBranchNumber = getItemInt("max token branch number", 0);
-    _simulationParameters->cellFunctionConstructorOffspringCellEnergy = getItemReal("offspring cell energy", 0);
-    _simulationParameters->cellMinEnergy = getItemReal("min energy", 0);
-    _simulationParameters->cellTransformationProb = getItemReal("transformation probability", 0);
-    _simulationParameters->cellFusionVelocity = getItemReal("fusion velocity", 0);
+    _simulationParameters.cellMinAge = getItemReal("min age", 0);
+	_simulationParameters.cellMinDistance = getItemReal("min distance", 0);
+	_simulationParameters.cellMaxDistance = getItemReal("max distance", 0);
+    _simulationParameters.cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);
+    _simulationParameters.cellMaxForce = getItemReal("max force", 0);
+    _simulationParameters.cellMaxForceDecayProb = getItemReal("max force decay probability", 0);
+    _simulationParameters.cellMaxBonds = getItemInt("max bonds", 0);
+    _simulationParameters.cellMaxToken = getItemInt("max token", 0);
+    _simulationParameters.cellMaxTokenBranchNumber = getItemInt("max token branch number", 0);
+    _simulationParameters.cellMinEnergy = getItemReal("min energy", 0);
+    _simulationParameters.cellTransformationProb = getItemReal("transformation probability", 0);
+    _simulationParameters.cellFusionVelocity = getItemReal("fusion velocity", 0);
 
-    _simulationParameters->cellFunctionComputerMaxInstructions = getItemInt("max instructions", 0);
-    _simulationParameters->cellFunctionComputerCellMemorySize = getItemInt("memory size", 0);
-    _simulationParameters->cellFunctionConstructorOffspringCellDistance = getItemReal("offspring cell distance", 0);
-    _simulationParameters->cellFunctionWeaponStrength = getItemReal("strength", 0);
-    _simulationParameters->cellFunctionSensorRange = getItemReal("range", 0);
-    _simulationParameters->cellFunctionCommunicatorRange = getItemReal("range", 1);
+    _simulationParameters.cellFunctionWeaponStrength = getItemReal("strength", 0);
+    _simulationParameters.cellFunctionWeaponEnergyCost = getItemReal("energy cost", 0);
+    _simulationParameters.cellFunctionComputerMaxInstructions = getItemInt("max instructions", 0);
+    _simulationParameters.cellFunctionComputerCellMemorySize = getItemInt("memory size", 0);
+    _simulationParameters.cellFunctionConstructorOffspringCellEnergy = getItemReal("offspring cell energy", 0);
+    _simulationParameters.cellFunctionConstructorOffspringCellDistance = getItemReal("offspring cell distance", 0);
+    _simulationParameters.cellFunctionConstructorOffspringTokenEnergy = getItemReal("offspring token energy", 0);
+    _simulationParameters.cellFunctionConstructorMutationProb = getItemReal("mutation probability", 0);
+    _simulationParameters.cellFunctionSensorRange = getItemReal("range", 0);
+    _simulationParameters.cellFunctionCommunicatorRange = getItemReal("range", 1);
 
-	_simulationParameters->tokenMemorySize = getItemInt("memory size", 1);
-	_simulationParameters->cellFunctionConstructorOffspringTokenEnergy = getItemReal("offspring token energy", 0);
-    _simulationParameters->tokenMinEnergy = getItemReal("min energy", 1);
+	_simulationParameters.tokenMemorySize = getItemInt("memory size", 1);
+    _simulationParameters.tokenMinEnergy = getItemReal("min energy", 1);
 
-    _simulationParameters->radiationExponent = getItemReal("exponent", 0);
-    _simulationParameters->radiationFactor = getItemReal("factor", 0);
-    _simulationParameters->radiationProb = getItemReal("probability", 0);
-    _simulationParameters->radiationVelocityMultiplier = getItemReal("velocity multiplier", 0);
-    _simulationParameters->radiationVelocityPerturbation = getItemReal("velocity perturbation", 0);
+    _simulationParameters.radiationExponent = getItemReal("exponent", 0);
+    _simulationParameters.radiationFactor = getItemReal("factor", 0);
+    _simulationParameters.radiationProb = getItemReal("probability", 0);
+    _simulationParameters.radiationVelocityMultiplier = getItemReal("velocity multiplier", 0);
+    _simulationParameters.radiationVelocityPerturbation = getItemReal("velocity perturbation", 0);
 }
 
 void SimulationParametersDialog::setItem(QString key, int matchPos, int value)
@@ -152,7 +172,7 @@ qreal SimulationParametersDialog::getItemReal(QString key, int matchPos)
 	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(1).toDouble(&ok);
 }
 
-bool SimulationParametersDialog::saveSimulationParameters(string filename, SimulationParameters * parameters)
+bool SimulationParametersDialog::saveSimulationParameters(string filename)
 {
 	try {
 		std::ofstream stream(filename, std::ios_base::out | std::ios_base::binary);
@@ -173,7 +193,6 @@ bool SimulationParametersDialog::saveSimulationParameters(string filename, Simul
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-	delete _simulationParameters;
 	_simulationParameters = ModelSettings::getDefaultSimulationParameters();
     updateWidgetsFromSimulationParameters();
 }
@@ -183,13 +202,13 @@ void SimulationParametersDialog::loadButtonClicked ()
     QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
     if( !filename.isEmpty() ) {
 		auto origSimulationParameters = _simulationParameters;
-		if (SerializationHelper::loadFromFile<SimulationParameters*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, _simulationParameters)) {
-			delete origSimulationParameters;
+		if (SerializationHelper::loadFromFile<SimulationParameters>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, _simulationParameters)) {
 			updateWidgetsFromSimulationParameters();
 		}
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
 			msgBox.exec();
+			_simulationParameters = origSimulationParameters;
 		}
     }
 }

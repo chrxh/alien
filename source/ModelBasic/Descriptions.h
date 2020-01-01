@@ -1,23 +1,28 @@
 #pragma once
 #include "Definitions.h"
-#include "CellFeatureEnums.h"
 #include "Metadata.h"
 
 struct CellFeatureDescription
 {
-	Enums::CellFunction::Type type = Enums::CellFunction::COMPUTER;
 	QByteArray volatileData;
 	QByteArray constData;
 
-	CellFeatureDescription& setType(Enums::CellFunction::Type value) { type = value; return *this; }
+    Enums::CellFunction::Type getType() const
+    {
+        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned char>(_type) % Enums::CellFunction::_COUNTER);
+    }
+	CellFeatureDescription& setType(Enums::CellFunction::Type value) { _type = value; return *this; }
 	CellFeatureDescription& setVolatileData(QByteArray const &value) { volatileData = value; return *this; }
 	CellFeatureDescription& setConstData(QByteArray const &value) { constData = value; return *this; }
 	bool operator==(CellFeatureDescription const& other) const {
-		return type == other.type
+		return _type == other._type
 			&& volatileData == other.volatileData
 			&& constData == other.constData;
 	}
 	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
+
+private:
+    Enums::CellFunction::Type _type = Enums::CellFunction::COMPUTER;
 };
 
 
@@ -53,41 +58,17 @@ struct MODELBASIC_EXPORT CellDescription
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
 	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells = value; return *this; }
-	CellDescription& addConnection(uint64_t value)
-	{
-		if (!connectingCells) {
-			connectingCells = list<uint64_t>();
-		}
-		connectingCells->push_back(value);
-		return *this;
-	}
+	CellDescription& addConnection(uint64_t value);
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
 	CellDescription& setCellFeature(CellFeatureDescription const& value) { cellFeature = value; return *this; }
 	CellDescription& setTokens(vector<TokenDescription> const& value) { tokens = value; return *this; }
-	CellDescription& addToken(TokenDescription const& value)
-	{
-		if (!tokens) {
-			tokens = vector<TokenDescription>();
-		}
-		tokens->push_back(value);
-		return *this;
-	}
-	CellDescription& addToken(uint pos, TokenDescription const& value)
-	{
-		if (!tokens) {
-			tokens = vector<TokenDescription>();
-		}
-		tokens->insert(tokens->begin() + pos, value);
-		return *this;
-	}
-	CellDescription& delToken(uint pos)
-	{
-		CHECK(tokens);
-		tokens->erase(tokens->begin() + pos);
-		return *this;
-	}
+	CellDescription& addToken(TokenDescription const& value);
+	CellDescription& addToken(uint index, TokenDescription const& value);
+	CellDescription& delToken(uint index);
+	QVector2D getPosRelativeTo(ClusterDescription const& cluster) const;
+    bool isConnectedTo(uint64_t id) const;
 };
 
 struct MODELBASIC_EXPORT ClusterDescription
@@ -102,8 +83,9 @@ struct MODELBASIC_EXPORT ClusterDescription
 	optional<vector<CellDescription>> cells;
 
 	ClusterDescription() = default;
-	ClusterDescription(ClusterChangeDescription const& change);
-	ClusterDescription& setId(uint64_t value) { id = value; return *this; }
+    
+    ClusterDescription(ClusterChangeDescription const& change);
+    ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ClusterDescription& setAngle(double value) { angle = value; return *this; }
@@ -124,6 +106,8 @@ struct MODELBASIC_EXPORT ClusterDescription
 		addCells({ value });
 		return *this;
 	}
+
+	QVector2D getClusterPosFromCells() const;
 };
 
 struct MODELBASIC_EXPORT ParticleDescription
@@ -136,12 +120,12 @@ struct MODELBASIC_EXPORT ParticleDescription
 	optional<ParticleMetadata> metadata;
 
 	ParticleDescription() = default;
-	~ParticleDescription() = default;
 	ParticleDescription(ParticleChangeDescription const& change);
 	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
 	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	ParticleDescription& setEnergy(double value) { energy = value; return *this; }
+    ParticleDescription& setMetadata(ParticleMetadata const& value) { metadata = value; return *this; }
 };
 
 struct MODELBASIC_EXPORT DataDescription
@@ -149,6 +133,7 @@ struct MODELBASIC_EXPORT DataDescription
 	optional<vector<ClusterDescription>> clusters;
 	optional<vector<ParticleDescription>> particles;
 
+    DataDescription() = default;
 	DataDescription& addClusters(list<ClusterDescription> const& value)
 	{
 		if (clusters) {

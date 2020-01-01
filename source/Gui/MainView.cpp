@@ -1,16 +1,15 @@
 ﻿#include "ModelBasic/SimulationController.h"
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/SerializationHelper.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
 #include "Gui/ActionController.h"
 #include "Gui/ActionHolder.h"
 #include "Gui/DocumentationWindow.h"
-#include "Gui/StartScreenController.h"
 #include "Gui/MonitorController.h"
 
-#include "SerializationHelper.h"
 #include "InfoController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
@@ -34,12 +33,10 @@ MainView::MainView(QWidget * parent)
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
-	_startScreen = new StartScreenController(this);
 	_documentationWindow = new DocumentationWindow(this);
 	_monitor = new MonitorController(this);
 	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
-
 }
 
 MainView::~MainView()
@@ -48,7 +45,7 @@ MainView::~MainView()
 }
 
 void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository
-	, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator)
+	, SimulationMonitor* simMonitor, Notifier* notifier)
 {
 	_model = model;
 	_controller = mainController;
@@ -56,9 +53,9 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_notifier = notifier;
 
 	_infoController->init(ui->infoLabel, mainController);
-	_monitor->init(simMonitor);
+	_monitor->init(mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
-		, _monitor, repository, notifier, numberGenerator);
+		, _monitor, repository, notifier);
 
 	setupMenu();
 	setupFontsAndColors();
@@ -66,7 +63,6 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	setupFullScreen();
 	show();
 
-	_startScreen->start();
 	_initialied = true;
 }
 
@@ -139,7 +135,7 @@ void MainView::setupMenu()
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSettings->addAction(actions->actionConfigureGrid);
+	ui->menuSettings->addAction(actions->actionComputationSettings);
 	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
 	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
@@ -184,6 +180,8 @@ void MainView::setupMenu()
 	ui->menuCollection->addAction(actions->actionRandomMultiplier);
 	ui->menuCollection->addAction(actions->actionGridMultiplier);
 
+    ui->menuAnalysis->addAction(actions->actionMostFrequentCluster);
+
 	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();
 	ui->menuHelp->addAction(actions->actionDocumentation);
@@ -200,6 +198,7 @@ void MainView::setupFontsAndColors()
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
 	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
 	ui->menuSymbolMap->setFont(GuiSettings::getGlobalFont());
+    ui->menuAnalysis->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #303030");
@@ -224,6 +223,7 @@ void MainView::setupWidgets()
 
 	ui->tpsSpinBox->setValue(_model->getTPS());
 	connect(ui->tpsSpinBox, (void(QSpinBox::*)(int))(&QSpinBox::valueChanged), [this](int value) {
+        value = std::max(1, value);
 		_model->setTPS(value);
 		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
 		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);

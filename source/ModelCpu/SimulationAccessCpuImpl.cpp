@@ -4,6 +4,7 @@
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/EntityRenderer.h"
 
 #include "EntityFactory.h"
 #include "Cluster.h"
@@ -63,7 +64,13 @@ void SimulationAccessCpuImpl::requireData(IntRect rect, ResolveDescription const
 	}
 }
 
-void SimulationAccessCpuImpl::requireImage(IntRect rect, QImage * target)
+void SimulationAccessCpuImpl::requireData(ResolveDescription const & resolveDesc)
+{
+    auto const space = _context->getSpaceProperties();
+    requireData(IntRect{ {0, 0}, space->getSize() }, resolveDesc);
+}
+
+void SimulationAccessCpuImpl::requireImage(IntRect rect, QImagePtr const& target)
 {
 	_imageRequired = true;
 	_requiredRect = rect;
@@ -112,21 +119,10 @@ void SimulationAccessCpuImpl::callBackClear()
 
 void SimulationAccessCpuImpl::callBackUpdateData()
 {
-	updateClusterData();
-	updateParticleData();
-}
-
-namespace
-{
-	void getClusterPosFromCells(ClusterDescription& desc)
-	{
-		if (!desc.pos && desc.cells) {
-			desc.pos = QVector2D();
-			for (CellDescription const& cell : *desc.cells) {
-				*desc.pos += *cell.pos;
-			}
-			*desc.pos /= desc.cells->size();
-		}
+	if (!_dataToUpdate.empty()) {
+		updateClusterData();
+		updateParticleData();
+		Q_EMIT dataUpdated();
 	}
 }
 
@@ -147,7 +143,9 @@ void SimulationAccessCpuImpl::updateClusterData()
 		auto const& clusterDesc = clusterTracker.getValue();
 		if (clusterTracker.isAdded()) {
 			ClusterDescription clusterDescToAdd(clusterDesc);
-			getClusterPosFromCells(clusterDescToAdd);
+			if (!clusterDescToAdd.pos) {
+				clusterDescToAdd.pos = clusterDescToAdd.getClusterPosFromCells();
+			}
 			auto unitContext = grid->getUnitOfMapPos(*clusterDescToAdd.pos)->getContext();
 			auto cluster = factory->build(clusterDescToAdd, unitContext);
 			unitContext->getClustersRef().push_back(cluster);
@@ -367,78 +365,29 @@ namespace
 		b = b*e / 150;
 		return (r << 16) | (g << 8) | b;
 	}
-
-	uint32_t calcParticleColor(double energy)
-	{
-		quint32 e = (energy + 10) * 5;
-		if (e > 150) {
-			e = 150;
-		}
-		return (e << 16) | 0x30;
-	}
-}
-
-namespace
-{
-	void colorPixel(QImage* image, IntVector2D const& pos, QRgb const& color, int alpha)
-	{
-		QRgb const& origColor = image->pixel(pos.x, pos.y);
-
-		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
-		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
-		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
-		image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
-	}
 }
 
 void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceProperties();
+	auto space = unit->getContext()->getSpaceProperties();
+
+    EntityRenderer renderer(_requiredImage, _requiredRect.p1, space);
+
 	auto const &clusters = unit->getContext()->getClustersRef();
 	list<IntVector2D> tokenPos;
 	for (auto const &cluster : clusters) {
 		for (auto const &cell : cluster->getCellsRef()) {
-			auto pos = metric->correctPositionAndConvertToIntVector(cell->calcPosition(true));
+			auto pos = space->convertToIntVector(cell->calcPosition(true));
 			if (_requiredRect.isContained(pos)) {
+				renderer.renderCell(pos, cell->getMetadata().color, cell->getEnergy());
 				if (cell->getNumToken() > 0) {
 					tokenPos.push_back(pos);
-				} else {
-					_requiredImage->setPixel(pos.x, pos.y, calcCellColor(cell->getMetadata(), cell->getEnergy()));
 				}
 			}
 		}
 		if (!tokenPos.empty()) {
 			for (IntVector2D const& pos : tokenPos) {
-				_requiredImage->setPixel(pos.x, pos.y, 0xFFFFFF);
-
-				{
-					for (int i = 1; i < 4; ++i) {
-						IntVector2D posMod{ pos.x, pos.y - i };
-						metric->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i*255/4);
-					}
-				}
-				{
-					for (int i = 1; i < 4; ++i) {
-						IntVector2D posMod{ pos.x + i, pos.y };
-						metric->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
-					}
-				}
-				{
-					for (int i = 1; i < 4; ++i) {
-						IntVector2D posMod{ pos.x, pos.y + i };
-						metric->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
-					}
-				}
-				{
-					for (int i = 1; i < 4; ++i) {
-						IntVector2D posMod{ pos.x - i, pos.y };
-						metric->correctPosition(posMod);
-						colorPixel(_requiredImage, posMod, 0xFFFFFF, 255 - i * 255 / 4);
-					}
-				}
+				renderer.renderToken(pos);
 			}
 			tokenPos.clear();
 		}
@@ -447,12 +396,14 @@ void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 
 void SimulationAccessCpuImpl::drawParticlesFromUnit(Unit * unit)
 {
-	auto metric = unit->getContext()->getSpaceProperties();
+	auto space = unit->getContext()->getSpaceProperties();
+	EntityRenderer renderer(_requiredImage, _requiredRect.p1, space);
+
 	auto const &particles = unit->getContext()->getParticlesRef();
 	for (auto const &particle : particles) {
 		IntVector2D pos = particle->getPosition();
 		if (_requiredRect.isContained(pos)) {
-			_requiredImage->setPixel(pos.x, pos.y, calcParticleColor(particle->getEnergy()));
+			renderer.renderParticle(pos, particle->getEnergy());
 		}
 	}
 }

@@ -23,6 +23,12 @@ VisualEditController::VisualEditController(QWidget *parent)
 
     ui->simulationView->horizontalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
+    auto emptyScene = new QGraphicsScene(this);
+    emptyScene->setBackgroundBrush(QBrush(Const::UniverseColor));
+
+    QPixmap startScreenPixmap("://Tutorial/logo.png");
+    emptyScene->addPixmap(startScreenPixmap);
+    ui->simulationView->setScene(emptyScene);
 }
 
 VisualEditController::~VisualEditController()
@@ -35,10 +41,10 @@ void VisualEditController::init(Notifier* notifier, SimulationController* contro
 	_pixelUniverseInit = false;
 	_shapeUniverseInit = false;
 	_controller = controller;
-	_pixelUniverse->init(notifier, controller, access, repository, _viewport);
+    _viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, _activeScene);
+    _pixelUniverse->init(notifier, controller, access, repository, _viewport);
 	_itemUniverse->init(notifier, controller, repository, _viewport);
 	_activeScene = ActiveScene::PixelScene;
-	_viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, _activeScene);
 }
 
 void VisualEditController::refresh()

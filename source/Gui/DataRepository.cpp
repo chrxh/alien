@@ -12,12 +12,12 @@
 #include "Notifier.h"
 
 void DataRepository::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector
-	, SimulationContext* context, NumberGenerator* numberGenerator)
+	, SimulationContext* context)
 {
 	_descHelper = connector;
 	_access = access;
 	_notifier = notifier;
-	_numberGenerator = numberGenerator;
+	_numberGenerator = context->getNumberGenerator();
 	_parameters = context->getSimulationParameters();
 	_universeSize = context->getSpaceProperties()->getSize();
 	_unchangedData.clear();
@@ -84,9 +84,9 @@ optional<uint> DataRepository::getSelectedTokenIndex() const
 void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
-	int memorySize = _parameters->cellFunctionComputerCellMemorySize;
+	int memorySize = _parameters.cellFunctionComputerCellMemorySize;
 	auto desc = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
-		CellDescription().setEnergy(_parameters->cellFunctionConstructorOffspringCellEnergy).setMaxConnections(_parameters->cellCreationMaxConnection)
+		CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setMaxConnections(_parameters.cellCreationMaxConnection)
 		.setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
 		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setVolatileData(QByteArray(memorySize, 0))
@@ -102,7 +102,7 @@ void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 {
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
-	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters->cellMinEnergy / 2.0);
+	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters.cellMinEnergy / 2.0);
 	_descHelper->makeValid(desc);
 	_data.addParticle(desc);
 	_selectedCellIds = { };
@@ -201,32 +201,36 @@ namespace
 	}
 }
 
-void DataRepository::addDataAtFixedPosition(DataDescription data, optional<double> rotationAngle)
+void DataRepository::addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles)
 {
-	if (rotationAngle) {
-		int numClusters = data.clusters.is_initialized() ? data.clusters->size() : 0;
-		int numParticle = data.particles.is_initialized() ? data.particles->size() : 0;
-		auto clusterResolver = [&data](int index) -> ClusterDescription& {
-			return data.clusters->at(index);
-		};
-		auto particleResolver = [&data](int index) -> ParticleDescription& {
-			return data.particles->at(index);
-		};
-		rotate(*rotationAngle, numClusters, numParticle, clusterResolver, particleResolver);
-	}
-
-	if (data.clusters) {
-		for (auto& cluster : *data.clusters) {
-			cluster.id = 0;
-			_descHelper->makeValid(cluster);
-			_data.addCluster(cluster);
+	for (auto & dataAndAngle : dataAndAngles) {
+		auto & data = dataAndAngle.data;
+		auto & rotationAngel = dataAndAngle.angle;
+		if (rotationAngel) {
+			int numClusters = data.clusters.is_initialized() ? data.clusters->size() : 0;
+			int numParticle = data.particles.is_initialized() ? data.particles->size() : 0;
+			auto clusterResolver = [&data](int index) -> ClusterDescription& {
+				return data.clusters->at(index);
+			};
+			auto particleResolver = [&data](int index) -> ParticleDescription& {
+				return data.particles->at(index);
+			};
+			rotate(*dataAndAngle.angle, numClusters, numParticle, clusterResolver, particleResolver);
 		}
-	}
-	if (data.particles) {
-		for (auto& particle : *data.particles) {
-			particle.id = 0;
-			_descHelper->makeValid(particle);
-			_data.addParticle(particle);
+
+		if (data.clusters) {
+			for (auto& cluster : *data.clusters) {
+				cluster.id = 0;
+				_descHelper->makeValid(cluster);
+				_data.addCluster(cluster);
+			}
+		}
+		if (data.particles) {
+			for (auto& particle : *data.particles) {
+				particle.id = 0;
+				_descHelper->makeValid(particle);
+				_data.addParticle(particle);
+			}
 		}
 	}
 	_navi.update(_data);
@@ -246,7 +250,7 @@ void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerP
 		remainingEnergy -= particleEnergy;
 	}
 
-	addDataAtFixedPosition(data);
+	addDataAtFixedPosition({ { data, optional<double>() } });
 }
 
 namespace
@@ -347,7 +351,7 @@ void DataRepository::deleteExtendedSelection()
 
 void DataRepository::addToken()
 {
-	addToken(TokenDescription().setEnergy(_parameters->cellFunctionConstructorOffspringTokenEnergy).setData(QByteArray(_parameters->tokenMemorySize, 0)));
+	addToken(TokenDescription().setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0)));
 }
 
 void DataRepository::addToken(TokenDescription const & token)
@@ -356,7 +360,7 @@ void DataRepository::addToken(TokenDescription const & token)
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
 
 	int numToken = cell.tokens ? cell.tokens->size() : 0;
-	if (numToken < _parameters->cellMaxToken) {
+	if (numToken < _parameters.cellMaxToken) {
 		uint pos = _selectedTokenIndex ? *_selectedTokenIndex : numToken;
 		cell.addToken(pos, token);
 	}
@@ -400,11 +404,23 @@ void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)
 
 void DataRepository::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
-	_selectedCellIds = unordered_set<uint64_t>(cellIds.begin(), cellIds.end());
-	_selectedParticleIds = unordered_set<uint64_t>(particleIds.begin(), particleIds.end());
+	_selectedCellIds.clear();
+	for (uint64_t particleId : cellIds) {
+		if (_navi.cellIds.find(particleId) != _navi.cellIds.end()) {
+			_selectedCellIds.insert(particleId);
+		}
+	}
+
+	_selectedParticleIds.clear();
+	for (uint64_t particleId : particleIds) {
+		if (_navi.particleIds.find(particleId) != _navi.particleIds.end()) {
+			_selectedParticleIds.insert(particleId);
+		}
+	}
+
 	_selectedClusterIds.clear();
-	for (uint64_t cellId : cellIds) {
-		auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(cellId);
+	for (uint64_t particleId : cellIds) {
+		auto clusterIdByCellIdIter = _navi.clusterIdsByCellIds.find(particleId);
 		if (clusterIdByCellIdIter != _navi.clusterIdsByCellIds.end()) {
 			_selectedClusterIds.insert(clusterIdByCellIdIter->second);
 		}
@@ -446,20 +462,23 @@ namespace
 	template<typename T>
 	unordered_set<T> calcDifference(unordered_set<T> const& set1, unordered_set<T> const& set2)
 	{
-		unordered_set<T> result;
-		std::set_difference(set1.begin(), set1.end(), set2.begin(), set2.begin(), std::inserter(result, result.begin()));
-		return result;
+		set<T> orderedSet1(set1.begin(), set1.end());
+		set<T> orderedSet2(set2.begin(), set2.end());
+
+		set<T> result;
+		std::set_difference(orderedSet1.begin(), orderedSet1.end(), set2.begin(), set2.begin(), std::inserter(result, result.begin()));
+		return unordered_set<T>(result.begin(), result.end());
 	}
 }
 
 unordered_set<uint64_t> DataRepository::getSelectedCellIds() const
 {
-	return calcDifference<uint64_t>(_selectedCellIds, _navi.cellIds);	//really necessary?
+	return _selectedCellIds;
 }
 
 unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 {
-	return calcDifference<uint64_t>(_selectedParticleIds, _navi.particleIds);	//really necessary?
+	return _selectedParticleIds;
 }
 
 DataDescription DataRepository::getExtendedSelection() const
@@ -571,7 +590,7 @@ void DataRepository::requireDataUpdateFromSimulation(IntRect const& rect)
 	_access->requireData(rect, resolveDesc);
 }
 
-void DataRepository::requireImageFromSimulation(IntRect const & rect, QImage * target)
+void DataRepository::requireImageFromSimulation(IntRect const & rect, QImagePtr const& target)
 {
 	_rect = rect;
 	_access->requireImage(rect, target);

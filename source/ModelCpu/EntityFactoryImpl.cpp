@@ -10,7 +10,7 @@
 
 Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* context) const
 {
-	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getTag() : desc.id;
+	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getId() : desc.id;
 	auto result = new Cluster(QList<Cell*>(), id, desc.angle.get_value_or(0.0), desc.pos.get()
 		, desc.angularVel.get_value_or(0.0), desc.vel.get_value_or(QVector2D()), context);
 
@@ -24,7 +24,7 @@ Cluster* EntityFactoryImpl::build(ClusterDescription const& desc, UnitContext* c
 			auto cell = build(cellDesc, result, context);
 			cellsByIds[cellDesc.id] = cell;
 			if (desc.id == 0) {
-				cell->setId(context->getNumberGenerator()->getTag());	//generate id for cell if cluster has invalid id
+				cell->setId(context->getNumberGenerator()->getId());	//generate id for cell if cluster has invalid id
 			}
 		}
 
@@ -50,7 +50,7 @@ Cell * EntityFactoryImpl::build(CellDescription const& cellDesc, Cluster* cluste
 	auto const& energy = *cellDesc.energy;
 	auto const& maxConnections = cellDesc.maxConnections.get_value_or(0);
 	auto const& tokenAccessNumber = cellDesc.tokenBranchNumber.get_value_or(0);
-	uint64_t id = cellDesc.id == 0 ? context->getNumberGenerator()->getTag() : cellDesc.id;
+	uint64_t id = cellDesc.id == 0 ? context->getNumberGenerator()->getId() : cellDesc.id;
 	auto cell = new Cell(id, energy, context, maxConnections, tokenAccessNumber);
 	if (cellDesc.tokenBlocked) {
 		cell->setFlagTokenBlocked(*cellDesc.tokenBlocked);
@@ -83,7 +83,7 @@ Particle* EntityFactoryImpl::build(ParticleDescription const& desc, UnitContext*
 {
 	auto const& pos = *desc.pos;
 	auto const& vel = desc.vel.get_value_or({ 0.0, 0.0 });
-	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getTag() : desc.id;
+	uint64_t id = desc.id == 0 ? context->getNumberGenerator()->getId() : desc.id;
 	auto particle = new Particle(id, *desc.energy, pos, vel, context);
 	auto const& metadata = desc.metadata.get_value_or(ParticleMetadata());
 	particle->setMetadata(metadata);

@@ -73,6 +73,12 @@ int GuiSettings::getSettingsValue(std::string const & key, int defaultValue)
 	return settings.value(QString::fromStdString(key), QVariant(defaultValue)).toInt();
 }
 
+uint GuiSettings::getSettingsValue(std::string const & key, uint defaultValue)
+{
+    QSettings settings;
+    return settings.value(QString::fromStdString(key), QVariant(defaultValue)).toUInt();
+}
+
 double GuiSettings::getSettingsValue(std::string const & key, double defaultValue)
 {
 	QSettings settings;
@@ -89,6 +95,12 @@ void GuiSettings::setSettingsValue(std::string const & key, int value)
 {
 	QSettings settings;
 	settings.setValue(QString::fromStdString(key), QVariant(value));
+}
+
+void GuiSettings::setSettingsValue(std::string const & key, uint value)
+{
+    QSettings settings;
+    settings.setValue(QString::fromStdString(key), QVariant(value));
 }
 
 void GuiSettings::setSettingsValue(std::string const & key, double value)

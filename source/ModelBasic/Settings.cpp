@@ -1,7 +1,5 @@
 #include <QtGlobal>
 
-#include "CellFeatureEnums.h"
-
 #include "SymbolTable.h"
 #include "SimulationParameters.h"
 #include "Settings.h"
@@ -148,43 +146,45 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
 	return symbolTable;
 }
 
-SimulationParameters* ModelSettings::getDefaultSimulationParameters()
+SimulationParameters ModelSettings::getDefaultSimulationParameters()
 {
-	SimulationParameters* parameters = new SimulationParameters();
-	parameters->clusterMaxRadius = 40.0;
+	SimulationParameters parameters;
+	parameters.clusterMaxRadius = 40.0f;
 
-	parameters->cellMutationProb = 0.000001;
-	parameters->cellMinDistance = 0.3;
-	parameters->cellMaxDistance = 1.3;
-	parameters->cellMass_Reciprocal = 1;
-	parameters->callMaxForce = 0.8;
-	parameters->cellMaxForceDecayProb = 0.2;
-	parameters->cellMaxBonds = 6;
-	parameters->cellMaxToken = 9;
-	parameters->cellMaxTokenBranchNumber = 6;
-	parameters->cellFunctionConstructorOffspringCellEnergy = 100.0;
-	parameters->cellCreationMaxConnection = 4;
-	parameters->cellCreationTokenAccessNumber = 0;
-	parameters->cellMinEnergy = 50.0;
-	parameters->cellTransformationProb = 0.2;
-	parameters->cellFusionVelocity = 0.4;
+	parameters.cellMinDistance = 0.3f;
+	parameters.cellMaxDistance = 1.3f;
+	parameters.cellMass_Reciprocal = 1;
+	parameters.cellMaxForce = 0.8f;
+	parameters.cellMaxForceDecayProb = 0.2f;
+    parameters.cellMinAge = 40000;
+    parameters.cellMaxBonds = 6;
+	parameters.cellMaxToken = 3;
+	parameters.cellMaxTokenBranchNumber = 6;
+	parameters.cellCreationMaxConnection = 4;
+	parameters.cellCreationTokenAccessNumber = 0;
+	parameters.cellMinEnergy = 50.0f;
+	parameters.cellTransformationProb = 0.2f;
+	parameters.cellFusionVelocity = 0.4f;
 
-	parameters->cellFunctionWeaponStrength = 0.1;
-	parameters->cellFunctionComputerMaxInstructions = 15;
-	parameters->cellFunctionComputerCellMemorySize = 8;
-	parameters->cellFunctionConstructorOffspringCellDistance = 1.0;
-	parameters->cellFunctionSensorRange = 50.0;
-	parameters->cellFunctionCommunicatorRange = 50.0;
+	parameters.cellFunctionWeaponStrength = 0.1f;
+    parameters.cellFunctionWeaponEnergyCost = 0.5f;
+    parameters.cellFunctionComputerMaxInstructions = 15;
+	parameters.cellFunctionComputerCellMemorySize = 8;
+    parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
+	parameters.cellFunctionConstructorOffspringCellDistance = 1.0f;
+    parameters.cellFunctionConstructorOffspringTokenEnergy = 60.0f;
+    parameters.cellFunctionConstructorMutationProb = 0.00001f;
+    parameters.cellFunctionSensorRange = 50.0f;
+	parameters.cellFunctionCommunicatorRange = 50.0f;
 
-	parameters->tokenMemorySize = 256;
-	parameters->cellFunctionConstructorOffspringTokenEnergy = 60.0;
-	parameters->tokenMinEnergy = 3.0;
+	parameters.tokenMemorySize = 256;
+	parameters.tokenMinEnergy = 3.0f;
 
-	parameters->radiationExponent = 1.0;
-	parameters->radiationFactor = 0.0002;
-	parameters->radiationProb = 0.03;
-	parameters->radiationVelocityMultiplier = 1.0;
-	parameters->radiationVelocityPerturbation = 0.5;
+	parameters.radiationExponent = 1;
+	parameters.radiationFactor = 0.0002f;
+	parameters.radiationProb = 0.03f;
+	parameters.radiationVelocityMultiplier = 1.0f;
+	parameters.radiationVelocityPerturbation = 0.5f;
 
 	return parameters;
 }

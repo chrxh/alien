@@ -16,6 +16,7 @@ ToolbarController::ToolbarController(QWidget* parent)
 {
 	_view = new ToolbarView(parent);
 	_context = new ToolbarContext(this);
+    onShow(false);
 }
 
 void ToolbarController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataRepository* manipulator

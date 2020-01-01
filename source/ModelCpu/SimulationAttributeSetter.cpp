@@ -28,7 +28,7 @@ void SimulationAttributeSetter::init(SimulationContext * context)
 	_registered = true;
 }
 
-void SimulationAttributeSetter::setSimulationParameters(SimulationParameters const* parameters)
+void SimulationAttributeSetter::setSimulationParameters(SimulationParameters const& parameters)
 {
 	_parameters = parameters;
 	_updateSimulationParameters = true;
@@ -53,7 +53,7 @@ void SimulationAttributeSetter::accessToUnits()
 	for (int gridX = 0; gridX < gridSize.x; ++gridX) {
 		for (int gridY = 0; gridY < gridSize.y; ++gridY) {
 			auto unitContext = _grid->getUnitOfGridPos({ gridX, gridY })->getContext();
-			unitContext->setSimulationParameters(_parameters->clone());
+			unitContext->setSimulationParameters(_parameters);
 		}
 	}
 

@@ -118,9 +118,6 @@
     <ClInclude Include="..\..\source\ModelCpu\Particle.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelCpu\PhysicalQuantityConverter.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelCpu\PropulsionFunction.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
@@ -144,12 +141,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Debug\moc_CellComputerCompilerImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_CellComputerCompilerImpl.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_CellMap.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -193,12 +184,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SimulationAttributeSetter.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_SimulationMonitorImpl.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_SimulationMonitorImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_Unit.cpp">
@@ -252,9 +237,6 @@
     <ClCompile Include="..\..\source\ModelCpu\AccessPortFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\CellComputerCompilerImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\CellComputerFunctionImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -274,9 +256,6 @@
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\ParticleMapImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\SimulationMonitorImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\TokenImpl.cpp">
@@ -333,9 +312,6 @@
     <ClCompile Include="..\..\source\ModelCpu\Particle.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelCpu\PhysicalQuantityConverter.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\ModelCpu\PropulsionFunction.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
@@ -381,18 +357,27 @@
     <ClCompile Include="Release\moc_SimulationContextCpuImpl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelCpu\SimulationMonitorCpuImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationMonitorCpuImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationMonitorCpuImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationMonitorCpu.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationMonitorCpu.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\ModelCpu\CellComputerCompilerImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\CellMapImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\ParticleMapImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\ModelCpu\SimulationMonitorImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\UnitThreadControllerImpl.h">
@@ -445,6 +430,12 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\ModelCpu\SimulationContextCpuImpl.h">
       <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelCpu\SimulationMonitorCpuImpl.h">
+      <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelCpu\SimulationMonitorCpu.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

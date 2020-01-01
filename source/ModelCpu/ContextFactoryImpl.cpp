@@ -6,7 +6,6 @@
 #include "UnitThreadControllerImpl.h"
 #include "CellMapImpl.h"
 #include "ParticleMapImpl.h"
-#include "CellComputerCompilerImpl.h"
 
 SimulationContextCpuImpl * ContextFactoryImpl::buildSimulationContext() const
 {
@@ -48,7 +47,3 @@ ParticleMap * ContextFactoryImpl::buildEnergyParticleMap() const
 	return new ParticleMapImpl();
 }
 
-CellComputerCompilerImpl* ContextFactoryImpl::buildCellComputerCompiler() const
-{
-	return new CellComputerCompilerImpl();
-}
