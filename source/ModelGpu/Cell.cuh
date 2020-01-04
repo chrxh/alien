@@ -85,9 +85,22 @@ struct Cell
         atomicExch(&locked, 0);
     }
 
+    __device__ __inline__ bool isFused()
+    {
+        return _fused;
+    }
+
+    __device__ __inline__ void setFused(bool value)
+    {
+        _fused = value;
+    }
+
 private:
     int _cellFunctionType;
     float _energy;
+
+    //auxiliary data
+    int _fused;
 };
 
 template<>

@@ -1393,8 +1393,7 @@ __inline__ __device__ void ConstructorFunction::constructNewToken(
         EntityFactory factory;
         factory.init(_data);
 
-        result = factory.createToken(cellOfNewToken);
-        result->sourceCell = sourceCellOfNewToken;
+        result = factory.createToken(cellOfNewToken, sourceCellOfNewToken);
         result->setEnergy(energyOfNewToken);
     }
     __syncthreads();
