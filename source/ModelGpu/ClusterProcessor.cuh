@@ -41,7 +41,11 @@ private:
     __inline__ __device__ void copyClusterWithDecomposition_blockCall();
     __inline__ __device__ void copyClusterWithFusion_blockCall();
     __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster);
-    __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* sourceCluster2, Cluster* targetCluster);
+    __inline__ __device__ void copyTokenPointers_blockCall(
+        Cluster* sourceCluster1,
+        Cluster* sourceCluster2,
+        int additionalTokenPointers,
+        Cluster* targetCluster);
     __inline__ __device__ void getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
         int& counter, PartitionData const& tokenBlock);
 
@@ -211,6 +215,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                             auto index = cell->numConnections++;
                             cell->connections[index] = otherCell;
                             otherCell->connections[otherIndex] = cell;
+                            cell->setFused(true);
+                            otherCell->setFused(true);
                         }
                         else {
                             atomicAdd(&otherCell->numConnections, -1);
@@ -716,7 +722,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         }
         __syncthreads();
 
-        __shared__ float regainedEnergyPerCell;
+        __shared__ float regainedEnergy;
         if (0 == threadIdx.x) {
             newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
 
@@ -733,21 +739,66 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
                 Physics::kineticEnergy(
                     newCluster->numCellPointers, newCluster->vel, newCluster->angularMass, newCluster->angularVel);
 
-            auto const energyDiff = newKineticEnergy - origKineticEnergies;    //is negative for fusion
-            regainedEnergyPerCell = -energyDiff / newCluster->numCellPointers;
+            regainedEnergy = origKineticEnergies - newKineticEnergy;    //should be negative for fusion
         }
         __syncthreads();
 
         auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
+        updateCellVelocity_blockCall(newCluster);
+
+        __shared__ int numFusedCell;
+        __shared__ EntityFactory factory;
+        if (0 == threadIdx.x) {
+            numFusedCell = 0;
+            factory.init(_data);
+        }
+        __syncthreads();
 
         for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
             auto& cell = newCluster->cellPointers[index];
-            if (cell->getEnergy() + regainedEnergyPerCell > 0) {
-                cell->changeEnergy(regainedEnergyPerCell);
+            cell->tag = 0;
+            if (cell->isFused()) {
+                atomicAdd_block(&numFusedCell, 1);
             }
         }
-        updateCellVelocity_blockCall(newCluster);
-        copyTokenPointers_blockCall(_cluster, _cluster->clusterToFuse, newCluster);
+        __syncthreads();
+
+        copyTokenPointers_blockCall(_cluster, _cluster->clusterToFuse, numFusedCell, newCluster);
+        __syncthreads();
+
+        auto const newTokenPartition = calcPartition(newCluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (int index = newTokenPartition.startIndex; index <= newTokenPartition.endIndex; ++index) {
+            auto& token = newCluster->tokenPointers[index];
+            atomicAdd_block(&token->cell->tag, 1);
+        }
+
+        __syncthreads();
+
+        for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
+            auto& cell = newCluster->cellPointers[index];
+            if (!cell->isFused()) {
+                continue;
+            }
+            if (cell->tag < cudaSimulationParameters.cellMaxToken
+                && cell->getEnergy() + regainedEnergy / numFusedCell > cudaSimulationParameters.tokenMinEnergy) {
+                auto energyForToken = regainedEnergy / numFusedCell;
+                if (energyForToken < cudaSimulationParameters.tokenMinEnergy) {
+                    auto const energyFromCell = cudaSimulationParameters.tokenMinEnergy - energyForToken;
+                    cell->setEnergy(cell->getEnergy() - energyFromCell);
+                    energyForToken = cudaSimulationParameters.tokenMinEnergy;
+                }
+                auto newToken = factory.createToken(cell, cell);
+                auto const tokenIndex = atomicAdd_block(&newCluster->numTokenPointers, 1);
+                newCluster->tokenPointers[tokenIndex] = newToken;
+                newToken->setEnergy(energyForToken);
+            }
+            else {
+                if (regainedEnergy > 0) {
+                    cell->changeEnergy(regainedEnergy / numFusedCell);
+                }
+            }
+        }
+        __syncthreads();
     }
     else {
         if (0 == threadIdx.x) {
@@ -787,8 +838,11 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster
     __syncthreads();
 }
 
-__inline__ __device__ void
-ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* sourceCluster2, Cluster* targetCluster)
+__inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(
+    Cluster* sourceCluster1,
+    Cluster* sourceCluster2,
+    int additionalTokenPointers,
+    Cluster* targetCluster)
 {
     __shared__ int numberOfTokensToCopy;
     __shared__ int tokenCopyIndex;
@@ -806,7 +860,8 @@ ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster1, Cluster* 
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
-        targetCluster->tokenPointers = _data->entities.tokenPointers.getNewSubarray(numberOfTokensToCopy);
+        targetCluster->tokenPointers =
+            _data->entities.tokenPointers.getNewSubarray(numberOfTokensToCopy + additionalTokenPointers);
     }
     __syncthreads();
 
