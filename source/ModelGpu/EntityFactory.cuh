@@ -21,7 +21,7 @@ private:
 public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Cell* createCell(Cluster* cluster);
-    __inline__ __device__ Token* createToken(Cell* cell);
+    __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
     __inline__ __device__ Particle* createParticleFromTO(
         ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
     __inline__ __device__ Particle* createParticle(
@@ -126,6 +126,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         cell.setEnergy(cellTO.energy);
         cell.branchNumber = cellTO.branchNumber;
         cell.tokenBlocked = cellTO.tokenBlocked;
+        cell.setFused(false);
         cell.maxConnections = cellTO.maxConnections;
         cell.numConnections = cellTO.numConnections;
         for (int i = 0; i < cell.numConnections; ++i) {
@@ -219,13 +220,15 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->metadata.nameLen = 0;
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
+    result->setFused(false);
     return result;
 }
 
-__inline__ __device__ Token* EntityFactory::createToken(Cell* cell)
+__inline__ __device__ Token* EntityFactory::createToken(Cell* cell, Cell* sourceCell)
 {
     auto result =  _data->entities.tokens.getNewSubarray(1);
     result->cell = cell;
+    result->sourceCell = sourceCell;
     result->memory[0] = cell->branchNumber;
     return result;
 }
@@ -285,6 +288,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->alive = 1;
     cell->protectionCounter = 0;
     cell->locked = 0;
+    cell->setFused(false);
     cell->metadata.color = 0;
     cell->metadata.nameLen = 0;
     cell->metadata.descriptionLen = 0;
