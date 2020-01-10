@@ -21,10 +21,10 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
     tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
-    auto const minSize = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
-    auto maxSize = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
-    if (0 == maxSize) {
-        maxSize = 16000;  //large value => no max mass check
+    int const minMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
+    int maxMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
+    if (0 == maxMass) {
+        maxMass = 16000;  //large value => no max mass check
     }
 
     for (auto x = -2; x <= 2; ++x) {
@@ -38,7 +38,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
             if (otherCell->cluster == cell->cluster) {
                 continue;
             }
-            if (otherCell->cluster->numCellPointers < minSize || otherCell->cluster->numCellPointers > maxSize) {
+            if (otherCell->cluster->numCellPointers < minMass || otherCell->cluster->numCellPointers > maxMass) {
                 continue;
             }
             if (otherCell->tryLock()) {
