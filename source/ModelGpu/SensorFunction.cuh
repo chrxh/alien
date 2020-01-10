@@ -58,29 +58,29 @@ __inline__ __device__ void SensorFunction::processing_blockCall(Token* token)
         return;
     }
 
-    __shared__ int minSize;
-    __shared__ int maxSize;
+    __shared__ int minMass;
+    __shared__ int maxMass;
     if (0 == threadIdx.x) {
-        minSize = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
-        maxSize = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
-        if (0 == maxSize) {
-            maxSize = 16000;  //large value => no max mass check
+        minMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
+        maxMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
+        if (0 == maxMass) {
+            maxMass = 16000;  //large value => no max mass check
         }
     }
     __syncthreads();
 
     __shared__ Cell* scanCell;
     if (Enums::SensorIn::SEARCH_VICINITY == command) {
-        searchVicinity(token, minSize, maxSize, scanCell);
+        searchVicinity(token, minMass, maxMass, scanCell);
     }
     else if (Enums::SensorIn::SEARCH_BY_ANGLE == command) {
-        searchByAngle(token, minSize, maxSize, scanCell);
+        searchByAngle(token, minMass, maxMass, scanCell);
     }
     else if (Enums::SensorIn::SEARCH_FROM_CENTER == command) {
-        searchFromCenter(token, minSize, maxSize, scanCell);
+        searchFromCenter(token, minMass, maxMass, scanCell);
     }
     else {
-        searchTowardCenter(token, minSize, maxSize, scanCell);
+        searchTowardCenter(token, minMass, maxMass, scanCell);
     }
     __syncthreads();
 

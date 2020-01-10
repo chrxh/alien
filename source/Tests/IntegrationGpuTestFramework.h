@@ -42,6 +42,13 @@ protected:
     void setMaxConnections(ClusterDescription& cluster, int maxConnections) const;
     void setCenterPos(ClusterDescription& cluster, QVector2D const& centerPos) const;
 
+    double calcAndCheckEnergy(DataDescription const & data) const;
+    double calcAndCheckEnergy(ClusterDescription const& cluster) const;
+    double calcKineticEnergy(DataDescription const& data) const;
+    double calcKineticEnergy(ClusterDescription const& cluster) const;
+    void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
+    void checkEnergyValue(double value) const;
+
 protected:
 	double const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
 
@@ -50,12 +57,4 @@ protected:
 	SpaceProperties* _spaceProp = nullptr;
     SimulationAccessGpu* _access = nullptr;
     DescriptionHelper* _descHelper = nullptr;
-
-private:
-    double calcAndCheckEnergy(DataDescription const& data) const;
-    double calcAndCheckEnergy(ClusterDescription const& cluster) const;
-    double calcKineticEnergy(DataDescription const& data) const;
-    double calcKineticEnergy(ClusterDescription const& cluster) const;
-    void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
-    void checkEnergyValue(double value) const;
 };
