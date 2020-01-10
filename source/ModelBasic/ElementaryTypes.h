@@ -211,6 +211,8 @@ namespace Enums
     struct Weapon {
         enum Type {
             OUT = 5,
+            IN_MIN_MASS = 26,
+            IN_MAX_MASS = 27,
         };
     };
     struct WeaponOut {
