@@ -19,7 +19,13 @@ private:
 __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationData* data)
 {
     auto const& cell = token->cell;
-    token->memory[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
+    auto& tokenMem = token->memory;
+    tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
+    auto const minSize = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
+    auto maxSize = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
+    if (0 == maxSize) {
+        maxSize = 16000;  //large value => no max mass check
+    }
 
     for (auto x = -2; x <= 2; ++x) {
         for (auto y = -2; y <= 2; ++y) {
@@ -30,6 +36,9 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                 continue;
             }
             if (otherCell->cluster == cell->cluster) {
+                continue;
+            }
+            if (otherCell->cluster->numCellPointers < minSize || otherCell->cluster->numCellPointers > maxSize) {
                 continue;
             }
             if (otherCell->tryLock()) {
