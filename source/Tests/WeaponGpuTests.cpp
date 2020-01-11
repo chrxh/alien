@@ -28,12 +28,12 @@ protected:
         MEMBER_DECLARATION(WeaponTestParameters, int, minMass, 0);
         MEMBER_DECLARATION(WeaponTestParameters, int, maxMass, 0);
         struct Target {
-            Target(QVector2D position, int size = 1)
+            Target(QVector2D position, int mass = 1)
                 : position(position)
-                , size(size)
+                , mass(mass)
             {}
             QVector2D position;
-            int size;
+            int mass;
         };
         MEMBER_DECLARATION(WeaponTestParameters, optional<Target>, target1, boost::none);
         MEMBER_DECLARATION(WeaponTestParameters, optional<Target>, target2, boost::none);
@@ -68,11 +68,11 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
     optional<ClusterDescription> target1;
     optional<ClusterDescription> target2;
     if (parameters._target1) {
-        target1 = createRectangularCluster({ parameters._target1->size, 1 }, parameters._target1->position, QVector2D{});
+        target1 = createRectangularCluster({ parameters._target1->mass, 1 }, parameters._target1->position, QVector2D{});
         origData.addCluster(*target1);
     }
     if (parameters._target2) {
-        target2 = createRectangularCluster({ parameters._target2->size, 1 }, parameters._target2->position, QVector2D{});
+        target2 = createRectangularCluster({ parameters._target2->mass, 1 }, parameters._target2->position, QVector2D{});
         origData.addCluster(*target2);
     }
 
@@ -128,6 +128,21 @@ TEST_F(WeaponGpuTests, testNoTarget)
     EXPECT_EQ(-_parameters.cellFunctionWeaponEnergyCost, result.energyDiffOfWeapon);
 }
 
+TEST_F(WeaponGpuTests, testNoTargetBelowMinMass)
+{
+    auto const result = runWeaponTest(
+        WeaponTestParameters().minMass(2).maxMass(4).target1(WeaponTestParameters::Target{ QVector2D{ 1, 0 }, 1 }));
+    EXPECT_EQ(Enums::WeaponOut::STRIKE_SUCCESSFUL, result.tokenOutput);
+}
+
+TEST_F(WeaponGpuTests, testNoTargetAboveMaxMass)
+{
+    auto const result = runWeaponTest(
+        WeaponTestParameters().minMass(2).maxMass(4).target1(WeaponTestParameters::Target{ QVector2D{ 3, 0 }, 5 }));
+    EXPECT_EQ(Enums::WeaponOut::STRIKE_SUCCESSFUL, result.tokenOutput);
+}
+
+
 TEST_F(WeaponGpuTests, testStrike)
 {
     auto const result = runWeaponTest(WeaponTestParameters().target1(WeaponTestParameters::Target{ QVector2D{1, 0} }));
@@ -136,6 +151,20 @@ TEST_F(WeaponGpuTests, testStrike)
     auto const expectedEnergyLoss =
         _parameters.cellFunctionConstructorOffspringCellEnergy * _parameters.cellFunctionWeaponStrength + 1;
     EXPECT_EQ(-expectedEnergyLoss, *result.energyDiffOfTarget1);
+}
+
+TEST_F(WeaponGpuTests, testStrikeMinMass)
+{
+    auto const result = runWeaponTest(
+        WeaponTestParameters().minMass(2).maxMass(4).target1(WeaponTestParameters::Target{QVector2D{1.5, 0}, 2}));
+    EXPECT_EQ(Enums::WeaponOut::STRIKE_SUCCESSFUL, result.tokenOutput);
+}
+
+TEST_F(WeaponGpuTests, testStrikeMaxMass)
+{
+    auto const result = runWeaponTest(
+        WeaponTestParameters().minMass(2).maxMass(4).target1(WeaponTestParameters::Target{ QVector2D{ 2.5, 0 }, 4 }));
+    EXPECT_EQ(Enums::WeaponOut::STRIKE_SUCCESSFUL, result.tokenOutput);
 }
 
 TEST_F(WeaponGpuTests, testDoubleStrike)
