@@ -288,8 +288,10 @@ template<>
 bool checkCompatibility<QVector2D>(QVector2D vec1, QVector2D vec2)
 {
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(vec1.x(), vec2.x()));
-    EXPECT_TRUE(result &= checkCompatibility(vec1.y(), vec2.y()));
+    EXPECT_TRUE(result = checkCompatibility(vec1.x(), vec2.x()));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(vec1.y(), vec2.y()));
+    }
     return result;
 }
 
@@ -320,9 +322,13 @@ bool checkCompatibility<CellFeatureDescription>(CellFeatureDescription feature1,
     removeZerosAtEnd(feature2.constData);
 
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(feature1.getType(), feature2.getType()));
-    EXPECT_TRUE(result &= checkCompatibility(feature1.constData, feature2.constData));
-    EXPECT_TRUE(result &= checkCompatibility(feature1.volatileData, feature2.volatileData));
+    EXPECT_TRUE(result = checkCompatibility(feature1.getType(), feature2.getType()));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(feature1.constData, feature2.constData));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(feature1.volatileData, feature2.volatileData));
+    }
     return result;
 }
 
@@ -330,10 +336,16 @@ template<>
 bool checkCompatibility(CellMetadata metadata1, CellMetadata metadata2)
 {
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(metadata1.computerSourcecode, metadata2.computerSourcecode));
-    EXPECT_TRUE(result &= checkCompatibility(metadata1.name, metadata2.name));
-    EXPECT_TRUE(result &= checkCompatibility(metadata1.description, metadata2.description));
-    EXPECT_TRUE(result &= checkCompatibility(metadata1.color, metadata2.color));
+    EXPECT_TRUE(result = checkCompatibility(metadata1.computerSourcecode, metadata2.computerSourcecode));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(metadata1.name, metadata2.name));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(metadata1.description, metadata2.description));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(metadata1.color, metadata2.color));
+    }
     return result;
 }
 
@@ -341,10 +353,12 @@ template<>
 bool checkCompatibility(TokenDescription token1, TokenDescription token2)
 {
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(token1.energy, token2.energy));
+    EXPECT_TRUE(result = checkCompatibility(token1.energy, token2.energy));
 
     //do not compare first byte (overridden branch number)
-    EXPECT_TRUE(result &= checkCompatibility(token1.data->mid(1), token2.data->mid(1)));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(token1.data->mid(1), token2.data->mid(1)));
+    }
     return result;
 }
 
@@ -352,15 +366,31 @@ template<>
 bool checkCompatibility<CellDescription>(CellDescription cell1, CellDescription cell2)
 {
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(cell1.tokenBlocked, cell2.tokenBlocked));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.pos, cell2.pos));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.energy, cell2.energy));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.maxConnections, cell2.maxConnections));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.connectingCells, cell2.connectingCells));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.tokenBranchNumber, cell2.tokenBranchNumber));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.metadata, cell2.metadata));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.cellFeature, cell2.cellFeature));
-    EXPECT_TRUE(result &= checkCompatibility(cell1.tokens, cell2.tokens));
+    EXPECT_TRUE(result = checkCompatibility(cell1.tokenBlocked, cell2.tokenBlocked));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.pos, cell2.pos));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.energy, cell2.energy));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.maxConnections, cell2.maxConnections));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.connectingCells, cell2.connectingCells));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.tokenBranchNumber, cell2.tokenBranchNumber));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.metadata, cell2.metadata));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.cellFeature, cell2.cellFeature));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.tokens, cell2.tokens));
+    }
     return result;
 }
 
@@ -368,12 +398,22 @@ template<>
 bool checkCompatibility<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2)
 {
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(cluster1.pos, cluster2.pos));
-    EXPECT_TRUE(result &= checkCompatibility(cluster1.vel, cluster2.vel));
-    EXPECT_TRUE(result &= checkCompatibility(cluster1.angle, cluster2.angle));
-    EXPECT_TRUE(result &= checkCompatibility(cluster1.angularVel, cluster2.angularVel));
-    EXPECT_TRUE(result &= checkCompatibility(cluster1.metadata, cluster2.metadata));
-    EXPECT_TRUE(result &= checkCompatibility(cluster1.cells, cluster2.cells));
+    EXPECT_TRUE(result = checkCompatibility(cluster1.pos, cluster2.pos));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cluster1.vel, cluster2.vel));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cluster1.angle, cluster2.angle));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cluster1.angularVel, cluster2.angularVel));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cluster1.metadata, cluster2.metadata));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cluster1.cells, cluster2.cells));
+    }
     return result;
 }
 
@@ -381,10 +421,16 @@ template<>
 bool checkCompatibility<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2)
 {
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(particle1.pos, particle2.pos));
-    EXPECT_TRUE(result &= checkCompatibility(particle1.vel, particle2.vel));
-    EXPECT_TRUE(result &= checkCompatibility(particle1.energy, particle2.energy));
-    EXPECT_TRUE(result &= checkCompatibility(particle1.metadata, particle2.metadata));
+    EXPECT_TRUE(result = checkCompatibility(particle1.pos, particle2.pos));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(particle1.vel, particle2.vel));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(particle1.energy, particle2.energy));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(particle1.metadata, particle2.metadata));
+    }
     return result;
 }
 
@@ -417,7 +463,9 @@ bool checkCompatibility<DataDescription>(DataDescription data1, DataDescription 
 	sortById(data2);
 
     auto result = true;
-    EXPECT_TRUE(result &= checkCompatibility(data1.clusters, data2.clusters));
-    EXPECT_TRUE(result &= checkCompatibility(data1.particles, data2.particles));
+    EXPECT_TRUE(result = checkCompatibility(data1.clusters, data2.clusters));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(data1.particles, data2.particles));
+    }
     return result;
 }
