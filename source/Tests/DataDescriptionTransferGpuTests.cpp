@@ -45,7 +45,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataBefore, dataAfter);
+    checkCompatibility(dataBefore, dataAfter);
 }
 
 /**
@@ -70,7 +70,7 @@ TEST_F(DataDescriptionTransferGpuTests, testAddToken)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -96,7 +96,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_changeClusterId)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -128,7 +128,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_addSecondToken)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -160,7 +160,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeClusterWithToken_addSecondToke
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -200,7 +200,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithSeveralTokens)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -234,7 +234,7 @@ TEST_F(DataDescriptionTransferGpuTests, testRemoveCellWithToken)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -259,7 +259,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeParticle)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
 
-    checkCompatible(dataChanged, dataAfter);
+    checkCompatibility(dataChanged, dataAfter);
 }
 
 /**
@@ -279,19 +279,19 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateDataOutsideBoundaries)
 	EXPECT_EQ(1, dataAfter.clusters->size());
 	auto origCluster = dataBefore.clusters->at(0);
 	auto newCluster = dataAfter.clusters->at(0);
-	EXPECT_TRUE(isCompatible(*origCluster.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newCluster.pos));
+	checkCompatibility(*origCluster.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newCluster.pos);
 
 	unordered_map<uint64_t, CellDescription> origCellById = IntegrationTestHelper::getCellByCellId(dataBefore);
 	unordered_map<uint64_t, CellDescription> newCellById = IntegrationTestHelper::getCellByCellId(dataAfter);
 	for (CellDescription const& origCell : origCellById | boost::adaptors::map_values) {
 		CellDescription newCell = newCellById.at(origCell.id);
-		EXPECT_TRUE(isCompatible(*origCell.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newCell.pos));
+		checkCompatibility(*origCell.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newCell.pos);
 	}
 
 	EXPECT_EQ(1, dataAfter.particles->size());
 	auto origParticle = dataBefore.particles->at(0);
 	auto newParticle = dataAfter.particles->at(0);
-	EXPECT_TRUE(isCompatible(*origParticle.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newParticle.pos));
+	checkCompatibility(*origParticle.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newParticle.pos);
 }
 
 /**

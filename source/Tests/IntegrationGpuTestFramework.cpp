@@ -73,7 +73,7 @@ void IntegrationGpuTestFramework::checkEnergies(DataDescription const& origData,
 	auto energyBefore = calcAndCheckEnergy(origData);
 	auto energyAfter = calcAndCheckEnergy(newData);
 
-	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
+	checkCompatibility(energyBefore, energyAfter);
 }
 
 void IntegrationGpuTestFramework::checkCellConnections(DataDescription const & data) const
@@ -106,7 +106,7 @@ void IntegrationGpuTestFramework::checkKineticEnergy(DataDescription const & ori
 	auto energyBefore = calcKineticEnergy(origData);
 	auto energyAfter = calcKineticEnergy(newData);
 
-	EXPECT_TRUE(isCompatible(energyBefore, energyAfter));
+	checkCompatibility(energyBefore, energyAfter);
 }
 
 Physics::Velocities IntegrationGpuTestFramework::calcVelocitiesOfClusterPart(ClusterDescription const& cluster, set<uint64_t> const& cellIds) const

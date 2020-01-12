@@ -60,12 +60,12 @@ TEST_F(ClusterGpuTests, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOv
 	auto newCluster2 = clusterById.at(cellId2);
 
 	EXPECT_GE(99, newCell1.pos->x());
-	EXPECT_TRUE(isCompatible(100.0f, newCell1.pos->y()));
-	EXPECT_TRUE(isCompatible(QVector2D(-0.1f, 0), *newCluster1.vel));
+	checkCompatibility(100.0f, newCell1.pos->y());
+	checkCompatibility(QVector2D(-0.1f, 0), *newCluster1.vel);
 
 	EXPECT_LE(111, newCell2.pos->x());
-	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->y()));
-	EXPECT_TRUE(isCompatible(QVector2D(0.1f, 0), *newCluster2.vel));
+	checkCompatibility(100.0f, newCell2.pos->y());
+	checkCompatibility(QVector2D(0.1f, 0), *newCluster2.vel);
 
     check(origData, newData);
 }
@@ -109,12 +109,12 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_horizontal)
 	auto newCluster2 = clusterById.at(cellId2);
 
 	EXPECT_GE(99, newCell1.pos->x());
-	EXPECT_TRUE(isCompatible(100.0f, newCell1.pos->y()));
-	EXPECT_TRUE(isCompatible(QVector2D(-0.1f, 0), *newCluster1.vel));
+	checkCompatibility(100.0f, newCell1.pos->y());
+	checkCompatibility(QVector2D(-0.1f, 0), *newCluster1.vel);
 
 	EXPECT_LE(111, newCell2.pos->x());
-	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->y()));
-	EXPECT_TRUE(isCompatible(QVector2D(0.1f, 0), *newCluster2.vel));
+    checkCompatibility(100.0f, newCell2.pos->y());
+	checkCompatibility(QVector2D(0.1f, 0), *newCluster2.vel);
 
     check(origData, newData);
 }
@@ -157,12 +157,12 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_vertical)
 	auto newCluster2 = clusterById.at(cellId2);
 
 	EXPECT_GE(99, newCell1.pos->y());
-	EXPECT_TRUE(isCompatible(100.0f, newCell1.pos->x()));
-	EXPECT_TRUE(isCompatible(QVector2D(0, -0.1f), *newCluster1.vel));
+	checkCompatibility(100.0f, newCell1.pos->x());
+	checkCompatibility(QVector2D(0, -0.1f), *newCluster1.vel);
 
 	EXPECT_LE(111, newCell2.pos->y());
-	EXPECT_TRUE(isCompatible(100.0f, newCell2.pos->x()));
-	EXPECT_TRUE(isCompatible(QVector2D(0, 0.1f), *newCluster2.vel));
+	checkCompatibility(100.0f, newCell2.pos->x());
+	checkCompatibility(QVector2D(0, 0.1f), *newCluster2.vel);
 
     check(origData, newData);
 }
@@ -194,15 +194,15 @@ TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
 		auto cluster = clusterById.at(clusterId1);
 		EXPECT_EQ(100, cluster.pos->x());
 		EXPECT_GE(100, cluster.pos->y());
-		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->x()));
-		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->y()));
+		checkCompatibility(0.0f, cluster.vel->x());
+		checkCompatibility(-0.1f, cluster.vel->y());
 	}
 
 	{
 		auto cluster = clusterById.at(clusterId2);
 		EXPECT_EQ(100, cluster.pos->x());
 		EXPECT_LE(100, cluster.pos->y());
-		EXPECT_TRUE(isCompatible(QVector2D(0, 0), *cluster.vel));
+		checkCompatibility(QVector2D(0, 0), *cluster.vel);
 	}
 
     check(origData, newData);
@@ -232,16 +232,16 @@ TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUn
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
 		auto cluster = clusterById.at(clusterId1);
-		EXPECT_TRUE(isCompatible(-0.1f, cluster.vel->x()));
-		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
-		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+		checkCompatibility(-0.1f, cluster.vel->x());
+		checkCompatibility(0.0f, cluster.vel->y());
+		checkCompatibility(0.0, *cluster.angularVel);
 	}
 
 	{
 		auto cluster = clusterById.at(clusterId2);
-		EXPECT_TRUE(isCompatible(0.1f, cluster.vel->x()));
-		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->y()));
-		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+		checkCompatibility(0.1f, cluster.vel->x());
+		checkCompatibility(0.0f, cluster.vel->y());
+		checkCompatibility(0.0, *cluster.angularVel);
 	}
     check(origData, newData);
 }
@@ -274,14 +274,14 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 	auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
 	{
 		auto cluster = clusterById.at(clusterId1);
-		EXPECT_TRUE(isCompatible(QVector2D(0.0f, 0.1f), *cluster.vel));
-		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+		checkCompatibility(QVector2D(0.0f, 0.1f), *cluster.vel);
+		checkCompatibility(0.0, *cluster.angularVel);
 	}
 
 	{
 		auto cluster = clusterById.at(clusterId2);
-		EXPECT_TRUE(isCompatible(QVector2D(0.0f, -0.1f), *cluster.vel));
-		EXPECT_TRUE(isCompatible(0.0, *cluster.angularVel));
+		checkCompatibility(QVector2D(0.0f, -0.1f), *cluster.vel);
+		checkCompatibility(0.0, *cluster.angularVel);
 	}
 
     check(origData, newData);
@@ -429,7 +429,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
 
 	{
 		auto cluster = clusterById.at(clusterId2);
-		EXPECT_TRUE(isCompatible(0.0f, cluster.vel->x()));
+		checkCompatibility(0.0f, cluster.vel->x());
 		EXPECT_GE(NearlyZero, cluster.vel->y());
 		EXPECT_TRUE(abs(*cluster.angularVel) < 0.01);
 	}
@@ -623,7 +623,7 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy)
 		EXPECT_EQ(cluster.getClusterPosFromCells(), *cluster.pos);
 		for (CellDescription const& cell : *cluster.cells) {
 			CellDescription const& origCell = origCellById.at(cell.id);
-			EXPECT_TRUE(isCompatible(cell.pos, origCell.pos));
+			checkCompatibility(cell.pos, origCell.pos);
 		}
 	}
     check(origData, newData);
@@ -659,8 +659,8 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 			firstFragmentCellIds.insert(origData.clusters->at(1).cells->at(i).id);
 		}
 		Physics::Velocities velocities = calcVelocitiesOfClusterPart(refCluster, firstFragmentCellIds);
-		EXPECT_TRUE(isCompatible(velocities.linear, *firstFragment.vel));
-		EXPECT_TRUE(isCompatible(velocities.angular, *firstFragment.angularVel));
+		checkCompatibility(velocities.linear, *firstFragment.vel);
+		checkCompatibility(velocities.angular, *firstFragment.angularVel);
 	}
 	{
 		ClusterDescription secondFragment = newClusterById.at(origData.clusters->at(0).cells->at(4).id);
@@ -670,8 +670,8 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 			secondFragmentCellIds.insert(origData.clusters->at(1).cells->at(i).id);
 		}
 		Physics::Velocities velocities = calcVelocitiesOfClusterPart(refCluster, secondFragmentCellIds);
-		EXPECT_TRUE(isCompatible(velocities.linear, *secondFragment.vel));
-		EXPECT_TRUE(isCompatible(velocities.angular, *secondFragment.angularVel));
+		checkCompatibility(velocities.linear, *secondFragment.vel);
+		checkCompatibility(velocities.angular, *secondFragment.angularVel);
 	}
     check(origData, newData);
 }
@@ -774,8 +774,8 @@ TEST_F(ClusterGpuTests, testFusionOfLineClusters_duringRotation)
 
 	auto fusedCluster = newData.clusters->at(0);
 	EXPECT_EQ(22, fusedCluster.cells->size());
-	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
-	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
+	checkCompatibility(*fusedCluster.angularVel, expectedFusionVelocity.angular);
+	checkCompatibility(*fusedCluster.vel, expectedFusionVelocity.linear);
     check(origData, newData);
 }
 
@@ -806,8 +806,8 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_partialContact)
 
 	auto fusedCluster = newData.clusters->at(0);
 	EXPECT_EQ(22, fusedCluster.cells->size());
-	EXPECT_TRUE(isCompatible(*fusedCluster.angularVel, expectedFusionVelocity.angular));
-	EXPECT_TRUE(isCompatible(*fusedCluster.vel, expectedFusionVelocity.linear));
+	checkCompatibility(*fusedCluster.angularVel, expectedFusionVelocity.angular);
+	checkCompatibility(*fusedCluster.vel, expectedFusionVelocity.linear);
     check(origData, newData);
 }
 

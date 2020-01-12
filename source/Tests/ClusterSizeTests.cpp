@@ -82,7 +82,7 @@ TEST_F(ClusterSizeTests, testDistanceToNeighbors)
 							auto const& connectingCell = cluster.cells->at(navi.cellIndicesByCellIds.at(connectingCellId));
 							auto distance = *cell.pos - *connectingCell.pos;
 							_space->correctDisplacement(distance);
-							ASSERT_TRUE(predLessThanMediumPrecision(distance.length(), _parameters.cellMaxDistance));
+							ASSERT_TRUE(predLessThan_MediumPrecision(distance.length(), _parameters.cellMaxDistance));
 						}
 					}
 				}
