@@ -53,45 +53,40 @@ protected:
 };
 
 template<typename T>
-bool isCompatible(T a, T b)
+bool checkCompatibility(T a, T b)
 {
-	return a == b;
+    bool result = true;
+    EXPECT_EQ(a, b);
+    return a == b;
 }
 
 template<typename T>
-bool isCompatible(optional<T> a, optional<T> b)
+bool checkCompatibility(optional<T> a, optional<T> b)
 {
 	if (!a || !b) {
 		return true;
 	}
-	return isCompatible(*a, *b);
+	return checkCompatibility(*a, *b);
 }
 
-template<> bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2);
-template<> bool isCompatible<double>(double a, double b);
-template<> bool isCompatible<float>(float a, float b);
-template<> bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2);
-
-
-void checkCompatible(CellMetadata metadata1, CellMetadata metadata2);
-void checkCompatible(TokenDescription token1, TokenDescription token2);
-void checkCompatible(CellDescription cell1, CellDescription cell2);
-void checkCompatible(ClusterDescription cluster1, ClusterDescription cluster2);
-void checkCompatible(ParticleDescription particle1, ParticleDescription particle2);
-
 template<typename T>
-void checkCompatible(vector<T> a, vector<T> b)
+bool checkCompatibility(vector<T> a, vector<T> b)
 {
+    auto result = true;
     EXPECT_EQ(a.size(), b.size());
     for (int i = 0; i < a.size(); ++i) {
-        checkCompatible(a.at(i), b.at(i));
+        result &= checkCompatibility(a.at(i), b.at(i));
     }
+    return result;
 }
-template<typename T>
-void checkCompatible(optional<T> a, optional<T> b)
-{
-    if (a && b) {
-        checkCompatible(*a, *b);
-    }
-}
-void checkCompatible(DataDescription data1, DataDescription data2);
+
+template<> bool checkCompatibility<QVector2D>(QVector2D vec1, QVector2D vec2);
+template<> bool checkCompatibility<double>(double a, double b);
+template<> bool checkCompatibility<float>(float a, float b);
+template<> bool checkCompatibility<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2);
+template<> bool checkCompatibility<CellMetadata>(CellMetadata metadata1, CellMetadata metadata2);
+template<> bool checkCompatibility<TokenDescription>(TokenDescription token1, TokenDescription token2);
+template<> bool checkCompatibility<CellDescription>(CellDescription cell1, CellDescription cell2);
+template<> bool checkCompatibility<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2);
+template<> bool checkCompatibility<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2);
+template<> bool checkCompatibility<DataDescription>(DataDescription data1, DataDescription data2);

@@ -103,8 +103,8 @@ TEST_F(PropulsionGpuTests, testDoNothing)
     auto const& propOut = result.second;
 
     EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
-    EXPECT_TRUE(isCompatible(QVector2D{}, velocities.linear));
-    EXPECT_TRUE(isCompatible(0.0, velocities.angular));
+    checkCompatibility(QVector2D{}, velocities.linear);
+    checkCompatibility(0.0, velocities.angular);
 }
 
 TEST_F(PropulsionGpuTests, testThrustControlByAngle1)
@@ -241,7 +241,7 @@ TEST_F(PropulsionGpuTests, testThrustControlDampRotation3)
     auto const& propOut = result.second;
 
     EXPECT_EQ(Enums::PropOut::SUCCESS_DAMPING_FINISHED, propOut);
-    ASSERT_PRED2(predEqualMediumPrecision, 0, velocities.angular);
+    ASSERT_PRED2(predEqual_mediumPrecision, 0, velocities.angular);
 }
 
 TEST_F(PropulsionGpuTests, testPowerControl)
@@ -312,7 +312,7 @@ TEST_F(PropulsionGpuTests, testParallelization1)
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
     auto const& newCluster2 = clusterByClusterId.at(cluster2.id);
 
-    EXPECT_TRUE(isCompatible(static_cast<float>(cellMaxToken), newCluster1.vel->length() / newCluster2.vel->length()));
+    checkCompatibility(static_cast<float>(cellMaxToken), newCluster1.vel->length() / newCluster2.vel->length());
 }
 
 /**
@@ -375,7 +375,7 @@ TEST_F(PropulsionGpuTests, testParallelization2)
     auto const& newCluster1 = clusterByClusterId.at(cluster1.id);
     auto const& newCluster2 = clusterByClusterId.at(cluster2.id);
 
-    EXPECT_TRUE(isCompatible(2.0, *newCluster1.angularVel / *newCluster2.angularVel));
+    checkCompatibility(2.0, *newCluster1.angularVel / *newCluster2.angularVel);
 }
 
 TEST_F(PropulsionGpuTests, regressionTestNegativeValueForCommand)

@@ -1252,9 +1252,9 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestruction(
 
     EXPECT_EQ(expectations._tokenOutput, getConstrOut(token));
     auto movementOfCenter = testResult.movementOfCenter;
-    if (!isCompatible(movementOfCenter, QVector2D{})) {
+    if (movementOfCenter.length() > FLOATINGPOINT_MEDIUM_PRECISION) {
         _spaceProp->correctPosition(movementOfCenter);
-        EXPECT_TRUE(isCompatible(movementOfCenter, QVector2D{}));
+        checkCompatibility(movementOfCenter, QVector2D{});
     }
     
     checkTokenMovement(testResult);
@@ -1349,7 +1349,7 @@ void ConstructorGpuTests::_ResultChecker::checkCellPositionAfterCreation(
             auto const angle = Physics::clockwiseAngleFromFirstToSecondVector(
                 *firstCellOfConstructionSite->pos - *testResult.constructorCell.pos,
                 *testResult.sourceCell->pos - *testResult.constructorCell.pos);
-            EXPECT_TRUE(isCompatible(origAngle, angle));
+            checkCompatibility(origAngle, angle);
         }
 
         if (auto const thirdCellOfConstructionSite = testResult.getThirdCellOfConstructionSiteAfterCreation()) {
@@ -1399,8 +1399,8 @@ void ConstructorGpuTests::_ResultChecker::checkCellAttributesAfterCreation(TestR
 {
     auto const constructedCell = *testResult.getFirstCellOfConstructionSiteAfterCreation();
     auto const& token = testResult.token;
-    EXPECT_TRUE(isCompatible(
-        _parameters.cellFunctionConstructorOffspringCellEnergy, static_cast<float>(*constructedCell.energy)));
+    checkCompatibility(
+        _parameters.cellFunctionConstructorOffspringCellEnergy, static_cast<float>(*constructedCell.energy));
 
     auto const expectedBranchNumber = token.data->at(Enums::Constr::IN_CELL_BRANCH_NO);
     auto const expectedCellFunctionType = token.data->at(Enums::Constr::IN_CELL_FUNCTION);
@@ -1498,7 +1498,7 @@ void ConstructorGpuTests::_ResultChecker::checkConstructedTokenAfterCreation(
     if (expectations._constructedToken) {
         auto const actualTokens = testResult.getFirstCellOfConstructionSiteAfterCreation()->tokens;
         EXPECT_EQ(1, actualTokens->size());
-        EXPECT_TRUE(isCompatible(*expectations._constructedToken, actualTokens->at(0)));
+        checkCompatibility(*expectations._constructedToken, actualTokens->at(0));
 
         EXPECT_EQ(1, testResult.getFirstCellOfConstructionSiteAfterCreation()->tokens->size());
     }
