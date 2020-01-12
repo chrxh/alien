@@ -220,18 +220,18 @@ TEST_F(CleanupGpuTests, testCleanupParticleMap)
 
 TEST_F(CleanupGpuTests, testCleanupMetadata)
 {
-    DataDescription data;
-    data.addCluster(createSingleCellCluster(_numberGen->getId(), _numberGen->getId()));
+    DataDescription prevData;
+    prevData.addCluster(createSingleCellCluster(_numberGen->getId(), _numberGen->getId()));
 
-    DataDescription dataRead;
+    DataDescription data;
     for (int i = 0; i < 100; ++i) {
-        EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataRead, data)));
-        dataRead = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-        checkCompatibility(data, dataRead);
+        EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(data, prevData)));
+        data = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+        checkCompatibility(prevData, data);
 
         //generate new metadata
-        data.clusters->at(0).cells->at(0).setMetadata(
-            CellMetadata().setSourceCode(QString(100, QChar('d')) + QString("%1").arg(i)));
-        *data.clusters->at(0).cells->at(0).energy = i;
+        prevData.clusters->at(0).cells->at(0).setMetadata(CellMetadata().setSourceCode(
+            QString(100, QChar('d')) + QString("%1").arg(i)));  //exceeding 10k byte memory after some iterations
+        *prevData.clusters->at(0).cells->at(0).energy = i;
     }
 }
