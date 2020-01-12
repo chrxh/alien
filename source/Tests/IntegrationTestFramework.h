@@ -67,26 +67,31 @@ bool isCompatible(optional<T> a, optional<T> b)
 	return isCompatible(*a, *b);
 }
 
-template<typename T>
-bool isCompatible(vector<T> a, vector<T> b)
-{
-	if (a.size() != b.size()) {
-		return false;
-	}
-	for (int i = 0; i < a.size(); ++i) {
-		if (!isCompatible(a.at(i), b.at(i))) {
-			return false;
-		}
-	}
-	return true;
-}
-
 template<> bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2);
 template<> bool isCompatible<double>(double a, double b);
 template<> bool isCompatible<float>(float a, float b);
-template<> bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2);
 template<> bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2);
-template<> bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2);
-template<> bool isCompatible<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2);
-template<> bool isCompatible<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2);
-template<> bool isCompatible<DataDescription>(DataDescription data1, DataDescription data2);
+
+
+void checkCompatible(CellMetadata metadata1, CellMetadata metadata2);
+void checkCompatible(TokenDescription token1, TokenDescription token2);
+void checkCompatible(CellDescription cell1, CellDescription cell2);
+void checkCompatible(ClusterDescription cluster1, ClusterDescription cluster2);
+void checkCompatible(ParticleDescription particle1, ParticleDescription particle2);
+
+template<typename T>
+void checkCompatible(vector<T> a, vector<T> b)
+{
+    EXPECT_EQ(a.size(), b.size());
+    for (int i = 0; i < a.size(); ++i) {
+        checkCompatible(a.at(i), b.at(i));
+    }
+}
+template<typename T>
+void checkCompatible(optional<T> a, optional<T> b)
+{
+    if (a && b) {
+        checkCompatible(*a, *b);
+    }
+}
+void checkCompatible(DataDescription data1, DataDescription data2);

@@ -81,8 +81,11 @@ TokenDescription IntegrationTestFramework::createSimpleToken() const
 ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
 	optional<QVector2D> const & centerVel, Boundary boundary) const
 {
-	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+    QVector2D pos = centerPos
+        ? *centerPos
+        : QVector2D(
+            _numberGen->getRandomReal(0, _universeSize.x - 1), _numberGen->getRandomReal(0, _universeSize.y - 1));
+    QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
 
 	ClusterDescription cluster;
 	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
@@ -133,8 +136,11 @@ ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2
 ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, optional<QVector2D> const & centerPos,
 	optional<QVector2D> const & centerVel, optional<double> const & optAngle, optional<double> const & optAngularVel) const
 {
-	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+    QVector2D pos = centerPos
+        ? *centerPos
+        : QVector2D(
+            _numberGen->getRandomReal(0, _universeSize.x - 1), _numberGen->getRandomReal(0, _universeSize.y - 1));
+    QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
 	double angle = optAngle ? *optAngle : _numberGen->getRandomReal(0, 359);
 	double angularVel = optAngularVel.get_value_or(_numberGen->getRandomReal(-1, 1));
 
@@ -174,8 +180,11 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(
     optional<double> const& optAngularVel,
     Boundary boundary /*= Boundary::NonSticky*/) const
 {
-	QVector2D pos = centerPos ? * centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+    QVector2D pos = centerPos
+        ? *centerPos
+        : QVector2D(
+            _numberGen->getRandomReal(0, _universeSize.x - 1), _numberGen->getRandomReal(0, _universeSize.y - 1));
+    QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
 	double angularVel = optAngularVel.get_value_or(_numberGen->getRandomReal(-1, 1));
 
 	ClusterDescription cluster;
@@ -208,8 +217,11 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(
 
 ClusterDescription IntegrationTestFramework::createVerticalCluster(int numCells, optional<QVector2D> const & centerPos, optional<QVector2D> const & centerVel) const
 {
-	QVector2D pos = centerPos ? *centerPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
+    QVector2D pos = centerPos
+        ? *centerPos
+        : QVector2D(
+            _numberGen->getRandomReal(0, _universeSize.x - 1), _numberGen->getRandomReal(0, _universeSize.y - 1));
+    QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
 
 	ClusterDescription cluster;
 	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
@@ -248,8 +260,11 @@ ParticleDescription IntegrationTestFramework::createParticle(
     optional<QVector2D> const& optPos,
     optional<QVector2D> const& optVel) const
 {
-	auto pos = optPos ? *optPos : QVector2D(_numberGen->getRandomReal(0, _universeSize.x), _numberGen->getRandomReal(0, _universeSize.y));
-	auto vel = optVel ? *optVel : QVector2D(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
+    auto pos = optPos
+        ? *optPos
+        : QVector2D(
+            _numberGen->getRandomReal(0, _universeSize.x - 1), _numberGen->getRandomReal(0, _universeSize.y - 1));
+    auto vel = optVel ? *optVel : QVector2D(_numberGen->getRandomReal(-0.5, 0.5), _numberGen->getRandomReal(-0.5, 0.5));
 	return ParticleDescription().setEnergy(_parameters.cellMinEnergy / 2).setPos(pos).setVel(vel).setId(_numberGen->getId());
 }
 
@@ -285,13 +300,6 @@ bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2)
         && isCompatible(vec1.y(), vec2.y());
 }
 
-template<>
-bool isCompatible<TokenDescription>(TokenDescription token1, TokenDescription token2)
-{
-	return isCompatible(token1.energy, token2.energy)
-		&& isCompatible(token1.data->mid(1), token2.data->mid(1));	//do not compare first byte (overiden branch number)
-}
-
 namespace
 {
 	void removeZerosAtEnd(QByteArray& data)
@@ -323,39 +331,50 @@ bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellF
 		;
 }
 
-template<>
-bool isCompatible<CellDescription>(CellDescription cell1, CellDescription cell2)
+void checkCompatible(CellMetadata metadata1, CellMetadata metadata2)
 {
-	return isCompatible(cell1.tokenBlocked, cell2.tokenBlocked)
-		&& isCompatible(cell1.pos, cell2.pos)
-		&& isCompatible(cell1.energy, cell2.energy)
-		&& isCompatible(cell1.maxConnections, cell2.maxConnections)
-		&& isCompatible(cell1.connectingCells, cell2.connectingCells)
-		&& isCompatible(cell1.tokenBranchNumber, cell2.tokenBranchNumber)
-		&& isCompatible(cell1.metadata, cell2.metadata)
-		&& isCompatible(cell1.cellFeature, cell2.cellFeature)
-		&& isCompatible(cell1.tokens, cell2.tokens)
-		;
+    EXPECT_TRUE(isCompatible(metadata1.computerSourcecode, metadata2.computerSourcecode));
+    EXPECT_TRUE(isCompatible(metadata1.name, metadata2.name));
+    EXPECT_TRUE(isCompatible(metadata1.description, metadata2.description));
+    EXPECT_TRUE(isCompatible(metadata1.color, metadata2.color));
 }
 
-template<>
-bool isCompatible<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2)
+void checkCompatible(TokenDescription token1, TokenDescription token2)
 {
-	return isCompatible(cluster1.pos, cluster2.pos)
-		&& isCompatible(cluster1.vel, cluster2.vel)
-		&& isCompatible(cluster1.angle, cluster2.angle)
-		&& isCompatible(cluster1.angularVel, cluster2.angularVel)
-		&& isCompatible(cluster1.metadata, cluster2.metadata)
-		&& isCompatible(cluster1.cells, cluster2.cells);
+    EXPECT_TRUE(isCompatible(token1.energy, token2.energy));
+    EXPECT_TRUE(
+        isCompatible(token1.data->mid(1), token2.data->mid(1)));  //do not compare first byte (overidden branch number)
 }
 
-template<>
-bool isCompatible<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2)
+void checkCompatible(CellDescription cell1, CellDescription cell2)
 {
-	return isCompatible(particle1.pos, particle2.pos)
-		&& isCompatible(particle1.vel, particle2.vel)
-		&& isCompatible(particle1.energy, particle2.energy)
-		&& isCompatible(particle1.metadata, particle2.metadata);
+    EXPECT_TRUE(isCompatible(cell1.tokenBlocked, cell2.tokenBlocked));
+    EXPECT_TRUE(isCompatible(cell1.pos, cell2.pos));
+    EXPECT_TRUE(isCompatible(cell1.energy, cell2.energy));
+    EXPECT_TRUE(isCompatible(cell1.maxConnections, cell2.maxConnections));
+    EXPECT_TRUE(isCompatible(cell1.connectingCells, cell2.connectingCells));
+    EXPECT_TRUE(isCompatible(cell1.tokenBranchNumber, cell2.tokenBranchNumber));
+    checkCompatible(cell1.metadata, cell2.metadata);
+    EXPECT_TRUE(isCompatible(cell1.cellFeature, cell2.cellFeature));
+    checkCompatible(cell1.tokens, cell2.tokens);
+}
+
+void checkCompatible(ClusterDescription cluster1, ClusterDescription cluster2)
+{
+    EXPECT_TRUE(isCompatible(cluster1.pos, cluster2.pos));
+    EXPECT_TRUE(isCompatible(cluster1.vel, cluster2.vel));
+    EXPECT_TRUE(isCompatible(cluster1.angle, cluster2.angle));
+    EXPECT_TRUE(isCompatible(cluster1.angularVel, cluster2.angularVel));
+    EXPECT_TRUE(isCompatible(cluster1.metadata, cluster2.metadata));
+    checkCompatible(cluster1.cells, cluster2.cells);
+}
+
+void checkCompatible(ParticleDescription particle1, ParticleDescription particle2)
+{
+    EXPECT_TRUE(isCompatible(particle1.pos, particle2.pos));
+    EXPECT_TRUE(isCompatible(particle1.vel, particle2.vel));
+    EXPECT_TRUE(isCompatible(particle1.energy, particle2.energy));
+    EXPECT_TRUE(isCompatible(particle1.metadata, particle2.metadata));
 }
 
 namespace
@@ -380,11 +399,10 @@ namespace
 	}
 }
 
-template<>
-bool isCompatible<DataDescription>(DataDescription data1, DataDescription data2)
+void checkCompatible(DataDescription data1, DataDescription data2)
 {
 	sortById(data1);
 	sortById(data2);
-	return isCompatible(data1.clusters, data2.clusters)
-		&& isCompatible(data1.particles, data2.particles);
+    checkCompatible(data1.clusters, data2.clusters);
+    checkCompatible(data1.particles, data2.particles);
 }

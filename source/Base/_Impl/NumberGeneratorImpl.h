@@ -13,7 +13,6 @@ public:
 
 	virtual uint32_t getRandomInt() override;
 	virtual uint32_t getRandomInt(uint32_t range) override;
-	virtual uint32_t getLargeRandomInt(uint32_t range) override;
 	virtual double getRandomReal(double min, double max) override;
 	virtual double getRandomReal() override;
 	virtual QByteArray getRandomArray(int length) override;
@@ -21,7 +20,8 @@ public:
 	virtual uint64_t getId() override;
 
 private:
-	quint32 getNumberFromArray();
+    uint32_t getLargeRandomInt(uint32_t range);
+    quint32 getNumberFromArray();
 
 	int _index = 0;
 	vector<uint32_t> _arrayOfRandomNumbers;
