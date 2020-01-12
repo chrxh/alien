@@ -21,9 +21,9 @@ __device__ void copyString(
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
-        auto const& sourceCodeStringIndex = atomicAdd(&numStringBytes, sourceLen);
+        targetStringIndex = atomicAdd(&numStringBytes, sourceLen);
         for (int i = 0; i < sourceLen; ++i) {
-            stringBytes[sourceCodeStringIndex + i] = sourceString[i];
+            stringBytes[targetStringIndex + i] = sourceString[i];
         }
     }
 }
