@@ -65,7 +65,7 @@ TEST_F(DataDescriptionTransferTests, testCreateClusterDescriptionWithCompleteCel
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+	checkCompatible(dataBefore, dataAfter);
 }
 
 TEST_F(DataDescriptionTransferTests, testModifyClusterDescriptionWithCompleteCell)
@@ -92,7 +92,7 @@ TEST_F(DataDescriptionTransferTests, testModifyClusterDescriptionWithCompleteCel
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+	checkCompatible(dataBefore, dataAfter);
 }
 
 TEST_F(DataDescriptionTransferTests, testCreateRandomData)
@@ -109,7 +109,7 @@ TEST_F(DataDescriptionTransferTests, testCreateRandomData)
 	IntRect rect = { { 0, 0 }, { _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+    checkCompatible(dataBefore, dataAfter);
 }
 
 TEST_F(DataDescriptionTransferTests, testCreateAndDeleteRandomData)
@@ -144,7 +144,7 @@ TEST_F(DataDescriptionTransferTests, testCreateAndDeleteRandomData)
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+    checkCompatible(dataBefore, dataAfter);
 }
 
 TEST_F(DataDescriptionTransferTests, testModifyRandomParticles)
@@ -171,7 +171,7 @@ TEST_F(DataDescriptionTransferTests, testModifyRandomParticles)
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+    checkCompatible(dataBefore, dataAfter);
 }
 
 TEST_F(DataDescriptionTransferTests, testModifyRandomParticlesWithLargePositions)
@@ -198,7 +198,7 @@ TEST_F(DataDescriptionTransferTests, testModifyRandomParticlesWithLargePositions
 	IntRect rect = { { 0, 0 },{ _universeSize.x - 1, _universeSize.y - 1 } };
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, rect);
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+    checkCompatible(dataBefore, dataAfter);
 }
 
 TEST_F(DataDescriptionTransferTests, testCreateAndDeleteAndModifyWithinSimulation)

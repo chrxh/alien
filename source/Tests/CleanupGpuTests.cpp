@@ -227,7 +227,7 @@ TEST_F(CleanupGpuTests, testCleanupMetadata)
     for (int i = 0; i < 100; ++i) {
         EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataRead, data)));
         dataRead = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-        isCompatible(data, dataRead);
+        checkCompatible(data, dataRead);
 
         //generate new metadata
         data.clusters->at(0).cells->at(0).setMetadata(
