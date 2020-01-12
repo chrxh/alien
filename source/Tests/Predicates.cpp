@@ -5,19 +5,31 @@ bool predEqualIntVector(IntVector2D a, IntVector2D b)
 	return a == b;
 }
 
-bool predEqualMediumPrecision(double a, double b)
+bool predEqual_mediumPrecision(double a, double b)
 {
 	return qAbs(a - b) < FLOATINGPOINT_MEDIUM_PRECISION;
 }
 
-bool predLessThanMediumPrecision(double a, double b)
+bool predLessThan_MediumPrecision(double a, double b)
 {
 	return a <= b + FLOATINGPOINT_MEDIUM_PRECISION;
 }
 
-bool predEqualLowPrecision(double a, double b)
+bool predEqual_lowPrecision(double a, double b)
 {
 	return qAbs(a - b) < FLOATINGPOINT_LOW_PRECISION;
+}
+
+bool predEqual_relative(double a, double b)
+{
+    if (a == b) {
+        return true;
+    }
+
+    if (std::abs(a) < 0.0001) {
+        return std::abs(a - b) < 0.0001;
+    }
+    return std::abs(a - b) / std::abs(a) < 0.0001;  //use relative error
 }
 
 bool predEqual(double a, double b, double precision)

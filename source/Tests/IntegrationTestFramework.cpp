@@ -16,6 +16,7 @@
 #include "ModelCpu/UnitThread.h"
 #include "ModelBasic/SimulationAccess.h"
 
+#include "Predicates.h"
 #include "IntegrationTestFramework.h"
 
 IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
@@ -270,34 +271,26 @@ ParticleDescription IntegrationTestFramework::createParticle(
 
 
 template<>
-bool isCompatible<double>(double a, double b)
+bool checkCompatibility<double>(double a, double b)
 {
-    if (a == b) {
-        return true;
-    }
-    if (std::abs(a) < 0.0001) {
-        return std::abs(a - b) < 0.0001;
-    }
-	return std::abs(a - b) / std::abs(a) < 0.0001;  //use relative error
+    EXPECT_PRED2(predEqual_relative, a, b);
+    return predEqual_relative(a, b);
 }
 
 template<>
-bool isCompatible<float>(float a, float b)
+bool checkCompatibility<float>(float a, float b)
 {
-    if (a == b) {
-        return true;
-    }
-    if (std::abs(a) < 0.0001f) {
-        return std::abs(a - b) < 0.0001f;
-    }
-    return std::abs(a - b) / std::abs(a) < 0.0001f;  //use relative error
+    EXPECT_PRED2(predEqual_relative, a, b);
+    return predEqual_relative(a, b);
 }
 
 template<>
-bool isCompatible<QVector2D>(QVector2D vec1, QVector2D vec2)
+bool checkCompatibility<QVector2D>(QVector2D vec1, QVector2D vec2)
 {
-    return isCompatible(vec1.x(), vec2.x())
-        && isCompatible(vec1.y(), vec2.y());
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(vec1.x(), vec2.x()));
+    EXPECT_TRUE(result &= checkCompatibility(vec1.y(), vec2.y()));
+    return result;
 }
 
 namespace
@@ -319,62 +312,80 @@ namespace
 }
 
 template<>
-bool isCompatible<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2)
+bool checkCompatibility<CellFeatureDescription>(CellFeatureDescription feature1, CellFeatureDescription feature2)
 {
 	removeZerosAtEnd(feature1.volatileData);
     removeZerosAtEnd(feature1.constData);
 	removeZerosAtEnd(feature2.volatileData);
     removeZerosAtEnd(feature2.constData);
-    return isCompatible(feature1.getType(), feature2.getType())
-		&& isCompatible(feature1.constData, feature2.constData)
-		&& isCompatible(feature1.volatileData, feature2.volatileData)
-		;
+
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(feature1.getType(), feature2.getType()));
+    EXPECT_TRUE(result &= checkCompatibility(feature1.constData, feature2.constData));
+    EXPECT_TRUE(result &= checkCompatibility(feature1.volatileData, feature2.volatileData));
+    return result;
 }
 
-void checkCompatible(CellMetadata metadata1, CellMetadata metadata2)
+template<>
+bool checkCompatibility(CellMetadata metadata1, CellMetadata metadata2)
 {
-    EXPECT_TRUE(isCompatible(metadata1.computerSourcecode, metadata2.computerSourcecode));
-    EXPECT_TRUE(isCompatible(metadata1.name, metadata2.name));
-    EXPECT_TRUE(isCompatible(metadata1.description, metadata2.description));
-    EXPECT_TRUE(isCompatible(metadata1.color, metadata2.color));
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(metadata1.computerSourcecode, metadata2.computerSourcecode));
+    EXPECT_TRUE(result &= checkCompatibility(metadata1.name, metadata2.name));
+    EXPECT_TRUE(result &= checkCompatibility(metadata1.description, metadata2.description));
+    EXPECT_TRUE(result &= checkCompatibility(metadata1.color, metadata2.color));
+    return result;
 }
 
-void checkCompatible(TokenDescription token1, TokenDescription token2)
+template<>
+bool checkCompatibility(TokenDescription token1, TokenDescription token2)
 {
-    EXPECT_TRUE(isCompatible(token1.energy, token2.energy));
-    EXPECT_TRUE(
-        isCompatible(token1.data->mid(1), token2.data->mid(1)));  //do not compare first byte (overidden branch number)
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(token1.energy, token2.energy));
+
+    //do not compare first byte (overridden branch number)
+    EXPECT_TRUE(result &= checkCompatibility(token1.data->mid(1), token2.data->mid(1)));
+    return result;
 }
 
-void checkCompatible(CellDescription cell1, CellDescription cell2)
+template<>
+bool checkCompatibility<CellDescription>(CellDescription cell1, CellDescription cell2)
 {
-    EXPECT_TRUE(isCompatible(cell1.tokenBlocked, cell2.tokenBlocked));
-    EXPECT_TRUE(isCompatible(cell1.pos, cell2.pos));
-    EXPECT_TRUE(isCompatible(cell1.energy, cell2.energy));
-    EXPECT_TRUE(isCompatible(cell1.maxConnections, cell2.maxConnections));
-    EXPECT_TRUE(isCompatible(cell1.connectingCells, cell2.connectingCells));
-    EXPECT_TRUE(isCompatible(cell1.tokenBranchNumber, cell2.tokenBranchNumber));
-    checkCompatible(cell1.metadata, cell2.metadata);
-    EXPECT_TRUE(isCompatible(cell1.cellFeature, cell2.cellFeature));
-    checkCompatible(cell1.tokens, cell2.tokens);
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(cell1.tokenBlocked, cell2.tokenBlocked));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.pos, cell2.pos));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.energy, cell2.energy));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.maxConnections, cell2.maxConnections));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.connectingCells, cell2.connectingCells));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.tokenBranchNumber, cell2.tokenBranchNumber));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.metadata, cell2.metadata));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.cellFeature, cell2.cellFeature));
+    EXPECT_TRUE(result &= checkCompatibility(cell1.tokens, cell2.tokens));
+    return result;
 }
 
-void checkCompatible(ClusterDescription cluster1, ClusterDescription cluster2)
+template<>
+bool checkCompatibility<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2)
 {
-    EXPECT_TRUE(isCompatible(cluster1.pos, cluster2.pos));
-    EXPECT_TRUE(isCompatible(cluster1.vel, cluster2.vel));
-    EXPECT_TRUE(isCompatible(cluster1.angle, cluster2.angle));
-    EXPECT_TRUE(isCompatible(cluster1.angularVel, cluster2.angularVel));
-    EXPECT_TRUE(isCompatible(cluster1.metadata, cluster2.metadata));
-    checkCompatible(cluster1.cells, cluster2.cells);
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(cluster1.pos, cluster2.pos));
+    EXPECT_TRUE(result &= checkCompatibility(cluster1.vel, cluster2.vel));
+    EXPECT_TRUE(result &= checkCompatibility(cluster1.angle, cluster2.angle));
+    EXPECT_TRUE(result &= checkCompatibility(cluster1.angularVel, cluster2.angularVel));
+    EXPECT_TRUE(result &= checkCompatibility(cluster1.metadata, cluster2.metadata));
+    EXPECT_TRUE(result &= checkCompatibility(cluster1.cells, cluster2.cells));
+    return result;
 }
 
-void checkCompatible(ParticleDescription particle1, ParticleDescription particle2)
+template<>
+bool checkCompatibility<ParticleDescription>(ParticleDescription particle1, ParticleDescription particle2)
 {
-    EXPECT_TRUE(isCompatible(particle1.pos, particle2.pos));
-    EXPECT_TRUE(isCompatible(particle1.vel, particle2.vel));
-    EXPECT_TRUE(isCompatible(particle1.energy, particle2.energy));
-    EXPECT_TRUE(isCompatible(particle1.metadata, particle2.metadata));
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(particle1.pos, particle2.pos));
+    EXPECT_TRUE(result &= checkCompatibility(particle1.vel, particle2.vel));
+    EXPECT_TRUE(result &= checkCompatibility(particle1.energy, particle2.energy));
+    EXPECT_TRUE(result &= checkCompatibility(particle1.metadata, particle2.metadata));
+    return result;
 }
 
 namespace
@@ -399,10 +410,14 @@ namespace
 	}
 }
 
-void checkCompatible(DataDescription data1, DataDescription data2)
+template<>
+bool checkCompatibility<DataDescription>(DataDescription data1, DataDescription data2)
 {
-	sortById(data1);
+    sortById(data1);
 	sortById(data2);
-    checkCompatible(data1.clusters, data2.clusters);
-    checkCompatible(data1.particles, data2.particles);
+
+    auto result = true;
+    EXPECT_TRUE(result &= checkCompatibility(data1.clusters, data2.clusters));
+    EXPECT_TRUE(result &= checkCompatibility(data1.particles, data2.particles));
+    return result;
 }

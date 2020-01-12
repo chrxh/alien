@@ -71,7 +71,7 @@ TEST_F(ParticleGpuTests, testFusionOfTwoParticles)
 	ASSERT_FALSE(newData.clusters);
 	ASSERT_EQ(1, newData.particles->size());
 	auto newParticle = newData.particles->front();
-	EXPECT_TRUE(isCompatible(QVector2D(0, 0), *newParticle.vel));
+	checkCompatibility(QVector2D(0, 0), *newParticle.vel);
 
     check(origData, newData);
 }
