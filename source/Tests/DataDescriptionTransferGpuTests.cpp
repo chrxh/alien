@@ -45,7 +45,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataBefore, dataAfter));
+    checkCompatible(dataBefore, dataAfter);
 }
 
 /**
@@ -70,7 +70,7 @@ TEST_F(DataDescriptionTransferGpuTests, testAddToken)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
@@ -96,7 +96,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_changeClusterId)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
@@ -128,7 +128,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_addSecondToken)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
@@ -160,7 +160,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeClusterWithToken_addSecondToke
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
@@ -200,7 +200,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithSeveralTokens)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
@@ -234,7 +234,7 @@ TEST_F(DataDescriptionTransferGpuTests, testRemoveCellWithToken)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
@@ -259,7 +259,7 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeParticle)
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
 
-	ASSERT_TRUE(isCompatible(dataChanged, dataAfter));
+    checkCompatible(dataChanged, dataAfter);
 }
 
 /**
