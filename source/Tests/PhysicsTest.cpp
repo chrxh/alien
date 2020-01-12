@@ -4,7 +4,8 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/Physics.h"
-#include "tests/Predicates.h"
+
+#include "Predicates.h"
 
 class PhysicsTest : public ::testing::Test
 {
@@ -87,13 +88,13 @@ TEST_F (PhysicsTest, testRotateClockwise)
 TEST_F(PhysicsTest, testAngleOfVector)
 {
     qreal a = Physics::angleOfVector(QVector2D(0.0, -1.0));
-	ASSERT_PRED2(predEqualLowPrecision, 0.0, a);
+	ASSERT_PRED2(predEqual_lowPrecision, 0.0, a);
     a = Physics::angleOfVector(QVector2D(1.0, 0.0));
-	ASSERT_PRED2(predEqualLowPrecision, 90.0, a);
+	ASSERT_PRED2(predEqual_lowPrecision, 90.0, a);
     a = Physics::angleOfVector(QVector2D(0.0, 1.0));
-	ASSERT_PRED2(predEqualLowPrecision, 180.0, a);
+	ASSERT_PRED2(predEqual_lowPrecision, 180.0, a);
     a = Physics::angleOfVector(QVector2D(-1.0, 0.0));
-	ASSERT_PRED2(predEqualLowPrecision, 270.0, a);
+	ASSERT_PRED2(predEqual_lowPrecision, 270.0, a);
 }
 
 TEST_F(PhysicsTest, testUnitVectorOfAngle)
