@@ -475,6 +475,50 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
     check(origData, newData);
 }
 
+TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
+{
+    DataDescription origData;
+    auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
+
+    auto firstCluster = createHorizontalCluster(2, QVector2D{ 100, 100.5 }, QVector2D{ 0, 0 }, 0.0);
+    firstCluster.cells->at(0).tokenBranchNumber = 0;
+    firstCluster.cells->at(1).tokenBranchNumber = 1;
+    setMaxConnections(firstCluster, 2);
+    origData.addCluster(firstCluster);
+
+    auto secondCluster = createHorizontalCluster(2, QVector2D{ 102, 100.5 }, QVector2D{ -velocity, 0 }, 0.0);
+    secondCluster.cells->at(0).tokenBranchNumber = 0;
+    secondCluster.cells->at(1).tokenBranchNumber = 1;
+    setMaxConnections(secondCluster, 2);
+    origData.addCluster(secondCluster);
+
+
+    auto secondCellId = firstCluster.cells->at(1).id;
+    auto thirdCellId = secondCluster.cells->at(0).id;
+
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+    EXPECT_EQ(4, newCluster.cells->size());
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id == secondCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+        }
+        else if (newCell.id == thirdCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+        }
+        else if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
+}
+
+
 /**
 * Situation: - two horizontal clusters with each 2 cells and branch numbers (0, 1)
 *			 - each cluster has token on its first cell
@@ -497,7 +541,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 	setMaxConnections(firstCluster, 2);
 	origData.addCluster(firstCluster);
 
-	auto secondCluster = createHorizontalCluster(2, QVector2D{ 102, 100.5 }, QVector2D{ 0, -velocity }, 0.0);
+	auto secondCluster = createHorizontalCluster(2, QVector2D{ 102, 100.5 }, QVector2D{ -velocity, 0 }, 0.0);
 	secondCluster.cells->at(0).tokenBranchNumber = 0;
 	secondCluster.cells->at(1).tokenBranchNumber = 1;
 	secondCluster.cells->at(0).addToken(createSimpleToken());
@@ -505,7 +549,8 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 	origData.addCluster(secondCluster);
 
 	auto secondCellId = firstCluster.cells->at(1).id;
-	auto fourthCellId = secondCluster.cells->at(1).id;
+    auto thirdCellId = secondCluster.cells->at(0).id;
+    auto fourthCellId = secondCluster.cells->at(1).id;
 
 	IntegrationTestHelper::updateData(_access, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
@@ -517,12 +562,15 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 	EXPECT_EQ(4, newCluster.cells->size());
 	for (auto const& newCell : *newCluster.cells) {
 		if (newCell.id == secondCellId) {
-			EXPECT_EQ(1, newCell.tokens->size());
+			EXPECT_EQ(2, newCell.tokens->size());
 		}
 		else if (newCell.id == fourthCellId) {
 			EXPECT_EQ(1, newCell.tokens->size());
 		}
-		else if (newCell.tokens) {
+        else if (newCell.id == thirdCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+        }
+        else if (newCell.tokens) {
 			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
