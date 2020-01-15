@@ -43,6 +43,9 @@ protected:
         optional<QVector2D> const& pos = boost::none,
         optional<QVector2D> const& vel = boost::none) const;
 
+    //prevent indeterminism when position is between two pixels
+    QVector2D addSmallDisplacement(QVector2D const& value) const;
+
     ModelBasicBuilderFacade* _basicFacade = nullptr;
 	ModelCpuBuilderFacade* _cpuFacade = nullptr;
 	ModelGpuBuilderFacade* _gpuFacade = nullptr;

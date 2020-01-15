@@ -269,6 +269,11 @@ ParticleDescription IntegrationTestFramework::createParticle(
 	return ParticleDescription().setEnergy(_parameters.cellMinEnergy / 2).setPos(pos).setVel(vel).setId(_numberGen->getId());
 }
 
+QVector2D IntegrationTestFramework::addSmallDisplacement(QVector2D const & value) const
+{
+    return{ value.x() + 0.04232f, value.y() + 0.04232f };
+}
+
 
 template<>
 bool checkCompatibility<double>(double a, double b)
