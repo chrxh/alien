@@ -526,8 +526,10 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
 *			 - simulating 1 time step
 * Expected result:
 *			 - one cluster with branch numbers (0, 1, 0, 1)
-*			 - second cell has two tokens
-*			 - fourth cell has one token
+*			 - first cell has no tokens
+*			 - second cell has one token from spreading + one token from fusion
+*			 - third cell has one token from fusion
+*			 - fourth cell has one token from spreading
 */
 TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 {
@@ -548,7 +550,8 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 	setMaxConnections(secondCluster, 2);
 	origData.addCluster(secondCluster);
 
-	auto secondCellId = firstCluster.cells->at(1).id;
+    auto firstCellId = firstCluster.cells->at(0).id;
+    auto secondCellId = firstCluster.cells->at(1).id;
     auto thirdCellId = secondCluster.cells->at(0).id;
     auto fourthCellId = secondCluster.cells->at(1).id;
 
@@ -556,24 +559,20 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
 
 	ASSERT_EQ(1, newData.clusters->size());
 	auto newCluster = newData.clusters->at(0);
 	EXPECT_EQ(4, newCluster.cells->size());
-	for (auto const& newCell : *newCluster.cells) {
-		if (newCell.id == secondCellId) {
-			EXPECT_EQ(2, newCell.tokens->size());
-		}
-		else if (newCell.id == fourthCellId) {
-			EXPECT_EQ(1, newCell.tokens->size());
-		}
-        else if (newCell.id == thirdCellId) {
-            EXPECT_EQ(1, newCell.tokens->size());
-        }
-        else if (newCell.tokens) {
-			EXPECT_TRUE(newCell.tokens->empty());
-		}
-	}
+    
+    auto const newFirstCell = newCellByCellId.at(firstCellId);
+    auto const newSecondCell = newCellByCellId.at(secondCellId);
+    auto const newThirdCell = newCellByCellId.at(thirdCellId);
+    auto const newFourthCell = newCellByCellId.at(fourthCellId);
+    EXPECT_TRUE(!newFirstCell.tokens || newFirstCell.tokens->empty());
+    EXPECT_EQ(2, newSecondCell.tokens->size());
+    EXPECT_EQ(1, newThirdCell.tokens->size());
+    EXPECT_EQ(1, newFourthCell.tokens->size());
 }
 
 /**
