@@ -52,7 +52,7 @@ void WeaponGpuTests::SetUp()
 
 auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const -> WeaponTestResult
 {
-    auto origCluster = createLineCluster(2, QVector2D{}, QVector2D{}, 0.0f, 0.0f);
+    auto origCluster = createLineCluster(2, addSmallDisplacement(QVector2D{}), QVector2D{}, 0.0f, 0.0f);
     auto& firstCell = origCluster.cells->at(0);
     firstCell.tokenBranchNumber = 0;
     auto& secondCell = origCluster.cells->at(1);
@@ -68,11 +68,13 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
     optional<ClusterDescription> target1;
     optional<ClusterDescription> target2;
     if (parameters._target1) {
-        target1 = createRectangularCluster({ parameters._target1->mass, 1 }, parameters._target1->position, QVector2D{});
+        target1 = createRectangularCluster(
+            {parameters._target1->mass, 1}, addSmallDisplacement(parameters._target1->position), QVector2D{});
         origData.addCluster(*target1);
     }
     if (parameters._target2) {
-        target2 = createRectangularCluster({ parameters._target2->mass, 1 }, parameters._target2->position, QVector2D{});
+        target2 = createRectangularCluster(
+            {parameters._target2->mass, 1}, addSmallDisplacement(parameters._target2->position), QVector2D{});
         origData.addCluster(*target2);
     }
 
