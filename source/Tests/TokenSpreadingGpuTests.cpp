@@ -20,6 +20,7 @@ protected:
 void TokenSpreadingGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.cellFusionVelocity = 0.4;
     _context->setSimulationParameters(_parameters);
 }
 
@@ -478,7 +479,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
 TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
 {
     DataDescription origData;
-    auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
+    auto const velocity = 0.6f;
 
     auto firstCluster = createHorizontalCluster(2, QVector2D{ 100, 100.5 }, QVector2D{ 0, 0 }, 0.0);
     firstCluster.cells->at(0).tokenBranchNumber = 0;
@@ -534,7 +535,7 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
 TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 {
 	DataDescription origData;
-	auto velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
+	auto const velocity = 0.6f;
 
 	auto firstCluster = createHorizontalCluster(2, QVector2D{ 100, 100.5 }, QVector2D{ 0, 0 }, 0.0);
 	firstCluster.cells->at(0).tokenBranchNumber = 0;
@@ -821,7 +822,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
 */
 TEST_F(TokenSpreadingGpuTests, regressionTestManyStickyRotatingTokenClusters)
 {
-    auto highVel = _parameters.cellFusionVelocity*2;
+    auto const highVel = _parameters.cellFusionVelocity*2;
 
     _parameters.cellMaxTokenBranchNumber = 4;
     _context->setSimulationParameters(_parameters);
