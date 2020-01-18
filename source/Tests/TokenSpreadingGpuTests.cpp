@@ -20,6 +20,7 @@ protected:
 void TokenSpreadingGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.cellTransformationProb = 0; //excluding transformation of particle to cell
     _parameters.cellFusionVelocity = 0.4;
     _context->setSimulationParameters(_parameters);
 }

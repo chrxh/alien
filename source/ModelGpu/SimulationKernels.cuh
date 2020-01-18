@@ -33,7 +33,7 @@ __global__ void clusterProcessingStep2(SimulationData data, int numClusters)
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
         clusterProcessor.init_blockCall(data, clusterIndex);
-        clusterProcessor.destroyCell_blockCall();
+        clusterProcessor.destroyCloseCell_blockCall();
     }
 }
 
