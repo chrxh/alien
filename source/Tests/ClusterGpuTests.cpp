@@ -683,6 +683,7 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 TEST_F(ClusterGpuTests, testDestructionOfTooCloseCells)
 {
     _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.cellTransformationProb = 0; //excluding transformation of particle to cell
     _context->setSimulationParameters(_parameters);
 
     float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;

@@ -19,7 +19,7 @@ public:
     __inline__ __device__ void processingMovement_blockCall();
     __inline__ __device__ void updateMap_blockCall();
 
-    __inline__ __device__ void destroyCell_blockCall();
+    __inline__ __device__ void destroyCloseCell_blockCall();
 
     __inline__ __device__ void processingCollision_blockCall();
     __inline__ __device__ void processingRadiation_blockCall();
@@ -309,7 +309,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::destroyCell_blockCall()
+__inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
