@@ -779,6 +779,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
         secondCell.tokenBranchNumber = 1;
         thirdCell.tokenBranchNumber = 2;
         firstCell.addToken(token);
+        (*token.data)[Enums::Branching::TOKEN_BRANCH_NUMBER] = 1;
         secondCell.addToken(token);
         origData.addCluster(cluster);
         firstCellOfSecondClusterId = firstCell.id;
