@@ -173,7 +173,9 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
     parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
 	parameters.cellFunctionConstructorOffspringCellDistance = 1.0f;
     parameters.cellFunctionConstructorOffspringTokenEnergy = 60.0f;
-    parameters.cellFunctionConstructorMutationProb = 0.00001f;
+    parameters.cellFunctionConstructorDataMutationProb = 0.00001f;
+    parameters.cellFunctionConstructorPropertyMutationProb = 0.00005f;
+    parameters.cellFunctionConstructorStructureMutationProb = 0.00015f;
     parameters.cellFunctionSensorRange = 50.0f;
 	parameters.cellFunctionCommunicatorRange = 50.0f;
 

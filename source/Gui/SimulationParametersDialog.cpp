@@ -98,7 +98,9 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
     setItem("offspring cell energy", 0, _simulationParameters.cellFunctionConstructorOffspringCellEnergy);
     setItem("offspring cell distance", 0, _simulationParameters.cellFunctionConstructorOffspringCellDistance);
 	setItem("offspring token energy", 0, _simulationParameters.cellFunctionConstructorOffspringTokenEnergy);
-    setItem("mutation probability", 0, _simulationParameters.cellFunctionConstructorMutationProb);
+    setItem("cell data mutation probability", 0, _simulationParameters.cellFunctionConstructorDataMutationProb);
+    setItem("cell property mutation probability", 0, _simulationParameters.cellFunctionConstructorPropertyMutationProb);
+    setItem("structure mutation probability", 0, _simulationParameters.cellFunctionConstructorStructureMutationProb);
     setItem("range", 0, _simulationParameters.cellFunctionSensorRange);
     setItem("range", 1, _simulationParameters.cellFunctionCommunicatorRange);
 
@@ -136,7 +138,9 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
     _simulationParameters.cellFunctionConstructorOffspringCellEnergy = getItemReal("offspring cell energy", 0);
     _simulationParameters.cellFunctionConstructorOffspringCellDistance = getItemReal("offspring cell distance", 0);
     _simulationParameters.cellFunctionConstructorOffspringTokenEnergy = getItemReal("offspring token energy", 0);
-    _simulationParameters.cellFunctionConstructorMutationProb = getItemReal("mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorDataMutationProb = getItemReal("cell data mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorPropertyMutationProb = getItemReal("cell property mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorStructureMutationProb = getItemReal("structure mutation probability", 0);
     _simulationParameters.cellFunctionSensorRange = getItemReal("range", 0);
     _simulationParameters.cellFunctionCommunicatorRange = getItemReal("range", 1);
 
