@@ -53,21 +53,22 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
 
     return ClusterDescription()
         .addCell(CellDescription()
-            .setCellFeature(CellFeatureDescription()
-                .setType(Enums::CellFunction::COMPUTER)
-                .setConstData(code)
-                .setVolatileData(cellMemory))
-            .setId(cellId)
-            .setPos({ 1, 2 })
-            .setEnergy(_parameters.cellMinEnergy * 2)
-            .setFlagTokenBlocked(true)
-            .setMaxConnections(3)
-            .setMetadata(cellMetadata)
-            .setTokenBranchNumber(2)
-            .setTokens({ TokenDescription().setData(tokenMemory).setEnergy(89) }))
+                     .setCellFeature(CellFeatureDescription()
+                                         .setType(Enums::CellFunction::COMPUTER)
+                                         .setConstData(code)
+                                         .setVolatileData(cellMemory))
+                     .setId(cellId)
+                     .setPos({1, 2})
+                     .setEnergy(_parameters.cellMinEnergy * 2)
+                     .setFlagTokenBlocked(true)
+                     .setMaxConnections(3)
+                     .setMetadata(cellMetadata)
+                     .setTokenBranchNumber(2)
+                     .setAge(3)
+                     .setTokens({TokenDescription().setData(tokenMemory).setEnergy(89)}))
         .setId(clusterId)
-        .setPos({ 1, 2 })
-        .setVel({ -1, 1 })
+        .setPos({1, 2})
+        .setVel({-1, 1})
         .setAngle(23)
         .setAngularVel(1.2)
         .setMetadata(clusterMetadata);
@@ -395,6 +396,9 @@ bool checkCompatibility<CellDescription>(CellDescription cell1, CellDescription 
     }
     if (result) {
         EXPECT_TRUE(result = checkCompatibility(cell1.tokens, cell2.tokens));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.age, cell2.age));
     }
     return result;
 }
