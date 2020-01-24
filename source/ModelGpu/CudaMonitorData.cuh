@@ -12,6 +12,7 @@ public:
     __host__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numClusters);
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, _numClustersWithTokens);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numCells);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numTokens);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numParticles);
@@ -20,6 +21,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<double>(1, _internalEnergy);
 
         checkCudaErrors(cudaMemset(_numClusters, 0, sizeof(int)));
+        checkCudaErrors(cudaMemset(_numClustersWithTokens, 0, sizeof(int)));
         checkCudaErrors(cudaMemset(_numCells, 0, sizeof(int)));
         checkCudaErrors(cudaMemset(_numTokens, 0, sizeof(int)));
         checkCudaErrors(cudaMemset(_numParticles, 0, sizeof(int)));
@@ -34,6 +36,7 @@ public:
     __host__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_numClusters);
+        CudaMemoryManager::getInstance().freeMemory(_numClustersWithTokens);
         CudaMemoryManager::getInstance().freeMemory(_numCells);
         CudaMemoryManager::getInstance().freeMemory(_numTokens);
         CudaMemoryManager::getInstance().freeMemory(_numParticles);
@@ -46,6 +49,7 @@ public:
     {
         MonitorData result;
         checkCudaErrors(cudaMemcpy(&result.numClusters, _numClusters, sizeof(int), cudaMemcpyDeviceToHost));
+        checkCudaErrors(cudaMemcpy(&result.numClustersWithTokens, _numClustersWithTokens, sizeof(int), cudaMemcpyDeviceToHost));
         checkCudaErrors(cudaMemcpy(&result.numCells, _numCells, sizeof(int), cudaMemcpyDeviceToHost));
         checkCudaErrors(cudaMemcpy(&result.numParticles, _numParticles, sizeof(int), cudaMemcpyDeviceToHost));
         checkCudaErrors(cudaMemcpy(&result.numTokens, _numTokens, sizeof(int), cudaMemcpyDeviceToHost));
@@ -58,6 +62,7 @@ public:
     __inline__ __device__ void reset()
     {
         *_numClusters = 0;
+        *_numClustersWithTokens = 0;
         *_numCells = 0;
         *_numTokens = 0;
         *_numParticles = 0;
@@ -69,6 +74,11 @@ public:
     __inline__ __device__ void incNumClusters(int changeValue)
     {
         atomicAdd(_numClusters, changeValue);
+    }
+
+    __inline__ __device__ void incNumClustersWithTokens(int changeValue)
+    {
+        atomicAdd(_numClustersWithTokens, changeValue);
     }
 
     __inline__ __device__ void incNumCells(int changeValue)
@@ -103,6 +113,7 @@ public:
 
 private:
     int* _numClusters;
+    int* _numClustersWithTokens;
     int* _numCells;
     int* _numTokens;
     int* _numParticles;
