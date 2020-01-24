@@ -130,6 +130,7 @@ DataDescription DataConverter::getDataDescription() const
                                     .setTokens(vector<TokenDescription>{})
                                     .setTokenBranchNumber(cellTO.branchNumber)
                                     .setFlagTokenBlocked(cellTO.tokenBlocked)
+                                    .setAge(cellTO.age)
                                     .setCellFeature(feature));
         }
 		result.addCluster(clusterDesc);
@@ -430,6 +431,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	cellTO.maxConnections = *cellDesc.maxConnections;
 	cellTO.branchNumber = cellDesc.tokenBranchNumber.get_value_or(0);
 	cellTO.tokenBlocked = cellDesc.tokenBlocked.get_value_or(false);
+    cellTO.age = cellDesc.age.get_value_or(0);
     auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
     cellTO.cellFunctionType = cellFunction.getType();
     cellTO.numStaticBytes = std::min(cellFunction.constData.size(), MAX_CELL_STATIC_BYTES);
