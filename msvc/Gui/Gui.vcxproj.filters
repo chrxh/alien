@@ -929,9 +929,6 @@
     <ClInclude Include="ui_SymbolTableDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\MonitorModel.h">
-      <Filter>Source Files\Monitoring</Filter>
-    </ClInclude>
     <ClInclude Include="ui_MonitorView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
