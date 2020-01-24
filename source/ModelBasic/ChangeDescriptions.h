@@ -15,6 +15,7 @@ struct MODELBASIC_EXPORT CellChangeDescription
 	ValueTracker<CellMetadata> metadata;
 	ValueTracker<CellFeatureDescription> cellFeatures;
 	ValueTracker<vector<TokenDescription>> tokens;
+    ValueTracker<int> age;
 
 	CellChangeDescription() = default;
 	CellChangeDescription(CellDescription const& desc);
@@ -30,6 +31,7 @@ struct MODELBASIC_EXPORT CellChangeDescription
 	CellChangeDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellChangeDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
 	CellChangeDescription& setCellFunction(CellFeatureDescription const& value) { cellFeatures = value; return *this; }
+    CellChangeDescription& setAge(int value) { age = value; return *this; }
 };
 
 struct MODELBASIC_EXPORT ClusterChangeDescription
