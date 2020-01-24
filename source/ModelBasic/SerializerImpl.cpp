@@ -113,14 +113,37 @@ namespace boost {
 		{
 			ar & data.computerSourcecode & data.name & data.description & data.color;
 		}
+/*
 		template<class Archive>
-		inline void serialize(Archive & ar, CellDescription& data, const unsigned int /*version*/)
+		inline void serialize(Archive & ar, CellDescription& data, const unsigned int / *version* /)
 		{
 			ar & data.id & data.pos & data.energy & data.maxConnections & data.connectingCells;
 			ar & data.tokenBlocked & data.tokenBranchNumber & data.metadata & data.cellFeature;
 			ar & data.tokens;
 		}
-		template<class Archive>
+*/
+        template<class Archive>
+        inline void save(Archive& ar, CellDescription const& data, const unsigned int /*version*/)
+        {
+            ar << data.id << data.pos << data.energy << data.maxConnections << data.connectingCells;
+            ar << data.tokenBlocked << data.tokenBranchNumber << data.metadata << data.cellFeature;
+            ar << data.tokens << data.age;
+        }
+        template<class Archive>
+        inline void load(Archive& ar, CellDescription& data, const unsigned int /*version*/)
+        {
+            ar >> data.id >> data.pos >> data.energy >> data.maxConnections >> data.connectingCells;
+            ar >> data.tokenBlocked >> data.tokenBranchNumber >> data.metadata >> data.cellFeature;
+            ar >> data.tokens;
+        }
+        template<class Archive>
+        inline void serialize(Archive & ar, CellDescription& data, const unsigned int version)
+        {
+            boost::serialization::split_free(ar, data, version);
+        }
+
+        
+        template<class Archive>
 		inline void serialize(Archive & ar, ClusterMetadata& data, const unsigned int /*version*/)
 		{
 			ar & data.name;
