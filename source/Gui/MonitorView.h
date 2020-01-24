@@ -17,7 +17,7 @@ public:
     MonitorView(QWidget *parent = nullptr);
     virtual ~MonitorView();
 
-	void init(MonitorModel const& model);
+	void init(MonitorDataSP const& model);
 
 	void update();
 
@@ -29,7 +29,7 @@ protected:
 private:
 	QString generateString() const;
 
-	MonitorModel _model;
+	MonitorDataSP _model;
     Ui::MonitorView *ui;
 };
 

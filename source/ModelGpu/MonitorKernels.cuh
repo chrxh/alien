@@ -27,6 +27,9 @@ getMonitorDataForClusters(SimulationData data, CudaMonitorData monitorData, int 
             monitorData.incRotationalKineticEnergy(Physics::rotationalKineticEnergy(cluster->angularMass, cluster->angularVel));
             monitorData.incNumCells(cluster->numCellPointers);
             monitorData.incNumTokens(cluster->numTokenPointers);
+            if (cluster->numTokenPointers > 0) {
+                monitorData.incNumClustersWithTokens(1);
+            }
         }
 
         __shared__ float clusterInternalEnergy;

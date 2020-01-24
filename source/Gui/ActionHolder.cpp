@@ -229,7 +229,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionGridMultiplier = new QAction("Grid multiplier", this);
 	actionGridMultiplier->setEnabled(false);
 
-    actionMostFrequentCluster = new QAction("Most frequent cluster with token", this);
+    actionMostFrequentCluster = new QAction("Most frequent cluster with tokens", this);
     actionMostFrequentCluster->setEnabled(true);
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);
