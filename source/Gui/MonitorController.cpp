@@ -4,7 +4,6 @@
 #include "ModelBasic/SimulationMonitor.h"
 
 #include "MonitorView.h"
-#include "MonitorModel.h"
 #include "MonitorController.h"
 #include "MainController.h"
 
@@ -27,7 +26,7 @@ MonitorController::MonitorController(QWidget* parent)
 
 void MonitorController::init(MainController* mainController)
 {
-	_model = boost::make_shared<_MonitorModel>();
+	_model = boost::make_shared<MonitorData>();
 	_mainController = mainController;
 	_view->init(_model);
 }
@@ -57,12 +56,6 @@ void MonitorController::dataReadyToRetrieve()
 {
 	SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
 	MonitorData const& data = simMonitor->retrieveData();
-	_model->numClusters= data.numClusters;
-	_model->numCells = data.numCells;
-	_model->numParticles = data.numParticles;
-	_model->numTokens = data.numTokens;
-	_model->totalInternalEnergy = data.totalInternalEnergy;
-	_model->totalLinearKineticEnergy = data.totalLinearKineticEnergy;
-	_model->totalRotationalKineticEnergy = data.totalRotationalKineticEnergy;
+    *_model = data;
 	_view->update();
 }

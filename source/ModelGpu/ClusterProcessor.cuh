@@ -676,7 +676,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
             correction = _data->cellMap.correctionIncrement(_cluster->pos, otherCluster->pos);	//to be added to otherCluster
 
             newCluster->pos = (_cluster->pos * _cluster->numCellPointers
-                               + ((otherCluster->pos + correction) * otherCluster->numCellPointers))
+                + ((otherCluster->pos + correction) * otherCluster->numCellPointers))
                 / newCluster->numCellPointers;
             newCluster->vel =
                 (_cluster->vel * _cluster->numCellPointers + otherCluster->vel * otherCluster->numCellPointers)
@@ -701,7 +701,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
             atomicAdd(&newCluster->angularVel, angularMomentum);
         }
         __syncthreads();
-       
+
         PartitionData otherCellBlock = calcPartition(otherCluster->numCellPointers, threadIdx.x, blockDim.x);
 
         for (int otherCellIndex = otherCellBlock.startIndex; otherCellIndex <= otherCellBlock.endIndex; ++otherCellIndex) {
@@ -799,6 +799,10 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
             }
         }
         __syncthreads();
+        for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
+            auto& cell = newCluster->cellPointers[index];
+            cell->setFused(false);
+        }
     }
     else {
         if (0 == threadIdx.x) {

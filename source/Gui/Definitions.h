@@ -57,8 +57,8 @@ class Manipulator;
 class MonitorController;
 class ImageSectionItem;
 
-struct _MonitorModel;
-using MonitorModel = shared_ptr<_MonitorModel>;
+struct MonitorData;
+using MonitorDataSP = boost::shared_ptr<MonitorData>;
 
 enum class ActiveScene { PixelScene, ItemScene };
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };

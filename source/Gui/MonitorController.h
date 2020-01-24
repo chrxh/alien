@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "Gui/Definitions.h"
+#include "ModelBasic/MonitorData.h"
+
+#include "Definitions.h"
 
 class MonitorController
 	: public QObject
@@ -24,7 +26,8 @@ private:
 
 	MonitorView* _view = nullptr;
 	QTimer* _updateTimer = nullptr;
-	MonitorModel _model;
+
+    MonitorDataSP _model;
 	MainController* _mainController = nullptr;
 
 	list<QMetaObject::Connection> _monitorConnections;
