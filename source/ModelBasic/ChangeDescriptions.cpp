@@ -12,6 +12,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 	metadata = desc.metadata;
 	cellFeatures = desc.cellFeature;
 	tokens = desc.tokens;
+    age = desc.age;
 }
 
 CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
@@ -26,6 +27,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
 	metadata = ValueTracker<CellMetadata>(before.metadata, after.metadata);
 	cellFeatures = ValueTracker<CellFeatureDescription>(before.cellFeature, after.cellFeature);
 	tokens = ValueTracker<vector<TokenDescription>>(before.tokens, after.tokens);
+    age = ValueTracker<int>(before.age, after.age);
 }
 
 bool CellChangeDescription::isEmpty() const

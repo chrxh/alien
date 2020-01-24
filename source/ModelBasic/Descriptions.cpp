@@ -22,6 +22,7 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	metadata = static_cast<optional<CellMetadata>>(change.metadata);
 	cellFeature = static_cast<optional<CellFeatureDescription>>(change.cellFeatures);
 	tokens = static_cast<optional<vector<TokenDescription>>>(change.tokens);
+    age = static_cast<optional<int>>(change.age);
 }
 
 CellDescription& CellDescription::addConnection(uint64_t value)
@@ -89,7 +90,6 @@ ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
 			cells->emplace_back(CellDescription(cellTracker.getValue()));
 		}
 	}
-
 }
 
 QVector2D ClusterDescription::getClusterPosFromCells() const

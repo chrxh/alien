@@ -444,7 +444,6 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	else {
 		cellTO.numConnections = 0;
 	}
-    cellTO.age = 0;
     if (cellDesc.metadata) {
         auto& metadataTO = cellTO.metadata;
         metadataTO.color = cellDesc.metadata->color;
@@ -549,16 +548,16 @@ void DataConverter::applyChangeDescription(ClusterChangeDescription const& clust
 
 void DataConverter::applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cellTO)
 {
-	if (cellChanges.pos) {
-		QVector2D newAbsPos = cellChanges.pos.getValue();
-		convert(newAbsPos, cellTO.pos);
-	}
-	if (cellChanges.energy) {
-		cellTO.energy = cellChanges.energy.getValue();
-	}
-	if (cellChanges.tokenBranchNumber) {
-		cellTO.branchNumber = cellChanges.tokenBranchNumber.getValue();
-	}
+    if (cellChanges.pos) {
+        QVector2D newAbsPos = cellChanges.pos.getValue();
+        convert(newAbsPos, cellTO.pos);
+    }
+    if (cellChanges.energy) {
+        cellTO.energy = cellChanges.energy.getValue();
+    }
+    if (cellChanges.tokenBranchNumber) {
+        cellTO.branchNumber = cellChanges.tokenBranchNumber.getValue();
+    }
     if (cellChanges.cellFeatures) {
         auto cellFunction = *cellChanges.cellFeatures;
         cellTO.cellFunctionType = cellFunction.getType();
@@ -582,6 +581,9 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
         if (metadataTO.sourceCodeLen > 0) {
             metadataTO.sourceCodeStringIndex = convertStringAndReturnStringIndex(cellChanges.metadata->computerSourcecode);
         }
+    }
+    if (cellChanges.age) {
+        cellTO.age = cellChanges.age.getValue();
     }
 }
 
