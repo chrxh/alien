@@ -79,9 +79,9 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 	setItem("max radius", 0, _simulationParameters.clusterMaxRadius);
 
     setItem("min token usages", 0, _simulationParameters.cellMinTokenUsages);
+    setItem("token usage decay probability", 0, _simulationParameters.cellTokenUsageDecayProb);
     setItem("min distance", 0, _simulationParameters.cellMinDistance);
 	setItem("max distance", 0, _simulationParameters.cellMaxDistance);
-	setItem("mass", 0, 1.0/_simulationParameters.cellMass_Reciprocal);
 	setItem("max force", 0, _simulationParameters.cellMaxForce);
     setItem("max force decay probability", 0, _simulationParameters.cellMaxForceDecayProb);
     setItem("max bonds", 0, _simulationParameters.cellMaxBonds);
@@ -119,9 +119,9 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 	_simulationParameters.clusterMaxRadius = getItemReal("max radius", 0);
 	
     _simulationParameters.cellMinTokenUsages = getItemReal("min token usages", 0);
-	_simulationParameters.cellMinDistance = getItemReal("min distance", 0);
+    _simulationParameters.cellTokenUsageDecayProb = getItemReal("token usage decay probability", 0);
+    _simulationParameters.cellMinDistance = getItemReal("min distance", 0);
 	_simulationParameters.cellMaxDistance = getItemReal("max distance", 0);
-    _simulationParameters.cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);
     _simulationParameters.cellMaxForce = getItemReal("max force", 0);
     _simulationParameters.cellMaxForceDecayProb = getItemReal("max force decay probability", 0);
     _simulationParameters.cellMaxBonds = getItemInt("max bonds", 0);
