@@ -217,6 +217,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
 
                 int tokenIndex = newNumTokens++;
                 Token* newToken;
+                ++connectingCell->tokenUsages;
                 if (!tokenRecycled) {
                     moveToken(token, newToken, connectingCell);
                     tokenRecycled = true;
