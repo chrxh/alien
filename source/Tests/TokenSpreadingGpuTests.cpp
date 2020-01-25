@@ -923,3 +923,33 @@ TEST_F(TokenSpreadingGpuTests, regressionTestMovementOnLowEnergyCellWithSimultan
     ASSERT_EQ(1, newData.clusters->size());
     check(origData, newData);
 }
+
+TEST_F(TokenSpreadingGpuTests, testCellDecayDueToTokenUsage)
+{
+    _parameters.cellMinTokenUsages = 1;
+    _parameters.cellTokenUsageDecayProb = 1;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+    auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
+    int index = 0;
+    auto token = createSimpleToken();
+    for (auto& cell : *cluster.cells) {
+        cell.tokenBranchNumber = ++index;
+        (*token.data)[Enums::Branching::TOKEN_BRANCH_NUMBER] = index;
+        cell.addToken(token);
+    }
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(2, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    check(origData, newData);
+
+    ASSERT_EQ(1, newData.clusters->size());
+
+    auto const& newCluster = newData.clusters->at(0);
+    EXPECT_GE(2, newCluster.cells->size());
+
+}
