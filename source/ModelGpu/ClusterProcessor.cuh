@@ -33,7 +33,7 @@ private:
     __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_blockCall();
 
     __inline__ __device__ void updateCellVelocity_blockCall(Cluster* cluster);
-    __inline__ __device__ void cellAging(Cell* cell);
+    __inline__ __device__ void destroyDyingCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
     __inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
@@ -314,7 +314,7 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
         destroyCloseCell(cell);
-        cellAging(cell);
+        destroyDyingCell(cell);
     }
     __syncthreads();
 }
@@ -450,10 +450,10 @@ __inline__ __device__ void ClusterProcessor::updateCellVelocity_blockCall(Cluste
     __threadfence();
 }
 
-__inline__ __device__ void ClusterProcessor::cellAging(Cell * cell)
+__inline__ __device__ void ClusterProcessor::destroyDyingCell(Cell * cell)
 {
-    if (++cell->age > cudaSimulationParameters.cellMinAge) {
-        if (_data->numberGen.random() < 0.000001) {
+    if (cell->tokenUsages > cudaSimulationParameters.cellMinTokenUsages) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellTokenUsageDecayProb) {
             if (_data->numberGen.random() < 0.1) {
                 atomicExch(&cell->alive, 0);
                 atomicExch(&cell->cluster->decompositionRequired, 1);
