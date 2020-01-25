@@ -454,10 +454,8 @@ __inline__ __device__ void ClusterProcessor::destroyDyingCell(Cell * cell)
 {
     if (cell->tokenUsages > cudaSimulationParameters.cellMinTokenUsages) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellTokenUsageDecayProb) {
-            if (_data->numberGen.random() < 0.1) {
-                atomicExch(&cell->alive, 0);
-                atomicExch(&cell->cluster->decompositionRequired, 1);
-            }
+            atomicExch(&cell->alive, 0);
+            atomicExch(&cell->cluster->decompositionRequired, 1);
         }
     }
 }
