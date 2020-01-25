@@ -117,14 +117,6 @@
       </item>
       <item>
        <property name="text">
-        <string>mass</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>max force</string>
        </property>
        <property name="flags">
