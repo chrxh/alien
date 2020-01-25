@@ -59,7 +59,7 @@ struct CellAccessTO
     char staticData[MAX_CELL_STATIC_BYTES];
     unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
-    int age;
+    int tokenUsages;
     CellMetadataAccessTO metadata;
 };
 

@@ -50,7 +50,7 @@ struct MODELBASIC_EXPORT CellDescription
 	optional<CellMetadata> metadata;
 	optional<CellFeatureDescription> cellFeature;
 	optional<vector<TokenDescription>> tokens;
-    optional<int> age;
+    optional<int> tokenUsages;
 
 	CellDescription() = default;
 	CellDescription(CellChangeDescription const& change);
@@ -68,7 +68,7 @@ struct MODELBASIC_EXPORT CellDescription
 	CellDescription& addToken(TokenDescription const& value);
 	CellDescription& addToken(uint index, TokenDescription const& value);
 	CellDescription& delToken(uint index);
-    CellDescription& setAge(int value) { age = value; return *this; }
+    CellDescription& setTokenUsages(int value) { tokenUsages = value; return *this; }
     QVector2D getPosRelativeTo(ClusterDescription const& cluster) const;
     bool isConnectedTo(uint64_t id) const;
 };

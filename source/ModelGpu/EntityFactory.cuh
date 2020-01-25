@@ -156,7 +156,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
             cell.mutableData[i] = cellTO.mutableData[i];
         }
-        cell.age = cellTO.age;
+        cell.tokenUsages = cellTO.tokenUsages;
         cell.metadata.color = cellTO.metadata.color;
 
         copyString(
@@ -211,7 +211,7 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
 {
     auto result = _data->entities.cells.getNewSubarray(1);
     result->cluster = cluster;
-    result->age = 0;
+    result->tokenUsages = 0;
     result->id = _data->numberGen.createNewId_kernel();
     result->locked = 0;
     result->protectionCounter = 0;
@@ -314,7 +314,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
         cell->mutableData[i] = _data->numberGen.random(255);
     }
-    cell->age = 0;
+    cell->tokenUsages = 0;
     return cluster;
 }
 

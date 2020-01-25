@@ -78,7 +78,7 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 {
 	setItem("max radius", 0, _simulationParameters.clusterMaxRadius);
 
-    setItem("min age", 0, _simulationParameters.cellMinAge);
+    setItem("min token usages", 0, _simulationParameters.cellMinTokenUsages);
     setItem("min distance", 0, _simulationParameters.cellMinDistance);
 	setItem("max distance", 0, _simulationParameters.cellMaxDistance);
 	setItem("mass", 0, 1.0/_simulationParameters.cellMass_Reciprocal);
@@ -118,7 +118,7 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 {
 	_simulationParameters.clusterMaxRadius = getItemReal("max radius", 0);
 	
-    _simulationParameters.cellMinAge = getItemReal("min age", 0);
+    _simulationParameters.cellMinTokenUsages = getItemReal("min token usages", 0);
 	_simulationParameters.cellMinDistance = getItemReal("min distance", 0);
 	_simulationParameters.cellMaxDistance = getItemReal("max distance", 0);
     _simulationParameters.cellMass_Reciprocal = 1.0/ getItemReal("mass", 0);
