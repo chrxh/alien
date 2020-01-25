@@ -494,10 +494,8 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
     setMaxConnections(secondCluster, 2);
     origData.addCluster(secondCluster);
 
-
     auto secondCellId = firstCluster.cells->at(1).id;
     auto thirdCellId = secondCluster.cells->at(0).id;
-
 
     IntegrationTestHelper::updateData(_access, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -507,6 +505,53 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
     ASSERT_EQ(1, newData.clusters->size());
     auto newCluster = newData.clusters->at(0);
     EXPECT_EQ(4, newCluster.cells->size());
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id == secondCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+        }
+        else if (newCell.id == thirdCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+        }
+        else if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
+}
+
+TEST_F(TokenSpreadingGpuTests, testCreationAfterSecondFusion)
+{
+    DataDescription origData;
+    auto const velocity = 0.6f;
+
+    auto firstCluster = createHorizontalCluster(2, QVector2D{ 96, 100.5 }, QVector2D{ velocity, 0 }, 0.0);
+    firstCluster.cells->at(0).tokenBranchNumber = 0;
+    firstCluster.cells->at(1).tokenBranchNumber = 1;
+    setMaxConnections(firstCluster, 2);
+    origData.addCluster(firstCluster);
+
+    auto secondCluster = createHorizontalCluster(2, QVector2D{ 100, 100.5 }, QVector2D{ 0, 0 }, 0.0);
+    secondCluster.cells->at(0).tokenBranchNumber = 0;
+    secondCluster.cells->at(1).tokenBranchNumber = 1;
+    setMaxConnections(secondCluster, 2);
+    origData.addCluster(secondCluster);
+
+    auto thirdCluster = createHorizontalCluster(2, QVector2D{ 102, 100.5 }, QVector2D{ -velocity, 0 }, 0.0);
+    thirdCluster.cells->at(0).tokenBranchNumber = 0;
+    thirdCluster.cells->at(1).tokenBranchNumber = 1;
+    setMaxConnections(thirdCluster, 2);
+    origData.addCluster(thirdCluster);
+
+    auto secondCellId = firstCluster.cells->at(1).id;
+    auto thirdCellId = secondCluster.cells->at(0).id;
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(3, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+    EXPECT_EQ(6, newCluster.cells->size());
     for (auto const& newCell : *newCluster.cells) {
         if (newCell.id == secondCellId) {
             EXPECT_EQ(1, newCell.tokens->size());
