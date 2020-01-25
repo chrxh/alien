@@ -145,10 +145,8 @@ namespace boost {
 		{
 			ar & data.clusters & data.particles;
 		}
-
-/*
         template<class Archive>
-		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int / *version* /)
+		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
 		{
 			ar & data.clusterMaxRadius;
 			ar & data.cellFunctionConstructorDataMutationProb;
@@ -187,118 +185,14 @@ namespace boost {
             ar & data.cellTokenUsageDecayProb;
 
             int fillInt = 0;
-			double fillDouble = 0.0;
+			float fillFloat = 0.0f;
 			for (int i = 0; i < 46; ++i) {
 				ar & fillInt;
 			}
 			for (int i = 0; i < 50; ++i) {
-				ar & fillDouble;
+				ar & fillFloat;
 			}
 		}
-*/
-
-        template <class Archive>
-        inline void save(Archive& ar, SimulationParameters const& data, const unsigned int /*version */)
-        {
-            ar<< data.clusterMaxRadius;
-            ar<< data.cellFunctionConstructorDataMutationProb;
-            ar<< data.cellMinDistance;
-            ar<< data.cellMaxDistance;
-            ar<< data.cellMass_Reciprocal;
-            ar<< data.cellMaxForce;
-            ar<< data.cellMaxForceDecayProb;
-            ar<< data.cellMaxBonds;
-            ar<< data.cellMaxToken;
-            ar<< data.cellMaxTokenBranchNumber;
-            ar<< data.cellFunctionConstructorOffspringCellEnergy;
-            ar<< data.cellCreationMaxConnection;
-            ar<< data.cellCreationTokenAccessNumber;
-            ar<< data.cellMinEnergy;
-            ar<< data.cellTransformationProb;
-            ar<< data.cellFusionVelocity;
-            ar<< data.cellFunctionWeaponStrength;
-            ar<< data.cellFunctionComputerMaxInstructions;
-            ar<< data.cellFunctionComputerCellMemorySize;
-            ar<< data.tokenMemorySize;
-            ar<< data.cellFunctionConstructorOffspringCellDistance;
-            ar<< data.cellFunctionSensorRange;
-            ar<< data.cellFunctionCommunicatorRange;
-            ar<< data.cellFunctionConstructorOffspringTokenEnergy;
-            ar<< data.tokenMinEnergy;
-            ar<< data.radiationExponent;
-            ar<< data.radiationFactor;
-            ar<< data.radiationProb;
-            ar<< data.radiationVelocityMultiplier;
-            ar<< data.radiationVelocityPerturbation;
-            ar<< data.cellMinTokenUsages;
-            ar<< data.cellFunctionWeaponEnergyCost;
-            ar<< data.cellFunctionConstructorPropertyMutationProb;
-            ar<< data.cellFunctionConstructorStructureMutationProb;
-            ar<< data.cellTokenUsageDecayProb;
-
-            int fillInt = 0;
-            float fillFloat = 0.0;
-            for (int i = 0; i < 50; ++i) {
-                ar << fillInt;
-            }
-            for (int i = 0; i < 50; ++i) {
-                ar << fillFloat;
-            }
-        }
-
-        template <class Archive>
-        inline void load(Archive& ar, SimulationParameters & data, const unsigned int /*version */ )
-        {
-            ar >> data.clusterMaxRadius;
-            ar >> data.cellFunctionConstructorDataMutationProb;
-            ar >> data.cellMinDistance;
-            ar >> data.cellMaxDistance;
-            ar >> data.cellMass_Reciprocal;
-            ar >> data.cellMaxForce;
-            ar >> data.cellMaxForceDecayProb;
-            ar >> data.cellMaxBonds;
-            ar >> data.cellMaxToken;
-            ar >> data.cellMaxTokenBranchNumber;
-            ar >> data.cellFunctionConstructorOffspringCellEnergy;
-            ar >> data.cellCreationMaxConnection;
-            ar >> data.cellCreationTokenAccessNumber;
-            ar >> data.cellMinEnergy;
-            ar >> data.cellTransformationProb;
-            ar >> data.cellFusionVelocity;
-            ar >> data.cellFunctionWeaponStrength;
-            ar >> data.cellFunctionComputerMaxInstructions;
-            ar >> data.cellFunctionComputerCellMemorySize;
-            ar >> data.tokenMemorySize;
-            ar >> data.cellFunctionConstructorOffspringCellDistance;
-            ar >> data.cellFunctionSensorRange;
-            ar >> data.cellFunctionCommunicatorRange;
-            ar >> data.cellFunctionConstructorOffspringTokenEnergy;
-            ar >> data.tokenMinEnergy;
-            ar >> data.radiationExponent;
-            ar >> data.radiationFactor;
-            ar >> data.radiationProb;
-            ar >> data.radiationVelocityMultiplier;
-            ar >> data.radiationVelocityPerturbation;
-            ar >> data.cellMinTokenUsages;
-            ar >> data.cellFunctionWeaponEnergyCost;
-            ar >> data.cellFunctionConstructorPropertyMutationProb;
-            ar >> data.cellFunctionConstructorStructureMutationProb;
-//            ar >> data.cellTokenUsageDecayProb;
-
-            int fillInt = 0;
-            float fillFloat = 0.0;
-            for (int i = 0; i < 50; ++i) {
-                ar >> fillInt;
-            }
-            for (int i = 0; i < 50; ++i) {
-                ar >> fillFloat;
-            }
-        }
-        template<class Archive>
-        inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int version)
-        {
-            boost::serialization::split_free(ar, data, version);
-        }
 
         template<class Archive>
 		inline void save(Archive& ar, SymbolTable const& data, const unsigned int /*version*/)
