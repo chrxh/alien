@@ -107,7 +107,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
                 cellTO.tokenBlocked = cell.tokenBlocked;
                 cellTO.cellFunctionType = cell.getCellFunctionType();
                 cellTO.numStaticBytes = cell.numStaticBytes;
-                cellTO.age = cell.age;
+                cellTO.tokenUsages = cell.tokenUsages;
                 cellTO.metadata.color = cell.metadata.color;
 
                 copyString(

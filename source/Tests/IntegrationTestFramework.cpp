@@ -64,7 +64,7 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
                      .setMaxConnections(3)
                      .setMetadata(cellMetadata)
                      .setTokenBranchNumber(2)
-                     .setAge(3)
+                     .setTokenUsages(3)
                      .setTokens({TokenDescription().setData(tokenMemory).setEnergy(89)}))
         .setId(clusterId)
         .setPos({1, 2})
@@ -398,7 +398,7 @@ bool checkCompatibility<CellDescription>(CellDescription cell1, CellDescription 
         EXPECT_TRUE(result = checkCompatibility(cell1.tokens, cell2.tokens));
     }
     if (result) {
-        EXPECT_TRUE(result = checkCompatibility(cell1.age, cell2.age));
+        EXPECT_TRUE(result = checkCompatibility(cell1.tokenUsages, cell2.tokenUsages));
     }
     return result;
 }

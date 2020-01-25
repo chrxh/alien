@@ -156,7 +156,8 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 	parameters.cellMass_Reciprocal = 1;
 	parameters.cellMaxForce = 0.8f;
 	parameters.cellMaxForceDecayProb = 0.2f;
-    parameters.cellMinAge = 40000;
+    parameters.cellMinTokenUsages = 40000;
+    parameters.cellTokenUsageDecayProb = 0.000001f;
     parameters.cellMaxBonds = 6;
 	parameters.cellMaxToken = 3;
 	parameters.cellMaxTokenBranchNumber = 6;
