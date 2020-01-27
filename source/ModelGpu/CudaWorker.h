@@ -16,9 +16,14 @@ public:
 	CudaWorker(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~CudaWorker();
 
-    void init(SpaceProperties* space, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
-	void terminateWorker();
+    void init(
+        SpaceProperties* space,
+        int timestep,
+        SimulationParameters const& parameters,
+        CudaConstants const& cudaConstants);
+    void terminateWorker();
 	bool isSimulationRunning();
+    int getTimestep() const;
 
 	void addJob(CudaJob const& job);
 	vector<CudaJob> getFinishedJobs(string const& originId);
@@ -36,7 +41,7 @@ private:
 	SpaceProperties* _space = nullptr;
 	CudaSimulation* _cudaSimulation = nullptr;
 
-	std::mutex _mutex;
+	mutable std::mutex _mutex;
 	std::condition_variable _condition;
 	vector<CudaJob> _jobs;
 	vector<CudaJob> _finishedJobs;

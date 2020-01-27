@@ -76,6 +76,11 @@ NumberGenerator * SimulationContextCpuImpl::getNumberGenerator() const
 	return _numberGen;
 }
 
+int SimulationContextCpuImpl::getTimestep() const
+{
+    return 0;
+}
+
 map<string, int> SimulationContextCpuImpl::getSpecificData() const
 {
 	ModelCpuData data(_threads->getMaxRunningThreads(), _grid->getSize());

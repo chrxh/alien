@@ -15,12 +15,16 @@ CudaWorker::~CudaWorker()
 	delete _cudaSimulation;
 }
 
-void CudaWorker::init(SpaceProperties* space, SimulationParameters const& parameters, CudaConstants const& cudaConstants)
+void CudaWorker::init(
+    SpaceProperties* space,
+    int timestep,
+    SimulationParameters const& parameters,
+    CudaConstants const& cudaConstants)
 {
 	_space = space;
 	auto size = space->getSize();
 	delete _cudaSimulation;
-	_cudaSimulation = new CudaSimulation({ size.x, size.y }, parameters, cudaConstants);
+	_cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
 }
 
 void CudaWorker::terminateWorker()
@@ -157,4 +161,10 @@ bool CudaWorker::isSimulationRunning()
 {
 	std::lock_guard<std::mutex> lock(_mutex);
 	return _simulationRunning;
+}
+
+int CudaWorker::getTimestep() const
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    return _cudaSimulation->getTimestep();
 }

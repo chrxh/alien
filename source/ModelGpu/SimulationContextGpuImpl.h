@@ -16,6 +16,7 @@ public:
 
     void init(
         SpaceProperties* metric,
+        int timestep,
         SymbolTable* symbolTable,
         SimulationParameters const& parameters,
         ModelGpuData const& specificData);
@@ -26,6 +27,7 @@ public:
 	virtual NumberGenerator* getNumberGenerator() const override;
 
 	virtual map<string, int> getSpecificData() const override;
+    virtual int getTimestep() const override;
 
 	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
 

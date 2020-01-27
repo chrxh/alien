@@ -34,10 +34,11 @@ CudaController::~CudaController()
 
 void CudaController::init(
     SpaceProperties* space,
+    int timestep,
     SimulationParameters const& parameters,
     CudaConstants const& cudaConstants)
 {
-	_worker->init(space, parameters, cudaConstants);
+	_worker->init(space, timestep, parameters, cudaConstants);
 }
 
 CudaWorker * CudaController::getCudaWorker() const

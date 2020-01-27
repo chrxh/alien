@@ -7,7 +7,11 @@
 class CudaSimulation
 {
 public:
-    CudaSimulation(int2 const &size, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
+    CudaSimulation(
+        int2 const& size,
+        int timestep,
+        SimulationParameters const& parameters,
+        CudaConstants const& cudaConstants);
     ~CudaSimulation();
 
     void calcCudaTimestep();
@@ -16,6 +20,7 @@ public:
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
     MonitorData getMonitorData();
+    int getTimestep() const;
 
     void setSimulationParameters(SimulationParameters const& parameters);
 
