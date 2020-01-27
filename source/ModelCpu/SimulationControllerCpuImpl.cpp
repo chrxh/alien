@@ -50,11 +50,6 @@ SimulationContext * SimulationControllerCpuImpl::getContext() const
 	return _context;
 }
 
-uint SimulationControllerCpuImpl::getTimestep() const
-{
-	return _timestep;
-}
-
 void SimulationControllerCpuImpl::setRestrictTimestepsPerSecond(optional<int> tps)
 {
 	_restrictTps = tps;

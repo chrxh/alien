@@ -13,7 +13,11 @@ public:
 	CudaController(QObject* parent = nullptr);
 	virtual ~CudaController();
 
-    void init(SpaceProperties* space, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
+    void init(
+        SpaceProperties* space,
+        int timestep,
+        SimulationParameters const& parameters,
+        CudaConstants const& cudaConstants);
 
     CudaWorker* getCudaWorker() const;
 

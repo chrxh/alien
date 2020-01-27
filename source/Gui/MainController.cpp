@@ -395,7 +395,7 @@ void MainController::onAddMostFrequentClusterToSimulation()
 
 int MainController::getTimestep() const
 {
-	return _simController->getTimestep();
+	return _simController->getContext()->getTimestep();
 }
 
 SimulationConfig MainController::getSimulationConfig() const

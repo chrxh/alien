@@ -247,7 +247,7 @@ void SerializerImpl::serialize(SimulationController * simController, int typeId,
 			newSettings->universeSize,
 			typeId,
 			newSettings->typeSpecificData,
-			simController->getTimestep()
+			simController->getContext()->getTimestep()
 		};
 	}
 	else {
@@ -257,7 +257,7 @@ void SerializerImpl::serialize(SimulationController * simController, int typeId,
 			simController->getContext()->getSpaceProperties()->getSize(),
 			typeId,
 			simController->getContext()->getSpecificData(),
-			simController->getTimestep()
+			simController->getContext()->getTimestep()
 		};
 	}
 

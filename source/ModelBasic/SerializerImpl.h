@@ -47,7 +47,7 @@ private:
 		IntVector2D universeSize;
 		int typeId;
 		map<string, int> typeSpecificData;
-		uint timestep;
+		int timestep;
 	};
 	ConfigToSerialize _configToSerialize;
 	string _serializedSimulation;

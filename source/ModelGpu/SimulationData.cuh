@@ -8,6 +8,7 @@
 struct SimulationData
 {
     int2 size;
+    int timestep;
 
     Map<Cell> cellMap;
     Map<Particle> particleMap;
@@ -20,9 +21,10 @@ struct SimulationData
 
     CudaNumberGenerator numberGen;
 
-    void init(int2 const& universeSize, CudaConstants const& cudaConstants)
+    void init(int2 const& universeSize, CudaConstants const& cudaConstants, int timestep_)
     {
         size = universeSize;
+        timestep = timestep_;
 
         entities.init(cudaConstants);
         entitiesForCleanup.init(cudaConstants);
