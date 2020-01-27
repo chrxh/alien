@@ -19,6 +19,7 @@ SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/
 
 void SimulationContextGpuImpl::init(
     SpaceProperties* space,
+    int timestep,
     SymbolTable* symbolTable,
     SimulationParameters const& parameters,
     ModelGpuData const& specificData)
@@ -36,7 +37,7 @@ void SimulationContextGpuImpl::init(
 	auto cudaController = new CudaController;
 	SET_CHILD(_cudaController, cudaController);
 
-	_cudaController->init(space, parameters, specificData.getCudaConstants());
+	_cudaController->init(space, timestep, parameters, specificData.getCudaConstants());
 }
 
 SpaceProperties * SimulationContextGpuImpl::getSpaceProperties() const
@@ -62,6 +63,11 @@ NumberGenerator * SimulationContextGpuImpl::getNumberGenerator() const
 map<string, int> SimulationContextGpuImpl::getSpecificData() const
 {
 	return _specificData.getData();
+}
+
+int SimulationContextGpuImpl::getTimestep() const
+{
+    return _cudaController->getCudaWorker()->getTimestep();
 }
 
 void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters const& parameters)

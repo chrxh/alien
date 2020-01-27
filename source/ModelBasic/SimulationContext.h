@@ -14,6 +14,7 @@ public:
 	virtual SymbolTable* getSymbolTable() const = 0;
 	virtual SimulationParameters const& getSimulationParameters() const = 0;
 	virtual NumberGenerator* getNumberGenerator() const = 0;	//must be used to generate ids in descriptions
+    virtual int getTimestep() const = 0;
 
 	virtual map<string, int> getSpecificData() const = 0;
 

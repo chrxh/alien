@@ -18,6 +18,7 @@ public:
 	virtual SymbolTable* getSymbolTable() const override;
 	virtual SimulationParameters const& getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
+    virtual int getTimestep() const override;
 
 	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
 
