@@ -53,6 +53,7 @@ namespace
 
 CudaSimulation::CudaSimulation(
     int2 const& size,
+    int timestep,
     SimulationParameters const& parameters,
     CudaConstants const& cudaConstants)
 {
@@ -69,7 +70,7 @@ CudaSimulation::CudaSimulation(
 
     auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    _cudaSimulationData->init(size, cudaConstants);
+    _cudaSimulationData->init(size, cudaConstants, timestep);
     _cudaMonitorData->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
@@ -115,6 +116,7 @@ CudaSimulation::~CudaSimulation()
 void CudaSimulation::calcCudaTimestep()
 {
     GPU_FUNCTION(calcSimulationTimestep, *_cudaSimulationData);
+    ++_cudaSimulationData->timestep;
 }
 
 void CudaSimulation::DEBUG_printNumEntries()
@@ -165,6 +167,11 @@ MonitorData CudaSimulation::getMonitorData()
 {
     GPU_FUNCTION(getCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
     return _cudaMonitorData->getMonitorData();
+}
+
+int CudaSimulation::getTimestep() const
+{
+    return _cudaSimulationData->timestep;
 }
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
