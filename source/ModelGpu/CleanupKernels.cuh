@@ -106,19 +106,18 @@ __global__ void cleanupClusterPointers(SimulationData data)
     __syncthreads();
 }
 
-__global__ void cleanupClusters(SimulationData data)
+__global__ void cleanupClusters(Array<Cluster*> clusterPointers, Array<Cluster> clustersForCleanup)
 {
-    auto& clusters = data.entities.clusterPointers;
-    PartitionData pointerBlock = calcPartition(clusters.getNumEntries(), 
+    PartitionData pointerBlock = calcPartition(clusterPointers.getNumEntries(), 
         threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     int numClustersToCopy = pointerBlock.numElements();
     if (numClustersToCopy > 0) {
-        Cluster* newClusters = data.entitiesForCleanup.clusters.getNewSubarray(numClustersToCopy);
+        Cluster* newClusters = clustersForCleanup.getNewSubarray(numClustersToCopy);
         
         int newClusterIndex = 0;
         for (int clusterIndex = pointerBlock.startIndex; clusterIndex <= pointerBlock.endIndex; ++clusterIndex) {
-            auto& clusterPointer = clusters.at(clusterIndex);
+            auto& clusterPointer = clusterPointers.at(clusterIndex);
             auto& newCluster = newClusters[newClusterIndex];
             newCluster = *clusterPointer;
             clusterPointer = &newCluster;
@@ -334,7 +333,8 @@ __global__ void cleanup(SimulationData data)
 
     if (data.entities.clusters.getNumEntries() > cudaConstants.MAX_CLUSTERS * FillLevelFactor) {
         data.entitiesForCleanup.clusters.reset();
-        KERNEL_CALL(cleanupClusters, data);
+        KERNEL_CALL(cleanupClusters, data.entities.clusterPointers, data.entitiesForCleanup.clusters);
+        KERNEL_CALL(cleanupClusters, data.entities.clusterFreezedPointers, data.entitiesForCleanup.clusters);
         data.entities.clusters.swapContent(data.entitiesForCleanup.clusters);
     }
 

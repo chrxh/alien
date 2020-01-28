@@ -165,9 +165,9 @@ void MainController::init()
     }
 
     //auto save every hour
-    _timer = new QTimer(this);
-    connect(_timer, &QTimer::timeout, this, (void(MainController::*)())(&MainController::autoSave));
-    _timer->start(1000 * 60 * 20);
+    _autosaveTimer = new QTimer(this);
+    connect(_autosaveTimer, &QTimer::timeout, this, (void(MainController::*)())(&MainController::autoSave));
+    _autosaveTimer->start(1000 * 60 * 20);
 }
 
 void MainController::autoSave()
