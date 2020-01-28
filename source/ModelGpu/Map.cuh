@@ -2,6 +2,7 @@
 
 #include "device_functions.h"
 #include "Particle.cuh"
+#include "Cluster.cuh"
 
 class MapInfo
 {
@@ -64,47 +65,25 @@ protected:
 	int2 _size;
 };
 
-template<typename T>
-class Map
-    : public MapInfo
+template <typename T>
+class BasicMap : public MapInfo
 {
 public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries)
+    __device__ __inline__ T* get(float2 const& pos) const
     {
-        MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
-        _mapEntries.init(maxEntries);
-
-        std::vector<T*> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
+        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
+        return _map[mapEntry];
     }
 
-    __device__ __inline__ void reset()
+    __device__ __inline__ void set(float2 const& pos, T* entity)
     {
-        _mapEntries.reset();
-    }
-
-    __host__ __inline__ void free()
-    {
-        CudaMemoryManager::getInstance().freeMemory(_map);
-        _mapEntries.free();
-    }
-
-	__device__ __inline__ T* get(float2 const& pos) const
-	{
-		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * _size.x;
-		return _map[mapEntry];
-	}
-
-	__device__ __inline__ void set(float2 const& pos, T* entity)
-	{
-		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * _size.x;
+        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
         _map[mapEntry] = entity;
-	}
+    }
 
     __device__ __inline__ void set_blockCall(int numEntities, T** entities)
     {
@@ -131,25 +110,74 @@ public:
         __syncthreads();
     }
 
-    __device__ __inline__ void cleanup_gridCall()
+protected:
+    T** _map;
+    Array<int> _mapEntries;
+};
+
+class CellMap
+    : public BasicMap<Cell>
+{
+public:
+    __host__ __inline__ void init(int2 const& size, int maxEntries)
+    {
+        MapInfo::init(size);
+        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, _map);
+        _mapEntries.init(maxEntries);
+        _freezedMapEntries.init(maxEntries);
+
+        std::vector<Cell*> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
+    }
+
+    __device__ __inline__ void reset()
+    {
+        _mapEntries.reset();
+    }
+
+    __host__ __inline__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_map);
+        _mapEntries.free();
+    }
+
+    __device__ __inline__ void cleanupWithoutFreezed_gridCall()
     {
         auto partition =
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto mapEntry = _mapEntries.at(index);
+            auto const&  mapEntry = _mapEntries.at(index);
+/*
+            auto& cell = _map[mapEntry];
+            if (cell && cell->cluster->isFreezed()) {
+                auto freezedMapentry = _freezedMapEntries.getNewElement();
+                *freezedMapentry = mapEntry;
+            }
+            else {
+*/
+                _map[mapEntry] = nullptr;
+/*
+            }
+*/
+        }
+    }
+
+    __device__ __inline__ void cleanupWithFreezed_gridCall()
+    {
+        auto partition =
+            calcPartition(_freezedMapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
         }
     }
 
 private:
-	T ** _map;
-    Array<int> _mapEntries;
+    Array<int> _freezedMapEntries;
 };
 
-/*
-template<>
-class Map<Particle>
-    : public MapInfo
+class ParticleMap
+    : public BasicMap<Particle>
 {
 public:
     __host__ __inline__ void init(int2 const& size, int maxEntries)
@@ -173,47 +201,6 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ Particle* get(float2 const& pos) const
-    {
-        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-        mapPosCorrection(posInt);
-        auto mapEntry = posInt.x + posInt.y * _size.x;
-        return _map[mapEntry];
-    }
-
-    __device__ __inline__ void set(float2 const& pos, Particle* entity)
-    {
-        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-        mapPosCorrection(posInt);
-        auto mapEntry = posInt.x + posInt.y * _size.x;
-        _map[mapEntry] = entity;
-    }
-
-    __device__ __inline__ void set_blockCall(int numEntities, Particle** entities)
-    {
-        if (0 == numEntities) {
-            return;
-        }
-
-        __shared__ int* entrySubarray;
-        if (0 == threadIdx.x) {
-            entrySubarray = _mapEntries.getNewSubarray(numEntities);
-        }
-        __syncthreads();
-
-        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& entity = entities[index];
-            int2 posInt = { floorInt(entity->absPos.x), floorInt(entity->absPos.y) };
-            mapPosCorrection(posInt);
-            auto mapEntry = posInt.x + posInt.y * _size.x;
-            _map[mapEntry] = entity;
-
-            entrySubarray[index] = mapEntry;
-        }
-        __syncthreads();
-    }
-
     __device__ __inline__ void cleanup_gridCall()
     {
         auto partition =
@@ -223,9 +210,4 @@ public:
             _map[mapEntry] = nullptr;
         }
     }
-
-private:
-    Particle** _map;
-    Array<int> _mapEntries;
 };
-*/

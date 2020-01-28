@@ -127,7 +127,7 @@ __global__ void particleProcessingStep3(SimulationData data)
 }
 
 /************************************************************************/
-/* Main      															*/
+/* Freezing                                                             */
 /************************************************************************/
 
 __global__ void freezeClustersIfAllowed(SimulationData data)
@@ -155,6 +155,15 @@ __global__ void unfreezeClustersIfAllowed(SimulationData data)
     }
 }
 
+__global__ void cleanupCellMapWithFreezed(SimulationData data)
+{
+    data.cellMap.cleanupWithFreezed_gridCall();
+}
+
+/************************************************************************/
+/* Main      															*/
+/************************************************************************/
+
 __global__ void calcSimulationTimestep(SimulationData data)
 {
     data.cellMap.reset();
@@ -174,7 +183,8 @@ __global__ void calcSimulationTimestep(SimulationData data)
     KERNEL_CALL(particleProcessingStep3, data);
 
     KERNEL_CALL(freezeClustersIfAllowed, data);
-    if ((data.timestep % 2) == 0) {
+    if ((data.timestep % 5) == 0) {
+//        KERNEL_CALL(cleanupCellMapWithFreezed, data);
         KERNEL_CALL(unfreezeClustersIfAllowed, data);
         data.entities.clusterFreezedPointers.reset();
     }
