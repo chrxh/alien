@@ -144,7 +144,7 @@ __global__ void freezeClustersIfAllowed(SimulationData data)
     }
 }
 
-__global__ void unfreezeClustersIfAllowed(SimulationData data)
+__global__ void unfreezeAllClusters(SimulationData data)
 {
     auto const clusterPartition = calcPartition(
         data.entities.clusterFreezedPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -152,12 +152,13 @@ __global__ void unfreezeClustersIfAllowed(SimulationData data)
         auto const& clusterFreezed = data.entities.clusterFreezedPointers.at(clusterIndex);
         auto clusterPointer = data.entities.clusterPointers.getNewElement();
         *clusterPointer = clusterFreezed;
+        clusterFreezed->setUnfreezed();
     }
 }
 
-__global__ void cleanupCellMapWithFreezed(SimulationData data)
+__global__ void cleanupCellMapFreezed(SimulationData data)
 {
-    data.cellMap.cleanupWithFreezed_gridCall();
+    data.cellMap.cleanupFreezed_gridCall();
 }
 
 /************************************************************************/
@@ -184,8 +185,10 @@ __global__ void calcSimulationTimestep(SimulationData data)
 
     KERNEL_CALL(freezeClustersIfAllowed, data);
     if ((data.timestep % 5) == 0) {
-//        KERNEL_CALL(cleanupCellMapWithFreezed, data);
-        KERNEL_CALL(unfreezeClustersIfAllowed, data);
+        KERNEL_CALL(cleanupCellMapFreezed, data);
+        data.cellMap.resetFreezed();
+
+        KERNEL_CALL(unfreezeAllClusters, data);
         data.entities.clusterFreezedPointers.reset();
     }
 
