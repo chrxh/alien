@@ -250,9 +250,9 @@ __global__ void cleanupTokens(Array<Cluster*> clusterPointers, Array<Token> toke
     }
 }
 
-__global__ void cleanupCellMapWithoutFreezed(SimulationData data)
+__global__ void cleanupCellMap(SimulationData data)
 {
-    data.cellMap.cleanupWithoutFreezed_gridCall();
+    data.cellMap.cleanup_gridCall();
 }
 
 __global__ void cleanupParticleMap(SimulationData data)
@@ -368,6 +368,6 @@ __global__ void cleanup(SimulationData data)
         data.entities.strings.swapContent(data.entitiesForCleanup.strings);
     }
 
-    KERNEL_CALL(cleanupCellMapWithoutFreezed, data);
+    KERNEL_CALL(cleanupCellMap, data);
     KERNEL_CALL(cleanupParticleMap, data);
 }

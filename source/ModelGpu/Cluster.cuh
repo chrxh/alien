@@ -42,9 +42,9 @@ struct Cluster
             && clusterToFuse == nullptr;
     }
 
-    __device__ __inline__ void setUnfreezed()
+    __device__ __inline__ void setUnfreezed(int forTimesteps = 0)
     {
-        _timestepsUntilFreeze = 30;
+        _timestepsUntilFreeze = forTimesteps;
         _freezed = false;
     }
 
