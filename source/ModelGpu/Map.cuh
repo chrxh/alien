@@ -135,39 +135,41 @@ public:
         _mapEntries.reset();
     }
 
+    __device__ __inline__ void resetFreezed()
+    {
+        _freezedMapEntries.reset();
+    }
+
     __host__ __inline__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_map);
         _mapEntries.free();
+        _freezedMapEntries.free();
     }
 
-    __device__ __inline__ void cleanupWithoutFreezed_gridCall()
+    __device__ __inline__ void cleanup_gridCall()
     {
         auto partition =
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const&  mapEntry = _mapEntries.at(index);
-/*
             auto& cell = _map[mapEntry];
             if (cell && cell->cluster->isFreezed()) {
                 auto freezedMapentry = _freezedMapEntries.getNewElement();
                 *freezedMapentry = mapEntry;
             }
             else {
-*/
                 _map[mapEntry] = nullptr;
-/*
             }
-*/
         }
     }
 
-    __device__ __inline__ void cleanupWithFreezed_gridCall()
+    __device__ __inline__ void cleanupFreezed_gridCall()
     {
         auto partition =
             calcPartition(_freezedMapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& mapEntry = _mapEntries.at(index);
+            auto const& mapEntry = _freezedMapEntries.at(index);
             _map[mapEntry] = nullptr;
         }
     }

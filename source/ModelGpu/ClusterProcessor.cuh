@@ -300,8 +300,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         }
         updateCellVelocity_blockCall(cluster);
         updateCellVelocity_blockCall(firstOtherCluster);
-        cluster->setUnfreezed();
-        firstOtherCluster->setUnfreezed();
+        cluster->setUnfreezed(30);
+        firstOtherCluster->setUnfreezed(30);
     }
     __syncthreads();
 
