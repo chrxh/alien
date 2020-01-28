@@ -329,11 +329,9 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     if ((data.timestep % 5) == 0) {
 
         if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
-            printf("before: %d\n", data.entities.clusterPointers.getNumEntries());
             data.entitiesForCleanup.particles.reset();
             KERNEL_CALL(cleanupParticles, data);
             data.entities.particles.swapContent(data.entitiesForCleanup.particles);
-            printf("after: %d\n", data.entities.clusterPointers.getNumEntries());
         }
 
         if (data.entities.clusters.getNumEntries() > cudaConstants.MAX_CLUSTERS * FillLevelFactor) {
