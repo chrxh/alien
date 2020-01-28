@@ -277,7 +277,6 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numTokens = 0;
     *access.numStringBytes = 0;
 
-    KERNEL_CALL_1_1(unfreeze, data);
     KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, access);
     KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
