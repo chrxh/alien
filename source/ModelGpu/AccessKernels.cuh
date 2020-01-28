@@ -28,10 +28,9 @@ __device__ void copyString(
     }
 }
 
-__global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
-    SimulationData data, DataAccessTO dataTO)
+__global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2 rectLowerRight,
+    Array<Cluster*> clusters, DataAccessTO dataTO)
 {
-    auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock =
         calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
 
@@ -45,7 +44,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
         __shared__ MapInfo map;
         if (0 == threadIdx.x) {
             containedInRect = false;
-            map.init(data.size);
+            map.init(universeSize);
         }
         __syncthreads();
 
@@ -278,7 +277,8 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numTokens = 0;
     *access.numStringBytes = 0;
 
-    KERNEL_CALL(getClusterAccessData, rectUpperLeft, rectLowerRight, data, access);
+    KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, access);
+    KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
 }
 
