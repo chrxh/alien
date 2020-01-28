@@ -300,8 +300,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         }
         updateCellVelocity_blockCall(cluster);
         updateCellVelocity_blockCall(firstOtherCluster);
-        cluster->setUnfreezed(30);
-        firstOtherCluster->setUnfreezed(30);
+        cluster->unfreeze(30);
+        firstOtherCluster->unfreeze(30);
     }
     __syncthreads();
 
@@ -655,7 +655,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
 
 __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
 {
-    if (_cluster < _cluster->clusterToFuse) {
+    if (_cluster < _cluster->clusterToFuse || _cluster->clusterToFuse->isFreezed()) {
         __shared__ Cluster* newCluster;
         __shared__ Cluster* otherCluster;
         __shared__ float2 correction;
@@ -803,6 +803,10 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         for (int index = newCellPartition.startIndex; index <= newCellPartition.endIndex; ++index) {
             auto& cell = newCluster->cellPointers[index];
             cell->setFused(false);
+        }
+        if (otherCluster->isFreezed()) {
+            auto pointerArrayElement = otherCluster->getPointerArrayElement();
+            *pointerArrayElement = nullptr;
         }
     }
     else {

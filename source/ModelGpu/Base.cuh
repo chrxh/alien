@@ -197,3 +197,6 @@ __host__ __device__ __inline__ void swap(T &a, T &b)
         func<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >>>(##__VA_ARGS__); \
         cudaDeviceSynchronize();
 
+#define KERNEL_CALL_1_1(func, ...)  \
+        func<<<1, 1>>>(##__VA_ARGS__); \
+        cudaDeviceSynchronize();

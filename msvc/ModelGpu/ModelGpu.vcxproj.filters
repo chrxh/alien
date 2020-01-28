@@ -195,6 +195,9 @@
     <ClInclude Include="..\..\source\ModelGpu\DynamicMemory.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\FreezingKernels.cuh">
+      <Filter>Source Files\Impl\Kernels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">
