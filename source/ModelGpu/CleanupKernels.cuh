@@ -70,11 +70,9 @@ __global__ void cleanupParticles(SimulationData data)
     }
 }
 
-__global__ void cleanupClusterPointers(SimulationData data)
+__global__ void cleanupClusterPointers(Array<Cluster*> clusterPointers, Array<Cluster*> clusterPointersForCleanup)
 {
-    auto& clusters = data.entities.clusterPointers;
-    auto& newClusters = data.entitiesForCleanup.clusterPointers;
-    PartitionData pointerBlock = calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    PartitionData pointerBlock = calcPartition(clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     __shared__ int numClusterPointers;
     if (0 == threadIdx.x) {
@@ -83,7 +81,7 @@ __global__ void cleanupClusterPointers(SimulationData data)
     __syncthreads();
 
     for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        if (clusters.at(index) != nullptr) {
+        if (clusterPointers.at(index) != nullptr) {
             atomicAdd(&numClusterPointers, 1);
         }
     }
@@ -91,13 +89,13 @@ __global__ void cleanupClusterPointers(SimulationData data)
 
     __shared__ Cluster** newClusterPointers;
     if (0 == threadIdx.x) {
-        newClusterPointers = newClusters.getNewSubarray(numClusterPointers);
+        newClusterPointers = clusterPointersForCleanup.getNewSubarray(numClusterPointers);
         numClusterPointers = 0;
     }
     __syncthreads();
 
     for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        auto const& clusterPointer = clusters.at(index);
+        auto const& clusterPointer = clusterPointers.at(index);
         if (clusterPointer != nullptr) {
             int newIndex = atomicAdd(&numClusterPointers, 1);
             newClusterPointers[newIndex] = clusterPointer;
@@ -312,8 +310,12 @@ __global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory s
 
 __global__ void cleanup(SimulationData data)
 {
+    data.cellMap.reset();   //only for setSimulationData needed
+    KERNEL_CALL(cleanupCellMap, data);  //should be called before cleanupClusters and cleanupCells due to freezing
+    KERNEL_CALL(cleanupParticleMap, data);
+
     data.entitiesForCleanup.clusterPointers.reset();
-    KERNEL_CALL(cleanupClusterPointers, data);
+    KERNEL_CALL(cleanupClusterPointers, data.entities.clusterPointers, data.entitiesForCleanup.clusterPointers);
     data.entities.clusterPointers.swapContent(data.entitiesForCleanup.clusterPointers);
 
     data.entitiesForCleanup.particlePointers.reset();
@@ -367,7 +369,4 @@ __global__ void cleanup(SimulationData data)
         KERNEL_CALL(cleanupMetadata, data.entities.clusterFreezedPointers, data.entitiesForCleanup.strings);
         data.entities.strings.swapContent(data.entitiesForCleanup.strings);
     }
-
-    KERNEL_CALL(cleanupCellMap, data);
-    KERNEL_CALL(cleanupParticleMap, data);
 }

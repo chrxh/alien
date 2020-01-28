@@ -150,9 +150,11 @@ __global__ void unfreezeAllClusters(SimulationData data)
         data.entities.clusterFreezedPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         auto const& clusterFreezed = data.entities.clusterFreezedPointers.at(clusterIndex);
-        auto clusterPointer = data.entities.clusterPointers.getNewElement();
-        *clusterPointer = clusterFreezed;
-        clusterFreezed->setUnfreezed();
+        if (clusterFreezed && nullptr == clusterFreezed->clusterToFuse) {
+            auto clusterPointer = data.entities.clusterPointers.getNewElement();
+            *clusterPointer = clusterFreezed;
+            clusterFreezed->setUnfreezed();
+        }
     }
 }
 
