@@ -131,16 +131,15 @@ __global__ void cleanupClusters(Array<Cluster*> clusterPointers, Array<Cluster> 
     }
 }
 
-__global__ void cleanupCellPointers(SimulationData data)
+__global__ void cleanupCellPointers(Array<Cluster*> clusterPointers, Array<Cell*> cellPointers)
 {
-    auto& clusters = data.entities.clusterPointers;
-    PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    PartitionData clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusters.at(clusterIndex);
+        auto& cluster = clusterPointers.at(clusterIndex);
 
         __shared__ Cell** newCellPointers;
         if (0 == threadIdx.x) {
-            newCellPointers = data.entitiesForCleanup.cellPointers.getNewSubarray(cluster->numCellPointers);
+            newCellPointers = cellPointers.getNewSubarray(cluster->numCellPointers);
         }
         __syncthreads();
 
@@ -160,16 +159,15 @@ __global__ void cleanupCellPointers(SimulationData data)
     }
 }
 
-__global__ void cleanupCells(SimulationData data)
+__global__ void cleanupCells(Array<Cluster*> clusterPointers, Array<Cell> cells)
 {
-    auto& clusters = data.entities.clusterPointers;
-    PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    PartitionData clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusters.at(clusterIndex);
+        auto& cluster = clusterPointers.at(clusterIndex);
 
         __shared__ Cell* newCells;
         if (0 == threadIdx.x) {
-            newCells = data.entitiesForCleanup.cells.getNewSubarray(cluster->numCellPointers);
+            newCells = cells.getNewSubarray(cluster->numCellPointers);
         }
         __syncthreads();
 
@@ -202,16 +200,15 @@ __global__ void cleanupCells(SimulationData data)
     }
 }
 
-__global__ void cleanupTokenPointers(SimulationData data)
+__global__ void cleanupTokenPointers(Array<Cluster*> clusterPointers, Array<Token*> tokenPointers)
 {
-    auto& clusters = data.entities.clusterPointers;
-    PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    PartitionData clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusters.at(clusterIndex);
+        auto& cluster = clusterPointers.at(clusterIndex);
 
         __shared__ Token** newTokenPointers;
         if (0 == threadIdx.x) {
-            newTokenPointers = data.entitiesForCleanup.tokenPointers.getNewSubarray(cluster->numTokenPointers);
+            newTokenPointers = tokenPointers.getNewSubarray(cluster->numTokenPointers);
         }
         __syncthreads();
 
@@ -229,16 +226,15 @@ __global__ void cleanupTokenPointers(SimulationData data)
     }
 }
 
-__global__ void cleanupTokens(SimulationData data)
+__global__ void cleanupTokens(Array<Cluster*> clusterPointers, Array<Token> tokens)
 {
-    auto& clusters = data.entities.clusterPointers;
-    PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    PartitionData clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusters.at(clusterIndex);
+        auto& cluster = clusterPointers.at(clusterIndex);
 
         __shared__ Token* newTokens;
         if (0 == threadIdx.x) {
-            newTokens = data.entitiesForCleanup.tokens.getNewSubarray(cluster->numTokenPointers);
+            newTokens = tokens.getNewSubarray(cluster->numTokenPointers);
         }
         __syncthreads();
 
@@ -254,9 +250,9 @@ __global__ void cleanupTokens(SimulationData data)
     }
 }
 
-__global__ void cleanupCellMap(SimulationData data)
+__global__ void cleanupCellMapWithoutFreezed(SimulationData data)
 {
-    data.cellMap.cleanup_gridCall();
+    data.cellMap.cleanupWithoutFreezed_gridCall();
 }
 
 __global__ void cleanupParticleMap(SimulationData data)
@@ -264,16 +260,15 @@ __global__ void cleanupParticleMap(SimulationData data)
     data.particleMap.cleanup_gridCall();
 }
 
-__global__ void cleanupMetadata(SimulationData data)
+__global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory strings)
 {
-    auto& clusters = data.entities.clusterPointers;
-    auto const clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    auto const clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusters.at(clusterIndex);
+        auto& cluster = clusterPointers.at(clusterIndex);
 
         if (0 == threadIdx.x) {
             auto const len = cluster->metadata.nameLen;
-            auto newName = data.entitiesForCleanup.strings.getArray<char>(len);
+            auto newName = strings.getArray<char>(len);
             for(int i = 0; i < len; ++i) {
                 newName[i] = cluster->metadata.name[i];
             }
@@ -285,7 +280,7 @@ __global__ void cleanupMetadata(SimulationData data)
             auto& cell = cluster->cellPointers[cellIndex];
             {
                 auto const len = cell->metadata.nameLen;
-                auto newName = data.entitiesForCleanup.strings.getArray<char>(len);
+                auto newName = strings.getArray<char>(len);
                 for (int i = 0; i < len; ++i) {
                     newName[i] = cell->metadata.name[i];
                 }
@@ -293,7 +288,7 @@ __global__ void cleanupMetadata(SimulationData data)
             }
             {
                 auto const len = cell->metadata.descriptionLen;
-                auto newDescription = data.entitiesForCleanup.strings.getArray<char>(len);
+                auto newDescription = strings.getArray<char>(len);
                 for (int i = 0; i < len; ++i) {
                     newDescription[i] = cell->metadata.description[i];
                 }
@@ -301,7 +296,7 @@ __global__ void cleanupMetadata(SimulationData data)
             }
             {
                 auto const len = cell->metadata.sourceCodeLen;
-                auto newSourceCode = data.entitiesForCleanup.strings.getArray<char>(len);
+                auto newSourceCode = strings.getArray<char>(len);
                 for (int i = 0; i < len; ++i) {
                     newSourceCode[i] = cell->metadata.sourceCode[i];
                 }
@@ -340,34 +335,39 @@ __global__ void cleanup(SimulationData data)
 
     if (data.entities.cellPointers.getNumEntries() > cudaConstants.MAX_CELLPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.cellPointers.reset();
-        KERNEL_CALL(cleanupCellPointers, data);
+        KERNEL_CALL(cleanupCellPointers, data.entities.clusterPointers, data.entitiesForCleanup.cellPointers);
+        KERNEL_CALL(cleanupCellPointers, data.entities.clusterFreezedPointers, data.entitiesForCleanup.cellPointers);
         data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
     }
 
     if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
         data.entitiesForCleanup.cells.reset();
-        KERNEL_CALL(cleanupCells, data);
+        KERNEL_CALL(cleanupCells, data.entities.clusterPointers, data.entitiesForCleanup.cells);
+        KERNEL_CALL(cleanupCells, data.entities.clusterFreezedPointers, data.entitiesForCleanup.cells);
         data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     }
 
     if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
         data.entitiesForCleanup.tokenPointers.reset();
-        KERNEL_CALL(cleanupTokenPointers, data);
+        KERNEL_CALL(cleanupTokenPointers, data.entities.clusterPointers, data.entitiesForCleanup.tokenPointers);
+        KERNEL_CALL(cleanupTokenPointers, data.entities.clusterFreezedPointers, data.entitiesForCleanup.tokenPointers);
         data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
     }
 
     if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
         data.entitiesForCleanup.tokens.reset();
-        KERNEL_CALL(cleanupTokens, data);
+        KERNEL_CALL(cleanupTokens, data.entities.clusterPointers, data.entitiesForCleanup.tokens);
+        KERNEL_CALL(cleanupTokens, data.entities.clusterFreezedPointers, data.entitiesForCleanup.tokens);
         data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
     }
 
     if (data.entities.strings.getNumBytes() > cudaConstants.MAX_STRINGBYTES * FillLevelFactor) {
         data.entitiesForCleanup.strings.reset();
-        KERNEL_CALL(cleanupMetadata, data);
+        KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
+        KERNEL_CALL(cleanupMetadata, data.entities.clusterFreezedPointers, data.entitiesForCleanup.strings);
         data.entities.strings.swapContent(data.entitiesForCleanup.strings);
     }
 
-    KERNEL_CALL(cleanupCellMap, data);
+    KERNEL_CALL(cleanupCellMapWithoutFreezed, data);
     KERNEL_CALL(cleanupParticleMap, data);
 }
