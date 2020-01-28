@@ -103,5 +103,5 @@ private:
 	using SimulationMonitorBuildFunc = std::function<SimulationMonitor*(SimulationController*)>;
 	SimulationMonitorBuildFunc _monitorBuildFunc;
 
-    QTimer* _timer = nullptr;
+    QTimer* _autosaveTimer = nullptr;
 };

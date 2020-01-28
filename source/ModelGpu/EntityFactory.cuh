@@ -54,6 +54,7 @@ __inline__ __device__ Cluster * EntityFactory::createCluster(Cluster** clusterPo
 {
     auto result = _data->entities.clusters.getNewElement();
     result->metadata.nameLen = 0;
+    result->init();
 
     auto newClusterPointer = clusterPointerToReuse ? clusterPointerToReuse : _data->entities.clusterPointers.getNewElement();
     *newClusterPointer = result;
@@ -99,6 +100,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         cluster->decompositionRequired = 0;
         cluster->locked = 0;
         cluster->clusterToFuse = nullptr;
+        cluster->init();
 
         angularMass = 0.0f;
         Math::inverseRotationMatrix(cluster->angle, invRotMatrix);
@@ -274,6 +276,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cluster->clusterToFuse = nullptr;
     cluster->locked = 0;
     cluster->decompositionRequired = 0;
+    cluster->init();
 
     cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = pos;

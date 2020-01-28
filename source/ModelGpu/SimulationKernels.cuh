@@ -130,6 +130,31 @@ __global__ void particleProcessingStep3(SimulationData data)
 /* Main      															*/
 /************************************************************************/
 
+__global__ void freezeClustersIfAllowed(SimulationData data)
+{
+    auto const clusterPartition = calcPartition(
+        data.entities.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
+        auto& cluster = data.entities.clusterPointers.at(clusterIndex);
+        if (cluster && cluster->isFreezed()) {
+            auto clusterFreezedPointer = data.entities.clusterFreezedPointers.getNewElement();
+            *clusterFreezedPointer = cluster;
+            cluster = nullptr;
+        }
+    }
+}
+
+__global__ void unfreezeClustersIfAllowed(SimulationData data)
+{
+    auto const clusterPartition = calcPartition(
+        data.entities.clusterFreezedPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
+        auto const& clusterFreezed = data.entities.clusterFreezedPointers.at(clusterIndex);
+        auto clusterPointer = data.entities.clusterPointers.getNewElement();
+        *clusterPointer = clusterFreezed;
+    }
+}
+
 __global__ void calcSimulationTimestep(SimulationData data)
 {
     data.cellMap.reset();
@@ -148,7 +173,14 @@ __global__ void calcSimulationTimestep(SimulationData data)
     KERNEL_CALL(particleProcessingStep2, data);
     KERNEL_CALL(particleProcessingStep3, data);
 
+    KERNEL_CALL(freezeClustersIfAllowed, data);
+    if ((data.timestep % 2) == 0) {
+        KERNEL_CALL(unfreezeClustersIfAllowed, data);
+        data.entities.clusterFreezedPointers.reset();
+    }
+
     cleanup << <1, 1 >> > (data);
+    
     cudaDeviceSynchronize();
 
 }
