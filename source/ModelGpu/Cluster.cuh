@@ -28,6 +28,36 @@ struct Cluster
     int locked;	//0 = unlocked, 1 = locked
     Cluster* clusterToFuse;
 
+    __device__ __inline__ void init()
+    {
+        _timestepsUntilFreeze = 30;
+        _freezed = false;
+    }
+
+    __device__ __inline__ bool isFreezed()
+    {
+        return _freezed
+            && numTokenPointers == 0
+            && decompositionRequired == 0
+            && clusterToFuse == nullptr;
+    }
+
+    __device__ __inline__ void setUnfreezed()
+    {
+        _timestepsUntilFreeze = 30;
+        _freezed = false;
+    }
+
+    __device__ __inline__ void timestepSimulated()
+    {
+        if (_timestepsUntilFreeze > 0) {
+            --_timestepsUntilFreeze;
+        }
+        else {
+            _freezed = true;
+        }
+    }
+
     __device__ __inline__ void tagCellByIndex_blockCall(PartitionData const& blockData)
     {
         for (auto cellIndex = blockData.startIndex; cellIndex <= blockData.endIndex; ++cellIndex) {
@@ -36,4 +66,7 @@ struct Cluster
         }
         __syncthreads();
     }
+private:
+    bool _freezed;
+    int _timestepsUntilFreeze;
 };
