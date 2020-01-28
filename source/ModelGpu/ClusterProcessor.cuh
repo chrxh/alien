@@ -300,6 +300,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         }
         updateCellVelocity_blockCall(cluster);
         updateCellVelocity_blockCall(firstOtherCluster);
+        cluster->setUnfreezed();
+        firstOtherCluster->setUnfreezed();
     }
     __syncthreads();
 
@@ -534,6 +536,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
             entries[i].cluster.clusterToFuse = nullptr;
             entries[i].cluster.locked = 0;
             entries[i].cluster.metadata.nameLen = 0;
+            entries[i].cluster.init();
         }
     }
     __syncthreads();
@@ -601,7 +604,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto const newCluster = factory.createCluster();;
+        auto const newCluster = factory.createCluster();
 
         newClusters[index] = newCluster;
         *newClusters[index] = entries[index].cluster;
@@ -919,6 +922,7 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
     else if (_cluster->clusterToFuse) {
         copyClusterWithFusion_blockCall();
     }
+    _cluster->timestepSimulated();
 }
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForSmallCluster_blockCall()
