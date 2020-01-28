@@ -37,6 +37,9 @@ __global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
 
         auto const& cluster = clusters.at(clusterIndex);
+        if (nullptr == cluster) {
+            continue;
+        }
 
         PartitionData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
 
@@ -274,6 +277,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numTokens = 0;
     *access.numStringBytes = 0;
 
+    KERNEL_CALL_1_1(unfreeze, data);
     KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, access);
     KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
@@ -282,13 +286,13 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
+    KERNEL_CALL_1_1(unfreeze, data);
+
     KERNEL_CALL(filterClusters, rectUpperLeft, rectLowerRight, data.entities.clusterPointers);
-    KERNEL_CALL(filterClusters, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
     KERNEL_CALL(createDataFromTO, data, access);
 
-    cleanup<<<1, 1>>>(data);
-    cudaDeviceSynchronize();
+    KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
 }
 
 __global__ void clearData(SimulationData data)

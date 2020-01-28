@@ -11,6 +11,7 @@
 #include "ParticleProcessor.cuh"
 #include "TokenProcessor.cuh"
 #include "CleanupKernels.cuh"
+#include "FreezingKernels.cuh"
 
 /************************************************************************/
 /* Helpers for clusters													*/
@@ -127,43 +128,6 @@ __global__ void particleProcessingStep3(SimulationData data)
 }
 
 /************************************************************************/
-/* Freezing                                                             */
-/************************************************************************/
-
-__global__ void freezeClustersIfAllowed(SimulationData data)
-{
-    auto const clusterPartition = calcPartition(
-        data.entities.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        auto& cluster = data.entities.clusterPointers.at(clusterIndex);
-        if (cluster && cluster->isFreezed()) {
-            auto clusterFreezedPointer = data.entities.clusterFreezedPointers.getNewElement();
-            *clusterFreezedPointer = cluster;
-            cluster = nullptr;
-        }
-    }
-}
-
-__global__ void unfreezeAllClusters(SimulationData data)
-{
-    auto const clusterPartition = calcPartition(
-        data.entities.clusterFreezedPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        auto const& clusterFreezed = data.entities.clusterFreezedPointers.at(clusterIndex);
-        if (clusterFreezed && nullptr == clusterFreezed->clusterToFuse) {
-            auto clusterPointer = data.entities.clusterPointers.getNewElement();
-            *clusterPointer = clusterFreezed;
-            clusterFreezed->setUnfreezed();
-        }
-    }
-}
-
-__global__ void cleanupCellMapFreezed(SimulationData data)
-{
-    data.cellMap.cleanupFreezed_gridCall();
-}
-
-/************************************************************************/
 /* Main      															*/
 /************************************************************************/
 
@@ -186,17 +150,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     KERNEL_CALL(particleProcessingStep3, data);
 
     KERNEL_CALL(freezeClustersIfAllowed, data);
-    if ((data.timestep % 5) == 0) {
-        KERNEL_CALL(cleanupCellMapFreezed, data);
-        data.cellMap.resetFreezed();
 
-        KERNEL_CALL(unfreezeAllClusters, data);
-        data.entities.clusterFreezedPointers.reset();
-    }
-
-    cleanup << <1, 1 >> > (data);
-    
-    cudaDeviceSynchronize();
-
+    KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
 
