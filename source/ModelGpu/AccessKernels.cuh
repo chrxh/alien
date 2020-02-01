@@ -286,6 +286,7 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     KERNEL_CALL_1_1(unfreeze, data);
+    data.entities.clusterFreezedPointers.reset();
 
     KERNEL_CALL(filterClusters, rectUpperLeft, rectLowerRight, data.entities.clusterPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
