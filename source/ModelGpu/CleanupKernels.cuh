@@ -313,6 +313,7 @@ __global__ void cleanupAfterSimulation(SimulationData data)
 {
     if ((data.timestep % 5) == 0) {
         KERNEL_CALL_1_1(unfreeze, data);
+        data.entities.clusterFreezedPointers.reset();
     }
 
     KERNEL_CALL(cleanupCellMap, data);  //should be called before cleanupClusters and cleanupCells due to freezing
@@ -384,56 +385,42 @@ __global__ void cleanupAfterDataManipulation(SimulationData data)
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
     if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.particles.reset();
         KERNEL_CALL(cleanupParticles, data);
         data.entities.particles.swapContent(data.entitiesForCleanup.particles);
     }
 
     if (data.entities.clusters.getNumEntries() > cudaConstants.MAX_CLUSTERS * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.clusters.reset();
         KERNEL_CALL(cleanupClusters, data.entities.clusterPointers, data.entitiesForCleanup.clusters);
         data.entities.clusters.swapContent(data.entitiesForCleanup.clusters);
     }
 
     if (data.entities.cellPointers.getNumEntries() > cudaConstants.MAX_CELLPOINTERS * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.cellPointers.reset();
         KERNEL_CALL(cleanupCellPointers, data.entities.clusterPointers, data.entitiesForCleanup.cellPointers);
         data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
     }
 
     if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.cells.reset();
         KERNEL_CALL(cleanupCells, data.entities.clusterPointers, data.entitiesForCleanup.cells);
         data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     }
 
     if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.tokenPointers.reset();
         KERNEL_CALL(cleanupTokenPointers, data.entities.clusterPointers, data.entitiesForCleanup.tokenPointers);
         data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
     }
 
     if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.tokens.reset();
         KERNEL_CALL(cleanupTokens, data.entities.clusterPointers, data.entitiesForCleanup.tokens);
         data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
     }
 
     if (data.entities.strings.getNumBytes() > cudaConstants.MAX_STRINGBYTES * FillLevelFactor) {
-        KERNEL_CALL_1_1(unfreeze, data);
-
         data.entitiesForCleanup.strings.reset();
         KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
         data.entities.strings.swapContent(data.entitiesForCleanup.strings);
