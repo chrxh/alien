@@ -311,11 +311,6 @@ __global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory s
 
 __global__ void cleanupAfterSimulation(SimulationData data)
 {
-    if ((data.timestep % 5) == 0) {
-        KERNEL_CALL_1_1(unfreeze, data);
-        data.entities.clusterFreezedPointers.reset();
-    }
-
     KERNEL_CALL(cleanupCellMap, data);  //should be called before cleanupClusters and cleanupCells due to freezing
     KERNEL_CALL(cleanupParticleMap, data);
 
@@ -328,6 +323,8 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
     if ((data.timestep % 5) == 0) {
+        KERNEL_CALL_1_1(unfreeze, data);
+        data.entities.clusterFreezedPointers.reset();
 
         if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
             data.entitiesForCleanup.particles.reset();
