@@ -11,6 +11,6 @@ __global__ void DEBUG_checkCluster(SimulationData data, int numClusters, int par
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         auto const clusterPointer = &data.entities.clusterPointers.at(clusterIndex);
-        DEBUG_cluster::check_blockCall(&data, *clusterPointer, parameter);
+        DEBUG_cluster::check_block(&data, *clusterPointer, parameter);
     }
 }

@@ -11,13 +11,13 @@
 class ParticleProcessor
 {
 public:
-	__inline__ __device__ void init_gridCall(SimulationData& data);
+	__inline__ __device__ void init_system(SimulationData& data);
 
-    __inline__ __device__ void processingMovement_gridCall();
-    __inline__ __device__ void updateMap_gridCall();
-    __inline__ __device__ void processingCollision_gridCall();
-    __inline__ __device__ void processingTransformation_gridCall();
-	__inline__ __device__ void processingDataCopy_gridCall();
+    __inline__ __device__ void processingMovement_system();
+    __inline__ __device__ void updateMap_system();
+    __inline__ __device__ void processingCollision_system();
+    __inline__ __device__ void processingTransformation_system();
+	__inline__ __device__ void processingDataCopy_system();
 
 private:
 
@@ -30,7 +30,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ParticleProcessor::init_gridCall(SimulationData & data)
+__inline__ __device__ void ParticleProcessor::init_system(SimulationData & data)
 {
     _data = &data;
 
@@ -38,7 +38,7 @@ __inline__ __device__ void ParticleProcessor::init_gridCall(SimulationData & dat
         data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
-__inline__ __device__ void ParticleProcessor::processingMovement_gridCall()
+__inline__ __device__ void ParticleProcessor::processingMovement_system()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.at(particleIndex);
@@ -47,15 +47,15 @@ __inline__ __device__ void ParticleProcessor::processingMovement_gridCall()
     }
 }
 
-__inline__ __device__ void ParticleProcessor::updateMap_gridCall()
+__inline__ __device__ void ParticleProcessor::updateMap_system()
 {
     auto const particleBlock = calcPartition(_data->entities.particlePointers.getNumEntries(), blockIdx.x, gridDim.x);
 
     Particle** particlePointers = &_data->entities.particlePointers.at(particleBlock.startIndex);
-    _data->particleMap.set_blockCall(particleBlock.numElements(), particlePointers);
+    _data->particleMap.set_block(particleBlock.numElements(), particlePointers);
 }
 
-__inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
+__inline__ __device__ void ParticleProcessor::processingCollision_system()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         Particle* particle = _data->entities.particlePointers.at(particleIndex);
@@ -84,7 +84,7 @@ __inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
     }
 }
 
-__inline__ __device__ void ParticleProcessor::processingTransformation_gridCall()
+__inline__ __device__ void ParticleProcessor::processingTransformation_system()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
@@ -101,7 +101,7 @@ __inline__ __device__ void ParticleProcessor::processingTransformation_gridCall(
     }
 }
 
-__inline__ __device__ void ParticleProcessor::processingDataCopy_gridCall()
+__inline__ __device__ void ParticleProcessor::processingDataCopy_system()
 {
 	for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
 		auto& particle = _data->entities.particlePointers.at(particleIndex);

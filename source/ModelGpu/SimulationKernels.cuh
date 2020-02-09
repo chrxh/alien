@@ -22,9 +22,9 @@ __global__ void clusterProcessingStep1(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterIndex);
-        clusterProcessor.processingMovement_blockCall();
-        clusterProcessor.updateMap_blockCall();
+        clusterProcessor.init_block(data, clusterIndex);
+        clusterProcessor.processingMovement_block();
+        clusterProcessor.updateMap_block();
     }
 }
 
@@ -33,8 +33,8 @@ __global__ void clusterProcessingStep2(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterIndex);
-        clusterProcessor.destroyCloseCell_blockCall();
+        clusterProcessor.init_block(data, clusterIndex);
+        clusterProcessor.destroyCloseCell_block();
     }
 }
 
@@ -43,10 +43,10 @@ __global__ void clusterProcessingStep3(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterIndex);
+        clusterProcessor.init_block(data, clusterIndex);
         clusterProcessor
-            .processingCollision_blockCall();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
-        clusterProcessor.processingRadiation_blockCall();
+            .processingCollision_block();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
+        clusterProcessor.processingRadiation_block();
     }
 }
 
@@ -55,10 +55,10 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
-        clusterProcessor.init_blockCall(data, clusterIndex);
-        clusterProcessor.processingCellDeath_blockCall();
-        clusterProcessor.processingDecomposition_blockCall();
-        clusterProcessor.processingClusterCopy_blockCall();
+        clusterProcessor.init_block(data, clusterIndex);
+        clusterProcessor.processingCellDeath_block();
+        clusterProcessor.processingDecomposition_block();
+        clusterProcessor.processingClusterCopy_block();
     }
 }
 
@@ -68,7 +68,7 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters)
 /************************************************************************/
 __global__ void resetCellFunctionData(SimulationData data)
 {
-    data.cellFunctionData.mapSectionCollector.reset_gridCall();
+    data.cellFunctionData.mapSectionCollector.reset_system();
 }
 
 __global__ void tokenProcessingStep1(SimulationData data, int numClusters)
@@ -76,10 +76,10 @@ __global__ void tokenProcessingStep1(SimulationData data, int numClusters)
     auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, clusterIndex);
-        tokenProcessor.processingEnergyAveraging_gridCall();
-        tokenProcessor.processingSpreading_gridCall();
-        tokenProcessor.processingLightWeigthedFeatures_gridCall();
+        tokenProcessor.init_block(data, clusterIndex);
+        tokenProcessor.processingEnergyAveraging_block();
+        tokenProcessor.processingSpreading_block();
+        tokenProcessor.processingLightWeigthedFeatures_block();
     }
 }
 
@@ -88,8 +88,8 @@ __global__ void tokenProcessingStep2(SimulationData data, int numClusters)
     auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, clusterIndex);
-        tokenProcessor.createCellFunctionData_blockCall();
+        tokenProcessor.init_block(data, clusterIndex);
+        tokenProcessor.createCellFunctionData_block();
     }
 }
 
@@ -98,8 +98,8 @@ __global__ void tokenProcessingStep3(SimulationData data, int numClusters)
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
-        tokenProcessor.init_blockCall(data, clusterIndex);
-        tokenProcessor.processingHeavyWeightedFeatures_blockCall();
+        tokenProcessor.init_block(data, clusterIndex);
+        tokenProcessor.processingHeavyWeightedFeatures_block();
     }
 }
 
@@ -110,24 +110,24 @@ __global__ void tokenProcessingStep3(SimulationData data, int numClusters)
 __global__ void particleProcessingStep1(SimulationData data)
 {
 	ParticleProcessor particleProcessor;
-    particleProcessor.init_gridCall(data);
-    particleProcessor.processingMovement_gridCall();
-    particleProcessor.updateMap_gridCall();
-    particleProcessor.processingTransformation_gridCall();
+    particleProcessor.init_system(data);
+    particleProcessor.processingMovement_system();
+    particleProcessor.updateMap_system();
+    particleProcessor.processingTransformation_system();
 }
 
 __global__ void particleProcessingStep2(SimulationData data)
 {
     ParticleProcessor particleProcessor;
-    particleProcessor.init_gridCall(data);
-    particleProcessor.processingCollision_gridCall();
+    particleProcessor.init_system(data);
+    particleProcessor.processingCollision_system();
 }
 
 __global__ void particleProcessingStep3(SimulationData data)
 {
 	ParticleProcessor particleProcessor;
-    particleProcessor.init_gridCall(data);
-    particleProcessor.processingDataCopy_gridCall();
+    particleProcessor.init_system(data);
+    particleProcessor.processingDataCopy_system();
 }
 
 /************************************************************************/
