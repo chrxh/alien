@@ -63,7 +63,7 @@ __inline__ __device__ void ParticleProcessor::processingCollision_gridCall()
         if (otherParticle && otherParticle != particle) {
             if (1 == particle->alive && 1 == otherParticle->alive) {
 
-                DoubleLock lock;
+                SystemDoubleLock lock;
                 lock.init(&particle->locked, &otherParticle->locked);
                 lock.tryLock();
                 if (!lock.isLocked()) {
