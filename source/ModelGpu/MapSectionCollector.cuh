@@ -24,7 +24,7 @@ public:
         _clusterListBySectionIndex.free();
     }
 
-    __device__ __inline__ void reset_gridCall()
+    __device__ __inline__ void reset_system()
     {
         auto const partition = calcPartition(
             _numSections.x * _numSections.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -41,7 +41,7 @@ public:
         clusterList.pushBack(cluster, dynamicMemory);
     }
 
-    __device__ __inline__ void getClusters_blockCall(float2 const& pos, float radius, MapInfo const& map, 
+    __device__ __inline__ void getClusters_block(float2 const& pos, float radius, MapInfo const& map, 
         DynamicMemory* dynamicMemory, List<Cluster*>& result)
     {
         __shared__ int2 sectionCenter;

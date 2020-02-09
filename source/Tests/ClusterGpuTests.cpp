@@ -1075,7 +1075,7 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestThreeOverlappingClusters)
 *   - left cluster approaches for fusion
 *   - right cluster approaches for collision with high velocity
 * Expected result: energy inequality fulfilled
-* Fixed error: dying cells led to several particles in processingCellDeath_blockCall when fusion takes place simultaneously
+* Fixed error: dying cells led to several particles in processingCellDeath_block when fusion takes place simultaneously
 */
 TEST_F(ClusterGpuWithOneBlockTests, regressionTestFusionAndHeavyCollision)
 {
