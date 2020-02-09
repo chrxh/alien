@@ -90,6 +90,7 @@ TEST_F(CleanupGpuTests, testCleanupCells)
 TEST_F(CleanupGpuTests, testCleanupClusters)
 {
     _parameters.radiationProb = 0;
+    _parameters.cellFusionVelocity = 100.0f;
     _context->setSimulationParameters(_parameters);
 
     DataDescription origData;

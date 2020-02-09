@@ -297,6 +297,7 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 
 __global__ void clearData(SimulationData data)
 {
+    data.entities.clusterFreezedPointers.reset();
     data.entities.clusterPointers.reset();
     data.entities.cellPointers.reset();
     data.entities.tokenPointers.reset();

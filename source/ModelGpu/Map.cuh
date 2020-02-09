@@ -153,14 +153,18 @@ public:
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const&  mapEntry = _mapEntries.at(index);
+/*
             auto& cell = _map[mapEntry];
             if (cell && cell->cluster->isFreezed()) {
-                auto freezedMapentry = _freezedMapEntries.getNewElement();
-                *freezedMapentry = mapEntry;
+                auto freezedMapEntry = _freezedMapEntries.getNewElement();
+                *freezedMapEntry = mapEntry;
             }
             else {
+*/
                 _map[mapEntry] = nullptr;
+/*
             }
+*/
         }
     }
 
