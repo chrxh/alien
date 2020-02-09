@@ -322,7 +322,7 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     KERNEL_CALL(cleanupParticlePointers, data);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
-    if ((data.timestep % 5) == 0) {
+    if ((data.timestep % 15) == 0) {
         KERNEL_CALL_1_1(unfreeze, data);
         data.entities.clusterFreezedPointers.reset();
 

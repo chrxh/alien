@@ -57,8 +57,10 @@ __global__ void cleanupCellMapFreezed(SimulationData data)
 
 __global__ void unfreeze(SimulationData data)
 {
+/*
     KERNEL_CALL(cleanupCellMapFreezed, data);
     data.cellMap.resetFreezed();
+*/
 
     KERNEL_CALL(unfreezeAllClusters, data);
 }

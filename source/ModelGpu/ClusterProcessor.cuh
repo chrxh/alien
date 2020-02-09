@@ -655,7 +655,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
 
 __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
 {
-    if (_cluster < _cluster->clusterToFuse || _cluster->clusterToFuse->isFreezed()) {
+    if (_cluster < _cluster->clusterToFuse /*|| _cluster->clusterToFuse->isFreezed()*/) {
         __shared__ Cluster* newCluster;
         __shared__ Cluster* otherCluster;
         __shared__ float2 correction;
@@ -804,10 +804,12 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
             auto& cell = newCluster->cellPointers[index];
             cell->setFused(false);
         }
+/*
         if (otherCluster->isFreezed()) {
             auto pointerArrayElement = otherCluster->getPointerArrayElement();
             *pointerArrayElement = nullptr;
         }
+*/
     }
     else {
         if (0 == threadIdx.x) {
