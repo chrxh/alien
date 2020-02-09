@@ -95,7 +95,7 @@ __global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2
             }
             __syncthreads();
 
-            cluster->tagCellByIndex_blockCall(cellBlock);
+            cluster->tagCellByIndex_block(cellBlock);
 
             for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
                 Cell& cell = *cluster->cellPointers[cellIndex];
@@ -254,7 +254,7 @@ __global__ void createDataFromTO(SimulationData data, DataAccessTO simulationTO)
     PartitionData clusterBlock = calcPartition(*simulationTO.numClusters, blockIdx.x, gridDim.x);
 
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        factory.createClusterFromTO_blockCall(simulationTO.clusters[clusterIndex], &simulationTO);
+        factory.createClusterFromTO_block(simulationTO.clusters[clusterIndex], &simulationTO);
     }
 
     PartitionData particleBlock =

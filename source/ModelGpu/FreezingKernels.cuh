@@ -48,7 +48,7 @@ __global__ void unfreezeAllClusters(SimulationData data)
 
 __global__ void cleanupCellMapFreezed(SimulationData data)
 {
-    data.cellMap.cleanupFreezed_gridCall();
+    data.cellMap.cleanupFreezed_system();
 }
 
 /************************************************************************/

@@ -72,7 +72,7 @@ struct Cluster
         }
     }
 
-    __device__ __inline__ void tagCellByIndex_blockCall(PartitionData const& blockData)
+    __device__ __inline__ void tagCellByIndex_block(PartitionData const& blockData)
     {
         for (auto cellIndex = blockData.startIndex; cellIndex <= blockData.endIndex; ++cellIndex) {
             Cell& cell = *cellPointers[cellIndex];
