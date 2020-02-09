@@ -85,7 +85,7 @@ public:
         _map[mapEntry] = entity;
     }
 
-    __device__ __inline__ void set_blockCall(int numEntities, T** entities)
+    __device__ __inline__ void set_block(int numEntities, T** entities)
     {
         if (0 == numEntities) {
             return;
@@ -147,7 +147,7 @@ public:
         _freezedMapEntries.free();
     }
 
-    __device__ __inline__ void cleanup_gridCall()
+    __device__ __inline__ void cleanup_system()
     {
         auto partition =
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -168,7 +168,7 @@ public:
         }
     }
 
-    __device__ __inline__ void cleanupFreezed_gridCall()
+    __device__ __inline__ void cleanupFreezed_system()
     {
         auto partition =
             calcPartition(_freezedMapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -207,7 +207,7 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void cleanup_gridCall()
+    __device__ __inline__ void cleanup_system()
     {
         auto partition =
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);

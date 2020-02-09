@@ -30,7 +30,7 @@ public:
         float2 const& vel,
         ParticleMetadata const& metadata);  //TODO: not adding to simulation!
     __inline__ __device__ Cluster* createCluster(Cluster** clusterPointerToReuse = nullptr);
-    __inline__ __device__ void createClusterFromTO_blockCall(
+    __inline__ __device__ void createClusterFromTO_block(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
     __inline__ __device__ Cluster* createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
@@ -61,7 +61,7 @@ __inline__ __device__ Cluster * EntityFactory::createCluster(Cluster** clusterPo
     return result;
 }
 
-__inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
+__inline__ __device__ void EntityFactory::createClusterFromTO_block(
     ClusterAccessTO const& clusterTO,
     DataAccessTO const* simulationTO)
 {

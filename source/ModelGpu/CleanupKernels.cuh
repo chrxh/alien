@@ -171,7 +171,7 @@ __global__ void cleanupCells(Array<Cluster*> clusterPointers, Array<Cell> cells)
         __syncthreads();
 
         auto cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-        cluster->tagCellByIndex_blockCall(cellBlock);
+        cluster->tagCellByIndex_block(cellBlock);
 
         for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
             auto& origCellPtr = cluster->cellPointers[cellIndex];
@@ -251,12 +251,12 @@ __global__ void cleanupTokens(Array<Cluster*> clusterPointers, Array<Token> toke
 
 __global__ void cleanupCellMap(SimulationData data)
 {
-    data.cellMap.cleanup_gridCall();
+    data.cellMap.cleanup_system();
 }
 
 __global__ void cleanupParticleMap(SimulationData data)
 {
-    data.particleMap.cleanup_gridCall();
+    data.particleMap.cleanup_system();
 }
 
 __global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory strings)

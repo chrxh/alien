@@ -21,122 +21,113 @@
 class TokenProcessor
 {
 public:
-    __inline__ __device__ void init_gridCall(SimulationData& data);
-    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
+    __inline__ __device__ void init_block(SimulationData& data, int clusterIndex);
 
-    __inline__ __device__ void processingEnergyAveraging_gridCall();
-    __inline__ __device__ void processingSpreading_gridCall();
-    __inline__ __device__ void processingLightWeigthedFeatures_gridCall();
-    __inline__ __device__ void processingHeavyWeightedFeatures_blockCall();
+    __inline__ __device__ void processingEnergyAveraging_block();
+    __inline__ __device__ void processingSpreading_block();
+    __inline__ __device__ void processingLightWeigthedFeatures_block();
+    __inline__ __device__ void processingHeavyWeightedFeatures_block();
 
-    __inline__ __device__ void createCellFunctionData_blockCall();
+    __inline__ __device__ void createCellFunctionData_block();
 
 private:
     __inline__ __device__ void calcAnticipatedTokens(Cluster* cluster, int& result);
     __inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
     __inline__ __device__ void moveToken(Token* sourceToken, Token*& targetToken, Cell* targetCell, Cell* dummy);
 
+    __inline__ __device__ void resetTags_block();
+
 private:
     SimulationData* _data;
     Cluster* _cluster;
-    PartitionData _clusterPartition;
+    PartitionData _cellPartition;
+    PartitionData _tokenPartition;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void TokenProcessor::init_gridCall(SimulationData& data)
-{
-    _data = &data;
-    auto const& clusters = data.entities.clusterPointers;
-    _clusterPartition =
-        calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-}
-
-__inline__ __device__ void TokenProcessor::init_blockCall(SimulationData& data, int clusterIndex)
+__inline__ __device__ void TokenProcessor::init_block(SimulationData& data, int clusterIndex)
 {
     _data = &data;
     _cluster = data.entities.clusterPointers.at(clusterIndex);
+    _cellPartition = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
+    _tokenPartition = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
 }
 
-__inline__ __device__ void TokenProcessor::processingEnergyAveraging_gridCall()
+__inline__ __device__ void TokenProcessor::processingEnergyAveraging_block()
 {
-//    auto const& clusters = _data->entities.clusterPointers;
-//    for (int clusterIndex = _clusterPartition.startIndex; clusterIndex <= _clusterPartition.endIndex; ++clusterIndex) {
-        auto& cluster = _cluster;
-        if (0 == cluster->numTokenPointers) {
-            return;
+    auto& cluster = _cluster;
+    if (0 == cluster->numTokenPointers) {
+        return;
+    }
+
+    __shared__ BlockLock clusterLock;
+    clusterLock.init_block();
+
+    resetTags_block();
+
+    Cell* candidateCellsForEnergyAveraging[MAX_CELL_BONDS + 1];
+    Cell* cellsForEnergyAveraging[MAX_CELL_BONDS + 1];
+    for (auto tokenIndex = _tokenPartition.startIndex; tokenIndex <= _tokenPartition.endIndex; ++tokenIndex) {
+        auto const& token = cluster->tokenPointers[tokenIndex];
+        auto& cell = token->cell;
+        if (token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
+            continue;
         }
-        if (0 == threadIdx.x) {
 
-            for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-                Cell* cell = cluster->cellPointers[cellIndex];
-                if (1 == cell->alive) {
-                    cell->tag = 0;
-                }
+        int tokenBranchNumber = token->getTokenBranchNumber();
+        int numCandidateCellsForEnergyAveraging = 1;
+        candidateCellsForEnergyAveraging[0] = cell;
+        for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
+            auto& connectingCell = *cell->connections[connectionIndex];
+            if (0 == connectingCell.alive) {
+                continue;
             }
-
-            Cell* candidateCellsForEnergyAveraging[MAX_CELL_BONDS + 1];
-            Cell* cellsForEnergyAveraging[MAX_CELL_BONDS + 1];
-            for (int tokenIndex = 0; tokenIndex < cluster->numTokenPointers; ++tokenIndex) {
-                auto const& token = cluster->tokenPointers[tokenIndex];
-                auto& cell = token->cell;
-                if (token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
-                    continue;
-                }
-
-                int tokenBranchNumber = token->getTokenBranchNumber();
-                int numCandidateCellsForEnergyAveraging = 1;
-                candidateCellsForEnergyAveraging[0] = cell;
-                for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
-                    auto& connectingCell = *cell->connections[connectionIndex];
-                    if (0 == connectingCell.alive) {
-                        continue;
-                    }
-                    if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
-                        % cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
-                        continue;
-                    }
-                    if (connectingCell.tokenBlocked) {
-                        continue;
-                    }
-                    int numToken = atomicAdd(&connectingCell.tag, 1);
-                    if (numToken >= cudaSimulationParameters.cellMaxToken) {
-                        continue;
-                    }
-                    candidateCellsForEnergyAveraging[numCandidateCellsForEnergyAveraging++] = &connectingCell;
-                }
-
-                float averageEnergy = 0;
-                int numCellsForEnergyAveraging = 0;
-
-                for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-                    auto const& cell = candidateCellsForEnergyAveraging[index];
-                    cell->getLock();
-                }
-
-                for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-                    auto const& cell = candidateCellsForEnergyAveraging[index];
-                    averageEnergy += cell->getEnergy();
-                    cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
-                }
-                averageEnergy /= numCellsForEnergyAveraging;
-                for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
-                    auto const& cell = cellsForEnergyAveraging[index];
-                    cell->setEnergy(averageEnergy);
-                }
-
-                for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-                    auto const& cell = candidateCellsForEnergyAveraging[index];
-                    cell->releaseLock();
-                }
+            if (((tokenBranchNumber + 1 - connectingCell.branchNumber)
+                % cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
+                continue;
             }
+            if (connectingCell.tokenBlocked) {
+                continue;
+            }
+            int numToken = atomicAdd(&connectingCell.tag, 1);
+            if (numToken >= cudaSimulationParameters.cellMaxToken) {
+                continue;
+            }
+            candidateCellsForEnergyAveraging[numCandidateCellsForEnergyAveraging++] = &connectingCell;
         }
-        __syncthreads();
-//    }
+
+        float averageEnergy = 0;
+        int numCellsForEnergyAveraging = 0;
+
+        clusterLock.getLock();
+        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+            auto const& cell = candidateCellsForEnergyAveraging[index];
+            cell->getLock();
+        }
+        clusterLock.releaseLock();
+
+        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+            auto const& cell = candidateCellsForEnergyAveraging[index];
+            averageEnergy += cell->getEnergy();
+            cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
+        }
+        averageEnergy /= numCellsForEnergyAveraging;
+        for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
+            auto const& cell = cellsForEnergyAveraging[index];
+            cell->setEnergy(averageEnergy);
+        }
+
+        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+            auto const& cell = candidateCellsForEnergyAveraging[index];
+            cell->releaseLock();
+        }
+    }
+    __syncthreads();
 }
 
-__inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
+__inline__ __device__ void TokenProcessor::processingSpreading_block()
 {
     auto& cluster = _cluster;
     if (0 == cluster->numTokenPointers) {
@@ -146,17 +137,10 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
     __shared__ int anticipatedTokens;
     calcAnticipatedTokens(cluster, anticipatedTokens);
 
-    __shared__ BlockLock lock;
-    lock.init_block();
+    __shared__ BlockLock clusterLock;
+    clusterLock.init_block();
 
-    auto const cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
-    for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-        auto& cell = cluster->cellPointers[cellIndex];
-        if (1 == cell->alive) {
-            cell->tag = 0;
-        }
-    }
-    __syncthreads();
+    resetTags_block();
 
     __shared__ int newNumTokens;
     __shared__ Token** newTokenPointers;
@@ -166,8 +150,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
     }
     __syncthreads();
 
-    auto const tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
-    for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+    for (auto tokenIndex = _tokenPartition.startIndex; tokenIndex <= _tokenPartition.endIndex; ++tokenIndex) {
         auto& token = cluster->tokenPointers[tokenIndex];
         auto cell = token->cell;
         if (0 == cell->alive || token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
@@ -202,13 +185,13 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
             continue;
         }
 
-        lock.getLock();
+        clusterLock.getLock();
         cell->getLock();
         for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
             auto const& connectingCell = cell->connections[connectionIndex];
             connectingCell->getLock();
         }
-        lock.releaseLock();
+        clusterLock.releaseLock();
 
         auto const tokenEnergy = token->getEnergy();
         auto const sharedEnergyFromPrevToken = tokenEnergy / numFreePlaces;
@@ -271,7 +254,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
     __syncthreads();
 }
 
-__inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridCall()
+__inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_block()
 {
     EntityFactory factory;
     factory.init(_data);
@@ -304,7 +287,7 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridC
     __syncthreads();
 }
 
-__inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_blockCall()
+__inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block()
 {
     __syncthreads();
 
@@ -313,13 +296,13 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
         return;
     }
     ConstructorFunction constructor;
-    constructor.init_blockCall(_cluster, _data);
+    constructor.init_block(_cluster, _data);
 
     SensorFunction sensor;
-    sensor.init_blockCall(_cluster, _data);
+    sensor.init_block(_cluster, _data);
 
     CommunicatorFunction communicator;
-    communicator.init_blockCall(_data);
+    communicator.init_block(_data);
     __syncthreads();
 
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
@@ -330,22 +313,22 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
         case Enums::CellFunction::CONSTRUCTOR: {
             __syncthreads();
 
-            constructor.processing_blockCall(token);
+            constructor.processing_block(token);
             __syncthreads();
         } break;
         case Enums::CellFunction::SENSOR: {
-            sensor.processing_blockCall(token);
+            sensor.processing_block(token);
             __syncthreads();
         } break;
         case Enums::CellFunction::COMMUNICATOR: {
-            communicator.processing_blockCall(token);
+            communicator.processing_block(token);
             __syncthreads();
         } break;
         }
     }
 }
 
-__inline__ __device__ void TokenProcessor::createCellFunctionData_blockCall()
+__inline__ __device__ void TokenProcessor::createCellFunctionData_block()
 {
     auto const cellPartition = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
     __shared__ bool hasToken;
@@ -446,4 +429,15 @@ __inline__ __device__ void TokenProcessor::moveToken(Token* sourceToken, Token*&
     targetToken->memory[0] = targetCell->branchNumber;
     targetToken->sourceCell = sourceToken->cell;
     targetToken->cell = targetCell;
+}
+
+__inline__ __device__ void TokenProcessor::resetTags_block()
+{
+    for (auto cellIndex = _cellPartition.startIndex; cellIndex <= _cellPartition.endIndex; ++cellIndex) {
+        auto& cell = _cluster->cellPointers[cellIndex];
+        if (1 == cell->alive) {
+            cell->tag = 0;
+        }
+    }
+    __syncthreads();
 }
