@@ -125,7 +125,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         return;
     }
 
-    __shared__ DoubleLock lock;
+    __shared__ SystemDoubleLock lock;
     if (0 == threadIdx.x) {
         lock.init(&cluster->locked, &firstOtherCluster->locked);
         lock.tryLock();
