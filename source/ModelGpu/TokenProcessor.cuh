@@ -146,11 +146,8 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
     __shared__ int anticipatedTokens;
     calcAnticipatedTokens(cluster, anticipatedTokens);
 
-    __shared__ int clusterLock;
-    if (0 == threadIdx.x) {
-        clusterLock = 0;
-    }
-    __syncthreads();
+    __shared__ BlockLock lock;
+    lock.init_block();
 
     auto const cellBlock = calcPartition(_cluster->numCellPointers, threadIdx.x, blockDim.x);
     for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
@@ -205,13 +202,13 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
             continue;
         }
 
-        while (1 == atomicExch(&clusterLock, 1)) {}
+        lock.getLock();
         cell->getLock();
         for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
             auto const& connectingCell = cell->connections[connectionIndex];
             connectingCell->getLock();
         }
-        atomicExch(&clusterLock, 0);
+        lock.releaseLock();
 
         auto const tokenEnergy = token->getEnergy();
         auto const sharedEnergyFromPrevToken = tokenEnergy / numFreePlaces;
@@ -272,121 +269,6 @@ __inline__ __device__ void TokenProcessor::processingSpreading_gridCall()
         cluster->numTokenPointers = newNumTokens;
     }
     __syncthreads();
-
-
-
-/*
-        if(0 == threadIdx.x) {
-            for (int cellIndex = 0; cellIndex < cluster->numCellPointers; ++cellIndex) {
-                Cell* cell = cluster->cellPointers[cellIndex];
-                if (1 == cell->alive) {
-                    cell->tag = 0;
-                }
-            }
-
-            int newNumTokens = 0;
-            Token** newTokenPointers = _data->entities.tokenPointers.getNewSubarray(anticipatedTokens);
-            for (int tokenIndex = 0; tokenIndex < cluster->numTokenPointers; ++tokenIndex) {
-                auto& token = cluster->tokenPointers[tokenIndex];
-                auto cell = token->cell;
-                if (0 == cell->alive || token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
-                    cell->getLock();
-                    cell->changeEnergy(token->getEnergy());
-                    cell->releaseLock();
-                    continue;
-                }
-
-                int tokenBranchNumber = token->getTokenBranchNumber();
-
-                int numFreePlaces = 0;
-                for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
-                    auto const& connectingCell = cell->connections[connectionIndex];
-                    if (0 == connectingCell->alive) {
-                        continue;
-                    }
-                    if (((tokenBranchNumber + 1 - connectingCell->branchNumber)
-                        % cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
-                        continue;
-                    }
-                    if (connectingCell->tokenBlocked) {
-                        continue;
-                    }
-                    ++numFreePlaces;
-                }
-
-                if (0 == numFreePlaces) {
-                    cell->getLock();
-                    cell->changeEnergy(token->getEnergy());
-                    cell->releaseLock();
-                    continue;
-                }
-
-                cell->getLock();
-                for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
-                    auto const& connectingCell = cell->connections[connectionIndex];
-                    connectingCell->getLock();
-                }
-
-                auto const tokenEnergy = token->getEnergy();
-                auto const sharedEnergyFromPrevToken = tokenEnergy / numFreePlaces;
-                auto remainingTokenEnergyForCell = tokenEnergy;
-                auto tokenRecycled = false;
-                for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
-                    auto const& connectingCell = cell->connections[connectionIndex];
-                    if (0 == connectingCell->alive) {
-                        continue;
-                    }
-                    if (((tokenBranchNumber + 1 - connectingCell->branchNumber)
-                        % cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
-                        continue;
-                    }
-                    if (connectingCell->tokenBlocked) {
-                        continue;
-                    }
-                    int numToken = connectingCell->tag++;
-                    if (numToken >= cudaSimulationParameters.cellMaxToken) {
-                        continue;
-                    }
-
-                    int tokenIndex = newNumTokens++;
-                    Token* newToken;
-                    ++connectingCell->tokenUsages;
-                    if (!tokenRecycled) {
-                        moveToken(token, newToken, connectingCell);
-                        tokenRecycled = true;
-                    }
-                    else {
-                        newToken = _data->entities.tokens.getNewElement();
-                        copyToken(token, newToken, connectingCell);
-                    }
-                    newTokenPointers[tokenIndex] = newToken;
-
-                    if (connectingCell->getEnergy() > cudaSimulationParameters.cellMinEnergy + tokenEnergy - sharedEnergyFromPrevToken) {
-                        newToken->setEnergy(tokenEnergy);
-                        connectingCell->changeEnergy(-(tokenEnergy - sharedEnergyFromPrevToken));
-                    }
-                    else {
-                        newToken->setEnergy(sharedEnergyFromPrevToken);
-                    }
-                    remainingTokenEnergyForCell -= sharedEnergyFromPrevToken;
-                }
-                if (remainingTokenEnergyForCell > 0) {
-                    cell->changeEnergy(remainingTokenEnergyForCell);
-                }
-                cell->releaseLock();
-                for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
-                    auto const& connectingCell = cell->connections[connectionIndex];
-                    connectingCell->releaseLock();
-                }
-            }
-
-            cluster->tokenPointers = newTokenPointers;
-            cluster->numTokenPointers = newNumTokens;
-        }
-        __syncthreads();
-*/
-
-
 }
 
 __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_gridCall()
