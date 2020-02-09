@@ -71,13 +71,16 @@ __global__ void resetCellFunctionData(SimulationData data)
     data.cellFunctionData.mapSectionCollector.reset_gridCall();
 }
 
-__global__ void tokenProcessingStep1(SimulationData data)
+__global__ void tokenProcessingStep1(SimulationData data, int numClusters)
 {
-    TokenProcessor tokenProcessor;
-    tokenProcessor.init_gridCall(data);
-    tokenProcessor.processingEnergyAveraging_gridCall();
-    tokenProcessor.processingSpreading_gridCall();
-    tokenProcessor.processingLightWeigthedFeatures_gridCall();
+    auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
+        TokenProcessor tokenProcessor;
+        tokenProcessor.init_blockCall(data, clusterIndex);
+        tokenProcessor.processingEnergyAveraging_gridCall();
+        tokenProcessor.processingSpreading_gridCall();
+        tokenProcessor.processingLightWeigthedFeatures_gridCall();
+    }
 }
 
 __global__ void tokenProcessingStep2(SimulationData data, int numClusters)
@@ -138,7 +141,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     data.dynamicMemory.reset();
     KERNEL_CALL(resetCellFunctionData, data);
     KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep1, data);
+    KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
@@ -149,7 +152,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     KERNEL_CALL(particleProcessingStep2, data);
     KERNEL_CALL(particleProcessingStep3, data);
 
-    KERNEL_CALL(freezeClustersIfAllowed, data);
+//    KERNEL_CALL(freezeClustersIfAllowed, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
