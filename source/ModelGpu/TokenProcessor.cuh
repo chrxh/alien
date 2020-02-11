@@ -129,13 +129,12 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_block()
 
 __inline__ __device__ void TokenProcessor::processingSpreading_block()
 {
-    auto& cluster = _cluster;
-    if (0 == cluster->numTokenPointers) {
+    if (0 == _cluster->numTokenPointers) {
         return;
     }
 
     __shared__ int anticipatedTokens;
-    calcAnticipatedTokens(cluster, anticipatedTokens);
+    calcAnticipatedTokens(_cluster, anticipatedTokens);
 
     __shared__ BlockLock clusterLock;
     clusterLock.init_block();
@@ -151,7 +150,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
     __syncthreads();
 
     for (auto tokenIndex = _tokenPartition.startIndex; tokenIndex <= _tokenPartition.endIndex; ++tokenIndex) {
-        auto& token = cluster->tokenPointers[tokenIndex];
+        auto& token = _cluster->tokenPointers[tokenIndex];
         auto cell = token->cell;
         if (0 == cell->alive || token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
             cell->getLock();
@@ -248,10 +247,12 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        cluster->tokenPointers = newTokenPointers;
-        cluster->numTokenPointers = newNumTokens;
+        _cluster->tokenPointers = newTokenPointers;
+        _cluster->numTokenPointers = newNumTokens;
     }
     __syncthreads();
+
+    _tokenPartition = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
 }
 
 __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_block()
@@ -259,30 +260,26 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_block
     EntityFactory factory;
     factory.init(_data);
 
-    if(0 == threadIdx.x) {
-        auto& cluster = _cluster;
-        auto const numTokenPointers = cluster->numTokenPointers;
-        for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
-            auto& token = cluster->tokenPointers[tokenIndex];
-            auto cell = token->cell;
-            cell->getLock();
-            EnergyGuidance::processing(token);
-            switch (cell->getCellFunctionType()) {
-            case Enums::CellFunction::COMPUTER: {
-                CellComputerFunction::processing(token);
-            } break;
-            case Enums::CellFunction::PROPULSION: {
-                PropulsionFunction::processing(token, factory);
-            } break;
-            case Enums::CellFunction::SCANNER: {
-                ScannerFunction::processing(token);
-            } break;
-            case Enums::CellFunction::WEAPON: {
-                WeaponFunction::processing(token, _data);
-            } break;
-            }
-            cell->releaseLock();
+    for (auto tokenIndex = _tokenPartition.startIndex; tokenIndex <= _tokenPartition.endIndex; ++tokenIndex) {
+        auto& token = _cluster->tokenPointers[tokenIndex];
+        auto cell = token->cell;
+        cell->getLock();
+        EnergyGuidance::processing(token);
+        switch (cell->getCellFunctionType()) {
+        case Enums::CellFunction::COMPUTER: {
+            CellComputerFunction::processing(token);
+        } break;
+        case Enums::CellFunction::PROPULSION: {
+            PropulsionFunction::processing(token, factory);
+        } break;
+        case Enums::CellFunction::SCANNER: {
+            ScannerFunction::processing(token);
+        } break;
+        case Enums::CellFunction::WEAPON: {
+            WeaponFunction::processing(token, _data);
+        } break;
         }
+        cell->releaseLock();
     }
     __syncthreads();
 }
