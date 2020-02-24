@@ -30,6 +30,7 @@ public:
     virtual int getTimestep() const override;
 
 	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
+    virtual void setExecutionParameters(ExecutionParameters const& parameters) override;
 
 	virtual CudaController* getCudaController() const;
 

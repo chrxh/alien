@@ -48,6 +48,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionRestore->setIconVisibleInMenu(false);
 	actionExit = new QAction("Exit", this);
 	actionExit->setEnabled(true);
+    actionFreezing = new QAction("Freezing", this);
+    actionFreezing->setIconVisibleInMenu(false);
+    actionFreezing->setEnabled(true);
+    actionFreezing->setCheckable(true);
+    actionFreezing->setChecked(false);
+    actionFreezing->setToolTip("freezing");
 
 	actionComputationSettings = new QAction("Computation", this);
 	actionComputationSettings->setEnabled(true);

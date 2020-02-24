@@ -64,14 +64,20 @@ void CudaController::calculate(RunningMode mode)
 
 void CudaController::restrictTimestepsPerSecond(optional<int> tps)
 {
-	CudaJob job = boost::make_shared<_TpsRestrictionJob>(ThreadControllerId, tps);
+    auto const job = boost::make_shared<_TpsRestrictionJob>(ThreadControllerId, tps);
 	_worker->addJob(job);
 }
 
 void CudaController::setSimulationParameters(SimulationParameters const & parameters)
 {
-	CudaJob job = boost::make_shared<_SetSimulationParametersJob>(ThreadControllerId, parameters);
+    auto const job = boost::make_shared<_SetSimulationParametersJob>(ThreadControllerId, parameters);
 	_worker->addJob(job);
+}
+
+void CudaController::setExecutionParameters(ExecutionParameters const & parameters)
+{
+    auto const job = boost::make_shared<_setExecutionParametersJob>(ThreadControllerId, parameters);
+    _worker->addJob(job);
 }
 
 void CudaController::timestepCalculatedWithGpu()

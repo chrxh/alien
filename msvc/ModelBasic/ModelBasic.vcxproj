@@ -406,6 +406,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\ModelBasic\ExecutionParameters.h" />
     <CustomBuild Include="..\..\source\ModelBasic\CellComputerCompilerImpl.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Tests|x64'">Moc%27ing CellComputerCompilerImpl.h...</Message>
