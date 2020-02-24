@@ -322,7 +322,9 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     KERNEL_CALL(cleanupParticlePointers, data);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
-    if ((data.timestep % 15) == 0) {
+    auto const freezingTimesteps =
+        cudaExecutionParameters.activateFreezing ? cudaExecutionParameters.freezingTimesteps : 1;
+    if ((data.timestep % freezingTimesteps) == 0) {
         KERNEL_CALL_1_1(unfreeze, data);
         data.entities.clusterFreezedPointers.reset();
 

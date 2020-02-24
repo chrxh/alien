@@ -18,15 +18,17 @@
 
 __global__ void freezeClustersIfAllowed(SimulationData data)
 {
-    auto const clusterPartition = calcPartition(
-        data.entities.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        auto& cluster = data.entities.clusterPointers.at(clusterIndex);
-        if (cluster && cluster->isCandidateToFreeze()) {
-            auto clusterFreezedPointer = data.entities.clusterFreezedPointers.getNewElement();
-            *clusterFreezedPointer = cluster;
-            cluster->freeze(clusterFreezedPointer);
-            cluster = nullptr;
+    if (cudaExecutionParameters.activateFreezing) {
+        auto const clusterPartition = calcPartition(
+            data.entities.clusterPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
+            auto& cluster = data.entities.clusterPointers.at(clusterIndex);
+            if (cluster && cluster->isCandidateToFreeze()) {
+                auto clusterFreezedPointer = data.entities.clusterFreezedPointers.getNewElement();
+                *clusterFreezedPointer = cluster;
+                cluster->freeze(clusterFreezedPointer);
+                cluster = nullptr;
+            }
         }
     }
 }
