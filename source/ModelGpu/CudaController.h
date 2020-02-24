@@ -24,6 +24,7 @@ public:
 	void calculate(RunningMode mode);
 	void restrictTimestepsPerSecond(optional<int> tps);
 	void setSimulationParameters(SimulationParameters const& parameters);
+    void setExecutionParameters(ExecutionParameters const& parameters);
 
 	Q_SIGNAL void timestepCalculated();
 

@@ -76,6 +76,11 @@ void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters cons
 	_cudaController->setSimulationParameters(parameters);
 }
 
+void SimulationContextGpuImpl::setExecutionParameters(ExecutionParameters const& parameters)
+{
+    _cudaController->setExecutionParameters(parameters);
+}
+
 CudaController * SimulationContextGpuImpl::getCudaController() const
 {
 	return _cudaController;

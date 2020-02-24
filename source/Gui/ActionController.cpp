@@ -1,6 +1,7 @@
 ﻿#include <QFileDialog>
 #include <QMessageBox>
 #include <QAction>
+#include <QInputDialog>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -89,7 +90,8 @@ void ActionController::init(
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
 	connect(actions->actionSnapshot, &QAction::triggered, this, &ActionController::onMakeSnapshot);
 	connect(actions->actionRestore, &QAction::triggered, this, &ActionController::onRestoreSnapshot);
-	connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
+    connect(actions->actionFreezing, &QAction::triggered, this, &ActionController::onFreezing);
+    connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
 
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
 	connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
@@ -183,6 +185,17 @@ void ActionController::onRestoreSnapshot()
 {
 	_mainController->onRestoreSnapshot();
 	_visualEditor->refresh();
+}
+
+void ActionController::onFreezing(bool toggled)
+{
+    auto parameters = _mainModel->getExecutionParameters();
+    parameters.activateFreezing = toggled;
+    if (toggled) {
+        parameters.freezingTimesteps = QInputDialog::getInt(_mainView, "Freezing", "Enter number of frames for freezing", parameters.freezingTimesteps, 1, 100);
+    }
+    _mainModel->setExecutionParameters(parameters);
+    _mainController->onUpdateExecutionParameters(parameters);
 }
 
 void ActionController::onZoomInClicked()
@@ -290,8 +303,9 @@ void ActionController::onEditSimulationParameters()
 	auto config = _mainController->getSimulationConfig();
 	SimulationParametersDialog dialog(config, _serializer, _mainView);
 	if (dialog.exec()) {
-		_mainModel->setSimulationParameters(dialog.getSimulationParameters());
-		_mainController->onUpdateSimulationParametersForRunningSimulation();
+        auto const parameters = dialog.getSimulationParameters();
+		_mainModel->setSimulationParameters(parameters);
+		_mainController->onUpdateSimulationParameters(parameters);
 	}
 }
 
@@ -307,7 +321,7 @@ void ActionController::onLoadSimulationParameters()
 			auto valResult = config->validate(errorMsg);
 			if (valResult == _SimulationConfig::ValidationResult::Ok) {
 				_mainModel->setSimulationParameters(parameters);
-				_mainController->onUpdateSimulationParametersForRunningSimulation();
+				_mainController->onUpdateSimulationParameters(parameters);
 			}
 			else if (valResult == _SimulationConfig::ValidationResult::Error) {
 				QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
@@ -795,9 +809,9 @@ void ActionController::onShowDocumentation(bool show)
 	_mainView->showDocumentation(show);
 }
 
-void ActionController::onToggleRestrictTPS(bool triggered)
+void ActionController::onToggleRestrictTPS(bool toggled)
 {
-	if (triggered) {
+	if (toggled) {
 		_mainController->onRestrictTPS(_mainModel->getTPS());
 	}
 	else {

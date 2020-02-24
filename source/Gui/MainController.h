@@ -27,8 +27,9 @@ public:
     enum class LoadOption { Non, SaveOldSim };
 	bool onLoadSimulation(string const& filename, LoadOption option);
 	void onRecreateSimulation(SimulationConfig const& config);
-	void onUpdateSimulationParametersForRunningSimulation();
-	void onRestrictTPS(optional<int> const& tps);
+	void onUpdateSimulationParameters(SimulationParameters const& parameters);
+    void onUpdateExecutionParameters(ExecutionParameters const& parameters);
+    void onRestrictTPS(optional<int> const& tps);
     void onAddMostFrequentClusterToSimulation();
 
 	int getTimestep() const;
