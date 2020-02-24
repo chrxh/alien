@@ -191,3 +191,11 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 
 	return parameters;
 }
+
+ExecutionParameters ModelSettings::getDefaultExecutionParameters()
+{
+    ExecutionParameters result;
+    result.activateFreezing = false;
+    result.freezingTimesteps = 5;
+    return result;
+}

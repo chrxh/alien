@@ -152,7 +152,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     KERNEL_CALL(particleProcessingStep2, data);
     KERNEL_CALL(particleProcessingStep3, data);
 
-//    KERNEL_CALL(freezeClustersIfAllowed, data);
+    KERNEL_CALL(freezeClustersIfAllowed, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
