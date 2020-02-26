@@ -26,9 +26,11 @@ public:
     __inline__ __device__ void processingEnergyAveraging_block();
     __inline__ __device__ void processingSpreading_block();
     __inline__ __device__ void processingLightWeigthedFeatures_block();
-    __inline__ __device__ void processingHeavyWeightedFeatures_block();
 
     __inline__ __device__ void createCellFunctionData_block();
+
+    __inline__ __device__ void processingHeavyWeightedFeatures_block();
+
 
 private:
     __inline__ __device__ void calcAnticipatedTokens(Cluster* cluster, int& result);
@@ -151,6 +153,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
 
     for (auto tokenIndex = _tokenPartition.startIndex; tokenIndex <= _tokenPartition.endIndex; ++tokenIndex) {
         auto& token = _cluster->tokenPointers[tokenIndex];
+
         auto cell = token->cell;
         if (0 == cell->alive || token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
             cell->getLock();
@@ -238,6 +241,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
         if (remainingTokenEnergyForCell > 0) {
             cell->changeEnergy(remainingTokenEnergyForCell);
         }
+
         cell->releaseLock();
         for (int connectionIndex = 0; connectionIndex < cell->numConnections; ++connectionIndex) {
             auto const& connectingCell = cell->connections[connectionIndex];
@@ -290,8 +294,10 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
 
     auto const numTokenPointers = _cluster->numTokenPointers;
     if (0 == numTokenPointers) {
+        __syncthreads();
         return;
     }
+
     ConstructorFunction constructor;
     constructor.init_block(_cluster, _data);
 
@@ -304,24 +310,20 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
 
     for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
         auto const& token = _cluster->tokenPointers[tokenIndex];
-
         auto const type = token->cell->getCellFunctionType();
+        __syncthreads();
         switch (type) {
         case Enums::CellFunction::CONSTRUCTOR: {
-            __syncthreads();
-
             constructor.processing_block(token);
-            __syncthreads();
         } break;
         case Enums::CellFunction::SENSOR: {
             sensor.processing_block(token);
-            __syncthreads();
         } break;
         case Enums::CellFunction::COMMUNICATOR: {
             communicator.processing_block(token);
-            __syncthreads();
         } break;
         }
+        __syncthreads();
     }
 }
 
