@@ -211,14 +211,15 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
             if (connectingCell->tokenBlocked) {
                 continue;
             }
-            int numToken = connectingCell->tag++;
+            
+            int numToken = atomicAdd_block(&connectingCell->tag, 1);
             if (numToken >= cudaSimulationParameters.cellMaxToken) {
                 continue;
             }
 
-            int tokenIndex = newNumTokens++;
+            int tokenIndex = atomicAdd_block(&newNumTokens, 1);
             Token* newToken;
-            ++connectingCell->tokenUsages;
+            atomicAdd_block(&connectingCell->tokenUsages, 1);
             if (!tokenRecycled) {
                 moveToken(token, newToken, connectingCell, cell);
                 tokenRecycled = true;
