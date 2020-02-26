@@ -192,7 +192,15 @@ void ActionController::onFreezing(bool toggled)
     auto parameters = _mainModel->getExecutionParameters();
     parameters.activateFreezing = toggled;
     if (toggled) {
-        parameters.freezingTimesteps = QInputDialog::getInt(_mainView, "Freezing", "Enter number of frames for freezing", parameters.freezingTimesteps, 1, 100);
+        bool ok;
+        auto const freezingTimesteps = QInputDialog::getInt(
+            _mainView, "Freezing", "Enter number of frames for freezing", parameters.freezingTimesteps, 1, 100, 1, &ok);
+        if (!ok) {
+            auto const actionHolder = _model->getActionHolder();
+            actionHolder->actionFreezing->setChecked(false);
+            return;
+        }
+        parameters.freezingTimesteps = freezingTimesteps;
     }
     _mainModel->setExecutionParameters(parameters);
     _mainController->onUpdateExecutionParameters(parameters);
