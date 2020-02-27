@@ -90,7 +90,7 @@ void ActionController::init(
 	connect(actions->actionRunStepBackward, &QAction::triggered, this, &ActionController::onStepBackward);
 	connect(actions->actionSnapshot, &QAction::triggered, this, &ActionController::onMakeSnapshot);
 	connect(actions->actionRestore, &QAction::triggered, this, &ActionController::onRestoreSnapshot);
-    connect(actions->actionFreezing, &QAction::triggered, this, &ActionController::onFreezing);
+    connect(actions->actionAcceleration, &QAction::triggered, this, &ActionController::onAcceleration);
     connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
 
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
@@ -187,20 +187,20 @@ void ActionController::onRestoreSnapshot()
 	_visualEditor->refresh();
 }
 
-void ActionController::onFreezing(bool toggled)
+void ActionController::onAcceleration(bool toggled)
 {
     auto parameters = _mainModel->getExecutionParameters();
     parameters.activateFreezing = toggled;
     if (toggled) {
         bool ok;
-        auto const freezingTimesteps = QInputDialog::getInt(
-            _mainView, "Freezing", "Enter number of frames for freezing", parameters.freezingTimesteps, 1, 100, 1, &ok);
+        auto const accelerationTimesteps = QInputDialog::getInt(
+            _mainView, "Acceleration", "Enter number of frames of acceleration", parameters.freezingTimesteps, 1, 100, 1, &ok);
         if (!ok) {
             auto const actionHolder = _model->getActionHolder();
-            actionHolder->actionFreezing->setChecked(false);
+            actionHolder->actionAcceleration->setChecked(false);
             return;
         }
-        parameters.freezingTimesteps = freezingTimesteps;
+        parameters.freezingTimesteps = accelerationTimesteps;
     }
     _mainModel->setExecutionParameters(parameters);
     _mainController->onUpdateExecutionParameters(parameters);

@@ -124,7 +124,6 @@ public:
         MapInfo::init(size);
         CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, _map);
         _mapEntries.init(maxEntries);
-        _freezedMapEntries.init(maxEntries);
 
         std::vector<Cell*> hostMap(size.x * size.y, 0);
         checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
@@ -135,16 +134,10 @@ public:
         _mapEntries.reset();
     }
 
-    __device__ __inline__ void resetFreezed()
-    {
-        _freezedMapEntries.reset();
-    }
-
     __host__ __inline__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_map);
         _mapEntries.free();
-        _freezedMapEntries.free();
     }
 
     __device__ __inline__ void cleanup_system()
@@ -153,33 +146,10 @@ public:
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const&  mapEntry = _mapEntries.at(index);
-/*
-            auto& cell = _map[mapEntry];
-            if (cell && cell->cluster->isFreezed()) {
-                auto freezedMapEntry = _freezedMapEntries.getNewElement();
-                *freezedMapEntry = mapEntry;
-            }
-            else {
-*/
-                _map[mapEntry] = nullptr;
-/*
-            }
-*/
-        }
-    }
-
-    __device__ __inline__ void cleanupFreezed_system()
-    {
-        auto partition =
-            calcPartition(_freezedMapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& mapEntry = _freezedMapEntries.at(index);
             _map[mapEntry] = nullptr;
         }
     }
 
-private:
-    Array<int> _freezedMapEntries;
 };
 
 class ParticleMap
