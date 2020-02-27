@@ -30,7 +30,7 @@ struct Cluster
 
     __device__ __inline__ void init()
     {
-        _timestepsUntilFreeze = 30;
+        _timestepsUntilFreezing = 30;
         _freezed = false;
         _pointerArrayElement = nullptr;
     }
@@ -53,13 +53,13 @@ struct Cluster
 
     __device__ __inline__ void unfreeze(int timesteps = 0)
     {
-        _timestepsUntilFreeze = timesteps;
+        _timestepsUntilFreezing = timesteps;
         _freezed = false;
     }
 
     __device__ __inline__ bool isCandidateToFreeze()
     {
-        return _timestepsUntilFreeze == 0
+        return _timestepsUntilFreezing == 0
             && numTokenPointers == 0
             && decompositionRequired == 0
             && clusterToFuse == nullptr;
@@ -67,8 +67,8 @@ struct Cluster
 
     __device__ __inline__ void timestepSimulated()
     {
-        if (_timestepsUntilFreeze > 0) {
-            --_timestepsUntilFreeze;
+        if (_timestepsUntilFreezing > 0) {
+            --_timestepsUntilFreezing;
         }
     }
 
@@ -82,6 +82,6 @@ struct Cluster
     }
 private:
     bool _freezed;
-    int _timestepsUntilFreeze;
+    int _timestepsUntilFreezing;
     Cluster** _pointerArrayElement;
 };
