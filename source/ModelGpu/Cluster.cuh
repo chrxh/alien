@@ -57,6 +57,11 @@ struct Cluster
         atomicExch(&_freezed, 0);
     }
 
+    __device__ __inline__ bool isActive()
+    {
+        return numTokenPointers > 0;
+    }
+
     __device__ __inline__ bool isCandidateToFreeze()
     {
         return _timestepsUntilFreezing == 0
