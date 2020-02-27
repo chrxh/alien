@@ -54,6 +54,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionAcceleration->setCheckable(true);
     actionAcceleration->setChecked(false);
     actionAcceleration->setToolTip("Accelerate computations of active clusters");
+    QIcon iconAccelerate;
+    iconAccelerate.addFile(":/Icons/accelerate.png", QSize(), QIcon::Normal, QIcon::Off);
+    actionAcceleration->setIcon(iconAccelerate);
+    actionAcceleration->setIconVisibleInMenu(false);
 
 	actionComputationSettings = new QAction("Computation", this);
 	actionComputationSettings->setEnabled(true);

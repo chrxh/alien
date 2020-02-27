@@ -31,7 +31,7 @@ struct Cluster
     __device__ __inline__ void init()
     {
         _timestepsUntilFreezing = 30;
-        _freezed = false;
+        _freezed = 0;
         _pointerArrayElement = nullptr;
     }
 
@@ -42,7 +42,7 @@ struct Cluster
 
     __device__ __inline__ void freeze(Cluster** pointerArrayElement)
     {
-        _freezed = true;
+        atomicExch(&_freezed, 1);
         _pointerArrayElement = pointerArrayElement;
     }
 
@@ -53,8 +53,8 @@ struct Cluster
 
     __device__ __inline__ void unfreeze(int timesteps = 0)
     {
-        _timestepsUntilFreezing = timesteps;
-        _freezed = false;
+        atomicExch(&_timestepsUntilFreezing, timesteps);
+        atomicExch(&_freezed, 0);
     }
 
     __device__ __inline__ bool isCandidateToFreeze()
@@ -81,7 +81,7 @@ struct Cluster
         __syncthreads();
     }
 private:
-    bool _freezed;
+    int _freezed;       // 0 = unfreezed, 1 = freezed
     int _timestepsUntilFreezing;
     Cluster** _pointerArrayElement;
 };
