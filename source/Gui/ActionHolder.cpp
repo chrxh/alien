@@ -53,7 +53,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionAcceleration->setEnabled(true);
     actionAcceleration->setCheckable(true);
     actionAcceleration->setChecked(false);
-    actionAcceleration->setToolTip("Accelerate computations of active clusters");
+    actionAcceleration->setToolTip("Accelerate computation of active clusters");
     QIcon iconAccelerate;
     iconAccelerate.addFile(":/Icons/accelerate.png", QSize(), QIcon::Normal, QIcon::Off);
     actionAcceleration->setIcon(iconAccelerate);
@@ -239,7 +239,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionGridMultiplier = new QAction("Grid multiplier", this);
 	actionGridMultiplier->setEnabled(false);
 
-    actionMostFrequentCluster = new QAction("Most frequent cluster with tokens", this);
+    actionMostFrequentCluster = new QAction("Most frequent active cluster", this);
     actionMostFrequentCluster->setEnabled(true);
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);

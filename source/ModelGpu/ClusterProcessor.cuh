@@ -100,7 +100,9 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 if (cluster == otherCell->cluster) {
                     continue;
                 }
-                cluster->unfreeze(30);
+                if (cluster->isActive()) {
+                    otherCell->cluster->unfreeze(30);
+                }
 
                 if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
                     continue;
@@ -230,6 +232,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 cluster->clusterToFuse = firstOtherCluster;
                 firstOtherCluster->clusterToFuse = cluster;
                 cluster->unfreeze(30);
+                firstOtherCluster->unfreeze(30);
             }
         }
     }
@@ -299,7 +302,6 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
             cluster->angularVel = angularVelA2;
             firstOtherCluster->vel = vB2;
             firstOtherCluster->angularVel = angularVelB2;
-            cluster->unfreeze(30);
         }
         updateCellVelocity_block(cluster);
         updateCellVelocity_block(firstOtherCluster);
