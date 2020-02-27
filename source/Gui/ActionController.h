@@ -26,7 +26,7 @@ private:
 	Q_SLOT void onStepBackward();
 	Q_SLOT void onMakeSnapshot();
 	Q_SLOT void onRestoreSnapshot();
-    Q_SLOT void onFreezing(bool toggled);
+    Q_SLOT void onAcceleration(bool toggled);
 
 	Q_SLOT void onConfigureGrid();
 	Q_SLOT void onEditSimulationParameters();

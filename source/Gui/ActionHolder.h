@@ -20,7 +20,7 @@ public:
 	QAction* actionRunStepBackward = nullptr;
     QAction* actionSnapshot = nullptr;
 	QAction* actionRestore = nullptr;
-    QAction* actionFreezing = nullptr;
+    QAction* actionAcceleration = nullptr;
 	QAction* actionExit = nullptr;
 
 	QAction* actionComputationSettings = nullptr;

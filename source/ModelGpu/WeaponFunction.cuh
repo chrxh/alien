@@ -50,6 +50,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     cell->changeEnergy(energyToTransfer / 2.0f);
                     token->memory[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                 }
+                otherCell->cluster->unfreeze(30);
                 otherCell->releaseLock();
             }
         }

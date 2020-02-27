@@ -39,7 +39,7 @@ __global__ void unfreezeAllClusters(SimulationData data)
         calcPartition(data.entities.clusterFreezedPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         auto clusterFreezed = data.entities.clusterFreezedPointers.at(clusterIndex);
-        if (clusterFreezed != nullptr /* && !clusterFreezed->isCandidateToFreeze()*/) {
+        if (clusterFreezed != nullptr) {
             auto clusterPointer = data.entities.clusterPointers.getNewElement();
             *clusterPointer = clusterFreezed;
             clusterFreezed->unfreeze();
@@ -48,22 +48,12 @@ __global__ void unfreezeAllClusters(SimulationData data)
 
 }
 
-__global__ void cleanupCellMapFreezed(SimulationData data)
-{
-    data.cellMap.cleanupFreezed_system();
-}
-
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
 
 __global__ void unfreeze(SimulationData data)
 {
-/*
-    KERNEL_CALL(cleanupCellMapFreezed, data);
-    data.cellMap.resetFreezed();
-*/
-
     KERNEL_CALL(unfreezeAllClusters, data);
 }
 
