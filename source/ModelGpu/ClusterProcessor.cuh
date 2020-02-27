@@ -186,8 +186,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
     }
 
     if (CollisionState::Fusion == state) {
-        if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse
-            /*&& !cluster->decompositionRequired && !firstOtherCluster->decompositionRequired*/) {
+        if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse) {
             for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
                 Cell* cell = cluster->cellPointers[index];
                 for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
@@ -228,6 +227,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
             if (0 == threadIdx.x) {
                 cluster->clusterToFuse = firstOtherCluster;
                 firstOtherCluster->clusterToFuse = cluster;
+                cluster->unfreeze(30);
+                firstOtherCluster->unfreeze(30);
             }
         }
     }
@@ -297,11 +298,11 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
             cluster->angularVel = angularVelA2;
             firstOtherCluster->vel = vB2;
             firstOtherCluster->angularVel = angularVelB2;
+            cluster->unfreeze(30);
+            firstOtherCluster->unfreeze(30);
         }
         updateCellVelocity_block(cluster);
         updateCellVelocity_block(firstOtherCluster);
-        cluster->unfreeze(30);
-        firstOtherCluster->unfreeze(30);
     }
     __syncthreads();
 
@@ -655,7 +656,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
 
 __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
 {
-    if (_cluster < _cluster->clusterToFuse /*|| _cluster->clusterToFuse->isFreezed()*/) {
+    if (_cluster < _cluster->clusterToFuse) {
         __shared__ Cluster* newCluster;
         __shared__ Cluster* otherCluster;
         __shared__ float2 correction;
@@ -804,12 +805,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             auto& cell = newCluster->cellPointers[index];
             cell->setFused(false);
         }
-/*
-        if (otherCluster->isFreezed()) {
-            auto pointerArrayElement = otherCluster->getPointerArrayElement();
-            *pointerArrayElement = nullptr;
-        }
-*/
     }
     else {
         if (0 == threadIdx.x) {

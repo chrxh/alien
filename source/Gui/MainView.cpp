@@ -121,7 +121,7 @@ void MainView::setupMenu()
 	ui->toolBar->addAction(actions->actionRunSimulation);
 	ui->toolBar->addAction(actions->actionRunStepBackward);
 	ui->toolBar->addAction(actions->actionRunStepForward);
-    ui->toolBar->addAction(actions->actionFreezing);
+    ui->toolBar->addAction(actions->actionAcceleration);
     ui->toolBar->addSeparator();
 
 	ui->menuSimulation->addAction(actions->actionNewSimulation);
@@ -131,7 +131,7 @@ void MainView::setupMenu()
 	ui->menuSimulation->addAction(actions->actionRunSimulation);
 	ui->menuSimulation->addAction(actions->actionRunStepForward);
 	ui->menuSimulation->addAction(actions->actionRunStepBackward);
-    ui->menuSimulation->addAction(actions->actionFreezing);
+    ui->menuSimulation->addAction(actions->actionAcceleration);
     ui->menuSimulation->addAction(actions->actionSnapshot);
 	ui->menuSimulation->addAction(actions->actionRestore);
 	ui->menuSimulation->addSeparator();
