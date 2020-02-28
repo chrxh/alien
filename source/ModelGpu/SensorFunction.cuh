@@ -101,6 +101,7 @@ __inline__ __device__ void SensorFunction::processing_block(Token* token)
         tokenMem[Enums::Sensor::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(angleAndDistance.distance);
         tokenMem[Enums::Sensor::INOUT_ANGLE] = QuantityConverter::convertAngleToData(angleAndDistance.angle);
         tokenMem[Enums::Sensor::OUT_MASS] = QuantityConverter::convertURealToData(scanCell->cluster->numCellPointers);
+        scanCell->cluster->unfreeze(30);
     }
     __syncthreads();
 }
