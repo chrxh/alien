@@ -19,4 +19,5 @@ public:
 	virtual map<string, int> getSpecificData() const = 0;
 
 	virtual void setSimulationParameters(SimulationParameters const& parameters) = 0;
+    virtual void setExecutionParameters(ExecutionParameters const& parameters) = 0;
 };

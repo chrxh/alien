@@ -9,7 +9,7 @@
 class DEBUG_cluster
 {
 public:
-    __inline__ __device__ static void calcEnergy_blockCall(Cluster* cluster, float& result)
+    __inline__ __device__ static void calcEnergy_block(Cluster* cluster, float& result)
     {
         if (0 == threadIdx.x) {
             atomicAdd_block(&result, Physics::kineticEnergy(cluster->numCellPointers, cluster->vel, cluster->angularMass, cluster->angularVel));
@@ -26,7 +26,7 @@ public:
         }
     }
 
-    __inline__ __device__ static void check_blockCall(SimulationData* data, Cluster* cluster, int a, int b = -1)
+    __inline__ __device__ static void check_block(SimulationData* data, Cluster* cluster, int a, int b = -1)
     {
         if (0 == threadIdx.x) {
             if (!checkPointer(cluster, data->entities.clusters)) {

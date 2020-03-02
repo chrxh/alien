@@ -3,14 +3,24 @@
 MainModel::MainModel(QObject * parent) : QObject(parent) {
 }
 
-SimulationParameters const& MainModel::getSimulationParameters() const
+SimulationParameters MainModel::getSimulationParameters() const
 {
-	return _parameters;
+	return _simulationParameters;
 }
 
 void MainModel::setSimulationParameters(SimulationParameters const& parameters)
 {
-	_parameters = parameters;
+	_simulationParameters = parameters;
+}
+
+ExecutionParameters MainModel::getExecutionParameters() const
+{
+    return _executionParameters;
+}
+
+void MainModel::setExecutionParameters(ExecutionParameters const & parameters)
+{
+    _executionParameters = parameters;
 }
 
 SymbolTable * MainModel::getSymbolTable() const

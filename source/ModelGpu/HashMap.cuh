@@ -7,7 +7,7 @@ template <typename Key, typename Value, typename Hash = HashFunctor<Key>>
 class HashMap
 {
 public:
-    __device__ __inline__ void init_blockCall(int size, DynamicMemory& arrays)
+    __device__ __inline__ void init_block(int size, DynamicMemory& arrays)
     {
         __shared__ Entry* entries;
         if (0 == threadIdx.x) {
@@ -19,7 +19,7 @@ public:
         _entries = entries;
     }
 
-    __device__ __inline__ void reset_blockCall()
+    __device__ __inline__ void reset_block()
     {
         auto const threadBlock = calcPartition(_size, threadIdx.x, blockDim.x);
         for (int i = threadBlock.startIndex; i <= threadBlock.endIndex; ++i) {

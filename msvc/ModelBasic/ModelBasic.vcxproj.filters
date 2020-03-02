@@ -269,5 +269,8 @@
     <ClInclude Include="..\..\source\ModelBasic\DescriptionFactoryImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\ExecutionParameters.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

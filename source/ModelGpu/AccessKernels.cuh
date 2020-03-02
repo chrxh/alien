@@ -28,16 +28,18 @@ __device__ void copyString(
     }
 }
 
-__global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
-    SimulationData data, DataAccessTO dataTO)
+__global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2 rectLowerRight,
+    Array<Cluster*> clusters, DataAccessTO dataTO)
 {
-    auto& clusters = data.entities.clusterPointers;
     PartitionData clusterBlock =
         calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
 
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
 
         auto const& cluster = clusters.at(clusterIndex);
+        if (nullptr == cluster) {
+            continue;
+        }
 
         PartitionData cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
 
@@ -45,7 +47,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
         __shared__ MapInfo map;
         if (0 == threadIdx.x) {
             containedInRect = false;
-            map.init(data.size);
+            map.init(universeSize);
         }
         __syncthreads();
 
@@ -93,7 +95,7 @@ __global__ void getClusterAccessData(int2 rectUpperLeft, int2 rectLowerRight,
             }
             __syncthreads();
 
-            cluster->tagCellByIndex_blockCall(cellBlock);
+            cluster->tagCellByIndex_block(cellBlock);
 
             for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
                 Cell& cell = *cluster->cellPointers[cellIndex];
@@ -185,9 +187,8 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 }
 
 __device__ void filterCluster(int2 const& rectUpperLeft, int2 const& rectLowerRight,
-    SimulationData& data, int clusterIndex)
+    Array<Cluster*> clusters, int clusterIndex)
 {
-    auto& clusters = data.entities.clusterPointers;
     auto& cluster = clusters.at(clusterIndex);
 
     PartitionData cellBlock =
@@ -214,37 +215,35 @@ __device__ void filterCluster(int2 const& rectUpperLeft, int2 const& rectLowerRi
 }
 
 __device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerRight,
-    SimulationData& data, int particleIndex)
+    Array<Particle*> particles, int particleIndex)
 {
-    auto& particle = data.entities.particlePointers.getEntireArray()[particleIndex];
+    auto& particle = particles.getEntireArray()[particleIndex];
     if (isContained(rectUpperLeft, rectLowerRight, particle->absPos)) {
         particle = nullptr;
     }
 }
 
-__global__ void filterClusters(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void filterClusters(int2 rectUpperLeft, int2 rectLowerRight, Array<Cluster*> clusters)
 {
-    auto& clusters = data.entities.clusterPointers;
-
     PartitionData clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        filterCluster(rectUpperLeft, rectLowerRight, data, clusterIndex);
+        filterCluster(rectUpperLeft, rectLowerRight, clusters, clusterIndex);
     }
     __syncthreads();
 }
 
-__global__ void filterParticles(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void filterParticles(int2 rectUpperLeft, int2 rectLowerRight, Array<Particle*> particles)
 {
     PartitionData particleBlock =
-        calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        filterParticle(rectUpperLeft, rectLowerRight, data, particleIndex);
+        filterParticle(rectUpperLeft, rectLowerRight, particles, particleIndex);
     }
     __syncthreads();
 }
 
 
-__global__ void convertData(SimulationData data, DataAccessTO simulationTO)
+__global__ void createDataFromTO(SimulationData data, DataAccessTO simulationTO)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -255,7 +254,7 @@ __global__ void convertData(SimulationData data, DataAccessTO simulationTO)
     PartitionData clusterBlock = calcPartition(*simulationTO.numClusters, blockIdx.x, gridDim.x);
 
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        factory.createClusterFromTO_blockCall(simulationTO.clusters[clusterIndex], &simulationTO);
+        factory.createClusterFromTO_block(simulationTO.clusters[clusterIndex], &simulationTO);
     }
 
     PartitionData particleBlock =
@@ -278,23 +277,27 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     *access.numTokens = 0;
     *access.numStringBytes = 0;
 
-    KERNEL_CALL(getClusterAccessData, rectUpperLeft, rectLowerRight, data, access);
+    KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, access);
+    KERNEL_CALL(getClusterAccessData, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
 }
 
 __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
-    KERNEL_CALL(filterClusters, rectUpperLeft, rectLowerRight, data);
-    KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data);
-    KERNEL_CALL(convertData, data, access);
+    KERNEL_CALL_1_1(unfreeze, data);
+    data.entities.clusterFreezedPointers.reset();
 
-    cleanup<<<1, 1>>>(data);
-    cudaDeviceSynchronize();
+    KERNEL_CALL(filterClusters, rectUpperLeft, rectLowerRight, data.entities.clusterPointers);
+    KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
+    KERNEL_CALL(createDataFromTO, data, access);
+
+    KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
 }
 
 __global__ void clearData(SimulationData data)
 {
+    data.entities.clusterFreezedPointers.reset();
     data.entities.clusterPointers.reset();
     data.entities.cellPointers.reset();
     data.entities.tokenPointers.reset();

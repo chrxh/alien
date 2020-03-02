@@ -14,39 +14,39 @@
 class ClusterProcessor
 {
 public:
-    __inline__ __device__ void init_blockCall(SimulationData& data, int clusterIndex);
+    __inline__ __device__ void init_block(SimulationData& data, int clusterIndex);
 
-    __inline__ __device__ void processingMovement_blockCall();
-    __inline__ __device__ void updateMap_blockCall();
+    __inline__ __device__ void processingMovement_block();
+    __inline__ __device__ void updateMap_block();
 
-    __inline__ __device__ void destroyCloseCell_blockCall();
+    __inline__ __device__ void destroyCloseCell_block();
 
-    __inline__ __device__ void processingCollision_blockCall();
-    __inline__ __device__ void processingRadiation_blockCall();
+    __inline__ __device__ void processingCollision_block();
+    __inline__ __device__ void processingRadiation_block();
 
-    __inline__ __device__ void processingCellDeath_blockCall();
-    __inline__ __device__ void processingDecomposition_blockCall();
-    __inline__ __device__ void processingClusterCopy_blockCall();
+    __inline__ __device__ void processingCellDeath_block();
+    __inline__ __device__ void processingDecomposition_block();
+    __inline__ __device__ void processingClusterCopy_block();
 
 private:
-    __inline__ __device__ void processingDecomposition_optimizedForSmallCluster_blockCall();
-    __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_blockCall();
+    __inline__ __device__ void processingDecomposition_optimizedForSmallCluster_block();
+    __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_block();
 
-    __inline__ __device__ void updateCellVelocity_blockCall(Cluster* cluster);
+    __inline__ __device__ void updateCellVelocity_block(Cluster* cluster);
     __inline__ __device__ void destroyDyingCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
     __inline__ __device__ bool areConnectable(Cell *cell1, Cell *cell2);
 
-    __inline__ __device__ void copyClusterWithDecomposition_blockCall();
-    __inline__ __device__ void copyClusterWithFusion_blockCall();
-    __inline__ __device__ void copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster);
-    __inline__ __device__ void copyTokenPointers_blockCall(
+    __inline__ __device__ void copyClusterWithDecomposition_block();
+    __inline__ __device__ void copyClusterWithFusion_block();
+    __inline__ __device__ void copyTokenPointers_block(Cluster* sourceCluster, Cluster* targetCluster);
+    __inline__ __device__ void copyTokenPointers_block(
         Cluster* sourceCluster1,
         Cluster* sourceCluster2,
         int additionalTokenPointers,
         Cluster* targetCluster);
-    __inline__ __device__ void getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
+    __inline__ __device__ void getNumberOfTokensToCopy_block(Cluster* sourceCluster, Cluster* targetCluster, 
         int& counter, PartitionData const& tokenBlock);
 
 
@@ -65,7 +65,7 @@ private:
 
 #define PROTECTION_TIMESTEPS 14
 
-__inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
+__inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
     __shared__ Cluster* cluster;
     __shared__ Cluster* firstOtherCluster;
@@ -100,6 +100,10 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
                 if (cluster == otherCell->cluster) {
                     continue;
                 }
+                if (cluster->isActive()) {
+                    otherCell->cluster->unfreeze(30);
+                }
+
                 if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
                     continue;
                 }
@@ -125,7 +129,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
         return;
     }
 
-    __shared__ DoubleLock lock;
+    __shared__ SystemDoubleLock lock;
     if (0 == threadIdx.x) {
         lock.init(&cluster->locked, &firstOtherCluster->locked);
         lock.tryLock();
@@ -186,8 +190,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
     }
 
     if (CollisionState::Fusion == state) {
-        if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse
-            /*&& !cluster->decompositionRequired && !firstOtherCluster->decompositionRequired*/) {
+        if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse) {
             for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
                 Cell* cell = cluster->cellPointers[index];
                 for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
@@ -228,6 +231,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
             if (0 == threadIdx.x) {
                 cluster->clusterToFuse = firstOtherCluster;
                 firstOtherCluster->clusterToFuse = cluster;
+                cluster->unfreeze(30);
+                firstOtherCluster->unfreeze(30);
             }
         }
     }
@@ -298,8 +303,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
             firstOtherCluster->vel = vB2;
             firstOtherCluster->angularVel = angularVelB2;
         }
-        updateCellVelocity_blockCall(cluster);
-        updateCellVelocity_blockCall(firstOtherCluster);
+        updateCellVelocity_block(cluster);
+        updateCellVelocity_block(firstOtherCluster);
     }
     __syncthreads();
 
@@ -309,7 +314,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
+__inline__ __device__ void ClusterProcessor::destroyCloseCell_block()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
@@ -319,7 +324,7 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
+__inline__ __device__ void ClusterProcessor::processingCellDeath_block()
 {
     if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
         PartitionData tokenBlock = calcPartition(_cluster->numTokenPointers, threadIdx.x, blockDim.x);
@@ -347,21 +352,21 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::processingDecomposition_blockCall()
+__inline__ __device__ void ClusterProcessor::processingDecomposition_block()
 {
     if (0 == _cluster->decompositionRequired || _cluster->clusterToFuse) {
         return;
     }
 
     if (_cluster->numCellPointers < 100) {
-        processingDecomposition_optimizedForSmallCluster_blockCall();
+        processingDecomposition_optimizedForSmallCluster_block();
     }
     else {
-        processingDecomposition_optimizedForLargeCluster_blockCall();
+        processingDecomposition_optimizedForLargeCluster_block();
     }
 }
 
-__inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
+__inline__ __device__ void ClusterProcessor::processingMovement_block()
 {
     __shared__ float rotMatrix[2][2];
     if (0 == threadIdx.x) {
@@ -385,16 +390,16 @@ __inline__ __device__ void ClusterProcessor::processingMovement_blockCall()
     }
     __syncthreads();
 
-    updateCellVelocity_blockCall(_cluster);
+    updateCellVelocity_block(_cluster);
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::updateMap_blockCall()
+__inline__ __device__ void ClusterProcessor::updateMap_block()
 {
-    _data->cellMap.set_blockCall(_cluster->numCellPointers, _cluster->cellPointers);
+    _data->cellMap.set_block(_cluster->numCellPointers, _cluster->cellPointers);
 }
 
-__inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
+__inline__ __device__ void ClusterProcessor::processingRadiation_block()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         Cell *cell = _cluster->cellPointers[cellIndex];
@@ -428,7 +433,7 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::updateCellVelocity_blockCall(Cluster* cluster)
+__inline__ __device__ void ClusterProcessor::updateCellVelocity_block(Cluster* cluster)
 {
     auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
     for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
@@ -495,7 +500,7 @@ __inline__ __device__ bool ClusterProcessor::areConnectable(Cell * cell1, Cell *
     return cell1->numConnections < cell1->maxConnections && cell2->numConnections < cell2->maxConnections;
 }
 
-__inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data, int clusterIndex)
+__inline__ __device__ void ClusterProcessor::init_block(SimulationData& data, int clusterIndex)
 {
     _data = &data;
 
@@ -509,7 +514,7 @@ __inline__ __device__ void ClusterProcessor::init_blockCall(SimulationData& data
 
 #define MAX_DECOMPOSITIONS 5
 
-__inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockCall()
+__inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block()
 {
     __shared__ int numDecompositions;
     struct Entry {
@@ -534,6 +539,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
             entries[i].cluster.clusterToFuse = nullptr;
             entries[i].cluster.locked = 0;
             entries[i].cluster.metadata.nameLen = 0;
+            entries[i].cluster.init();
         }
     }
     __syncthreads();
@@ -601,7 +607,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
         
-        auto const newCluster = factory.createCluster();;
+        auto const newCluster = factory.createCluster();
 
         newClusters[index] = newCluster;
         *newClusters[index] = entries[index].cluster;
@@ -645,12 +651,12 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_blockC
 
     for (int index = 0; index < numDecompositions; ++index) {
         Cluster* newCluster = newClusters[index];
-        copyTokenPointers_blockCall(_cluster, newCluster);
+        copyTokenPointers_block(_cluster, newCluster);
     }
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
+__inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
 {
     if (_cluster < _cluster->clusterToFuse) {
         __shared__ Cluster* newCluster;
@@ -742,7 +748,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         __syncthreads();
 
         auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
-        updateCellVelocity_blockCall(newCluster);
+        updateCellVelocity_block(newCluster);
 
         __shared__ int numFusedCell;
         __shared__ EntityFactory factory;
@@ -761,7 +767,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
         }
         __syncthreads();
 
-        copyTokenPointers_blockCall(_cluster, _cluster->clusterToFuse, numFusedCell, newCluster);
+        copyTokenPointers_block(_cluster, _cluster->clusterToFuse, numFusedCell, newCluster);
         __syncthreads();
 
         auto const newTokenPartition = calcPartition(newCluster->numTokenPointers, threadIdx.x, blockDim.x);
@@ -810,7 +816,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_blockCall()
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster* sourceCluster, Cluster* targetCluster)
+__inline__ __device__ void ClusterProcessor::copyTokenPointers_block(Cluster* sourceCluster, Cluster* targetCluster)
 {
     __shared__ int numberOfTokensToCopy;
     __shared__ int tokenCopyIndex;
@@ -821,7 +827,7 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster
     __syncthreads();
 
     PartitionData tokenBlock = calcPartition(sourceCluster->numTokenPointers, threadIdx.x, blockDim.x);
-    getNumberOfTokensToCopy_blockCall(sourceCluster, targetCluster, numberOfTokensToCopy, tokenBlock);
+    getNumberOfTokensToCopy_block(sourceCluster, targetCluster, numberOfTokensToCopy, tokenBlock);
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
@@ -840,7 +846,7 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(Cluster
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(
+__inline__ __device__ void ClusterProcessor::copyTokenPointers_block(
     Cluster* sourceCluster1,
     Cluster* sourceCluster2,
     int additionalTokenPointers,
@@ -857,8 +863,8 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(
     PartitionData tokenBlock1 = calcPartition(sourceCluster1->numTokenPointers, threadIdx.x, blockDim.x);
     PartitionData tokenBlock2 = calcPartition(sourceCluster2->numTokenPointers, threadIdx.x, blockDim.x);
 
-    getNumberOfTokensToCopy_blockCall(sourceCluster1, targetCluster, numberOfTokensToCopy, tokenBlock1);
-    getNumberOfTokensToCopy_blockCall(sourceCluster2, targetCluster, numberOfTokensToCopy, tokenBlock2);
+    getNumberOfTokensToCopy_block(sourceCluster1, targetCluster, numberOfTokensToCopy, tokenBlock1);
+    getNumberOfTokensToCopy_block(sourceCluster2, targetCluster, numberOfTokensToCopy, tokenBlock2);
 
     if (0 == threadIdx.x) {
         targetCluster->numTokenPointers = numberOfTokensToCopy;
@@ -890,7 +896,7 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_blockCall(
 }
 
 __inline__ __device__ void
-ClusterProcessor::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Cluster* targetCluster, 
+ClusterProcessor::getNumberOfTokensToCopy_block(Cluster* sourceCluster, Cluster* targetCluster, 
     int& counter, PartitionData const& tokenBlock)
 {
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
@@ -903,7 +909,7 @@ ClusterProcessor::getNumberOfTokensToCopy_blockCall(Cluster* sourceCluster, Clus
     __syncthreads();
 }
 
-__inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
+__inline__ __device__ void ClusterProcessor::processingClusterCopy_block()
 {
     if (_cluster->numCellPointers == 1 && 0 == _cluster->cellPointers[0]->alive && !_cluster->clusterToFuse) {
         if (0 == threadIdx.x) {
@@ -914,14 +920,15 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_blockCall()
     }
 
     if (1 == _cluster->decompositionRequired && !_cluster->clusterToFuse) {
-        copyClusterWithDecomposition_blockCall();
+        copyClusterWithDecomposition_block();
     }
     else if (_cluster->clusterToFuse) {
-        copyClusterWithFusion_blockCall();
+        copyClusterWithFusion_block();
     }
+    _cluster->timestepSimulated();
 }
 
-__inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForSmallCluster_blockCall()
+__inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForSmallCluster_block()
 {
     __shared__ bool changes;
 
@@ -959,7 +966,7 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
     } while (changes);
 }
 
-__inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForLargeCluster_blockCall()
+__inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForLargeCluster_block()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto& cell = _cluster->cellPointers[cellIndex];
@@ -1026,7 +1033,7 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
 
         if (1 == startCellFound) {
             if (startCell->alive) {
-                Tagger::tagComponent_blockCall(_cluster, startCell, nullptr, currentTag, 0, dynamicMemory);
+                Tagger::tagComponent_block(_cluster, startCell, nullptr, currentTag, 0, dynamicMemory);
             }
             __syncthreads();
 
