@@ -7,8 +7,8 @@
 class SensorFunction
 {
 public:
-    __inline__ __device__ void init_blockCall(Cluster* cluster, SimulationData* data);
-    __inline__ __device__ void processing_blockCall(Token* token);
+    __inline__ __device__ void init_block(Cluster* cluster, SimulationData* data);
+    __inline__ __device__ void processing_block(Token* token);
 
 private:
     __device__ __inline__ void searchVicinity(Token* token, int const& minSize, int const& maxSize, Cell*& result);
@@ -37,13 +37,13 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void SensorFunction::init_blockCall(Cluster* cluster, SimulationData* data)
+__inline__ __device__ void SensorFunction::init_block(Cluster* cluster, SimulationData* data)
 {
     _data = data;
     _cluster = cluster;
 }
 
-__inline__ __device__ void SensorFunction::processing_blockCall(Token* token)
+__inline__ __device__ void SensorFunction::processing_block(Token* token)
 {
     auto& tokenMem = token->memory;
 
@@ -101,6 +101,7 @@ __inline__ __device__ void SensorFunction::processing_blockCall(Token* token)
         tokenMem[Enums::Sensor::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(angleAndDistance.distance);
         tokenMem[Enums::Sensor::INOUT_ANGLE] = QuantityConverter::convertAngleToData(angleAndDistance.angle);
         tokenMem[Enums::Sensor::OUT_MASS] = QuantityConverter::convertURealToData(scanCell->cluster->numCellPointers);
+        scanCell->cluster->unfreeze(30);
     }
     __syncthreads();
 }

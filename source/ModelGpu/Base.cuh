@@ -131,15 +131,65 @@ __host__ __device__ __inline__ bool isContained(int2 const& rectUpperLeft, int2 
         && pos.y <= rectLowerRight.y;
 }
 
-
-class DoubleLock
+class BlockLock
 {
-private:
-    int* _lock1;
-    int* _lock2;
-    int _lockState1;
-    int _lockState2;
+public:
+    __device__ __inline__ void init_block()
+    {
+        if (0 == threadIdx.x) {
+            lock = 0;
+        }
+        __syncthreads();
+    }
 
+    __device__ __inline__ void getLock()
+    {
+        while (1 == atomicExch_block(&lock, 1)) {}
+    }
+
+    __device__ __inline__ bool tryLock()
+    {
+        return 0 == atomicExch_block(&lock, 1);
+    }
+
+    __device__ __inline__ void releaseLock()
+    {
+        atomicExch_block(&lock, 0);
+    }
+
+private:
+    int lock;   //0 = unlocked, 1 = locked
+};
+
+class SystemLock
+{
+public:
+    __device__ __inline__ void init()
+    {
+        lock = 0;
+    }
+
+    __device__ __inline__ void getLock()
+    {
+        while (1 == atomicExch(&lock, 1)) {}
+    }
+
+    __device__ __inline__ bool tryLock()
+    {
+        return 0 == atomicExch(&lock, 1);
+    }
+
+    __device__ __inline__ void releaseLock()
+    {
+        atomicExch(&lock, 0);
+    }
+
+private:
+    int lock;   //0 = unlocked, 1 = locked
+};
+
+class SystemDoubleLock
+{
 public:
     __device__ __inline__ void init(int* lock1, int* lock2)
     {
@@ -178,6 +228,12 @@ public:
             atomicExch(_lock2, 0);
         }
     }
+
+private:
+    int* _lock1;
+    int* _lock2;
+    int _lockState1;
+    int _lockState2;
 };
 
 float random(float max)
@@ -197,3 +253,6 @@ __host__ __device__ __inline__ void swap(T &a, T &b)
         func<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >>>(##__VA_ARGS__); \
         cudaDeviceSynchronize();
 
+#define KERNEL_CALL_1_1(func, ...)  \
+        func<<<1, 1>>>(##__VA_ARGS__); \
+        cudaDeviceSynchronize();

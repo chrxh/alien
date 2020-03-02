@@ -11,18 +11,18 @@
 /************************************************************************/
 
 __global__ void
-getMonitorDataForClusters(SimulationData data, CudaMonitorData monitorData, int numClusters)
+getMonitorDataForClusters(Array<Cluster*> clusterPointers, CudaMonitorData monitorData)
 {
-    if (0 == threadIdx.x && 0 == blockIdx.x) {
-        monitorData.incNumClusters(numClusters);
-    }
-
     auto const clusterPartition =
-        calcPartition(numClusters, blockIdx.x, gridDim.x);
+        calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        auto const cluster = data.entities.clusterPointers.at(clusterIndex);
+        auto const cluster = clusterPointers.at(clusterIndex);
+        if (nullptr == cluster) {
+            continue;
+        }
         auto const mass = static_cast<float>(cluster->numCellPointers);
         if (0 == threadIdx.x) {
+            monitorData.incNumClusters(1);
             monitorData.incLinearKineticEnergy(Physics::linearKineticEnergy(mass, cluster->vel));
             monitorData.incRotationalKineticEnergy(Physics::rotationalKineticEnergy(cluster->angularMass, cluster->angularVel));
             monitorData.incNumCells(cluster->numCellPointers);
@@ -83,7 +83,8 @@ __global__ void getCudaMonitorData(SimulationData data, CudaMonitorData monitorD
 {
     monitorData.reset();
 
-    KERNEL_CALL(getMonitorDataForClusters, data, monitorData, data.entities.clusterPointers.getNumEntries());
+    KERNEL_CALL(getMonitorDataForClusters, data.entities.clusterPointers, monitorData);
+    KERNEL_CALL(getMonitorDataForClusters, data.entities.clusterFreezedPointers, monitorData);
     KERNEL_CALL(getMonitorDataForParticles, data, monitorData);
 }
 

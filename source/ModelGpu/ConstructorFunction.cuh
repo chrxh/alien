@@ -11,8 +11,8 @@
 class ConstructorFunction
 {
 public:
-    __inline__ __device__ void init_blockCall(Cluster* cluster, SimulationData* data);
-    __inline__ __device__ void processing_blockCall(Token* token);
+    __inline__ __device__ void init_block(Cluster* cluster, SimulationData* data);
+    __inline__ __device__ void processing_block(Token* token);
 
 private:
     struct ClusterComponent
@@ -184,7 +184,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void ConstructorFunction::processing_blockCall(Token* token)
+__inline__ __device__ void ConstructorFunction::processing_block(Token* token)
 {
     _token = token;
 
@@ -219,7 +219,7 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall(Token* toke
         cellPointerArray1 = _data->dynamicMemory.getArray<Cell*>(_cluster->numCellPointers);
         cellPointerArray2 = _data->dynamicMemory.getArray<Cell*>(_cluster->numCellPointers);
     }
-    _dynamicMemory.cellPosMap.init_blockCall(_cluster->numCellPointers * 2, _data->dynamicMemory);
+    _dynamicMemory.cellPosMap.init_block(_cluster->numCellPointers * 2, _data->dynamicMemory);
     __syncthreads();
 
     _dynamicMemory.cellPointerArray1 = cellPointerArray1;
@@ -245,7 +245,7 @@ __inline__ __device__ void ConstructorFunction::processing_blockCall(Token* toke
     __syncthreads();
 }
 
-__inline__ __device__ void ConstructorFunction::init_blockCall(Cluster* cluster, SimulationData* data)
+__inline__ __device__ void ConstructorFunction::init_block(Cluster* cluster, SimulationData* data)
 {
     _data = data;
     _cluster = cluster;
@@ -802,7 +802,7 @@ __inline__ __device__ void ConstructorFunction::tagConstructionSite(Cell* baseCe
         firstCellOfConstructionSite->tag = ClusterComponent::ConstructionSite;
     }
     __syncthreads();
-    Tagger::tagComponent_blockCall(_cluster, firstCellOfConstructionSite, baseCell, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
+    Tagger::tagComponent_block(_cluster, firstCellOfConstructionSite, baseCell, ClusterComponent::ConstructionSite, ClusterComponent::Constructor, tagMemory);
 }
 
 __inline__ __device__ void ConstructorFunction::calcMaxAngles(Cell* constructionCell, Angles& result)
@@ -1113,7 +1113,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     }
     __syncthreads();
 
-    tempCellMap.reset_blockCall();
+    tempCellMap.reset_block();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1177,7 +1177,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     }
     __syncthreads();
 
-    tempCellMap.reset_blockCall();
+    tempCellMap.reset_block();
     __syncthreads();
 
     __shared__ float2 newCenter;
@@ -1239,7 +1239,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     }
     __syncthreads();
 
-    tempCellMap.reset_blockCall();
+    tempCellMap.reset_block();
     __syncthreads();
 
     __shared__ float2 newCenter;

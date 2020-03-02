@@ -26,6 +26,7 @@ private:
 	Q_SLOT void onStepBackward();
 	Q_SLOT void onMakeSnapshot();
 	Q_SLOT void onRestoreSnapshot();
+    Q_SLOT void onAcceleration(bool toggled);
 
 	Q_SLOT void onConfigureGrid();
 	Q_SLOT void onEditSimulationParameters();
@@ -70,7 +71,7 @@ private:
 	Q_SLOT void onShowAbout();
 	Q_SLOT void onShowDocumentation(bool show);
 
-	Q_SLOT void onToggleRestrictTPS(bool triggered);
+	Q_SLOT void onToggleRestrictTPS(bool toggled);
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 

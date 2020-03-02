@@ -61,7 +61,7 @@ QString MonitorView::generateString() const
 	text += " " + StringHelper::generateFormattedIntString(_model->numParticles, true) + " " + parEnd;
 	text += parStart + colorTextStart + "number of tokens:" + StringHelper::ws(14) + colorEnd;
     text += " " + StringHelper::generateFormattedIntString(_model->numTokens, true) + " " + parEnd;
-    text += parStart + colorTextStart + "number of clusters with tokens:" + StringHelper::ws(0) + colorEnd;
+    text += parStart + colorTextStart + "number of active clusters:" + StringHelper::ws(5) + colorEnd;
     text += " " + StringHelper::generateFormattedIntString(_model->numClustersWithTokens, true) + " " + parEnd;
     text += parStart + colorTextStart + "total internal energy:" + StringHelper::ws(9) + colorEnd;
 	text += " " + StringHelper::generateFormattedRealString(_model->totalInternalEnergy, true) + " " + parEnd;

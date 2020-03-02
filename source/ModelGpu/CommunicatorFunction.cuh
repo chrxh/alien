@@ -8,8 +8,8 @@
 class CommunicatorFunction
 {
 public:
-    __inline__ __device__ void init_blockCall(SimulationData* data);
-    __inline__ __device__ void processing_blockCall(Token* token);
+    __inline__ __device__ void init_block(SimulationData* data);
+    __inline__ __device__ void processing_block(Token* token);
 
 private:
     __inline__ __device__ static Enums::CommunicatorIn::Type getCommand(Token* token);
@@ -29,7 +29,7 @@ private:
     __inline__ __device__ void setNewMessageReceived(Cell* cell, bool value) const;
     __inline__ __device__ bool getNewMessageReceived(Cell* cell) const;
 
-    __inline__ __device__ void sendMessage_blockCall(Token* token) const;
+    __inline__ __device__ void sendMessage_block(Token* token) const;
     __inline__ __device__ void receiveMessage(Token* token) const;
 
     struct MessageData {
@@ -70,12 +70,12 @@ namespace {
     };
 }
 
-__inline__ __device__ void CommunicatorFunction::init_blockCall(SimulationData * data)
+__inline__ __device__ void CommunicatorFunction::init_block(SimulationData * data)
 {
     _data = data;
 }
 
-__inline__ __device__ void CommunicatorFunction::processing_blockCall(Token * token)
+__inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
 {
     __syncthreads();
 
@@ -98,7 +98,7 @@ __inline__ __device__ void CommunicatorFunction::processing_blockCall(Token * to
     }
 
     if (Enums::CommunicatorIn::SEND_MESSAGE == command) {
-        sendMessage_blockCall(token);
+        sendMessage_block(token);
     }
 
     if (Enums::CommunicatorIn::RECEIVE_MESSAGE == command) {
@@ -168,7 +168,7 @@ __inline__ __device__ bool CommunicatorFunction::getNewMessageReceived(Cell * ce
     return cell->staticData[StaticDataInternal::NewMessageReceived];
 }
 
-__inline__ __device__ void CommunicatorFunction::sendMessage_blockCall(Token * token) const
+__inline__ __device__ void CommunicatorFunction::sendMessage_block(Token * token) const
 {
     __shared__ MessageData messageDataToSend;
     if (0 == threadIdx.x) {
@@ -211,7 +211,7 @@ __inline__ __device__ void CommunicatorFunction::sendMessageToNearbyCommunicator
     Cell * senderCell, Cell * senderPreviousCell, int & numMessages) const
 { 
     __shared__ List<Cluster*> clusterList;
-    _data->cellFunctionData.mapSectionCollector.getClusters_blockCall(senderCell->absPos,
+    _data->cellFunctionData.mapSectionCollector.getClusters_block(senderCell->absPos,
         cudaSimulationParameters.cellFunctionCommunicatorRange, _data->cellMap, &_data->dynamicMemory, clusterList);
 
     if (0 == threadIdx.x) {

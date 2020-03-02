@@ -21,6 +21,8 @@ struct SimulationData
 
     CudaNumberGenerator numberGen;
 
+    int* debug;
+
     void init(int2 const& universeSize, CudaConstants const& cudaConstants, int timestep_)
     {
         size = universeSize;
@@ -33,6 +35,10 @@ struct SimulationData
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
+
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, debug);
+        checkCudaErrors(cudaMemset(debug, 0, sizeof(int)));
+
     }
 
     void free()
@@ -44,6 +50,7 @@ struct SimulationData
         particleMap.free();
         numberGen.free();
         dynamicMemory.free();
+        CudaMemoryManager::getInstance().freeMemory(debug);
     }
 };
 

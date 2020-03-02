@@ -2,6 +2,7 @@
 
 #include "Base/Definitions.h"
 #include "ModelBasic/ChangeDescriptions.h"
+#include "ModelBasic/ExecutionParameters.h"
 
 #include "AccessTOs.cuh"
 #include "DefinitionsImpl.h"
@@ -220,4 +221,27 @@ public:
 
 private:
 	SimulationParameters _parameters;
+};
+
+class _setExecutionParametersJob
+    : public _CudaJob
+{
+public:
+    _setExecutionParametersJob(
+        string const& originId,
+        ExecutionParameters const& parameters,
+        bool notifyFinish = false)
+        : _CudaJob(originId, notifyFinish)
+        , _parameters(parameters)
+    {}
+
+    virtual ~_setExecutionParametersJob() = default;
+
+    ExecutionParameters const& getSimulationExecutionParameters() const
+    {
+        return _parameters;
+    }
+
+private:
+    ExecutionParameters _parameters;
 };
