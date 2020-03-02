@@ -96,44 +96,48 @@ void CudaWorker::processJobs()
 
 	for (auto const& job : _jobs) {
 
-		if (auto getDataJob = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
-			auto rect = getDataJob->getRect();
-			auto dataTO = getDataJob->getDataTO();
+		if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
+			auto rect = _job->getRect();
+			auto dataTO = _job->getDataTO();
 			_cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 		}
 
-		if (auto setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
-            auto rect = setDataJob->getRect();
-			auto dataTO = setDataJob->getDataTO();
+		if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
+            auto rect = _job->getRect();
+			auto dataTO = _job->getDataTO();
 			_cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 		}
 
-		if (auto runSimJob = boost::dynamic_pointer_cast<_RunSimulationJob>(job)) {
+		if (auto _job = boost::dynamic_pointer_cast<_RunSimulationJob>(job)) {
 			_simulationRunning = true;
 		}
 
-		if (auto stopSimulationJob = boost::dynamic_pointer_cast<_StopSimulationJob>(job)) {
+		if (auto _job = boost::dynamic_pointer_cast<_StopSimulationJob>(job)) {
 			_simulationRunning = false;
 		}
 
-		if (auto calcSingleTimestepJob = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
+		if (auto _job = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
 			_cudaSimulation->calcCudaTimestep();
 			Q_EMIT timestepCalculated();
 		}
 
-		if (auto tpsRestrictionJob = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
-			_tpsRestriction = tpsRestrictionJob->getTpsRestriction();
+		if (auto _job = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
+			_tpsRestriction = _job->getTpsRestriction();
 		}
 
-		if (auto setSimulationParametersJob = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
-			_cudaSimulation->setSimulationParameters(setSimulationParametersJob->getSimulationParameters());
+		if (auto _job = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
+			_cudaSimulation->setSimulationParameters(_job->getSimulationParameters());
 		}
 
-        if (auto getMonitorDataJob = boost::dynamic_pointer_cast<_GetMonitorDataJob>(job)) {
-            getMonitorDataJob->setMonitorData(_cudaSimulation->getMonitorData());
+        if (auto _job = boost::dynamic_pointer_cast<_setExecutionParametersJob>(job)) {
+            _cudaSimulation->setExecutionParameters(_job->getSimulationExecutionParameters());
         }
 
-        if (auto clearDataJob = boost::dynamic_pointer_cast<_ClearDataJob>(job)) {
+        if (auto _job = boost::dynamic_pointer_cast<_GetMonitorDataJob>(job)) {
+            _job->setMonitorData(_cudaSimulation->getMonitorData());
+        }
+
+        if (auto _job = boost::dynamic_pointer_cast<_ClearDataJob>(job)) {
             _cudaSimulation->clear();
         }
 

@@ -301,7 +301,7 @@ class ConstructorGpuWithHighBlockCountTests : public ConstructorGpuTests
 {
 public:
     ConstructorGpuWithHighBlockCountTests()
-        : ConstructorGpuTests({ 64 * 8 * 6 * 4 + 100, 20 }, getModelGpuDataWithHighBlockCount())
+        : ConstructorGpuTests({ 64 * 8 * 6 * 4 * 2 + 100, 20 }, getModelGpuDataWithHighBlockCount())
     { }
 
     virtual ~ConstructorGpuWithHighBlockCountTests() = default;
@@ -316,6 +316,8 @@ void ConstructorGpuTests::SetUp()
     _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellFunctionConstructorOffspringCellDistance = 1;
     _parameters.cellFunctionConstructorDataMutationProb = 0;
+    _parameters.cellFunctionConstructorPropertyMutationProb = 0;
+    _parameters.cellFunctionConstructorStructureMutationProb = 0;
     _context->setSimulationParameters(_parameters);
 
     _resultChecker = boost::make_shared<_ResultChecker>(_parameters, _spaceProp);
@@ -1065,7 +1067,7 @@ auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClusters
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
 
-    auto const refPos = QVector2D{ 10, 10 };
+    auto const refPos = QVector2D{ 10.23f, 10.23f };
 
     DataDescription origData;
     for (int clusterIndex = 0; clusterIndex < parameters._numClusters; ++clusterIndex) {
@@ -2838,7 +2840,7 @@ TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentConstructors_ma
 TEST_F(ConstructorGpuWithHighBlockCountTests, testParallelConstructionFromDifferentConstructors_greatManyIsolatedClusters)
 {
     auto testResult = runMassiveParallelClustersTest(
-        MassiveParallelClustersTestParameters().clusterLen(4).numClusters(64 * 8 * 4).distanceBetweenClusters(6));
+        MassiveParallelClustersTestParameters().clusterLen(4).numClusters(64 * 8 * 4).distanceBetweenClusters(12));
     EXPECT_EQ(64 * 8 * 4, testResult.numCellsPerCluster.size());
     for (auto const& clusterSize : testResult.numCellsPerCluster) {
         EXPECT_EQ(4 * 4, clusterSize);

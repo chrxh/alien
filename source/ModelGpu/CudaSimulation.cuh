@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModelBasic/MonitorData.h"
+#include "ModelBasic/ExecutionParameters.h"
 
 #include "Definitions.cuh"
 
@@ -23,6 +24,7 @@ public:
     int getTimestep() const;
 
     void setSimulationParameters(SimulationParameters const& parameters);
+    void setExecutionParameters(ExecutionParameters const& parameters);
 
     void clear();
 

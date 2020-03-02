@@ -28,7 +28,56 @@ struct Cluster
     int locked;	//0 = unlocked, 1 = locked
     Cluster* clusterToFuse;
 
-    __device__ __inline__ void tagCellByIndex_blockCall(PartitionData const& blockData)
+    __device__ __inline__ void init()
+    {
+        _timestepsUntilFreezing = 30;
+        _freezed = 0;
+        _pointerArrayElement = nullptr;
+    }
+
+    __device__ __inline__ bool isFreezed()
+    {
+        return _freezed;
+    }
+
+    __device__ __inline__ void freeze(Cluster** pointerArrayElement)
+    {
+        atomicExch(&_freezed, 1);
+        _pointerArrayElement = pointerArrayElement;
+    }
+
+    __device__ __inline__ Cluster** getPointerArrayElement()
+    {
+        return _pointerArrayElement;
+    }
+
+    __device__ __inline__ void unfreeze(int timesteps = 0)
+    {
+        atomicExch(&_timestepsUntilFreezing, timesteps);
+        atomicExch(&_freezed, 0);
+    }
+
+    __device__ __inline__ bool isActive()
+    {
+        return numTokenPointers > 0;
+    }
+
+    __device__ __inline__ bool isCandidateToFreeze()
+    {
+        return _timestepsUntilFreezing == 0
+            && numTokenPointers == 0
+            && decompositionRequired == 0
+            && clusterToFuse == nullptr;
+    }
+
+    __device__ __inline__ void timestepSimulated()
+    {
+        if (_timestepsUntilFreezing > 0) {
+            --_timestepsUntilFreezing;
+        }
+    }
+
+    __device__ __inline__ void tagCellByIndex_block(PartitionData const& blockData)
     {
         for (auto cellIndex = blockData.startIndex; cellIndex <= blockData.endIndex; ++cellIndex) {
             Cell& cell = *cellPointers[cellIndex];
@@ -36,4 +85,8 @@ struct Cluster
         }
         __syncthreads();
     }
+private:
+    int _freezed;       // 0 = unfreezed, 1 = freezed
+    int _timestepsUntilFreezing;
+    Cluster** _pointerArrayElement;
 };

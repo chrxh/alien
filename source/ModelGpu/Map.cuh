@@ -1,6 +1,8 @@
 #pragma once
 
 #include "device_functions.h"
+#include "Particle.cuh"
+#include "Cluster.cuh"
 
 class MapInfo
 {
@@ -63,49 +65,27 @@ protected:
 	int2 _size;
 };
 
-template<typename T>
-class Map
-    : public MapInfo
+template <typename T>
+class BasicMap : public MapInfo
 {
 public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries)
+    __device__ __inline__ T* get(float2 const& pos) const
     {
-        MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
-        _mapEntries.init(maxEntries);
-
-        std::vector<T*> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
+        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
+        return _map[mapEntry];
     }
 
-    __device__ __inline__ void reset()
+    __device__ __inline__ void set(float2 const& pos, T* entity)
     {
-        _mapEntries.reset();
-    }
-
-    __host__ __inline__ void free()
-    {
-        CudaMemoryManager::getInstance().freeMemory(_map);
-        _mapEntries.free();
-    }
-
-	__device__ __inline__ T* get(float2 const& pos) const
-	{
-		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * _size.x;
-		return _map[mapEntry];
-	}
-
-	__device__ __inline__ void set(float2 const& pos, T* entity)
-	{
-		int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-		mapPosCorrection(posInt);
-		auto mapEntry = posInt.x + posInt.y * _size.x;
+        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
         _map[mapEntry] = entity;
-	}
+    }
 
-    __device__ __inline__ void set_blockCall(int numEntities, T** entities)
+    __device__ __inline__ void set_block(int numEntities, T** entities)
     {
         if (0 == numEntities) {
             return;
@@ -130,18 +110,46 @@ public:
         __syncthreads();
     }
 
-    __device__ __inline__ void cleanup_gridCall()
+protected:
+    T** _map;
+    Array<int> _mapEntries;
+};
+
+template<typename T>
+class Map
+    : public BasicMap<T>
+{
+public:
+    __host__ __inline__ void init(int2 const& size, int maxEntries)
+    {
+        MapInfo::init(size);
+        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
+        _mapEntries.init(maxEntries);
+
+        std::vector<T*> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
+    }
+
+    __device__ __inline__ void reset()
+    {
+        _mapEntries.reset();
+    }
+
+    __host__ __inline__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_map);
+        _mapEntries.free();
+    }
+
+    __device__ __inline__ void cleanup_system()
     {
         auto partition =
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto mapEntry = _mapEntries.at(index);
+            auto const&  mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
         }
     }
 
-private:
-	T ** _map;
-    Array<int> _mapEntries;
 };
 

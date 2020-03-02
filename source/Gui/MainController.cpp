@@ -20,6 +20,7 @@
 #include "ModelBasic/DescriptionHelper.h"
 #include "ModelBasic/SimulationMonitor.h"
 #include "ModelBasic/SerializationHelper.h"
+#include "ModelBasic/Settings.h"
 
 #include "ModelCpu/SimulationControllerCpu.h"
 #include "ModelCpu/SimulationAccessCpu.h"
@@ -150,7 +151,7 @@ void MainController::init()
         config->maxTokens = 10000;
         config->maxParticles = 1000000;
         config->dynamicMemorySize = 100000000;
-        config->universeSize = IntVector2D({ 12 * 33 * 2 , 12 * 17 * 2 });
+        config->universeSize = IntVector2D({ 2000 , 1000 });
         config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
         config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
         onNewSimulation(config, 0);
@@ -165,9 +166,9 @@ void MainController::init()
     }
 
     //auto save every hour
-    _timer = new QTimer(this);
-    connect(_timer, &QTimer::timeout, this, (void(MainController::*)())(&MainController::autoSave));
-    _timer->start(1000 * 60 * 20);
+    _autosaveTimer = new QTimer(this);
+    connect(_autosaveTimer, &QTimer::timeout, this, (void(MainController::*)())(&MainController::autoSave));
+    _autosaveTimer->start(1000 * 60 * 20);
 }
 
 void MainController::autoSave()
@@ -231,6 +232,7 @@ void MainController::onRestoreSnapshot()
 void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
 {
 	_model->setSimulationParameters(parameters);
+    _model->setExecutionParameters(ModelSettings::getDefaultExecutionParameters());
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
@@ -372,15 +374,24 @@ void MainController::onRecreateSimulation(SimulationConfig const& config)
     }
 }
 
-void MainController::onUpdateSimulationParametersForRunningSimulation()
+void MainController::onUpdateSimulationParameters(SimulationParameters const& parameters)
 {
     auto progress = MessageHelper::createProgressDialog("Updating simulation parameters...", _view);
 
-	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
+	_simController->getContext()->setSimulationParameters(parameters);
 
     QApplicationHelper::processEventsForMilliSec(500);
     delete progress;
+}
 
+void MainController::onUpdateExecutionParameters(ExecutionParameters const & parameters)
+{
+    auto progress = MessageHelper::createProgressDialog("Updating execution parameters...", _view);
+
+    _simController->getContext()->setExecutionParameters(parameters);
+
+    QApplicationHelper::processEventsForMilliSec(500);
+    delete progress;
 }
 
 void MainController::onRestrictTPS(optional<int> const& tps)
