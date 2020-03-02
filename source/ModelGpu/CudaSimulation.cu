@@ -176,7 +176,18 @@ int CudaSimulation::getTimestep() const
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
 {
-    checkCudaErrors(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpyToSymbol(
+        cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+}
+
+void CudaSimulation::setExecutionParameters(ExecutionParameters const & parameters)
+{
+    checkCudaErrors(cudaMemcpyToSymbol(
+        cudaExecutionParameters,
+        &parameters,
+        sizeof(ExecutionParameters),
+        0,
+        cudaMemcpyHostToDevice));
 }
 
 void CudaSimulation::clear()

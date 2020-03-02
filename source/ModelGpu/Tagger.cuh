@@ -12,7 +12,7 @@ public:
         Cell** cellsToEvaluate;             //size of numCells
         Cell** cellsToEvaluateNextRound;    //size of numCells
     };
-    __inline__ __device__ static void tagComponent_blockCall(
+    __inline__ __device__ static void tagComponent_block(
         Cluster* cluster,
         Cell* startCell,
         Cell* forbiddingConnectingCell,
@@ -22,7 +22,7 @@ public:
     );
 };
 
-__inline__ __device__ void Tagger::tagComponent_blockCall(
+__inline__ __device__ void Tagger::tagComponent_block(
     Cluster* cluster,
     Cell* startCell,
     Cell* forbiddingConnectingCell,

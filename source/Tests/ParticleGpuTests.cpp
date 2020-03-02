@@ -120,7 +120,7 @@ TEST_F(ParticleGpuTests, testTransformationParticleToCell)
 
 /**
 * Situation: many random particles and one 10x10 cluster
-* Fixed error: wrong block partition in ParticleProcessor::updateMap_gridCall led to dead cells in particle map
+* Fixed error: wrong block partition in ParticleProcessor::updateMap_system led to dead cells in particle map
 * Expected result: energy balance fulfilled
 */
 TEST_F(ParticleGpuWithOneBlockTests, regressionTestFusionOfManyParticles)

@@ -30,7 +30,7 @@ public:
         float2 const& vel,
         ParticleMetadata const& metadata);  //TODO: not adding to simulation!
     __inline__ __device__ Cluster* createCluster(Cluster** clusterPointerToReuse = nullptr);
-    __inline__ __device__ void createClusterFromTO_blockCall(
+    __inline__ __device__ void createClusterFromTO_block(
         ClusterAccessTO const& clusterTO,
         DataAccessTO const* _simulationTO);
     __inline__ __device__ Cluster* createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
@@ -54,13 +54,14 @@ __inline__ __device__ Cluster * EntityFactory::createCluster(Cluster** clusterPo
 {
     auto result = _data->entities.clusters.getNewElement();
     result->metadata.nameLen = 0;
+    result->init();
 
     auto newClusterPointer = clusterPointerToReuse ? clusterPointerToReuse : _data->entities.clusterPointers.getNewElement();
     *newClusterPointer = result;
     return result;
 }
 
-__inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
+__inline__ __device__ void EntityFactory::createClusterFromTO_block(
     ClusterAccessTO const& clusterTO,
     DataAccessTO const* simulationTO)
 {
@@ -99,6 +100,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_blockCall(
         cluster->decompositionRequired = 0;
         cluster->locked = 0;
         cluster->clusterToFuse = nullptr;
+        cluster->init();
 
         angularMass = 0.0f;
         Math::inverseRotationMatrix(cluster->angle, invRotMatrix);
@@ -274,6 +276,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cluster->clusterToFuse = nullptr;
     cluster->locked = 0;
     cluster->decompositionRequired = 0;
+    cluster->init();
 
     cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = pos;
