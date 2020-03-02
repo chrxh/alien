@@ -10,8 +10,8 @@ struct SimulationData
     int2 size;
     int timestep;
 
-    CellMap cellMap;
-    ParticleMap particleMap;
+    Map<Cell> cellMap;
+    Map<Particle> particleMap;
     CellFunctionData cellFunctionData;
 
     Entities entities;
