@@ -115,18 +115,19 @@ protected:
     Array<int> _mapEntries;
 };
 
-class CellMap
-    : public BasicMap<Cell>
+template<typename T>
+class Map
+    : public BasicMap<T>
 {
 public:
     __host__ __inline__ void init(int2 const& size, int maxEntries)
     {
         MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, _map);
+        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
         _mapEntries.init(maxEntries);
 
-        std::vector<Cell*> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*)*size.x*size.y, cudaMemcpyHostToDevice));
+        std::vector<T*> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*)*size.x*size.y, cudaMemcpyHostToDevice));
     }
 
     __device__ __inline__ void reset()
@@ -152,38 +153,3 @@ public:
 
 };
 
-class ParticleMap
-    : public BasicMap<Particle>
-{
-public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries)
-    {
-        MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, _map);
-        _mapEntries.init(maxEntries);
-
-        std::vector<Particle*> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Particle*)*size.x*size.y, cudaMemcpyHostToDevice));
-    }
-
-    __device__ __inline__ void reset()
-    {
-        _mapEntries.reset();
-    }
-
-    __host__ __inline__ void free()
-    {
-        CudaMemoryManager::getInstance().freeMemory(_map);
-        _mapEntries.free();
-    }
-
-    __device__ __inline__ void cleanup_system()
-    {
-        auto partition =
-            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto mapEntry = _mapEntries.at(index);
-            _map[mapEntry] = nullptr;
-        }
-    }
-};
