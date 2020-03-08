@@ -7,7 +7,7 @@
 #include "SimulationControllerGpu.h"
 #include "CudaController.h"
 #include "CudaWorker.h"
-#include "CudaJob.h"
+#include "CudaJobs.h"
 #include "CudaConstants.h"
 #include "SimulationMonitorGpuImpl.h"
 

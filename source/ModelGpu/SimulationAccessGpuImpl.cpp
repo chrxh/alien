@@ -9,7 +9,7 @@
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
 #include "SimulationControllerGpu.h"
-#include "CudaJob.h"
+#include "CudaJobs.h"
 #include "DataConverter.h"
 
 namespace

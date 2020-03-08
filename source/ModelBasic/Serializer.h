@@ -18,6 +18,7 @@ public:
 	struct Settings {
 		IntVector2D universeSize;
 		map<string, int> typeSpecificData;
+        bool duplicateContent;
 	};
 	virtual void serialize(SimulationController* simController, int typeId, optional<Settings> newSettings = boost::none) = 0;
 	Q_SIGNAL void serializationFinished();

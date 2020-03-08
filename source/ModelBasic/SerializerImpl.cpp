@@ -240,28 +240,34 @@ void SerializerImpl::serialize(SimulationController * simController, int typeId,
 
 	_serializedSimulation.clear();
 
-	if (newSettings) {
+    auto const context = simController->getContext();
+    auto const universeSize = context->getSpaceProperties()->getSize();
+    if (newSettings) {
 		_configToSerialize = {
-			simController->getContext()->getSimulationParameters(),
-			simController->getContext()->getSymbolTable(),
+			context->getSimulationParameters(),
+			context->getSymbolTable(),
 			newSettings->universeSize,
 			typeId,
 			newSettings->typeSpecificData,
-			simController->getContext()->getTimestep()
+			context->getTimestep()
 		};
-	}
+        _duplicationSettings.enabled = newSettings->duplicateContent;
+        _duplicationSettings.origUniverseSize = universeSize;
+        _duplicationSettings.count = {
+            newSettings->universeSize.x / universeSize.x, newSettings->universeSize.y / universeSize.y};
+    }
 	else {
 		_configToSerialize = {
-			simController->getContext()->getSimulationParameters(),
-			simController->getContext()->getSymbolTable(),
-			simController->getContext()->getSpaceProperties()->getSize(),
+			context->getSimulationParameters(),
+			context->getSymbolTable(),
+			context->getSpaceProperties()->getSize(),
 			typeId,
-			simController->getContext()->getSpecificData(),
-			simController->getContext()->getTimestep()
+			context->getSpecificData(),
+			context->getTimestep()
 		};
+        _duplicationSettings.enabled = false;
 	}
 
-	IntVector2D universeSize = simController->getContext()->getSpaceProperties()->getSize();
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveIds = false;
 	_access->requireData({ { 0, 0 }, universeSize }, resolveDesc);
@@ -380,6 +386,9 @@ void SerializerImpl::dataReadyToRetrieve()
 	boost::archive::binary_oarchive archive(stream);
 
 	auto content = _access->retrieveData();
+    if (_duplicationSettings.enabled) {
+        _descHelper->duplicate(content, _duplicationSettings.origUniverseSize, _configToSerialize.universeSize);
+    }
 	archive << content
 		<< _configToSerialize.universeSize << _configToSerialize.typeId << _configToSerialize.typeSpecificData << _configToSerialize.parameters
 		<< *_configToSerialize.symbolTable << _configToSerialize.timestep;

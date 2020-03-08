@@ -16,5 +16,7 @@ public:
     virtual void makeValid(DataDescription& data) = 0;
     virtual void makeValid(ClusterDescription& cluster) = 0;
 	virtual void makeValid(ParticleDescription& particle) = 0;
+
+    virtual void duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size) = 0;
 };
 

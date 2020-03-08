@@ -549,6 +549,15 @@
     <ClCompile Include="..\..\source\Gui\ComputationSettingsWidget.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Worker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_Worker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Worker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -787,6 +796,9 @@
     <CustomBuild Include="..\..\source\Gui\ComputationSettingsWidget.ui">
       <Filter>Source Files\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\Worker.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\Gui\resources\tutorial\angle.png">
@@ -972,6 +984,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\QApplicationHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Jobs.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
