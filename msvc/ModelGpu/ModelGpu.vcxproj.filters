@@ -60,9 +60,6 @@
     <ClInclude Include="..\..\source\ModelGpu\DataConverter.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaJob.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\Base.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
@@ -197,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\FreezingKernels.cuh">
       <Filter>Source Files\Impl\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaJobs.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

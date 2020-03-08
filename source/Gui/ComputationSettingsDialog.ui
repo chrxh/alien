@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>255</height>
+    <height>286</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>computation settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="2" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -27,7 +27,7 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -44,6 +44,13 @@
        <width>0</width>
        <height>0</height>
       </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="extrapolateContentCheckBox">
+     <property name="text">
+      <string>extrapolate content</string>
      </property>
     </widget>
    </item>

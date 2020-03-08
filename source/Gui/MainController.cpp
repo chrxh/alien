@@ -45,6 +45,7 @@
 #include "SimulationConfig.h"
 #include "DataAnalyzer.h"
 #include "QApplicationHelper.h"
+#include "Worker.h"
 
 namespace Const
 {
@@ -134,11 +135,12 @@ void MainController::init()
     _repository = new DataRepository(this);
     _notifier = new Notifier(this);
     _dataAnalyzer = new DataAnalyzer(this);
-
-    connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
+    auto worker = new Worker(this);
+    SET_CHILD(_worker, worker);
 
     _serializer->init(_controllerBuildFunc, _accessBuildFunc);
     _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
+    _worker->init(_serializer);
 
     if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
 
@@ -186,7 +188,11 @@ void MainController::autoSaveIntern(std::string const& filename)
 
 void MainController::saveSimulationIntern(string const & filename)
 {
-    _jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
+    auto const saveFunction = [filename](Serializer* serializer) {
+        SerializationHelper::saveToFile(filename, [&]() { return serializer->retrieveSerializedSimulation(); });
+    };
+    _worker->addJob(boost::make_shared<_Job>(saveFunction));
+
     if (dynamic_cast<SimulationControllerCpu*>(_simController)) {
         _serializer->serialize(_simController, int(ModelComputationType::Cpu));
     }
@@ -345,9 +351,12 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     return true;
 }
 
-void MainController::onRecreateSimulation(SimulationConfig const& config)
+void MainController::onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent)
 {
-	_jobsAfterSerialization.push_back(boost::make_shared<_RecreateJob>());
+    auto const recreateFunction = [&](Serializer* serializer) {
+        recreateSimulation(serializer->retrieveSerializedSimulation());
+    };
+    _worker->addJob(boost::make_shared<_Job>(recreateFunction));
 
 	if (auto const configCpu = boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
 		ModelCpuData data(configCpu->maxThreads, configCpu->gridSize);
@@ -369,7 +378,7 @@ void MainController::onRecreateSimulation(SimulationConfig const& config)
         data.setDynamicMemorySize(configGpu->dynamicMemorySize);
         data.setStringByteSize(1000000);
 
-        Serializer::Settings settings{ configGpu->universeSize, data.getData() };
+        Serializer::Settings settings{ configGpu->universeSize, data.getData(), extrapolateContent };
         _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
     }
 }
@@ -469,17 +478,3 @@ void MainController::addRandomEnergy(double amount)
 
 }
 
-void MainController::serializationFinished()
-{
-	for (auto job : _jobsAfterSerialization) {
-		if (job->type == _AsyncJob::Type::SaveToFile) {
-			auto saveToFileJob = boost::static_pointer_cast<_SaveToFileJob>(job);
-			SerializationHelper::saveToFile(saveToFileJob->filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
-		}
-		if (job->type == _AsyncJob::Type::Recreate) {
-			auto recreateJob = boost::static_pointer_cast<_RecreateJob>(job);
-			recreateSimulation(_serializer->retrieveSerializedSimulation());
-		}
-	}
-	_jobsAfterSerialization.clear();
-}
