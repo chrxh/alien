@@ -3,6 +3,7 @@
 
 #include "ModelBasic/Definitions.h"
 
+#include "Jobs.h"
 #include "Definitions.h"
 
 class MainController
@@ -26,7 +27,7 @@ public:
 	void onSaveSimulation(string const& filename);
     enum class LoadOption { Non, SaveOldSim };
 	bool onLoadSimulation(string const& filename, LoadOption option);
-	void onRecreateSimulation(SimulationConfig const& config);
+	void onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent);
 	void onUpdateSimulationParameters(SimulationParameters const& parameters);
     void onUpdateExecutionParameters(ExecutionParameters const& parameters);
     void onRestrictTPS(optional<int> const& tps);
@@ -45,44 +46,7 @@ private:
     void autoSaveIntern(std::string const& filename);
     void saveSimulationIntern(string const& filename);
 
-	class _AsyncJob
-	{
-	public:
-		virtual ~_AsyncJob() = default;
-
-		enum class Type {
-			SaveToFile,
-			Recreate
-		};
-		Type type;
-
-		_AsyncJob(Type type) : type(type) {}
-	};
-	using AsyncJob = shared_ptr<_AsyncJob>;
-
-	class _SaveToFileJob : public _AsyncJob
-	{
-	public:
-		virtual ~_SaveToFileJob() = default;
-
-		string filename;
-
-		_SaveToFileJob(string filename) : _AsyncJob(Type::SaveToFile), filename(filename) {} 
-	};
-	using SaveToFileJob = shared_ptr<_SaveToFileJob>;
-
-	class _RecreateJob : public _AsyncJob
-	{
-	public:
-		virtual ~_RecreateJob() = default;
-
-		_RecreateJob()
-			: _AsyncJob(Type::Recreate) {}
-	};
-	using RecreateOperation = shared_ptr<_RecreateJob>;
-
-	list<AsyncJob> _jobsAfterSerialization;
-	Q_SLOT void serializationFinished();
+    Worker* _worker = nullptr;
 
 	MainView* _view = nullptr;
 	MainModel* _model = nullptr;

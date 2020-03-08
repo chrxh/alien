@@ -6,7 +6,7 @@
 #include "ModelBasic/SpaceProperties.h"
 
 #include "AccessTOs.cuh"
-#include "CudaJob.h"
+#include "CudaJobs.h"
 #include "CudaWorker.h"
 #include "ModelGpuData.h"
 

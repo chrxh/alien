@@ -1,5 +1,5 @@
 #include "CudaWorker.h"
-#include "CudaJob.h"
+#include "CudaJobs.h"
 
 #include "CudaController.h"
 #include "ModelGpuData.h"

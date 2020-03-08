@@ -19,6 +19,8 @@ public:
     virtual void makeValid(ClusterDescription& cluster) override;
 	virtual void makeValid(ParticleDescription& particle) override;
 
+    virtual void duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size) override;
+
 private:
 	list<uint64_t> filterPresentCellIds(unordered_set<uint64_t> const& cellIds) const;
 	void updateInternals();

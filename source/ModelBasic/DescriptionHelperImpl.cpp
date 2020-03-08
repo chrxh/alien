@@ -88,6 +88,41 @@ void DescriptionHelperImpl::makeValid(ParticleDescription & particle)
 	particle.id = _numberGen->getId();
 }
 
+void DescriptionHelperImpl::duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
+{
+    DataDescription result;
+
+    for (int incX = 0; incX < size.x; incX += origSize.x) {
+        for (int incY = 0; incY < size.y; incY += origSize.y) {
+            if (data.clusters) {
+                for (auto cluster : *data.clusters) {
+                    auto origPos = *cluster.pos;
+                    cluster.pos = QVector2D{ origPos.x() + incX, origPos.y() + incY };
+                    if (cluster.pos->x() < size.x && cluster.pos->y() < size.y) {
+                        if (cluster.cells) {
+                            for (auto& cell : *cluster.cells) {
+                                auto origPos = *cell.pos;
+                                cell.pos = QVector2D{ origPos.x() + incX, origPos.y() + incY };
+                            }
+                        }
+                        result.addCluster(cluster);
+                    }
+                }
+            }
+            if (data.particles) {
+                for (auto particle : *data.particles) {
+                    auto origPos = *particle.pos;
+                    particle.pos = QVector2D{ origPos.x() + incX, origPos.y() + incY };
+                    if (particle.pos->x() < size.x && particle.pos->y() < size.y) {
+                        result.addParticle(particle);
+                    }
+                }
+            }
+        }
+    }
+    data = result;
+}
+
 list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(unordered_set<uint64_t> const & cellIds) const
 {
 	list<uint64_t> result;

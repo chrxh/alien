@@ -50,6 +50,13 @@ private:
 		int timestep;
 	};
 	ConfigToSerialize _configToSerialize;
+    struct DuplicationSettings
+    {
+        bool enabled = false;
+        IntVector2D origUniverseSize;
+        IntVector2D count;
+    };
+    DuplicationSettings _duplicationSettings;
 	string _serializedSimulation;
 
 	list<QMetaObject::Connection> _connections;

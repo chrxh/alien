@@ -5,23 +5,23 @@
 #include "ComputationSettingsDialog.h"
 #include "SimulationConfig.h"
 
-#include <iostream>
 ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& config, QWidget * parent /*= nullptr*/)
 	: QDialog(parent), _config(config)
 {
 	ui.setupUi(this);
 	setFont(GuiSettings::getGlobalFont());
 
+    auto const configGpu = boost::static_pointer_cast<_SimulationConfigGpu>(config);
     ui.computationSettingsWidget->setUniverseSize(config->universeSize);
-    if (auto const configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-        ui.computationSettingsWidget->setNumBlocks(configGpu->numBlocks);
-        ui.computationSettingsWidget->setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
-        ui.computationSettingsWidget->setMaxClusters(configGpu->maxClusters);
-        ui.computationSettingsWidget->setMaxCells(configGpu->maxCells);
-        ui.computationSettingsWidget->setMaxTokens(configGpu->maxTokens);
-        ui.computationSettingsWidget->setMaxParticles(configGpu->maxParticles);
-        ui.computationSettingsWidget->setDynamicMemorySize(configGpu->dynamicMemorySize);
-    }
+    ui.computationSettingsWidget->setNumBlocks(configGpu->numBlocks);
+    ui.computationSettingsWidget->setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
+    ui.computationSettingsWidget->setMaxClusters(configGpu->maxClusters);
+    ui.computationSettingsWidget->setMaxCells(configGpu->maxCells);
+    ui.computationSettingsWidget->setMaxTokens(configGpu->maxTokens);
+    ui.computationSettingsWidget->setMaxParticles(configGpu->maxParticles);
+    ui.computationSettingsWidget->setDynamicMemorySize(configGpu->dynamicMemorySize);
+    ui.extrapolateContentCheckBox->setChecked(
+        GuiSettings::getSettingsValue(Const::ExtrapolateContentKey, Const::ExtrapolateContentDefault));
 
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationSettingsDialog::okClicked);
 }
@@ -66,8 +66,14 @@ uint ComputationSettingsDialog::getDynamicMemorySize() const
     return ui.computationSettingsWidget->getDynamicMemorySize();
 }
 
+bool ComputationSettingsDialog::isExtrapolateContent() const
+{
+    return ui.extrapolateContentCheckBox->isChecked();
+}
+
 void ComputationSettingsDialog::okClicked()
 {
+    GuiSettings::setSettingsValue(Const::ExtrapolateContentKey, isExtrapolateContent());
     accept();
 }
 
