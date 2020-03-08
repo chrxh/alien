@@ -300,7 +300,8 @@ void ActionController::onConfigureGrid()
             configGpu->maxParticles = dialog.getMaxParticles();
             configGpu->dynamicMemorySize = dialog.getDynamicMemorySize();
 
-            _mainController->onRecreateSimulation(configGpu);
+            auto const extrapolateContent = dialog.isExtrapolateContent();
+            _mainController->onRecreateUniverse(configGpu, extrapolateContent);
             settingUpNewSimulation(configGpu);
         }
 	}
