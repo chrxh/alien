@@ -68,11 +68,20 @@ namespace
 			if ((str.at(0) == QChar('[')) && (str.at(1) != QChar('['))) {
 				int i = str.indexOf("]");
 				if (i >= 0) {
-					bool ok(true);
-					quint32 addr = str.mid(1, i - 1).toUInt(&ok) % 256;
-					if (ok) {
-						return addr;
-					}
+                    if (str.mid(1, 2) == QString("0x")) {
+                        bool ok(true);
+                        quint32 addr = str.mid(3, i - 3).toUInt(&ok, 16) % 256;
+                        if (ok) {
+                            return addr;
+                        }
+                    }
+                    else {
+                        bool ok(true);
+                        quint32 addr = str.mid(1, i - 1).toUInt(&ok) % 256;
+                        if (ok) {
+                            return addr;
+                        }
+                    }
 				}
 			}
 		}
@@ -93,7 +102,8 @@ void TokenEditTab::updateDisplay()
 	//find all addresses from variables
 	_hexEditByStartAddress.clear();
 	QMap< quint8, QStringList > addressVarMap;
-	for(auto const& keyAndValue : _model->getSymbolTable()->getEntries()) {
+    auto const entries = _model->getSymbolTable()->getEntries();
+	for(auto const& keyAndValue : entries) {
 		QString k = QString::fromStdString(keyAndValue.first);
 		QString v = QString::fromStdString(keyAndValue.second);
 
