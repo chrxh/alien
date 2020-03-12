@@ -49,7 +49,8 @@ private:
     __inline__ __device__ bool checkDistance(float distance);
     __inline__ __device__ Cell* getFirstCellOfConstructionSite();
 
-    __inline__ __device__ void mutation();
+    __inline__ __device__ void mutateOwnToken();
+    __inline__ __device__ void mutateDuplicatedToken(Token* token);
 
     __inline__ __device__ void continueConstruction(Cell* firstCellOfConstructionSite);
     __inline__ __device__ void startNewConstruction();
@@ -226,7 +227,7 @@ __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
     _dynamicMemory.cellPointerArray2 = cellPointerArray2;
     __syncthreads();
 
-    mutation();
+    mutateOwnToken();
     __syncthreads();
 
     if (firstCellOfConstructionSite) {
@@ -288,7 +289,7 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
     return result;
 }
 
-__inline__ __device__ void ConstructorFunction::mutation()
+__inline__ __device__ void ConstructorFunction::mutateOwnToken()
 {
     if (0 == threadIdx.x) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorPropertyMutationProb) {
@@ -317,6 +318,16 @@ __inline__ __device__ void ConstructorFunction::mutation()
     for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorDataMutationProb) {
             _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + index] = _data->numberGen.random(255);
+        }
+    }
+}
+
+__inline__ __device__ void ConstructorFunction::mutateDuplicatedToken(Token * token)
+{
+    auto const memoryPartition = calcPartition(256, threadIdx.x, blockDim.x);
+    for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorDataMutationProb) {
+            token->memory[index] = _data->numberGen.random(255);
         }
     }
 }
@@ -1400,16 +1411,19 @@ __inline__ __device__ void ConstructorFunction::constructNewToken(
 
     auto const threadBlock = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
     if (duplicate) {
-        for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex;
-             ++i) {  //do not copy branchnumber (at address 0)
+        //do not copy branchnumber (at address 0)
+        for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex; ++i) {
             result->memory[i] = _token->memory[i];
         }
     } else {
-        for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex;
-             ++i) {  //do not copy branchnumber (at address 0)
+        //do not copy branchnumber (at address 0)
+        for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex; ++i) {
             result->memory[i] = 0;
         }
     }
+    __syncthreads();
+
+    mutateDuplicatedToken(result);
 }
 
 __inline__ __device__ void
