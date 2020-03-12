@@ -489,9 +489,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction()
         _cluster->angularVel = angularVelAfterConstruction;
         _cluster->angularMass = angularMassAfterConstruction;
         separateConstructionWhenFinished(newCell);
-        createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option;
+        createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-        createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
     }
     __syncthreads();
 
@@ -726,9 +726,9 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         firstCellOfConstructionSite->tokenBlocked = false;  //disable token blocking on construction side
         separateConstructionWhenFinished(newCell);
 
-        createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option;
+        createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option
             || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
-        createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option;
     }
     __syncthreads();
 
