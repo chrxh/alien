@@ -30,11 +30,7 @@ private:
 
 	Q_SLOT void onConfigureGrid();
 	Q_SLOT void onEditSimulationParameters();
-	Q_SLOT void onLoadSimulationParameters();
-	Q_SLOT void onSaveSimulationParameters();
 	Q_SLOT void onEditSymbolTable();
-	Q_SLOT void onLoadSymbolTable();
-	Q_SLOT void onSaveSymbolTable();
 
 	Q_SLOT void onToggleEditorMode(bool editMode);
 	Q_SLOT void onToggleMonitor(bool show);

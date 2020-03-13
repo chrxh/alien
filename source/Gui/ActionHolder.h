@@ -25,13 +25,8 @@ public:
 
 	QAction* actionComputationSettings = nullptr;
 	QAction* actionEditSimParameters = nullptr;
-	QAction* actionLoadSimParameters = nullptr;
-	QAction* actionSaveSimParameters = nullptr;
 
 	QAction* actionEditSymbols = nullptr;
-	QAction* actionLoadSymbols = nullptr;
-	QAction* actionSaveSymbols = nullptr;
-	QAction* actionMergeWithSymbols = nullptr;
 
 	QAction* actionEditor = nullptr;
 	QAction* actionMonitor = nullptr;
