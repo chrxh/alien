@@ -174,6 +174,11 @@ int CudaSimulation::getTimestep() const
     return _cudaSimulationData->timestep;
 }
 
+void CudaSimulation::setTimestep(int timestep)
+{
+    _cudaSimulationData->timestep = timestep;
+}
+
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
 {
     checkCudaErrors(cudaMemcpyToSymbol(

@@ -19,6 +19,7 @@ public:
 	virtual SimulationParameters const& getSimulationParameters() const override;
 	virtual NumberGenerator* getNumberGenerator() const override;
     virtual int getTimestep() const override;
+    virtual void setTimestep(int timestep) override;
 
 	virtual void setSimulationParameters(SimulationParameters const& parameters) override;
     virtual void setExecutionParameters(ExecutionParameters const& parameters) override {}
