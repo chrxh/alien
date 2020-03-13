@@ -62,26 +62,11 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionComputationSettings = new QAction("Computation", this);
 	actionComputationSettings->setEnabled(true);
 
-	actionEditSimParameters = new QAction("Edit", this);
+	actionEditSimParameters = new QAction("Simulation parameters", this);
 	actionEditSimParameters->setEnabled(true);
 
-	actionLoadSimParameters = new QAction("Load", this);
-	actionLoadSimParameters->setEnabled(true);
-
-	actionSaveSimParameters = new QAction("Save", this);
-	actionSaveSimParameters->setEnabled(true);
-
-	actionEditSymbols = new QAction("Edit", this);
+	actionEditSymbols = new QAction("Symbol map", this);
 	actionEditSymbols->setEnabled(true);
-
-	actionLoadSymbols = new QAction("Load", this);
-	actionLoadSymbols->setEnabled(true);
-
-	actionSaveSymbols = new QAction("Save", this);
-	actionSaveSymbols->setEnabled(true);
-
-	actionMergeWithSymbols = new QAction("Merge with", this);
-	actionMergeWithSymbols->setEnabled(true);
 
 	actionEditor = new QAction("Editor", this);
 	actionEditor->setCheckable(true);

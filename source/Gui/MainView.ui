@@ -780,18 +780,6 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <widget class="QMenu" name="menuSimulationParameters">
-     <property name="title">
-      <string>Simulation parameters</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuSymbolMap">
-     <property name="title">
-      <string>Symbol map</string>
-     </property>
-    </widget>
-    <addaction name="menuSimulationParameters"/>
-    <addaction name="menuSymbolMap"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
