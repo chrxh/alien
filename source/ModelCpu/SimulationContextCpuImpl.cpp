@@ -81,6 +81,10 @@ int SimulationContextCpuImpl::getTimestep() const
     return 0;
 }
 
+void SimulationContextCpuImpl::setTimestep(int timestep)
+{
+}
+
 map<string, int> SimulationContextCpuImpl::getSpecificData() const
 {
 	ModelCpuData data(_threads->getMaxRunningThreads(), _grid->getSize());

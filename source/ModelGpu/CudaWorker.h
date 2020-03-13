@@ -24,6 +24,7 @@ public:
     void terminateWorker();
 	bool isSimulationRunning();
     int getTimestep() const;
+    void setTimestep(int timestep);
 
 	void addJob(CudaJob const& job);
 	vector<CudaJob> getFinishedJobs(string const& originId);

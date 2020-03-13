@@ -172,3 +172,9 @@ int CudaWorker::getTimestep() const
     std::lock_guard<std::mutex> lock(_mutex);
     return _cudaSimulation->getTimestep();
 }
+
+void CudaWorker::setTimestep(int timestep)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    return _cudaSimulation->setTimestep(timestep);
+}
