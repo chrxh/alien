@@ -100,11 +100,7 @@ void ActionController::init(
 	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleMonitor);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
-	connect(actions->actionLoadSimParameters, &QAction::triggered, this, &ActionController::onLoadSimulationParameters);
-	connect(actions->actionSaveSimParameters, &QAction::triggered, this, &ActionController::onSaveSimulationParameters);
 	connect(actions->actionEditSymbols, &QAction::triggered, this, &ActionController::onEditSymbolTable);
-	connect(actions->actionLoadSymbols, &QAction::triggered, this, &ActionController::onLoadSymbolTable);
-	connect(actions->actionSaveSymbols, &QAction::triggered, this, &ActionController::onSaveSymbolTable);
 
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
@@ -318,47 +314,6 @@ void ActionController::onEditSimulationParameters()
 	}
 }
 
-void ActionController::onLoadSimulationParameters()
-{
-	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
-	if (!filename.isEmpty()) {
-		SimulationParameters parameters;
-		if (SerializationHelper::loadFromFile<SimulationParameters>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, parameters)) {
-			auto config = _mainController->getSimulationConfig();
-			config->parameters = parameters;
-			string errorMsg;
-			auto valResult = config->validate(errorMsg);
-			if (valResult == _SimulationConfig::ValidationResult::Ok) {
-				_mainModel->setSimulationParameters(parameters);
-				_mainController->onUpdateSimulationParameters(parameters);
-			}
-			else if (valResult == _SimulationConfig::ValidationResult::Error) {
-				QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
-				msgBox.exec();
-			}
-			else {
-				THROW_NOT_IMPLEMENTED();
-			}
-		}
-		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation parameter file could not loaded.");
-			msgBox.exec();
-		}
-	}
-}
-
-void ActionController::onSaveSimulationParameters()
-{
-	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
-	if (!filename.isEmpty()) {
-		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_mainModel->getSimulationParameters()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Simulation parameters could not saved.");
-			msgBox.exec();
-		}
-	}
-
-}
-
 void ActionController::onEditSymbolTable()
 {
 	auto origSymbols = _mainModel->getSymbolTable();
@@ -366,35 +321,6 @@ void ActionController::onEditSymbolTable()
 	if (dialog.exec()) {
 		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
 		Q_EMIT _dataEditor->getContext()->refresh();
-	}
-}
-
-void ActionController::onLoadSymbolTable()
-{
-	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
-	if (!filename.isEmpty()) {
-		SymbolTable* symbolTable;
-		if (SerializationHelper::loadFromFile<SymbolTable*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSymbolTable(data); }, symbolTable)) {
-			_mainModel->getSymbolTable()->getSymbolsFrom(symbolTable);
-			delete symbolTable;
-			Q_EMIT _dataEditor->getContext()->refresh();
-		}
-		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified symbol table could not loaded.");
-			msgBox.exec();
-		}
-	}
-}
-
-void ActionController::onSaveSymbolTable()
-{
-	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
-	if (!filename.isEmpty()) {
-		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSymbolTable(_mainModel->getSymbolTable()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Symbol table could not saved.");
-			msgBox.exec();
-			return;
-		}
 	}
 }
 
