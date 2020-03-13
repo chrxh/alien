@@ -70,6 +70,11 @@ int SimulationContextGpuImpl::getTimestep() const
     return _cudaController->getCudaWorker()->getTimestep();
 }
 
+void SimulationContextGpuImpl::setTimestep(int timestep)
+{
+    return _cudaController->getCudaWorker()->setTimestep(timestep);
+}
+
 void SimulationContextGpuImpl::setSimulationParameters(SimulationParameters const& parameters)
 {
 	_parameters = parameters;

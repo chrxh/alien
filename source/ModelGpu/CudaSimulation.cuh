@@ -22,6 +22,7 @@ public:
 
     MonitorData getMonitorData();
     int getTimestep() const;
+    void setTimestep(int timestep);
 
     void setSimulationParameters(SimulationParameters const& parameters);
     void setExecutionParameters(ExecutionParameters const& parameters);
