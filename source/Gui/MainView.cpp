@@ -138,13 +138,8 @@ void MainView::setupMenu()
 	ui->menuSimulation->addAction(actions->actionExit);
 
 	ui->menuSettings->addAction(actions->actionComputationSettings);
-	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
-	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
-	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
-	ui->menuSymbolMap->addAction(actions->actionEditSymbols);
-	ui->menuSymbolMap->addAction(actions->actionLoadSymbols);
-	ui->menuSymbolMap->addAction(actions->actionSaveSymbols);
-	ui->menuSymbolMap->addAction(actions->actionMergeWithSymbols);
+    ui->menuSettings->addAction(actions->actionEditSimParameters);
+    ui->menuSettings->addAction(actions->actionEditSymbols);
 
 	ui->menuView->addAction(actions->actionEditor);
 	ui->menuView->addAction(actions->actionMonitor);
@@ -198,8 +193,6 @@ void MainView::setupFontsAndColors()
 	ui->menuCollection->setFont(GuiSettings::getGlobalFont());
 	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
-	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
-	ui->menuSymbolMap->setFont(GuiSettings::getGlobalFont());
     ui->menuAnalysis->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
