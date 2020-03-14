@@ -227,9 +227,6 @@ __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
     _dynamicMemory.cellPointerArray2 = cellPointerArray2;
     __syncthreads();
 
-    mutateOwnToken();
-    __syncthreads();
-
     if (firstCellOfConstructionSite) {
         auto const distance = QuantityConverter::convertDataToDistance(_token->memory[Enums::Constr::IN_DIST]);
         if (!checkDistance(distance)) {
@@ -324,7 +321,7 @@ __inline__ __device__ void ConstructorFunction::mutateOwnToken()
 
 __inline__ __device__ void ConstructorFunction::mutateDuplicatedToken(Token * token)
 {
-    auto const memoryPartition = calcPartition(256, threadIdx.x, blockDim.x);
+    auto const memoryPartition = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
     for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorDataMutationProb) {
             token->memory[index] = _data->numberGen.random(255);
