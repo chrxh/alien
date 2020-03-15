@@ -66,7 +66,7 @@ public:
                 __syncthreads();
 
                 if (numClusters > 0) {
-                    auto const& partition = calcPartition(numClusters, threadIdx.x, blockDim.x);
+                    auto const partition = calcPartition(numClusters, threadIdx.x, blockDim.x);
                     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
                         auto const& cluster = clusterArray[index];
                         auto const distance = map.mapDistance(cluster->pos, pos);
