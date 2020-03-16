@@ -29,8 +29,9 @@ public:
 
     __inline__ __device__ void createCellFunctionData_block();
 
-    __inline__ __device__ void processingHeavyWeightedFeatures_block();
+    __inline__ __device__ void processingConstructors_block();
 
+    __inline__ __device__ void processingCommunicatorsAnsSensors_block();
 
 private:
     __inline__ __device__ void calcAnticipatedTokens(Cluster* cluster, int& result);
@@ -289,7 +290,7 @@ __inline__ __device__ void TokenProcessor::processingLightWeigthedFeatures_block
     __syncthreads();
 }
 
-__inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block()
+__inline__ __device__ void TokenProcessor::processingConstructors_block()
 {
     __syncthreads();
 
@@ -301,6 +302,31 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
 
     ConstructorFunction constructor;
     constructor.init_block(_cluster, _data);
+
+    __syncthreads();
+
+    for (int tokenIndex = 0; tokenIndex < numTokenPointers; ++tokenIndex) {
+        auto const& token = _cluster->tokenPointers[tokenIndex];
+        auto const type = token->cell->getCellFunctionType();
+        __syncthreads();
+        switch (type) {
+        case Enums::CellFunction::CONSTRUCTOR: {
+            constructor.processing_block(token);
+        } break;
+        }
+        __syncthreads();
+    }
+}
+
+__inline__ __device__ void TokenProcessor::processingCommunicatorsAnsSensors_block()
+{
+    __syncthreads();
+
+    auto const numTokenPointers = _cluster->numTokenPointers;
+    if (0 == numTokenPointers) {
+        __syncthreads();
+        return;
+    }
 
     SensorFunction sensor;
     sensor.init_block(_cluster, _data);
@@ -314,9 +340,6 @@ __inline__ __device__ void TokenProcessor::processingHeavyWeightedFeatures_block
         auto const type = token->cell->getCellFunctionType();
         __syncthreads();
         switch (type) {
-        case Enums::CellFunction::CONSTRUCTOR: {
-            constructor.processing_block(token);
-        } break;
         case Enums::CellFunction::SENSOR: {
             sensor.processing_block(token);
         } break;

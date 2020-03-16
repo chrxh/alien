@@ -99,7 +99,17 @@ __global__ void tokenProcessingStep3(SimulationData data, int numClusters)
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
         tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.processingHeavyWeightedFeatures_block();
+        tokenProcessor.processingConstructors_block();
+    }
+}
+
+__global__ void tokenProcessingStep4(SimulationData data, int numClusters)
+{
+    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        TokenProcessor tokenProcessor;
+        tokenProcessor.init_block(data, clusterIndex);
+        tokenProcessor.processingCommunicatorsAnsSensors_block();
     }
 }
 
@@ -144,6 +154,7 @@ __global__ void calcSimulationTimestep(SimulationData data)
     KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
+    KERNEL_CALL(tokenProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
