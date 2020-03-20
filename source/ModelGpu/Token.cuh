@@ -9,12 +9,6 @@ struct Token
     Cell* sourceCell;
     Cell* cell;
 
-    __inline__ __device__ int getMaxConnectionsForConstructor()
-    {
-        return static_cast<unsigned char>(memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS])
-            % (cudaSimulationParameters.cellMaxBonds + 1);
-    }
-
     __inline__ __device__ int getTokenBranchNumber()
     {
         return static_cast<unsigned char>(memory[0]) % cudaSimulationParameters.cellMaxTokenBranchNumber;
