@@ -315,9 +315,9 @@ void ConstructorGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellFunctionConstructorOffspringCellDistance = 1;
-    _parameters.cellFunctionConstructorDataMutationProb = 0;
-    _parameters.cellFunctionConstructorPropertyMutationProb = 0;
-    _parameters.cellFunctionConstructorStructureMutationProb = 0;
+    _parameters.cellFunctionConstructorCellDataMutationProb = 0;
+    _parameters.cellFunctionConstructorCellPropertyMutationProb = 0;
+    _parameters.cellFunctionConstructorCellStructureMutationProb = 0;
     _context->setSimulationParameters(_parameters);
 
     _resultChecker = boost::make_shared<_ResultChecker>(_parameters, _spaceProp);
