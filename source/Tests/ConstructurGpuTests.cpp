@@ -2224,11 +2224,9 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_finishWith
         runStartConstructionOnHorizontalClusterTest(StartConstructionOnHorizontalClusterTestParameters().token(token));
 
     auto const expectedCellPos = QVector2D{cellDistance + _offspringDistance, 0};
-    QByteArray expectedTokenMemory(_parameters.tokenMemorySize, 0);
-    expectedTokenMemory[0] = cellBranchNumber;
     auto const expectedToken = TokenDescription()
                                    .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
-                                   .setData(expectedTokenMemory);
+                                   .setData(*token.data);
     _resultChecker->check(
         result,
         Expectations()
@@ -2603,7 +2601,7 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWit
     expectedTokenMemory[0] = cellBranchNumber;
     auto const expectedToken = TokenDescription()
         .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
-        .setData(expectedTokenMemory);
+        .setData(*token.data);
     _resultChecker->check(
         result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedToken(expectedToken));
 }
