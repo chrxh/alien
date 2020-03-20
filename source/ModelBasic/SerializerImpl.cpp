@@ -149,7 +149,7 @@ namespace boost {
 		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
 		{
 			ar & data.clusterMaxRadius;
-			ar & data.cellFunctionConstructorDataMutationProb;
+			ar & data.cellFunctionConstructorCellDataMutationProb;
 			ar & data.cellMinDistance;
 			ar & data.cellMaxDistance;
 			ar & data.cellMass_Reciprocal;
@@ -180,16 +180,17 @@ namespace boost {
 			ar & data.radiationVelocityPerturbation;
             ar & data.cellMinTokenUsages;
             ar & data.cellFunctionWeaponEnergyCost;
-            ar & data.cellFunctionConstructorPropertyMutationProb;
-            ar & data.cellFunctionConstructorStructureMutationProb;
+            ar & data.cellFunctionConstructorCellPropertyMutationProb;
+            ar & data.cellFunctionConstructorCellStructureMutationProb;
             ar & data.cellTokenUsageDecayProb;
+            ar & data.cellFunctionConstructorTokenDataMutationProb;
 
             int fillInt = 0;
 			float fillFloat = 0.0f;
 			for (int i = 0; i < 46; ++i) {
 				ar & fillInt;
 			}
-			for (int i = 0; i < 50; ++i) {
+			for (int i = 0; i < 49; ++i) {
 				ar & fillFloat;
 			}
 		}
