@@ -61,7 +61,8 @@ private:
     __inline__ __device__ bool checkDistance(float distance);
     __inline__ __device__ Cell* getFirstCellOfConstructionSite();
 
-    __inline__ __device__ void mutateOwnToken();
+    __inline__ __device__ void mutateConstructionData(ConstructionData& constructionData);
+    __inline__ __device__ void mutateCellFunctionData(Cell* cell);
     __inline__ __device__ void mutateDuplicatedToken(Token* token);
 
     __inline__ __device__ void continueConstruction(
@@ -214,6 +215,7 @@ __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
     __shared__ ConstructionData constructionData;
     if (0 == threadIdx.x) {
         readConstructionData(token, constructionData);
+        mutateConstructionData(constructionData);
     }
     __syncthreads();
 
@@ -311,44 +313,56 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
     return result;
 }
 
-__inline__ __device__ void ConstructorFunction::mutateOwnToken()
+__inline__ __device__ void ConstructorFunction::mutateConstructionData(ConstructionData& constructionData)
 {
-    if (0 == threadIdx.x) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorPropertyMutationProb) {
-            _token->memory[Enums::Constr::IN_OPTION] = _data->numberGen.random(255);
-        }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorStructureMutationProb) {
-            _token->memory[Enums::Constr::INOUT_ANGLE] = _data->numberGen.random(255);
-        }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorStructureMutationProb) {
-            _token->memory[Enums::Constr::IN_DIST] = _data->numberGen.random(255);
-        }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorPropertyMutationProb) {
-            _token->memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = _data->numberGen.random(255);
-        }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorPropertyMutationProb) {
-            _token->memory[Enums::Constr::IN_CELL_BRANCH_NO] = _data->numberGen.random(255);
-        }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorPropertyMutationProb) {
-            _token->memory[Enums::Constr::IN_CELL_METADATA] = _data->numberGen.random(255);
-        }
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorPropertyMutationProb) {
-            _token->memory[Enums::Constr::IN_CELL_FUNCTION] = _data->numberGen.random(255);
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.constrInOption = static_cast<Enums::ConstrInOption::Type>(
+            static_cast<unsigned char>(_data->numberGen.random(255)) % Enums::ConstrInOption::_COUNTER);
+    }
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
+        constructionData.angle = _data->numberGen.random(255);
+    }
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
+        constructionData.distance = _data->numberGen.random(255);
+    }
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.maxConnections = _data->numberGen.random(255);
+    }
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.branchNumber = _data->numberGen.random(255);
+    }
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.metaData = _data->numberGen.random(255);
+    }
+    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.cellFunctionType = _data->numberGen.random(255);
+    }
+}
+
+__inline__ __device__ void ConstructorFunction::mutateCellFunctionData(Cell * cell)
+{
+    auto const staticDataBlock = calcPartition(cell->numStaticBytes, threadIdx.x, blockDim.x);
+    for (int i = staticDataBlock.startIndex; i <= staticDataBlock.endIndex; ++i) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+            cell->staticData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1) % MAX_TOKEN_MEM_SIZE];
         }
     }
-    auto const memoryPartition = calcPartition(MAX_CELL_STATIC_BYTES + MAX_CELL_MUTABLE_BYTES + 2, threadIdx.x, blockDim.x);
-    for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorDataMutationProb) {
-            _token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA + index] = _data->numberGen.random(255);
+
+    auto const offset = cell->numStaticBytes + 1;
+    auto const mutableDataBlock = calcPartition(cell->numMutableBytes, threadIdx.x, blockDim.x);
+    for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+            cell->mutableData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
         }
     }
+
 }
 
 __inline__ __device__ void ConstructorFunction::mutateDuplicatedToken(Token * token)
 {
     auto const memoryPartition = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
     for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorDataMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
             token->memory[index] = _data->numberGen.random(255);
         }
     }
@@ -1419,6 +1433,9 @@ __inline__ __device__ void ConstructorFunction::constructNewCell(
     for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
         result->mutableData[i] = _token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
     }
+    __syncthreads();
+
+    mutateCellFunctionData(result);
 }
 
 __inline__ __device__ void ConstructorFunction::constructNewToken(

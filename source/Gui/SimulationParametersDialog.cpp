@@ -98,9 +98,10 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
     setItem("offspring cell energy", 0, _simulationParameters.cellFunctionConstructorOffspringCellEnergy);
     setItem("offspring cell distance", 0, _simulationParameters.cellFunctionConstructorOffspringCellDistance);
 	setItem("offspring token energy", 0, _simulationParameters.cellFunctionConstructorOffspringTokenEnergy);
-    setItem("cell data mutation probability", 0, _simulationParameters.cellFunctionConstructorDataMutationProb);
-    setItem("cell property mutation probability", 0, _simulationParameters.cellFunctionConstructorPropertyMutationProb);
-    setItem("structure mutation probability", 0, _simulationParameters.cellFunctionConstructorStructureMutationProb);
+    setItem("token data mutation probability", 0, _simulationParameters.cellFunctionConstructorTokenDataMutationProb);
+    setItem("cell data mutation probability", 0, _simulationParameters.cellFunctionConstructorCellDataMutationProb);
+    setItem("cell property mutation probability", 0, _simulationParameters.cellFunctionConstructorCellPropertyMutationProb);
+    setItem("cell structure mutation probability", 0, _simulationParameters.cellFunctionConstructorCellStructureMutationProb);
     setItem("range", 0, _simulationParameters.cellFunctionSensorRange);
     setItem("range", 1, _simulationParameters.cellFunctionCommunicatorRange);
 
@@ -138,9 +139,10 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
     _simulationParameters.cellFunctionConstructorOffspringCellEnergy = getItemReal("offspring cell energy", 0);
     _simulationParameters.cellFunctionConstructorOffspringCellDistance = getItemReal("offspring cell distance", 0);
     _simulationParameters.cellFunctionConstructorOffspringTokenEnergy = getItemReal("offspring token energy", 0);
-    _simulationParameters.cellFunctionConstructorDataMutationProb = getItemReal("cell data mutation probability", 0);
-    _simulationParameters.cellFunctionConstructorPropertyMutationProb = getItemReal("cell property mutation probability", 0);
-    _simulationParameters.cellFunctionConstructorStructureMutationProb = getItemReal("structure mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorTokenDataMutationProb = getItemReal("token data mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorCellDataMutationProb = getItemReal("cell data mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorCellPropertyMutationProb = getItemReal("cell property mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorCellStructureMutationProb = getItemReal("cell structure mutation probability", 0);
     _simulationParameters.cellFunctionSensorRange = getItemReal("range", 0);
     _simulationParameters.cellFunctionCommunicatorRange = getItemReal("range", 1);
 
