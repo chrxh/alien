@@ -235,6 +235,14 @@
        </item>
        <item>
         <property name="text">
+         <string>token data mutation probability</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>cell data mutation probability</string>
         </property>
         <property name="flags">
@@ -251,7 +259,7 @@
        </item>
        <item>
         <property name="text">
-         <string>structure mutation probability</string>
+         <string>cell structure mutation probability</string>
         </property>
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
