@@ -23,11 +23,24 @@ private:
     struct CellFeatureAnalysisDescription
     {
         int cellFunction;
+        QByteArray constData;
 
-        bool operator<(CellFeatureAnalysisDescription const& other) const { return cellFunction < other.cellFunction; }
+        bool operator<(CellFeatureAnalysisDescription const& other) const {
+            if (cellFunction != other.cellFunction) {
+                return cellFunction < other.cellFunction;
+            }
+            if (constData != other.constData) {
+                return constData < other.constData;
+            }
+            return false;
+        }
+        bool operator==(CellFeatureAnalysisDescription const& other) const
+        {
+            return cellFunction == other.cellFunction && constData == other.constData;
+        }
         bool operator!=(CellFeatureAnalysisDescription const& other) const
         {
-            return cellFunction != other.cellFunction;
+            return !operator==(other);
         }
     };
     struct CellAnalysisDescription
@@ -37,6 +50,21 @@ private:
         bool tokenBlocked;
         int tokenBranchNumber;
         CellFeatureAnalysisDescription feature;
+
+        bool operator==(CellAnalysisDescription const& other) const
+        {
+            return maxConnections == other.maxConnections
+                && numConnections == other.numConnections
+                && tokenBlocked == other.tokenBlocked
+                && tokenBranchNumber == other.tokenBranchNumber
+                && feature == other.feature;
+        }
+
+        bool operator!=(CellAnalysisDescription const& other) const
+        {
+            return !operator==(other);
+        }
+
         bool operator<(CellAnalysisDescription const& other) const
         {
             if (maxConnections != other.maxConnections) {
@@ -62,7 +90,15 @@ private:
         bool hasToken;
         std::vector<CellAnalysisDescription> cells;
 
-        bool operator<(ClusterAnalysisDescription const& other) const { return cells < other.cells; }
+        bool operator<(ClusterAnalysisDescription const& other) const {
+            if (hasToken != other.hasToken) {
+                return hasToken < other.hasToken;
+            }
+            if (cells != other.cells) {
+                return cells < other.cells;
+            }
+            return false;
+        }
     };
     struct PartitionData
     {
