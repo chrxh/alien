@@ -362,7 +362,7 @@ __inline__ __device__ void ConstructorFunction::mutateDuplicatedToken(Token * to
 {
     auto const memoryPartition = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
     for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorTokenDataMutationProb) {
             token->memory[index] = _data->numberGen.random(255);
         }
     }
