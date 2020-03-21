@@ -96,8 +96,9 @@ auto DataAnalyzer::getAnalysisDescription(ClusterDescription const& cluster) con
 
             CellFeatureAnalysisDescription featureAnalysisData;
             featureAnalysisData.cellFunction = cell.cellFeature->getType();
+            featureAnalysisData.constData = cell.cellFeature->constData;
             cellAnalysisData.feature = featureAnalysisData;
-
+            
             result.cells.emplace_back(cellAnalysisData);
             if (cell.tokens && cell.tokens->size() > 0) {
                 result.hasToken = true;
