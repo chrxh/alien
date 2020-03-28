@@ -200,6 +200,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         }
         int index = tokenTO.cellIndex - clusterTO.cellStartIndex;
         token.cell = cells + index;
+        token.sourceCell = token.cell;
     }
 
     __syncthreads();
