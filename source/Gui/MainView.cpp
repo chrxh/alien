@@ -162,6 +162,9 @@ void MainView::setupMenu()
 	ui->menuEntity->addAction(actions->actionCopyToken);
 	ui->menuEntity->addAction(actions->actionPasteToken);
 	ui->menuEntity->addAction(actions->actionDeleteToken);
+    ui->menuEntity->addSeparator();
+    ui->menuEntity->addAction(actions->actionCopyToClipboard);
+    ui->menuEntity->addAction(actions->actionPasteFromClipboard);
 
 	ui->menuCollection->addAction(actions->actionNewRectangle);
 	ui->menuCollection->addAction(actions->actionNewHexagon);
