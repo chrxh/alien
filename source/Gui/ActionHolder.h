@@ -45,6 +45,8 @@ public:
 	QAction* actionCopyToken = nullptr;
 	QAction* actionPasteToken = nullptr;
 	QAction* actionDeleteToken = nullptr;
+    QAction* actionCopyToClipboard = nullptr;
+    QAction* actionPasteFromClipboard = nullptr;
 
 	QAction* actionNewRectangle = nullptr;
 	QAction* actionNewHexagon = nullptr;

@@ -49,6 +49,8 @@ private:
 	Q_SLOT void onDeleteToken();
 	Q_SLOT void onToggleCellInfo(bool show);
 	Q_SLOT void onCenterSelection(bool show);
+    Q_SLOT void onCopyToClipboard();
+    Q_SLOT void onPasteFromClipboard();
 
 	Q_SLOT void onNewRectangle();
 	Q_SLOT void onNewHexagon();
