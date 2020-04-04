@@ -178,6 +178,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDeleteToken->setEnabled(false);
 	actionDeleteToken->setToolTip("delete token");
 
+    actionCopyToClipboard = new QAction("Copy memory to clipboard", this);
+    actionCopyToClipboard->setEnabled(false);
+
+    actionPasteFromClipboard = new QAction("Paste memory from clipboard", this);
+    actionPasteFromClipboard->setEnabled(false);
+
 	actionNewRectangle = new QAction("New rectangle", this);
 	actionNewRectangle->setEnabled(true);
 

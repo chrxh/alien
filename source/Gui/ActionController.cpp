@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QInputDialog>
+#include <QClipboard>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -113,6 +114,8 @@ void ActionController::init(
 	connect(actions->actionPasteToken, &QAction::triggered, this, &ActionController::onPasteToken);
 	connect(actions->actionShowCellInfo, &QAction::toggled, this, &ActionController::onToggleCellInfo);
 	connect(actions->actionCenterSelection, &QAction::toggled, this, &ActionController::onCenterSelection);
+    connect(actions->actionCopyToClipboard, &QAction::triggered, this, &ActionController::onCopyToClipboard);
+    connect(actions->actionPasteFromClipboard, &QAction::triggered, this, &ActionController::onPasteFromClipboard);
 
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
@@ -624,6 +627,52 @@ void ActionController::onCenterSelection(bool centerSelection)
 	_visualEditor->toggleCenterSelection(centerSelection);
 }
 
+void ActionController::onCopyToClipboard()
+{
+    auto const cellIds = _repository->getSelectedCellIds();
+    CHECK(cellIds.size() == 1);
+    auto const tokenIndex = _repository->getSelectedTokenIndex();
+    CHECK(tokenIndex);
+    auto const& cell = _repository->getCellDescRef(*cellIds.begin());
+    auto const& token = cell.tokens->at(*tokenIndex);
+
+    auto const& tokenMemory = *token.data;
+    auto tokenMemoryInHex = tokenMemory.toHex();
+
+    for (int index = 255 * 2; index > 0; index -= 2) {
+        tokenMemoryInHex.insert(index, QChar(' ' ));
+    }
+    
+    auto clipboard = QApplication::clipboard();
+    clipboard->setText(QString::fromStdString(tokenMemoryInHex.toStdString()));
+}
+
+void ActionController::onPasteFromClipboard()
+{
+    auto const cellIds = _repository->getSelectedCellIds();
+    CHECK(cellIds.size() == 1);
+    auto const tokenIndex = _repository->getSelectedTokenIndex();
+    CHECK(tokenIndex);
+    auto& cell = _repository->getCellDescRef(*cellIds.begin());
+    auto& token = cell.tokens->at(*tokenIndex);
+
+    auto& tokenMemory = *token.data;
+    auto clipboard = QApplication::clipboard();
+    QString newTokenMemoryInHex = clipboard->text();
+    newTokenMemoryInHex.remove(QChar(' '));
+    tokenMemory = QByteArray::fromHex(newTokenMemoryInHex.toUtf8());
+
+    auto const tokenMemorySize = _mainModel->getSimulationParameters().tokenMemorySize;
+    if (tokenMemorySize != tokenMemory.size()) {
+        QMessageBox msgBox(QMessageBox::Critical, "Error", "Clipboard memory does not fit to token memory.");
+        msgBox.exec();
+        return;
+    }
+    Q_EMIT _notifier->notifyDataRepositoryChanged({
+        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
+    }, UpdateDescription::All);
+}
+
 void ActionController::onNewRectangle()
 {
 	NewRectangleDialog dialog(_mainModel->getSimulationParameters());
@@ -829,6 +878,8 @@ void ActionController::updateActionsEnableState()
 	actions->actionCopyToken->setEnabled(editMode && cellWithTokenSelected);
 	actions->actionPasteToken->setEnabled(editMode && entitySelected && tokenCopied);
 	actions->actionDeleteToken->setEnabled(editMode && cellWithTokenSelected);
+    actions->actionCopyToClipboard ->setEnabled(editMode && cellWithTokenSelected);
+    actions->actionPasteFromClipboard->setEnabled(editMode && cellWithTokenSelected);
 
 	actions->actionNewRectangle->setEnabled(true);
 	actions->actionNewHexagon->setEnabled(true);
