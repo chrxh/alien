@@ -21,7 +21,7 @@ namespace
         result.setMaxParticlePointers(2000000 * 10);
         result.setMaxTokenPointers(500000 * 10);
         result.setDynamicMemorySize(200000000);
-        result.setStringByteSize(10000000);
+        result.setStringByteSize(100000000);
         return result;
     }
 }
@@ -40,15 +40,53 @@ protected:
     virtual void SetUp() {}
 };
 
-/**
-* Situation: - many concentrated replicator clusters
-*			 - simulating 100 time steps
-* Expected result: no crash
-*/
-TEST_F(ReplicatorGpuTests, regressionTestManyConcentratedReplicators)
+TEST_F(ReplicatorGpuTests, testManyReplicators)
 {
-    DataDescription loadData;
     auto serializer = _basicFacade->buildSerializer();
+
+    SimulationParameters parameters;
+    {
+        auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.par" };
+        SerializationHelper::loadFromFile<SimulationParameters>(
+            filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
+    }
+    _context->setSimulationParameters(parameters);
+
+    DataDescription loadData;
+    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
+    SerializationHelper::loadFromFile<DataDescription>(
+        filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
+
+    auto& replicator = loadData.clusters->at(0);
+
+    DataDescription origData;
+    for (int i = 0; i < 20000; ++i) {
+        setCenterPos(replicator, QVector2D{ static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
+            static_cast<float>(_numberGen->getRandomReal(0, _universeSize.y)) });
+        replicator.vel = QVector2D{ static_cast<float>(_numberGen->getRandomReal(-0.09, 0.09)),
+            static_cast<float>(_numberGen->getRandomReal(-0.09, 0.09f)) };
+        replicator.angularVel = 0;
+        _descHelper->makeValid(replicator);
+        origData.addCluster(replicator);
+    }
+
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(1000, _controller);
+}
+
+TEST_F(ReplicatorGpuTests, testManyConcentratedReplicators)
+{
+    auto serializer = _basicFacade->buildSerializer();
+
+    SimulationParameters parameters;
+    {
+        auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.par" };
+        SerializationHelper::loadFromFile<SimulationParameters>(
+            filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
+    }
+    _context->setSimulationParameters(parameters);
+
+    DataDescription loadData;
     auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
     SerializationHelper::loadFromFile<DataDescription>(
         filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
@@ -70,25 +108,67 @@ TEST_F(ReplicatorGpuTests, regressionTestManyConcentratedReplicators)
     IntegrationTestHelper::runSimulation(100, _controller);
 }
 
-/**
-* Situation: many advanced replicators
-* Expected result: no crash
-* Fixed errors:
-*   - energy is never negative in cells (is not checked here but can be checked in Cell::changeEnergy)
-*   - constructor accessed connections of cells from other clusters with no locking
-*/
-TEST_F(ReplicatorGpuTests, regressionTestManyAdvancedReplicators)
+namespace
 {
-    DataDescription loadData;
+    ModelGpuData getModelGpuDataWithManyThreads()
+    {
+        ModelGpuData result;
+        result.setNumThreadsPerBlock(256);
+        result.setNumBlocks(128);
+        result.setMaxClusters(100000);
+        result.setMaxCells(500000);
+        result.setMaxParticles(500000);
+        result.setMaxTokens(50000);
+        result.setMaxCellPointers(500000 * 10);
+        result.setMaxClusterPointers(100000 * 10);
+        result.setMaxParticlePointers(500000 * 10);
+        result.setMaxTokenPointers(50000 * 10);
+        result.setDynamicMemorySize(100000000);
+        result.setStringByteSize(1000);
+        return result;
+    }
+}
+
+class ReplicatorGpuTestsWithManyThreads : public IntegrationGpuTestFramework
+{
+public:
+    ReplicatorGpuTestsWithManyThreads()
+        : IntegrationGpuTestFramework({ 1000, 1000 }, getModelGpuDataForReplicatorGpuTests())
+    { }
+
+    virtual ~ReplicatorGpuTestsWithManyThreads() = default;
+};
+
+TEST_F(ReplicatorGpuTestsWithManyThreads, testManyReplicators)
+{
     auto serializer = _basicFacade->buildSerializer();
-    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator2.aco" };
-    SerializationHelper::loadFromFile<DataDescription>(
-        filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
+
+    SimulationParameters parameters;
+    {
+        auto filename = string{ "..\\..\\source\\Tests\\TestData\\dna-replicator.par" };
+        SerializationHelper::loadFromFile<SimulationParameters>(
+            filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
+    }
+    _context->setSimulationParameters(parameters);
+
+    DataDescription loadData;
+    {
+        auto filename = string{ "..\\..\\source\\Tests\\TestData\\dna-replicator.aco" };
+        SerializationHelper::loadFromFile<DataDescription>(
+            filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
+    }
 
     auto& replicator = loadData.clusters->at(0);
 
     DataDescription origData;
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 2500; ++i) {
+        origData.addCluster(createRectangularCluster(
+            {8, 4},
+            boost::none,
+            QVector2D(_numberGen->getRandomReal(-0.1, 0.1), _numberGen->getRandomReal(-0.1, 0.1))));
+    }
+
+    for (int i = 0; i < 20; ++i) {
         setCenterPos(replicator, QVector2D{ static_cast<float>(_numberGen->getRandomReal(0, _universeSize.x)),
             static_cast<float>(_numberGen->getRandomReal(0, _universeSize.y)) });
         replicator.vel = QVector2D{ static_cast<float>(_numberGen->getRandomReal(-0.09, 0.09)),
@@ -99,6 +179,8 @@ TEST_F(ReplicatorGpuTests, regressionTestManyAdvancedReplicators)
     }
 
     IntegrationTestHelper::updateData(_access, origData);
-    IntegrationTestHelper::runSimulation(1000, _controller);
+    IntegrationTestHelper::runSimulation(5000, _controller);
+    DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+    check(origData, newData);
 }
 
