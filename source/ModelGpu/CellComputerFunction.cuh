@@ -30,7 +30,8 @@ __inline__ __device__ void CellComputerFunction::processing(Token* token)
     auto cell = token->cell;
     bool condTable[MAX_CELL_STATIC_BYTES / 3 + 1];
     int condPointer(0);
-    for (int instructionPointer = 0; instructionPointer < cell->numStaticBytes; ) {
+    int numStaticBytes = min(cell->numStaticBytes, cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3);
+    for (int instructionPointer = 0; instructionPointer < numStaticBytes; ) {
 
         //decode instruction
         InstructionCoded instruction;
