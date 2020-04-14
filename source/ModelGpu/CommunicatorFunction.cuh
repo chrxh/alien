@@ -108,7 +108,6 @@ __inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
             token->cell->releaseLock();
         }
     }
-
     __syncthreads();
 }
 
@@ -219,7 +218,12 @@ __inline__ __device__ void CommunicatorFunction::sendMessageToNearbyCommunicator
     }
     __syncthreads();
 
-    auto const clusters = clusterList.asArray(&_data->dynamicMemory);
+    __shared__ Cluster** clusters;
+    if (0 == threadIdx.x) {
+        clusters = clusterList.asArray(&_data->dynamicMemory);
+    }
+    __syncthreads();
+
     auto const clusterPartition = calcPartition(clusterList.getSize(), threadIdx.x, blockDim.x);
 
     for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
