@@ -44,13 +44,11 @@ private:
 	void setupFullScreen();
 
 private:
-	Q_SLOT void documentationWindowClosed();
 	Q_SLOT void monitorClosed();
 
 private:
 	Ui::MainView* ui = nullptr;
 	VisualEditController* _visualEditor = nullptr;
-	DocumentationWindow* _documentationWindow = nullptr;
 
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;

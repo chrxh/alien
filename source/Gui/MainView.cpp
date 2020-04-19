@@ -1,4 +1,7 @@
-﻿#include "ModelBasic/SimulationController.h"
+﻿#include <QDesktopServices>
+#include <QUrl>
+
+#include "ModelBasic/SimulationController.h"
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/SerializationHelper.h"
@@ -7,7 +10,6 @@
 #include "Gui/ToolbarContext.h"
 #include "Gui/ActionController.h"
 #include "Gui/ActionHolder.h"
-#include "Gui/DocumentationWindow.h"
 #include "Gui/MonitorController.h"
 
 #include "InfoController.h"
@@ -33,9 +35,7 @@ MainView::MainView(QWidget * parent)
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
-	_documentationWindow = new DocumentationWindow(this);
 	_monitor = new MonitorController(this);
-	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
 }
 
@@ -88,7 +88,7 @@ InfoController * MainView::getInfoController() const
 
 void MainView::showDocumentation(bool show)
 {
-	_documentationWindow->setVisible(show);
+    QDesktopServices::openUrl(QUrl("https://alien-project.org/documentation.html"));
 }
 
 void MainView::resizeEvent(QResizeEvent *event)
@@ -234,11 +234,6 @@ void MainView::setupFullScreen()
 	if (fullScreen) {
 		setWindowState(windowState() | Qt::WindowFullScreen);
 	}
-}
-
-void MainView::documentationWindowClosed()
-{
-	_actions->getActionHolder()->actionDocumentation->setChecked(false);
 }
 
 void MainView::monitorClosed()

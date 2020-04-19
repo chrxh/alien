@@ -9,9 +9,6 @@
       <Extensions>cpp;cxx;c;def</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
-    <Filter Include="Source Files\Assistance">
-      <UniqueIdentifier>{6b1aa77d-d5f0-4133-ae8e-d70427125474}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Dialogs">
       <UniqueIdentifier>{d16cdb26-d3e1-445a-b5cc-92d808304c2c}</UniqueIdentifier>
     </Filter>
@@ -142,15 +139,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_ActionModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\DocumentationWindow.cpp">
-      <Filter>Source Files\Assistance</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DocumentationWindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DocumentationWindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\CellComputerEditTab.cpp">
@@ -616,12 +604,6 @@
     <CustomBuild Include="..\..\source\Gui\ActionModel.h">
       <Filter>Source Files\Actions</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DocumentationWindow.h">
-      <Filter>Source Files\Assistance</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\DocumentationWindow.ui">
-      <Filter>Source Files\Assistance</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\CellComputerEditTab.h">
       <Filter>Source Files\DataEditor</Filter>
     </CustomBuild>
@@ -898,9 +880,6 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\StringHelper.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_DocumentationWindow.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_CellComputerEditTab.h">
       <Filter>Generated Files</Filter>
