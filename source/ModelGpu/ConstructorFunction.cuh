@@ -341,9 +341,13 @@ __inline__ __device__ void ConstructorFunction::mutateConstructionData(Construct
 
 __inline__ __device__ void ConstructorFunction::mutateCellFunctionData(Cell * cell)
 {
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
-        cell->numStaticBytes = _data->numberGen.random(MAX_CELL_STATIC_BYTES);
+    if (0 == threadIdx.x) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+            cell->numStaticBytes = _data->numberGen.random(MAX_CELL_STATIC_BYTES);
+        }
     }
+    __syncthreads();
+
     auto const staticDataBlock = calcPartition(MAX_CELL_STATIC_BYTES, threadIdx.x, blockDim.x);
     for (int i = staticDataBlock.startIndex; i <= staticDataBlock.endIndex; ++i) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
@@ -351,9 +355,13 @@ __inline__ __device__ void ConstructorFunction::mutateCellFunctionData(Cell * ce
         }
     }
 
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
-        cell->numMutableBytes = _data->numberGen.random(MAX_CELL_MUTABLE_BYTES);
+    if (0 == threadIdx.x) {
+        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+            cell->numMutableBytes = _data->numberGen.random(MAX_CELL_MUTABLE_BYTES);
+        }
     }
+    __syncthreads();
+
     auto const mutableDataBlock = calcPartition(MAX_CELL_MUTABLE_BYTES, threadIdx.x, blockDim.x);
     for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
