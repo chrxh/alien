@@ -16,7 +16,6 @@ class ParticleItem;
 class CellConnectionItem;
 class ItemConfig;
 class MonitorView;
-class DocumentationWindow;
 class MetadataManager;
 class PixelUniverseView;
 class ItemUniverseView;
