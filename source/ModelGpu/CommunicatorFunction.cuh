@@ -213,13 +213,10 @@ __inline__ __device__ void CommunicatorFunction::sendMessageToNearbyCommunicator
     _data->cellFunctionData.mapSectionCollector.getClusters_block(senderCell->absPos,
         cudaSimulationParameters.cellFunctionCommunicatorRange, _data->cellMap, &_data->dynamicMemory, clusterList);
 
+    __shared__ Cluster** clusters;
+
     if (0 == threadIdx.x) {
         numMessages = 0;
-    }
-    __syncthreads();
-
-    __shared__ Cluster** clusters;
-    if (0 == threadIdx.x) {
         clusters = clusterList.asArray(&_data->dynamicMemory);
     }
     __syncthreads();
