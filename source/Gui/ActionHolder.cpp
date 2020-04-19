@@ -237,7 +237,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionAbout->setEnabled(true);
 	actionDocumentation = new QAction("Documentation", this);
 	actionDocumentation->setEnabled(true);
-	actionDocumentation->setCheckable(true);
+	actionDocumentation->setCheckable(false);
 
 	actionRestrictTPS = new QAction("restrict TPS", this);
 	actionRestrictTPS->setCheckable(true);
