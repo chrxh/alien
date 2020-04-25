@@ -315,6 +315,7 @@ void ConstructorGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;  //exclude radiation
     _parameters.cellFunctionConstructorOffspringCellDistance = 1;
+    _parameters.cellFunctionConstructorTokenDataMutationProb = 0;
     _parameters.cellFunctionConstructorCellDataMutationProb = 0;
     _parameters.cellFunctionConstructorCellPropertyMutationProb = 0;
     _parameters.cellFunctionConstructorCellStructureMutationProb = 0;
