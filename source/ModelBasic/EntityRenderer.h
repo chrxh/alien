@@ -16,12 +16,12 @@ public:
 	void renderCell(IntVector2D pos, uint8_t colorCode, double energy)
 	{
         pos -= _positionOfImage;
+        _space->correctPosition(pos);
         if (!_imageRect.isContained(pos)) {
             return;
         }
 		auto color = EntityRenderer::calcCellColor(colorCode, energy);
 
-		_space->correctPosition(pos);
 		_image->setPixel(pos.x, pos.y, color);
 
 		--pos.x;
