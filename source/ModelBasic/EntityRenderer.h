@@ -63,7 +63,7 @@ public:
 
 		auto const color = EntityRenderer::calcTokenColor();
         _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0xA0);
+        EntityRenderer::colorPixel(pos, color, 0x70);
 
         --pos.x;
         _space->correctPosition(pos);
