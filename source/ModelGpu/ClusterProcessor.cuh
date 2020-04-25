@@ -68,8 +68,8 @@ private:
 __inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
     __shared__ Cluster* cluster;
-    __shared__ Cluster* firstOtherCluster;
-    __shared__ int firstOtherClusterId;
+    __shared__ Cluster* largestOtherCluster;
+    __shared__ int largestOtherClusterSize;
     __shared__ int numberOfCollidingCells;
     __shared__ float2 collisionCenterPos;
     __shared__ bool avoidCollision;
@@ -77,8 +77,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
     __shared__ CollisionState state;
     if (0 == threadIdx.x) {
         cluster = _cluster;
-        firstOtherCluster = nullptr;
-        firstOtherClusterId = 0;
+        largestOtherCluster = nullptr;
+        largestOtherClusterSize = 0;
         collisionCenterPos.x = 0;
         collisionCenterPos.y = 0;
         numberOfCollidingCells = 0;
@@ -86,6 +86,9 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
         state = CollisionState::ElasticCollision;
     }
     __syncthreads();
+
+    __shared__ BlockLock blockLock;
+    blockLock.init_block();
 
     //find colliding cluster
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
@@ -97,11 +100,13 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 if (!otherCell || otherCell == cell) {
                     continue;
                 }
-                if (cluster == otherCell->cluster) {
+
+                auto const otherCluster = otherCell->cluster;
+                if (cluster == otherCluster) {
                     continue;
                 }
                 if (cluster->isActive()) {
-                    otherCell->cluster->unfreeze(30);
+                    otherCluster->unfreeze(30);
                 }
 
                 if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
@@ -113,25 +118,28 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
                     continue;
                 }
-                int origFirstOtherClusterId = atomicCAS(&firstOtherClusterId, 0, otherCell->cluster->id);
-                if (0 != origFirstOtherClusterId) {
-                    continue;
+                auto origLargestOtherClusterSize = atomicMax_block(&largestOtherClusterSize, otherCluster->numCellPointers);
+                if (origLargestOtherClusterSize < otherCluster->numCellPointers) {
+                    blockLock.getLock();
+                    if (largestOtherClusterSize == otherCluster->numCellPointers) {
+                        largestOtherCluster = otherCluster;
+                    }
+                    blockLock.releaseLock();
                 }
 
-                firstOtherCluster = otherCell->cluster;
             }
         }
     }
     __syncthreads();
 
-    if (!firstOtherCluster) {
+    if (!largestOtherCluster) {
         __syncthreads();
         return;
     }
 
     __shared__ SystemDoubleLock lock;
     if (0 == threadIdx.x) {
-        lock.init(&cluster->locked, &firstOtherCluster->locked);
+        lock.init(&cluster->locked, &largestOtherCluster->locked);
         lock.tryLock();
     }
     __syncthreads();
@@ -148,7 +156,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 if (!otherCell || otherCell == cell) {
                     continue;
                 }
-                if (firstOtherCluster != otherCell->cluster) {
+                if (largestOtherCluster != otherCell->cluster) {
                     continue;
                 }
                 if (0 == cell->alive || 0 == otherCell->alive) {
@@ -190,7 +198,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
     }
 
     if (CollisionState::Fusion == state) {
-        if (nullptr == cluster->clusterToFuse && nullptr == firstOtherCluster->clusterToFuse) {
+        if (nullptr == cluster->clusterToFuse && nullptr == largestOtherCluster->clusterToFuse) {
             for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
                 Cell* cell = cluster->cellPointers[index];
                 for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
@@ -199,7 +207,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                         if (!otherCell || otherCell == cell) {
                             continue;
                         }
-                        if (firstOtherCluster != otherCell->cluster) {
+                        if (largestOtherCluster != otherCell->cluster) {
                             continue;
                         }
                         if (0 == cell->alive || 0 == otherCell->alive) {
@@ -229,10 +237,10 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
             }
             __syncthreads();
             if (0 == threadIdx.x) {
-                cluster->clusterToFuse = firstOtherCluster;
-                firstOtherCluster->clusterToFuse = cluster;
+                cluster->clusterToFuse = largestOtherCluster;
+                largestOtherCluster->clusterToFuse = cluster;
                 cluster->unfreeze(30);
-                firstOtherCluster->unfreeze(30);
+                largestOtherCluster->unfreeze(30);
             }
         }
     }
@@ -246,10 +254,10 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
             collisionCenterPos = collisionCenterPos / numberOfCollidingCells;
             rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
             _data->cellMap.mapDisplacementCorrection(rAPp);
-            rBPp = { collisionCenterPos.x - firstOtherCluster->pos.x, collisionCenterPos.y - firstOtherCluster->pos.y };
+            rBPp = { collisionCenterPos.x - largestOtherCluster->pos.x, collisionCenterPos.y - largestOtherCluster->pos.y };
             _data->cellMap.mapDisplacementCorrection(rBPp);
             outwardVector =
-                Physics::tangentialVelocity(rBPp, firstOtherCluster->vel, firstOtherCluster->angularVel)
+                Physics::tangentialVelocity(rBPp, largestOtherCluster->vel, largestOtherCluster->angularVel)
                 - Physics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel);
             Math::rotateQuarterCounterClockwise(rAPp);
             Math::rotateQuarterCounterClockwise(rBPp);
@@ -266,7 +274,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                     if (!otherCell || otherCell == cell) {
                         continue;
                     }
-                    if (firstOtherCluster != otherCell->cluster) {
+                    if (largestOtherCluster != otherCell->cluster) {
                         continue;
                     }
                     if (0 == cell->alive || 0 == otherCell->alive) {
@@ -288,23 +296,23 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
 
         if (0 == threadIdx.x) {
             float mA = cluster->numCellPointers;
-            float mB = firstOtherCluster->numCellPointers;
+            float mB = largestOtherCluster->numCellPointers;
             float2 vA2{ 0.0f, 0.0f };
             float2 vB2{ 0.0f, 0.0f };
             float angularVelA2{ 0.0f };
             float angularVelB2{ 0.0f };
             Math::normalize(n);
-            Physics::calcCollision(cluster->vel, firstOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
-                firstOtherCluster->angularVel, n, cluster->angularMass, firstOtherCluster->angularMass,
+            Physics::calcCollision(cluster->vel, largestOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
+                largestOtherCluster->angularVel, n, cluster->angularMass, largestOtherCluster->angularMass,
                 mA, mB, vA2, vB2, angularVelA2, angularVelB2);
 
             cluster->vel = vA2;
             cluster->angularVel = angularVelA2;
-            firstOtherCluster->vel = vB2;
-            firstOtherCluster->angularVel = angularVelB2;
+            largestOtherCluster->vel = vB2;
+            largestOtherCluster->angularVel = angularVelB2;
         }
         updateCellVelocity_block(cluster);
-        updateCellVelocity_block(firstOtherCluster);
+        updateCellVelocity_block(largestOtherCluster);
     }
     __syncthreads();
 
