@@ -162,9 +162,10 @@ private:
 	{
 		QRgb const& origColor = _image->pixel(pos.x, pos.y);
 
-		int red = (qRed(color) * alpha + qRed(origColor) * (255 - alpha)) / 255;
-		int green = (qGreen(color) * alpha + qGreen(origColor) * (255 - alpha)) / 255;
-		int blue = (qBlue(color) * alpha + qBlue(origColor) * (255 - alpha)) / 255;
+        int red = std::min(qRed(origColor) + qRed(color) * alpha / 255, 255);
+        int green = std::min(qGreen(origColor) + qGreen(color) * alpha / 255, 255);
+        int blue = std::min(qBlue(origColor) + qBlue(color) * alpha / 255, 255);
+
 		_image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
 	}
 
