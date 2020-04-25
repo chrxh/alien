@@ -22,24 +22,24 @@ public:
         }
 		auto color = EntityRenderer::calcCellColor(colorCode, energy);
 
-		_image->setPixel(pos.x, pos.y, color);
+        EntityRenderer::colorPixel(pos, color, 0xB0);
 
 		--pos.x;
 		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x60);
+		EntityRenderer::colorPixel(pos, color, 0x40);
 
 		pos.x += 2;
 		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x60);
+		EntityRenderer::colorPixel(pos, color, 0x40);
 
 		--pos.x;
 		--pos.y;
 		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x60);
+		EntityRenderer::colorPixel(pos, color, 0x40);
 
 		pos.y += 2;
 		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x60);
+		EntityRenderer::colorPixel(pos, color, 0x40);
 	}
 
 	void renderParticle(IntVector2D pos, double energy)
