@@ -160,13 +160,14 @@ private:
 
 	void colorPixel(IntVector2D const& pos, QRgb const& color, int alpha)
 	{
-		QRgb const& origColor = _image->pixel(pos.x, pos.y);
+        QRgb * scanLine = reinterpret_cast<QRgb *>(_image->scanLine(pos.y));
 
+        auto origColor = scanLine[pos.x];
         int red = std::min(qRed(origColor) + qRed(color) * alpha / 255, 255);
         int green = std::min(qGreen(origColor) + qGreen(color) * alpha / 255, 255);
         int blue = std::min(qBlue(origColor) + qBlue(color) * alpha / 255, 255);
 
-		_image->setPixel(pos.x, pos.y, qRgb(red, green, blue));
+        scanLine[pos.x] = qRgb(red, green, blue);
 	}
 
 private:
