@@ -7,9 +7,14 @@
 class EntityRenderer
 {
 public:
-	EntityRenderer(QImagePtr const& image, IntVector2D const& positionOfImage, SpaceProperties const* space)
-        : _image(image), _positionOfImage(positionOfImage), _space(space), _imageRect{ {2, 2}, {_image->width() - 3, _image->height() - 3} }
-	{
+    EntityRenderer(QImagePtr const& image, IntVector2D const& positionOfImage, SpaceProperties const* space)
+        : _image(image)
+        , _positionOfImage(positionOfImage)
+        , _space(space)
+        , _imageRect{{2, 2}, {_image->width() - 3, _image->height() - 3}}
+        , _imageData(reinterpret_cast<QRgb*>(_image->bits()))
+        , _imageWidth(_image->width())
+    {
         _space->truncatePosition(_positionOfImage);
     }
 
@@ -22,24 +27,7 @@ public:
         }
 		auto color = EntityRenderer::calcCellColor(colorCode, energy);
 
-        EntityRenderer::colorPixel(pos, color, 0xB0);
-
-		--pos.x;
-		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x40);
-
-		pos.x += 2;
-		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x40);
-
-		--pos.x;
-		--pos.y;
-		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x40);
-
-		pos.y += 2;
-		_space->correctPosition(pos);
-		EntityRenderer::colorPixel(pos, color, 0x40);
+        EntityRenderer::colorPixel(pos, color);
 	}
 
 	void renderParticle(IntVector2D pos, double energy)
@@ -51,7 +39,7 @@ public:
 
 		_space->correctPosition(pos);
         auto const color = EntityRenderer::calcParticleColor(energy);
-        EntityRenderer::colorPixel(pos, color, 0x80);
+        EntityRenderer::colorPixel(pos, color);
 	}
 
 	void renderToken(IntVector2D pos)
@@ -63,24 +51,7 @@ public:
 
 		auto const color = EntityRenderer::calcTokenColor();
         _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x70);
-
-        --pos.x;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x25);
-
-        pos.x += 2;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x25);
-
-        --pos.x;
-        --pos.y;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x25);
-
-        pos.y += 2;
-        _space->correctPosition(pos);
-        EntityRenderer::colorPixel(pos, color, 0x25);
+        EntityRenderer::colorPixel(pos, color);
 	}
 
 private:
@@ -158,20 +129,38 @@ private:
 		return (r << 16) | (g << 8) | b;
 	}
 
-	void colorPixel(IntVector2D const& pos, QRgb const& color, int alpha)
+	void colorPixel(IntVector2D pos, QRgb color)
 	{
-        QRgb * scanLine = reinterpret_cast<QRgb *>(_image->scanLine(pos.y));
+        color = (color >> 1) & 0x7e7e7e;
+        int memPos = pos.y * _imageWidth + pos.x;
+        addingColor(_imageData[memPos], color);
 
-        auto origColor = scanLine[pos.x];
-        int red = std::min(qRed(origColor) + qRed(color) * alpha / 255, 255);
-        int green = std::min(qGreen(origColor) + qGreen(color) * alpha / 255, 255);
-        int blue = std::min(qBlue(origColor) + qBlue(color) * alpha / 255, 255);
+        color = (color >> 1) & 0x7e7e7e;
+        addingColor(_imageData[memPos - 1], color);
+        addingColor(_imageData[memPos + 1], color);
+        addingColor(_imageData[memPos - _imageWidth], color);
+        addingColor(_imageData[memPos + _imageWidth], color);
+    }
 
-        scanLine[pos.x] = qRgb(red, green, blue);
-	}
+    void addingColor(QRgb& color, QRgb const& colorToAdd)
+    {
+        auto newColor = (color & 0xfefefe) + (colorToAdd & 0xfefefe);
+        if ((newColor & 0x1000000) != 0) {
+            newColor |= 0xff0000;
+        }
+        if ((newColor & 0x10000) != 0) {
+            newColor |= 0xff00;
+        }
+        if ((newColor & 0x100) != 0) {
+            newColor |= 0xff;
+        }
+        color = newColor;
+    }
 
 private:
 	QImagePtr _image;
+    int _imageWidth = 0;
+    QRgb * _imageData = nullptr;
     IntRect _imageRect;
 
     IntVector2D _positionOfImage;
