@@ -65,5 +65,6 @@ private:
 
 	bool _updateInProgress = false;
 	vector<CudaJob> _waitingJobs;
+
 };
 
