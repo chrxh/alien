@@ -11,7 +11,7 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	_pixelScene = pixelScene;
 	_itemScene = itemScene;
 	_activeScene = activeScene;
-	_view->resetTransform();
+    _view->resetTransform();
 	zoom(2.0);
 	setSceneToView(boost::none, activeScene);
 
@@ -72,7 +72,7 @@ void ViewportController::zoom(double factor)
 {
 	disconnectAll();
 	_view->scale(factor, factor);
-	connectAll();
+    connectAll();
 
 	Q_EMIT scrolled();
 }
