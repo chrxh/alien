@@ -140,7 +140,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
     __shared__ SystemDoubleLock lock;
     if (0 == threadIdx.x) {
         lock.init(&cluster->locked, &largestOtherCluster->locked);
-        lock.tryLock();
+        lock.getLock();
     }
     __syncthreads();
     if (!lock.isLocked()) {
