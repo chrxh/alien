@@ -214,6 +214,11 @@ public:
         return true;
     }
 
+    __device__ __inline__ void getLock()
+    {
+        while (!tryLock()) {};
+    }
+
     __device__ __inline__ bool isLocked()
     {
         return _lockState1 == 0 && _lockState2 == 0;

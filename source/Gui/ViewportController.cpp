@@ -32,13 +32,7 @@ void ViewportController::setModeToNoUpdate()
 
 void ViewportController::setActiveScene(ActiveScene activeScene)
 {
-/*
-	saveScenePos();
-*/
 	setSceneToView(_activeScene, activeScene);
-/*
-	loadScenePos();
-*/
 	_activeScene = activeScene;
 }
 
