@@ -20,6 +20,7 @@ public:
     int getLayers () const;
     double getDistance () const;
     double getCellEnergy () const;
+    int getColorCode() const;
 
 private:
 	Q_SLOT void okClicked();
