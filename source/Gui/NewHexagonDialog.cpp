@@ -18,7 +18,8 @@ NewHexagonDialog::NewHexagonDialog(SimulationParameters const& simulationParamet
 		GuiSettings::getSettingsValue(Const::NewHexagonDistanceKey, Const::NewHexagonDistanceDefault)));
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::NewHexagonCellEnergyKey, Const::NewHexagonCellEnergyDefault)));
-
+    ui->colorCodeEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::NewHexagonColorCodeKey, Const::NewHexagonColorCodeDefault)));
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewHexagonDialog::okClicked);
 }
 
@@ -45,11 +46,18 @@ double NewHexagonDialog::getCellEnergy () const
     return ui->energyEdit->text().toDouble(&ok);
 }
 
+int NewHexagonDialog::getColorCode() const
+{
+    bool ok(true);
+    return ui->colorCodeEdit->text().toInt(&ok);
+}
+
 void NewHexagonDialog::okClicked()
 {
 	GuiSettings::setSettingsValue(Const::NewHexagonLayersKey, getLayers());
 	GuiSettings::setSettingsValue(Const::NewHexagonDistanceKey, getDistance());
 	GuiSettings::setSettingsValue(Const::NewHexagonCellEnergyKey, getCellEnergy());
+    GuiSettings::setSettingsValue(Const::NewHexagonColorCodeKey, getColorCode());
 
 	accept();
 }
