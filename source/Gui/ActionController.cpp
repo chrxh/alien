@@ -750,10 +750,11 @@ void ActionController::onNewHexagon()
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
 		double energy = dialog.getCellEnergy();
+        int colorCode = dialog.getColorCode();
 
         auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
         auto hexagon = factory->createHexagon(
-            DescriptionFactory::CreateHexagonParameters().layers(layers).cellDistance(dist).cellEnergy(energy));
+            DescriptionFactory::CreateHexagonParameters().layers(layers).cellDistance(dist).cellEnergy(energy).colorCode(colorCode));
 
 		_repository->addAndSelectData(DataDescription().addCluster(hexagon), { 0, 0 });
 		Q_EMIT _notifier->notifyDataRepositoryChanged({

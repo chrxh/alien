@@ -40,7 +40,7 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
                     .setMaxConnections(maxCon)
                     .setFlagTokenBlocked(false)
                     .setTokenBranchNumber(0)
-                    .setMetadata(CellMetadata())
+                    .setMetadata(CellMetadata().setColor(parameters._colorCode))
                     .setCellFeature(CellFeatureDescription());
 
             if (layers - 1 + i > 0) {
@@ -62,12 +62,11 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
                         .setEnergy(parameters._cellEnergy)
                         .setPos(
                             parameters._centerPosition
-                            + QVector2D{static_cast<float>(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), 
-                                        static_cast<float>(+j * incY)})
+                            + QVector2D{static_cast<float>(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), static_cast<float>(+j * incY)})
                         .setMaxConnections(maxCon)
                         .setFlagTokenBlocked(false)
                         .setTokenBranchNumber(0)
-                        .setMetadata(CellMetadata())
+                        .setMetadata(CellMetadata().setColor(parameters._colorCode))
                         .setCellFeature(CellFeatureDescription());
 
                 if (layers - 1 + i > 0) {

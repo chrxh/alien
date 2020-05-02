@@ -161,6 +161,8 @@ namespace Const
 	const double NewHexagonDistanceDefault = 1.0;
 	const std::string NewHexagonCellEnergyKey = "newHaxagon/cellEnergy";
 	const double NewHexagonCellEnergyDefault = 100.0;
+    const std::string NewHexagonColorCodeKey = "newHaxagon/colorCode";
+    const int NewHexagonColorCodeDefault = 0;
 
 	const std::string NewParticlesTotalEnergyKey = "newParticles/totalEnergy";
 	const double NewParticlesTotalEnergyDefault = 1000000.0;
