@@ -46,13 +46,13 @@ private:
         Cluster* sourceCluster2,
         int additionalTokenPointers,
         Cluster* targetCluster);
-    __inline__ __device__ void getNumberOfTokensToCopy_block(Cluster* sourceCluster, Cluster* targetCluster, 
+    __inline__ __device__ void getNumberOfTokensToCopy_block(Cluster* sourceCluster, Cluster* targetCluster,
         int& counter, PartitionData const& tokenBlock);
 
 
     SimulationData* _data;
     EntityFactory _factory;
-    
+
     Cluster* _cluster;
     Cluster** _clusterPointer;
 
@@ -162,7 +162,9 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                     >= cudaSimulationParameters.cellMaxDistance) {
                     continue;
                 }
-                if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+                auto protectionCounter = atomicAdd(&cell->protectionCounter, 0);
+                auto otherProtectionCounter = atomicAdd(&otherCell->protectionCounter, 0);
+                if (protectionCounter > 0 || otherProtectionCounter > 0) {
                     avoidCollision = true;
                     break;
                 }
@@ -283,8 +285,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                     float2 normal = Physics::calcNormalToCell(otherCell, outwardVector);
                     atomicAdd(&n.x, normal.x);
                     atomicAdd(&n.y, normal.y);
-                    cell->protectionCounter = PROTECTION_TIMESTEPS;
-                    otherCell->protectionCounter = PROTECTION_TIMESTEPS;
+                    atomicExch(&cell->protectionCounter, PROTECTION_TIMESTEPS);
+                    atomicExch(&otherCell->protectionCounter, PROTECTION_TIMESTEPS);
                 }
             }
         }
@@ -302,10 +304,12 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 largestOtherCluster->angularVel, n, cluster->angularMass, largestOtherCluster->angularMass,
                 mA, mB, vA2, vB2, angularVelA2, angularVelB2);
 
-            cluster->vel = vA2;
-            cluster->angularVel = angularVelA2;
-            largestOtherCluster->vel = vB2;
-            largestOtherCluster->angularVel = angularVelB2;
+            atomicExch(&cluster->vel.x, vA2.x);
+            atomicExch(&cluster->vel.y, vA2.y);
+            atomicExch(&cluster->angularVel, angularVelA2);
+            atomicExch(&largestOtherCluster->vel.x, vB2.x);
+            atomicExch(&largestOtherCluster->vel.y, vB2.y);
+            atomicExch(&largestOtherCluster->angularVel, angularVelB2);
         }
         updateCellVelocity_block(cluster);
         updateCellVelocity_block(largestOtherCluster);
@@ -412,8 +416,8 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_block()
             auto const cellEnergy = cell->getEnergy();
             auto &pos = cell->absPos;
             float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
-                + float2{(_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                         (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+                + float2{ (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                         (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation };
             float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
             _data->cellMap.mapPosCorrection(particlePos);
 
@@ -610,7 +614,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         entries[index].cluster.vel.y /= numCells;
         entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         entries[index].cluster.numCellPointers = 0;
-        
+
         auto const newCluster = factory.createCluster();
 
         newClusters[index] = newCluster;
@@ -900,7 +904,7 @@ __inline__ __device__ void ClusterProcessor::copyTokenPointers_block(
 }
 
 __inline__ __device__ void
-ClusterProcessor::getNumberOfTokensToCopy_block(Cluster* sourceCluster, Cluster* targetCluster, 
+ClusterProcessor::getNumberOfTokensToCopy_block(Cluster* sourceCluster, Cluster* targetCluster,
     int& counter, PartitionData const& tokenBlock)
 {
     for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
