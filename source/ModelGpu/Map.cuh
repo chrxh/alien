@@ -120,7 +120,6 @@ public:
             value |= numEntriesBits;
             atomicMax(_map + mapEntry, value);
             entrySubarray[index] = mapEntry;
-
         }
         __syncthreads();
     }
@@ -130,11 +129,11 @@ public:
         int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
         mapPosCorrection(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
-        auto cellIndex =_map[mapEntry] & 0xffffffff;
+        auto cellIndex = _map[mapEntry];
         if (0 == cellIndex) {
             return nullptr;
         }
-        return _cellPointersArray[cellIndex];
+        return _cellPointersArray[cellIndex & 0xffffffff];
     }
 
     __device__ __inline__ void cleanup_system()
