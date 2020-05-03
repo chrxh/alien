@@ -1096,11 +1096,39 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestFusionAndHeavyCollision)
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
     check(origData, newData);
-/*
+}
 
-    auto energyBefore = calcEnergy(origData);
-    auto energyAfter = calcEnergy(newData);
+TEST_F(ClusterGpuTests, testSimultaneousCollisionOfBlocks)
+{
+    DataDescription origData;
+    origData.addCluster(createRectangularCluster({ 11, 101 }, QVector2D{ 100.5f, 100.5f }, QVector2D{ 0, 0 }));
+    origData.addCluster(createRectangularCluster({ 11, 11 }, QVector2D{ 112.5f, 55.5f }, QVector2D{ -0.2f, 0 }));
+    origData.addCluster(createRectangularCluster({ 11, 11 }, QVector2D{ 112.5f, 145.5f }, QVector2D{ -0.2f, 0 }));
+    auto const clusterId1 = origData.clusters->at(0).id;
+    auto const clusterId2 = origData.clusters->at(1).id;
+    auto const clusterId3 = origData.clusters->at(2).id;
 
-    EXPECT_LE(energyAfter, energyBefore + FLOATINGPOINT_MEDIUM_PRECISION);
-*/
+    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::runSimulation(10, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    ASSERT_EQ(3, newData.clusters->size());
+
+    auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
+    {
+        auto cluster = clusterById.at(clusterId1);
+        EXPECT_GT(-NearlyZero, cluster.vel->x());
+    }
+
+    {
+        auto cluster = clusterById.at(clusterId2);
+        EXPECT_LT(NearlyZero, cluster.vel->x());
+    }
+
+    {
+        auto cluster = clusterById.at(clusterId3);
+        EXPECT_LT(NearlyZero, cluster.vel->x());
+    }
+    check(origData, newData);
 }

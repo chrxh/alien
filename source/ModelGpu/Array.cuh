@@ -31,6 +31,16 @@ public:
         checkCudaErrors(cudaMemset(_numEntries, 0, sizeof(int)));
     }
 
+    __host__ __inline__ T* getArrayForHost() const
+    {
+        T* result;
+        checkCudaErrors(cudaMemcpy(&result, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+        return result;
+    }
+
+    __device__ __inline__ T* getArrayForDevice() const { return *_data; }
+
+
     __host__ __inline__ void free()
     {
         T* data = nullptr;
@@ -83,7 +93,5 @@ public:
 
     __device__ __inline__ int getNumEntries() const { return *_numEntries; }
     __device__ __inline__ void setNumEntries(int value) const { *_numEntries = value; }
-
-    __device__ __inline__ T* getEntireArray() const { return *_data; }
 
 };

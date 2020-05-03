@@ -66,11 +66,11 @@ public:
     __host__ __inline__ void init(int2 const& size, int maxEntries)
     {
         MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<T*>(size.x * size.y, _map);
+        CudaMemoryManager::getInstance().acquireMemory<T>(size.x * size.y, _map);
         _mapEntries.init(maxEntries);
 
-        std::vector<T*> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T*) * size.x * size.y, cudaMemcpyHostToDevice));
+        std::vector<T> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T) * size.x * size.y, cudaMemcpyHostToDevice));
     }
 
     __device__ __inline__ void reset() { _mapEntries.reset(); }
@@ -87,60 +87,69 @@ public:
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
-            _map[mapEntry] = nullptr;
+            _map[mapEntry] = 0;
         }
     }
 
-    __device__ __inline__ T* get(float2 const& pos) const
-    {
-        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        mapPosCorrection(posInt);
-        auto mapEntry = posInt.x + posInt.y * _size.x;
-        return _map[mapEntry];
-    }
-
 protected:
-    T** _map;
+    T* _map;
     Array<int> _mapEntries;
 };
 
-class CellMap : public BasicMap<Cell>
+class CellMap : public BasicMap<unsigned long long int>
 {
 public:
-    __device__ __inline__ void set_block(int numEntities, Cell** entities)
+    __host__ __inline__ void init(int2 const& size, int maxEntries, Cell** cellPointerArray)
+    {
+        _cellPointerArray = cellPointerArray;
+        BasicMap<unsigned long long int>::init(size, maxEntries);
+    }
+
+    __device__ __inline__ void set_block(int numEntities, Cell** cellsToSet)
     {
         if (0 == numEntities) {
             return;
         }
 
         __shared__ int* entrySubarray;
+        __shared__ unsigned long long int numEntriesBits;
         if (0 == threadIdx.x) {
             entrySubarray = _mapEntries.getNewSubarray(numEntities);
+            numEntriesBits = static_cast<unsigned long long int>(numEntities) << 32;
         }
         __syncthreads();
 
         auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& entity = entities[index];
+            auto const& entity = cellsToSet[index];
             int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
             mapPosCorrection(posInt);
             auto mapEntry = posInt.x + posInt.y * _size.x;
-            _map[mapEntry] = entity;
+        
+            unsigned long long int value =  &entity - _cellPointerArray;
+            value |= numEntriesBits;
+            atomicMax(_map + mapEntry, value);
             entrySubarray[index] = mapEntry;
-            if (auto const origCell = _map[mapEntry]) {
-                if (origCell->cluster->numCellPointers < numEntities) {
-                    _map[mapEntry] = entity;
-                }
-            } else {
-                _map[mapEntry] = entity;
-                entrySubarray[index] = mapEntry;
-            }
+
         }
         __syncthreads();
     }
+
+    __device__ __inline__ Cell* get(float2 const& pos) const
+    {
+        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
+        auto cellIndex =_map[mapEntry] & 0xffffffff;
+        return _cellPointerArray[cellIndex];
+    }
+
+private:
+    Cell** _cellPointerArray;
+
 };
 
-class ParticleMap : public BasicMap<Particle>
+class ParticleMap : public BasicMap<Particle*>
 {
 public:
     __device__ __inline__ void set_block(int numEntities, Particle** entities)
@@ -165,5 +174,13 @@ public:
             entrySubarray[index] = mapEntry;
         }
         __syncthreads();
+    }
+
+    __device__ __inline__ Particle* get(float2 const& pos) const
+    {
+        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
+        return _map[mapEntry];
     }
 };
