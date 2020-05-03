@@ -81,16 +81,6 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void cleanup_system()
-    {
-        auto partition =
-            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& mapEntry = _mapEntries.at(index);
-            _map[mapEntry] = 0;
-        }
-    }
-
 protected:
     T* _map;
     Array<int> _mapEntries;
@@ -141,7 +131,20 @@ public:
         mapPosCorrection(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
         auto cellIndex =_map[mapEntry] & 0xffffffff;
+        if (0 == cellIndex) {
+            return nullptr;
+        }
         return _cellPointersArray[cellIndex];
+    }
+
+    __device__ __inline__ void cleanup_system()
+    {
+        auto partition =
+            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& mapEntry = _mapEntries.at(index);
+            _map[mapEntry] = 0;
+        }
     }
 
 private:
@@ -182,5 +185,15 @@ public:
         mapPosCorrection(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
         return _map[mapEntry];
+    }
+
+    __device__ __inline__ void cleanup_system()
+    {
+        auto partition =
+            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& mapEntry = _mapEntries.at(index);
+            _map[mapEntry] = nullptr;
+        }
     }
 };
