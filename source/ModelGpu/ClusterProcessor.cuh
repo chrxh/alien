@@ -68,27 +68,15 @@ private:
 __inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
     __shared__ Cluster* cluster;
-    __shared__ Cluster* largestOtherCluster;
-    __shared__ int largestOtherClusterSize;
-    __shared__ int numberOfCollidingCells;
-    __shared__ float2 collisionCenterPos;
-    __shared__ bool avoidCollision;
-    enum CollisionState { ElasticCollision, Fusion };
-    __shared__ CollisionState state;
+    __shared__ unsigned long long int largestOtherClusterData;
+    __shared__ Cluster* clustersArray;
+
     if (0 == threadIdx.x) {
         cluster = _cluster;
-        largestOtherCluster = nullptr;
-        largestOtherClusterSize = 0;
-        collisionCenterPos.x = 0;
-        collisionCenterPos.y = 0;
-        numberOfCollidingCells = 0;
-        avoidCollision = false;
-        state = CollisionState::ElasticCollision;
+        largestOtherClusterData = 0;
+        clustersArray = _data->entities.clusters.getArrayForDevice();
     }
     __syncthreads();
-
-    __shared__ BlockLock blockLock;
-    blockLock.init_block();
 
     //find colliding cluster
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
@@ -118,31 +106,39 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos) >= cudaSimulationParameters.cellMaxDistance) {
                     continue;
                 }
-                auto origLargestOtherClusterSize = atomicMax_block(&largestOtherClusterSize, otherCluster->numCellPointers);
-                if (origLargestOtherClusterSize < otherCluster->numCellPointers) {
-                    blockLock.getLock();
-                    if (largestOtherClusterSize == otherCluster->numCellPointers) {
-                        largestOtherCluster = otherCluster;
-                    }
-                    blockLock.releaseLock();
-                }
-
+                unsigned long long int otherClusterData = otherCell->cluster - clustersArray;
+                otherClusterData |= (static_cast<unsigned long long int>(otherCluster->numCellPointers) << 32);
+                atomicMax_block(&largestOtherClusterData, otherClusterData);
             }
         }
     }
     __syncthreads();
 
-    if (!largestOtherCluster) {
+    if (0 == largestOtherClusterData) {
         __syncthreads();
         return;
     }
 
     __shared__ SystemDoubleLock lock;
+    __shared__ Cluster* largestOtherCluster;
+    __shared__ float2 collisionCenterPos;
+    __shared__ int numberOfCollidingCells;
+    __shared__ bool avoidCollision;
+    enum CollisionState { ElasticCollision, Fusion };
+    __shared__ CollisionState state;
     if (0 == threadIdx.x) {
+        collisionCenterPos.x = 0;
+        collisionCenterPos.y = 0;
+        numberOfCollidingCells = 0;
+        avoidCollision = false;
+        state = CollisionState::ElasticCollision;
+        largestOtherClusterData = largestOtherClusterData & 0xffffffff;
+        largestOtherCluster = &clustersArray[largestOtherClusterData];
         lock.init(&cluster->locked, &largestOtherCluster->locked);
         lock.getLock();
     }
     __syncthreads();
+
     if (!lock.isLocked()) {
         __syncthreads();
         return;
