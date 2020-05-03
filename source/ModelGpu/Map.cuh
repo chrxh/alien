@@ -101,7 +101,7 @@ class CellMap : public BasicMap<unsigned long long int>
 public:
     __host__ __inline__ void init(int2 const& size, int maxEntries, Cell** cellPointerArray)
     {
-        _cellPointerArray = cellPointerArray;
+        _cellPointersArray = cellPointerArray;
         BasicMap<unsigned long long int>::init(size, maxEntries);
     }
 
@@ -126,7 +126,7 @@ public:
             mapPosCorrection(posInt);
             auto mapEntry = posInt.x + posInt.y * _size.x;
         
-            unsigned long long int value =  &entity - _cellPointerArray;
+            unsigned long long int value =  &entity - _cellPointersArray;
             value |= numEntriesBits;
             atomicMax(_map + mapEntry, value);
             entrySubarray[index] = mapEntry;
@@ -141,11 +141,11 @@ public:
         mapPosCorrection(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
         auto cellIndex =_map[mapEntry] & 0xffffffff;
-        return _cellPointerArray[cellIndex];
+        return _cellPointersArray[cellIndex];
     }
 
 private:
-    Cell** _cellPointerArray;
+    Cell** _cellPointersArray;
 
 };
 
