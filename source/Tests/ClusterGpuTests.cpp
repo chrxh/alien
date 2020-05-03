@@ -258,8 +258,8 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 	auto size = _spaceProp->getSize();
 
 	DataDescription origData;
-	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, size.y + 0.5f }, QVector2D{ 0, -0.1f }, 0.0));
-	origData.addCluster(createHorizontalCluster(10, QVector2D{ 100, size.y - 0.5f }, QVector2D{ 0, 0.1f }, 0.0));
+	origData.addCluster(createHorizontalCluster(2, QVector2D{ 100, size.y + 0.5f }, QVector2D{ 0, -0.1f }, 0.0));
+	origData.addCluster(createHorizontalCluster(2, QVector2D{ 100, size.y - 0.5f }, QVector2D{ 0, 0.1f }, 0.0));
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
