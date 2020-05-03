@@ -88,7 +88,7 @@ __inline__ __device__ void ParticleProcessor::processingTransformation_system()
 {
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         if (_data->numberGen.random() < cudaSimulationParameters.cellTransformationProb) {
-            auto& particle = _data->entities.particlePointers.getEntireArray()[particleIndex];
+            auto& particle = _data->entities.particlePointers.getArrayForDevice()[particleIndex];
             auto innerEnergy = particle->getEnergy()- Physics::linearKineticEnergy(1.0f, particle->vel);
             if (innerEnergy >= cudaSimulationParameters.cellMinEnergy) {
                 EntityFactory factory;
