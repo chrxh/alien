@@ -147,15 +147,15 @@ public:
     template<typename T>
     __inline__ __device__ static bool checkPointer(T* pointer, Array<T> array)
     {
-        if (array.getEntireArray() <= pointer && pointer < (array.getEntireArray() + array.getNumEntries())) {
+        if (array.getArrayForDevice() <= pointer && pointer < (array.getArrayForDevice() + array.getNumEntries())) {
             return true;
         }
         else {
             printf(
                 "boundary check failed. pointer %llu not in interval [%llu, %llu). Array size: %d\n",
                 (uintptr_t)(pointer),
-                (uintptr_t)(array.getEntireArray()),
-                (uintptr_t)(array.getEntireArray() + array.getNumEntries()),
+                (uintptr_t)(array.getArrayForDevice()),
+                (uintptr_t)(array.getArrayForDevice() + array.getNumEntries()),
                 array.getNumEntries());
             return false;
         }
