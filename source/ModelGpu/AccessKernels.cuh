@@ -217,7 +217,7 @@ __device__ void filterCluster(int2 const& rectUpperLeft, int2 const& rectLowerRi
 __device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     Array<Particle*> particles, int particleIndex)
 {
-    auto& particle = particles.getEntireArray()[particleIndex];
+    auto& particle = particles.getArrayForDevice()[particleIndex];
     if (isContained(rectUpperLeft, rectLowerRight, particle->absPos)) {
         particle = nullptr;
     }
