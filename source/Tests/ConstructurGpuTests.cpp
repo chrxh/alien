@@ -996,18 +996,21 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
 
     TestResult result;
     result.movementOfCenter = newCenter - *cluster.pos;
-
-    auto const& newConstructor = newCellByCellId.at(cellIds[offset + 1]);
-    auto const& newToken = newConstructor.tokens->at(0);
-
     result.origToken = parameters._tokenOnSourceCell;
-    result.token = newToken;
+
+    auto findResult = newCellByCellId.find(cellIds[offset + 1]);
+    if (findResult != newCellByCellId.end()) {
+        auto const& newConstructor = newCellByCellId.at(cellIds[offset + 1]);
+        result.constructorCell = newConstructor;
+
+        auto const& newToken = newConstructor.tokens->at(0);
+        result.token = newToken;
+    }
     result.origSourceCell = origCells[offset];
     if (newCellByCellId.find(cellIds[offset]) != newCellByCellId.end()) {
         result.sourceCell = newCellByCellId.at(cellIds[offset]);
     }
     result.origConstructorCell = origCells[offset + 1];
-    result.constructorCell = newConstructor;
     for (int i = 0; i < offset + 2; ++i) {
         result.origConstructor.emplace_back(origCells[i]);
         newCellByCellId.erase(cellIds[i]);
@@ -1237,13 +1240,18 @@ void ConstructorGpuTests::_ResultChecker::checkIfDestruction(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
-    auto const& token = testResult.token;
+    EXPECT_GE(testResult.origConstructionSite.size(), testResult.constructionSite.size());
 
-    EXPECT_EQ(expectations._tokenOutput, getConstrOut(token));
+    //constructor not destroyed?
+    if (testResult.constructorCell.id != 0) {
 
-    if (Enums::ConstrIn::DO_NOTHING == getConstrIn(token)) {
-        EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
-        return;
+        //evaluate constructor data
+        EXPECT_EQ(expectations._tokenOutput, getConstrOut(testResult.token));
+
+        if (Enums::ConstrIn::DO_NOTHING == getConstrIn(testResult.token)) {
+            EXPECT_FALSE(testResult.getFirstCellOfConstructionSiteAfterCreation());
+            return;
+        }
     }
 }
 
