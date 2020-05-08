@@ -1240,10 +1240,12 @@ void ConstructorGpuTests::_ResultChecker::checkIfDestruction(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
-    EXPECT_GE(testResult.origConstructionSite.size(), testResult.constructionSite.size());
+    //constructor destroyed?
+    if (0 == testResult.constructorCell.id) {
 
-    //constructor not destroyed?
-    if (testResult.constructorCell.id != 0) {
+        EXPECT_GE(testResult.origConstructionSite.size(), testResult.constructionSite.size());
+    }
+    else {
 
         //evaluate constructor data
         EXPECT_EQ(expectations._tokenOutput, getConstrOut(testResult.token));

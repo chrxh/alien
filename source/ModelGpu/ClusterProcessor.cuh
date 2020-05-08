@@ -63,9 +63,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-#define PROTECTION_TIMESTEPS 14
-
-__inline__ __device__ void ClusterProcessor::processingCollision_block()
+ __inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
     __shared__ Cluster* cluster;
     __shared__ unsigned long long int largestOtherClusterData;
@@ -97,7 +95,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                     otherCluster->unfreeze(30);
                 }
 
-                if (cell->protectionCounter > 0 || otherCell->protectionCounter > 0) {
+                if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
                     continue;
                 }
                 if (0 == cell->alive || 0 == otherCell->alive) {
@@ -162,9 +160,7 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                     >= cudaSimulationParameters.cellMaxDistance) {
                     continue;
                 }
-                auto protectionCounter = atomicAdd(&cell->protectionCounter, 0);
-                auto otherProtectionCounter = atomicAdd(&otherCell->protectionCounter, 0);
-                if (protectionCounter > 0 || otherProtectionCounter > 0) {
+                if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
                     avoidCollision = true;
                     break;
                 }
@@ -248,15 +244,26 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
         __shared__ float2 rBPp;
         __shared__ float2 outwardVector;
         __shared__ float2 n;
+        __shared__ float2 clusterVel;
+        __shared__ float clusterAngularVel;
+        __shared__ float2 largestOtherClusterVel;
+        __shared__ float largestOtherClusterAngularVel;
+
         if (0 == threadIdx.x) {
             collisionCenterPos = collisionCenterPos / numberOfCollidingCells;
             rAPp = { collisionCenterPos.x - cluster->pos.x, collisionCenterPos.y - cluster->pos.y };
             _data->cellMap.mapDisplacementCorrection(rAPp);
             rBPp = { collisionCenterPos.x - largestOtherCluster->pos.x, collisionCenterPos.y - largestOtherCluster->pos.y };
             _data->cellMap.mapDisplacementCorrection(rBPp);
+
+            clusterVel = cluster->getVelocity();
+            clusterAngularVel = cluster->getAngularVelocity();
+            largestOtherClusterVel = largestOtherCluster->getVelocity();
+            largestOtherClusterAngularVel = largestOtherCluster->getAngularVelocity();
+
             outwardVector =
-                Physics::tangentialVelocity(rBPp, largestOtherCluster->vel, largestOtherCluster->angularVel)
-                - Physics::tangentialVelocity(rAPp, cluster->vel, cluster->angularVel);
+                Physics::tangentialVelocity(rBPp, largestOtherClusterVel, largestOtherClusterAngularVel)
+                - Physics::tangentialVelocity(rAPp, clusterVel, clusterAngularVel);
             Math::rotateQuarterCounterClockwise(rAPp);
             Math::rotateQuarterCounterClockwise(rBPp);
             n.x = 0.0f;
@@ -285,8 +292,8 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
                     float2 normal = Physics::calcNormalToCell(otherCell, outwardVector);
                     atomicAdd(&n.x, normal.x);
                     atomicAdd(&n.y, normal.y);
-                    atomicExch(&cell->protectionCounter, PROTECTION_TIMESTEPS);
-                    atomicExch(&otherCell->protectionCounter, PROTECTION_TIMESTEPS);
+                    cell->activateProtectionCounter_safe();
+                    otherCell->activateProtectionCounter_safe();
                 }
             }
         }
@@ -300,16 +307,15 @@ __inline__ __device__ void ClusterProcessor::processingCollision_block()
             float angularVelA2{ 0.0f };
             float angularVelB2{ 0.0f };
             Math::normalize(n);
-            Physics::calcCollision(cluster->vel, largestOtherCluster->vel, rAPp, rBPp, cluster->angularVel,
-                largestOtherCluster->angularVel, n, cluster->angularMass, largestOtherCluster->angularMass,
+            
+            Physics::calcCollision(clusterVel, largestOtherClusterVel, rAPp, rBPp, clusterAngularVel,
+                largestOtherClusterAngularVel, n, cluster->angularMass, largestOtherCluster->angularMass,
                 mA, mB, vA2, vB2, angularVelA2, angularVelB2);
 
-            atomicExch(&cluster->vel.x, vA2.x);
-            atomicExch(&cluster->vel.y, vA2.y);
-            atomicExch(&cluster->angularVel, angularVelA2);
-            atomicExch(&largestOtherCluster->vel.x, vB2.x);
-            atomicExch(&largestOtherCluster->vel.y, vB2.y);
-            atomicExch(&largestOtherCluster->angularVel, angularVelB2);
+            cluster->setVelocity(vA2);
+            cluster->setAngularVelocity(angularVelA2);
+            largestOtherCluster->setVelocity(vB2);
+            largestOtherCluster->setAngularVelocity(angularVelB2);
         }
         updateCellVelocity_block(cluster);
         updateCellVelocity_block(largestOtherCluster);
@@ -378,9 +384,9 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 {
     __shared__ float rotMatrix[2][2];
     if (0 == threadIdx.x) {
-        _cluster->angle += _cluster->angularVel;
+        _cluster->angle += _cluster->getAngularVelocity();
         Math::angleCorrection(_cluster->angle);
-        _cluster->pos = _cluster->pos + _cluster->vel;
+        _cluster->pos = _cluster->pos + _cluster->getVelocity();
         _data->cellMap.mapPosCorrection(_cluster->pos);
         Math::rotationMatrix(_cluster->angle, rotMatrix);
     }
@@ -391,10 +397,7 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 
         float2 absPos = Math::applyMatrix(cell->relPos, rotMatrix) + _cluster->pos;
         cell->absPos = absPos;
-
-        if (cell->protectionCounter > 0) {
-            --cell->protectionCounter;
-        }
+        cell->decrementProtectionCounter();
     }
     __syncthreads();
 
@@ -449,7 +452,7 @@ __inline__ __device__ void ClusterProcessor::updateCellVelocity_block(Cluster* c
 
         auto r = cell->absPos - cluster->pos;
         _data->cellMap.mapDisplacementCorrection(r);
-        auto newVel = Physics::tangentialVelocity(r, cluster->vel, cluster->angularVel);
+        auto newVel = Physics::tangentialVelocity(r, cluster->getVelocity(), cluster->getAngularVelocity());
 
         auto a = newVel - cell->vel;
         if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
@@ -475,7 +478,7 @@ __inline__ __device__ void ClusterProcessor::destroyDyingCell(Cell * cell)
 
 __inline__ __device__ void ClusterProcessor::destroyCloseCell(Cell * cell)
 {
-    if (cell->protectionCounter > 0) {
+    if (cell->getProtectionCounter() > 0) {
         return;
     }
     destroyCloseCell(cell->absPos, cell);
@@ -537,9 +540,9 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
             entries[i].tag = -1;
             entries[i].cluster.pos = { 0.0f, 0.0f };
-            entries[i].cluster.vel = { 0.0f, 0.0f };
+            entries[i].cluster.setVelocity({ 0.0f, 0.0f });
             entries[i].cluster.angle = _cluster->angle;
-            entries[i].cluster.angularVel = 0.0f;
+            entries[i].cluster.setAngularVelocity(0.0f);
             entries[i].cluster.angularMass = 0.0f;
             entries[i].cluster.numCellPointers = 0;
             entries[i].cluster.numTokenPointers = 0;
@@ -565,8 +568,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
                 atomicAdd(&entries[index].cluster.numCellPointers, 1);
                 atomicAdd(&entries[index].cluster.pos.x, cell->absPos.x);
                 atomicAdd(&entries[index].cluster.pos.y, cell->absPos.y);
-                atomicAdd(&entries[index].cluster.vel.x, cell->vel.x);
-                atomicAdd(&entries[index].cluster.vel.y, cell->vel.y);
+                entries[index].cluster.addVelocity_safe(cell->vel);
 
                 entries[index].cluster.id = _data->numberGen.createNewId_kernel();
                 Math::inverseRotationMatrix(entries[index].cluster.angle, entries[index].invRotMatrix);
@@ -577,8 +579,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
                 atomicAdd(&entries[index].cluster.numCellPointers, 1);
                 atomicAdd(&entries[index].cluster.pos.x, cell->absPos.x);
                 atomicAdd(&entries[index].cluster.pos.y, cell->absPos.y);
-                atomicAdd(&entries[index].cluster.vel.x, cell->vel.x);
-                atomicAdd(&entries[index].cluster.vel.y, cell->vel.y);
+                entries[index].cluster.addVelocity_safe(cell->vel);
 
                 foundMatch = true;
                 break;
@@ -589,9 +590,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.numCellPointers, 1);
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.x, cell->absPos.x);
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.y, cell->absPos.y);
-            atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.x, cell->vel.x);
-            atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.vel.y, cell->vel.y);
-
+            entries[MAX_DECOMPOSITIONS - 1].cluster.addVelocity_safe(cell->vel);
             entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = 1;
         }
     }
@@ -607,13 +606,13 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
     PartitionData decompositionBlock =
         calcPartition(numDecompositions, threadIdx.x, blockDim.x);
     for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
-        auto numCells = entries[index].cluster.numCellPointers;
-        entries[index].cluster.pos.x /= numCells;
-        entries[index].cluster.pos.y /= numCells;
-        entries[index].cluster.vel.x /= numCells;
-        entries[index].cluster.vel.y /= numCells;
-        entries[index].cluster.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
-        entries[index].cluster.numCellPointers = 0;
+        auto& clusterEntry = entries[index].cluster;
+        auto numCells = clusterEntry.numCellPointers;
+        clusterEntry.pos.x /= numCells;
+        clusterEntry.pos.y /= numCells;
+        clusterEntry.setVelocity(clusterEntry.getVelocity() / numCells);
+        clusterEntry.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
+        clusterEntry.numCellPointers = 0;
 
         auto const newCluster = factory.createCluster();
 
@@ -634,9 +633,9 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
 
                 auto r = cell->absPos - _cluster->pos;
                 _data->cellMap.mapDisplacementCorrection(r);
-                float2 relVel = cell->vel - newCluster->vel;
+                float2 relVel = cell->vel - newCluster->getVelocity();
                 float angularMomentum = Physics::angularMomentum(r, relVel);
-                atomicAdd(&newCluster->angularVel, angularMomentum);
+                newCluster->addAngularVelocity_safe(angularMomentum);
 
                 float(&invRotMatrix)[2][2] = entries[index].invRotMatrix;
                 cell->relPos = Math::applyMatrix(deltaPos, invRotMatrix);
@@ -653,7 +652,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         Cluster* newCluster = newClusters[index];
 
         //newCluster->angularVel contains angular momentum until here
-        newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
+        newCluster->setAngularVelocity(Physics::angularVelocity(newCluster->getAngularVelocity(), newCluster->angularMass));
     }
 
 
@@ -690,10 +689,11 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             newCluster->pos = (_cluster->pos * _cluster->numCellPointers
                 + ((otherCluster->pos + correction) * otherCluster->numCellPointers))
                 / newCluster->numCellPointers;
-            newCluster->vel =
-                (_cluster->vel * _cluster->numCellPointers + otherCluster->vel * otherCluster->numCellPointers)
-                / newCluster->numCellPointers;
-            newCluster->angularVel = 0.0f;
+            newCluster->setVelocity(
+                (_cluster->getVelocity() * _cluster->numCellPointers
+                 + otherCluster->getVelocity() * otherCluster->numCellPointers)
+                / newCluster->numCellPointers);
+            newCluster->setAngularVelocity(0);
             newCluster->angularMass = 0.0f;
         }
         __syncthreads();
@@ -708,9 +708,9 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
 
             auto r = cell->absPos - _cluster->pos;
             _data->cellMap.mapDisplacementCorrection(r);
-            float2 relVel = cell->vel - _cluster->vel;
+            float2 relVel = cell->vel - _cluster->getVelocity();
             float angularMomentum = Physics::angularMomentum(r, relVel);
-            atomicAdd(&newCluster->angularVel, angularMomentum);
+            newCluster->addAngularVelocity_safe(angularMomentum);
         }
         __syncthreads();
 
@@ -728,28 +728,28 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             cell->cluster = newCluster;
             atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
 
-            float2 relVel = cell->vel - otherCluster->vel;
+            float2 relVel = cell->vel - otherCluster->getVelocity();
             float angularMomentum = Physics::angularMomentum(r, relVel);
-            atomicAdd(&newCluster->angularVel, angularMomentum);
+            newCluster->addAngularVelocity_safe(angularMomentum);
         }
         __syncthreads();
 
         __shared__ float regainedEnergy;
         if (0 == threadIdx.x) {
-            newCluster->angularVel = Physics::angularVelocity(newCluster->angularVel, newCluster->angularMass);
+            newCluster->setAngularVelocity(Physics::angularVelocity(newCluster->getAngularVelocity(), newCluster->angularMass));
 
             auto const origKineticEnergies =
                 Physics::kineticEnergy(
-                    _cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel)
+                    _cluster->numCellPointers, _cluster->getVelocity(), _cluster->angularMass, _cluster->getAngularVelocity())
                 + Physics::kineticEnergy(
                     otherCluster->numCellPointers,
-                    otherCluster->vel,
+                    otherCluster->getVelocity(),
                     otherCluster->angularMass,
-                    otherCluster->angularVel);
+                    otherCluster->getAngularVelocity());
 
             auto const newKineticEnergy =
                 Physics::kineticEnergy(
-                    newCluster->numCellPointers, newCluster->vel, newCluster->angularMass, newCluster->angularVel);
+                    newCluster->numCellPointers, newCluster->getVelocity(), newCluster->angularMass, newCluster->getAngularVelocity());
 
             regainedEnergy = origKineticEnergies - newKineticEnergy;    //should be negative for fusion
         }

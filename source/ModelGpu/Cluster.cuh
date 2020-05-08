@@ -13,9 +13,7 @@ struct Cluster
 {
     uint64_t id;
     float2 pos;
-    float2 vel;
     float angle;
-    float angularVel;
     float angularMass;
     int numCellPointers;
     Cell** cellPointers;
@@ -33,6 +31,47 @@ struct Cluster
         _timestepsUntilFreezing = 30;
         _freezed = 0;
         _pointerArrayElement = nullptr;
+    }
+
+    __device__ __inline__ float2& getVelocity()
+    {
+        return vel;
+    }
+
+    __device__ __inline__ float2 getVelocity_safe()
+    {
+        return{ atomicAdd(&vel.x, 0), atomicAdd(&vel.y, 0) };
+    }
+
+    __device__ __inline__ void addVelocity_safe(float2 const& value)
+    {
+        atomicAdd(&vel.x, value.x);
+        atomicAdd(&vel.y, value.y);
+    }
+
+    __device__ __inline__ void setVelocity(float2 const& value)
+    {
+        vel = value;
+    }
+
+    __device__ __inline__ float& getAngularVelocity()
+    {
+        return angularVel;
+    }
+
+    __device__ __inline__ float getAngularVelocity_safe()
+    {
+        return atomicAdd(&angularVel, 0);
+    }
+
+    __device__ __inline__ void setAngularVelocity(float const& value)
+    {
+        angularVel = value;
+    }
+
+    __device__ __inline__ void addAngularVelocity_safe(float const& value)
+    {
+        atomicAdd(&angularVel, value);
     }
 
     __device__ __inline__ bool isFreezed()
@@ -86,6 +125,9 @@ struct Cluster
         __syncthreads();
     }
 private:
+    float2 vel;
+    float angularVel;
+
     int _freezed;       // 0 = unfreezed, 1 = freezed
     int _timestepsUntilFreezing;
     Cluster** _pointerArrayElement;
