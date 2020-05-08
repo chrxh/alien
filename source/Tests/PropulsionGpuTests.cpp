@@ -53,7 +53,7 @@ ClusterDescription PropulsionGpuTests::createClusterForPropulsionTest(Enums::Pro
     secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::PROPULSION);
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
-    tokenData[Enums::Prop::IN] = command;
+    tokenData[Enums::Prop::INPUT] = command;
     tokenData[Enums::Prop::IN_ANGLE] = propAngle;
     tokenData[Enums::Prop::IN_POWER] = propPower;
     for (int i = 0; i < numTokens; ++i) {
@@ -91,7 +91,7 @@ pair<Physics::Velocities, Enums::PropOut::Type> PropulsionGpuTests::extractResul
     }
     auto token = cell.tokens->at(0);
     result.first = { *cluster.vel, *cluster.angularVel };
-    result.second = static_cast<Enums::PropOut::Type>(token.data->at(Enums::Prop::OUT));
+    result.second = static_cast<Enums::PropOut::Type>(token.data->at(Enums::Prop::OUTPUT));
     return result;
 }
 
@@ -326,7 +326,7 @@ TEST_F(PropulsionGpuTests, testParallelization2)
 {
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
-    tokenData[Enums::Prop::IN] = Enums::PropIn::ROTATION_CLOCKWISE;
+    tokenData[Enums::Prop::INPUT] = Enums::PropIn::ROTATION_CLOCKWISE;
     tokenData[Enums::Prop::IN_ANGLE] = 0;
     tokenData[Enums::Prop::IN_POWER] = 100;
 

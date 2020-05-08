@@ -23,7 +23,7 @@ namespace Enums
 
     struct EnergyGuidance {
         enum Type {
-            IN = 1,
+            INPUT = 1,
             IN_VALUE_CELL = 2,
             IN_VALUE_TOKEN = 3
         };
@@ -43,7 +43,7 @@ namespace Enums
 
     struct Communicator {
         enum Type {
-            IN = 26,
+            INPUT = 26,
             IN_CHANNEL = 27,
             IN_MESSAGE = 28,
             IN_ANGLE = 29,
@@ -78,14 +78,14 @@ namespace Enums
     };
     struct ComputerOptype {
         enum Type {
-            MEM, MEMMEM, CMEM, CONST
+            MEM, MEMMEM, CMEM, CONSTANT
         };
     };
 
     struct Constr {
         enum Type {
-            OUT = 5,
-            IN = 6,
+            OUTPUT = 5,
+            INPUT = 6,
             IN_OPTION = 7,
             INOUT_ANGLE = 15,
             IN_DIST = 16,
@@ -131,8 +131,8 @@ namespace Enums
 
     struct Prop {
         enum Type {
-            OUT = 5,
-            IN = 8,
+            OUTPUT = 5,
+            INPUT = 8,
             IN_ANGLE = 9,
             IN_POWER = 10
         };
@@ -159,7 +159,7 @@ namespace Enums
 
     struct Scanner {
         enum Type {
-            OUT = 5,
+            OUTPUT = 5,
             INOUT_CELL_NUMBER = 12,
             OUT_MASS = 13,
             OUT_ENERGY = 14,
@@ -182,8 +182,8 @@ namespace Enums
 
     struct Sensor {
         enum Type {
-            OUT = 5,
-            IN = 20,
+            OUTPUT = 5,
+            INPUT = 20,
             INOUT_ANGLE = 21,
             IN_MIN_MASS = 22,
             IN_MAX_MASS = 23,
@@ -210,7 +210,7 @@ namespace Enums
 
     struct Weapon {
         enum Type {
-            OUT = 5,
+            OUTPUT = 5,
             IN_MIN_MASS = 26,
             IN_MAX_MASS = 27,
         };

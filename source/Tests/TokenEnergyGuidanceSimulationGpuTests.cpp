@@ -39,7 +39,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
     secondCell.energy = firstCell.energy;
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_CELL;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::BALANCE_CELL;
     tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
     firstCell.addToken(token);
     origData.addCluster(cluster);
@@ -91,7 +91,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken + 1 + tokenTransferEnergyAmount;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_CELL;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::BALANCE_CELL;
     tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
@@ -135,7 +135,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken + 1 + tokenTransferEnergyAmount;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_TOKEN;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::BALANCE_TOKEN;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
     origData.addCluster(cluster);
@@ -181,7 +181,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken - 1 + tokenTransferEnergyAmount;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_TOKEN;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::BALANCE_TOKEN;
     tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
@@ -228,7 +228,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowC
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken + 1 + tokenTransferEnergyAmount;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_BOTH;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::BALANCE_BOTH;
     tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
@@ -275,7 +275,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highC
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken - 1;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::BALANCE_BOTH;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::BALANCE_BOTH;
     tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
@@ -319,7 +319,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
     secondCell.energy = firstCell.energy;
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::HARVEST_CELL;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::HARVEST_CELL;
     tokenData[Enums::EnergyGuidance::IN_VALUE_CELL] = valueCell;
     firstCell.addToken(token);
     origData.addCluster(cluster);
@@ -362,7 +362,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken + 1 + tokenTransferEnergyAmount;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::HARVEST_TOKEN;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::HARVEST_TOKEN;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
     origData.addCluster(cluster);
@@ -405,7 +405,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
     auto token = createSimpleToken();
     token.energy = _parameters.tokenMinEnergy + valueToken + 1 + tokenTransferEnergyAmount;
     auto& tokenData = *token.data;
-    tokenData[Enums::EnergyGuidance::IN] = Enums::EnergyGuidanceIn::HARVEST_TOKEN;
+    tokenData[Enums::EnergyGuidance::INPUT] = Enums::EnergyGuidanceIn::HARVEST_TOKEN;
     tokenData[Enums::EnergyGuidance::IN_VALUE_TOKEN] = valueToken;
     firstCell.addToken(token);
     firstCell.addToken(token);

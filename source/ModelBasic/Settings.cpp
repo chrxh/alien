@@ -19,7 +19,7 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
     symbolTable->addEntry("BRANCH_NUMBER","[0]");
 
     //energy guidance system
-    symbolTable->addEntry("ENERGY_GUIDANCE_IN","["+std::to_string(Enums::EnergyGuidance::IN)+"]");
+    symbolTable->addEntry("ENERGY_GUIDANCE_IN","["+std::to_string(Enums::EnergyGuidance::INPUT)+"]");
     symbolTable->addEntry("ENERGY_GUIDANCE_IN::DEACTIVATED",std::to_string(Enums::EnergyGuidanceIn::DEACTIVATED));
     symbolTable->addEntry("ENERGY_GUIDANCE_IN::BALANCE_CELL",std::to_string(Enums::EnergyGuidanceIn::BALANCE_CELL));
     symbolTable->addEntry("ENERGY_GUIDANCE_IN::BALANCE_TOKEN",std::to_string(Enums::EnergyGuidanceIn::BALANCE_TOKEN));
@@ -30,14 +30,14 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
     symbolTable->addEntry("ENERGY_GUIDANCE_IN_VALUE_TOKEN","["+std::to_string(Enums::EnergyGuidance::IN_VALUE_TOKEN)+"]");
 
     //constructor
-    symbolTable->addEntry("CONSTR_OUT","["+std::to_string(Enums::Constr::OUT)+"]");
+    symbolTable->addEntry("CONSTR_OUT","["+std::to_string(Enums::Constr::OUTPUT)+"]");
     symbolTable->addEntry("CONSTR_OUT::SUCCESS",std::to_string(Enums::ConstrOut::SUCCESS));
     symbolTable->addEntry("CONSTR_OUT::SUCCESS_ROT",std::to_string(Enums::ConstrOut::SUCCESS_ROT));
     symbolTable->addEntry("CONSTR_OUT::ERROR_NO_ENERGY",std::to_string(Enums::ConstrOut::ERROR_NO_ENERGY));
     symbolTable->addEntry("CONSTR_OUT::ERROR_OBSTACLE",std::to_string(Enums::ConstrOut::ERROR_OBSTACLE));
     symbolTable->addEntry("CONSTR_OUT::ERROR_CONNECTION",std::to_string(Enums::ConstrOut::ERROR_CONNECTION));
     symbolTable->addEntry("CONSTR_OUT::ERROR_DIST",std::to_string(Enums::ConstrOut::ERROR_DIST));
-    symbolTable->addEntry("CONSTR_IN","["+std::to_string(Enums::Constr::IN)+"]");
+    symbolTable->addEntry("CONSTR_IN","["+std::to_string(Enums::Constr::INPUT)+"]");
     symbolTable->addEntry("CONSTR_IN::DO_NOTHING",std::to_string(Enums::ConstrIn::DO_NOTHING));
     symbolTable->addEntry("CONSTR_IN::SAFE",std::to_string(Enums::ConstrIn::SAFE));
     symbolTable->addEntry("CONSTR_IN::UNSAFE",std::to_string(Enums::ConstrIn::UNSAFE));
@@ -66,11 +66,11 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
     symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION_DATA","["+std::to_string(Enums::Constr::IN_CELL_FUNCTION_DATA)+"]");
 
     //propulsion
-    symbolTable->addEntry("PROP_OUT","["+std::to_string(Enums::Prop::OUT)+"]");
+    symbolTable->addEntry("PROP_OUT","["+std::to_string(Enums::Prop::OUTPUT)+"]");
     symbolTable->addEntry("PROP_OUT::SUCCESS",std::to_string(Enums::PropOut::SUCCESS));
     symbolTable->addEntry("PROP_OUT::SUCCESS_DAMPING_FINISHED",std::to_string(Enums::PropOut::SUCCESS_DAMPING_FINISHED));
     symbolTable->addEntry("PROP_OUT::ERROR_NO_ENERGY",std::to_string(Enums::PropOut::ERROR_NO_ENERGY));
-    symbolTable->addEntry("PROP_IN","["+std::to_string(Enums::Prop::IN)+"]");
+    symbolTable->addEntry("PROP_IN","["+std::to_string(Enums::Prop::INPUT)+"]");
     symbolTable->addEntry("PROP_IN::DO_NOTHING",std::to_string(Enums::PropIn::DO_NOTHING));
     symbolTable->addEntry("PROP_IN::BY_ANGLE",std::to_string(Enums::PropIn::BY_ANGLE));
     symbolTable->addEntry("PROP_IN::FROM_CENTER",std::to_string(Enums::PropIn::FROM_CENTER));
@@ -82,7 +82,7 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
     symbolTable->addEntry("PROP_IN_POWER","["+std::to_string(Enums::Prop::IN_POWER)+"]");
 
     //scanner
-    symbolTable->addEntry("SCANNER_OUT","["+std::to_string(Enums::Scanner::OUT)+"]");
+    symbolTable->addEntry("SCANNER_OUT","["+std::to_string(Enums::Scanner::OUTPUT)+"]");
     symbolTable->addEntry("SCANNER_OUT::SUCCESS",std::to_string(Enums::ScannerOut::SUCCESS));
     symbolTable->addEntry("SCANNER_OUT::FINISHED",std::to_string(Enums::ScannerOut::FINISHED));
     symbolTable->addEntry("SCANNER_OUT::RESTART",std::to_string(Enums::ScannerOut::RESTART));
@@ -105,15 +105,15 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
     symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION_DATA","["+std::to_string(Enums::Scanner::OUT_CELL_FUNCTION_DATA)+"]");
 
     //weapon
-    symbolTable->addEntry("WEAPON_OUT","["+std::to_string(Enums::Weapon::OUT)+"]");
+    symbolTable->addEntry("WEAPON_OUT","["+std::to_string(Enums::Weapon::OUTPUT)+"]");
     symbolTable->addEntry("WEAPON_OUT::NO_TARGET",std::to_string(Enums::WeaponOut::NO_TARGET));
     symbolTable->addEntry("WEAPON_OUT::STRIKE_SUCCESSFUL",std::to_string(Enums::WeaponOut::STRIKE_SUCCESSFUL));
 
     //sensor
-    symbolTable->addEntry("SENSOR_OUT", "["+std::to_string(Enums::Sensor::OUT)+"]");
+    symbolTable->addEntry("SENSOR_OUT", "["+std::to_string(Enums::Sensor::OUTPUT)+"]");
     symbolTable->addEntry("SENSOR_OUT::NOTHING_FOUND", std::to_string(Enums::SensorOut::NOTHING_FOUND));
     symbolTable->addEntry("SENSOR_OUT::CLUSTER_FOUND", std::to_string(Enums::SensorOut::CLUSTER_FOUND));
-    symbolTable->addEntry("SENSOR_IN", "["+std::to_string(Enums::Sensor::IN)+"]");
+    symbolTable->addEntry("SENSOR_IN", "["+std::to_string(Enums::Sensor::INPUT)+"]");
     symbolTable->addEntry("SENSOR_IN::DO_NOTHING", std::to_string(Enums::SensorIn::DO_NOTHING));
     symbolTable->addEntry("SENSOR_IN::SEARCH_VICINITY", std::to_string(Enums::SensorIn::SEARCH_VICINITY));
     symbolTable->addEntry("SENSOR_IN::SEARCH_BY_ANGLE", std::to_string(Enums::SensorIn::SEARCH_BY_ANGLE));
@@ -126,7 +126,7 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
     symbolTable->addEntry("SENSOR_OUT_DISTANCE", "["+std::to_string(Enums::Sensor::OUT_DISTANCE)+"]");
 
     //communicator
-    symbolTable->addEntry("COMMUNICATOR_IN", "["+std::to_string(Enums::Communicator::IN)+"]");
+    symbolTable->addEntry("COMMUNICATOR_IN", "["+std::to_string(Enums::Communicator::INPUT)+"]");
     symbolTable->addEntry("COMMUNICATOR_IN::DO_NOTHING", std::to_string(Enums::CommunicatorIn::DO_NOTHING));
     symbolTable->addEntry("COMMUNICATOR_IN::SET_LISTENING_CHANNEL", std::to_string(Enums::CommunicatorIn::SET_LISTENING_CHANNEL));
     symbolTable->addEntry("COMMUNICATOR_IN::SEND_MESSAGE", std::to_string(Enums::CommunicatorIn::SEND_MESSAGE));
