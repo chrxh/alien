@@ -40,7 +40,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
         tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = 1;
         lookupResult.cell = cell;
         lookupResult.prevCell = cell;
-        tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::RESTART;
+        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::RESTART;
     }
 
     //no restart? => increase cell number
@@ -50,10 +50,10 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
         //prove whether finished or not
         auto lookupResult = spiralLookupAlgorithm(n + 1, cell, token->sourceCell);
         if (lookupResult.finish) {
-            tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::FINISHED;
+            tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::FINISHED;
         }
         else {
-            tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
+            tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::SUCCESS;
         }
     }
 

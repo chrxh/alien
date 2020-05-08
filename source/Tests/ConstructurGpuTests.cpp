@@ -1146,7 +1146,7 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
 {
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
-    tokenData[Enums::Constr::IN] = tokenParameters._constructionInput;
+    tokenData[Enums::Constr::INPUT] = tokenParameters._constructionInput;
     tokenData[Enums::Constr::IN_OPTION] = tokenParameters._constructionOption;
     tokenData[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(tokenParameters._angle);
     tokenData[Enums::Constr::IN_DIST] = QuantityConverter::convertDistanceToData(tokenParameters._distance);
@@ -1645,12 +1645,12 @@ auto ConstructorGpuTests::_ResultChecker::calcAngularMasses(TestResult const & t
 Enums::ConstrIn::Type ConstructorGpuTests::_ResultChecker::getConstrIn(TokenDescription const & token) const
 {
     return static_cast<Enums::ConstrIn::Type>(
-        static_cast<unsigned char>(token.data->at(Enums::Constr::IN)) % Enums::ConstrIn::_COUNTER);
+        static_cast<unsigned char>(token.data->at(Enums::Constr::INPUT)) % Enums::ConstrIn::_COUNTER);
 }
 
 Enums::ConstrOut::Type ConstructorGpuTests::_ResultChecker::getConstrOut(TokenDescription const & token) const
 {
-    return static_cast<Enums::ConstrOut::Type>(token.data->at(Enums::Constr::OUT));
+    return static_cast<Enums::ConstrOut::Type>(token.data->at(Enums::Constr::OUTPUT));
 }
 
 bool ConstructorGpuTests::isFinished(TokenDescription const& token)
@@ -2796,7 +2796,7 @@ TEST_F(ConstructorGpuTests, testLargeCluster_limitSize)
     auto const result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
             constructionSiteProperties));
-    EXPECT_NE(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUT));
+    EXPECT_NE(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUTPUT));
 }
 
 TEST_F(ConstructorGpuTests, testLargeCluster_errorMaxRadius)
@@ -2816,7 +2816,7 @@ TEST_F(ConstructorGpuTests, testLargeCluster_errorMaxRadius)
     auto const result = runFurtherCellConstructionOnLineClusterTest(
         FurtherCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token).propertiesOfConstructionSite(
             constructionSiteProperties));
-    EXPECT_EQ(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUT));
+    EXPECT_EQ(Enums::ConstrOut::ERROR_MAX_RADIUS, result.token.data->at(Enums::Constr::OUTPUT));
 }
 
 TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentSources)
@@ -2831,7 +2831,7 @@ TEST_F(ConstructorGpuTests, testParallelConstructionFromDifferentSources)
                                                                       .tokensOnSource3(maxToken / 2));
 
     for (auto const& token : *result.constructorCell.tokens) {
-        EXPECT_EQ(Enums::ConstrOut::SUCCESS, token.data->at(Enums::Constr::OUT));
+        EXPECT_EQ(Enums::ConstrOut::SUCCESS, token.data->at(Enums::Constr::OUTPUT));
     }
     EXPECT_EQ(maxToken, result.constructionSite.size() - result.origConstructionSite.size());
 }
@@ -2904,7 +2904,7 @@ TEST_F(ConstructorGpuTests, testMultipleConnectedConstructionSites_errorConnecti
 
     for (int i = 0; i <= 3; i += 3) {
         auto const& token = newCluster.cells->at(i + 1).tokens->at(0);
-        EXPECT_EQ(Enums::ConstrOut::ERROR_CONNECTION, token.data->at(Enums::Constr::OUT));
+        EXPECT_EQ(Enums::ConstrOut::ERROR_CONNECTION, token.data->at(Enums::Constr::OUTPUT));
     }
 }
 

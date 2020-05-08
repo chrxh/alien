@@ -20,7 +20,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
 {
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
-    tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
+    tokenMem[Enums::Weapon::OUTPUT] = Enums::WeaponOut::NO_TARGET;
     int const minMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
     int maxMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
     if (0 == maxMass) {
@@ -48,7 +48,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     otherCell->changeEnergy(-energyToTransfer);
                     token->changeEnergy(energyToTransfer / 2.0f);
                     cell->changeEnergy(energyToTransfer / 2.0f);
-                    token->memory[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
+                    token->memory[Enums::Weapon::OUTPUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                 }
                 otherCell->cluster->unfreeze(30);
                 otherCell->releaseLock();

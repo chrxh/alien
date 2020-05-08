@@ -92,7 +92,7 @@ void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters,
         {
             auto token = createSimpleToken();
             auto& tokenData = *token.data;
-            tokenData[Enums::Communicator::IN] = com._command;
+            tokenData[Enums::Communicator::INPUT] = com._command;
             if (Enums::CommunicatorIn::SEND_MESSAGE == com._command) {
                 tokenData[Enums::Communicator::IN_MESSAGE] = com._sendingMessage;
                 tokenData[Enums::Communicator::IN_ANGLE] = QuantityConverter::convertAngleToData(com._sendingAngle);
@@ -106,7 +106,7 @@ void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters,
         {
             auto token = createSimpleToken();
             auto& tokenData = *token.data;
-            tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SET_LISTENING_CHANNEL;
+            tokenData[Enums::Communicator::INPUT] = Enums::CommunicatorIn::SET_LISTENING_CHANNEL;
             tokenData[Enums::Communicator::IN_CHANNEL] = com._listeningChannel;
             tokenData[Enums::Branching::TOKEN_BRANCH_NUMBER] = 2;
             cluster.cells->at(2).addToken(token);

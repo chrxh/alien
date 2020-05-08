@@ -136,7 +136,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
     ProcessingResult processingResult {false, 0};
     Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
-	quint8 cmd = tokenMem[Enums::Constr::IN] % 4;
+	quint8 cmd = tokenMem[Enums::Constr::INPUT] % 4;
     quint8 opt = tokenMem[Enums::Constr::IN_OPTION] % 7;
 	auto cellMap = _context->getCellMap();
 	auto metric = _context->getSpaceProperties();
@@ -149,12 +149,12 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
     //read shift length for construction site from token data
     qreal len = QuantityConverter::convertDataToDistance(tokenMem[Enums::Constr::IN_DIST]);
     if( len > parameters.cellMaxDistance ) {        //length to large?
-        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
+        tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
         return processingResult;
     }
 
 	if (!checkMaxRadiusOfCluster(cluster, len + 2, parameters)) {	//+2 because neighbor pixels are also retrieved
-		tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
+		tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
 		return processingResult;
 	}
 
@@ -282,7 +282,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
                 //not enough energy?
                 if( token->getEnergy() <= (parameters.cellFunctionConstructorOffspringCellEnergy + eDiff + parameters.tokenMinEnergy + FLOATINGPOINT_HIGH_PRECISION) ) {
-                    tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+                    tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore cluster
                     foreach( Cell* otherCell, cluster->getCellsRef() ) {
@@ -300,7 +300,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
                     if( obstacleCheck(cluster, safeMode, cellMap, metric, parameters) ) {
-                        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+                        tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
                         foreach( Cell* otherCell, cluster->getCellsRef() ) {
@@ -317,7 +317,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 cluster->setAngularVel(angularVelNew);
 
                 //update token data
-                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS_ROT;
+                tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS_ROT;
                 tokenMem[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(angleSum - angleConstrSite - angleConstructor);
                 cluster->drawCellsToMap();
             }
@@ -358,7 +358,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
                 //not enough energy?
                 if( token->getEnergy() <= (parameters.cellFunctionConstructorOffspringCellEnergy + tokenEnergy + eDiff + parameters.tokenMinEnergy + FLOATINGPOINT_HIGH_PRECISION) ) {
-                    tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+                    tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
 
                     //restore construction site
                     foreach( Cell* otherCell, cluster->getCellsRef() ) {
@@ -389,7 +389,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
                     if( obstacleCheck(cluster, safeMode, cellMap, metric, parameters) ) {
-                        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+                        tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
                         cluster->removeCell(newCell);
@@ -474,7 +474,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 }
 
                 //update token data
-                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+                tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
                 tokenMem[Enums::Constr::INOUT_ANGLE] = 0;
                 cluster->drawCellsToMap();
 
@@ -502,7 +502,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
         //construction site connected with other cells than "cell"? => error
         else {
-            tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+            tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
 
             //restore connection to "cell"
             cell->newConnection(constructionCell);
@@ -568,7 +568,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
                 //not enough energy?
                 if( token->getEnergy() <= (parameters.cellFunctionConstructorOffspringCellEnergy + tokenEnergy + eDiff + parameters.tokenMinEnergy + FLOATINGPOINT_HIGH_PRECISION) ) {
-                    tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+                    tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
                     return processingResult;
                 }
 
@@ -590,7 +590,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 if( cmd != Enums::ConstrIn::BRUTEFORCE) {
                     bool safeMode = (cmd == Enums::ConstrIn::SAFE);
                     if( obstacleCheck(cluster, safeMode, cellMap, metric, parameters) ) {
-                        tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+                        tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_OBSTACLE;
 
                         //restore construction site
                         cluster->removeCell(newCell);
@@ -644,7 +644,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
                 }
 
                 //update token data
-                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+                tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
                 tokenMem[Enums::Constr::INOUT_ANGLE] = 0;
                 cluster->drawCellsToMap();
 
@@ -668,7 +668,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
 
             //no connection by now
             else {
-                tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+                tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
             }
         }
 
@@ -676,7 +676,7 @@ CellFeatureChain::ProcessingResult ConstructorFunction::processImpl (Token* toke
         else {
 
             //error code
-            tokenMem[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+            tokenMem[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
         }
     }
     return processingResult;

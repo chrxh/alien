@@ -114,7 +114,7 @@ __inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
 __inline__ __device__ Enums::CommunicatorIn::Type CommunicatorFunction::getCommand(Token * token)
 {
     return static_cast<Enums::CommunicatorIn::Type>(
-        static_cast<unsigned char>(token->memory[Enums::Communicator::IN]) % Enums::CommunicatorIn::_COUNTER);
+        static_cast<unsigned char>(token->memory[Enums::Communicator::INPUT]) % Enums::CommunicatorIn::_COUNTER);
 }
 
 __inline__ __device__ void CommunicatorFunction::setListeningChannel(Cell* cell, unsigned char channel) const

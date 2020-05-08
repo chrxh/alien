@@ -53,7 +53,7 @@ void SensorGpuTests::runStandardTest(TestParameters const& testParameters, Expec
     origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::SENSOR);
     auto origToken = createSimpleToken();
     auto& origTokenData = *origToken.data;
-    origTokenData[Enums::Sensor::IN] = testParameters._command;
+    origTokenData[Enums::Sensor::INPUT] = testParameters._command;
     if (testParameters._angle) {
         origTokenData[Enums::Sensor::INOUT_ANGLE] = QuantityConverter::convertAngleToData(*testParameters._angle);
     }
@@ -85,10 +85,10 @@ void SensorGpuTests::runStandardTest(TestParameters const& testParameters, Expec
     EXPECT_EQ(1, secondCell.tokens->size());
 
     auto const& token = secondCell.tokens->at(0);
-    EXPECT_EQ(expectations._command, token.data->at(Enums::Sensor::OUT));
+    EXPECT_EQ(expectations._command, token.data->at(Enums::Sensor::OUTPUT));
 
     auto const expectedMass = testParameters._sizeOfCluster.x * testParameters._sizeOfCluster.y;
-    if (Enums::SensorOut::CLUSTER_FOUND == token.data->at(Enums::Sensor::OUT)) {
+    if (Enums::SensorOut::CLUSTER_FOUND == token.data->at(Enums::Sensor::OUTPUT)) {
         EXPECT_EQ(expectedMass, static_cast<unsigned char>(token.data->at(Enums::Sensor::OUT_MASS)));
 
         auto actualAngle = QuantityConverter::convertDataToAngle(token.data->at(Enums::Sensor::INOUT_ANGLE));

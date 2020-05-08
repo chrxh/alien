@@ -20,7 +20,7 @@ CellFeatureChain::ProcessingResult WeaponFunction::processImpl (Token* token, Ce
 	auto parameters = _context->getSimulationParameters();
 
 	auto& tokenMem = token->getMemoryRef();
-    tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::NO_TARGET;
+    tokenMem[Enums::Weapon::OUTPUT] = Enums::WeaponOut::NO_TARGET;
     QVector2D pos = cell->getCluster()->calcPosition(cell);
     for(int x = -2; x < 3; ++x)
         for(int y = -2; y < 3; ++y) {
@@ -35,7 +35,7 @@ CellFeatureChain::ProcessingResult WeaponFunction::processImpl (Token* token, Ce
                         otherCell->setEnergy(otherCell->getEnergy()-energy);
                         token->setEnergy(token->getEnergy() + energy/2.0);
                         cell->setEnergy(cell->getEnergy()+energy/2.0);
-                        tokenMem[Enums::Weapon::OUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
+                        tokenMem[Enums::Weapon::OUTPUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                     }
                 }
             }

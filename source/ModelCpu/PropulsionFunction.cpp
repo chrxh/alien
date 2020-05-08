@@ -33,12 +33,12 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
     ProcessingResult processingResult {false, 0};
     Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
-    quint8 cmd = tokenMem[Enums::Prop::IN] % 7;
+    quint8 cmd = tokenMem[Enums::Prop::INPUT] % 7;
     qreal angle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Prop::IN_ANGLE]);
     qreal power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
     if( cmd == Enums::PropIn::DO_NOTHING ) {
-        tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
+        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
         return processingResult;
     }
 
@@ -90,7 +90,7 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
             newAngularVel = cluster->getAngularVel();
 
             //update return value
-            tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS_DAMPING_FINISHED;
+            tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS_DAMPING_FINISHED;
             return processingResult;
         }
     }
@@ -116,12 +116,12 @@ CellFeatureChain::ProcessingResult PropulsionFunction::processImpl (Token* token
         token->setEnergy(token->getEnergy() - (energyDiff+qAbs(energyDiff)));
 
         //update return value
-        tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
+        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
     }
     else {
 
         //update return value
-        tokenMem[Enums::Prop::OUT] = Enums::PropOut::ERROR_NO_ENERGY;
+        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::ERROR_NO_ENERGY;
     }
     return processingResult;
 }

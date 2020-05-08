@@ -24,13 +24,13 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
     ProcessingResult processingResult {false, 0};
     Cluster* cluster(cell->getCluster());
 	auto& tokenMem = token->getMemoryRef();
-	quint8 cmd = tokenMem[Enums::Sensor::IN] % 5;
+	quint8 cmd = tokenMem[Enums::Sensor::INPUT] % 5;
 	auto cellMap = _context->getCellMap();
 	auto metric = _context->getSpaceProperties();
 	auto parameters = _context->getSimulationParameters();
 
     if( cmd == Enums::SensorIn::DO_NOTHING ) {
-        tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::NOTHING_FOUND;
+        tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::NOTHING_FOUND;
         return processingResult;
     }
     quint8 minMass = tokenMem[Enums::Sensor::IN_MIN_MASS];
@@ -49,7 +49,7 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
 //        nanoseconds diff1 = high_resolution_clock::now()- time1;
 //        cout << "Dauer: " << diff1.count() << endl;
         if( otherCluster ) {
-            tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::CLUSTER_FOUND;
+            tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::CLUSTER_FOUND;
             tokenMem[Enums::Sensor::OUT_MASS] = QuantityConverter::convertURealToData(otherCluster->getMass());
 
             //calc relative angle
@@ -78,10 +78,10 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
                         }
                     }
             }
-            tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::NOTHING_FOUND;
+            tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::NOTHING_FOUND;
         }
         else
-            tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::NOTHING_FOUND;
+            tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::NOTHING_FOUND;
         return processingResult;
     }
 
@@ -135,7 +135,7 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
                     largestClusterCell = hitCell;
                 }
             }
-            tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::CLUSTER_FOUND;
+            tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::CLUSTER_FOUND;
             qreal dist = metric->displacement(largestClusterCell->calcPosition(), cell->calcPosition()).length();
             tokenMem[Enums::Sensor::OUT_DISTANCE] = QuantityConverter::convertURealToData(dist);
             tokenMem[Enums::Sensor::OUT_MASS] = QuantityConverter::convertURealToData(largestClusterCell->getCluster()->getMass());
@@ -143,6 +143,6 @@ CellFeatureChain::ProcessingResult SensorFunction::processImpl (Token* token, Ce
             return processingResult;
         }
     }
-    tokenMem[Enums::Sensor::OUT] = Enums::SensorOut::NOTHING_FOUND;
+    tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::NOTHING_FOUND;
     return processingResult;
 }
