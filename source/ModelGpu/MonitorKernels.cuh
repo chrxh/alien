@@ -23,8 +23,9 @@ getMonitorDataForClusters(Array<Cluster*> clusterPointers, CudaMonitorData monit
         auto const mass = static_cast<float>(cluster->numCellPointers);
         if (0 == threadIdx.x) {
             monitorData.incNumClusters(1);
-            monitorData.incLinearKineticEnergy(Physics::linearKineticEnergy(mass, cluster->vel));
-            monitorData.incRotationalKineticEnergy(Physics::rotationalKineticEnergy(cluster->angularMass, cluster->angularVel));
+            monitorData.incLinearKineticEnergy(Physics::linearKineticEnergy(mass, cluster->getVelocity()));
+            monitorData.incRotationalKineticEnergy(
+                Physics::rotationalKineticEnergy(cluster->angularMass, cluster->getAngularVelocity()));
             monitorData.incNumCells(cluster->numCellPointers);
             monitorData.incNumTokens(cluster->numTokenPointers);
             if (cluster->numTokenPointers > 0) {
