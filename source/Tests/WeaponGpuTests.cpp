@@ -91,7 +91,7 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
     auto const& newToken = newSecondCell.tokens->at(0);
 
     WeaponTestResult result;
-    result.tokenOutput = static_cast<Enums::WeaponOut::Type>(newToken.data->at(Enums::Weapon::OUT));
+    result.tokenOutput = static_cast<Enums::WeaponOut::Type>(newToken.data->at(Enums::Weapon::OUTPUT));
     if (parameters._target1) {
         auto const& newTarget1 = newClusterByClusterId.at(target1->id);
         result.energyDiffOfTarget1 = calcAndCheckEnergy(newTarget1) - calcAndCheckEnergy(*target1);

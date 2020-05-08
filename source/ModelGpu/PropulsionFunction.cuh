@@ -23,10 +23,10 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     auto const& sourceCell = token->sourceCell;
     auto const& cluster = cell->cluster;
     auto& tokenMem = token->memory;
-    auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::IN]) % Enums::PropIn::_COUNTER;
+    auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::INPUT]) % Enums::PropIn::_COUNTER;
 
     if (Enums::PropIn::DO_NOTHING == command) {
-        tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
+        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
         return;
     }
 
@@ -89,7 +89,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
         if ((angularVel >= 0.0 && angularVel + angularVelInc <= 0.0) ||
             (angularVel <= 0.0 && angularVel + angularVelInc >= 0.0)) {
 
-            tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS_DAMPING_FINISHED;
+            tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS_DAMPING_FINISHED;
             return;
         }
     }
@@ -99,7 +99,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     auto energyDiff = newKineticEnergy - origKineticEnergy;
 
     if (energyDiff > 0.0f && token->getEnergy() < 2*energyDiff + cudaSimulationParameters.tokenMinEnergy) {
-        tokenMem[Enums::Prop::OUT] = Enums::PropOut::ERROR_NO_ENERGY;
+        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::ERROR_NO_ENERGY;
         return;
     }
 
@@ -113,7 +113,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     factory.createParticle(abs(energyDiff), particlePos, particleVel, { cell->metadata.color });
 
     token->changeEnergy(-(energyDiff + abs(energyDiff)));
-    tokenMem[Enums::Prop::OUT] = Enums::PropOut::SUCCESS;
+    tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
 
 }
 

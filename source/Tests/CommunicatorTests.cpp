@@ -56,7 +56,7 @@ TEST_F(CommunicatorTests, testSendMessage_receiveOnSameChannel)
 	const uint8_t angle = QuantityConverter::convertAngleToData(180.0);
 
 	QByteArray tokenData(_parameters.tokenMemorySize, 0);
-	tokenData[Enums::Communicator::IN] = Enums::CommunicatorIn::SEND_MESSAGE;
+	tokenData[Enums::Communicator::INPUT] = Enums::CommunicatorIn::SEND_MESSAGE;
 	tokenData[Enums::Communicator::IN_CHANNEL] = channel;
 	tokenData[Enums::Communicator::IN_MESSAGE] = message;
 	tokenData[Enums::Communicator::IN_ANGLE] = angle;

@@ -89,7 +89,7 @@ TEST_F(ScannerGpuTests, testScanOriginCell)
     auto const& newToken = newSecondCell.tokens->at(0);
 
     checkScannedCellWithToken(newSecondCell, newSecondCell, newSecondCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(0, newToken.data->at(Enums::Scanner::OUT_DISTANCE));
     EXPECT_EQ(1, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(2, newToken.data->at(Enums::Scanner::OUT_MASS));
@@ -129,7 +129,7 @@ TEST_F(ScannerGpuTests, testScanSecondCell)
     auto const& newToken = newCell.tokens->at(0);
 
     checkScannedCellWithToken(newTokenSourceCell, newCell, newCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(2, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -173,7 +173,7 @@ TEST_F(ScannerGpuTests, testScanThirdCell)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newScanCell, newTokenSourceCell, newMiddleCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(3, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -222,7 +222,7 @@ TEST_F(ScannerGpuTests, testScanFourthCell_onHexagon)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newScanCell, newPrevScanCell, newTokenSourceCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(4, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(19, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -270,7 +270,7 @@ TEST_F(ScannerGpuTests, testScanDistantCell)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newScanCell, newPrevScanCell, newPrevPrevScanCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(10, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -318,7 +318,7 @@ TEST_F(ScannerGpuTests, testScanFinished)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newScanCell, newPrevScanCell, newPrevPrevScanCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::FINISHED, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::FINISHED, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -356,7 +356,7 @@ TEST_F(ScannerGpuTests, testScanRestart1)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newMiddleCell, newMiddleCell, newMiddleCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(1, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -394,7 +394,7 @@ TEST_F(ScannerGpuTests, testScanRestart2)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newMiddleCell, newMiddleCell, newMiddleCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(1, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -432,7 +432,7 @@ TEST_F(ScannerGpuTests, testScanMaxCellNumber)
     auto const& newToken = newMiddleCell.tokens->at(0);
 
     checkScannedCellWithToken(newMiddleCell, newMiddleCell, newMiddleCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(1, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
@@ -480,7 +480,7 @@ TEST_F(ScannerGpuTests, testScanMaxCellNumber_largeCluster)
     auto const& newToken = newFirstCell.tokens->at(0);
 
     checkScannedCellWithToken(newScanCell, newPrevScanCell, newPrevPrevScanCell, newToken);
-    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUT));
+    EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(0, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(255, static_cast<unsigned char>(newToken.data->at(Enums::Scanner::OUT_MASS)));
 }

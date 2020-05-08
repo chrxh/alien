@@ -103,13 +103,13 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
         tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = 1;
         scanCell = cell;
         scanCellPre1 = cell;
-        tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::RESTART;
+        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::RESTART;
     }
 
     //no restart? => increase cell number
     else {
         tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = n+1;
-        tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::SUCCESS;
+        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::SUCCESS;
 
         //prove whether finished or not
         tag = numberGen->getId();
@@ -118,7 +118,7 @@ CellFeatureChain::ProcessingResult ScannerFunction::processImpl (Token* token, C
         Cell* scanCellTemp = cell;
         spiralLookupAlgorithm(scanCellTemp, scanCellPreTemp1, scanCellPreTemp2, n+1, tag);
         if( scanCellTemp == scanCellPreTemp1 )
-            tokenMem[Enums::Scanner::OUT] = Enums::ScannerOut::FINISHED;
+            tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::FINISHED;
     }
 
     //start cell

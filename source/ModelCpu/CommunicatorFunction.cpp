@@ -58,7 +58,7 @@ QByteArray CommunicatorFunction::getInternalData () const
 
 Enums::CommunicatorIn::Type CommunicatorFunction::getCommand (Token* token) const
 {
-    return static_cast<Enums::CommunicatorIn::Type>(token->getMemoryRef()[Enums::Communicator::IN] % 4);
+    return static_cast<Enums::CommunicatorIn::Type>(token->getMemoryRef()[Enums::Communicator::INPUT] % 4);
 }
 
 void CommunicatorFunction::setListeningChannel (Token* token)

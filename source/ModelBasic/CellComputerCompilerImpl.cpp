@@ -226,7 +226,7 @@ namespace
 				instructionUncoded.operand2.chop(1);
 			}
 			else
-				instructionCoded.opType2 = Enums::ComputerOptype::CONST;
+				instructionCoded.opType2 = Enums::ComputerOptype::CONSTANT;
 
 
 			if (instructionUncoded.operand1.left(2) == "0x") {
@@ -377,7 +377,7 @@ std::string CellComputerCompilerImpl::decompileSourceCode(QByteArray const & dat
 			textOp2 = "[[" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.tokenMemorySize), 0, 16) + "]]";
 		if (instruction.opType2 == Enums::ComputerOptype::CMEM)
 			textOp2 = "(" + QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.cellFunctionComputerCellMemorySize), 0, 16) + ")";
-		if (instruction.opType2 == Enums::ComputerOptype::CONST)
+		if (instruction.opType2 == Enums::ComputerOptype::CONSTANT)
 			textOp2 = QString("0x%1").arg(CompilerHelper::convertToAddress(instruction.operand2, _parameters.tokenMemorySize), 0, 16);
 
 		//write separation/comparator
