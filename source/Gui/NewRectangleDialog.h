@@ -18,6 +18,7 @@ public:
 	IntVector2D getBlockSize() const;
 	double getDistance() const;
 	double getInternalEnergy () const;
+    int getColorCode() const;
 
 private:
 	Q_SLOT void okClicked();

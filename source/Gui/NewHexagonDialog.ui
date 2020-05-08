@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>399</width>
-    <height>262</height>
+    <width>350</width>
+    <height>265</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -69,6 +69,9 @@
        <widget class="QLineEdit" name="colorCodeEdit">
         <property name="inputMask">
          <string>9</string>
+        </property>
+        <property name="text">
+         <string>0</string>
         </property>
         <property name="frame">
          <bool>false</bool>
