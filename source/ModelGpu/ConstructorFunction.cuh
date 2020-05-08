@@ -489,8 +489,8 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
 
     __shared__ float kineticEnergyBeforeConstruction;
     if (0 == threadIdx.x) {
-        kineticEnergyBeforeConstruction =
-            Physics::kineticEnergy(_cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel);
+        kineticEnergyBeforeConstruction = Physics::kineticEnergy(
+            _cluster->numCellPointers, _cluster->getVelocity(), _cluster->angularMass, _cluster->getAngularVelocity());
     }
     __syncthreads();
 
@@ -503,9 +503,9 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
     __shared__ EnergyForNewEntities energyForNewEntities;
     if (0 == threadIdx.x) {
         auto const mass = static_cast<float>(_cluster->numCellPointers);
-        velocityAfterConstruction = Physics::transformVelocity(mass, mass + 1, _cluster->vel);
+        velocityAfterConstruction = Physics::transformVelocity(mass, mass + 1, _cluster->getVelocity());
         angularVelAfterConstruction =
-            Physics::transformAngularVelocity(_cluster->angularMass, angularMassAfterConstruction, _cluster->angularVel);
+            Physics::transformAngularVelocity(_cluster->angularMass, angularMassAfterConstruction, _cluster->getAngularVelocity());
         auto const kineticEnergyAfterConstruction = Physics::kineticEnergy(
             mass + 1, velocityAfterConstruction, angularMassAfterConstruction, angularVelAfterConstruction);
         auto const kineticEnergyDiff = kineticEnergyAfterConstruction - kineticEnergyBeforeConstruction;
@@ -545,8 +545,8 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
     __shared__ bool createEmptyToken;
     __shared__ bool createDuplicateToken;
     if (0 == threadIdx.x) {
-        _cluster->vel = velocityAfterConstruction;
-        _cluster->angularVel = angularVelAfterConstruction;
+        _cluster->setVelocity(velocityAfterConstruction);
+        _cluster->setAngularVelocity(angularVelAfterConstruction);
         _cluster->angularMass = angularMassAfterConstruction;
         separateConstructionWhenFinished(newCell, constructionData);
         createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option;
@@ -589,8 +589,8 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __shared__ RotationMatrices rotationMatrices;
     __shared__ float kineticEnergyBeforeRotation;
     if (0 == threadIdx.x) {
-        kineticEnergyBeforeRotation =
-            Physics::kineticEnergy(_cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel);
+        kineticEnergyBeforeRotation = Physics::kineticEnergy(
+            _cluster->numCellPointers, _cluster->getVelocity(), _cluster->angularMass, _cluster->getAngularVelocity());
         rotationMatrices = calcRotationMatrices(anglesToRotate);
     }
     __syncthreads();
@@ -602,10 +602,10 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __shared__ float angularVelAfterRotation;
     __shared__ float kineticEnergyDiff;
     if (0 == threadIdx.x) {
-        angularVelAfterRotation =
-            Physics::transformAngularVelocity(_cluster->angularMass, angularMassAfterRotation, _cluster->angularVel);
+        angularVelAfterRotation = Physics::transformAngularVelocity(
+            _cluster->angularMass, angularMassAfterRotation, _cluster->getAngularVelocity());
         auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
-            _cluster->numCellPointers, _cluster->vel, angularMassAfterRotation, angularVelAfterRotation);
+            _cluster->numCellPointers, _cluster->getVelocity(), angularMassAfterRotation, angularVelAfterRotation);
 
         kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeRotation;
     }
@@ -641,7 +641,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __syncthreads();
 
     if (0 == threadIdx.x) {
-        _cluster->angularVel = angularVelAfterRotation;
+        _cluster->setAngularVelocity(angularVelAfterRotation);
         _cluster->angularMass = angularMassAfterRotation;
 
         _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS_ROT;
@@ -719,7 +719,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __shared__ float kineticEnergyBeforeConstruction;
     if (0 == threadIdx.x) {
         kineticEnergyBeforeConstruction = Physics::kineticEnergy(
-            _cluster->numCellPointers, _cluster->vel, _cluster->angularMass, _cluster->angularVel);
+            _cluster->numCellPointers, _cluster->getVelocity(), _cluster->angularMass, _cluster->getAngularVelocity());
     }
     __syncthreads();
 
@@ -737,9 +737,9 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __shared__ EnergyForNewEntities energyForNewEntities;
     if (0 == threadIdx.x) {
         auto const mass = static_cast<float>(_cluster->numCellPointers);
-        velocityAfterConstruction = Physics::transformVelocity(mass, mass + 1, _cluster->vel);
-        angularVelAfterConstruction =
-            Physics::transformAngularVelocity(_cluster->angularMass, angularMassAfterConstruction, _cluster->angularVel);
+        velocityAfterConstruction = Physics::transformVelocity(mass, mass + 1, _cluster->getVelocity());
+        angularVelAfterConstruction = Physics::transformAngularVelocity(
+            _cluster->angularMass, angularMassAfterConstruction, _cluster->getAngularVelocity());
         auto const kineticEnergyAfterRotation = Physics::kineticEnergy(
             mass + 1, velocityAfterConstruction, angularMassAfterConstruction, angularVelAfterConstruction);
         auto const kineticEnergyDiff = kineticEnergyAfterRotation - kineticEnergyBeforeConstruction;
@@ -779,8 +779,8 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __shared__ bool createEmptyToken;
     __shared__ bool createDuplicateToken;
     if (0 == threadIdx.x) {
-        _cluster->vel = velocityAfterConstruction;
-        _cluster->angularVel = angularVelAfterConstruction;
+        _cluster->setVelocity(velocityAfterConstruction);
+        _cluster->setAngularVelocity(angularVelAfterConstruction);
         _cluster->angularMass = angularMassAfterConstruction;
 
         firstCellOfConstructionSite->tokenBlocked = false;  //disable token blocking on construction side
@@ -1143,7 +1143,7 @@ __inline__ __device__ void ConstructorFunction::completeCellAbsPosAndVel()
         cell->absPos = Math::applyMatrix(cell->relPos, rotationMatrix) + _cluster->pos;
 
         auto r = cell->absPos - _cluster->pos;
-        cell->vel = Physics::tangentialVelocity(r, _cluster->vel, _cluster->angularVel);
+        cell->vel = Physics::tangentialVelocity(r, _cluster->getVelocity(), _cluster->getAngularVelocity());
     }
 }
 

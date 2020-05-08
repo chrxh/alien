@@ -40,9 +40,35 @@ struct Cell
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
-    int protectionCounter;
     int alive;  //0 = dead, 1 == alive
     int tag;
+
+    __inline__ __device__ void initProtectionCounter()
+    {
+        _protectionCounter = 0;
+    }
+                     
+    __inline__ __device__ void activateProtectionCounter_safe()
+    {
+        atomicExch(&_protectionCounter, 14);
+    }
+
+    __inline__ __device__ void decrementProtectionCounter()
+    {
+        if (_protectionCounter > 0) {
+            --_protectionCounter;
+        }
+    }
+
+    __inline__ __device__ int getProtectionCounter()
+    {
+        return _protectionCounter;
+    }
+
+    __inline__ __device__ int getProtectionCounter_safe()
+    {
+        return atomicAdd(&_protectionCounter, 0);
+    }
 
     __inline__ __device__ Enums::CellFunction::Type getCellFunctionType() const
     {
@@ -98,6 +124,7 @@ struct Cell
 private:
     int _cellFunctionType;
     float _energy;
+    int _protectionCounter;
 
     //auxiliary data
     int _fused;
