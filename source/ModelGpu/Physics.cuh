@@ -190,13 +190,13 @@ __device__ __inline__ float2 Physics::calcOutwardVector(Cell* cellA, Cell* cellB
 {
 	Cluster* clusterA = cellA->cluster;
 	float2 posA = clusterA->pos;
-	float2 velA = clusterA->vel;
-	float angVelA = clusterA->angularVel * DEG_TO_RAD;
+	float2 velA = clusterA->getVelocity();
+	float angVelA = clusterA->getAngularVelocity() * DEG_TO_RAD;
 
 	Cluster* clusterB = cellB->cluster;
 	float2 posB = clusterB->pos;
-	float2 velB = clusterB->vel;
-	float angVelB = clusterB->angularVel * DEG_TO_RAD;
+	float2 velB = clusterB->getVelocity();
+	float angVelB = clusterB->getAngularVelocity() * DEG_TO_RAD;
 
     float2 rAPp = cellB->absPos - posA;
 	map.mapDisplacementCorrection(rAPp);

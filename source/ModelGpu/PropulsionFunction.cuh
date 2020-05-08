@@ -34,8 +34,8 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
     float power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
 
     float const clusterMass = cluster->numCellPointers / cudaSimulationParameters.cellMass_Reciprocal;
-    auto const& angularVel = cluster->angularVel;
-    auto const& vel = cluster->vel;
+    auto const& angularVel = cluster->getAngularVelocity_safe();
+    auto const& vel = cluster->getVelocity_safe();
     auto const& angularMass = cluster->angularMass;
 
     auto origKineticEnergy =
@@ -103,8 +103,8 @@ __inline__ __device__ void PropulsionFunction::processing(Token * token, EntityF
         return;
     }
 
-    cluster->vel = vel + velInc;
-    cluster->angularVel += angularVelInc;
+    cluster->addVelocity_safe(velInc);
+    cluster->addAngularVelocity_safe(angularVelInc);
 
     //create energy particle with difference energy
     Math::normalize(impulse);

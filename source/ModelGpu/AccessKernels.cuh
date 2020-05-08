@@ -77,9 +77,9 @@ __global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2
                 ClusterAccessTO& clusterTO = dataTO.clusters[clusterAccessIndex];
                 clusterTO.id = cluster->id;
                 clusterTO.pos = cluster->pos;
-                clusterTO.vel = cluster->vel;
+                clusterTO.vel = cluster->getVelocity();
                 clusterTO.angle = cluster->angle;
-                clusterTO.angularVel = cluster->angularVel;
+                clusterTO.angularVel = cluster->getAngularVelocity();
                 clusterTO.numCells = cluster->numCellPointers;
                 clusterTO.numTokens = cluster->numTokenPointers;
                 clusterTO.cellStartIndex = cellTOIndex;
