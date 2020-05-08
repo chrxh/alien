@@ -177,6 +177,8 @@ namespace Const
 	const double NewRectangleDistDefault = 1.0;
 	const std::string NewRectangleCellEnergyKey = "newRectangle/cellEnergy";
 	const double NewRectangleCellEnergyDefault = 100.0;
+    const std::string NewRectangleColorCodeKey = "newRectangle/colorCode";
+    const int NewRectangleColorCodeDefault = 0;
 
     const std::string ExtrapolateContentKey = "computation/extrapolateContent";
     const bool ExtrapolateContentDefault = false;

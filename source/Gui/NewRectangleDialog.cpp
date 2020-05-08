@@ -21,6 +21,8 @@ NewRectangleDialog::NewRectangleDialog(SimulationParameters const& simulationPar
 		GuiSettings::getSettingsValue(Const::NewRectangleDistKey, Const::NewRectangleDistDefault)));
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::NewRectangleCellEnergyKey, Const::NewRectangleCellEnergyDefault)));
+    ui->colorCodeEdit->setText(StringHelper::toString(
+        GuiSettings::getSettingsValue(Const::NewRectangleColorCodeKey, Const::NewRectangleColorCodeDefault)));
 
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewRectangleDialog::okClicked);
 }
@@ -48,12 +50,19 @@ double NewRectangleDialog::getInternalEnergy () const
     return ui->energyEdit->text().toDouble(&ok);
 }
 
+int NewRectangleDialog::getColorCode() const
+{
+    bool ok(true);
+    return ui->colorCodeEdit->text().toInt(&ok);
+}
+
 void NewRectangleDialog::okClicked()
 {
 	GuiSettings::setSettingsValue(Const::NewRectangleSizeXKey, getBlockSize().x);
 	GuiSettings::setSettingsValue(Const::NewRectangleSizeYKey, getBlockSize().y);
 	GuiSettings::setSettingsValue(Const::NewRectangleDistKey, getDistance());
 	GuiSettings::setSettingsValue(Const::NewRectangleCellEnergyKey, getInternalEnergy());
+    GuiSettings::setSettingsValue(Const::NewRectangleColorCodeKey, getColorCode());
 
 	accept();
 }

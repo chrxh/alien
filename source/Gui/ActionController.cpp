@@ -680,6 +680,7 @@ void ActionController::onNewRectangle()
 		IntVector2D size = dialog.getBlockSize();
 		double distance = dialog.getDistance();
 		double energy = dialog.getInternalEnergy();
+        int colorCode = dialog.getColorCode();
 
 		uint64_t id = 0;
 
@@ -697,7 +698,7 @@ void ActionController::onNewRectangle()
 				cellRow.push_back(CellDescription().setId(++id).setEnergy(energy)
 					.setPos({ static_cast<float>(x), static_cast<float>(y) })
 					.setMaxConnections(maxConn).setFlagTokenBlocked(false)
-					.setTokenBranchNumber(0).setMetadata(CellMetadata())
+					.setTokenBranchNumber(0).setMetadata(CellMetadata().setColor(colorCode))
 					.setCellFeature(CellFeatureDescription()));
 			}
 			cellMatrix.push_back(cellRow);
