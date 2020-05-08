@@ -42,7 +42,7 @@ private:
 	ActiveScene _activeScene = ActiveScene::PixelScene;
 
     bool _pixelUniverseInit = false;
-    bool _shapeUniverseInit = false;
+    bool _itemUniverseInit = false;
 
     qreal _posIncrement = 0.0;
 };

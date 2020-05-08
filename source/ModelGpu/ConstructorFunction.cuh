@@ -220,7 +220,7 @@ __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
     __syncthreads();
 
     if (Enums::ConstrIn::DO_NOTHING == constructionData.constrIn) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
         __syncthreads();
         return;
     }
@@ -230,7 +230,7 @@ __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
     __syncthreads();
 
     if (!isRadiusTooLarge) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_MAX_RADIUS;
         __syncthreads();
         return;
     }
@@ -259,7 +259,7 @@ __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
     if (firstCellOfConstructionSite) {
         auto const distance = QuantityConverter::convertDataToDistance(constructionData.distance);
         if (!checkDistance(distance)) {
-            _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
+            _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
             __syncthreads();
             return;
         }
@@ -389,7 +389,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     __syncthreads();
 
     if (ClusterComponent::ConstructionSite == cell->tag) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
         return;
     }
 
@@ -415,7 +415,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     if (isAngleRestricted) {
 
         if (abs(anglesToRotate.constructor) < 1.0f && abs(anglesToRotate.constructionSite) < 1.0f) {
-            _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_DIST;
+            _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
             return;
         }
 
@@ -450,7 +450,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
     auto const adaptMaxConnections = isAdaptMaxConnections(constructionData);
 
     if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
         return;
     }
 
@@ -482,7 +482,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
         __syncthreads();
 
         if (isObstaclePresent) {
-            _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+            _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             return;
         }
     }
@@ -515,7 +515,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
     __syncthreads();
 
     if (!energyForNewEntities.energyAvailable) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
         return;
     }
 
@@ -575,7 +575,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(Constructio
     }
 
     if (0 == threadIdx.x) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
         _token->memory[Enums::Constr::INOUT_ANGLE] = 0;
     }
 }
@@ -613,7 +613,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     if (_token->getEnergy() <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy
             + cudaSimulationParameters.tokenMinEnergy + kineticEnergyDiff) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
         __syncthreads();
         return;
     }
@@ -628,7 +628,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         __syncthreads();
 
         if (result) {
-            _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+            _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             __syncthreads();
             return;
         }
@@ -644,7 +644,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         _cluster->setAngularVelocity(angularVelAfterRotation);
         _cluster->angularMass = angularMassAfterRotation;
 
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS_ROT;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS_ROT;
         _token->memory[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(
             desiredAngle - (anglesToRotate.constructionSite - anglesToRotate.constructor));
     }
@@ -664,7 +664,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
 
     auto const adaptMaxConnections = isAdaptMaxConnections(constructionData);
     if (1 == getMaxConnections(constructionData)) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
         __syncthreads();
         return;
     }
@@ -710,7 +710,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
         __syncthreads();
 
         if (result) {
-            _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_OBSTACLE;
+            _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_OBSTACLE;
             __syncthreads();
             return;
         }
@@ -748,7 +748,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     __syncthreads();
 
     if (!energyForNewEntities.energyAvailable) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
         __syncthreads();
         return;
     }
@@ -811,7 +811,7 @@ __inline__ __device__ void ConstructorFunction::continueConstructionWithRotation
     }
 
     if (0 == threadIdx.x) {
-        _token->memory[Enums::Constr::OUT] = Enums::ConstrOut::SUCCESS;
+        _token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
         _token->memory[Enums::Constr::INOUT_ANGLE] = 0;
     }
 }
@@ -1662,7 +1662,7 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token * tok
 {
     auto const& memory = token->memory;
     data.constrIn = static_cast<Enums::ConstrIn::Type>(
-        static_cast<unsigned char>(token->memory[Enums::Constr::IN]) % Enums::ConstrIn::_COUNTER);
+        static_cast<unsigned char>(token->memory[Enums::Constr::INPUT]) % Enums::ConstrIn::_COUNTER);
     data.constrInOption = static_cast<Enums::ConstrInOption::Type>(
         static_cast<unsigned char>(token->memory[Enums::Constr::IN_OPTION]) % Enums::ConstrInOption::_COUNTER);
     data.angle = memory[Enums::Constr::INOUT_ANGLE];

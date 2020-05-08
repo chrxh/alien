@@ -1,6 +1,7 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QGraphicsItem>
+#include <QGLWidget>
 
 #include "Gui/Settings.h"
 #include "ModelBasic/SimulationAccess.h"
@@ -39,9 +40,10 @@ VisualEditController::~VisualEditController()
 void VisualEditController::init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* repository)
 {
 	_pixelUniverseInit = false;
-	_shapeUniverseInit = false;
+	_itemUniverseInit = false;
 	_controller = controller;
 	_activeScene = ActiveScene::PixelScene;
+    ui->simulationView->setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
     _viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, _activeScene);
     _pixelUniverse->init(notifier, controller, access, repository, _viewport);
 	_itemUniverse->init(notifier, controller, repository, _viewport);

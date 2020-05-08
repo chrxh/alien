@@ -17,7 +17,7 @@ CellFeatureChain::ProcessingResult EnergyGuidanceImpl::processImpl (Token* token
 {
     ProcessingResult processingResult {false, 0};
 	auto& tokenMem = token->getMemoryRef();
-	quint8 cmd = tokenMem[Enums::EnergyGuidance::IN] % 6;
+	quint8 cmd = tokenMem[Enums::EnergyGuidance::INPUT] % 6;
     qreal valueCell = static_cast<quint8>(tokenMem[Enums::EnergyGuidance::IN_VALUE_CELL]);
     qreal valueToken = static_cast<quint8>(tokenMem[Enums::EnergyGuidance::IN_VALUE_TOKEN]);
 	auto parameters = _context->getSimulationParameters();
