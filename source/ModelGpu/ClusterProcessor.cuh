@@ -79,8 +79,8 @@ private:
     //find colliding cluster
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
         Cell* cell = cluster->cellPointers[index];
-        for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
-            for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
+        for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
+            for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
                 Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
 
                 if (!otherCell || otherCell == cell) {
@@ -144,8 +144,8 @@ private:
 
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
         Cell* cell = cluster->cellPointers[index];
-        for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
-            for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
+        for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
+            for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
                 Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
                 if (!otherCell || otherCell == cell) {
                     continue;
@@ -195,8 +195,8 @@ private:
         if (nullptr == cluster->clusterToFuse && nullptr == largestOtherCluster->clusterToFuse) {
             for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
                 Cell* cell = cluster->cellPointers[index];
-                for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
-                    for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
+                for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
+                    for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
                         Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
                         if (!otherCell || otherCell == cell) {
                             continue;
@@ -273,8 +273,8 @@ private:
 
         for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
             Cell* cell = cluster->cellPointers[index];
-            for (float dx = -1.0f; dx < 1.9f; dx += 1.0f) {
-                for (float dy = -1.0f; dy < 1.9f; dy += 1.0f) {
+            for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
+                for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
                     Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
                     if (!otherCell || otherCell == cell) {
                         continue;
