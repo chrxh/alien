@@ -1101,34 +1101,29 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestFusionAndHeavyCollision)
 TEST_F(ClusterGpuTests, testSimultaneousCollisionOfBlocks)
 {
     DataDescription origData;
-    origData.addCluster(createRectangularCluster({ 11, 101 }, QVector2D{ 100.5f, 100.5f }, QVector2D{ 0, 0 }));
-    origData.addCluster(createRectangularCluster({ 11, 11 }, QVector2D{ 112.5f, 55.5f }, QVector2D{ -0.2f, 0 }));
-    origData.addCluster(createRectangularCluster({ 11, 11 }, QVector2D{ 112.5f, 145.5f }, QVector2D{ -0.2f, 0 }));
-    auto const clusterId1 = origData.clusters->at(0).id;
-    auto const clusterId2 = origData.clusters->at(1).id;
-    auto const clusterId3 = origData.clusters->at(2).id;
+    origData.addCluster(createRectangularCluster({ 31, 201 }, QVector2D{ 90.5f, 100.5f }, QVector2D{ 0, 0 }));
+    for (int i = 1; i <= 9; ++i) {
+        origData.addCluster(createRectangularCluster({ 11, 11 }, QVector2D{ 111.5f, 0.5f + i * 20}, QVector2D{ -0.1f, 0 }));
+    }
+    auto clusterId = [&](int i) { return origData.clusters->at(i).id; };
 
     IntegrationTestHelper::updateData(_access, origData);
-    IntegrationTestHelper::runSimulation(10, _controller);
+    IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    ASSERT_EQ(3, newData.clusters->size());
+    ASSERT_EQ(10, newData.clusters->size());
 
     auto clusterById = IntegrationTestHelper::getClusterByClusterId(newData);
     {
-        auto cluster = clusterById.at(clusterId1);
+        auto cluster = clusterById.at(clusterId(0));
         EXPECT_GT(-NearlyZero, cluster.vel->x());
     }
 
-    {
-        auto cluster = clusterById.at(clusterId2);
+    for(int i = 1; i < 10; ++i) {
+        auto cluster = clusterById.at(clusterId(i));
         EXPECT_LT(NearlyZero, cluster.vel->x());
     }
 
-    {
-        auto cluster = clusterById.at(clusterId3);
-        EXPECT_LT(NearlyZero, cluster.vel->x());
-    }
     check(origData, newData);
 }
