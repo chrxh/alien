@@ -144,6 +144,8 @@ private:
 
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
         Cell* cell = cluster->cellPointers[index];
+        Cell* closestOtherCell = nullptr;
+        float distanceOfClosestOtherCell = 0;
         for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
             for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
                 Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
@@ -161,16 +163,18 @@ private:
                     continue;
                 }
                 if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
-                    avoidCollision = true;
-                    break;
+                    continue;
                 }
                 if (Math::length(cell->vel - otherCell->vel) >= cudaSimulationParameters.cellFusionVelocity
                     && areConnectable(cell, otherCell)) {
                     state = CollisionState::Fusion;
                 }
-                atomicAdd(&collisionCenterPos.x, otherCell->absPos.x);
-                atomicAdd(&collisionCenterPos.y, otherCell->absPos.y);
-                atomicAdd(&numberOfCollidingCells, 1);
+                
+                auto const distance = _data->cellMap.mapDistance(cell->absPos, otherCell->absPos);
+                if (!closestOtherCell || distance < distanceOfClosestOtherCell) {
+                    closestOtherCell = otherCell;
+                    distanceOfClosestOtherCell = distance;
+                }
             }
             if (avoidCollision) {
                 break;
@@ -178,6 +182,11 @@ private:
         }
         if (avoidCollision) {
             break;
+        }
+        if (closestOtherCell) {
+            atomicAdd_block(&collisionCenterPos.x, closestOtherCell->absPos.x);
+            atomicAdd_block(&collisionCenterPos.y, closestOtherCell->absPos.y);
+            atomicAdd_block(&numberOfCollidingCells, 1);
         }
     }
     __syncthreads();
@@ -273,6 +282,8 @@ private:
 
         for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
             Cell* cell = cluster->cellPointers[index];
+            Cell* closestOtherCell = nullptr;
+            float distanceOfClosestOtherCell = 0;
             for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
                 for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
                     Cell* otherCell = _data->cellMap.get(cell->absPos + float2{ dx, dy });
@@ -289,12 +300,22 @@ private:
                         >= cudaSimulationParameters.cellMaxDistance) {
                         continue;
                     }
-                    float2 normal = Physics::calcNormalToCell(otherCell, outwardVector);
-                    atomicAdd(&n.x, normal.x);
-                    atomicAdd(&n.y, normal.y);
-                    cell->activateProtectionCounter_safe();
-                    otherCell->activateProtectionCounter_safe();
+                    if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
+                        continue;
+                    }
+                    auto const distance = _data->cellMap.mapDistance(cell->absPos, otherCell->absPos);
+                    if (!closestOtherCell || distance < distanceOfClosestOtherCell) {
+                        closestOtherCell = otherCell;
+                        distanceOfClosestOtherCell = distance;
+                    }
                 }
+            }
+            if (closestOtherCell) {
+                float2 normal = Physics::calcNormalToCell(closestOtherCell, outwardVector);
+                atomicAdd_block(&n.x, normal.x);
+                atomicAdd_block(&n.y, normal.y);
+                cell->activateProtectionCounter_safe();
+                closestOtherCell->activateProtectionCounter_safe();
             }
         }
         __syncthreads();
