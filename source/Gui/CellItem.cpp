@@ -1,14 +1,16 @@
 #include <QPainter>
+#include <QGraphicsBlurEffect>
 
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/Settings.h"
+#include "ModelBasic/Colors.h"
 
 #include "Gui/Settings.h"
 
 #include "ItemConfig.h"
 #include "CellItem.h"
 #include "CoordinateSystem.h"
-
+    
 namespace
 {
 	QString getTypeString(Enums::CellFunction::Type type)
@@ -66,20 +68,20 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
     //set brush color
 	QColor brushColor;
 	uint8_t colorCode = getColorCode() % 7;
-    if( colorCode == 0 )
-       brushColor = Const::IndividualCellColor1;
+    if (colorCode == 0)
+        brushColor = toQColor(Const::IndividualCellColor1);
     if( colorCode == 1 )
-        brushColor = Const::IndividualCellColor2;
+        brushColor = toQColor(Const::IndividualCellColor2);
     if( colorCode == 2 )
-        brushColor = Const::IndividualCellColor3;
+        brushColor = toQColor(Const::IndividualCellColor3);
     if( colorCode == 3 )
-        brushColor = Const::IndividualCellColor4;
+        brushColor = toQColor(Const::IndividualCellColor4);
     if( colorCode == 4 )
-        brushColor = Const::IndividualCellColor5;
+        brushColor = toQColor(Const::IndividualCellColor5);
     if( colorCode == 5 )
-        brushColor = Const::IndividualCellColor6;
+        brushColor = toQColor(Const::IndividualCellColor6);
     if( colorCode == 6 )
-        brushColor = Const::IndividualCellColor7;
+        brushColor = toQColor(Const::IndividualCellColor7);
 	if (!isConnectable()) {
 		brushColor.setHsl(brushColor.hslHue(), brushColor.hslSaturation(), qMax(0, brushColor.lightness() - 60), brushColor.alpha());
 	}
@@ -116,10 +118,10 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 	if (_config->isShowCellInfo()) {
 		auto font = GuiSettings::getCellFont();
 		painter->setFont(font);
-		painter->setPen(QPen(QBrush(Const::CellFunctionInfoColor), CoordinateSystem::modelToScene(0.03)));
+		painter->setPen(QPen(QBrush(toQColor(Const::CellFunctionInfoColor)), CoordinateSystem::modelToScene(0.03)));
 		painter->drawText(QRectF(CoordinateSystem::modelToScene(-1.5), CoordinateSystem::modelToScene(0.1), CoordinateSystem::modelToScene(3.0)
 			, CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, _displayString);
-		painter->setPen(QPen(QBrush(Const::BranchNumberInfoColor), CoordinateSystem::modelToScene(0.03)));
+		painter->setPen(QPen(QBrush(toQColor(Const::BranchNumberInfoColor)), CoordinateSystem::modelToScene(0.03)));
 		painter->drawText(QRectF(CoordinateSystem::modelToScene(-0.49), CoordinateSystem::modelToScene(-0.47)
 			, CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0)), Qt::AlignCenter, QString::number(getBranchNumber()));
 	}

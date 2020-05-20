@@ -43,11 +43,11 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
             }
             if (otherCell->tryLock()) {
                 auto const energyToTransfer =
-                    otherCell->getEnergy() * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
-                if (otherCell->getEnergy() > energyToTransfer) {
-                    otherCell->changeEnergy(-energyToTransfer);
+                    otherCell->getEnergy_safe() * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+                if (otherCell->getEnergy_safe() > energyToTransfer) {
+                    otherCell->changeEnergy_safe(-energyToTransfer);
                     token->changeEnergy(energyToTransfer / 2.0f);
-                    cell->changeEnergy(energyToTransfer / 2.0f);
+                    cell->changeEnergy_safe(energyToTransfer / 2.0f);
                     token->memory[Enums::Weapon::OUTPUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                 }
                 otherCell->cluster->unfreeze(30);
@@ -56,7 +56,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
         }
     }
     if (cudaSimulationParameters.cellFunctionWeaponEnergyCost > 0) {
-        auto const cellEnergy = cell->getEnergy();
+        auto const cellEnergy = cell->getEnergy_safe();
         auto &pos = cell->absPos;
         float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
             + float2{ (data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
@@ -66,7 +66,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
 
         particlePos = particlePos - particleVel;	//because particle will still be moved in current time step
         auto const radiationEnergy = min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
-        cell->changeEnergy(-radiationEnergy);
+        cell->changeEnergy_safe(-radiationEnergy);
         EntityFactory factory;
         factory.init(data);
         auto particle = factory.createParticle(radiationEnergy, particlePos, particleVel, { cell->metadata.color });

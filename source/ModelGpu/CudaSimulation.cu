@@ -15,6 +15,7 @@
 #include "AccessKernels.cuh"
 #include "CleanupKernels.cuh"
 #include "MonitorKernels.cuh"
+#include "RenderingKernels.cuh"
 #include "Entities.cuh"
 #include "CudaMemoryManager.cuh"
 #include "CudaMonitorData.cuh"
@@ -129,6 +130,17 @@ void CudaSimulation::DEBUG_printNumEntries()
         << "Tokens: " << _cudaSimulationData->entities.tokens.retrieveNumEntries() << "; "
         << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; "
         << std::endl;
+}
+
+void CudaSimulation::getSimulationImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageRawData)
+{
+    int width = rectLowerRight.x - rectUpperLeft.x + 1;
+    int height = rectLowerRight.y - rectUpperLeft.y + 1;
+    int numPixels = width * height;
+
+    GPU_FUNCTION(drawImage, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
+    checkCudaErrors(cudaMemcpy(
+        imageRawData, _cudaSimulationData->imageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)

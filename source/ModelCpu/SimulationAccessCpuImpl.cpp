@@ -313,60 +313,6 @@ void SimulationAccessCpuImpl::drawImageFromUnit(Unit * unit)
 	drawParticlesFromUnit(unit);
 }
 
-namespace
-{
-	uint32_t calcCellColor(CellMetadata const& meta, double energy)
-	{
-		uint8_t r = 0;
-		uint8_t g = 0;
-		uint8_t b = 0;
-		auto const& color = meta.color;
-		if (color == 0) {
-			r = Const::IndividualCellColor1.red();
-			g = Const::IndividualCellColor1.green();
-			b = Const::IndividualCellColor1.blue();
-		}
-		if (color == 1) {
-			r = Const::IndividualCellColor2.red();
-			g = Const::IndividualCellColor2.green();
-			b = Const::IndividualCellColor2.blue();
-		}
-		if (color == 2) {
-			r = Const::IndividualCellColor3.red();
-			g = Const::IndividualCellColor3.green();
-			b = Const::IndividualCellColor3.blue();
-		}
-		if (color == 3) {
-			r = Const::IndividualCellColor4.red();
-			g = Const::IndividualCellColor4.green();
-			b = Const::IndividualCellColor4.blue();
-		}
-		if (color == 4) {
-			r = Const::IndividualCellColor5.red();
-			g = Const::IndividualCellColor5.green();
-			b = Const::IndividualCellColor5.blue();
-		}
-		if (color == 5) {
-			r = Const::IndividualCellColor6.red();
-			g = Const::IndividualCellColor6.green();
-			b = Const::IndividualCellColor6.blue();
-		}
-		if (color == 6) {
-			r = Const::IndividualCellColor7.red();
-			g = Const::IndividualCellColor7.green();
-			b = Const::IndividualCellColor7.blue();
-		}
-		quint32 e = energy / 2.0 + 20.0;
-		if (e > 150) {
-			e = 150;
-		}
-		r = r*e / 150;
-		g = g*e / 150;
-		b = b*e / 150;
-		return (r << 16) | (g << 8) | b;
-	}
-}
-
 void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
 {
 	auto space = unit->getContext()->getSpaceProperties();

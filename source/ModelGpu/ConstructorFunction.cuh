@@ -841,8 +841,8 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(float energyLoss, 
     _token->changeEnergy(-(cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token + energyLoss));
     if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
         || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
-        auto const averageEnergy = (cell->getEnergy() + result.cell) / 2;
-        cell->setEnergy(averageEnergy);
+        auto const averageEnergy = (cell->getEnergy_safe() + result.cell) / 2;
+        cell->setEnergy_safe(averageEnergy);
         result.cell = averageEnergy;
     }
 
@@ -1417,7 +1417,7 @@ __inline__ __device__ void ConstructorFunction::constructNewCell(
         EntityFactory factory;
         factory.init(_data);
         result = factory.createCell(_cluster);
-        result->setEnergy(energyOfNewCell);
+        result->setEnergy_safe(energyOfNewCell);
         result->relPos = relPosOfNewCell;
         float rotMatrix[2][2];
         Math::rotationMatrix(_cluster->angle, rotMatrix);

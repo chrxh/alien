@@ -366,7 +366,7 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_block()
         for (int tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
             auto token = _cluster->tokenPointers[tokenIndex];
             if (0 == token->cell->alive) {
-                token->cell->changeEnergy(token->getEnergy());
+                token->cell->changeEnergy_safe(token->getEnergy());
                 token->setEnergy(0);
             }
         }
@@ -378,8 +378,8 @@ __inline__ __device__ void ClusterProcessor::processingCellDeath_block()
                 auto pos = cell->absPos;
                 _data->cellMap.mapPosCorrection(pos);
                 auto const kineticEnergy = Physics::linearKineticEnergy(1.0f, cell->vel);
-                _factory.createParticle(cell->getEnergy() + kineticEnergy, pos, cell->vel, { cell->metadata.color });
-                cell->setEnergy(0);
+                _factory.createParticle(cell->getEnergy_safe() + kineticEnergy, pos, cell->vel, { cell->metadata.color });
+                cell->setEnergy_safe(0);
             }
         }
     }
@@ -437,7 +437,7 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_block()
         Cell *cell = _cluster->cellPointers[cellIndex];
 
         if (_data->numberGen.random() < cudaSimulationParameters.radiationProb) {
-            auto const cellEnergy = cell->getEnergy();
+            auto const cellEnergy = cell->getEnergy_safe();
             auto &pos = cell->absPos;
             float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
                 + float2{ (_data->numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
@@ -453,11 +453,11 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_block()
                 if (radiationEnergy > cellEnergy - 1) {
                     radiationEnergy = cellEnergy - 1;
                 }
-                cell->changeEnergy(-radiationEnergy);
+                cell->changeEnergy_safe(-radiationEnergy);
                 auto particle = _factory.createParticle(radiationEnergy, particlePos, particleVel, { cell->metadata.color });
             }
         }
-        if (cell->getEnergy() < cudaSimulationParameters.cellMinEnergy) {
+        if (cell->getEnergy_safe() < cudaSimulationParameters.cellMinEnergy) {
             atomicExch(&cell->alive, 0);
             atomicExch(&cell->cluster->decompositionRequired, 1);
         }
@@ -813,11 +813,11 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
                 continue;
             }
             if (cell->tag < cudaSimulationParameters.cellMaxToken
-                && cell->getEnergy() + regainedEnergy / numFusedCell > cudaSimulationParameters.tokenMinEnergy) {
+                && cell->getEnergy_safe() + regainedEnergy / numFusedCell > cudaSimulationParameters.tokenMinEnergy) {
                 auto energyForToken = regainedEnergy / numFusedCell;
                 if (energyForToken < cudaSimulationParameters.tokenMinEnergy) {
                     auto const energyFromCell = cudaSimulationParameters.tokenMinEnergy - energyForToken;
-                    cell->setEnergy(cell->getEnergy() - energyFromCell);
+                    cell->setEnergy_safe(cell->getEnergy_safe() - energyFromCell);
                     energyForToken = cudaSimulationParameters.tokenMinEnergy;
                 }
                 auto newToken = factory.createToken(cell, cell);
@@ -827,7 +827,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             }
             else {
                 if (regainedEnergy > 0) {
-                    cell->changeEnergy(regainedEnergy / numFusedCell);
+                    cell->changeEnergy_safe(regainedEnergy / numFusedCell);
                 }
             }
         }

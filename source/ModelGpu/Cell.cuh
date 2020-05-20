@@ -81,19 +81,24 @@ struct Cell
         _cellFunctionType = value;
     }
 
-    __device__ __inline__ void setEnergy(float value)
+    __device__ __inline__ void setEnergy_safe(float value)
     {
         atomicExch(&_energy, value);
     }
 
-    __device__ __inline__ void changeEnergy(float changeValue)
+    __device__ __inline__ void changeEnergy_safe(float changeValue)
     {
         atomicAdd(&_energy, changeValue);
     }
 
-    __device__ __inline__ float getEnergy()
+    __device__ __inline__ float getEnergy_safe()
     {
         return atomicAdd(&_energy, 0);
+    }
+
+    __device__ __inline__ float getEnergy() const
+    {
+        return _energy;
     }
 
     __device__ __inline__ void getLock()

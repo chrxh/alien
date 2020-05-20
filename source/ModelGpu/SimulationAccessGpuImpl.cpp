@@ -87,7 +87,7 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target)
 {
 	auto worker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_GetDataForImageJob>(getObjectId(), rect, _dataTOCache->getDataTO(), target);
+	CudaJob job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target);
 	if (!_updateInProgress) {
 		worker->addJob(job);
 	}
@@ -113,10 +113,7 @@ void SimulationAccessGpuImpl::jobsFinished()
 			Q_EMIT dataUpdated();
 		}
 
-		if (auto const& getDataForImageJob = boost::dynamic_pointer_cast<_GetDataForImageJob>(job)) {
-			auto dataTO = getDataForImageJob->getDataTO();
-			createImageFromGpuModel(dataTO, getDataForImageJob->getRect(), getDataForImageJob->getTargetImage());
-			_dataTOCache->releaseDataTO(dataTO);
+		if (auto const& getImageJob = boost::dynamic_pointer_cast<_GetImageJob>(job)) {
 			Q_EMIT imageReady();
 		}
 
