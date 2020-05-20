@@ -430,7 +430,6 @@
     <ClInclude Include="..\..\source\ModelBasic\DescriptionHelper.h" />
     <ClInclude Include="..\..\source\ModelBasic\Descriptions.h" />
     <ClInclude Include="..\..\source\ModelBasic\DllExport.h" />
-    <ClInclude Include="..\..\source\ModelBasic\EntityRenderer.h" />
     <ClInclude Include="..\..\source\ModelBasic\ElementaryTypes.h" />
     <ClInclude Include="..\..\source\ModelBasic\Metadata.h" />
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicBuilderFacade.h" />

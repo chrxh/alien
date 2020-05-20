@@ -30,14 +30,9 @@ private:
 	void callBackClear();
 	void callBackUpdateData();
 	void callBackCollectData();
-	void callBackDrawImage();
 
 	void updateClusterData();
 	void updateParticleData();
-
-	void drawImageFromUnit(Unit* unit);
-	void drawClustersFromUnit(Unit* unit);
-	void drawParticlesFromUnit(Unit* unit);
 
 	void collectDataFromUnit(Unit* unit);
 	void collectClustersFromUnit(Unit* unit);
