@@ -8,12 +8,6 @@
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/SimulationParameters.h"
-#include "ModelCpu/UnitGrid.h"
-#include "ModelCpu/Unit.h"
-#include "ModelCpu/UnitContext.h"
-#include "ModelCpu/MapCompartment.h"
-#include "ModelCpu/UnitThreadControllerImpl.h"
-#include "ModelCpu/UnitThread.h"
 #include "ModelBasic/SimulationAccess.h"
 
 #include "Predicates.h"
@@ -24,7 +18,6 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	_cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
 	_gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 	_symbols = _basicFacade->buildDefaultSymbolTable();
 	_parameters = _basicFacade->buildDefaultSimulationParameters();
