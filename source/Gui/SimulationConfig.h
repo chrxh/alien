@@ -20,16 +20,6 @@ public:
 };
 
 
-class _SimulationConfigCpu
-	: public _SimulationConfig
-{
-public:
-	virtual ValidationResult validate(string& errorMsg) const override;
-
-	uint maxThreads = 0;
-	IntVector2D gridSize;
-};
-
 class _SimulationConfigGpu
 	: public _SimulationConfig
 {

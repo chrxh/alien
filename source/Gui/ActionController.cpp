@@ -843,12 +843,12 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
 
-	if (boost::dynamic_pointer_cast<_SimulationConfigCpu>(config)) {
-		_infoController->setDevice(InfoController::Device::CPU);
+	if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+		_infoController->setDevice(InfoController::Device::Gpu);
 	}
-	else if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-		_infoController->setDevice(InfoController::Device::GPU);
-	}
+    else {
+        THROW_NOT_IMPLEMENTED();
+    }
 }
 
 void ActionController::updateZoomFactor()

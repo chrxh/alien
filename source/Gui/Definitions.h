@@ -73,8 +73,7 @@ using SimulationConfigGpu = boost::shared_ptr<_SimulationConfigGpu>;
 
 enum class ModelComputationType
 {
-	Cpu,
-	Gpu
+	Gpu = 1
 };
 
 class DataAnalyzer;

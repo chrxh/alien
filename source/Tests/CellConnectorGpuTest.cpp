@@ -9,57 +9,45 @@
 #include "ModelBasic/DescriptionHelper.h"
 #include "ModelBasic/SimulationParameters.h"
 
-#include "ModelCpu/SimulationContextCpuImpl.h"
-#include "ModelCpu/SimulationControllerCpu.h"
-#include "ModelCpu/ModelCpuBuilderFacade.h"
-#include "ModelCpu/ModelCpuData.h"
+#include "ModelGpu/SimulationContextGpuImpl.h"
+#include "ModelGpu/SimulationControllerGpu.h"
+#include "ModelGpu/ModelGpuBuilderFacade.h"
+#include "ModelGpu/ModelGpuData.h"
 
 #include "tests/Predicates.h"
 
-class CellConnectorTest : public ::testing::Test
+#include "IntegrationGpuTestFramework.h"
+
+
+class CellConnectorGpuTest : public IntegrationGpuTestFramework
 {
 public:
-	CellConnectorTest();
-	~CellConnectorTest();
+    CellConnectorGpuTest();
+    ~CellConnectorGpuTest();
 
 protected:
 	bool clusterConsistsOfFollowingCells(ClusterDescription const &cluster, set<uint64_t> const &cellIds);
 
-	SimulationController* _controller = nullptr;
-	SimulationParameters _parameters;
-	NumberGenerator* _numberGen = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
-
-	IntVector2D _universeSize{ 600, 300 };
 
 	DataDescription _data;
 	DescriptionNavigator _navi;
 };
 
-CellConnectorTest::CellConnectorTest()
+CellConnectorGpuTest::CellConnectorGpuTest()
+    : IntegrationGpuTestFramework({ 600, 300 })
 {
 	auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	auto cpuFacade = ServiceLocator::getInstance().getService<ModelCpuBuilderFacade>();
-	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto symbols = basicFacade->buildDefaultSymbolTable();
-	_parameters = basicFacade->buildDefaultSimulationParameters();
-	_controller = cpuFacade->buildSimulationController({ _universeSize, symbols, _parameters }, ModelCpuData(1, { 1,1 }));
-	auto context = static_cast<SimulationContextCpuImpl*>(_controller->getContext());
-
-	_numberGen = factory->buildRandomNumberGenerator();
-	_numberGen->init(NUMBER_GENERATOR_ARRAY_SIZE, 0);
-
 	_descHelper = basicFacade->buildDescriptionHelper();
-	_descHelper->init(context);
+	_descHelper->init(_context);
 }
 
-CellConnectorTest::~CellConnectorTest()
+CellConnectorGpuTest::~CellConnectorGpuTest()
 {
-	delete _controller;
 	delete _descHelper;
 }
 
-bool CellConnectorTest::clusterConsistsOfFollowingCells(ClusterDescription const &cluster, set<uint64_t> const & cellIds)
+bool CellConnectorGpuTest::clusterConsistsOfFollowingCells(ClusterDescription const &cluster, set<uint64_t> const & cellIds)
 {
 	vector<uint64_t> clusterCellIds(cluster.cells->size());
 	std::transform(cluster.cells->begin(), cluster.cells->end(), clusterCellIds.begin(), [](auto const &cell) {
@@ -70,7 +58,7 @@ bool CellConnectorTest::clusterConsistsOfFollowingCells(ClusterDescription const
 }
 
 
-TEST_F(CellConnectorTest, testMoveOneCellAway)
+TEST_F(CellConnectorGpuTest, testMoveOneCellAway)
 {
 	vector<uint64_t> cellIds;
 	cellIds.push_back(_numberGen->getId());
@@ -92,7 +80,7 @@ TEST_F(CellConnectorTest, testMoveOneCellAway)
 	ASSERT_EQ(1, cluster1.cells->size());
 }
 
-TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
+TEST_F(CellConnectorGpuTest, testMoveOneCellWithinCluster)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 3; ++i) {
@@ -116,7 +104,7 @@ TEST_F(CellConnectorTest, testMoveOneCellWithinCluster)
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster0, { cellIds[0], cellIds[1], cellIds[2] }));
 }
 
-TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
+TEST_F(CellConnectorGpuTest, testMoveOneCellToAnOtherCluster)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 4; ++i) {
@@ -146,7 +134,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToAnOtherCluster)
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster1, { cellIds[2], cellIds[3], cellIds[1] }));
 }
 
-TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
+TEST_F(CellConnectorGpuTest, testMoveOneCellToUniteClusters)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
@@ -177,7 +165,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteClusters)
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster0, { cellIds[0], cellIds[1], cellIds[2], cellIds[3], cellIds[4] }));
 }
 
-TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
+TEST_F(CellConnectorGpuTest, testMoveOneCellToUniteAndDevideClusters)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
@@ -218,7 +206,7 @@ TEST_F(CellConnectorTest, testMoveOneCellToUniteAndDevideClusters)
 	ASSERT_TRUE(clusterConsistsOfFollowingCells(cluster2, { cellIds[3], cellIds[4] }));
 }
 
-TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
+TEST_F(CellConnectorGpuTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
@@ -269,7 +257,7 @@ TEST_F(CellConnectorTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters)
 	}
 }
 
-TEST_F(CellConnectorTest, testMoveSeveralCells)
+TEST_F(CellConnectorGpuTest, testMoveSeveralCells)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 5; ++i) {
@@ -312,7 +300,7 @@ TEST_F(CellConnectorTest, testMoveSeveralCells)
 	ASSERT_EQ(1, cell4.connectingCells.get().size());
 }
 
-TEST_F(CellConnectorTest, testMoveSeveralCellsOverOtherCells)
+TEST_F(CellConnectorGpuTest, testMoveSeveralCellsOverOtherCells)
 {
 	vector<uint64_t> cellIds;
 	for (int i = 0; i < 20; ++i) {
