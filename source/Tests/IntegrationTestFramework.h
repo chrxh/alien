@@ -2,7 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#include "ModelCpu/Definitions.h"
 #include "ModelGpu/Definitions.h"
 
 #include "TestSettings.h"
@@ -47,7 +46,6 @@ protected:
     QVector2D addSmallDisplacement(QVector2D const& value) const;
 
     ModelBasicBuilderFacade* _basicFacade = nullptr;
-	ModelCpuBuilderFacade* _cpuFacade = nullptr;
 	ModelGpuBuilderFacade* _gpuFacade = nullptr;
 	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;

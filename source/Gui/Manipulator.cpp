@@ -2,7 +2,6 @@
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/Physics.h"
-#include "ModelCpu/ModelCpuBuilderFacade.h"
 #include "ModelGpu/ModelGpuBuilderFacade.h"
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"

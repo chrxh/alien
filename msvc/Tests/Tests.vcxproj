@@ -250,9 +250,6 @@
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{21bb3377-a473-473c-a064-396ec67979ab}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ModelCpu\ModelCpu.vcxproj">
-      <Project>{c908aae6-8426-43c2-bbef-77fab49231fc}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\ModelBasic\ModelBasic.vcxproj">
       <Project>{046b2f85-571f-35cc-b683-6c420049404b}</Project>
     </ProjectReference>
@@ -261,25 +258,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\source\Tests\CellConnectorGpuTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CleanupGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\CommunicatorGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\ConstructurGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\CpuBenchmarks.cpp" />
     <ClCompile Include="..\..\source\Tests\GpuBenchmark.cpp" />
-    <ClCompile Include="..\..\source\Tests\CellClusterTest.cpp" />
     <ClCompile Include="..\..\source\Tests\CellComputerGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\CellConnectorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ChangeDescriptionsTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ClusterGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\ClusterSizeTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\CommunicatorTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\ComparisonTests.cpp" />
     <ClCompile Include="..\..\source\Tests\DataDescriptionTransferGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\DataDescriptionTransferTests.cpp" />
     <ClCompile Include="..\..\source\Tests\IntegrationTestFramework.cpp" />
     <ClCompile Include="..\..\source\Tests\IntegrationTestHelper.cpp" />
-    <ClCompile Include="..\..\source\Tests\MapCompartmentTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\MultithreadingTests.cpp" />
     <ClCompile Include="..\..\source\Tests\NumberGeneratorTest.cpp" />
     <ClCompile Include="..\..\source\Tests\ParticleGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\IntegrationGpuTestFramework.cpp" />
@@ -287,15 +276,11 @@
     <ClCompile Include="..\..\source\Tests\Predicates.cpp" />
     <ClCompile Include="..\..\source\Tests\PropulsionGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\ReplicatorGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\ReplicatorTests.cpp" />
     <ClCompile Include="..\..\source\Tests\ScannerGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\SensorGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\SerializationTests.cpp" />
     <ClCompile Include="..\..\source\Tests\TestSuite.cpp" />
     <ClCompile Include="..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp" />
     <ClCompile Include="..\..\source\Tests\TokenSpreadingGpuTests.cpp" />
-    <ClCompile Include="..\..\source\Tests\UnitGridTest.cpp" />
-    <ClCompile Include="..\..\source\Tests\UnitThreadControllerImplTest.cpp" />
     <ClCompile Include="..\..\source\Tests\WeaponGpuTests.cpp" />
   </ItemGroup>
   <ItemGroup>
