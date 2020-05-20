@@ -61,7 +61,9 @@ void PixelUniverseView::activate()
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
 
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-	_repository->requireImageFromSimulation({ { 0, 0 }, size }, _imageSectionItem->getImageOfVisibleRect());
+    auto image = _imageSectionItem->getImageOfVisibleRect();
+    _repository->requireImageFromSimulation(
+        {{0, 0}, {image->width(), image->height()}}, _imageSectionItem->getImageOfVisibleRect());
 }
 
 void PixelUniverseView::deactivate()

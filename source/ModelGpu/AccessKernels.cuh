@@ -102,7 +102,7 @@ __global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2
                 CellAccessTO& cellTO = cellTOs[cellIndex];
                 cellTO.id = cell.id;
                 cellTO.pos = cell.absPos;
-                cellTO.energy = cell.getEnergy();
+                cellTO.energy = cell.getEnergy_safe();
                 cellTO.maxConnections = cell.maxConnections;
                 cellTO.numConnections = cell.numConnections;
                 cellTO.branchNumber = cell.branchNumber;
@@ -169,12 +169,8 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight,
         calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto& particle = *data.entities.particlePointers.at(particleIndex);
-        if (particle.absPos.x >= rectUpperLeft.x
-            && particle.absPos.x <= rectLowerRight.x
-            && particle.absPos.y >= rectUpperLeft.y
-            && particle.absPos.y <= rectLowerRight.y)
-        {
+        auto const& particle = *data.entities.particlePointers.at(particleIndex);
+        if (isContained(rectUpperLeft, rectLowerRight, particle.absPos)) {
             int particleAccessIndex = atomicAdd(access.numParticles, 1);
             ParticleAccessTO& particleAccess = access.particles[particleAccessIndex];
 

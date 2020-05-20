@@ -113,13 +113,13 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_block()
 
         for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
             auto const& cell = candidateCellsForEnergyAveraging[index];
-            averageEnergy += cell->getEnergy();
+            averageEnergy += cell->getEnergy_safe();
             cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
         }
         averageEnergy /= numCellsForEnergyAveraging;
         for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
             auto const& cell = cellsForEnergyAveraging[index];
-            cell->setEnergy(averageEnergy);
+            cell->setEnergy_safe(averageEnergy);
         }
 
         for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
@@ -158,7 +158,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
         auto cell = token->cell;
         if (0 == cell->alive || token->getEnergy() < cudaSimulationParameters.tokenMinEnergy) {
             cell->getLock();
-            cell->changeEnergy(token->getEnergy());
+            cell->changeEnergy_safe(token->getEnergy());
             cell->releaseLock();
             continue;
         }
@@ -183,7 +183,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
 
         if (0 == numFreePlaces) {
             cell->getLock();
-            cell->changeEnergy(token->getEnergy());
+            cell->changeEnergy_safe(token->getEnergy());
             cell->releaseLock();
             continue;
         }
@@ -231,9 +231,9 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
             }
             newTokenPointers[tokenIndex] = newToken;
 
-            if (connectingCell->getEnergy() > cudaSimulationParameters.cellMinEnergy + tokenEnergy - sharedEnergyFromPrevToken) {
+            if (connectingCell->getEnergy_safe() > cudaSimulationParameters.cellMinEnergy + tokenEnergy - sharedEnergyFromPrevToken) {
                 newToken->setEnergy(tokenEnergy);
-                connectingCell->changeEnergy(-(tokenEnergy - sharedEnergyFromPrevToken));
+                connectingCell->changeEnergy_safe(-(tokenEnergy - sharedEnergyFromPrevToken));
             }
             else {
                 newToken->setEnergy(sharedEnergyFromPrevToken);
@@ -241,7 +241,7 @@ __inline__ __device__ void TokenProcessor::processingSpreading_block()
             remainingTokenEnergyForCell -= sharedEnergyFromPrevToken;
         }
         if (remainingTokenEnergyForCell > 0) {
-            cell->changeEnergy(remainingTokenEnergyForCell);
+            cell->changeEnergy_safe(remainingTokenEnergyForCell);
         }
 
         cell->releaseLock();
