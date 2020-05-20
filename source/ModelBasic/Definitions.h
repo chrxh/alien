@@ -38,3 +38,8 @@ using SimulationControllerBuildFunc = std::function<SimulationController*(
 	)>;
 using SimulationAccessBuildFunc = std::function<SimulationAccess*(SimulationController*)>;
 
+class _PhysicalAction;
+using PhysicalAction = shared_ptr<_PhysicalAction>;
+
+class _ApplyForceAction;
+using ApplyForceAction = shared_ptr<_ApplyForceAction>;
