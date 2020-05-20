@@ -436,6 +436,7 @@
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicBuilderFacadeImpl.h" />
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicServices.h" />
     <ClInclude Include="..\..\source\ModelBasic\MonitorData.h" />
+    <ClInclude Include="..\..\source\ModelBasic\PhysicalActions.h" />
     <ClInclude Include="..\..\source\ModelBasic\QuantityConverter.h" />
     <ClInclude Include="..\..\source\ModelBasic\Physics.h" />
     <CustomBuild Include="..\..\source\ModelBasic\SerializerImpl.h">

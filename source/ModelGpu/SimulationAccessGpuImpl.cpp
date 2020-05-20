@@ -95,6 +95,10 @@ void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target
 	}
 }
 
+void SimulationAccessGpuImpl::applyAction(PhysicalAction const & action)
+{
+}
+
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
 {
 	return _dataCollected;
