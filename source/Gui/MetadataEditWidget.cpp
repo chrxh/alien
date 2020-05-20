@@ -2,6 +2,7 @@
 #include <QTextBlock>
 
 #include "ModelBasic/Settings.h"
+#include "ModelBasic/Colors.h"
 
 #include "Gui/Settings.h"
 
@@ -47,17 +48,17 @@ void MetadataEditWidget::updateDisplay ()
 	//define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     QString parEnd = "</p>";
-    QString colorTextStart = "<span style=\"color:"+Const::CellEditTextColor1.name()+"\">";
-    QString colorDataStart = "<span style=\"color:"+Const::CellEditMetadataColor.name()+"\">";
+    QString colorTextStart = "<span style=\"color:" + Const::CellEditTextColor1.name() + "\">";
+    QString colorDataStart = "<span style=\"color:"+ Const::CellEditMetadataColor.name()+"\">";
     QString colorBlack = "<span style=\"color:#000000\">";
     QString colorWhite = "<span style=\"color:#FFFFFF\">";
-    QString color1 = "<span style=\"color:"+Const::IndividualCellColor1.name()+"\">";
-    QString color2 = "<span style=\"color:"+Const::IndividualCellColor2.name()+"\">";
-    QString color3 = "<span style=\"color:"+Const::IndividualCellColor3.name()+"\">";
-    QString color4 = "<span style=\"color:"+Const::IndividualCellColor4.name()+"\">";
-    QString color5 = "<span style=\"color:"+Const::IndividualCellColor5.name()+"\">";
-    QString color6 = "<span style=\"color:"+Const::IndividualCellColor6.name()+"\">";
-    QString color7 = "<span style=\"color:"+Const::IndividualCellColor7.name()+"\">";
+    QString color1 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor1).name()+"\">";
+    QString color2 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor2).name()+"\">";
+    QString color3 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor3).name()+"\">";
+    QString color4 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor4).name()+"\">";
+    QString color5 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor5).name()+"\">";
+    QString color6 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor6).name()+"\">";
+    QString color7 = "<span style=\"color:"+ toQColor(Const::IndividualCellColor7).name()+"\">";
     QString colorEnd = "</span>";
 
 //    QString sep0 = colorBlack + "&#9002;" + colorEnd + colorWhite;

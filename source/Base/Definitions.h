@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QColor>
 #include <QVector2D>
 #include <QVector2D>
 #include <QSize>
@@ -50,6 +51,11 @@ const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1;
 inline float toFloat(int value)
 {
     return static_cast<float>(value);
+}
+
+inline QColor toQColor(unsigned int const& rgba)
+{
+    return QColor((rgba >> 16) & 0xff, (rgba >> 8) & 0xff, rgba & 0xff, rgba >> 24);
 }
 
 struct IntRect;

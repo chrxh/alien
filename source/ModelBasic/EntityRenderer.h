@@ -25,7 +25,7 @@ public:
         if (!_imageRect.isContained(pos)) {
             return;
         }
-		auto color = EntityRenderer::calcCellColor(colorCode, energy);
+        auto color = QRgb();// EntityRenderer::calcCellColor(colorCode, energy);
 
         EntityRenderer::colorPixel(pos, color);
 	}
@@ -69,6 +69,7 @@ private:
 		return 0xFFFFFF;
 	}
 
+/*
 	uint32_t calcCellColor(uint8_t colorCode, double energy)
 	{
 		uint8_t r = 0;
@@ -128,6 +129,7 @@ private:
 		b = b*e / 150;
 		return (r << 16) | (g << 8) | b;
 	}
+*/
 
 	void colorPixel(IntVector2D pos, QRgb color)
 	{
