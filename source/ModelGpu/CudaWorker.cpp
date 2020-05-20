@@ -86,6 +86,8 @@ void CudaWorker::run()
 	} while (!isTerminate());
 }
 
+#include <iostream>
+
 void CudaWorker::processJobs()
 {
 	std::lock_guard<std::mutex> lock(_mutex);
@@ -95,6 +97,12 @@ void CudaWorker::processJobs()
 	bool notify = false;
 
 	for (auto const& job : _jobs) {
+
+        if (auto _job = boost::dynamic_pointer_cast<_GetImageJob>(job)) {
+            auto rect = _job->getRect();
+            auto image = _job->getTargetImage();
+            _cudaSimulation->getSimulationImage({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, image->bits());
+        }
 
 		if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
 			auto rect = _job->getRect();

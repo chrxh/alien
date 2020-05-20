@@ -86,7 +86,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     }
 
     //scan cell
-    int cellEnergy = min(static_cast<int>(floorf(lookupResult.cell->getEnergy())), 255);
+    int cellEnergy = min(static_cast<int>(floorf(lookupResult.cell->getEnergy_safe())), 255);
     tokenMem[Enums::Scanner::OUT_ENERGY] = cellEnergy;
     tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = lookupResult.cell->maxConnections;
     tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = lookupResult.cell->branchNumber;

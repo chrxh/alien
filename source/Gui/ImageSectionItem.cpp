@@ -19,10 +19,10 @@ QImagePtr ImageSectionItem::getImageOfVisibleRect()
 {
     //resize image?
     IntVector2D viewportSize{ static_cast<int>(_viewport->getRect().width()), static_cast<int>(_viewport->getRect().height()) };
-    viewportSize.x = std::min(static_cast<int>(_boundingRect.width() + 1), viewportSize.x);
-    viewportSize.y = std::min(static_cast<int>(_boundingRect.height() + 1), viewportSize.y);
+    viewportSize.x = std::min(static_cast<int>(_boundingRect.width()), viewportSize.x);
+    viewportSize.y = std::min(static_cast<int>(_boundingRect.height()), viewportSize.y);
     if (_imageOfVisibleRect->width() != viewportSize.x || _imageOfVisibleRect->height() != viewportSize.y) {
-        _imageOfVisibleRect = boost::make_shared<QImage>(viewportSize.x, viewportSize.y, QImage::Format_RGB32);
+        _imageOfVisibleRect = boost::make_shared<QImage>(viewportSize.x, viewportSize.y, QImage::Format_ARGB32);
         _imageOfVisibleRect->fill(QColor(0, 0, 0));
     }
 

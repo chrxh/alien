@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QImage>
+
 #include "Base/Definitions.h"
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/ExecutionParameters.h"
@@ -86,14 +88,25 @@ private:
 	IntRect _rect;
 };
 
-class _GetDataForImageJob
-	: public _GetDataJob
+class _GetImageJob
+	: public _CudaJob
 {
 public:
-	_GetDataForImageJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO, QImagePtr const& targetImage)
-		: _GetDataJob(originId, rect, dataTO), _targetImage(targetImage) { }
+    _GetImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage)
+		: _CudaJob(originId, true), _targetImage(targetImage)
+    {
+        auto imageSize = targetImage->size();
 
-	virtual ~_GetDataForImageJob() = default;
+        IntVector2D upperLeft = { std::max(0, rect.p1.x), std::max(0, rect.p1.y) };
+        _rect = { upperLeft, {upperLeft.x + imageSize.width() - 1, upperLeft.y + imageSize.height() - 1 } };
+    }
+
+    virtual ~_GetImageJob() = default;
+
+    IntRect getRect() const
+    {
+        return _rect;
+    }
 
     QImagePtr getTargetImage() const
 	{
@@ -101,6 +114,7 @@ public:
 	}
 
 private:
+    IntRect _rect;
     QImagePtr _targetImage;
 };
 

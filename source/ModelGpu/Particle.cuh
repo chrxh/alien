@@ -18,14 +18,24 @@ struct Particle
     int locked;	//0 = unlocked, 1 = locked
     int alive;  //0 = dead, 1 == alive
 
-    __device__ __inline__ float getEnergy()
+    __device__ __inline__ float getEnergy_safe()
     {
         return atomicAdd(&_energy, 0);
     }
 
-    __device__ __inline__ void setEnergy(float value)
+    __device__ __inline__ float getEnergy() const
+    {
+        return _energy;
+    }
+
+    __device__ __inline__ void setEnergy_safe(float value)
     {
         atomicExch(&_energy, value);
+    }
+
+    __device__ __inline__ void setEnergy(float value)
+    {
+        _energy = value;
     }
 
     __device__ __inline__ void changeEnergy(float changeValue)

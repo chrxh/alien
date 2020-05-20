@@ -131,6 +131,15 @@ __host__ __device__ __inline__ bool isContained(int2 const& rectUpperLeft, int2 
         && pos.y <= rectLowerRight.y;
 }
 
+__host__ __device__ __inline__ bool
+isContained(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int const& boundary = 0)
+{
+    return pos.x >= rectUpperLeft.x + boundary
+        && pos.x <= rectLowerRight.x - boundary
+        && pos.y >= rectUpperLeft.y + boundary
+        && pos.y <= rectLowerRight.y - boundary;
+}
+
 class BlockLock
 {
 public:
