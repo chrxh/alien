@@ -4,7 +4,6 @@
 #include "ModelBasic/ChangeDescriptions.h"
 #include "ModelBasic/Settings.h"
 #include "ModelBasic/SpaceProperties.h"
-#include "ModelBasic/EntityRenderer.h"
 
 #include "EntityFactory.h"
 #include "Cluster.h"
@@ -95,7 +94,6 @@ void SimulationAccessCpuImpl::accessToUnits()
 	callBackClear();
 	callBackUpdateData();
 	callBackCollectData();
-	callBackDrawImage();
 }
 
 void SimulationAccessCpuImpl::callBackClear()
@@ -283,75 +281,6 @@ void SimulationAccessCpuImpl::callBackCollectData()
 	}
 
 	Q_EMIT dataReadyToRetrieve();
-}
-
-void SimulationAccessCpuImpl::callBackDrawImage()
-{
-	if (!_imageRequired) {
-		return;
-	}
-	_imageRequired = false;
-
-	_requiredImage->fill(QColor(0x00, 0x00, 0x1b));
-
-	auto grid = _context->getUnitGrid();
-	IntVector2D gridPosUpperLeft = grid->getGridPosOfMapPos(_requiredRect.p1.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
-	IntVector2D gridPosLowerRight = grid->getGridPosOfMapPos(_requiredRect.p2.toQVector2D(), UnitGrid::CorrectionMode::Truncation);
-	IntVector2D gridPos;
-	for (gridPos.x = gridPosUpperLeft.x; gridPos.x <= gridPosLowerRight.x; ++gridPos.x) {
-		for (gridPos.y = gridPosUpperLeft.y; gridPos.y <= gridPosLowerRight.y; ++gridPos.y) {
-			drawImageFromUnit(grid->getUnitOfGridPos(gridPos));
-		}
-	}
-
-	Q_EMIT imageReady();
-}
-
-void SimulationAccessCpuImpl::drawImageFromUnit(Unit * unit)
-{
-	drawClustersFromUnit(unit);
-	drawParticlesFromUnit(unit);
-}
-
-void SimulationAccessCpuImpl::drawClustersFromUnit(Unit * unit)
-{
-	auto space = unit->getContext()->getSpaceProperties();
-
-    EntityRenderer renderer(_requiredImage, _requiredRect.p1, space);
-
-	auto const &clusters = unit->getContext()->getClustersRef();
-	list<IntVector2D> tokenPos;
-	for (auto const &cluster : clusters) {
-		for (auto const &cell : cluster->getCellsRef()) {
-			auto pos = space->convertToIntVector(cell->calcPosition(true));
-			if (_requiredRect.isContained(pos)) {
-				renderer.renderCell(pos, cell->getMetadata().color, cell->getEnergy());
-				if (cell->getNumToken() > 0) {
-					tokenPos.push_back(pos);
-				}
-			}
-		}
-		if (!tokenPos.empty()) {
-			for (IntVector2D const& pos : tokenPos) {
-				renderer.renderToken(pos);
-			}
-			tokenPos.clear();
-		}
-	}
-}
-
-void SimulationAccessCpuImpl::drawParticlesFromUnit(Unit * unit)
-{
-	auto space = unit->getContext()->getSpaceProperties();
-	EntityRenderer renderer(_requiredImage, _requiredRect.p1, space);
-
-	auto const &particles = unit->getContext()->getParticlesRef();
-	for (auto const &particle : particles) {
-		IntVector2D pos = particle->getPosition();
-		if (_requiredRect.isContained(pos)) {
-			renderer.renderParticle(pos, particle->getEnergy());
-		}
-	}
 }
 
 void SimulationAccessCpuImpl::collectDataFromUnit(Unit * unit)

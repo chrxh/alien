@@ -26,7 +26,6 @@ private:
 	Q_SLOT void jobsFinished();
 
 	void updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc);
-	void createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImagePtr const& targetImage);
 	void createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect);
 
 	void metricCorrection(DataChangeDescription& data) const;

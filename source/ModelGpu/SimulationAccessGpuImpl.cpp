@@ -2,7 +2,6 @@
 #include <QImage>
 
 #include "ModelBasic/SpaceProperties.h"
-#include "ModelBasic/EntityRenderer.h"
 
 #include "CudaWorker.h"
 #include "CudaController.h"
@@ -143,36 +142,6 @@ void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, IntRe
 	auto cudaWorker = _context->getCudaController()->getCudaWorker();
 	CudaJob job = boost::make_shared<_SetDataJob>(getObjectId(), true, rect, dataToUpdateTO);
 	cudaWorker->addJob(job);
-}
-
-void SimulationAccessGpuImpl::createImageFromGpuModel(DataAccessTO const& dataTO, IntRect const& rect, QImagePtr const& targetImage)
-{
-	auto space = _context->getSpaceProperties();
-	auto worker = _context->getCudaController()->getCudaWorker();
-	EntityRenderer renderer(targetImage, rect.p1, space);
-
-    targetImage->fill(QColor(0, 0, 0x1b));
-
-	for (int i = 0; i < *dataTO.numParticles; ++i) {
-		ParticleAccessTO& particle = dataTO.particles[i];
-		float2& pos = particle.pos;
-		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		renderer.renderParticle(intPos, particle.energy);
-	}
-
-	for (int i = 0; i < *dataTO.numCells; ++i) {
-		CellAccessTO& cell = dataTO.cells[i];
-		float2 const& pos = cell.pos;
-		IntVector2D intPos = { static_cast<int>(pos.x), static_cast<int>(pos.y) };
-		renderer.renderCell(intPos, cell.metadata.color, cell.energy);
-	}
-
-	for (int i = 0; i < *dataTO.numTokens; ++i) {
-		TokenAccessTO const& token = dataTO.tokens[i];
-		CellAccessTO const& cell = dataTO.cells[token.cellIndex];
-		IntVector2D pos = { static_cast<int>(cell.pos.x), static_cast<int>(cell.pos.y) };
-		renderer.renderToken(pos);
-	}
 }
 
 void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect)
