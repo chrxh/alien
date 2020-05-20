@@ -16,7 +16,7 @@ public:
 
 	void increaseTimestep();
 	void setZoomFactor(double factor);
-	enum class Device { CPU, GPU };
+	enum class Device { Gpu };
 	void setDevice(Device value);
 
 private:
@@ -30,5 +30,5 @@ private:
 	int _tpsCounting = 0;
 	int _tps = 0;
 	double _zoomFactor = 2.0;
-	Device _device = Device::CPU;
+	Device _device = Device::Gpu;
 };
