@@ -272,5 +272,8 @@
     <ClInclude Include="..\..\source\ModelBasic\Colors.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\PhysicalActions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
