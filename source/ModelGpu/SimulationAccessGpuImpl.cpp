@@ -43,10 +43,8 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 
 void SimulationAccessGpuImpl::clear()
 {
-    auto cudaWorker = _context->getCudaController()->getCudaWorker();
-
-    CudaJob job = boost::make_shared<_ClearDataJob>(getObjectId());
-    cudaWorker->addJob(job);
+    auto job = boost::make_shared<_ClearDataJob>(getObjectId());
+    scheduleJob(job);
 }
 
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc)
@@ -60,9 +58,9 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 	auto updateDescCorrected = updateDesc;
 	metricCorrection(updateDescCorrected);
 
-	CudaJob job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), updateDescCorrected);
-	cudaWorker->addJob(job);
-	_updateInProgress = true;
+	auto job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), updateDescCorrected);
+    scheduleJob(job);
+    _updateInProgress = true;
 }
 
 void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc)
@@ -73,35 +71,37 @@ void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
-	auto worker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache->getDataTO());
-	if (!_updateInProgress) {
-		worker->addJob(job);
-	}
-	else {
-		_waitingJobs.push_back(job);
-	}
+	auto job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache->getDataTO());
+    scheduleJob(job);
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target)
 {
-	auto worker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target);
-	if (!_updateInProgress) {
-		worker->addJob(job);
-	}
-	else {
-		_waitingJobs.push_back(job);
-	}
+	auto job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target);
+    scheduleJob(job);
 }
 
 void SimulationAccessGpuImpl::applyAction(PhysicalAction const & action)
 {
+    auto job = boost::make_shared<_PhysicalActionJob>(getObjectId(), action);
+    scheduleJob(job);
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
 {
 	return _dataCollected;
+}
+
+void SimulationAccessGpuImpl::scheduleJob(CudaJob const & job)
+{
+    auto worker = _context->getCudaController()->getCudaWorker();
+
+    if (!_updateInProgress) {
+        worker->addJob(job);
+    }
+    else {
+        _waitingJobs.push_back(job);
+    }
 }
 
 void SimulationAccessGpuImpl::jobsFinished()

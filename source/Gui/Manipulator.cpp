@@ -2,6 +2,7 @@
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/Physics.h"
+#include "ModelBasic/PhysicalActions.h"
 #include "ModelGpu/ModelGpuBuilderFacade.h"
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
@@ -30,35 +31,6 @@ void Manipulator::init(SimulationContext* context, SimulationAccess* access)
 	_connections.push_back(connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &Manipulator::dataReadyToRetrieve, Qt::QueuedConnection));
 }
 
-void Manipulator::applyForce(QVector2D const& pos, QVector2D const& posDelta)
-{
-	_mode = Mode::ApplyForce;
-	proceedManipulation(pos, posDelta);
-}
-
-void Manipulator::applyRotation(QVector2D const & pos, QVector2D const & posDelta)
-{
-	_mode = Mode::ApplyRotation;
-	proceedManipulation(pos, posDelta);
-}
-
-void Manipulator::proceedManipulation(QVector2D const& pos, QVector2D const& posDelta)
-{
-	if (!_waitingForData && posDelta.lengthSquared() > FLOATINGPOINT_MEDIUM_PRECISION) {
-		_waitingForData = true;
-		_applyAtPos = pos;
-		_applyForce = posDelta;
-		IntVector2D intPos(pos);
-		IntRect updateRect({
-			{ intPos.x - CaptureLength / 2, intPos.y - CaptureLength / 2 },
-			{ intPos.x + CaptureLength / 2, intPos.y + CaptureLength / 2 }
-		});
-
-		ResolveDescription resolveDesc;
-		resolveDesc.resolveCellLinks = false;
-		_access->requireData(updateRect, resolveDesc);
-	}
-}
 
 namespace
 {

@@ -14,11 +14,8 @@ public:
 
 	void init(SimulationContext* context, SimulationAccess* access);
 
-	void applyForce(QVector2D const& pos, QVector2D const& deltaPos);
-	void applyRotation(QVector2D const& pos, QVector2D const& deltaPos);
 
 private:
-	void proceedManipulation(QVector2D const& pos, QVector2D const& deltaPos);
 	Q_SLOT void dataReadyToRetrieve();
 
 	list<QMetaObject::Connection> _connections;

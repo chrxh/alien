@@ -16,6 +16,7 @@
 #include "CleanupKernels.cuh"
 #include "MonitorKernels.cuh"
 #include "RenderingKernels.cuh"
+#include "PhysicalActionKernels.cuh"
 #include "Entities.cuh"
 #include "CudaMemoryManager.cuh"
 #include "CudaMonitorData.cuh"
@@ -173,6 +174,12 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->stringBytes, dataTO.stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyHostToDevice));
 
     GPU_FUNCTION(setSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+}
+
+void CudaSimulation::applyForce(ApplyForceData const& applyData)
+{
+    CudaApplyForceData cudaApplyData{ applyData.startPos, applyData.endPos, applyData.force };
+    GPU_FUNCTION(cudaApplyForce, cudaApplyData, *_cudaSimulationData);
 }
 
 MonitorData CudaSimulation::getMonitorData()
