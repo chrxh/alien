@@ -25,6 +25,9 @@ public:
     __inline__ __device__ static float lengthSquared(float2 const& v);
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
+    __inline__ __device__ static bool
+    isContainedInLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary = 0);
+
 
 private:
     __inline__ __device__ static void angleCorrection(int &angle);
@@ -175,4 +178,30 @@ __inline__ __device__ float Math::subtractAngle(float angleMinuend, float angleS
         angleDiff += 360.0;
     }
     return angleDiff;
+}
+
+__inline__ __device__ bool
+Math::isContainedInLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary)
+{
+    auto const relPos = pos - startSegment;
+    auto segmentDirection = endSegment - startSegment;
+    if (length(segmentDirection) < FP_PRECISION) {
+        return false;
+    }
+
+    auto const segmentLength = length(segmentDirection);
+    segmentDirection = segmentDirection / segmentLength;
+    auto normal = segmentDirection;
+    rotateQuarterCounterClockwise(normal);
+    auto const signedDistanceFromLine = dot(relPos, normal);
+    if (abs(signedDistanceFromLine) > boundary) {
+        return false;
+    }
+
+    auto const signedDistanceFromStart = dot(relPos, segmentDirection);
+    if (signedDistanceFromStart <= 0 || signedDistanceFromStart >= segmentLength) {
+        return false;
+    }
+
+    return true;
 }

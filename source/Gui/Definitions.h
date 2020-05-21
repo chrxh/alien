@@ -52,7 +52,6 @@ class VersionController;
 class VisualEditController;
 class ActionHolder;
 class ActionController;
-class Manipulator;
 class MonitorController;
 class ImageSectionItem;
 
@@ -66,8 +65,7 @@ enum class NotifyScrollChanged { No, Yes };
 
 class _SimulationConfig;
 using SimulationConfig = boost::shared_ptr<_SimulationConfig>;
-class _SimulationConfigCpu;
-using SimulationConfigCpu = boost::shared_ptr<_SimulationConfigCpu>;
+
 class _SimulationConfigGpu;
 using SimulationConfigGpu = boost::shared_ptr<_SimulationConfigGpu>;
 

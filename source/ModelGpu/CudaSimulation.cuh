@@ -21,6 +21,14 @@ public:
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
+    struct ApplyForceData
+    {
+        float2 startPos;
+        float2 endPos;
+        float2 force;
+    };
+    void applyForce(ApplyForceData const& applyData);
+
     MonitorData getMonitorData();
     int getTimestep() const;
     void setTimestep(int timestep);

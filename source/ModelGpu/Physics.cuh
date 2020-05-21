@@ -32,7 +32,7 @@ public:
         float angularMass, float2& velInc, float& angularVelInc);
 
 private:
-	__device__ __inline__ static float2 calcOutwardVector(Cell* cellA, Cell* cellB, MapInfo const& map);
+    __device__ __inline__ static float2 calcOutwardVector(Cell* cellA, Cell* cellB, MapInfo const& map);
 };
 
 
@@ -168,16 +168,16 @@ __inline__ __device__ float Physics::rotationalKineticEnergy(float angularMass, 
     return 0.5f * angularMass * angularVel * angularVel;
 }
 
-__inline__ __device__ void Physics::calcImpulseIncrement(float2 const & impulse, float2 rAPp, float mass,
+__inline__ __device__ void Physics::calcImpulseIncrement(float2 const & impulse, float2 relPos, float mass,
     float angularMass, float2 & velInc, float & angularVelInc)
 {
-    Math::rotateQuarterCounterClockwise(rAPp);
+    Math::rotateQuarterCounterClockwise(relPos);
     velInc = impulse / mass;
     if (abs(angularMass) < FP_PRECISION) {
         angularVelInc = 0;
     }
     else {
-        angularVelInc = -Math::dot(rAPp, impulse) / angularMass * RAD_TO_DEG;
+        angularVelInc = -Math::dot(relPos, impulse) / angularMass * RAD_TO_DEG;
     }
 }
 

@@ -237,11 +237,11 @@ private:
 	SimulationParameters _parameters;
 };
 
-class _setExecutionParametersJob
+class _SetExecutionParametersJob
     : public _CudaJob
 {
 public:
-    _setExecutionParametersJob(
+    _SetExecutionParametersJob(
         string const& originId,
         ExecutionParameters const& parameters,
         bool notifyFinish = false)
@@ -249,7 +249,7 @@ public:
         , _parameters(parameters)
     {}
 
-    virtual ~_setExecutionParametersJob() = default;
+    virtual ~_SetExecutionParametersJob() = default;
 
     ExecutionParameters const& getSimulationExecutionParameters() const
     {
@@ -258,4 +258,22 @@ public:
 
 private:
     ExecutionParameters _parameters;
+};
+
+class _PhysicalActionJob
+    : public _CudaJob
+{
+public:
+    _PhysicalActionJob(string const& originId, PhysicalAction const& action)
+        : _CudaJob(originId, false), _action(action) { }
+
+    virtual ~_PhysicalActionJob() = default;
+
+    PhysicalAction getAction()
+    {
+        return _action;
+    }
+
+private:
+    PhysicalAction _action;
 };
