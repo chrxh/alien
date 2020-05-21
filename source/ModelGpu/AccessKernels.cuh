@@ -54,7 +54,7 @@ __global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2
         for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
             auto pos = cluster->cellPointers[cellIndex]->absPos;
             map.mapPosCorrection(pos);
-            if (isContained(rectUpperLeft, rectLowerRight, pos)) {
+            if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 containedInRect = true;
             }
         }
@@ -170,7 +170,7 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight,
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = *data.entities.particlePointers.at(particleIndex);
-        if (isContained(rectUpperLeft, rectLowerRight, particle.absPos)) {
+        if (isContainedInRect(rectUpperLeft, rectLowerRight, particle.absPos)) {
             int particleAccessIndex = atomicAdd(access.numParticles, 1);
             ParticleAccessTO& particleAccess = access.particles[particleAccessIndex];
 
@@ -198,7 +198,7 @@ __device__ void filterCluster(int2 const& rectUpperLeft, int2 const& rectLowerRi
 
     for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
         Cell const& cell = *cluster->cellPointers[cellIndex];
-        if (isContained(rectUpperLeft, rectLowerRight, cell.absPos)) {
+        if (isContainedInRect(rectUpperLeft, rectLowerRight, cell.absPos)) {
             containedInRect = true;
         }
     }
@@ -214,7 +214,7 @@ __device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerR
     Array<Particle*> particles, int particleIndex)
 {
     auto& particle = particles.getArrayForDevice()[particleIndex];
-    if (isContained(rectUpperLeft, rectLowerRight, particle->absPos)) {
+    if (isContainedInRect(rectUpperLeft, rectLowerRight, particle->absPos)) {
         particle = nullptr;
     }
 }

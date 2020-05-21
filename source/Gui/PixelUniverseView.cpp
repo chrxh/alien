@@ -4,7 +4,9 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
+#include "ModelBasic/PhysicalActions.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/SimulationContext.h"
 #include "ModelBasic/SpaceProperties.h"
@@ -14,14 +16,12 @@
 
 #include "CoordinateSystem.h"
 #include "DataRepository.h"
-#include "Manipulator.h"
 #include "ImageSectionItem.h"
 #include "PixelUniverseView.h"
 
 PixelUniverseView::PixelUniverseView(QObject* parent)
 {
 	setBackgroundBrush(QBrush(Const::BackgroundColor));
-	_manipulator = new Manipulator(this);
     update();
 }
 
@@ -29,15 +29,19 @@ PixelUniverseView::~PixelUniverseView()
 {
 }
 
-void PixelUniverseView::init(Notifier* notifier, SimulationController* controller
-	, SimulationAccess* access, DataRepository* repository, ViewportInterface* viewport)
+void PixelUniverseView::init(
+    Notifier* notifier,
+    SimulationController* controller,
+    SimulationAccess* access,
+    DataRepository* repository,
+    ViewportInterface* viewport)
 {
 	_controller = controller;
 	_viewport = viewport;
 	_repository = repository;
 	_notifier = notifier;
 
-	_manipulator->init(controller->getContext(), access);
+    SET_CHILD(_access, access);
 
     delete _imageSectionItem;
     auto const viewportRect = _viewport->getRect();
@@ -82,16 +86,18 @@ void PixelUniverseView::refresh()
 void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
 	if (e->buttons() == Qt::MouseButton::LeftButton) {
-		auto pos = e->scenePos();
-		auto lastPos = e->lastScenePos();
-		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
-		_manipulator->applyForce({ static_cast<float>(pos.x()), static_cast<float>(pos.y()) }, delta);
+		QVector2D pos(e->scenePos().x(), e->scenePos().y());
+        QVector2D lastPos(e->lastScenePos().x(), e->lastScenePos().y());
+        auto const force = (pos - lastPos) / 10;
+        auto const action = boost::make_shared<_ApplyForceAction>(lastPos, pos, force);
+        _access->applyAction(action);
 	}
 	if (e->buttons() == (Qt::MouseButton::LeftButton | Qt::MouseButton::RightButton)) {
-		auto pos = e->scenePos();
-		auto lastPos = e->lastScenePos();
-		QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
-		_manipulator->applyRotation({ static_cast<float>(pos.x()), static_cast<float>(pos.y()) }, delta);
+        QVector2D pos(e->scenePos().x(), e->scenePos().y());
+        QVector2D lastPos(e->lastScenePos().x(), e->lastScenePos().y());
+        auto const force = (pos - lastPos) / 10;
+        auto const action = boost::make_shared<_ApplyForceAction>(lastPos, pos, force);
+        _access->applyAction(action);
 	}
 }
 

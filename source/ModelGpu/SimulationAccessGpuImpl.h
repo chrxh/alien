@@ -24,6 +24,7 @@ public:
     virtual DataDescription const& retrieveData() override;
 
 private:
+    void scheduleJob(CudaJob const& job);
 	Q_SLOT void jobsFinished();
 
 	void updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc);
