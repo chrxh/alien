@@ -49,6 +49,12 @@ struct Cluster
         atomicAdd(&vel.y, value.y);
     }
 
+    __device__ __inline__ void addVelocity(float2 const& value)
+    {
+        vel.x += value.x;
+        vel.y += value.y;
+    }
+
     __device__ __inline__ void setVelocity(float2 const& value)
     {
         vel = value;
@@ -72,6 +78,11 @@ struct Cluster
     __device__ __inline__ void addAngularVelocity_safe(float const& value)
     {
         atomicAdd(&angularVel, value);
+    }
+
+    __device__ __inline__ void addAngularVelocity(float const& value)
+    {
+        angularVel += value;
     }
 
     __device__ __inline__ bool isFreezed()
@@ -124,6 +135,12 @@ struct Cluster
         }
         __syncthreads();
     }
+
+    __device__ __inline__ int getMass()
+    {
+        return static_cast<float>(numCellPointers);
+    }
+
 private:
     float2 vel;
     float angularVel;

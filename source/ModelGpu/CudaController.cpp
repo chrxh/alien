@@ -76,7 +76,7 @@ void CudaController::setSimulationParameters(SimulationParameters const & parame
 
 void CudaController::setExecutionParameters(ExecutionParameters const & parameters)
 {
-    auto const job = boost::make_shared<_setExecutionParametersJob>(ThreadControllerId, parameters);
+    auto const job = boost::make_shared<_SetExecutionParametersJob>(ThreadControllerId, parameters);
     _worker->addJob(job);
 }
 

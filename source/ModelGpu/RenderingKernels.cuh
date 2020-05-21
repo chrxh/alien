@@ -137,7 +137,7 @@ __global__ void drawClusters(
             auto const& cell = cluster->cellPointers[cellIndex];
             auto intPos = toInt2(cell->absPos);
             map.mapPosCorrection(intPos);
-            if (isContained(rectUpperLeft, rectLowerRight, intPos, 1)) {
+            if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
                 auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
                 auto const color = calcColor(cell);
                 drawEntity(imageData, imageSize, index, color);
@@ -151,7 +151,7 @@ __global__ void drawClusters(
             auto const& cell = token->cell;
             auto intPos = toInt2(cell->absPos);
             map.mapPosCorrection(intPos);
-            if (isContained(rectUpperLeft, rectLowerRight, intPos, 1)) {
+            if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
                 auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
                 auto const color = calcColor(token);
                 drawEntity(imageData, imageSize, index, color);
@@ -175,7 +175,7 @@ __global__ void drawParticles(
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto intPos = toInt2(particle->absPos);
-        if (isContained(rectUpperLeft, rectLowerRight, intPos, 1)) {
+        if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
             auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
             auto const color = calcColor(particle);
             drawEntity(imageData, imageSize, index, color);

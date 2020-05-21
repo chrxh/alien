@@ -15,9 +15,13 @@ public:
     PixelUniverseView(QObject* parent = nullptr);
     virtual ~PixelUniverseView();
 
-	virtual void init(Notifier* notifier, SimulationController* controller, SimulationAccess* access
-		, DataRepository* manipulator, ViewportInterface* viewport);
-	virtual void activate();
+    virtual void init(
+        Notifier* notifier,
+        SimulationController* controller,
+        SimulationAccess* access,
+        DataRepository* manipulator,
+        ViewportInterface* viewport);
+    virtual void activate();
 	virtual void deactivate();
 
 	virtual void refresh();
@@ -33,7 +37,7 @@ private:
 
 	list<QMetaObject::Connection> _connections;
 
-	Manipulator* _manipulator = nullptr;
+    SimulationAccess* _access = nullptr;
 	DataRepository* _repository = nullptr;
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;

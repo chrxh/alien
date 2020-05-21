@@ -4,6 +4,7 @@
 #include <QThread>
 
 #include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/PhysicalActions.h"
 
 #include "AccessTOs.cuh"
 #include "CudaJobs.h"
@@ -86,8 +87,6 @@ void CudaWorker::run()
 	} while (!isTerminate());
 }
 
-#include <iostream>
-
 void CudaWorker::processJobs()
 {
 	std::lock_guard<std::mutex> lock(_mutex);
@@ -137,7 +136,7 @@ void CudaWorker::processJobs()
 			_cudaSimulation->setSimulationParameters(_job->getSimulationParameters());
 		}
 
-        if (auto _job = boost::dynamic_pointer_cast<_setExecutionParametersJob>(job)) {
+        if (auto _job = boost::dynamic_pointer_cast<_SetExecutionParametersJob>(job)) {
             _cudaSimulation->setExecutionParameters(_job->getSimulationExecutionParameters());
         }
 
@@ -147,6 +146,16 @@ void CudaWorker::processJobs()
 
         if (auto _job = boost::dynamic_pointer_cast<_ClearDataJob>(job)) {
             _cudaSimulation->clear();
+        }
+
+        if (auto _job = boost::dynamic_pointer_cast<_PhysicalActionJob>(job)) {
+            auto action = _job->getAction();
+            if (auto _action = boost::dynamic_pointer_cast<_ApplyForceAction>(action)) {
+                float2 startPos = { _action->getStartPos().x(), _action->getStartPos().y() };
+                float2 endPos = { _action->getEndPos().x(), _action->getEndPos().y() };
+                float2 force = { _action->getForce().x(), _action->getForce().y() };
+                _cudaSimulation->applyForce({ startPos, endPos, force });
+            }
         }
 
 		if (job->isNotifyFinish()) {

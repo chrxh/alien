@@ -123,7 +123,7 @@ __host__ __device__ __inline__ int floorInt(float v)
     return result;
 }
 
-__host__ __device__ __inline__ bool isContained(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
+__host__ __device__ __inline__ bool isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
 {
     return pos.x >= rectUpperLeft.x
         && pos.x <= rectLowerRight.x
@@ -132,13 +132,29 @@ __host__ __device__ __inline__ bool isContained(int2 const& rectUpperLeft, int2 
 }
 
 __host__ __device__ __inline__ bool
-isContained(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int const& boundary = 0)
+isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int const& boundary = 0)
 {
     return pos.x >= rectUpperLeft.x + boundary
         && pos.x <= rectLowerRight.x - boundary
         && pos.y >= rectUpperLeft.y + boundary
         && pos.y <= rectLowerRight.y - boundary;
 }
+
+template<typename T>
+__device__ __inline__  T* atomicExch(T** address, T* value)
+{
+    return reinterpret_cast<T*>(atomicExch(reinterpret_cast<unsigned long long int*>(address),
+        reinterpret_cast<unsigned long long int>(value)));
+}
+
+/*
+template<typename T>
+__device__ __inline__  T* atomicExch_block(T** address, T* value)
+{
+    return reinterpret_cast<T*>(atomicExch_block(reinterpret_cast<unsigned long long int*>(address),
+        reinterpret_cast<unsigned long long int>(value)));
+}
+*/
 
 class BlockLock
 {

@@ -20,8 +20,7 @@ public:
         newEntry->value = value;
         newEntry->nextListEntry = nullptr;
 
-        auto origEndListEntry = reinterpret_cast<ListEntry*>(atomicExch(reinterpret_cast<unsigned long long int*>(&_endListEntry),
-            reinterpret_cast<unsigned long long int>(newEntry)));
+        auto origEndListEntry = atomicExch<ListEntry>(&_endListEntry, newEntry);
 
         __threadfence();
 
