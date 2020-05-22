@@ -92,11 +92,11 @@ void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
         auto const action = boost::make_shared<_ApplyForceAction>(lastPos, pos, force);
         _access->applyAction(action);
 	}
-	if (e->buttons() == (Qt::MouseButton::LeftButton | Qt::MouseButton::RightButton)) {
+	if (e->buttons() == Qt::MouseButton::RightButton) {
         QVector2D pos(e->scenePos().x(), e->scenePos().y());
         QVector2D lastPos(e->lastScenePos().x(), e->lastScenePos().y());
         auto const force = (pos - lastPos) / 10;
-        auto const action = boost::make_shared<_ApplyForceAction>(lastPos, pos, force);
+        auto const action = boost::make_shared<_ApplyRotationAction>(lastPos, pos, force);
         _access->applyAction(action);
 	}
 }

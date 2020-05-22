@@ -18,7 +18,13 @@ struct CudaApplyForceData
     float2 startPos;
     float2 endPos;
     float2 force;
+    bool onlyRotation;
 };
+
+namespace
+{
+    __device__ auto const actionRadius = 20.0f;
+}
 
 __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universeSize, Array<Cluster*> clusters)
 {
@@ -45,14 +51,17 @@ __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universe
             auto const& cell = cluster->cellPointers[cellIndex];
             auto pos = cell->absPos;
             map.mapPosCorrection(pos);
-            if (Math::isContainedInLineSegment(applyData.startPos, applyData.endPos, pos, 10)) {
-
+            auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
+            if (distanceToSegment < actionRadius) {
+                auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
                 float2 velInc;
                 float angularVelInc;
                 Physics::calcImpulseIncrement(
-                    applyData.force, cell->relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
-                atomicAdd_block(&accumulatedVelInc.x, velInc.x);
-                atomicAdd_block(&accumulatedVelInc.y, velInc.y);
+                    weightedForce, cell->relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
+                if (!applyData.onlyRotation) {
+                    atomicAdd_block(&accumulatedVelInc.x, velInc.x);
+                    atomicAdd_block(&accumulatedVelInc.y, velInc.y);
+                }
                 atomicAdd_block(&accumulatedAngularVelInc, angularVelInc);
 
             }
@@ -74,8 +83,10 @@ __global__ void applyForceToParticles(CudaApplyForceData applyData, int2 univers
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto const& pos = particle->absPos;
-        if (Math::isContainedInLineSegment(applyData.startPos, applyData.endPos, pos, 10)) {
-            particle->vel = particle->vel + applyData.force;
+        auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
+        if (distanceToSegment < actionRadius) {
+            auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
+            particle->vel = particle->vel + weightedForce;
         }
     }
 }
