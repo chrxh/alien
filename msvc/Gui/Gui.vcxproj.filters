@@ -450,15 +450,6 @@
     <ClCompile Include="Release\moc_ItemUniverseView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Manipulator.cpp">
-      <Filter>Source Files\VisualEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_Manipulator.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_Manipulator.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\MarkerItem.cpp">
       <Filter>Source Files\VisualEditor</Filter>
     </ClCompile>
@@ -743,9 +734,6 @@
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\ItemUniverseView.h">
-      <Filter>Source Files\VisualEditor</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\Manipulator.h">
       <Filter>Source Files\VisualEditor</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\PixelUniverseView.h">

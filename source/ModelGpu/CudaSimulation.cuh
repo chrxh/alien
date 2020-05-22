@@ -26,6 +26,7 @@ public:
         float2 startPos;
         float2 endPos;
         float2 force;
+        bool onlyRotation;
     };
     void applyForce(ApplyForceData const& applyData);
 
