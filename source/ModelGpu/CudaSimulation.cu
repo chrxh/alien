@@ -178,7 +178,7 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
 
 void CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
-    CudaApplyForceData cudaApplyData{ applyData.startPos, applyData.endPos, applyData.force };
+    CudaApplyForceData cudaApplyData{ applyData.startPos, applyData.endPos, applyData.force, applyData.onlyRotation };
     GPU_FUNCTION(cudaApplyForce, cudaApplyData, *_cudaSimulationData);
 }
 

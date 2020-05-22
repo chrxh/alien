@@ -25,8 +25,8 @@ public:
     __inline__ __device__ static float lengthSquared(float2 const& v);
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
-    __inline__ __device__ static bool
-    isContainedInLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary = 0);
+    __inline__ __device__ static float
+    calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary = 0);
 
 
 private:
@@ -180,13 +180,13 @@ __inline__ __device__ float Math::subtractAngle(float angleMinuend, float angleS
     return angleDiff;
 }
 
-__inline__ __device__ bool
-Math::isContainedInLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary)
+__inline__ __device__ float
+Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary)
 {
     auto const relPos = pos - startSegment;
     auto segmentDirection = endSegment - startSegment;
     if (length(segmentDirection) < FP_PRECISION) {
-        return false;
+        return boundary + 1;
     }
 
     auto const segmentLength = length(segmentDirection);
@@ -195,13 +195,13 @@ Math::isContainedInLineSegment(float2 const& startSegment, float2 const& endSegm
     rotateQuarterCounterClockwise(normal);
     auto const signedDistanceFromLine = dot(relPos, normal);
     if (abs(signedDistanceFromLine) > boundary) {
-        return false;
+        return boundary + 1;
     }
 
     auto const signedDistanceFromStart = dot(relPos, segmentDirection);
-    if (signedDistanceFromStart <= 0 || signedDistanceFromStart >= segmentLength) {
-        return false;
+    if (signedDistanceFromStart < 0 || signedDistanceFromStart > segmentLength) {
+        return boundary + 1;
     }
 
-    return true;
+    return abs(signedDistanceFromLine);
 }
