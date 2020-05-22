@@ -154,7 +154,13 @@ void CudaWorker::processJobs()
                 float2 startPos = { _action->getStartPos().x(), _action->getStartPos().y() };
                 float2 endPos = { _action->getEndPos().x(), _action->getEndPos().y() };
                 float2 force = { _action->getForce().x(), _action->getForce().y() };
-                _cudaSimulation->applyForce({ startPos, endPos, force });
+                _cudaSimulation->applyForce({ startPos, endPos, force, false });
+            }
+            if (auto _action = boost::dynamic_pointer_cast<_ApplyRotationAction>(action)) {
+                float2 startPos = { _action->getStartPos().x(), _action->getStartPos().y() };
+                float2 endPos = { _action->getEndPos().x(), _action->getEndPos().y() };
+                float2 force = { _action->getForce().x(), _action->getForce().y() };
+                _cudaSimulation->applyForce({ startPos, endPos, force, true });
             }
         }
 
