@@ -20,7 +20,8 @@ struct SimulationData
     DynamicMemory dynamicMemory;
 
     CudaNumberGenerator numberGen;
-    unsigned int* imageData;
+    unsigned int* rawImageData;
+    unsigned int* finalImageData;
 
     void init(int2 const& universeSize, CudaConstants const& cudaConstants, int timestep_)
     {
@@ -35,8 +36,8 @@ struct SimulationData
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
 
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(universeSize.x * universeSize.y, imageData);
-
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(universeSize.x * universeSize.y, rawImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(universeSize.x * universeSize.y, finalImageData);
     }
 
     void free()
@@ -49,7 +50,8 @@ struct SimulationData
         numberGen.free();
         dynamicMemory.free();
 
-        CudaMemoryManager::getInstance().freeMemory(imageData);
+        CudaMemoryManager::getInstance().freeMemory(rawImageData);
+        CudaMemoryManager::getInstance().freeMemory(finalImageData);
     }
 };
 

@@ -141,7 +141,7 @@ void CudaSimulation::getSimulationImage(int2 const & rectUpperLeft, int2 const &
 
     GPU_FUNCTION(drawImage, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
     checkCudaErrors(cudaMemcpy(
-        imageRawData, _cudaSimulationData->imageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
+        imageRawData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
@@ -219,7 +219,36 @@ void CudaSimulation::clear()
     GPU_FUNCTION(clearData, *_cudaSimulationData);
 }
 
+namespace
+{
+    void calcImageBlurFactors(int* imageBlurFactors)
+    {
+        imageBlurFactors[0] = 200;
+        imageBlurFactors[1] = 5;
+        imageBlurFactors[2] = 5;
+        imageBlurFactors[3] = 5;
+        imageBlurFactors[4] = 5;
+        imageBlurFactors[5] = 5;
+
+        int sum = 0;
+        int2 relPos;
+        for (relPos.x = -5; relPos.x <= 5; ++relPos.x) {
+            for (relPos.y = -5; relPos.y <= 5; ++relPos.y) {
+                auto r = Math::length(toFloat2(relPos));
+                if (r <= 5 + FP_PRECISION) {
+                    sum += imageBlurFactors[floorInt(r)];
+                }
+            }
+        }
+        imageBlurFactors[6] = sum;
+    }
+}
+
 void CudaSimulation::setCudaConstants(CudaConstants const & cudaConstants_)
 {
     checkCudaErrors(cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));
+
+    int imageBlurFactors[7];
+    calcImageBlurFactors(imageBlurFactors);
+    checkCudaErrors(cudaMemcpyToSymbol(cudaImageBlurFactors, &imageBlurFactors, sizeof(int) * 7, 0, cudaMemcpyHostToDevice));
 }
