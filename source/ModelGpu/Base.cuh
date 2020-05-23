@@ -114,6 +114,11 @@ __host__ __device__ __inline__ int2 toInt2(float2 const &p)
     return{ static_cast<int>(p.x), static_cast<int>(p.y) };
 }
 
+__host__ __device__ __inline__ float2 toFloat2(int2 const &p)
+{
+    return{ static_cast<float>(p.x), static_cast<float>(p.y) };
+}
+
 __host__ __device__ __inline__ int floorInt(float v)
 {
     int result = static_cast<int>(v);

@@ -21,8 +21,8 @@ public:
     __inline__ __device__ static void normalize(float2& vec);
     __inline__ __device__ static float2 normalized(float2 vec);
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
-    __inline__ __device__ static float length(float2 const& v);
-    __inline__ __device__ static float lengthSquared(float2 const& v);
+    __inline__ __host__ __device__ static float length(float2 const& v);
+    __inline__ __host__ __device__ static float lengthSquared(float2 const& v);
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float
@@ -40,6 +40,11 @@ __inline__ __device__ float2 operator+(float2 const& p, float2 const& q)
 }
 
 __inline__ __device__ float2 operator-(float2 const& p, float2 const& q)
+{
+    return{ p.x - q.x, p.y - q.y };
+}
+
+__inline__ __device__ int2 operator-(int2 const& p, int2 const& q)
 {
     return{ p.x - q.x, p.y - q.y };
 }
@@ -151,12 +156,12 @@ __device__ __inline__ float Math::dot(float2 const &p, float2 const &q)
     return p.x*q.x + p.y*q.y;
 }
 
-__device__ __inline__ float Math::length(float2 const & v)
+__host__ __device__ __inline__ float Math::length(float2 const & v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
 }
 
-__device__ __inline__ float Math::lengthSquared(float2 const & v)
+__host__ __device__ __inline__ float Math::lengthSquared(float2 const & v)
 {
     return v.x * v.x + v.y * v.y;
 }
