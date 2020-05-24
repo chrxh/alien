@@ -59,7 +59,7 @@ void PixelUniverseView::init(
 void PixelUniverseView::activate()
 {
 	deactivate();
-	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
+	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestImage));
 	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &PixelUniverseView::receivedNotifications));
 	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::imageReady, Qt::QueuedConnection));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
@@ -80,7 +80,7 @@ void PixelUniverseView::deactivate()
 
 void PixelUniverseView::refresh()
 {
-	requestData();
+	requestImage();
 }
 
 void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
@@ -107,10 +107,10 @@ void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
 		return;
 	}
 
-	requestData();
+	requestImage();
 }
 
-void PixelUniverseView::requestData()
+void PixelUniverseView::requestImage()
 {
 	IntRect rect = _viewport->getRect();
 	_repository->requireImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
@@ -123,6 +123,6 @@ void PixelUniverseView::imageReady()
 
 void PixelUniverseView::scrolled()
 {
-	requestData();
+	requestImage();
 }
 
