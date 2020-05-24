@@ -7,15 +7,16 @@
 
 void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* itemScene, ActiveScene activeScene)
 {
+	disconnectAll();
+
 	_view = view;
 	_pixelScene = pixelScene;
 	_itemScene = itemScene;
 	_activeScene = activeScene;
     _view->resetTransform();
-	zoom(2.0);
+	zoom(2.0, false);
 	setSceneToView(boost::none, activeScene);
 
-	disconnectAll();
 	connectAll();
 }
 
@@ -62,13 +63,15 @@ QVector2D ViewportController::getCenter() const
 	return result;
 }
 
-void ViewportController::zoom(double factor)
+void ViewportController::zoom(double factor, bool notify)
 {
 	disconnectAll();
 	_view->scale(factor, factor);
     connectAll();
 
-	Q_EMIT scrolled();
+    if (notify) {
+        Q_EMIT scrolled();
+    }
 }
 
 qreal ViewportController::getZoomFactor() const
