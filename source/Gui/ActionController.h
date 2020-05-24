@@ -36,7 +36,8 @@ private:
 	Q_SLOT void onToggleMonitor(bool show);
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
-	Q_SLOT void onToggleFullscreen(bool fullscreen);
+	Q_SLOT void onToggleFullscreen(bool toogled);
+    Q_SLOT void onToggleGlowEffect(bool toogled);
 
 	Q_SLOT void onNewCell();
 	Q_SLOT void onNewParticle();

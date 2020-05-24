@@ -97,6 +97,7 @@ void ActionController::init(
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
 	connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
 	connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
+    connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
 
 	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleMonitor);
@@ -217,10 +218,10 @@ void ActionController::onZoomOutClicked()
 	updateZoomFactor();
 }
 
-void ActionController::onToggleFullscreen(bool fullscreen)
+void ActionController::onToggleFullscreen(bool toogled)
 {
 	Qt::WindowStates state = _mainView->windowState();
-	if (fullscreen) {
+	if (toogled) {
 		state |= Qt::WindowFullScreen;
 	}
 	else {
@@ -228,7 +229,16 @@ void ActionController::onToggleFullscreen(bool fullscreen)
 	}
 	_mainView->setWindowState(state);
 
-	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, fullscreen);
+	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, toogled);
+}
+
+void ActionController::onToggleGlowEffect(bool toogled)
+{
+    auto parameters = _mainModel->getExecutionParameters();
+    parameters.imageGlow = toogled;
+    _mainModel->setExecutionParameters(parameters);
+    _mainController->onUpdateExecutionParameters(parameters);
+    _mainView->refresh();
 }
 
 void ActionController::onToggleEditorMode(bool editMode)
@@ -839,9 +849,11 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 	actions->actionRunSimulation->setChecked(false);
 	actions->actionRestore->setEnabled(false);
 	actions->actionRunStepBackward->setEnabled(false);
+    actions->actionGlowEffect->setEnabled(true);
 	onRunClicked(false);
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
+
 
 	if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
 		_infoController->setDevice(InfoController::Device::Gpu);
@@ -868,8 +880,9 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
+    actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
-	actions->actionCenterSelection->setEnabled(editMode);
+    actions->actionCenterSelection->setEnabled(editMode);
 
 	actions->actionNewCell->setEnabled(true);
 	actions->actionNewParticle->setEnabled(true);
