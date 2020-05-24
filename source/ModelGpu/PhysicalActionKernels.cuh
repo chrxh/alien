@@ -56,14 +56,15 @@ __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universe
                 auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
                 float2 velInc;
                 float angularVelInc;
+
+                auto const relPos = cell->absPos - cluster->pos;
                 Physics::calcImpulseIncrement(
-                    weightedForce, cell->relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
+                    weightedForce, relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
                 if (!applyData.onlyRotation) {
                     atomicAdd_block(&accumulatedVelInc.x, velInc.x);
                     atomicAdd_block(&accumulatedVelInc.y, velInc.y);
                 }
                 atomicAdd_block(&accumulatedAngularVelInc, angularVelInc);
-
             }
         }
         __syncthreads();
