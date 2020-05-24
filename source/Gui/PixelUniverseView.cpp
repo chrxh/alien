@@ -47,7 +47,7 @@ void PixelUniverseView::init(
     auto const viewportRect = _viewport->getRect();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-    _imageSectionItem = new ImageSectionItem(_viewport, QRectF(0,0, size.x, size.y));
+    _imageSectionItem = new ImageSectionItem(_viewport, QRectF(0,0, size.x, size.y), repository->getImageMutex());
 
     addItem(_imageSectionItem);
 
@@ -61,7 +61,7 @@ void PixelUniverseView::activate()
 	deactivate();
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestData));
 	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &PixelUniverseView::receivedNotifications));
-	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::displayData, Qt::QueuedConnection));
+	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::imageReady, Qt::QueuedConnection));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
 
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
@@ -116,7 +116,7 @@ void PixelUniverseView::requestData()
 	_repository->requireImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
 }
 
-void PixelUniverseView::displayData()
+void PixelUniverseView::imageReady()
 {
 	update();
 }

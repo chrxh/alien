@@ -19,7 +19,7 @@ public:
 	virtual void updateData(DataChangeDescription const &dataToUpdate) override;
     virtual void requireData(ResolveDescription const& resolveDesc) override;
     virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
-	virtual void requireImage(IntRect rect, QImagePtr const& target) override;
+	virtual void requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
     virtual void applyAction(PhysicalAction const& action) override;
     virtual DataDescription const& retrieveData() override;
 

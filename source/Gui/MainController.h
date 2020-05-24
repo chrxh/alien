@@ -43,8 +43,10 @@ private:
 	void connectSimController() const;
 	void addRandomEnergy(double amount);
 
+    void serializeSimulationAndWaitUntilFinished();
     void autoSaveIntern(std::string const& filename);
     void saveSimulationIntern(string const& filename);
+
 
     Worker* _worker = nullptr;
 

@@ -3,8 +3,8 @@
 #include "ImageSectionItem.h"
 #include "ViewportInterface.h"
 
-ImageSectionItem::ImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect)
-    : QGraphicsItem(), _viewport(viewport), _boundingRect(boundingRect)
+ImageSectionItem::ImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect, std::mutex& mutex)
+    : QGraphicsItem(), _viewport(viewport), _boundingRect(boundingRect), _mutex(mutex)
 {
     auto const viewportRect = _viewport->getRect();
     _imageOfVisibleRect = boost::make_shared<QImage>(viewportRect.width(), viewportRect.height(), QImage::Format_RGB32);
@@ -37,6 +37,9 @@ QRectF ImageSectionItem::boundingRect() const
 void ImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget /*= Q_NULLPTR*/)
 {
     auto const viewportRect = _viewport->getRect();
+
+    std::lock_guard<std::mutex> lock(_mutex);
+
     painter->drawImage(
         std::max(0.0f, static_cast<float>(viewportRect.x())),
         std::max(0.0f, static_cast<float>(viewportRect.y())),
