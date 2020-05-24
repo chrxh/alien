@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "Definitions.h"
 #include "Descriptions.h"
 
@@ -15,7 +17,7 @@ public:
 	virtual void updateData(DataChangeDescription const &desc) = 0;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
     virtual void requireData(ResolveDescription const& resolveDesc) = 0;
-    virtual void requireImage(IntRect rect, QImagePtr const& target) = 0;
+    virtual void requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) = 0;
     virtual void applyAction(PhysicalAction const& action) = 0;
 
 	Q_SIGNAL void dataReadyToRetrieve();

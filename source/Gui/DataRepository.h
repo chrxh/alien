@@ -60,6 +60,7 @@ public:
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
 	virtual void requireImageFromSimulation(IntRect const& rect, QImagePtr const& target);
+    virtual std::mutex& getImageMutex();
 
 	Q_SIGNAL void imageReady();
 
@@ -90,4 +91,5 @@ private:
 	DescriptionNavigator _navi;
 	IntRect _rect;
 	IntVector2D _universeSize;
+    std::mutex _mutex;
 };

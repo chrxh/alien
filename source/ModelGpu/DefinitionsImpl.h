@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 class SimulationControllerGpuImpl;
 class SimulationContextGpuImpl;
 class CudaWorker;
