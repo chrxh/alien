@@ -17,7 +17,7 @@ public:
 
     void calcCudaTimestep();
 
-    void getSimulationImage(int2 const& rectUpperLeft, int2 const& rectLowerRight, unsigned char* imageRawData);
+    void getSimulationImage(int2 const& rectUpperLeft, int2 const& rectLowerRight, unsigned char* imageData);
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
