@@ -105,8 +105,14 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionFullscreen->setEnabled(true);
 	actionFullscreen->setCheckable(true);
 	actionFullscreen->setShortcut(Qt::Key_F7);
-	bool fullScreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
-	actionFullscreen->setChecked(fullScreen);
+	bool isFullscreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
+	actionFullscreen->setChecked(isFullscreen);
+    
+    actionGlowEffect = new QAction("Glow effect", this);
+    actionGlowEffect->setEnabled(true);
+    actionGlowEffect->setCheckable(true);
+    actionGlowEffect->setShortcut(Qt::ALT + Qt::Key_G);
+    actionGlowEffect->setChecked(true);
 
 	actionShowCellInfo = new QAction("Cell info", this);
 	QIcon iconCellInfo;
