@@ -593,7 +593,12 @@ void DataRepository::requireDataUpdateFromSimulation(IntRect const& rect)
 void DataRepository::requireImageFromSimulation(IntRect const & rect, QImagePtr const& target)
 {
 	_rect = rect;
-	_access->requireImage(rect, target);
+	_access->requireImage(rect, target, _mutex);
+}
+
+std::mutex & DataRepository::getImageMutex()
+{
+    return _mutex;
 }
 
 void DataRepository::updateAfterCellReconnections()

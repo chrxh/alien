@@ -32,7 +32,7 @@ protected:
 private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void requestData();
-	Q_SLOT void displayData();
+	Q_SLOT void imageReady();
 	Q_SLOT void scrolled();
 
 	list<QMetaObject::Connection> _connections;

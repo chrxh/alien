@@ -75,9 +75,9 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
     scheduleJob(job);
 }
 
-void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target)
+void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex)
 {
-	auto job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target);
+	auto job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target, mutex);
     scheduleJob(job);
 }
 
