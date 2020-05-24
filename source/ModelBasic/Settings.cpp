@@ -198,5 +198,6 @@ ExecutionParameters ModelSettings::getDefaultExecutionParameters()
     ExecutionParameters result;
     result.activateFreezing = false;
     result.freezingTimesteps = 5;
+    result.imageGlow = true;
     return result;
 }
