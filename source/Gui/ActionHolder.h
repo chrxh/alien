@@ -33,7 +33,8 @@ public:
 	QAction* actionZoomIn = nullptr;
 	QAction* actionZoomOut = nullptr;
 	QAction* actionFullscreen = nullptr;
-	QAction* actionShowCellInfo = nullptr;
+    QAction* actionGlowEffect = nullptr;
+    QAction* actionShowCellInfo = nullptr;
 	QAction* actionCenterSelection = nullptr;
 
 	QAction* actionNewCell = nullptr;

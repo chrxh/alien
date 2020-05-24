@@ -243,13 +243,22 @@ __global__ void drawImage(int2 rectUpperLeft, int2 rectLowerRight, SimulationDat
     int numPixels = width * height;
     int2 imageSize{ width, height };
 
-    KERNEL_CALL(clearImageMap, data.rawImageData, numPixels);
-    KERNEL_CALL(drawClusters, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, data.rawImageData, imageSize);
-    if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
-        KERNEL_CALL(drawClusters, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, data.rawImageData, imageSize);
+    unsigned int* targetImage;
+    if (cudaExecutionParameters.imageGlow) {
+        targetImage = data.rawImageData;
     }
-    KERNEL_CALL(drawParticles, data.size, rectUpperLeft, rectLowerRight, data.entities.particlePointers, data.rawImageData, imageSize);
+    else {
+        targetImage = data.finalImageData;
+    }
+    KERNEL_CALL(clearImageMap, targetImage, numPixels);
+    KERNEL_CALL(drawClusters, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, targetImage, imageSize);
+    if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
+        KERNEL_CALL(drawClusters, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, targetImage, imageSize);
+    }
+    KERNEL_CALL(drawParticles, data.size, rectUpperLeft, rectLowerRight, data.entities.particlePointers, targetImage, imageSize);
 
-    blurImage<<<128, dim3{11, 11}>>>(data.rawImageData, data.finalImageData, imageSize);
-    cudaDeviceSynchronize();
+    if (cudaExecutionParameters.imageGlow) {
+        blurImage << < 128, dim3{ 11, 11 } >> > (data.rawImageData, data.finalImageData, imageSize);
+        cudaDeviceSynchronize();
+    }
 }
