@@ -22,7 +22,7 @@ public:
 	virtual QRectF getRect() const override;
 	virtual QVector2D getCenter() const override;
 
-	virtual void zoom(double factor);
+    virtual void zoom(double factor, bool notify = true);
 	virtual qreal getZoomFactor() const;
 
 	virtual void scrollToPos(QVector2D pos, NotifyScrollChanged notify) override;
