@@ -8,7 +8,7 @@ class ImageSectionItem
     : public QGraphicsItem
 {
 public:
-    ImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect);
+    ImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect, std::mutex& mutex);
     ~ImageSectionItem();
 
     QImagePtr getImageOfVisibleRect();
@@ -19,4 +19,5 @@ private:
     QImagePtr _imageOfVisibleRect = nullptr;
     ViewportInterface* _viewport = nullptr;
     QRectF _boundingRect;
+    std::mutex& _mutex;
 };

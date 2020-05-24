@@ -92,8 +92,8 @@ class _GetImageJob
 	: public _CudaJob
 {
 public:
-    _GetImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage)
-		: _CudaJob(originId, true), _targetImage(targetImage)
+    _GetImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage, std::mutex& mutex)
+		: _CudaJob(originId, true), _targetImage(targetImage), _mutex(mutex)
     {
         auto imageSize = targetImage->size();
 
@@ -113,9 +113,15 @@ public:
 		return _targetImage;
 	}
 
+    std::mutex& getMutex()
+    {
+        return _mutex;
+    }
+
 private:
     IntRect _rect;
     QImagePtr _targetImage;
+    std::mutex& _mutex;
 };
 
 class _GetDataForEditJob

@@ -154,6 +154,26 @@ void MainController::autoSave()
     delete progress;
 }
 
+void MainController::serializeSimulationAndWaitUntilFinished()
+{
+    QEventLoop pause;
+    bool finished = false;
+    auto connection = _serializer->connect(_serializer, &Serializer::serializationFinished, [&]() {
+        finished = true;
+        pause.quit();
+    });
+    if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
+        _serializer->serialize(_simController, int(ModelComputationType::Gpu));
+    }
+    else {
+        THROW_NOT_IMPLEMENTED();
+    }
+    while (!finished) {
+        pause.exec();
+    }
+    QObject::disconnect(connection);
+}
+
 void MainController::autoSaveIntern(std::string const& filename)
 {
     saveSimulationIntern(filename);
@@ -162,17 +182,8 @@ void MainController::autoSaveIntern(std::string const& filename)
 
 void MainController::saveSimulationIntern(string const & filename)
 {
-    auto const saveFunction = [filename](Serializer* serializer) {
-        SerializationHelper::saveToFile(filename, [&]() { return serializer->retrieveSerializedSimulation(); });
-    };
-    _worker->addJob(boost::make_shared<_Job>(saveFunction));
-
-    if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
-        _serializer->serialize(_simController, int(ModelComputationType::Gpu));
-    }
-    else {
-        THROW_NOT_IMPLEMENTED();
-    }
+    serializeSimulationAndWaitUntilFinished();
+    SerializationHelper::saveToFile(filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
 }
 
 void MainController::onRunSimulation(bool run)
