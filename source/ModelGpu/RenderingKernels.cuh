@@ -222,9 +222,9 @@ __global__ void blurImage(
 
         if (0 == threadIdx.x && 0 == threadIdx.y) {
             auto sum = cudaImageBlurFactors[6];
-            red = red / sum;
-            green = green / sum;
-            blue = blue / sum;
+            red = min(255, red / sum);
+            green = min(255, green / sum);
+            blue = min(255, blue / sum);
             targetImage[pos.x + pos.y * imageSize.x] = 0xff000000 | (red << 16) | (green << 8) | blue;
         }
         __syncthreads();
