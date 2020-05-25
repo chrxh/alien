@@ -223,12 +223,12 @@ namespace
 {
     void calcImageBlurFactors(int* imageBlurFactors)
     {
-        imageBlurFactors[0] = 200;
-        imageBlurFactors[1] = 4;
-        imageBlurFactors[2] = 4;
-        imageBlurFactors[3] = 4;
-        imageBlurFactors[4] = 4;
-        imageBlurFactors[5] = 4;
+        imageBlurFactors[0] = 300;
+        imageBlurFactors[1] = 40;
+        imageBlurFactors[2] = 7;
+        imageBlurFactors[3] = 7;
+        imageBlurFactors[4] = 7;
+        imageBlurFactors[5] = 7;
 
         int sum = 0;
         int2 relPos;
@@ -240,7 +240,7 @@ namespace
                 }
             }
         }
-        imageBlurFactors[6] = sum;
+        imageBlurFactors[6] = sum - 400;
     }
 }
 
