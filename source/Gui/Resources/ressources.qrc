@@ -25,5 +25,6 @@
         <file>Icons/accelerate.png</file>
         <file>Icons/monitor.png</file>
         <file>Icons/monitor_active.png</file>
+        <file>Tutorial/logo.png</file>
     </qresource>
 </RCC>
