@@ -14,7 +14,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionLoadSimulation->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionSaveSimulation = new QAction("Save", this);
 	actionSaveSimulation->setEnabled(true);
-	actionLoadSimulation->setShortcut(Qt::CTRL + Qt::Key_S);
+    actionSaveSimulation->setShortcut(Qt::CTRL + Qt::Key_S);
 	actionRunSimulation = new QAction("Run", this);
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
