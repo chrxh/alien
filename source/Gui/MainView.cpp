@@ -201,7 +201,7 @@ void MainView::setupFontsAndColors()
     ui->menuAnalysis->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
-	ui->toolBar->setStyleSheet("background-color: #303030");
+	ui->toolBar->setStyleSheet("background-color: #151540");
 	{
 		QPalette p = ui->tpsForcingButton->palette();
 		p.setColor(QPalette::ButtonText, Const::ButtonTextColor);
