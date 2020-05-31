@@ -18,6 +18,7 @@ public:
 	virtual void calculateSingleTimestep() override;
 	virtual SimulationContext* getContext() const override;
 	virtual void setRestrictTimestepsPerSecond(optional<int> tps) override;
+    virtual void setEnableCalculateFrames(bool enabled) override;
 
 private:
 	Q_SLOT void oneSecondTimerTimeout();

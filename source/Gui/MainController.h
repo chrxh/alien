@@ -23,7 +23,8 @@ public:
 	void onStepBackward(bool& emptyStack);
 	void onMakeSnapshot();
 	void onRestoreSnapshot();
-	void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
+    void onToggleDisplayLink(bool toggled);
+    void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
 	void onSaveSimulation(string const& filename);
     enum class LoadOption { Non, SaveOldSim };
 	bool onLoadSimulation(string const& filename, LoadOption option);

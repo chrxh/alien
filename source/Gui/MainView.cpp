@@ -146,7 +146,8 @@ void MainView::setupMenu()
 	ui->menuView->addSeparator();
 	ui->menuView->addAction(actions->actionZoomIn);
 	ui->menuView->addAction(actions->actionZoomOut);
-	ui->menuView->addAction(actions->actionFullscreen);
+    ui->menuView->addAction(actions->actionDisplayLink);
+    ui->menuView->addAction(actions->actionFullscreen);
     ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionGlowEffect);
     ui->menuView->addSeparator();
