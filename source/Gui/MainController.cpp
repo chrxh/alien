@@ -220,6 +220,11 @@ void MainController::onRestoreSnapshot()
     }, UpdateDescription::All);
 }
 
+void MainController::onToggleDisplayLink(bool toggled)
+{
+    _simController->setEnableCalculateFrames(toggled);
+}
+
 void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
 {
 	_model->setSimulationParameters(parameters);

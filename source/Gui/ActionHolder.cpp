@@ -101,6 +101,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionZoomOut->setIcon(iconZoomOut);
 	actionZoomOut->setIconVisibleInMenu(false);
 
+    actionDisplayLink = new QAction("Display link", this);
+    actionDisplayLink->setCheckable(true);
+    actionDisplayLink->setChecked(true);
+    actionDisplayLink->setEnabled(true);
+    actionDisplayLink->setIconVisibleInMenu(false);
+
 	actionFullscreen = new QAction("Fullscreen", this);
 	actionFullscreen->setEnabled(true);
 	actionFullscreen->setCheckable(true);

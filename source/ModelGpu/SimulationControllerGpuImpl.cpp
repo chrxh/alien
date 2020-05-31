@@ -18,7 +18,8 @@ SimulationControllerGpuImpl::SimulationControllerGpuImpl(QObject* parent /*= nul
 	connect(_frameTimer, &QTimer::timeout, this, &SimulationControllerGpuImpl::frameTimerTimeout);
 
 	_oneSecondTimer->start(1000);
-	_frameTimer->start(updateFrameInMilliSec);
+
+    setEnableCalculateFrames(true);
 }
 
 void SimulationControllerGpuImpl::init(SimulationContext * context)
@@ -69,6 +70,16 @@ SimulationContext * SimulationControllerGpuImpl::getContext() const
 void SimulationControllerGpuImpl::setRestrictTimestepsPerSecond(optional<int> tps)
 {
 	_context->getCudaController()->restrictTimestepsPerSecond(tps);
+}
+
+void SimulationControllerGpuImpl::setEnableCalculateFrames(bool enabled)
+{
+    if (enabled) {
+        _frameTimer->start(updateFrameInMilliSec);
+    }
+    else {
+        _frameTimer->stop();
+    }
 }
 
 void SimulationControllerGpuImpl::oneSecondTimerTimeout()
