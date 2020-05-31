@@ -96,7 +96,8 @@ void ActionController::init(
 
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
 	connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
-	connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
+    connect(actions->actionDisplayLink, &QAction::triggered, this, &ActionController::onToggleDisplayLink);
+    connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
 
 	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
@@ -216,6 +217,11 @@ void ActionController::onZoomOutClicked()
 {
 	_visualEditor->zoom(0.5);
 	updateZoomFactor();
+}
+
+Q_SLOT void ActionController::onToggleDisplayLink(bool toggled)
+{
+    _mainController->onToggleDisplayLink(toggled);
 }
 
 void ActionController::onToggleFullscreen(bool toogled)
@@ -849,11 +855,11 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 	actions->actionRunSimulation->setChecked(false);
 	actions->actionRestore->setEnabled(false);
 	actions->actionRunStepBackward->setEnabled(false);
+    actions->actionDisplayLink->setEnabled(true);
     actions->actionGlowEffect->setEnabled(true);
 	onRunClicked(false);
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
-
 
 	if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
 		_infoController->setDevice(InfoController::Device::Gpu);
