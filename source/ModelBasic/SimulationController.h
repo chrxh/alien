@@ -14,8 +14,9 @@ public:
 	virtual void calculateSingleTimestep() = 0;
 	virtual SimulationContext* getContext() const = 0;
 	virtual void setRestrictTimestepsPerSecond(optional<int> tps) = 0;
+    virtual void setEnableCalculateFrames(bool enabled) = 0;
 
-	Q_SIGNAL void nextFrameCalculated();
+    Q_SIGNAL void nextFrameCalculated();
 	Q_SIGNAL void nextTimestepCalculated();
 };
 
