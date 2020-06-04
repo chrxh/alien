@@ -144,20 +144,20 @@ ActionHolder * ActionController::getActionHolder()
 	return _model->getActionHolder();
 }
 
-void ActionController::onRunClicked(bool run)
+void ActionController::onRunClicked(bool toggled)
 {
 	auto actions = _model->getActionHolder();
-	if (run) {
-		actions->actionRunSimulation->setIcon(QIcon("://Icons/pause.png"));
+	if (toggled) {
+		actions->actionRunSimulation->setIcon(QIcon("://Icons/play.png"));
 		actions->actionRunStepForward->setEnabled(false);
 	}
 	else {
-		actions->actionRunSimulation->setIcon(QIcon("://Icons/play.png"));
+		actions->actionRunSimulation->setIcon(QIcon("://Icons/pause.png"));
 		actions->actionRunStepForward->setEnabled(true);
 	}
 	actions->actionRunStepBackward->setEnabled(false);
 
-	_mainController->onRunSimulation(run);
+	_mainController->onRunSimulation(toggled);
 }
 
 void ActionController::onStepForward()
@@ -247,10 +247,10 @@ void ActionController::onToggleGlowEffect(bool toogled)
     _mainView->refresh();
 }
 
-void ActionController::onToggleEditorMode(bool editMode)
+void ActionController::onToggleEditorMode(bool toggled)
 {
-	_model->setEditMode(editMode);
-	if (editMode) {
+	_model->setEditMode(toggled);
+	if (toggled) {
 		_visualEditor->setActiveScene(ActiveScene::ItemScene);
 	}
 	else {
@@ -258,13 +258,13 @@ void ActionController::onToggleEditorMode(bool editMode)
 	}
 	updateActionsEnableState();
 
-	Q_EMIT _toolbar->getContext()->show(editMode);
-	Q_EMIT _dataEditor->getContext()->show(editMode);
+	Q_EMIT _toolbar->getContext()->show(toggled);
+	Q_EMIT _dataEditor->getContext()->show(toggled);
 }
 
-void ActionController::onToggleMonitor(bool show)
+void ActionController::onToggleMonitor(bool toggled)
 {
-	_monitor->onShow(show);
+	_monitor->onShow(toggled);
 }
 
 void ActionController::onNewSimulation()
