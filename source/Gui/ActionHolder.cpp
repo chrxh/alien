@@ -18,8 +18,9 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionRunSimulation = new QAction("Run", this);
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
-	QIcon iconRunSimulation;
-	iconRunSimulation.addFile(":/Icons/play.png", QSize(), QIcon::Normal, QIcon::Off);
+    QIcon iconRunSimulation;
+    iconRunSimulation.addFile(":/Icons/play.png", QSize(), QIcon::Normal, QIcon::On);
+    iconRunSimulation.addFile(":/Icons/pause.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRunSimulation->setIcon(iconRunSimulation);
 	actionRunSimulation->setIconVisibleInMenu(false);
 	actionRunStepForward = new QAction("Step forward", this);
@@ -105,6 +106,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionDisplayLink->setCheckable(true);
     actionDisplayLink->setChecked(true);
     actionDisplayLink->setEnabled(true);
+    QIcon iconDisplayLink;
+    iconDisplayLink.addFile(":/Icons/display_link_on.png", QSize(), QIcon::Normal, QIcon::On);
+    iconDisplayLink.addFile(":/Icons/display_link_off.png", QSize(), QIcon::Normal, QIcon::Off);
+    actionDisplayLink->setIcon(iconDisplayLink);
     actionDisplayLink->setIconVisibleInMenu(false);
 
 	actionFullscreen = new QAction("Fullscreen", this);

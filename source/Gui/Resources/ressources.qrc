@@ -26,5 +26,7 @@
         <file>Icons/monitor.png</file>
         <file>Icons/monitor_active.png</file>
         <file>Tutorial/logo.png</file>
+        <file>Icons/display_link_off.png</file>
+        <file>Icons/display_link_on.png</file>
     </qresource>
 </RCC>
