@@ -117,13 +117,13 @@ void MainView::setupMenu()
 	ui->toolBar->addSeparator();
 	ui->toolBar->addAction(actions->actionSnapshot);
 	ui->toolBar->addAction(actions->actionRestore);
-	ui->toolBar->addSeparator();
-    ui->toolBar->addAction(actions->actionDisplayLink);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(actions->actionRunSimulation);
 	ui->toolBar->addAction(actions->actionRunStepBackward);
 	ui->toolBar->addAction(actions->actionRunStepForward);
     ui->toolBar->addAction(actions->actionAcceleration);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(actions->actionDisplayLink);
     ui->toolBar->addSeparator();
 
 	ui->menuSimulation->addAction(actions->actionNewSimulation);
