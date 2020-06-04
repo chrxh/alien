@@ -21,7 +21,7 @@ private:
 	Q_SLOT void onNewSimulation();
 	Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
-	Q_SLOT void onRunClicked(bool run);
+	Q_SLOT void onRunClicked(bool toggled);
 	Q_SLOT void onStepForward();
 	Q_SLOT void onStepBackward();
 	Q_SLOT void onMakeSnapshot();
@@ -32,8 +32,8 @@ private:
 	Q_SLOT void onEditSimulationParameters();
 	Q_SLOT void onEditSymbolTable();
 
-	Q_SLOT void onToggleEditorMode(bool editMode);
-	Q_SLOT void onToggleMonitor(bool show);
+	Q_SLOT void onToggleEditorMode(bool toggled);
+	Q_SLOT void onToggleMonitor(bool toggled);
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
     Q_SLOT void onToggleDisplayLink(bool toggled);
