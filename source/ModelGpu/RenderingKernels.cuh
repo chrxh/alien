@@ -258,7 +258,8 @@ __global__ void drawImage(int2 rectUpperLeft, int2 rectLowerRight, SimulationDat
     KERNEL_CALL(drawParticles, data.size, rectUpperLeft, rectLowerRight, data.entities.particlePointers, targetImage, imageSize);
 
     if (cudaExecutionParameters.imageGlow) {
-        blurImage << < 128, dim3{ 11, 11 } >> > (data.rawImageData, data.finalImageData, imageSize);
+        auto const numBlocks = cudaConstants.NUM_BLOCKS*cudaConstants.NUM_THREADS_PER_BLOCK / 8;
+        blurImage << < numBlocks, dim3{ 11, 11 } >> > (data.rawImageData, data.finalImageData, imageSize);
         cudaDeviceSynchronize();
     }
 }
