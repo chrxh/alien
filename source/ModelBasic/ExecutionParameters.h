@@ -5,5 +5,5 @@ struct ExecutionParameters
     bool activateFreezing = false;
     int freezingTimesteps = 5;
 
-    bool imageGlow = false;
+    bool imageGlow = true;
 };
