@@ -123,7 +123,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionGlowEffect->setEnabled(true);
     actionGlowEffect->setCheckable(true);
     actionGlowEffect->setShortcut(Qt::ALT + Qt::Key_G);
-    actionGlowEffect->setChecked(false);
+    actionGlowEffect->setChecked(true);
 
 	actionShowCellInfo = new QAction("Cell info", this);
 	QIcon iconCellInfo;
