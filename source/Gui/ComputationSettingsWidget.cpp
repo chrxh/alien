@@ -40,7 +40,7 @@ ComputationSettingsWidget::ComputationSettingsWidget(QWidget* parent)
     ui.gpuDynamicMemorySizeEdit->setText(StringHelper::toString(
         GuiSettings::getSettingsValue(Const::GpuDynamicMemorySizeKey, Const::GpuDynamicMemorySizeDefault)));
     ui.gpuMetadataDynamicMemorySizeEdit->setText(StringHelper::toString(
-        GuiSettings::getSettingsValue(Const::GpuStringByteSizeKey, Const::GpuStringByteSizeDefault)));
+        GuiSettings::getSettingsValue(Const::GpuMetadataDynamicMemorySizeKey, Const::GpuDynamicMemorySizeDefault)));
 }
 
 IntVector2D ComputationSettingsWidget::getUniverseSize() const
@@ -136,12 +136,12 @@ void ComputationSettingsWidget::setDynamicMemorySize(uint value) const
     ui.gpuDynamicMemorySizeEdit->setText(QString::number(value));
 }
 
-uint ComputationSettingsWidget::getStringByteSize() const
+uint ComputationSettingsWidget::getMetadataDynamicMemorySize() const
 {
     return getUIntOrZero(ui.gpuMetadataDynamicMemorySizeEdit->text());
 }
 
-void ComputationSettingsWidget::setStringByteSize(uint value) const
+void ComputationSettingsWidget::setMetadataDynamicMemorySize(uint value) const
 {
     ui.gpuMetadataDynamicMemorySizeEdit->setText(QString::number(value));
 }
@@ -157,5 +157,5 @@ void ComputationSettingsWidget::saveSettings()
     GuiSettings::setSettingsValue(Const::GpuMaxTokensKey, getMaxTokens());
     GuiSettings::setSettingsValue(Const::GpuMaxParticlesKey, getMaxParticles());
     GuiSettings::setSettingsValue(Const::GpuDynamicMemorySizeKey, getDynamicMemorySize());
-    GuiSettings::setSettingsValue(Const::GpuStringByteSizeKey, getStringByteSize());
+    GuiSettings::setSettingsValue(Const::GpuMetadataDynamicMemorySizeKey, getMetadataDynamicMemorySize());
 }

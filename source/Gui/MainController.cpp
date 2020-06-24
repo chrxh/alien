@@ -127,7 +127,7 @@ void MainController::init()
         config->maxTokens = 10000;
         config->maxParticles = 1000000;
         config->dynamicMemorySize = 100000000;
-        config->stringByteSize = 50000000;
+        config->metadataDynamicMemorySize = 50000000;
         config->universeSize = IntVector2D({ 2000 , 1000 });
         config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
         config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
@@ -282,7 +282,7 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
         data.setMaxParticlePointers(configGpu->maxParticles * 10);
         data.setMaxTokenPointers(configGpu->maxTokens * 10);
         data.setDynamicMemorySize(configGpu->dynamicMemorySize);
-        data.setStringByteSize(configGpu->stringByteSize);
+        data.setMetadataDynamicMemorySize(configGpu->metadataDynamicMemorySize);
 
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}
@@ -357,7 +357,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
         data.setMaxParticlePointers(configGpu->maxParticles * 10);
         data.setMaxTokenPointers(configGpu->maxTokens*10);
         data.setDynamicMemorySize(configGpu->dynamicMemorySize);
-        data.setStringByteSize(configGpu->stringByteSize);
+        data.setMetadataDynamicMemorySize(configGpu->metadataDynamicMemorySize);
 
         Serializer::Settings settings{ configGpu->universeSize, data.getData(), extrapolateContent };
         _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
@@ -419,7 +419,7 @@ SimulationConfig MainController::getSimulationConfig() const
         result->maxTokens = data.getMaxTokens();
         result->maxParticles = data.getMaxParticles();
         result->dynamicMemorySize = data.getDynamicMemorySize();
-        result->stringByteSize = data.getStringByteSize();
+        result->metadataDynamicMemorySize = data.getMetadataDynamicMemorySize();
 
         result->universeSize = context->getSpaceProperties()->getSize();
 		result->symbolTable = context->getSymbolTable();

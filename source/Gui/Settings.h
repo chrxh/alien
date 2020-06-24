@@ -79,8 +79,8 @@ namespace Const
     const int GpuMaxParticlesDefault = 2000000;
     const std::string GpuDynamicMemorySizeKey = "newSim/gpu/dynamicMemorySize";
     const int GpuDynamicMemorySizeDefault = 100000000;
-    const std::string GpuStringByteSizeKey = "newSim/gpu/stringByteSize";
-    const int GpuStringByteSizeDefault = 50000000;
+    const std::string GpuMetadataDynamicMemorySizeKey = "newSim/gpu/metadataDynamicMemorySize";
+    const int GpuMetadataDynamicMemoryDefault = 50000000;
 
     const std::string InitialEnergyKey = "newSim/initialEnergy";
         const double InitialEnergyDefault = 0.0;

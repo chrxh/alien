@@ -314,7 +314,7 @@ void ActionController::onConfigureGrid()
             configGpu->maxTokens = dialog.getMaxTokens();
             configGpu->maxParticles = dialog.getMaxParticles();
             configGpu->dynamicMemorySize = dialog.getDynamicMemorySize();
-            configGpu->stringByteSize = dialog.getStringByteSize();
+            configGpu->metadataDynamicMemorySize = dialog.getMetadataDynamicMemorySize();
 
             auto const extrapolateContent = dialog.isExtrapolateContent();
             _mainController->onRecreateUniverse(configGpu, extrapolateContent);
