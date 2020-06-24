@@ -27,7 +27,7 @@ protected:
         data.setMaxParticlePointers(500 * 10);
         data.setMaxTokenPointers(50 * 10);
         data.setDynamicMemorySize(1000000);
-        data.setStringByteSize(1000);
+        data.setMetadataDynamicMemorySize(1000);
         return data;
     }
 

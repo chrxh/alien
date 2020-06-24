@@ -364,7 +364,7 @@ __global__ void cleanupAfterSimulation(SimulationData data)
             data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
         }
 
-        if (data.entities.strings.getNumBytes() > cudaConstants.MAX_STRINGBYTES * FillLevelFactor) {
+        if (data.entities.strings.getNumBytes() > cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE * FillLevelFactor) {
             data.entitiesForCleanup.strings.reset();
             KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
             data.entities.strings.swapContent(data.entitiesForCleanup.strings);
@@ -419,7 +419,7 @@ __global__ void cleanupAfterDataManipulation(SimulationData data)
         data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
     }
 
-    if (data.entities.strings.getNumBytes() > cudaConstants.MAX_STRINGBYTES * FillLevelFactor) {
+    if (data.entities.strings.getNumBytes() > cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE * FillLevelFactor) {
         data.entitiesForCleanup.strings.reset();
         KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
         data.entities.strings.swapContent(data.entitiesForCleanup.strings);

@@ -16,7 +16,7 @@ namespace
     string const maxParticlePointers_key = "maxParticlePointers";
     string const maxTokenPointers_key = "maxTokenPointers";
     string const dynamicMemorySize_key = "dynamicMemorySize";
-    string const stringByteSize_key = "stringByteSize";
+    string const metadataDynamicMemorySize_key = "stringByteSize";
 }
 
 
@@ -43,12 +43,7 @@ CudaConstants ModelGpuData::getCudaConstants() const
     result.MAX_PARTICLEPOINTERS = _data.at(maxParticlePointers_key);
     result.MAX_TOKENPOINTERS = _data.at(maxTokenPointers_key);
     result.DYNAMIC_MEMORY_SIZE = _data.at(dynamicMemorySize_key);
-    if (_data.find(stringByteSize_key) != _data.end()) {
-        result.MAX_STRINGBYTES = _data.at(stringByteSize_key);
-    }
-    else {
-        result.MAX_STRINGBYTES = 1000000;   //default
-    }
+    result.METADATA_DYNAMIC_MEMORY_SIZE = _data.at(metadataDynamicMemorySize_key);
     return result;
 }
 
@@ -142,14 +137,14 @@ void ModelGpuData::setMaxTokenPointers(int value)
     _data.insert_or_assign(maxTokenPointers_key, value);
 }
 
-int ModelGpuData::getStringByteSize()
+int ModelGpuData::getMetadataDynamicMemorySize()
 {
-    return _data.at(stringByteSize_key);
+    return _data.at(metadataDynamicMemorySize_key);
 }
 
-void ModelGpuData::setStringByteSize(int value)
+void ModelGpuData::setMetadataDynamicMemorySize(int value)
 {
-    _data.insert_or_assign(stringByteSize_key, value);
+    _data.insert_or_assign(metadataDynamicMemorySize_key, value);
 }
 
 map<string, int> ModelGpuData::getData() const

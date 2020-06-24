@@ -30,7 +30,7 @@ struct Entities
         tokens.init(cudaConstants.MAX_TOKENS);
         particles.init(cudaConstants.MAX_PARTICLES);
         particlePointers.init(cudaConstants.MAX_PARTICLEPOINTERS);
-        strings.init(cudaConstants.MAX_STRINGBYTES);
+        strings.init(cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE);
     }
 
     void free()
