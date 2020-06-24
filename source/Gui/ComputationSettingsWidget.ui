@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
-    <height>210</height>
+    <width>420</width>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,105 +43,8 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_5" rowstretch="0,0,0,0,0,0,0,0,0,0">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_16">
-        <property name="text">
-         <string>maximum number of clusters</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="gpuNumBlocksEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="gpuMaxClustersEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_19">
-        <property name="text">
-         <string>maximum number of particles</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>x</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_20">
-        <property name="text">
-         <string>dynamic memory size</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="gpuMaxParticlesEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QLineEdit" name="gpuDynamicMemorySizeEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>number of blocks</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="gpuUniverseSizeXEdit">
-        <property name="text">
-         <string>1440</string>
-        </property>
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" rowspan="2">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
        <widget class="QLabel" name="label_11">
         <property name="minimumSize">
          <size>
@@ -154,7 +57,27 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="gpuUniverseSizeXEdit">
+        <property name="text">
+         <string>1440</string>
+        </property>
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>x</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
        <widget class="QLineEdit" name="gpuUniverseSizeYEdit">
         <property name="text">
          <string>720</string>
@@ -167,7 +90,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>number of threads per block</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QLineEdit" name="gpuNumThreadsPerBlockEdit">
         <property name="frame">
          <bool>false</bool>
@@ -178,27 +108,64 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_15">
+       <widget class="QLabel" name="label_14">
         <property name="text">
-         <string>number of threads per block</string>
+         <string>number of blocks</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="gpuNumBlocksEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_16">
+        <property name="text">
+         <string>maximum number of clusters</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="gpuMaxClustersEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
        <widget class="QLabel" name="label_17">
         <property name="text">
          <string>maximum number of cells</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="gpuMaxCellsEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
        <widget class="QLabel" name="label_18">
         <property name="text">
          <string>maximum number of tokens</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="5" column="1">
        <widget class="QLineEdit" name="gpuMaxTokensEdit">
         <property name="frame">
          <bool>false</bool>
@@ -208,8 +175,49 @@
         </property>
        </widget>
       </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_19">
+        <property name="text">
+         <string>maximum number of particles</string>
+        </property>
+       </widget>
+      </item>
       <item row="6" column="1">
-       <widget class="QLineEdit" name="gpuMaxCellsEdit">
+       <widget class="QLineEdit" name="gpuMaxParticlesEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_20">
+        <property name="text">
+         <string>dynamic memory size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="gpuDynamicMemorySizeEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_21">
+        <property name="text">
+         <string>metadata dynamic memory size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLineEdit" name="gpuMetadataDynamicMemorySizeEdit">
         <property name="frame">
          <bool>false</bool>
         </property>
