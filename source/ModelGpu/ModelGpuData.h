@@ -37,8 +37,8 @@ public:
     void setMaxParticlePointers(int value);
     void setMaxTokenPointers(int value);
 
-    int getStringByteSize();
-    void setStringByteSize(int value);
+    int getMetadataDynamicMemorySize();
+    void setMetadataDynamicMemorySize(int value);
 
 	map<string, int> getData() const;
 

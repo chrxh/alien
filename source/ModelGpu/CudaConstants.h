@@ -15,5 +15,5 @@ struct CudaConstants
     int MAX_TOKENPOINTERS = 0;/* MAX_TOKENS * 10*/
     int DYNAMIC_MEMORY_SIZE = 0;
 
-    int MAX_STRINGBYTES = 0;
+    int METADATA_DYNAMIC_MEMORY_SIZE = 0;
 };

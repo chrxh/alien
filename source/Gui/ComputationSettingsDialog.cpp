@@ -20,7 +20,7 @@ ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& con
     ui.computationSettingsWidget->setMaxTokens(configGpu->maxTokens);
     ui.computationSettingsWidget->setMaxParticles(configGpu->maxParticles);
     ui.computationSettingsWidget->setDynamicMemorySize(configGpu->dynamicMemorySize);
-    ui.computationSettingsWidget->setStringByteSize(configGpu->stringByteSize);
+    ui.computationSettingsWidget->setMetadataDynamicMemorySize(configGpu->metadataDynamicMemorySize);
     ui.extrapolateContentCheckBox->setChecked(
         GuiSettings::getSettingsValue(Const::ExtrapolateContentKey, Const::ExtrapolateContentDefault));
 
@@ -67,9 +67,9 @@ uint ComputationSettingsDialog::getDynamicMemorySize() const
     return ui.computationSettingsWidget->getDynamicMemorySize();
 }
 
-uint ComputationSettingsDialog::getStringByteSize() const
+uint ComputationSettingsDialog::getMetadataDynamicMemorySize() const
 {
-    return ui.computationSettingsWidget->getStringByteSize();
+    return ui.computationSettingsWidget->getMetadataDynamicMemorySize();
 }
 
 bool ComputationSettingsDialog::isExtrapolateContent() const

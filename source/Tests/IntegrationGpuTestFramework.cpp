@@ -24,7 +24,7 @@ IntegrationGpuTestFramework::IntegrationGpuTestFramework(
         data.setMaxParticlePointers(500000 * 10);
         data.setMaxTokenPointers(50000 * 10);
         data.setDynamicMemorySize(100000000);
-        data.setStringByteSize(1000);
+        data.setMetadataDynamicMemorySize(1000);
     }
 
 	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, data, 0);
