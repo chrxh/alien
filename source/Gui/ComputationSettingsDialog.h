@@ -20,6 +20,7 @@ public:
     uint getMaxTokens() const;
     uint getMaxParticles() const;
     uint getDynamicMemorySize() const;
+    uint getStringByteSize() const;
     bool isExtrapolateContent() const;
 
 private:
