@@ -37,6 +37,9 @@ public:
     uint getDynamicMemorySize() const;
     void setDynamicMemorySize(uint value) const;
 
+    uint getStringByteSize() const;
+    void setStringByteSize(uint value) const;
+
     void saveSettings();
 
 private:

@@ -142,6 +142,11 @@ void ModelGpuData::setMaxTokenPointers(int value)
     _data.insert_or_assign(maxTokenPointers_key, value);
 }
 
+int ModelGpuData::getStringByteSize()
+{
+    return _data.at(stringByteSize_key);
+}
+
 void ModelGpuData::setStringByteSize(int value)
 {
     _data.insert_or_assign(stringByteSize_key, value);
