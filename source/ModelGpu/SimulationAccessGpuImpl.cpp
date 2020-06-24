@@ -241,7 +241,7 @@ DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getNewDataTO()
     result.cells = new CellAccessTO[_cudaConstants.MAX_CELLS];
     result.particles = new ParticleAccessTO[_cudaConstants.MAX_PARTICLES];
     result.tokens = new TokenAccessTO[_cudaConstants.MAX_TOKENS];
-    result.stringBytes = new char[_cudaConstants.MAX_STRINGBYTES];
+    result.stringBytes = new char[_cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE];
     return result;
 }
 

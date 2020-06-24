@@ -60,7 +60,7 @@ SimulationConfig NewSimulationDialog::getConfig() const
     config->maxTokens = ui->computationSettings->getMaxTokens();
     config->maxParticles = ui->computationSettings->getMaxParticles();
     config->dynamicMemorySize = ui->computationSettings->getDynamicMemorySize();
-    config->stringByteSize = ui->computationSettings->getStringByteSize();
+    config->metadataDynamicMemorySize = ui->computationSettings->getMetadataDynamicMemorySize();
     return config;
 }
 

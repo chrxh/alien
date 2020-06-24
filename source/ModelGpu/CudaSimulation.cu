@@ -84,7 +84,7 @@ CudaSimulation::CudaSimulation(
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cudaConstants.MAX_CELLS, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cudaConstants.MAX_PARTICLES, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(cudaConstants.MAX_TOKENS, _cudaAccessTO->tokens);
-    CudaMemoryManager::getInstance().acquireMemory<char>(cudaConstants.MAX_STRINGBYTES, _cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().acquireMemory<char>(cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE, _cudaAccessTO->stringBytes);
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 

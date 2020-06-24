@@ -40,7 +40,7 @@ ModelGpuData CleanupGpuTests::getModelDataForCleanup()
         result.setMaxParticlePointers(10000);
         result.setMaxTokenPointers(1000);
         result.setDynamicMemorySize(1000000);
-        result.setStringByteSize(10000);
+        result.setMetadataDynamicMemorySize(10000);
         return result;
     }
 }

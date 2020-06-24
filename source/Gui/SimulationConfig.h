@@ -33,5 +33,5 @@ public:
     uint maxTokens = 0;
     uint maxParticles = 0;
     uint dynamicMemorySize = 0;
-    uint stringByteSize = 0;
+    uint metadataDynamicMemorySize = 0;
 };
