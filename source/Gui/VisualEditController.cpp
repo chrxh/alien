@@ -1,7 +1,6 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QGraphicsItem>
-#include <QGLWidget>
 #include <QGraphicsBlurEffect>
 
 #include "Gui/Settings.h"
@@ -44,14 +43,6 @@ void VisualEditController::init(Notifier* notifier, SimulationController* contro
 	_itemUniverseInit = false;
 	_controller = controller;
 	_activeScene = ActiveScene::PixelScene;
-    auto glWidget = new QGLWidget(QGLFormat(QGL::SampleBuffers));
-/*
-    auto effect = new QGraphicsBlurEffect();
-    effect->setBlurRadius(1.5);
-    effect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
-    glWidget->setGraphicsEffect(effect);
-*/
-    ui->simulationView->setViewport(glWidget);
     _viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, _activeScene);
     _pixelUniverse->init(notifier, controller, access, repository, _viewport);
 	_itemUniverse->init(notifier, controller, repository, _viewport);
