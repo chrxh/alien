@@ -3,7 +3,7 @@
 #include "CellComputerCompilerImpl.h"
 #include "DescriptionHelperImpl.h"
 #include "SerializerImpl.h"
-#include "Settings.h"
+#include "ModelBasicSettings.h"
 
 DescriptionHelper * ModelBasicBuilderFacadeImpl::buildDescriptionHelper() const
 {
@@ -22,14 +22,19 @@ Serializer * ModelBasicBuilderFacadeImpl::buildSerializer() const
 	return new SerializerImpl();
 }
 
-SymbolTable * ModelBasicBuilderFacadeImpl::buildDefaultSymbolTable() const
+SymbolTable * ModelBasicBuilderFacadeImpl::getDefaultSymbolTable() const
 {
-	return ModelSettings::getDefaultSymbolTable();
+	return ModelBasicSettings::getDefaultSymbolTable();
 }
 
-SimulationParameters ModelBasicBuilderFacadeImpl::buildDefaultSimulationParameters() const
+SimulationParameters ModelBasicBuilderFacadeImpl::getDefaultSimulationParameters() const
 {
-	return ModelSettings::getDefaultSimulationParameters();
+	return ModelBasicSettings::getDefaultSimulationParameters();
+}
+
+ExecutionParameters ModelBasicBuilderFacadeImpl::getDefaultExecutionParameters() const
+{
+    return ModelBasicSettings::getDefaultExecutionParameters();
 }
 
 

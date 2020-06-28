@@ -1,7 +1,6 @@
 #include <QMouseEvent>
 #include <QTextBlock>
 
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/Colors.h"
 
 #include "Gui/Settings.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ModelGpu/CudaConstants.h"
+
 #include "Definitions.h"
 
 class _SimulationConfig
@@ -26,12 +28,5 @@ class _SimulationConfigGpu
 public:
 	virtual ValidationResult validate(string& errorMsg) const override;
 
-    uint numBlocks = 0;
-    uint numThreadsPerBlock = 0;
-    uint maxClusters = 0;
-    uint maxCells = 0;
-    uint maxTokens = 0;
-    uint maxParticles = 0;
-    uint dynamicMemorySize = 0;
-    uint metadataDynamicMemorySize = 0;
+    CudaConstants cudaConstants;
 };

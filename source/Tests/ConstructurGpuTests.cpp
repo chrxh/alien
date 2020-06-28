@@ -280,20 +280,20 @@ namespace
 {
     ModelGpuData getModelGpuDataWithHighBlockCount()
     {
-        ModelGpuData result;
-        result.setNumThreadsPerBlock(16);
-        result.setNumBlocks(64*8);
-        result.setMaxClusters(100000);
-        result.setMaxCells(500000);
-        result.setMaxParticles(500000);
-        result.setMaxTokens(50000);
-        result.setMaxCellPointers(500000 * 10);
-        result.setMaxClusterPointers(100000 * 10);
-        result.setMaxParticlePointers(500000 * 10);
-        result.setMaxTokenPointers(50000 * 10);
-        result.setDynamicMemorySize(100000000);
-        result.setMetadataDynamicMemorySize(1000);
-        return result;
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 16;
+        cudaConstants.NUM_BLOCKS = 64 * 8;
+        cudaConstants.MAX_CLUSTERS = 100000;
+        cudaConstants.MAX_CELLS = 500000;
+        cudaConstants.MAX_PARTICLES = 500000;
+        cudaConstants.MAX_TOKENS = 50000;
+        cudaConstants.MAX_CELLPOINTERS = 500000 * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = 100000 * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = 500000 * 10;
+        cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
+        return ModelGpuData(cudaConstants);
     }
 }
 
