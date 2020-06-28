@@ -15,20 +15,20 @@ public:
 protected:
     ModelGpuData getModelData()
     {
-        ModelGpuData data;
-        data.setNumThreadsPerBlock(64 * 2);
-        data.setNumBlocks(64);
-        data.setMaxClusters(100);
-        data.setMaxCells(500);
-        data.setMaxParticles(500);
-        data.setMaxTokens(50);
-        data.setMaxCellPointers(500 * 10);
-        data.setMaxClusterPointers(100 * 10);
-        data.setMaxParticlePointers(500 * 10);
-        data.setMaxTokenPointers(50 * 10);
-        data.setDynamicMemorySize(1000000);
-        data.setMetadataDynamicMemorySize(1000);
-        return data;
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 64 * 2;
+        cudaConstants.NUM_BLOCKS = 64;
+        cudaConstants.MAX_CLUSTERS = 100;
+        cudaConstants.MAX_CELLS = 500;
+        cudaConstants.MAX_PARTICLES = 500;
+        cudaConstants.MAX_TOKENS = 50;
+        cudaConstants.MAX_CELLPOINTERS = 500 * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = 100 * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = 500 * 10;
+        cudaConstants.MAX_TOKENPOINTERS = 50 * 10;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 1000000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
+        return ModelGpuData(cudaConstants);
     }
 
     virtual void SetUp();

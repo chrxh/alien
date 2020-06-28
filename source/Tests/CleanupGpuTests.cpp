@@ -27,22 +27,20 @@ void CleanupGpuTests::SetUp()
 
 ModelGpuData CleanupGpuTests::getModelDataForCleanup()
 {
-    {
-        ModelGpuData result;
-        result.setNumThreadsPerBlock(64);
-        result.setNumBlocks(64);
-        result.setMaxClusters(1000);
-        result.setMaxCells(1000);
-        result.setMaxParticles(10000);
-        result.setMaxTokens(100);
-        result.setMaxCellPointers(10000);
-        result.setMaxClusterPointers(10000);
-        result.setMaxParticlePointers(10000);
-        result.setMaxTokenPointers(1000);
-        result.setDynamicMemorySize(1000000);
-        result.setMetadataDynamicMemorySize(10000);
-        return result;
-    }
+    CudaConstants cudaConstants;
+    cudaConstants.NUM_THREADS_PER_BLOCK = 64;
+    cudaConstants.NUM_BLOCKS = 64;
+    cudaConstants.MAX_CLUSTERS = 1000;
+    cudaConstants.MAX_CELLS = 1000;
+    cudaConstants.MAX_PARTICLES = 10000;
+    cudaConstants.MAX_TOKENS = 100;
+    cudaConstants.MAX_CELLPOINTERS = 1000 * 10;
+    cudaConstants.MAX_CLUSTERPOINTERS = 1000 * 10;
+    cudaConstants.MAX_PARTICLEPOINTERS = 1000 * 10;
+    cudaConstants.MAX_TOKENPOINTERS = 100 * 10;
+    cudaConstants.DYNAMIC_MEMORY_SIZE = 1000000;
+    cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 10000;
+    return ModelGpuData(cudaConstants);
 }
 
 /**

@@ -2,6 +2,8 @@
 
 #include <QWidget>
 
+#include "ModelGpu/CudaConstants.h"
+
 #include "Definitions.h"
 #include "ui_ComputationSettingsWidget.h"
 
@@ -16,29 +18,8 @@ public:
     IntVector2D getUniverseSize() const;
     void setUniverseSize(IntVector2D const& value) const;
 
-    uint getNumBlocks() const;
-    void setNumBlocks(uint value) const;
-
-    uint getNumThreadsPerBlock() const;
-    void setNumThreadsPerBlock(uint value) const;
-
-    uint getMaxClusters() const;
-    void setMaxClusters(uint value) const;
-
-    uint getMaxCells() const;
-    void setMaxCells(uint value) const;
-
-    uint getMaxTokens() const;
-    void setMaxTokens(uint value) const;
-
-    uint getMaxParticles() const;
-    void setMaxParticles(uint value) const;
-
-    uint getDynamicMemorySize() const;
-    void setDynamicMemorySize(uint value) const;
-
-    uint getMetadataDynamicMemorySize() const;
-    void setMetadataDynamicMemorySize(uint value) const;
+    CudaConstants getCudaConstants() const;
+    void setCudaConstants(CudaConstants const& value);
 
     void saveSettings();
 

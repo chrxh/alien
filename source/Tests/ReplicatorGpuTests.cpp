@@ -9,20 +9,20 @@ namespace
 {
     ModelGpuData getModelGpuDataForReplicatorGpuTests()
     {
-        ModelGpuData result;
-        result.setNumThreadsPerBlock(16);
-        result.setNumBlocks(512);
-        result.setMaxClusters(100000);
-        result.setMaxCells(2000000);
-        result.setMaxParticles(2000000);
-        result.setMaxTokens(500000);
-        result.setMaxCellPointers(2000000 * 10);
-        result.setMaxClusterPointers(100000 * 10);
-        result.setMaxParticlePointers(2000000 * 10);
-        result.setMaxTokenPointers(500000 * 10);
-        result.setDynamicMemorySize(200000000);
-        result.setMetadataDynamicMemorySize(100000000);
-        return result;
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 16;
+        cudaConstants.NUM_BLOCKS = 512;
+        cudaConstants.MAX_CLUSTERS = 100000;
+        cudaConstants.MAX_CELLS = 2000000;
+        cudaConstants.MAX_PARTICLES = 2000000;
+        cudaConstants.MAX_TOKENS = 500000;
+        cudaConstants.MAX_CELLPOINTERS = 2000000 * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = 100000 * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = 2000000 * 10;
+        cudaConstants.MAX_TOKENPOINTERS = 500000 * 10;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 200000000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 100000000;
+        return ModelGpuData(cudaConstants);
     }
 }
 
@@ -112,20 +112,20 @@ namespace
 {
     ModelGpuData getModelGpuDataWithManyThreads()
     {
-        ModelGpuData result;
-        result.setNumThreadsPerBlock(256);
-        result.setNumBlocks(128);
-        result.setMaxClusters(100000);
-        result.setMaxCells(500000);
-        result.setMaxParticles(500000);
-        result.setMaxTokens(50000);
-        result.setMaxCellPointers(500000 * 10);
-        result.setMaxClusterPointers(100000 * 10);
-        result.setMaxParticlePointers(500000 * 10);
-        result.setMaxTokenPointers(50000 * 10);
-        result.setDynamicMemorySize(100000000);
-        result.setMetadataDynamicMemorySize(1000);
-        return result;
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 256;
+        cudaConstants.NUM_BLOCKS = 128;
+        cudaConstants.MAX_CLUSTERS = 100000;
+        cudaConstants.MAX_CELLS = 500000;
+        cudaConstants.MAX_PARTICLES = 500000;
+        cudaConstants.MAX_TOKENS = 50000;
+        cudaConstants.MAX_CELLPOINTERS = 500000 * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = 100000 * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = 500000 * 10;
+        cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
+        return ModelGpuData(cudaConstants);
     }
 }
 

@@ -13,14 +13,7 @@ public:
 	virtual ~ComputationSettingsDialog() = default;
 
     IntVector2D getUniverseSize() const;
-    uint getNumBlocks() const;
-    uint getNumThreadsPerBlock() const;
-    uint getMaxClusters() const;
-    uint getMaxCells() const;
-    uint getMaxTokens() const;
-    uint getMaxParticles() const;
-    uint getDynamicMemorySize() const;
-    uint getMetadataDynamicMemorySize() const;
+    CudaConstants getCudaConstants() const;
     bool isExtrapolateContent() const;
 
 private:

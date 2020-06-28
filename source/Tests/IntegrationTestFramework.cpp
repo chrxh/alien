@@ -5,7 +5,6 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SimulationAccess.h"
@@ -19,8 +18,8 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	_basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 	_gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-	_symbols = _basicFacade->buildDefaultSymbolTable();
-	_parameters = _basicFacade->buildDefaultSimulationParameters();
+	_symbols = _basicFacade->getDefaultSymbolTable();
+	_parameters = _basicFacade->getDefaultSimulationParameters();
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()

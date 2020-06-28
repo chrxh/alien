@@ -8,8 +8,10 @@ public:
 	~ModelBasicBuilderFacadeImpl() = default;
 
 	Serializer* buildSerializer() const override;
-	SymbolTable* buildDefaultSymbolTable() const override;
-	SimulationParameters buildDefaultSimulationParameters() const override;
-	DescriptionHelper* buildDescriptionHelper() const override;
+    DescriptionHelper* buildDescriptionHelper() const override;
 	CellComputerCompiler* buildCellComputerCompiler(SymbolTable* symbolTable, SimulationParameters const& parameters) const override;
+
+	SymbolTable* getDefaultSymbolTable() const override;
+	SimulationParameters getDefaultSimulationParameters() const override;
+    ExecutionParameters getDefaultExecutionParameters() const override;
 };

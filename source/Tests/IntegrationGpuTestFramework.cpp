@@ -13,18 +13,21 @@ IntegrationGpuTestFramework::IntegrationGpuTestFramework(
         data = *modelData;
     }
     else {
-        data.setNumThreadsPerBlock(64*2);
-        data.setNumBlocks(64);
-        data.setMaxClusters(100000);
-        data.setMaxCells(500000);
-        data.setMaxParticles(500000);
-        data.setMaxTokens(50000);
-        data.setMaxCellPointers(500000 * 10);
-        data.setMaxClusterPointers(100000 * 10);
-        data.setMaxParticlePointers(500000 * 10);
-        data.setMaxTokenPointers(50000 * 10);
-        data.setDynamicMemorySize(100000000);
-        data.setMetadataDynamicMemorySize(1000);
+
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 64 * 2;
+        cudaConstants.NUM_BLOCKS = 64;
+        cudaConstants.MAX_CLUSTERS = 100000;
+        cudaConstants.MAX_CELLS = 500000;
+        cudaConstants.MAX_PARTICLES = 500000;
+        cudaConstants.MAX_TOKENS = 50000;
+        cudaConstants.MAX_CELLPOINTERS = 500000 * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = 100000 * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = 500000 * 10;
+        cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
+        data = ModelGpuData(cudaConstants);
     }
 
 	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, data, 0);

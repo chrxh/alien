@@ -8,9 +8,13 @@ class ModelGpuBuilderFacadeImpl
 public:
 	virtual ~ModelGpuBuilderFacadeImpl() = default;
 
-	virtual SimulationControllerGpu* buildSimulationController(Config const& config
-		, ModelGpuData const& specificData
-		, uint timestepAtBeginning) const override;
-	virtual SimulationAccessGpu* buildSimulationAccess() const override;
-	virtual SimulationMonitorGpu* buildSimulationMonitor() const override;
+    SimulationControllerGpu* buildSimulationController(
+        Config const& config,
+        ModelGpuData const& specificData,
+        uint timestepAtBeginning) const override;
+    SimulationAccessGpu* buildSimulationAccess() const override;
+	SimulationMonitorGpu* buildSimulationMonitor() const override;
+
+    CudaConstants getDefaultCudaConstants() const override;
+
 };
