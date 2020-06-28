@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Settings.h"
-
 #include <QVector2D>
 #include <cmath>
+
+#include "Definitions.h"
 
 constexpr double degToRad = 3.14159265358979/180.0;
 constexpr double radToDeg = 180.0/3.14159265358979;

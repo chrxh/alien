@@ -53,14 +53,7 @@ SimulationConfig NewSimulationDialog::getConfig() const
 	config->universeSize = ui->computationSettings->getUniverseSize();
 	config->parameters = getSimulationParameters();
 	config->symbolTable = getSymbolTable();
-    config->numBlocks = ui->computationSettings->getNumBlocks();
-    config->numThreadsPerBlock = ui->computationSettings->getNumThreadsPerBlock();
-    config->maxClusters = ui->computationSettings->getMaxClusters();
-    config->maxCells = ui->computationSettings->getMaxCells();
-    config->maxTokens = ui->computationSettings->getMaxTokens();
-    config->maxParticles = ui->computationSettings->getMaxParticles();
-    config->dynamicMemorySize = ui->computationSettings->getDynamicMemorySize();
-    config->metadataDynamicMemorySize = ui->computationSettings->getMetadataDynamicMemorySize();
+    config->cudaConstants = ui->computationSettings->getCudaConstants();
     return config;
 }
 

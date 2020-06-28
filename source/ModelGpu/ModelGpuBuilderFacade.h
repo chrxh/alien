@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ModelBasic/Definitions.h"
+
+#include "CudaConstants.h"
 #include "Definitions.h"
 
 class ModelGpuBuilderFacade
@@ -19,5 +21,6 @@ public:
 	virtual SimulationAccessGpu* buildSimulationAccess() const = 0;
 	virtual SimulationMonitorGpu* buildSimulationMonitor() const = 0;
 
+    virtual CudaConstants getDefaultCudaConstants() const = 0;
 };
 

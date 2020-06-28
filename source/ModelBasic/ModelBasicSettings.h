@@ -2,7 +2,7 @@
 
 #include "Definitions.h"
 
-class MODELBASIC_EXPORT ModelSettings
+class ModelBasicSettings
 {
 public:
     static SymbolTable* getDefaultSymbolTable();

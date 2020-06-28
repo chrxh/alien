@@ -2,7 +2,6 @@
 
 #include "Descriptions.h"
 #include "ChangeDescriptions.h"
-#include "Settings.h"
 
 
 bool TokenDescription::operator==(TokenDescription const& other) const {

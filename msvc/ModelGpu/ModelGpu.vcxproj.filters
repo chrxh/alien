@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\source\ModelGpu\ClusterProcessor.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\ModelGpu\CudaConstants.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\ParticleProcessor.cuh">
       <Filter>Source Files\Impl\Device</Filter>
     </ClInclude>
@@ -203,6 +200,12 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelGpu\PhysicalActionKernels.cuh">
       <Filter>Source Files\Impl\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\CudaConstants.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\ModelGpuSettings.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -283,6 +286,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_CudaController.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelGpu\ModelGpuSettings.cpp">
+      <Filter>Source Files\Impl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

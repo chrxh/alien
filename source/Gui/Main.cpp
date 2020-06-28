@@ -7,7 +7,6 @@
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/SimulationAccess.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/SimulationParameters.h"
 #include "ModelBasic/SymbolTable.h"

@@ -13,14 +13,7 @@ ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& con
 
     auto const configGpu = boost::static_pointer_cast<_SimulationConfigGpu>(config);
     ui.computationSettingsWidget->setUniverseSize(config->universeSize);
-    ui.computationSettingsWidget->setNumBlocks(configGpu->numBlocks);
-    ui.computationSettingsWidget->setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
-    ui.computationSettingsWidget->setMaxClusters(configGpu->maxClusters);
-    ui.computationSettingsWidget->setMaxCells(configGpu->maxCells);
-    ui.computationSettingsWidget->setMaxTokens(configGpu->maxTokens);
-    ui.computationSettingsWidget->setMaxParticles(configGpu->maxParticles);
-    ui.computationSettingsWidget->setDynamicMemorySize(configGpu->dynamicMemorySize);
-    ui.computationSettingsWidget->setMetadataDynamicMemorySize(configGpu->metadataDynamicMemorySize);
+    ui.computationSettingsWidget->setCudaConstants(configGpu->cudaConstants);
     ui.extrapolateContentCheckBox->setChecked(
         GuiSettings::getSettingsValue(Const::ExtrapolateContentKey, Const::ExtrapolateContentDefault));
 
@@ -32,44 +25,9 @@ IntVector2D ComputationSettingsDialog::getUniverseSize() const
 	return ui.computationSettingsWidget->getUniverseSize();
 }
 
-uint ComputationSettingsDialog::getNumBlocks() const
+CudaConstants ComputationSettingsDialog::getCudaConstants() const
 {
-    return ui.computationSettingsWidget->getNumBlocks();
-}
-
-uint ComputationSettingsDialog::getNumThreadsPerBlock() const
-{
-    return ui.computationSettingsWidget->getNumThreadsPerBlock();
-}
-
-uint ComputationSettingsDialog::getMaxClusters() const
-{
-    return ui.computationSettingsWidget->getMaxClusters();
-}
-
-uint ComputationSettingsDialog::getMaxCells() const
-{
-    return ui.computationSettingsWidget->getMaxCells();
-}
-
-uint ComputationSettingsDialog::getMaxTokens() const
-{
-    return ui.computationSettingsWidget->getMaxTokens();
-}
-
-uint ComputationSettingsDialog::getMaxParticles() const
-{
-    return ui.computationSettingsWidget->getMaxParticles();
-}
-
-uint ComputationSettingsDialog::getDynamicMemorySize() const
-{
-    return ui.computationSettingsWidget->getDynamicMemorySize();
-}
-
-uint ComputationSettingsDialog::getMetadataDynamicMemorySize() const
-{
-    return ui.computationSettingsWidget->getMetadataDynamicMemorySize();
+    return ui.computationSettingsWidget->getCudaConstants();
 }
 
 bool ComputationSettingsDialog::isExtrapolateContent() const

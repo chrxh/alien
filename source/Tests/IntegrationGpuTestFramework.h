@@ -4,7 +4,6 @@
 
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/Physics.h"
 #include "ModelBasic/SimulationController.h"
 #include "ModelBasic/DescriptionHelper.h"

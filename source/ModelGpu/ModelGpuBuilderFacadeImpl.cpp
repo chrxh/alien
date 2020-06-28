@@ -7,6 +7,7 @@
 #include "SimulationAccessGpuImpl.h"
 #include "SimulationMonitorGpuImpl.h"
 #include "ModelGpuBuilderFacadeImpl.h"
+#include "ModelGpuSettings.h"
 
 SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(Config const & config, 
 	ModelGpuData const & specificData, uint timestepAtBeginning) const
@@ -30,4 +31,9 @@ SimulationAccessGpu * ModelGpuBuilderFacadeImpl::buildSimulationAccess() const
 SimulationMonitorGpu * ModelGpuBuilderFacadeImpl::buildSimulationMonitor() const
 {
 	return new SimulationMonitorGpuImpl();
+}
+
+CudaConstants ModelGpuBuilderFacadeImpl::getDefaultCudaConstants() const
+{
+    return ModelGpuSettings::getDefaultCudaConstants();
 }
