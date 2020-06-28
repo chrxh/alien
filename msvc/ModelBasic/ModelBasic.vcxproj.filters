@@ -105,9 +105,6 @@
     <ClCompile Include="Release\moc_Serializer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\ModelBasic\Settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tests\moc_SimulationAccess.cpp">
       <Filter>Generated Files\Tests</Filter>
     </ClCompile>
@@ -210,6 +207,9 @@
     <ClCompile Include="..\..\source\ModelBasic\DescriptionFactoryImpl.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\ModelBasic\ModelBasicSettings.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelBasic\ChangeDescriptions.h">
@@ -234,9 +234,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\Physics.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\ModelBasic\Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicBuilderFacadeImpl.h">
@@ -274,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\PhysicalActions.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\ModelBasicSettings.h">
+      <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

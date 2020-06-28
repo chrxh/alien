@@ -4,10 +4,12 @@
 #include <QMessageBox>
 #include <QStyledItemDelegate>
 
+#include "Base/ServiceLocator.h"
+
 #include "ModelBasic/SimulationParameters.h"
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SerializationHelper.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
 
 #include "Settings.h"
 #include "SimulationParametersDialog.h"
@@ -199,7 +201,8 @@ bool SimulationParametersDialog::saveSimulationParameters(string filename)
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-	_simulationParameters = ModelSettings::getDefaultSimulationParameters();
+    auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	_simulationParameters = modelBasicFacade->getDefaultSimulationParameters();
     updateWidgetsFromSimulationParameters();
 }
 

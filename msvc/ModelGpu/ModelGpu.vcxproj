@@ -254,6 +254,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\..\source\ModelGpu\PropulsionFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\ScannerFunction.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\SensorFunction.cuh" />
+    <ClInclude Include="..\..\source\ModelGpu\ModelGpuSettings.h" />
     <ClInclude Include="..\..\source\ModelGpu\SimulationKernels.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Tagger.cuh" />
     <ClInclude Include="..\..\source\ModelGpu\Token.cuh" />
@@ -411,6 +412,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuBuilderFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuData.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp" />
+    <ClCompile Include="..\..\source\ModelGpu\ModelGpuSettings.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\SimulationAccessGpuImpl.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\SimulationContextGpuImpl.cpp" />
     <ClCompile Include="..\..\source\ModelGpu\SimulationControllerGpuImpl.cpp" />

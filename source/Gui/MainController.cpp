@@ -20,7 +20,6 @@
 #include "ModelBasic/DescriptionHelper.h"
 #include "ModelBasic/SimulationMonitor.h"
 #include "ModelBasic/SerializationHelper.h"
-#include "ModelBasic/Settings.h"
 
 #include "ModelGpu/SimulationAccessGpu.h"
 #include "ModelGpu/SimulationControllerGpu.h"
@@ -119,18 +118,13 @@ void MainController::init()
     if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
+        auto const modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+
         auto config = boost::make_shared<_SimulationConfigGpu>();
-        config->numThreadsPerBlock = 32;
-        config->numBlocks = 512;
-        config->maxClusters = 10000;
-        config->maxCells = 1000000;
-        config->maxTokens = 10000;
-        config->maxParticles = 1000000;
-        config->dynamicMemorySize = 100000000;
-        config->metadataDynamicMemorySize = 50000000;
+        config->cudaConstants = modelGpuFacade->getDefaultCudaConstants();
         config->universeSize = IntVector2D({ 2000 , 1000 });
-        config->symbolTable = modelBasicFacade->buildDefaultSymbolTable();
-        config->parameters = modelBasicFacade->buildDefaultSimulationParameters();
+        config->symbolTable = modelBasicFacade->getDefaultSymbolTable();
+        config->parameters = modelBasicFacade->getDefaultSimulationParameters();
         onNewSimulation(config, 0);
     }
 
@@ -228,8 +222,10 @@ void MainController::onToggleDisplayLink(bool toggled)
 
 void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
 {
+    auto const modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+
 	_model->setSimulationParameters(parameters);
-    _model->setExecutionParameters(ModelSettings::getDefaultExecutionParameters());
+    _model->setExecutionParameters(modelBasicFacade->getDefaultExecutionParameters());
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
@@ -269,21 +265,9 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 	delete _simController;
 	if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
 		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-		ModelGpuBuilderFacade::Config simulationControllerConfig{ configGpu->universeSize, configGpu->symbolTable, configGpu->parameters };
-        ModelGpuData data;
-        data.setNumBlocks(configGpu->numBlocks);
-        data.setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
-        data.setMaxClusters(configGpu->maxClusters);
-        data.setMaxCells(configGpu->maxCells);
-        data.setMaxParticles(configGpu->maxParticles);
-        data.setMaxTokens(configGpu->maxTokens);
-        data.setMaxCellPointers(configGpu->maxCells * 10);
-        data.setMaxClusterPointers(configGpu->maxClusters * 10);
-        data.setMaxParticlePointers(configGpu->maxParticles * 10);
-        data.setMaxTokenPointers(configGpu->maxTokens * 10);
-        data.setDynamicMemorySize(configGpu->dynamicMemorySize);
-        data.setMetadataDynamicMemorySize(configGpu->metadataDynamicMemorySize);
-
+        auto simulationControllerConfig =
+            ModelGpuBuilderFacade::Config{configGpu->universeSize, configGpu->symbolTable, configGpu->parameters};
+        auto data = ModelGpuData(configGpu->cudaConstants);
 		_simController = facade->buildSimulationController(simulationControllerConfig, data);
 	}
 	else {
@@ -345,19 +329,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
     _worker->addJob(boost::make_shared<_Job>(recreateFunction));
 
     if (auto const configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-        ModelGpuData data;
-        data.setNumBlocks(configGpu->numBlocks);
-        data.setNumThreadsPerBlock(configGpu->numThreadsPerBlock);
-        data.setMaxClusters(configGpu->maxClusters);
-        data.setMaxCells(configGpu->maxCells);
-        data.setMaxParticles(configGpu->maxParticles);
-        data.setMaxTokens(configGpu->maxTokens);
-        data.setMaxClusterPointers(configGpu->maxClusters * 10);
-        data.setMaxCellPointers(configGpu->maxCells * 10);
-        data.setMaxParticlePointers(configGpu->maxParticles * 10);
-        data.setMaxTokenPointers(configGpu->maxTokens*10);
-        data.setDynamicMemorySize(configGpu->dynamicMemorySize);
-        data.setMetadataDynamicMemorySize(configGpu->metadataDynamicMemorySize);
+        auto data = ModelGpuData(configGpu->cudaConstants);
 
         Serializer::Settings settings{ configGpu->universeSize, data.getData(), extrapolateContent };
         _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
@@ -410,17 +382,9 @@ SimulationConfig MainController::getSimulationConfig() const
 	auto context = _simController->getContext();
 
 	if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
-        ModelGpuData data(context->getSpecificData());
+        auto data = ModelGpuData(context->getSpecificData());
         auto result = boost::make_shared<_SimulationConfigGpu>();
-        result->numBlocks = data.getNumBlocks();
-        result->numThreadsPerBlock = data.getNumThreadsPerBlock();
-        result->maxClusters = data.getMaxClusters();
-        result->maxCells = data.getMaxCells();
-        result->maxTokens = data.getMaxTokens();
-        result->maxParticles = data.getMaxParticles();
-        result->dynamicMemorySize = data.getDynamicMemorySize();
-        result->metadataDynamicMemorySize = data.getMetadataDynamicMemorySize();
-
+        result->cudaConstants = data.getCudaConstants();
         result->universeSize = context->getSpaceProperties()->getSize();
 		result->symbolTable = context->getSymbolTable();
 		result->parameters = context->getSimulationParameters();

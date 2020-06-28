@@ -2,9 +2,9 @@
 
 #include "SymbolTable.h"
 #include "SimulationParameters.h"
-#include "Settings.h"
+#include "ModelBasicSettings.h"
 
-SymbolTable* ModelSettings::getDefaultSymbolTable()
+SymbolTable* ModelBasicSettings::getDefaultSymbolTable()
 {
 	SymbolTable* symbolTable = new SymbolTable();
     symbolTable->clear();
@@ -146,7 +146,7 @@ SymbolTable* ModelSettings::getDefaultSymbolTable()
 	return symbolTable;
 }
 
-SimulationParameters ModelSettings::getDefaultSimulationParameters()
+SimulationParameters ModelBasicSettings::getDefaultSimulationParameters()
 {
 	SimulationParameters parameters;
 	parameters.clusterMaxRadius = 40.0f;
@@ -193,7 +193,7 @@ SimulationParameters ModelSettings::getDefaultSimulationParameters()
 	return parameters;
 }
 
-ExecutionParameters ModelSettings::getDefaultExecutionParameters()
+ExecutionParameters ModelBasicSettings::getDefaultExecutionParameters()
 {
     ExecutionParameters result;
     result.activateFreezing = false;

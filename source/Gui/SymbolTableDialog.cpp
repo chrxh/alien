@@ -4,7 +4,6 @@
 #include <QMessageBox>
 
 #include "Base/ServiceLocator.h"
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/ModelBasicBuilderFacade.h"
 #include "ModelBasic/Serializer.h"
@@ -127,7 +126,7 @@ void SymbolTableDialog::defaultButtonClicked ()
 {
 	ModelBasicBuilderFacade* facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
 
-	_symbolTable = facade->buildDefaultSymbolTable();
+	_symbolTable = facade->getDefaultSymbolTable();
     updateWidgetsFromSymbolTable();
 }
 

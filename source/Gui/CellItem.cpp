@@ -2,7 +2,6 @@
 #include <QGraphicsBlurEffect>
 
 #include "ModelBasic/ChangeDescriptions.h"
-#include "ModelBasic/Settings.h"
 #include "ModelBasic/Colors.h"
 
 #include "Gui/Settings.h"

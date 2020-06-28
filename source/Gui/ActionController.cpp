@@ -307,14 +307,7 @@ void ActionController::onConfigureGrid()
         if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(_mainController->getSimulationConfig())) {
 
             configGpu->universeSize = dialog.getUniverseSize();
-            configGpu->numBlocks = dialog.getNumBlocks();
-            configGpu->numThreadsPerBlock = dialog.getNumThreadsPerBlock();
-            configGpu->maxClusters = dialog.getMaxClusters();
-            configGpu->maxCells = dialog.getMaxCells();
-            configGpu->maxTokens = dialog.getMaxTokens();
-            configGpu->maxParticles = dialog.getMaxParticles();
-            configGpu->dynamicMemorySize = dialog.getDynamicMemorySize();
-            configGpu->metadataDynamicMemorySize = dialog.getMetadataDynamicMemorySize();
+            configGpu->cudaConstants = dialog.getCudaConstants();
 
             auto const extrapolateContent = dialog.isExtrapolateContent();
             _mainController->onRecreateUniverse(configGpu, extrapolateContent);
