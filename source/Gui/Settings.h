@@ -4,6 +4,8 @@
 #include <QFont>
 #include <QPalette>
 
+#include "Definitions.h"
+
 namespace Const
 {
 	//visual editor
@@ -45,18 +47,43 @@ namespace Const
 	const std::string MainViewFullScreenKey = "mainView/fullScreen";
 	const bool MainViewFullScreenDefault = true;
 
-	const std::string GridSizeXKey = "newSim/gridSize/x";
-	const int GridSizeXDefault = 12;
-	const std::string GridSizeYKey = "newSim/gridSize/y";
-	const int GridSizeYDefault = 6;
-	const std::string UnitSizeXKey = "newSim/unitSize/x";
-	const int UnitSizeXDefault = 100;
-	const std::string UnitSizeYKey = "newSim/unitSize/y";
-	const int UnitSizeYDefault = 100;
-	const std::string MaxThreadsKey = "newSim/maxThreads";
-	const int MaxThreadsDefault = 8;
-	const std::string InitialEnergyKey = "newSim/initialEnergy";
-	const double InitialEnergyDefault = 0.0;
+    const std::string ModelComputationTypeKey = "newSim/modelComputationType";
+    const ModelComputationType ModelComputationTypeDefault = ModelComputationType::Gpu;
+
+	const std::string CpuGridSizeXKey = "newSim/cpu/gridSize/x";
+	const int CpuGridSizeXDefault = 12;
+	const std::string CpuGridSizeYKey = "newSim/cpu/gridSize/y";
+	const int CpuGridSizeYDefault = 6;
+	const std::string CpuUnitSizeXKey = "newSim/cpu/unitSize/x";
+	const int CpuUnitSizeXDefault = 100;
+	const std::string CpuUnitSizeYKey = "newSim/cpu/unitSize/y";
+	const int CpuUnitSizeYDefault = 100;
+	const std::string CpuMaxThreadsKey = "newSim/cpu/maxThreads";
+	const int CpuMaxThreadsDefault = 8;
+    
+    const std::string GpuUniverseSizeXKey = "newSim/gpu/universeSize/x";
+    const int GpuUniverseSizeXDefault = 4000;
+    const std::string GpuUniverseSizeYKey = "newSim/gpu/universeSize/y";
+    const int GpuUniverseSizeYDefault = 2000;
+    const std::string GpuNumBlocksKey = "newSim/gpu/numBlocks";
+    const int GpuNumBlocksDefault = 64*8;
+    const std::string GpuNumThreadsPerBlockKey = "newSim/gpu/numThreadsPerBlock";
+    const int GpuNumThreadsPerBlockDefault = 16;
+    const std::string GpuMaxClustersKey = "newSim/gpu/maxClusters";
+    const int GpuMaxClustersDefault = 500000;
+    const std::string GpuMaxCellsKey = "newSim/gpu/maxCells";
+    const int GpuMaxCellsDefault = 2000000;
+    const std::string GpuMaxTokensKey = "newSim/gpu/maxTokens";
+    const int GpuMaxTokensDefault = 500000;
+    const std::string GpuMaxParticlesKey = "newSim/gpu/maxParticles";
+    const int GpuMaxParticlesDefault = 2000000;
+    const std::string GpuDynamicMemorySizeKey = "newSim/gpu/dynamicMemorySize";
+    const int GpuDynamicMemorySizeDefault = 100000000;
+    const std::string GpuMetadataDynamicMemorySizeKey = "newSim/gpu/metadataDynamicMemorySize";
+    const int GpuMetadataDynamicMemoryDefault = 50000000;
+
+    const std::string InitialEnergyKey = "newSim/initialEnergy";
+        const double InitialEnergyDefault = 0.0;
 
 	const std::string GridMulChangeVelXKey = "gridMul/changeVel/x";
 	const bool GridMulChangeVelXDefault = false;
@@ -136,6 +163,8 @@ namespace Const
 	const double NewHexagonDistanceDefault = 1.0;
 	const std::string NewHexagonCellEnergyKey = "newHaxagon/cellEnergy";
 	const double NewHexagonCellEnergyDefault = 100.0;
+    const std::string NewHexagonColorCodeKey = "newHaxagon/colorCode";
+    const int NewHexagonColorCodeDefault = 0;
 
 	const std::string NewParticlesTotalEnergyKey = "newParticles/totalEnergy";
 	const double NewParticlesTotalEnergyDefault = 1000000.0;
@@ -150,6 +179,12 @@ namespace Const
 	const double NewRectangleDistDefault = 1.0;
 	const std::string NewRectangleCellEnergyKey = "newRectangle/cellEnergy";
 	const double NewRectangleCellEnergyDefault = 100.0;
+    const std::string NewRectangleColorCodeKey = "newRectangle/colorCode";
+    const int NewRectangleColorCodeDefault = 0;
+
+    const std::string ExtrapolateContentKey = "computation/extrapolateContent";
+    const bool ExtrapolateContentDefault = false;
+
 }
 
 class GuiSettings
@@ -161,10 +196,12 @@ public:
 	static QPalette getPaletteForTab();
 
 	static int getSettingsValue(std::string const& key, int defaultValue);
-	static double getSettingsValue(std::string const& key, double defaultValue);
+    static uint getSettingsValue(std::string const& key, uint defaultValue);
+    static double getSettingsValue(std::string const& key, double defaultValue);
 	static bool getSettingsValue(std::string const& key, bool defaultValue);
 
 	static void setSettingsValue(std::string const& key, int value);
-	static void setSettingsValue(std::string const& key, double value);
+    static void setSettingsValue(std::string const& key, uint value);
+    static void setSettingsValue(std::string const& key, double value);
 	static void setSettingsValue(std::string const& key, bool value);
 };

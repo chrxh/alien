@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QMainWindow>
 
-#include "Model/Api/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
 #include "Definitions.h"
 
@@ -18,13 +18,17 @@ public:
 	MainView(QWidget * parent = nullptr);
 	virtual ~MainView();
 
-	virtual void init(MainModel* model, MainController* controller, Serializer* serializer, DataRepository* repository
-		, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator);
+    virtual void init(
+        MainModel* model,
+        MainController* controller,
+        Serializer* serializer,
+        DataRepository* repository,
+        SimulationMonitor* simMonitor,
+        Notifier* notifier);
 
+    virtual void refresh();
 
-	virtual void refresh();
-
-	virtual void setupEditors(SimulationController* controller);
+	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
 	virtual InfoController* getInfoController() const;
 
 	virtual void showDocumentation(bool show);
@@ -40,13 +44,11 @@ private:
 	void setupFullScreen();
 
 private:
-	Q_SLOT void documentationWindowClosed();
 	Q_SLOT void monitorClosed();
 
 private:
 	Ui::MainView* ui = nullptr;
 	VisualEditController* _visualEditor = nullptr;
-	DocumentationWindow* _documentationWindow = nullptr;
 
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
@@ -59,6 +61,5 @@ private:
 	InfoController* _infoController = nullptr;
 	MonitorController* _monitor = nullptr;
 
-	StartScreenController* _startScreen = nullptr;
 	bool _initialied = false;
 };

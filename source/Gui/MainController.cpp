@@ -2,30 +2,49 @@
 #include <fstream>
 
 #include <QTime>
+#include <QTimer>
+#include <QProgressDialog>
 #include <QCoreApplication>
+#include <QMessageBox>
 
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
-#include "Base/NumberGenerator.h"
 
-#include "Model/Api/ModelBuilderFacade.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceProperties.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SimulationParameters.h"
-#include "Model/Api/Serializer.h"
-#include "Model/Api/DescriptionHelper.h"
-#include "Model/Api/SimulationMonitor.h"
+#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/SimulationParameters.h"
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/DescriptionHelper.h"
+#include "ModelBasic/SimulationMonitor.h"
+#include "ModelBasic/SerializationHelper.h"
 
+#include "ModelGpu/SimulationAccessGpu.h"
+#include "ModelGpu/SimulationControllerGpu.h"
+#include "ModelGpu/ModelGpuBuilderFacade.h"
+#include "ModelGpu/ModelGpuData.h"
+#include "ModelGpu/SimulationMonitorGpu.h"
+
+#include "MessageHelper.h"
 #include "VersionController.h"
-#include "SerializationHelper.h"
 #include "InfoController.h"
 #include "MainController.h"
 #include "MainView.h"
 #include "MainModel.h"
 #include "DataRepository.h"
 #include "Notifier.h"
+#include "SimulationConfig.h"
+#include "DataAnalyzer.h"
+#include "QApplicationHelper.h"
+#include "Worker.h"
+
+namespace Const
+{
+    std::string const AutoSaveFilename = "autosave.sim";
+    std::string const AutoSaveForLoadingFilename = "autosave_load.sim";
+}
 
 MainController::MainController(QObject * parent)
 	: QObject(parent)
@@ -34,68 +53,132 @@ MainController::MainController(QObject * parent)
 
 MainController::~MainController()
 {
-	delete _view;
+    delete _view;
 }
 
 void MainController::init()
 {
-	_model = new MainModel(this);
-	_view = new MainView();
+    _model = new MainModel(this);
+    _view = new MainView();
 
-	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	auto numberGenerator = factory->buildRandomNumberGenerator();
+    _controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
+        SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
+    {
+        if (ModelComputationType(typeId) == ModelComputationType::Gpu) {
+            auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            ModelGpuData data(typeSpecificData);
+            return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
+        }
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
+    _accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
+    {
+        if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
+            auto modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            SimulationAccessGpu* access = modelGpuFacade->buildSimulationAccess();
+            access->init(controllerGpu);
+            return access;
+        }
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
+    _monitorBuildFunc = [](SimulationController* controller) -> SimulationMonitor*
+    {
+        if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
+            auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            SimulationMonitorGpu* moni = facade->buildSimulationMonitor();
+            moni->init(controllerGpu);
+            return moni;
+        }
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
 
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto serializer = facade->buildSerializer();
-	auto simAccessForDataController = facade->buildSimulationAccess();
-	auto descHelper = facade->buildDescriptionHelper();
-	auto versionController = new VersionController();
-	auto simMonitor = facade->buildSimulationMonitor();
-	SET_CHILD(_serializer, serializer);
-	SET_CHILD(_simAccess, simAccessForDataController);
-	SET_CHILD(_descHelper, descHelper);
-	SET_CHILD(_versionController, versionController);
-	SET_CHILD(_numberGenerator, numberGenerator);
-	SET_CHILD(_simMonitor, simMonitor);
-	_repository = new DataRepository(this);
-	_notifier = new Notifier(this);
+    auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto serializer = modelBasicFacade->buildSerializer();
+    auto descHelper = modelBasicFacade->buildDescriptionHelper();
+    auto versionController = new VersionController();
+    SET_CHILD(_serializer, serializer);
+    SET_CHILD(_descHelper, descHelper);
+    SET_CHILD(_versionController, versionController);
+    _repository = new DataRepository(this);
+    _notifier = new Notifier(this);
+    _dataAnalyzer = new DataAnalyzer(this);
+    auto worker = new Worker(this);
+    SET_CHILD(_worker, worker);
 
-	connect(_serializer, &Serializer::serializationFinished, this, &MainController::serializationFinished);
+    _serializer->init(_controllerBuildFunc, _accessBuildFunc);
+    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
+    _worker->init(_serializer);
 
-	_serializer->init();
-	_numberGenerator->init(12315312, 0);
-	_view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _numberGenerator);
+    if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
 
-	
-	if (!onLoadSimulation("autosave.sim")) {
+        //default simulation
+        auto const modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 
-		//default simulation
-		NewSimulationConfig config{
-			8, { 12, 6 },{ 12 * 33 * 2 , 12 * 17 * 2 },
-			facade->buildDefaultSymbolTable(),
-			facade->buildDefaultSimulationParameters(),
-			0/*20000 * 9 * 20*/
-		};
-		onNewSimulation(config);
-	}
-}
+        auto config = boost::make_shared<_SimulationConfigGpu>();
+        config->cudaConstants = modelGpuFacade->getDefaultCudaConstants();
+        config->universeSize = IntVector2D({ 2000 , 1000 });
+        config->symbolTable = modelBasicFacade->getDefaultSymbolTable();
+        config->parameters = modelBasicFacade->getDefaultSimulationParameters();
+        onNewSimulation(config, 0);
+    }
 
-namespace
-{
-	void processEventsForMilliSec(int millisec)
-	{
-		QTime dieTime = QTime::currentTime().addMSecs(millisec);
-		while (QTime::currentTime() < dieTime)
-		{
-			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-		}
-	}
+    auto config = getSimulationConfig();
+    if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+        _view->getInfoController()->setDevice(InfoController::Device::Gpu);
+    }
+    else {
+        THROW_NOT_IMPLEMENTED();
+    }
+
+    //auto save every 20 min
+    _autosaveTimer = new QTimer(this);
+    connect(_autosaveTimer, &QTimer::timeout, this, (void(MainController::*)())(&MainController::autoSave));
+    _autosaveTimer->start(1000 * 60 * 20);
 }
 
 void MainController::autoSave()
 {
-	onSaveSimulation("autosave.sim");
-	processEventsForMilliSec(200);
+    auto progress = MessageHelper::createProgressDialog("Autosaving...", _view);
+    autoSaveIntern(Const::AutoSaveFilename);
+    delete progress;
+}
+
+void MainController::serializeSimulationAndWaitUntilFinished()
+{
+    QEventLoop pause;
+    bool finished = false;
+    auto connection = _serializer->connect(_serializer, &Serializer::serializationFinished, [&]() {
+        finished = true;
+        pause.quit();
+    });
+    if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
+        _serializer->serialize(_simController, int(ModelComputationType::Gpu));
+    }
+    else {
+        THROW_NOT_IMPLEMENTED();
+    }
+    while (!finished) {
+        pause.exec();
+    }
+    QObject::disconnect(connection);
+}
+
+void MainController::autoSaveIntern(std::string const& filename)
+{
+    saveSimulationIntern(filename);
+	QApplicationHelper::processEventsForMilliSec(1000);
+}
+
+void MainController::saveSimulationIntern(string const & filename)
+{
+    serializeSimulationAndWaitUntilFinished();
+    SerializationHelper::saveToFile(filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
 }
 
 void MainController::onRunSimulation(bool run)
@@ -114,6 +197,9 @@ void MainController::onStepBackward(bool& emptyStack)
 {
 	_versionController->loadSimulationContentFromStack();
 	emptyStack = _versionController->isStackEmpty();
+    Q_EMIT _notifier->notifyDataRepositoryChanged({
+        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
+    }, UpdateDescription::All);
 }
 
 void MainController::onMakeSnapshot()
@@ -124,20 +210,41 @@ void MainController::onMakeSnapshot()
 void MainController::onRestoreSnapshot()
 {
 	_versionController->restoreSnapshot();
+    Q_EMIT _notifier->notifyDataRepositoryChanged({
+        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
+    }, UpdateDescription::All);
 }
 
-void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters* parameters)
+void MainController::onToggleDisplayLink(bool toggled)
 {
+    _simController->setEnableCalculateFrames(toggled);
+}
+
+void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
+{
+    auto const modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+
 	_model->setSimulationParameters(parameters);
+    _model->setExecutionParameters(modelBasicFacade->getDefaultExecutionParameters());
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
-	_simAccess->init(_simController->getContext());
-	_descHelper->init(_simController->getContext());
-	_versionController->init(_simController->getContext());
-	_repository->init(_notifier, _simAccess, _descHelper, _simController->getContext(), _numberGenerator);
-	_simMonitor->init(_simController->getContext());
-	_view->setupEditors(_simController);
+
+    delete _simAccess;  //for minimal memory usage deleting old object first
+    _simAccess = nullptr;
+	auto simAccess = _accessBuildFunc(_simController);
+    SET_CHILD(_simAccess, simAccess);
+	auto context = _simController->getContext();
+	_descHelper->init(context);
+	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
+	_repository->init(_notifier, _simAccess, _descHelper, context);
+    _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier);
+
+	auto simMonitor = _monitorBuildFunc(_simController);
+	SET_CHILD(_simMonitor, simMonitor);
+
+	SimulationAccess* accessForWidgets;
+	_view->setupEditors(_simController, _accessBuildFunc(_simController));
 }
 
 void MainController::recreateSimulation(string const & serializedSimulation)
@@ -153,64 +260,144 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 	_view->refresh();
 }
 
-void MainController::onNewSimulation(NewSimulationConfig config)
+void MainController::onNewSimulation(SimulationConfig const& config, double energyAtBeginning)
 {
 	delete _simController;
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	_simController = facade->buildSimulationController(config.maxThreads, config.gridSize, config.universeSize, config.symbolTable, config.parameters);
+	if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+        auto simulationControllerConfig =
+            ModelGpuBuilderFacade::Config{configGpu->universeSize, configGpu->symbolTable, configGpu->parameters};
+        auto data = ModelGpuData(configGpu->cudaConstants);
+		_simController = facade->buildSimulationController(simulationControllerConfig, data);
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
+	}
 
-	initSimulation(config.symbolTable, config.parameters);
+	initSimulation(config->symbolTable, config->parameters);
 
-	addRandomEnergy(config.energy);
+	addRandomEnergy(energyAtBeginning);
 
 	_view->refresh();
 }
 
 void MainController::onSaveSimulation(string const& filename)
 {
-	_jobsAfterSerialization.push_back(boost::make_shared<_SaveToFileJob>(filename));
-	_serializer->serialize(_simController);
+    auto progress = MessageHelper::createProgressDialog("Saving...", _view);
+
+    saveSimulationIntern(filename);
+
+    QApplicationHelper::processEventsForMilliSec(1000);
+    delete progress;
 }
 
-bool MainController::onLoadSimulation(string const & filename)
+bool MainController::onLoadSimulation(string const & filename, LoadOption option)
 {
-	auto origSimController = _simController;	//delete later if loading failed
-	if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
-		return false;
+    auto progress = MessageHelper::createProgressDialog("Loading...", _view);
+
+    if (LoadOption::SaveOldSim == option) {
+        autoSaveIntern(Const::AutoSaveForLoadingFilename);
+    }
+	delete _simController;
+    _simController = nullptr;
+
+    if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
+
+        //load old simulation
+        if (LoadOption::SaveOldSim == option) {
+            CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+                Const::AutoSaveForLoadingFilename,
+                [&](string const& data) { return _serializer->deserializeSimulation(data); },
+                _simController));
+        }
+        delete progress;
+        return false;
 	}
-	delete origSimController;
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
-
 	_view->refresh();
-	return true;
+
+    delete progress;
+    return true;
 }
 
-void MainController::onRecreateSimulation(SimulationConfig const& simConfig)
+void MainController::onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent)
 {
-	_jobsAfterSerialization.push_back(boost::make_shared<_RecreateJob>());
-	_serializer->serialize(_simController, { simConfig.universeSize, simConfig.gridSize, simConfig.maxThreads });
+    auto const recreateFunction = [&](Serializer* serializer) {
+        recreateSimulation(serializer->retrieveSerializedSimulation());
+    };
+    _worker->addJob(boost::make_shared<_Job>(recreateFunction));
+
+    if (auto const configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
+        auto data = ModelGpuData(configGpu->cudaConstants);
+
+        Serializer::Settings settings{ configGpu->universeSize, data.getData(), extrapolateContent };
+        _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
+    }
+    else {
+        THROW_NOT_IMPLEMENTED();
+    }
 }
 
-void MainController::onUpdateSimulationParametersForRunningSimulation()
+void MainController::onUpdateSimulationParameters(SimulationParameters const& parameters)
 {
-	_simController->getContext()->setSimulationParameters(_model->getSimulationParameters());
+    auto progress = MessageHelper::createProgressDialog("Updating simulation parameters...", _view);
+
+	_simController->getContext()->setSimulationParameters(parameters);
+
+    QApplicationHelper::processEventsForMilliSec(500);
+    delete progress;
+}
+
+void MainController::onUpdateExecutionParameters(ExecutionParameters const & parameters)
+{
+    auto progress = MessageHelper::createProgressDialog("Updating execution parameters...", _view);
+
+    _simController->getContext()->setExecutionParameters(parameters);
+
+    QApplicationHelper::processEventsForMilliSec(500);
+    delete progress;
 }
 
 void MainController::onRestrictTPS(optional<int> const& tps)
 {
-	_simController->setRestrictTimestepsPreSecond(tps);
+	_simController->setRestrictTimestepsPerSecond(tps);
+}
+
+void MainController::onAddMostFrequentClusterToSimulation()
+{
+    _dataAnalyzer->addMostFrequenceClusterRepresentantToSimulation();
 }
 
 int MainController::getTimestep() const
 {
-	return _simController->getTimestep();
+    if (_simController) {
+        return _simController->getContext()->getTimestep();
+    }
+    return 0;
 }
 
 SimulationConfig MainController::getSimulationConfig() const
 {
 	auto context = _simController->getContext();
-	return{ context->getMaxThreads(), context->getGridSize(), context->getSpaceProperties()->getSize() };
+
+	if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
+        auto data = ModelGpuData(context->getSpecificData());
+        auto result = boost::make_shared<_SimulationConfigGpu>();
+        result->cudaConstants = data.getCudaConstants();
+        result->universeSize = context->getSpaceProperties()->getSize();
+		result->symbolTable = context->getSymbolTable();
+		result->parameters = context->getSimulationParameters();
+		return result;
+	}
+	else {
+		THROW_NOT_IMPLEMENTED();
+	}
+}
+
+SimulationMonitor * MainController::getSimulationMonitor() const
+{
+	return _simMonitor;
 }
 
 void MainController::connectSimController() const
@@ -222,7 +409,7 @@ void MainController::connectSimController() const
 
 void MainController::addRandomEnergy(double amount)
 {
-	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters()->cellMinEnergy;
+	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters().cellMinEnergy;
 	_repository->addRandomParticles(amount, maxEnergyPerCell);
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,
@@ -233,17 +420,3 @@ void MainController::addRandomEnergy(double amount)
 
 }
 
-void MainController::serializationFinished()
-{
-	for (auto job : _jobsAfterSerialization) {
-		if (job->type == _AsyncJob::Type::SaveToFile) {
-			auto saveToFileJob = boost::static_pointer_cast<_SaveToFileJob>(job);
-			SerializationHelper::saveToFile(saveToFileJob->filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
-		}
-		if (job->type == _AsyncJob::Type::Recreate) {
-			auto recreateJob = boost::static_pointer_cast<_RecreateJob>(job);
-			recreateSimulation(_serializer->retrieveSerializedSimulation());
-		}
-	}
-	_jobsAfterSerialization.clear();
-}

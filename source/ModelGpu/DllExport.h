@@ -1,5 +1,4 @@
-#ifndef MODELGPU_DLLEXPORT_H
-#define MODELGPU_DLLEXPORT_H
+#pragma once
 
 #include <QtCore/qglobal.h>
 
@@ -12,5 +11,3 @@
 #else
 # define MODELGPU_EXPORT
 #endif
-
-#endif // MODELGPU_DLLEXPORT_H
