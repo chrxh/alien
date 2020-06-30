@@ -1,5 +1,4 @@
-#ifndef NUMBERGENERATORIMPL_H
-#define NUMBERGENERATORIMPL_H
+#pragma once
 
 #include "Base/NumberGenerator.h"
 
@@ -14,15 +13,15 @@ public:
 
 	virtual uint32_t getRandomInt() override;
 	virtual uint32_t getRandomInt(uint32_t range) override;
-	virtual uint32_t getLargeRandomInt(uint32_t range) override;
 	virtual double getRandomReal(double min, double max) override;
 	virtual double getRandomReal() override;
 	virtual QByteArray getRandomArray(int length) override;
 
-	virtual uint64_t getTag() override;
+	virtual uint64_t getId() override;
 
 private:
-	quint32 getNumberFromArray();
+    uint32_t getLargeRandomInt(uint32_t range);
+    quint32 getNumberFromArray();
 
 	int _index = 0;
 	vector<uint32_t> _arrayOfRandomNumbers;
@@ -30,4 +29,3 @@ private:
 	uint64_t _threadId = 0;
 };
 
-#endif // NUMBERGENERATORIMPL_H

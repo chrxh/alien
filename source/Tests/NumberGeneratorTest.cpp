@@ -29,21 +29,21 @@ NumberGeneratorTest::~NumberGeneratorTest()
 TEST_F(NumberGeneratorTest, testTags)
 {
 	_numberGen->init(123, 1);
-	quint64 tag = _numberGen->getTag();
+	quint64 tag = _numberGen->getId();
 	EXPECT_EQ(1, tag >> 48);
 	EXPECT_EQ(1, tag & 0xffffffffffff);
-	tag = _numberGen->getTag();
+	tag = _numberGen->getId();
 	EXPECT_EQ(1, tag >> 48);
 	EXPECT_EQ(2, tag & 0xffffffffffff);
-	tag = _numberGen->getTag();
+	tag = _numberGen->getId();
 	EXPECT_EQ(1, tag >> 48);
 	EXPECT_EQ(3, tag & 0xffffffffffff);
 
 	_numberGen->init(123, 23);
-	tag = _numberGen->getTag();
+	tag = _numberGen->getId();
 	EXPECT_EQ(23, tag >> 48);
 	EXPECT_EQ(1, tag & 0xffffffffffff);
-	tag = _numberGen->getTag();
+	tag = _numberGen->getId();
 	EXPECT_EQ(23, tag >> 48);
 	EXPECT_EQ(2, tag & 0xffffffffffff);
 }

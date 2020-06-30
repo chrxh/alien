@@ -1,16 +1,17 @@
-﻿#include "Model/Api/SimulationController.h"
-#include "Model/Api/Serializer.h"
-#include "Model/Api/SymbolTable.h"
+﻿#include <QDesktopServices>
+#include <QUrl>
 
-#include "Gui/Toolbar/ToolbarController.h"
-#include "Gui/Toolbar/ToolbarContext.h"
-#include "Gui/Actions/ActionController.h"
-#include "Gui/Actions/ActionHolder.h"
-#include "Gui/Assistance/DocumentationWindow.h"
-#include "Gui/Misc/StartScreenController.h"
-#include "Gui/Monitoring/MonitorController.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/Serializer.h"
+#include "ModelBasic/SymbolTable.h"
+#include "ModelBasic/SerializationHelper.h"
 
-#include "SerializationHelper.h"
+#include "Gui/ToolbarController.h"
+#include "Gui/ToolbarContext.h"
+#include "Gui/ActionController.h"
+#include "Gui/ActionHolder.h"
+#include "Gui/MonitorController.h"
+
 #include "InfoController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
@@ -34,12 +35,8 @@ MainView::MainView(QWidget * parent)
 	_dataEditor = new DataEditController(_visualEditor);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
-	_startScreen = new StartScreenController(this);
-	_documentationWindow = new DocumentationWindow(this);
 	_monitor = new MonitorController(this);
-	connect(_documentationWindow, &DocumentationWindow::closed, this, &MainView::documentationWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
-
 }
 
 MainView::~MainView()
@@ -48,7 +45,7 @@ MainView::~MainView()
 }
 
 void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository
-	, SimulationMonitor* simMonitor, Notifier* notifier, NumberGenerator* numberGenerator)
+	, SimulationMonitor* simMonitor, Notifier* notifier)
 {
 	_model = model;
 	_controller = mainController;
@@ -56,9 +53,9 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_notifier = notifier;
 
 	_infoController->init(ui->infoLabel, mainController);
-	_monitor->init(simMonitor);
+	_monitor->init(mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
-		, _monitor, repository, notifier, numberGenerator);
+		, _monitor, repository, notifier);
 
 	setupMenu();
 	setupFontsAndColors();
@@ -66,7 +63,6 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	setupFullScreen();
 	show();
 
-	_startScreen->start();
 	_initialied = true;
 }
 
@@ -75,11 +71,11 @@ void MainView::refresh()
 	_visualEditor->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller)
+void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)
 {
 	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
-	_visualEditor->init(_notifier, controller, _repository);
+	_visualEditor->init(_notifier, controller, access, _repository);
 
 	_visualEditor->setActiveScene(ActiveScene::PixelScene);
 	_actions->getActionHolder()->actionEditor->setChecked(false);
@@ -92,7 +88,7 @@ InfoController * MainView::getInfoController() const
 
 void MainView::showDocumentation(bool show)
 {
-	_documentationWindow->setVisible(show);
+    QDesktopServices::openUrl(QUrl("https://alien-project.org/documentation.html"));
 }
 
 void MainView::resizeEvent(QResizeEvent *event)
@@ -121,11 +117,14 @@ void MainView::setupMenu()
 	ui->toolBar->addSeparator();
 	ui->toolBar->addAction(actions->actionSnapshot);
 	ui->toolBar->addAction(actions->actionRestore);
-	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(actions->actionRunSimulation);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(actions->actionRunSimulation);
 	ui->toolBar->addAction(actions->actionRunStepBackward);
 	ui->toolBar->addAction(actions->actionRunStepForward);
-	ui->toolBar->addSeparator();
+    ui->toolBar->addAction(actions->actionAcceleration);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(actions->actionDisplayLink);
+    ui->toolBar->addSeparator();
 
 	ui->menuSimulation->addAction(actions->actionNewSimulation);
 	ui->menuSimulation->addAction(actions->actionLoadSimulation);
@@ -134,27 +133,26 @@ void MainView::setupMenu()
 	ui->menuSimulation->addAction(actions->actionRunSimulation);
 	ui->menuSimulation->addAction(actions->actionRunStepForward);
 	ui->menuSimulation->addAction(actions->actionRunStepBackward);
-	ui->menuSimulation->addAction(actions->actionSnapshot);
+    ui->menuSimulation->addAction(actions->actionAcceleration);
+    ui->menuSimulation->addAction(actions->actionSnapshot);
 	ui->menuSimulation->addAction(actions->actionRestore);
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSettings->addAction(actions->actionConfigureGrid);
-	ui->menuSimulationParameters->addAction(actions->actionEditSimParameters);
-	ui->menuSimulationParameters->addAction(actions->actionLoadSimParameters);
-	ui->menuSimulationParameters->addAction(actions->actionSaveSimParameters);
-	ui->menuSymbolMap->addAction(actions->actionEditSymbols);
-	ui->menuSymbolMap->addAction(actions->actionLoadSymbols);
-	ui->menuSymbolMap->addAction(actions->actionSaveSymbols);
-	ui->menuSymbolMap->addAction(actions->actionMergeWithSymbols);
+	ui->menuSettings->addAction(actions->actionComputationSettings);
+    ui->menuSettings->addAction(actions->actionEditSimParameters);
+    ui->menuSettings->addAction(actions->actionEditSymbols);
 
 	ui->menuView->addAction(actions->actionEditor);
 	ui->menuView->addAction(actions->actionMonitor);
 	ui->menuView->addSeparator();
 	ui->menuView->addAction(actions->actionZoomIn);
 	ui->menuView->addAction(actions->actionZoomOut);
-	ui->menuView->addAction(actions->actionFullscreen);
-	ui->menuView->addSeparator();
+    ui->menuView->addAction(actions->actionDisplayLink);
+    ui->menuView->addAction(actions->actionFullscreen);
+    ui->menuView->addSeparator();
+    ui->menuView->addAction(actions->actionGlowEffect);
+    ui->menuView->addSeparator();
 	ui->menuView->addAction(actions->actionShowCellInfo);
 	ui->menuView->addAction(actions->actionCenterSelection);
 
@@ -169,6 +167,9 @@ void MainView::setupMenu()
 	ui->menuEntity->addAction(actions->actionCopyToken);
 	ui->menuEntity->addAction(actions->actionPasteToken);
 	ui->menuEntity->addAction(actions->actionDeleteToken);
+    ui->menuEntity->addSeparator();
+    ui->menuEntity->addAction(actions->actionCopyToClipboard);
+    ui->menuEntity->addAction(actions->actionPasteFromClipboard);
 
 	ui->menuCollection->addAction(actions->actionNewRectangle);
 	ui->menuCollection->addAction(actions->actionNewHexagon);
@@ -184,6 +185,8 @@ void MainView::setupMenu()
 	ui->menuCollection->addAction(actions->actionRandomMultiplier);
 	ui->menuCollection->addAction(actions->actionGridMultiplier);
 
+    ui->menuAnalysis->addAction(actions->actionMostFrequentCluster);
+
 	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();
 	ui->menuHelp->addAction(actions->actionDocumentation);
@@ -198,11 +201,10 @@ void MainView::setupFontsAndColors()
 	ui->menuCollection->setFont(GuiSettings::getGlobalFont());
 	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
-	ui->menuSimulationParameters->setFont(GuiSettings::getGlobalFont());
-	ui->menuSymbolMap->setFont(GuiSettings::getGlobalFont());
+    ui->menuAnalysis->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
-	ui->toolBar->setStyleSheet("background-color: #303030");
+	ui->toolBar->setStyleSheet("background-color: #151540");
 	{
 		QPalette p = ui->tpsForcingButton->palette();
 		p.setColor(QPalette::ButtonText, Const::ButtonTextColor);
@@ -224,6 +226,7 @@ void MainView::setupWidgets()
 
 	ui->tpsSpinBox->setValue(_model->getTPS());
 	connect(ui->tpsSpinBox, (void(QSpinBox::*)(int))(&QSpinBox::valueChanged), [this](int value) {
+        value = std::max(1, value);
 		_model->setTPS(value);
 		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
 		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);
@@ -236,11 +239,6 @@ void MainView::setupFullScreen()
 	if (fullScreen) {
 		setWindowState(windowState() | Qt::WindowFullScreen);
 	}
-}
-
-void MainView::documentationWindowClosed()
-{
-	_actions->getActionHolder()->actionDocumentation->setChecked(false);
 }
 
 void MainView::monitorClosed()

@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "Model/Api/Definitions.h"
+#include "ModelBasic/Definitions.h"
 
+#include "Jobs.h"
 #include "Definitions.h"
 
 class MainController
@@ -11,71 +12,44 @@ class MainController
 	Q_OBJECT
 public:
 	MainController(QObject * parent = nullptr);
-	virtual ~MainController();
+	~MainController();
 
-	virtual void init();
+	void init();
 
-	virtual void autoSave();
+    void autoSave();
 
-	virtual void onRunSimulation(bool run);
-	virtual void onStepForward();
-	virtual void onStepBackward(bool& emptyStack);
-	virtual void onMakeSnapshot();
-	virtual void onRestoreSnapshot();
-	virtual void onNewSimulation(NewSimulationConfig config);
-	virtual void onSaveSimulation(string const& filename);
-	virtual bool onLoadSimulation(string const& filename);
-	virtual void onRecreateSimulation(SimulationConfig const& simConfig);
-	virtual void onUpdateSimulationParametersForRunningSimulation();
-	virtual void onRestrictTPS(optional<int> const& tps);
+	void onRunSimulation(bool run);
+	void onStepForward();
+	void onStepBackward(bool& emptyStack);
+	void onMakeSnapshot();
+	void onRestoreSnapshot();
+    void onToggleDisplayLink(bool toggled);
+    void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
+	void onSaveSimulation(string const& filename);
+    enum class LoadOption { Non, SaveOldSim };
+	bool onLoadSimulation(string const& filename, LoadOption option);
+	void onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent);
+	void onUpdateSimulationParameters(SimulationParameters const& parameters);
+    void onUpdateExecutionParameters(ExecutionParameters const& parameters);
+    void onRestrictTPS(optional<int> const& tps);
+    void onAddMostFrequentClusterToSimulation();
 
-	virtual int getTimestep() const;
-	virtual SimulationConfig getSimulationConfig() const;
+	int getTimestep() const;
+	SimulationConfig getSimulationConfig() const;
+	SimulationMonitor* getSimulationMonitor() const;
 
 private:
-	void initSimulation(SymbolTable* symbolTable, SimulationParameters* parameters);
+	void initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters);
 	void recreateSimulation(string const& serializedSimulation);
 	void connectSimController() const;
 	void addRandomEnergy(double amount);
 
-	class _AsyncJob
-	{
-	public:
-		virtual ~_AsyncJob() = default;
+    void serializeSimulationAndWaitUntilFinished();
+    void autoSaveIntern(std::string const& filename);
+    void saveSimulationIntern(string const& filename);
 
-		enum class Type {
-			SaveToFile,
-			Recreate
-		};
-		Type type;
 
-		_AsyncJob(Type type) : type(type) {}
-	};
-	using AsyncJob = shared_ptr<_AsyncJob>;
-
-	class _SaveToFileJob : public _AsyncJob
-	{
-	public:
-		virtual ~_SaveToFileJob() = default;
-
-		string filename;
-
-		_SaveToFileJob(string filename) : _AsyncJob(Type::SaveToFile), filename(filename) {} 
-	};
-	using SaveToFileJob = shared_ptr<_SaveToFileJob>;
-
-	class _RecreateJob : public _AsyncJob
-	{
-	public:
-		virtual ~_RecreateJob() = default;
-
-		_RecreateJob()
-			: _AsyncJob(Type::Recreate) {}
-	};
-	using RecreateOperation = shared_ptr<_RecreateJob>;
-
-	list<AsyncJob> _jobsAfterSerialization;
-	Q_SLOT void serializationFinished();
+    Worker* _worker = nullptr;
 
 	MainView* _view = nullptr;
 	MainModel* _model = nullptr;
@@ -89,4 +63,13 @@ private:
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
+    DataAnalyzer* _dataAnalyzer = nullptr;
+
+	SimulationControllerBuildFunc _controllerBuildFunc;
+	SimulationAccessBuildFunc _accessBuildFunc;
+
+	using SimulationMonitorBuildFunc = std::function<SimulationMonitor*(SimulationController*)>;
+	SimulationMonitorBuildFunc _monitorBuildFunc;
+
+    QTimer* _autosaveTimer = nullptr;
 };
