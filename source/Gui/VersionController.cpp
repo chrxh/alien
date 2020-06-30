@@ -1,10 +1,10 @@
-﻿#include "Model/Api/ModelBuilderFacade.h"
+﻿#include "ModelBasic/ModelBasicBuilderFacade.h"
 
 #include "Base/ServiceLocator.h"
-#include "Model/Api/SimulationAccess.h"
-#include "Model/Api/SimulationController.h"
-#include "Model/Api/SimulationContext.h"
-#include "Model/Api/SpaceProperties.h"
+#include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/SimulationController.h"
+#include "ModelBasic/SimulationContext.h"
+#include "ModelBasic/SpaceProperties.h"
 
 #include "VersionController.h"
 
@@ -14,12 +14,10 @@ VersionController::VersionController(QObject * parent) : QObject(parent)
 	
 }
 
-void VersionController::init(SimulationContext* context)
+void VersionController::init(SimulationContext* context, SimulationAccess* access)
 {
-	auto facade = ServiceLocator::getInstance().getService<ModelBuilderFacade>();
-	auto access = facade->buildSimulationAccess();
+    _context = context;
 	SET_CHILD(_access, access);
-	_access->init(context);
 	_universeSize = context->getSpaceProperties()->getSize();
 	_stack.clear();
 	_snapshot.reset();
@@ -43,7 +41,7 @@ void VersionController::loadSimulationContentFromStack()
 		return;
 	}
 	_access->clear();
-	_access->updateData(_stack.back());
+	_access->updateData(_stack.back().data);
 	_stack.pop_back();
 }
 
@@ -65,7 +63,8 @@ void VersionController::restoreSnapshot()
 		return;
 	}
 	_access->clear();
-	_access->updateData(*_snapshot);
+	_access->updateData(_snapshot->data);
+    _context->setTimestep(_snapshot->timestep);
 }
 
 void VersionController::dataReadyToRetrieve()
@@ -73,11 +72,12 @@ void VersionController::dataReadyToRetrieve()
 	if (!_target) {
 		return;
 	}
+    auto const timestep = _context->getTimestep();
 	if (*_target == TargetForReceivedData::Stack) {
-		_stack.push_back(_access->retrieveData());
+        _stack.emplace_back(SnapshotData{ _access->retrieveData(), timestep });
 	}
 	if (*_target == TargetForReceivedData::Snapshot) {
-		_snapshot = _access->retrieveData();
+        _snapshot = SnapshotData{ _access->retrieveData(), timestep };
 	}
 	_target.reset();
 }

@@ -1,38 +1,14 @@
 #pragma once
-#include <QEventLoop>
-
-#include "Model/Api/SimulationAccess.h"
+#include "IntegrationTestFramework.h"
 
 class IntegrationTestHelper
 {
 public:
-	static DataDescription getContent(SimulationAccess* access, IntRect const & rect)
-	{
-		bool contentReady = false;
-		QEventLoop pause;
-		access->connect(access, &SimulationAccess::dataReadyToRetrieve, [&]() {
-			contentReady = true;
-			pause.quit();
-		});
-		ResolveDescription rd;
-		rd.resolveCellLinks = true;
-		access->requireData(rect, rd);
-		if (!contentReady) {
-			pause.exec();
-		}
-		return access->retrieveData();
-	}
-
-	static unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data)
-	{
-		unordered_map<uint64_t, CellDescription> result;
-		if (data.clusters) {
-			for (ClusterDescription const& cluster : *data.clusters) {
-				for (CellDescription const& cell : *cluster.cells) {
-					result.insert_or_assign(cell.id, cell);
-				}
-			}
-		}
-		return result;
-	}
+    static DataDescription getContent(SimulationAccess* access, IntRect const& rect);
+    static void updateData(SimulationAccess* access, DataChangeDescription const& data);
+    static void runSimulation(int timesteps, SimulationController* controller);
+    static unordered_map<uint64_t, ParticleDescription> getParticleByParticleId(DataDescription const& data);
+    static unordered_map<uint64_t, CellDescription> getCellByCellId(DataDescription const& data);
+    static unordered_map<uint64_t, ClusterDescription> getClusterByCellId(DataDescription const& data);
+    static unordered_map<uint64_t, ClusterDescription> getClusterByClusterId(DataDescription const& data);
 };

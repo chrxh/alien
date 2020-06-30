@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QColor>
 #include <QVector2D>
 #include <QVector2D>
 #include <QSize>
@@ -43,8 +44,19 @@ using std::string;
 using boost::optional;
 using boost::shared_ptr;
 
+const double FLOATINGPOINT_HIGH_PRECISION = 1.0e-7;
 const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
-const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1f;
+const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1;
+
+inline float toFloat(int value)
+{
+    return static_cast<float>(value);
+}
+
+inline QColor toQColor(unsigned int const& rgba)
+{
+    return QColor((rgba >> 16) & 0xff, (rgba >> 8) & 0xff, rgba & 0xff, rgba >> 24);
+}
 
 struct IntRect;
 struct BASE_EXPORT IntVector2D {
@@ -57,6 +69,8 @@ struct BASE_EXPORT IntVector2D {
 	QVector2D toQVector2D();
 	IntVector2D& restrictToRect(IntRect const& rect);
 	bool operator==(IntVector2D const& vec);
+    void operator-=(IntVector2D const& vec);
+
 };
 
 BASE_EXPORT std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
@@ -98,3 +112,11 @@ IntVector2D IntRect::center() const
 	if(!(expression)) {\
 		throw std::exception("check failed");\
 	}
+
+#define MEMBER_DECLARATION(className, type, name, initialValue)\
+    type _ ## name = initialValue; \
+    className& name(type const& name)\
+    { \
+        _ ## name = name; \
+        return *this; \
+    }

@@ -1,7 +1,8 @@
+#include <QMetaType>
+
 #include "Base/ServiceLocator.h"
 
-#include "ModelGpu/_Impl/ModelGpuBuilderFacadeImpl.h"
-
+#include "ModelGpuBuilderFacadeImpl.h"
 #include "ModelGpuServices.h"
 
 ModelGpuServices::ModelGpuServices()
@@ -9,4 +10,5 @@ ModelGpuServices::ModelGpuServices()
 	static ModelGpuBuilderFacadeImpl modelGpuBuilder;
 
 	ServiceLocator::getInstance().registerService<ModelGpuBuilderFacade>(&modelGpuBuilder);
+	
 }
