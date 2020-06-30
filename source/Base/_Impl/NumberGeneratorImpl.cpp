@@ -29,17 +29,17 @@ uint32_t NumberGeneratorImpl::getRandomInt(uint32_t range)
 
 uint32_t NumberGeneratorImpl::getLargeRandomInt(uint32_t range)
 {
-	return static_cast<uint32_t>((static_cast<qreal>(range) * static_cast<qreal>(getNumberFromArray()) / RAND_MAX));
+	return static_cast<uint32_t>((static_cast<double>(range) * static_cast<double>(getNumberFromArray()) / RAND_MAX));
 }
 
 double NumberGeneratorImpl::getRandomReal(double min, double max)
 {
-	return (qreal)getLargeRandomInt((max - min) * 1000) / 1000.0 + min;
+	return static_cast<double>(getLargeRandomInt((max - min) * 1000) / 1000.0 + min);
 }
 
 double NumberGeneratorImpl::getRandomReal()
 {
-	return static_cast<qreal>(getNumberFromArray()) / RAND_MAX;
+	return static_cast<double>(getNumberFromArray()) / RAND_MAX;
 }
 
 QByteArray NumberGeneratorImpl::getRandomArray(int length)
@@ -52,7 +52,7 @@ QByteArray NumberGeneratorImpl::getRandomArray(int length)
 	return std::move(bytes);
 }
 
-uint64_t NumberGeneratorImpl::getTag()
+uint64_t NumberGeneratorImpl::getId()
 {
 	return _threadId | ++_runningNumber;
 }

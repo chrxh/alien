@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Model/Api/Descriptions.h"
+#include "ModelBasic/Descriptions.h"
 #include "Definitions.h"
 
 class VersionController
@@ -14,7 +14,7 @@ public:
 	VersionController(QObject * parent = nullptr);
 	virtual ~VersionController() = default;
 
-	virtual void init(SimulationContext* context);
+	virtual void init(SimulationContext* context, SimulationAccess* access);
 
 	virtual bool isStackEmpty();
 	virtual void clearStack();
@@ -28,10 +28,16 @@ private:
 	Q_SLOT void dataReadyToRetrieve();
 
 	IntVector2D _universeSize;
+    SimulationContext* _context = nullptr;
 	SimulationAccess* _access = nullptr;
 
 	enum class TargetForReceivedData { Stack, Snapshot};
 	optional<TargetForReceivedData> _target;
-	list<DataDescription> _stack;
-	optional<DataDescription> _snapshot;
+    struct SnapshotData
+    {
+        DataDescription data;
+        int timestep;
+    };
+	list<SnapshotData> _stack;
+	optional<SnapshotData> _snapshot;
 };

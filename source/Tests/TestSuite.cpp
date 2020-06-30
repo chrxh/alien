@@ -1,22 +1,12 @@
 #include <gtest/gtest.h>
 #include <QApplication>
 
-#include "Model/Api/ModelServices.h"
-
-/*
-#include "unittests/testphysics.h"
-#include "unittests/testcellcluster.h"
-#include "unittests/testtoken.h"
-#include "unittests/testcellfunctioncommunicator.h"
-#include "integrationtests/integrationtestreplicator.h"
-#include "integrationtests/integrationtestcomparison.h"
-*/
-
-//--gtest_filter=TestPhysics*
-// Ex.: SquareRoot*
+#include "ModelBasic/ModelBasicServices.h"
+#include "ModelGpu/ModelGpuServices.h"
 
 int main(int argc, char** argv) {
-	ModelServices _modelServices;
+	ModelBasicServices _modelBasicServices;
+	ModelGpuServices _modelGpuServices;
 
     QApplication app(argc, argv);
 

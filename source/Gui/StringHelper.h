@@ -16,14 +16,35 @@ public:
 		return QString("%1").arg(value);// QString::fromStdString(std::to_string(value));
 	}
 
-	static QString generateFormattedIntString(int i)
+	static QString generateFormattedIntString(int value, bool withComma = false)
 	{
 		QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
 		QString colorEnd = "</span>";
-		return colorDataStart + QString("%1").arg(i) + colorEnd;
+        if (!withComma) {
+            return colorDataStart + QString("%1").arg(value) + colorEnd;
+        }
+        else {
+            QString valueAsString;
+
+            do {
+                if (!valueAsString.isEmpty()) {
+                    valueAsString = QString(",") + valueAsString;
+                }
+                if (value >= 1000) {
+                    valueAsString = QString("%1").arg(value % 1000, 3) + valueAsString;
+                }
+                else {
+                    valueAsString = QString("%1").arg(value % 1000) + valueAsString;
+                }
+                value = value / 1000;
+            } while (value > 0);
+            valueAsString.replace(" ", "0");
+
+            return colorDataStart + valueAsString + colorEnd;
+        }
 	}
 
-	static QString generateFormattedRealString(qreal r)
+	static QString generateFormattedRealString(qreal r, bool withComma = false)
 	{
 		QString colorDataStart = "<span style=\"color:" + Const::CellEditDataColor1.name() + "\">";
 		QString colorData2Start = "<span style=\"color:" + Const::CellEditDataColor2.name() + "\">";
@@ -35,7 +56,7 @@ public:
 		}
 		int i = qFloor(r);
 		int re = (r - qFloor(r))*10000.0;
-		QString iS = QString("%1").arg(i);
+		QString iS = generateFormattedIntString(i, withComma);
 		QString reS = QString("%1").arg(re, 4);
 		reS.replace(" ", "0");
 		if (negativeSign)

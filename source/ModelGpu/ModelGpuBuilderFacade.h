@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Model/Api/Definitions.h"
+#include "ModelBasic/Definitions.h"
+
+#include "CudaConstants.h"
 #include "Definitions.h"
 
 class ModelGpuBuilderFacade
@@ -8,8 +10,17 @@ class ModelGpuBuilderFacade
 public:
 	virtual ~ModelGpuBuilderFacade() = default;
 
-	virtual SimulationController* buildSimulationController(IntVector2D universeSize, SymbolTable* symbolTable, SimulationParameters* parameters) const = 0;
-	virtual SimulationAccess* buildSimulationAccess(SimulationContext* context) const = 0;
+	struct Config {
+		IntVector2D universeSize;
+		SymbolTable* symbolTable;
+		SimulationParameters parameters;
+	};
+	virtual SimulationControllerGpu* buildSimulationController(Config const& config
+		, ModelGpuData const& specificData
+		, uint timestepAtBeginning = 0) const = 0;
+	virtual SimulationAccessGpu* buildSimulationAccess() const = 0;
+	virtual SimulationMonitorGpu* buildSimulationMonitor() const = 0;
 
+    virtual CudaConstants getDefaultCudaConstants() const = 0;
 };
 
