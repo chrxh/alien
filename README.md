@@ -1,6 +1,6 @@
 alien - Explore digital ecosystems!
 ===================================
-alien is a shortform for artificial life environment and denotes a research tool aiming to simulate digital organisms in an artificial ecosystem and (pre-)biotic evolution.
+ALiEn is a GPU-based physics engine focused on demands for artificial life computations. It contains a software tool designed to simulate digital organisms embedded in artificial ecosystems and to mimic conditions for (pre-)biotic evolution.
 
 Elementary constituents of simulated matter are free to be programmed in order to extend their capabilities and operate in their environment for special purposes.
 Complex and interconnected structures have the potential to perform arbitrary higher-order tasks. Complex structures can emerge spontaneously or by your intervention in the universe.
