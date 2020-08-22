@@ -20,6 +20,7 @@
 #include "ModelBasic/DescriptionHelper.h"
 #include "ModelBasic/SimulationMonitor.h"
 #include "ModelBasic/SerializationHelper.h"
+#include "ModelBasic/SimulationChanger.h"
 
 #include "ModelGpu/SimulationAccessGpu.h"
 #include "ModelGpu/SimulationControllerGpu.h"
@@ -215,9 +216,20 @@ void MainController::onRestoreSnapshot()
     }, UpdateDescription::All);
 }
 
-void MainController::onToggleDisplayLink(bool toggled)
+void MainController::onDisplayLink(bool toggled)
 {
     _simController->setEnableCalculateFrames(toggled);
+}
+
+void MainController::onSimulationChanger(bool toggled)
+{
+    if (toggled) {
+        auto parameters = _simController->getContext()->getSimulationParameters();
+        _simChanger->activate(parameters);
+    }
+    else {
+        _simChanger->deactivate();
+    }
 }
 
 void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
@@ -230,7 +242,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 	connectSimController();
 
-    delete _simAccess;  //for minimal memory usage deleting old object first
+    delete _simAccess;  //to reduce memory usage delete old object first
     _simAccess = nullptr;
 	auto simAccess = _accessBuildFunc(_simController);
     SET_CHILD(_simAccess, simAccess);
@@ -243,7 +255,22 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	auto simMonitor = _monitorBuildFunc(_simController);
 	SET_CHILD(_simMonitor, simMonitor);
 
-	SimulationAccess* accessForWidgets;
+    auto simChanger = modelBasicFacade->buildSimulationChanger(simMonitor, context->getNumberGenerator());
+    for (auto const& connection : _simChangerConnections) {
+        QObject::disconnect(connection);
+    }
+    SET_CHILD(_simChanger, simChanger);
+    _simChangerConnections.emplace_back(connect(
+        _simController,
+        &SimulationController::nextTimestepCalculated,
+        _simChanger,
+        &SimulationChanger::notifyNextTimestep));
+    _simChangerConnections.emplace_back(connect(_simChanger, &SimulationChanger::simulationParametersChanged, [&] {
+        auto newParameters = _simChanger->retrieveSimulationParameters();
+        onUpdateSimulationParameters(newParameters);
+    }));
+
+    SimulationAccess* accessForWidgets;
 	_view->setupEditors(_simController, _accessBuildFunc(_simController));
 }
 
