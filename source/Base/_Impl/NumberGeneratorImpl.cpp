@@ -27,6 +27,12 @@ uint32_t NumberGeneratorImpl::getRandomInt(uint32_t range)
 	return getNumberFromArray() % range;
 }
 
+uint32_t NumberGeneratorImpl::getRandomInt(uint32_t min, uint32_t max)
+{
+    auto delta = max - min + 1;
+    return min + (getNumberFromArray() % delta);
+}
+
 uint32_t NumberGeneratorImpl::getLargeRandomInt(uint32_t range)
 {
 	return static_cast<uint32_t>((static_cast<double>(range) * static_cast<double>(getNumberFromArray()) / RAND_MAX));
