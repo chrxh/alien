@@ -67,6 +67,12 @@
     <CustomBuild Include="..\..\source\ModelBasic\CellComputerCompilerImpl.h">
       <Filter>Source Files\Impl</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelBasic\SimulationChanger.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\ModelBasic\SimulationChangerImpl.h">
+      <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tests\moc_CellComputerCompiler.cpp">
@@ -210,6 +216,30 @@
     <ClCompile Include="..\..\source\ModelBasic\ModelBasicSettings.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationChanger.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationChanger.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationChanger.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\moc_SimulationChangerImpl.cpp">
+      <Filter>Generated Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SimulationChangerImpl.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SimulationChangerImpl.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelBasic\SimulationChangerImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\ModelBasic\SimulationParametersCalculator.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\ModelBasic\ChangeDescriptions.h">
@@ -273,6 +303,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\ModelBasic\ModelBasicSettings.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\ModelBasic\SimulationParametersCalculator.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
   </ItemGroup>
