@@ -24,7 +24,7 @@ You can build alien using Microsoft Visual Studio 2015 or higher. The solution f
 
 Installer
 =========
-There is also a Windows installer with 64 bit binaries available at [alien-project.org](https://alien-project.org/download.html).
+There is also a Windows installer with 64 bit binaries available at [alien-project.org](https://alien-project.org/downloads.html).
 
 License
 =======
