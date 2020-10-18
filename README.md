@@ -10,8 +10,8 @@ The software features
 - simulation and rendering on GPU 
 
 For further information and video material please also visit
-- website: alien-project.org
-- YouTube channel: youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw
+- website: [alien-project.org]
+- YouTube channel: [youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw]
 
 Documentation
 =============
