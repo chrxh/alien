@@ -1,5 +1,6 @@
-alien - Explore digital ecosystems!
-===================================
+alien - Explore artificial life world!
+======================================
+
 ALiEn is a GPU-based physics engine focused on demands for artificial life computations. It contains a software tool designed to simulate digital organisms embedded in artificial ecosystems and to mimic conditions for (pre-)biotic evolution.
 
 The software features
