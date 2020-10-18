@@ -583,6 +583,5 @@ stable/
 *computation.dat
 external/boost*
 source/tests/testdata/comparison/computation.dat
-misc/*
 *autosave.sim
 msvc/Gui/autosave_load.sim
