@@ -9,7 +9,9 @@ The software features
 - built-in graph editor for designing own machines 
 - simulation and rendering on GPU 
 
-Explore intriguing worlds which are beyond imagination!
+For further information and video material please also visit
+- [website](https://alien-project.org/index.html)
+- [YouTube channel] [https://www.youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw]
 
 Documentation
 =============
