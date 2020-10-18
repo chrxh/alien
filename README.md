@@ -1,5 +1,5 @@
-alien - Explore artificial life world!
-======================================
+alien - Explore the world of artificial life
+============================================
 
 ALiEn is a GPU-based physics engine focused on demands for artificial life computations. It contains a software tool designed to simulate digital organisms embedded in artificial ecosystems and to mimic conditions for (pre-)biotic evolution.
 
@@ -9,7 +9,9 @@ The software features
 - built-in graph editor for designing own machines 
 - simulation and rendering on GPU 
 
-Explore intriguing worlds which are beyond imagination!
+For further information and video material please also visit
+- website: [alien-project.org](https://alien-project.org/index.html)
+- YouTube channel: [youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 
 Documentation
 =============
