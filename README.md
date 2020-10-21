@@ -1,6 +1,5 @@
 <h1 align="center">
 <a href="https://alien-project.org" target="_blank">ALiEn - Explore the world of artificial life</a>
-<img src="img/alien.png">
 </h4>
 
 ![logo](img/alien.png)
@@ -13,7 +12,7 @@ The software features
 - built-in graph editor for designing own machines 
 - simulation and rendering on GPU 
 
-<img src="img/engine.gif">
+<img src="img/engine.gif" width=100%>
 
 For further information and artworks please also visit
 * [Website](https://alien-project.org)
