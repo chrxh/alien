@@ -1,5 +1,9 @@
-<h1 align="center"><a href="https://alien-project.org" target="_blank">ALiEn - Explore the world of artificial life</a>.</h4>
-![logo](./img/alien.png)
+<h1 align="center">
+<a href="https://alien-project.org" target="_blank">ALiEn - Explore the world of artificial life</a>
+<img src="img/alien.png">
+</h4>
+
+![logo](img/alien.png)
 
 ALiEn is a GPU-accelerated physics engine focused on demands for artificial life computations. It contains a software tool designed to simulate digital organisms embedded in artificial ecosystems and to mimic conditions for (pre-)biotic evolution.
 
@@ -9,7 +13,7 @@ The software features
 - built-in graph editor for designing own machines 
 - simulation and rendering on GPU 
 
-<img align="center" src="img/engine.gif" height="280">
+<img src="img/engine.gif">
 
 For further information and artworks please also visit
 * [Website](https://alien-project.org)
