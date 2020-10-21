@@ -17,7 +17,7 @@ The engine comes with a world builder, which makes it easy to construct universe
 - simulation and rendering on GPU
 
 The simulation code is written entirely in CUDA and highly optimized for large-scale real-time simulations of millions of bodies and particles.
-Development is driven by the desire to simulate entire artificial ecosystems in order to imitate the conditions of (pre-)biotic evolution and thus better understand their mechanisms.
+The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
 
 <img src="img/engine.gif" width=100%>
 
@@ -37,6 +37,7 @@ The following third-party libaries are necessary and should be installed:
 - Qt 5.8 or higher
 - boost library [version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1 of the repository
 - CUDA 9.0
+
 gtest framework is already contained in the repository in external/gtest.
 
 ## License
