@@ -10,7 +10,7 @@ alien is a GPU-accelerated physics engine with focus on artificial life computat
 Each simulated body has an internal structure which is modeled by a graph and can perform both physical actions and information processing by circulating tokens along the nodes.
 The engine comes with a world builder, which makes it easy to construct universes according to your own ideas.
 
-Main features
+**Main features**
 - realistic physical calculations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
 - programmable matter approach for simulating digital organisms and evolution
 - built-in graph editor for designing own machines 
@@ -21,7 +21,7 @@ Development is driven by the desire to simulate entire artificial ecosystems in 
 
 <img src="img/engine.gif" width=100%>
 
-Further information and artworks
+**Further information and artworks**
 * [Website](https://alien-project.org)
 * [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 
@@ -39,5 +39,5 @@ The following third-party libaries are necessary and should be installed:
 - CUDA 9.0
 gtest framework is already contained in the repository in external/gtest.
 
-##License
+## License
 alien is licensed under the [GPLv3](LICENSE).
