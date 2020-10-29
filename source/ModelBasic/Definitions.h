@@ -29,6 +29,7 @@ class SimulationMonitor;
 class SymbolTable;
 class SpaceProperties;
 class SimulationController;
+class SimulationChanger;
 
 using QImagePtr = shared_ptr<QImage>;
 
