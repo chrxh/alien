@@ -92,6 +92,7 @@ void ActionController::init(
 	connect(actions->actionSnapshot, &QAction::triggered, this, &ActionController::onMakeSnapshot);
 	connect(actions->actionRestore, &QAction::triggered, this, &ActionController::onRestoreSnapshot);
     connect(actions->actionAcceleration, &QAction::triggered, this, &ActionController::onAcceleration);
+    connect(actions->actionSimulationChanger, &QAction::triggered, this, &ActionController::onSimulationChanger);
     connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
 
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
@@ -207,6 +208,11 @@ void ActionController::onAcceleration(bool toggled)
     _mainController->onUpdateExecutionParameters(parameters);
 }
 
+void ActionController::onSimulationChanger(bool toggled)
+{
+    _mainController->onSimulationChanger(toggled);
+}
+
 void ActionController::onZoomInClicked()
 {
 	_visualEditor->zoom(2.0);
@@ -221,7 +227,7 @@ void ActionController::onZoomOutClicked()
 
 Q_SLOT void ActionController::onToggleDisplayLink(bool toggled)
 {
-    _mainController->onToggleDisplayLink(toggled);
+    _mainController->onDisplayLink(toggled);
 }
 
 void ActionController::onToggleFullscreen(bool toogled)
@@ -850,8 +856,10 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 	actions->actionRestore->setEnabled(false);
 	actions->actionRunStepBackward->setEnabled(false);
     actions->actionDisplayLink->setEnabled(true);
+    actions->actionDisplayLink->setChecked(true);
     actions->actionGlowEffect->setEnabled(true);
-	onRunClicked(false);
+    actions->actionSimulationChanger->setChecked(false);
+    onRunClicked(false);
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
 
