@@ -1,12 +1,13 @@
-#ifndef WEB_GLOBAL_H
-#define WEB_GLOBAL_H
+#pragma once
 
 #include <QtCore/qglobal.h>
 
+#ifndef ALIEN_STATIC
 #ifdef WEB_LIB
 # define WEB_EXPORT Q_DECL_EXPORT
 #else
 # define WEB_EXPORT Q_DECL_IMPORT
 #endif
-
-#endif // WEB_GLOBAL_H
+#else
+# define WEB_EXPORT
+#endif
