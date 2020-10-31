@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <QObject>
 
+#include "Web/Definitions.h"
+
 #include "Definitions.h"
 
 class ActionController
@@ -13,13 +15,14 @@ public:
 
 	virtual void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
-		, MonitorController* monitor, DataRepository* repository, Notifier* notifier);
+		, MonitorController* monitor, DataRepository* repository, Notifier* notifier, WebController* webController);
 
 	virtual ActionHolder* getActionHolder();
 
 private:
 	Q_SLOT void onNewSimulation();
-	Q_SLOT void onSaveSimulation();
+    Q_SLOT void onWebSimulation();
+    Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
 	Q_SLOT void onRunClicked(bool toggled);
 	Q_SLOT void onStepForward();
@@ -95,4 +98,5 @@ private:
 	ToolbarController* _toolbar = nullptr;
 	MonitorController* _monitor = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
+    WebController* _webController = nullptr;
 };
