@@ -13,7 +13,8 @@ public:
 	virtual ~ActionHolder() = default;
 
 	QAction* actionNewSimulation = nullptr;
-	QAction* actionLoadSimulation = nullptr;
+    QAction* actionWebSimulation = nullptr;
+    QAction* actionLoadSimulation = nullptr;
 	QAction* actionSaveSimulation = nullptr;
 	QAction* actionRunSimulation = nullptr;
 	QAction* actionRunStepForward = nullptr;

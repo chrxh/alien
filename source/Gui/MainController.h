@@ -3,6 +3,8 @@
 
 #include "ModelBasic/Definitions.h"
 
+#include "Web/Definitions.h"
+
 #include "Jobs.h"
 #include "Definitions.h"
 
@@ -25,6 +27,7 @@ public:
 	void onRestoreSnapshot();
     void onDisplayLink(bool toggled);
     void onSimulationChanger(bool toggled);
+
     void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
 	void onSaveSimulation(string const& filename);
     enum class LoadOption { Non, SaveOldSim };
@@ -69,6 +72,7 @@ private:
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
     DataAnalyzer* _dataAnalyzer = nullptr;
+    WebController* _webController = nullptr;
 
 	SimulationControllerBuildFunc _controllerBuildFunc;
 	SimulationAccessBuildFunc _accessBuildFunc;
