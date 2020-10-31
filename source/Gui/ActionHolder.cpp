@@ -60,7 +60,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionAcceleration->setIcon(iconAccelerate);
     actionAcceleration->setIconVisibleInMenu(false);
 
-    actionSimulationChanger = new QAction("Simulation changer", this);
+    actionSimulationChanger = new QAction("Parameter changer", this);
     actionSimulationChanger->setIconVisibleInMenu(false);
     actionSimulationChanger->setEnabled(true);
     actionSimulationChanger->setCheckable(true);
