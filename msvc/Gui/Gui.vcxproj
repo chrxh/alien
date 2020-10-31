@@ -511,6 +511,9 @@
     <ProjectReference Include="..\ModelGpu\ModelGpu.vcxproj">
       <Project>{2a5d1c28-f6ee-4a46-9c5d-b393990d335b}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Web\Web.vcxproj">
+      <Project>{efd32a97-74a4-4bf5-bc8a-f0d12c0ee147}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\source\Gui\resources\ressources.qrc">
