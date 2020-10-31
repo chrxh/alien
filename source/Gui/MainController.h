@@ -23,7 +23,8 @@ public:
 	void onStepBackward(bool& emptyStack);
 	void onMakeSnapshot();
 	void onRestoreSnapshot();
-    void onToggleDisplayLink(bool toggled);
+    void onDisplayLink(bool toggled);
+    void onSimulationChanger(bool toggled);
     void onNewSimulation(SimulationConfig const& config, double energyAtBeginning);
 	void onSaveSimulation(string const& filename);
     enum class LoadOption { Non, SaveOldSim };
@@ -56,6 +57,10 @@ private:
 
 	SimulationController* _simController = nullptr;
 	SimulationMonitor* _simMonitor = nullptr;
+
+    SimulationChanger* _simChanger = nullptr;
+    list<QMetaObject::Connection> _simChangerConnections;
+
 	DataRepository* _repository = nullptr;
 	Notifier* _notifier = nullptr;
 	VersionController* _versionController = nullptr;

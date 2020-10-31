@@ -136,7 +136,9 @@ void MainView::setupMenu()
     ui->menuSimulation->addAction(actions->actionAcceleration);
     ui->menuSimulation->addAction(actions->actionSnapshot);
 	ui->menuSimulation->addAction(actions->actionRestore);
-	ui->menuSimulation->addSeparator();
+    ui->menuSimulation->addSeparator();
+    ui->menuSimulation->addAction(actions->actionSimulationChanger);
+    ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
 	ui->menuSettings->addAction(actions->actionComputationSettings);

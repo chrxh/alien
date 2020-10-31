@@ -21,7 +21,8 @@ public:
     QAction* actionSnapshot = nullptr;
 	QAction* actionRestore = nullptr;
     QAction* actionAcceleration = nullptr;
-	QAction* actionExit = nullptr;
+    QAction* actionSimulationChanger = nullptr;
+    QAction* actionExit = nullptr;
 
 	QAction* actionComputationSettings = nullptr;
 	QAction* actionEditSimParameters = nullptr;
