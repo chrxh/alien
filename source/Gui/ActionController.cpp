@@ -38,6 +38,8 @@
 #include "Gui/MainView.h"
 #include "Gui/Notifier.h"
 
+#include "Web/WebController.h"
+
 #include "ActionModel.h"
 #include "ActionController.h"
 #include "ActionHolder.h"
@@ -60,7 +62,8 @@ void ActionController::init(
     ToolbarController* toolbar,
     MonitorController* monitor,
     DataRepository* repository,
-    Notifier* notifier)
+    Notifier* notifier,
+    WebController* webController)
 {
     auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
     auto numberGenerator = factory->buildRandomNumberGenerator();
@@ -77,13 +80,15 @@ void ActionController::init(
 	_monitor = monitor;
 	_repository = repository;
 	_notifier = notifier;
+    _webController = webController;
 	SET_CHILD(_numberGenerator, numberGenerator);
 
 	connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ActionController::receivedNotifications);
 
 	auto actions = _model->getActionHolder();
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
-	connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
+    connect(actions->actionWebSimulation, &QAction::triggered, this, &ActionController::onWebSimulation);
+    connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
 	connect(actions->actionComputationSettings, &QAction::triggered, this, &ActionController::onConfigureGrid);
 	connect(actions->actionRunSimulation, &QAction::toggled, this, &ActionController::onRunClicked);
@@ -281,6 +286,11 @@ void ActionController::onNewSimulation()
 
 		settingUpNewSimulation(_mainController->getSimulationConfig());
 	}
+}
+
+void ActionController::onWebSimulation()
+{
+    _webController->requestSimulationInfos();
 }
 
 void ActionController::onSaveSimulation()

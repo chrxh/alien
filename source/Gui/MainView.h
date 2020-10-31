@@ -3,6 +3,8 @@
 
 #include "ModelBasic/Definitions.h"
 
+#include "Web/Definitions.h"
+
 #include "Definitions.h"
 
 namespace Ui {
@@ -24,7 +26,8 @@ public:
         Serializer* serializer,
         DataRepository* repository,
         SimulationMonitor* simMonitor,
-        Notifier* notifier);
+        Notifier* notifier, 
+        WebController* webController);
 
     virtual void refresh();
 
@@ -38,7 +41,7 @@ protected:
 	virtual void closeEvent(QCloseEvent* event);
 
 private:
-	void setupMenu();
+	void setupMenuAndToolbar();
 	void setupFontsAndColors();
 	void setupWidgets();
 	void setupFullScreen();

@@ -28,6 +28,9 @@
 #include "ModelGpu/ModelGpuData.h"
 #include "ModelGpu/SimulationMonitorGpu.h"
 
+#include "Web/WebController.h"
+#include "Web/WebBuilderFacade.h"
+
 #include "MessageHelper.h"
 #include "VersionController.h"
 #include "InfoController.h"
@@ -112,8 +115,12 @@ void MainController::init()
     auto worker = new Worker(this);
     SET_CHILD(_worker, worker);
 
+    auto webFacade = ServiceLocator::getInstance().getService<WebBuilderFacade>();
+    auto webController = webFacade->buildWebController();
+    SET_CHILD(_webController, webController);
+
     _serializer->init(_controllerBuildFunc, _accessBuildFunc);
-    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier);
+    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _webController);
     _worker->init(_serializer);
 
     if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {

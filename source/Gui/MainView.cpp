@@ -45,7 +45,7 @@ MainView::~MainView()
 }
 
 void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository
-	, SimulationMonitor* simMonitor, Notifier* notifier)
+	, SimulationMonitor* simMonitor, Notifier* notifier, WebController* webController)
 {
 	_model = model;
 	_controller = mainController;
@@ -55,9 +55,9 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 	_infoController->init(ui->infoLabel, mainController);
 	_monitor->init(mainController);
 	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
-		, _monitor, repository, notifier);
+		, _monitor, repository, notifier, webController);
 
-	setupMenu();
+	setupMenuAndToolbar();
 	setupFontsAndColors();
 	setupWidgets();
 	setupFullScreen();
@@ -105,7 +105,7 @@ void MainView::closeEvent(QCloseEvent * event)
 	QMainWindow::closeEvent(event);
 }
 
-void MainView::setupMenu()
+void MainView::setupMenuAndToolbar()
 {
 	auto actions = _actions->getActionHolder();
 	ui->toolBar->addSeparator();
@@ -127,7 +127,8 @@ void MainView::setupMenu()
     ui->toolBar->addSeparator();
 
 	ui->menuSimulation->addAction(actions->actionNewSimulation);
-	ui->menuSimulation->addAction(actions->actionLoadSimulation);
+    ui->menuSimulation->addAction(actions->actionWebSimulation);
+    ui->menuSimulation->addAction(actions->actionLoadSimulation);
 	ui->menuSimulation->addAction(actions->actionSaveSimulation);
 	ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionRunSimulation);

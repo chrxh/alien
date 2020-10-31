@@ -537,6 +537,15 @@
     <ClCompile Include="Release\moc_Worker.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\WebSimulationDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_WebSimulationDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_WebSimulationDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -769,6 +778,12 @@
     <CustomBuild Include="..\..\source\Gui\Worker.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\WebSimulationDialog.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\WebSimulationDialog.ui">
+      <Filter>Source Files\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\Gui\resources\tutorial\angle.png">
@@ -955,6 +970,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\Jobs.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_WebSimulationDialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

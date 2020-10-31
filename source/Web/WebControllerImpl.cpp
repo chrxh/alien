@@ -21,7 +21,7 @@ void WebControllerImpl::requestSimulationInfos()
 {
     auto const apiMethodeName = "getsimulation"s;
 
-    if (_requesting.find(RequestType::SimulationInfo) != _requesting.end()) {
+    if (_requesting.find(RequestType::SimulationInfo) == _requesting.end()) {
         _http->get(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::SimulationInfo));
     }
 }
