@@ -14,8 +14,9 @@ public:
 
 	virtual uint32_t getRandomInt() = 0;
 	virtual uint32_t getRandomInt(uint32_t range) = 0;
-	virtual double getRandomReal(double min, double max) = 0;
+    virtual uint32_t getRandomInt(uint32_t min, uint32_t max) = 0;
 	virtual double getRandomReal() = 0;
+    virtual double getRandomReal(double min, double max) = 0;
 	virtual QByteArray getRandomArray(int length) = 0;
 
 	virtual uint64_t getId() = 0;
