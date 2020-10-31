@@ -14,6 +14,8 @@
 
 #include "ModelGpu/ModelGpuServices.h"
 
+#include "Web/WebServices.h"
+
 #include "Gui/MainController.h"
 
 int main(int argc, char *argv[])
@@ -24,6 +26,7 @@ int main(int argc, char *argv[])
 
 	ModelBasicServices modelBasicServices;
 	ModelGpuServices modelGpuServices;
+    WebServices webServices;
 
     MainController controller;
 	controller.init();
