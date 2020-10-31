@@ -35,7 +35,7 @@ For Windows 10 an installer for 64-bit binaries is provided: [download link](htt
 To build alien you need Microsoft Visual Studio 2015 or higher. You find the solution file in msvc/Gui/alien.sln.
 The following third-party libaries are necessary and should be installed:
 - [Qt 5.8 or higher](https://www.qt.io/download)
-- [boost library version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1 of the repository
+- [boost library version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1
 - [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive)
 
 gtest framework is already contained in the repository.

@@ -60,6 +60,13 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionAcceleration->setIcon(iconAccelerate);
     actionAcceleration->setIconVisibleInMenu(false);
 
+    actionSimulationChanger = new QAction("Parameter changer", this);
+    actionSimulationChanger->setIconVisibleInMenu(false);
+    actionSimulationChanger->setEnabled(true);
+    actionSimulationChanger->setCheckable(true);
+    actionSimulationChanger->setChecked(false);
+    actionSimulationChanger->setToolTip("Change simulation parameters automatically");
+
 	actionComputationSettings = new QAction("Computation", this);
 	actionComputationSettings->setEnabled(true);
 
