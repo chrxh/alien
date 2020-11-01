@@ -137,8 +137,6 @@ void MainView::setupMenu()
     ui->menuSimulation->addAction(actions->actionSnapshot);
 	ui->menuSimulation->addAction(actions->actionRestore);
     ui->menuSimulation->addSeparator();
-    ui->menuSimulation->addAction(actions->actionSimulationChanger);
-    ui->menuSimulation->addSeparator();
 	ui->menuSimulation->addAction(actions->actionExit);
 
 	ui->menuSettings->addAction(actions->actionComputationSettings);
@@ -187,7 +185,8 @@ void MainView::setupMenu()
 	ui->menuCollection->addAction(actions->actionRandomMultiplier);
 	ui->menuCollection->addAction(actions->actionGridMultiplier);
 
-    ui->menuAnalysis->addAction(actions->actionMostFrequentCluster);
+    ui->menuTools->addAction(actions->actionMostFrequentCluster);
+    ui->menuTools->addAction(actions->actionSimulationChanger);
 
 	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();
@@ -203,7 +202,7 @@ void MainView::setupFontsAndColors()
 	ui->menuCollection->setFont(GuiSettings::getGlobalFont());
 	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
-    ui->menuAnalysis->setFont(GuiSettings::getGlobalFont());
+    ui->menuTools->setFont(GuiSettings::getGlobalFont());
 
 	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
 	ui->toolBar->setStyleSheet("background-color: #151540");
