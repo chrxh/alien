@@ -45,7 +45,7 @@ void InfoController::updateInfoLabel()
 {
 	QString deviceString;
 	if (Device::Gpu == _device) {
-		deviceString = "Device: <font color=#80FF80><b>C U D A </b></font>";
+		deviceString = "Device: <font color=#80FF80><b>G P U </b></font>";
 	}
     else {
         THROW_NOT_IMPLEMENTED();
