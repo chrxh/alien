@@ -19,8 +19,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
     QIcon iconRunSimulation;
-    iconRunSimulation.addFile(":/Icons/play.png", QSize(), QIcon::Normal, QIcon::On);
-    iconRunSimulation.addFile(":/Icons/pause.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconRunSimulation.addFile(":/Icons/pause.png", QSize(), QIcon::Normal, QIcon::On);
+    iconRunSimulation.addFile(":/Icons/play.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRunSimulation->setIcon(iconRunSimulation);
 	actionRunSimulation->setIconVisibleInMenu(false);
 	actionRunStepForward = new QAction("Step forward", this);
@@ -81,8 +81,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionEditor->setChecked(false);
 	actionEditor->setEnabled(true);
 	QIcon iconEditor;
-	iconEditor.addFile(":/Icons/EditorView.png", QSize(), QIcon::Normal, QIcon::On);
-	iconEditor.addFile(":/Icons/PixelView.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconEditor.addFile(":/Icons/PixelView.png", QSize(), QIcon::Normal, QIcon::On);
+	iconEditor.addFile(":/Icons/EditorView.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionEditor->setIcon(iconEditor);
 	actionEditor->setIconVisibleInMenu(false);
 
