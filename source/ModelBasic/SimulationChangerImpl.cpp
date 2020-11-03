@@ -61,7 +61,7 @@ void SimulationChangerImpl::activate(SimulationParameters const & currentParamet
     _measurementsOfCurrentEpoch = 0;
     _measurementsOfCurrentRetreat = 0;
 
-    std::cout << "[parameter changer] activated" << std::endl;
+    std::cerr << "[parameter changer] activated" << std::endl;
 }
 
 void SimulationChangerImpl::deactivate()
@@ -71,7 +71,7 @@ void SimulationChangerImpl::deactivate()
     }
 
     _state = State::Deactivated;
-    std::cout << "[parameter changer] deactivated" << std::endl;
+    std::cerr << "[parameter changer] deactivated" << std::endl;
 }
 
 SimulationParameters const & SimulationChangerImpl::retrieveSimulationParameters()
@@ -94,11 +94,11 @@ void SimulationChangerImpl::monitorDataAvailable()
     if (State::Init == _state) {
         if (InitDuration == _measurementsSinceBeginning) {
             _activeClustersReference = activeClusters;
-            std::cout << "[parameter changer] measurement finished: " << *_activeClustersReference << " active clusters"
+            std::cerr << "[parameter changer] measurement finished: " << *_activeClustersReference << " active clusters"
                 << std::endl;
 
             _state = State::FindEpochTarget;
-            std::cout << "[parameter changer] find epoch target" << std::endl;
+            std::cerr << "[parameter changer] find epoch target" << std::endl;
         }
     }
     else if (State::FindEpochTarget == _state) {
@@ -107,15 +107,15 @@ void SimulationChangerImpl::monitorDataAvailable()
         _numRetreats = 0;
 
         _state = State::Epoch;
-        std::cout << "[parameter changer] start epoch" << std::endl;
+        std::cerr << "[parameter changer] start epoch" << std::endl;
     }
     else if (State::Epoch == _state) {
         if (activeClusters < *_activeClustersReference * RetreatStartFactor) {
-            std::cout << "[parameter changer] critical number of " << activeClusters << " active clusters reached" << std::endl;
+            std::cerr << "[parameter changer] critical number of " << activeClusters << " active clusters reached" << std::endl;
 
             ++_numRetreats;
             _state = State::Retreat;
-            std::cout << "[parameter changer] start retreat" << std::endl;
+            std::cerr << "[parameter changer] start retreat" << std::endl;
 
             while (!_calculator->isSourceReached()) {
                 _calculator->getPrevious();
@@ -128,44 +128,44 @@ void SimulationChangerImpl::monitorDataAvailable()
         else if (0 == ((_measurementsSinceBeginning - _measurementsOfCurrentEpoch) % StepDuration)) {
             _parameters = _calculator->getNext();
             Q_EMIT simulationParametersChanged();
-            std::cout << "[parameter changer] epoch step" << std::endl;
+            std::cerr << "[parameter changer] epoch step" << std::endl;
 
             if (_calculator->isTargetReached()) {
                 _state = State::FindEpochTarget;
-                std::cout << "[parameter changer] end epoch" << std::endl;
+                std::cerr << "[parameter changer] end epoch" << std::endl;
             }
         }
     }
     else if (State::Retreat == _state) {
         if (activeClusters < *_activeClustersReference * EmergencyRetreatStartFactor) {
-            std::cout << "[parameter changer] very critical number of " << activeClusters << " active clusters reached" << std::endl;
+            std::cerr << "[parameter changer] very critical number of " << activeClusters << " active clusters reached" << std::endl;
 
             _state = State::EmergencyRetreat;
-            std::cout << "[parameter changer] start emergency retreat" << std::endl;
+            std::cerr << "[parameter changer] start emergency retreat" << std::endl;
 
             _parameters = _initialParameters;
             Q_EMIT simulationParametersChanged();
         }
         if (activeClusters > *_activeClustersReference * RetreatEndFactor
             || _measurementsOfCurrentRetreat + RetreatDuration < _measurementsSinceBeginning) {
-            std::cout << "[parameter changer] end retreat" << std::endl;
+            std::cerr << "[parameter changer] end retreat" << std::endl;
 
             if (_numRetreats == MaxRetreats) {
                 _state = State::FindEpochTarget;
-                std::cout << "[parameter changer] find epoch target" << std::endl;
+                std::cerr << "[parameter changer] find epoch target" << std::endl;
             }
             else {
-                std::cout << "[parameter changer] restart epoch" << std::endl;
+                std::cerr << "[parameter changer] restart epoch" << std::endl;
                 _state = State::Epoch;
             }
         }
     }
     else if (State::EmergencyRetreat == _state) {
         if (activeClusters > *_activeClustersReference * RetreatEndFactor) {
-            std::cout << "[parameter changer] end emergency retreat" << std::endl;
+            std::cerr << "[parameter changer] end emergency retreat" << std::endl;
 
             _state = State::FindEpochTarget;
-            std::cout << "[parameter changer] find epoch target" << std::endl;
+            std::cerr << "[parameter changer] find epoch target" << std::endl;
         }
     }
 }
