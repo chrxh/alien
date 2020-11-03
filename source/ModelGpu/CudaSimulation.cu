@@ -42,13 +42,13 @@ namespace
         CudaInitializer()
         {
             cudaSetDevice(0);
-            std::cout << "[CUDA] initialized" << std::endl;
+            std::cerr << "[CUDA] initialized" << std::endl;
         }
 
         ~CudaInitializer()
         {
             cudaDeviceReset();
-            std::cout << "[CUDA] closed" << std::endl;
+            std::cerr << "[CUDA] closed" << std::endl;
         }
     };
 }
@@ -88,7 +88,7 @@ CudaSimulation::CudaSimulation(
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    std::cout << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired" << std::endl;
+    std::cerr << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired" << std::endl;
 }
 
 CudaSimulation::~CudaSimulation()
@@ -107,7 +107,7 @@ CudaSimulation::~CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
-    std::cout << "[CUDA] memory released" << std::endl;
+    std::cerr << "[CUDA] memory released" << std::endl;
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
@@ -123,7 +123,7 @@ void CudaSimulation::calcCudaTimestep()
 
 void CudaSimulation::DEBUG_printNumEntries()
 {
-    std::cout
+    std::cerr
         << "Particles: " << _cudaSimulationData->entities.particles.retrieveNumEntries() << "; "
         << "Cells: " << _cudaSimulationData->entities.cells.retrieveNumEntries() << "; "
         << "Clusters: " << _cudaSimulationData->entities.clusters.retrieveNumEntries() << "; "
