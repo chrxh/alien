@@ -259,6 +259,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\source\Web\Definitions.h" />
     <ClInclude Include="..\..\source\Web\DllExport.h" />
+    <ClInclude Include="..\..\source\Web\Parser.h" />
     <ClInclude Include="..\..\source\Web\WebServices.h" />
     <CustomBuild Include="..\..\source\Web\HttpClient.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -303,6 +304,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Web\HttpClient.cpp" />
+    <ClCompile Include="..\..\source\Web\Parser.cpp" />
     <ClCompile Include="..\..\source\Web\WebBuilderFacadeImpl.cpp" />
     <ClCompile Include="..\..\source\Web\WebControllerImpl.cpp" />
     <ClCompile Include="..\..\source\Web\WebServices.cpp" />

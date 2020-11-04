@@ -1,6 +1,5 @@
-#include <QJsonDocument>
-
 #include "HttpClient.h"
+#include "Parser.h"
 
 #include "WebControllerImpl.h"
 
@@ -15,6 +14,7 @@ WebControllerImpl::WebControllerImpl()
 {
     _http = new HttpClient(this);
     connect(_http, &HttpClient::dataReceived, this, &WebControllerImpl::dataReceived);
+    connect(_http, &HttpClient::error, this, &WebController::error);
 }
 
 void WebControllerImpl::requestSimulationInfos()
@@ -40,12 +40,16 @@ void WebControllerImpl::requestDisconnect(std::string const & simulationId)
 
 void WebControllerImpl::dataReceived(int handler, QByteArray data)
 {
-    QJsonDocument::fromJson(data);
-
     auto requestType = static_cast<RequestType>(handler);
     _requesting.erase(requestType);
 
     if (RequestType::SimulationInfo == requestType) {
-        auto dataString = QString::fromStdString(data.toStdString());
+        try {
+            auto simulationInfos = Parser::parse(data);
+            Q_EMIT simulationInfosReceived(simulationInfos);
+        }
+        catch (std::exception const& exception) {
+            Q_EMIT error(exception.what());
+        }
     }
 }

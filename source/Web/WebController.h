@@ -16,5 +16,6 @@ public:
     virtual void requestDisconnect(string const& simulationId) = 0;
 
     Q_SIGNAL void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
+    Q_SIGNAL void error(string message);
 
 };

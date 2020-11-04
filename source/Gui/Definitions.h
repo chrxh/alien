@@ -68,6 +68,9 @@ enum class NotifyScrollChanged { No, Yes };
 class _SimulationConfig;
 using SimulationConfig = boost::shared_ptr<_SimulationConfig>;
 
+class WebSimulationSelectionView;
+class WebSimulationTableModel;
+
 class _SimulationConfigGpu;
 using SimulationConfigGpu = boost::shared_ptr<_SimulationConfigGpu>;
 

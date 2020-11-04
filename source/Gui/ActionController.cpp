@@ -16,34 +16,34 @@
 #include "ModelBasic/SerializationHelper.h"
 #include "ModelBasic/DescriptionFactory.h"
 
-#include "Gui/ToolbarController.h"
-#include "Gui/ToolbarContext.h"
-#include "Gui/VisualEditController.h"
-#include "Gui/DataEditController.h"
-#include "Gui/DataEditContext.h"
-#include "Gui/NewSimulationDialog.h"
-#include "Gui/SimulationParametersDialog.h"
-#include "Gui/SymbolTableDialog.h"
-#include "Gui/ComputationSettingsDialog.h"
-#include "Gui/NewRectangleDialog.h"
-#include "Gui/NewHexagonDialog.h"
-#include "Gui/NewParticlesDialog.h"
-#include "Gui/RandomMultiplierDialog.h"
-#include "Gui/GridMultiplierDialog.h"
-#include "Gui/MonitorController.h"
-#include "Gui/Settings.h"
-#include "Gui/InfoController.h"
-#include "Gui/MainController.h"
-#include "Gui/MainModel.h"
-#include "Gui/MainView.h"
-#include "Gui/Notifier.h"
-
 #include "Web/WebController.h"
 
+#include "ToolbarController.h"
+#include "ToolbarContext.h"
+#include "VisualEditController.h"
+#include "DataEditController.h"
+#include "DataEditContext.h"
+#include "NewSimulationDialog.h"
+#include "SimulationParametersDialog.h"
+#include "SymbolTableDialog.h"
+#include "ComputationSettingsDialog.h"
+#include "NewRectangleDialog.h"
+#include "NewHexagonDialog.h"
+#include "NewParticlesDialog.h"
+#include "RandomMultiplierDialog.h"
+#include "GridMultiplierDialog.h"
+#include "MonitorController.h"
+#include "Settings.h"
+#include "InfoController.h"
+#include "MainController.h"
+#include "MainModel.h"
+#include "MainView.h"
+#include "Notifier.h"
 #include "ActionModel.h"
 #include "ActionController.h"
 #include "ActionHolder.h"
 #include "SimulationConfig.h"
+#include "WebSimulationSelectionController.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -290,7 +290,9 @@ void ActionController::onNewSimulation()
 
 void ActionController::onWebSimulation()
 {
-    _webController->requestSimulationInfos();
+    WebSimulationSelectionController dialog(_webController, _mainView);
+    if (dialog.execute()) {
+    }
 }
 
 void ActionController::onSaveSimulation()
