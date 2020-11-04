@@ -13,6 +13,8 @@ public:
     void get(QUrl const& url, int handler);
     Q_SIGNAL void dataReceived(int handler, QByteArray data);
 
+    Q_SIGNAL void error(string message);
+
 private:
     Q_SLOT void finished(QNetworkReply* reply);
 

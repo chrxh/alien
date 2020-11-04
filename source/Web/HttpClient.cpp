@@ -19,6 +19,10 @@ void HttpClient::get(QUrl const& url, int handler)
 
 void HttpClient::finished(QNetworkReply * reply)
 {
+    if (QNetworkReply::NetworkError::NoError != reply->error()) {
+        Q_EMIT error("Could not read data from server.");
+        return;
+    }
     auto data = reply->readAll();
 
     auto handler = _handlerByReply.at(reply);
