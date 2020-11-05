@@ -11,10 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Select a simulation</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="0" column="1">
+    <widget class="QTableView" name="webSimulationTableView"/>
+   </item>
+   <item row="1" column="1">
     <layout class="QHBoxLayout">
      <property name="spacing">
       <number>6</number>
@@ -31,6 +34,13 @@
      <property name="bottomMargin">
       <number>0</number>
      </property>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer>
        <property name="orientation">
@@ -59,9 +69,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="0" column="0">
-    <widget class="QTableView" name="webSimulationTableView"/>
    </item>
   </layout>
  </widget>
