@@ -37,6 +37,13 @@ vector<SimulationInfo> Parser::parse(QByteArray const & raw)
         simulationInfo.userName = simulationInfoObject.value("userName").toString().toStdString();
         simulationInfo.timestep = simulationInfoObject.value("timestep").toInt();
 
+        auto worldSizeValue = simulationInfoObject.value("worldSize");
+        if (!worldSizeValue.isArray()) {
+            throw ParseErrorException("Parser error.");
+        }
+        auto worldSizeArray = worldSizeValue.toArray();
+        simulationInfo.worldSize = IntVector2D{ worldSizeArray.at(0).toInt(), worldSizeArray.at(1).toInt() };
+
         result.emplace_back(simulationInfo);
     }
     return result;

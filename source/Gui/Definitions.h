@@ -69,6 +69,7 @@ class _SimulationConfig;
 using SimulationConfig = boost::shared_ptr<_SimulationConfig>;
 
 class WebSimulationSelectionView;
+class WebSimulationSelectionController;
 class WebSimulationTableModel;
 
 class _SimulationConfigGpu;

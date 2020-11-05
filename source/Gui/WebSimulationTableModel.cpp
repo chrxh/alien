@@ -1,5 +1,6 @@
 #include "WebSimulationTableModel.h"
 
+#include <QBrush>
 #include <QString>
 #include <QVariant>
 
@@ -25,21 +26,16 @@ QVariant WebSimulationTableModel::data(const QModelIndex &index, int role) const
         }
         auto const simulationInfo = _simulationInfos.at(index.row());
         switch (index.column()) {
-        case 0: {
-            return QVariant(simulationInfo.isActive);
-        } break;
-        case 1: {
-            return QVariant(QString::fromStdString(simulationInfo.simulationName));
-        } break;
-        case 2: {
-            return QVariant(QString::fromStdString(simulationInfo.userName));
-        } break;
-        case 3: {
-            return QVariant();
-        } break;
-        case 4: {
-            return QVariant(simulationInfo.timestep);
-        } break;
+        case 0:
+            return simulationInfo.isActive;
+        case 1:
+            return QString::fromStdString(simulationInfo.simulationName);
+        case 2:
+            return QString::fromStdString(simulationInfo.userName);
+        case 3:
+            return QString("%1 x %2").arg(simulationInfo.worldSize.x).arg(simulationInfo.worldSize.y);
+        case 4:
+            return simulationInfo.timestep;
         default:
         return QVariant();
         }
@@ -51,7 +47,25 @@ QVariant WebSimulationTableModel::data(const QModelIndex &index, int role) const
 
 QVariant WebSimulationTableModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
-    return QVariant(QString::fromStdString("Header"));
+    if (role == Qt::DisplayRole) {
+        if (Qt::Orientation::Horizontal == orientation) {
+            switch (section) {
+            case 0:
+                return QString("Active");
+            case 1:
+                return QString("Simulation name");
+            case 2:
+                return QString("Username");
+            case 3:
+                return QString("World size");
+            case 4:
+                return QString("Time step");
+            default:
+                return QString();
+            }
+        }
+    }
+    return QVariant();
 }
 
 void WebSimulationTableModel::setSimulationInfos(vector<SimulationInfo> const & value)

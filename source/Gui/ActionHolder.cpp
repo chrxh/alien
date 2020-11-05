@@ -9,7 +9,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionNewSimulation = new QAction("New", this);
 	actionNewSimulation->setEnabled(true);
 	actionNewSimulation->setShortcut(Qt::CTRL + Qt::Key_N);
-    actionWebSimulation = new QAction("Web", this);
+    actionWebSimulation = new QAction("Web access", this);
     actionWebSimulation->setEnabled(true);
     actionWebSimulation->setShortcut(Qt::CTRL + Qt::Key_W);
     actionLoadSimulation = new QAction("Load", this);
