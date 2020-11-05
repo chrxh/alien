@@ -12,7 +12,7 @@ WebSimulationSelectionController::WebSimulationSelectionController(WebController
     : QObject(parent), _webController(webController)
 {
     _model = new WebSimulationTableModel(parent);
-    _view = new WebSimulationSelectionView(_model, parent);
+    _view = new WebSimulationSelectionView(this, _model, parent);
     connect(webController, &WebController::simulationInfosReceived, this, &WebSimulationSelectionController::simulationInfosReceived);
     connect(webController, &WebController::error, this, &WebSimulationSelectionController::error);
 
@@ -22,6 +22,11 @@ WebSimulationSelectionController::WebSimulationSelectionController(WebController
 int WebSimulationSelectionController::execute()
 {
     return _view->exec();
+}
+
+void WebSimulationSelectionController::refresh()
+{
+    _webController->requestSimulationInfos();
 }
 
 void WebSimulationSelectionController::simulationInfosReceived(vector<SimulationInfo> simulationInfos)

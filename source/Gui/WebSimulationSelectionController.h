@@ -14,6 +14,8 @@ public:
 
     int execute();
 
+    void refresh();
+
 private:
     Q_SLOT void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
     Q_SLOT void error(string message);
