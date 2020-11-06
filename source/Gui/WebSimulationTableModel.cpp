@@ -55,7 +55,7 @@ QVariant WebSimulationTableModel::headerData(int section, Qt::Orientation orient
             case 1:
                 return QString("Simulation name");
             case 2:
-                return QString("Username");
+                return QString("User name");
             case 3:
                 return QString("World size");
             case 4:
