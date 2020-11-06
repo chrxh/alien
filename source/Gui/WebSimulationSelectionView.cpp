@@ -17,10 +17,11 @@ WebSimulationSelectionView::WebSimulationSelectionView(
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
 
-    ui->webSimulationTableView->setModel(model);
-    ui->webSimulationTableView->setAlternatingRowColors(true);
-    ui->webSimulationTableView->horizontalHeader()->setStretchLastSection(true);
-    ui->webSimulationTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->webSimulationTreeView->setModel(model);
+    ui->webSimulationTreeView->setAlternatingRowColors(true);
+    ui->webSimulationTreeView->setRootIsDecorated(false);
+    ui->webSimulationTreeView->header()->setStretchLastSection(false);
+    ui->webSimulationTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents); 
 
     connect(ui->refreshButton, &QPushButton::clicked, _controller, &WebSimulationSelectionController::refresh);
 }
