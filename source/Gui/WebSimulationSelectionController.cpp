@@ -19,6 +19,12 @@ WebSimulationSelectionController::WebSimulationSelectionController(WebController
     webController->requestSimulationInfos();
 }
 
+SimulationInfo WebSimulationSelectionController::getSelectedSimulation() const
+{
+    auto const index = _view->getIndexOfSelectedSimulation();
+    return _model->getSimulationInfo(index);
+}
+
 int WebSimulationSelectionController::execute()
 {
     return _view->exec();
