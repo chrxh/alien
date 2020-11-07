@@ -17,6 +17,12 @@ void HttpClient::get(QUrl const& url, int handler)
     _handlerByReply.insert_or_assign(reply, handler);
 }
 
+void HttpClient::post(QUrl const & url, int handler, QByteArray const & data)
+{
+    auto reply = _networkManager.post(QNetworkRequest(url), data);
+    _handlerByReply.insert_or_assign(reply, handler);
+}
+
 void HttpClient::finished(QNetworkReply * reply)
 {
     if (QNetworkReply::NetworkError::NoError != reply->error()) {

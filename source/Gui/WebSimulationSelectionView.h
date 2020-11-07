@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QItemSelection>
 
 #include "Definitions.h"
 
@@ -19,8 +20,13 @@ public:
         QWidget* parent = nullptr);
     virtual ~WebSimulationSelectionView();
 
+    int getIndexOfSelectedSimulation() const;
+
 private:
-    Ui::WebSimulationSelectionView *ui;
+
+    Q_SLOT void simulationSelectionChanged(QItemSelection const& selected, QItemSelection const& deselected);
+
+    Ui::WebSimulationSelectionView *_ui;
     WebSimulationSelectionController* _controller;
 };
 

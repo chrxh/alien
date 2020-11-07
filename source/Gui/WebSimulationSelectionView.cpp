@@ -1,3 +1,4 @@
+
 #include "WebSimulationSelectionView.h"
 
 #include "Gui/Settings.h"
@@ -11,23 +12,37 @@ WebSimulationSelectionView::WebSimulationSelectionView(
     WebSimulationTableModel* model, 
     QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::WebSimulationSelectionView)
+    , _ui(new Ui::WebSimulationSelectionView)
     , _controller(controller)
 {
-    ui->setupUi(this);
+    _ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
 
-    ui->webSimulationTreeView->setModel(model);
-    ui->webSimulationTreeView->setAlternatingRowColors(true);
-    ui->webSimulationTreeView->setRootIsDecorated(false);
-    ui->webSimulationTreeView->header()->setStretchLastSection(false);
-    ui->webSimulationTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents); 
+    _ui->webSimulationTreeView->setModel(model);
+    _ui->webSimulationTreeView->setAlternatingRowColors(true);
+    _ui->webSimulationTreeView->setRootIsDecorated(false);
+    _ui->webSimulationTreeView->header()->setStretchLastSection(false);
+    _ui->webSimulationTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents); 
+    auto const selectionModel = _ui->webSimulationTreeView->selectionModel();
 
-    connect(ui->refreshButton, &QPushButton::clicked, _controller, &WebSimulationSelectionController::refresh);
+    connect(_ui->refreshButton, &QPushButton::clicked, _controller, &WebSimulationSelectionController::refresh);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &WebSimulationSelectionView::simulationSelectionChanged);
 }
 
 
 WebSimulationSelectionView::~WebSimulationSelectionView()
 {
-    delete ui;
+    delete _ui;
+}
+
+int WebSimulationSelectionView::getIndexOfSelectedSimulation() const
+{
+    auto const selectionModel = _ui->webSimulationTreeView->selectionModel();
+    return selectionModel->selectedRows().front().row();
+}
+
+void WebSimulationSelectionView::simulationSelectionChanged(QItemSelection const& selected, QItemSelection const& deselected)
+{
+    auto const anyRowSelected = selected.indexes().size() > 0;
+    _ui->okButton->setEnabled(anyRowSelected);
 }
