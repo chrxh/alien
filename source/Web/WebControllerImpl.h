@@ -21,7 +21,8 @@ private:
     HttpClient* _http = nullptr;
 
     enum class RequestType {
-        SimulationInfo
+        SimulationInfo,
+        Connect
     };
     set<RequestType> _requesting;
 };

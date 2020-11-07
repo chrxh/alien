@@ -21,13 +21,21 @@ void WebControllerImpl::requestSimulationInfos()
 {
     auto const apiMethodeName = "getsimulation"s;
 
-    if (_requesting.find(RequestType::SimulationInfo) == _requesting.end()) {
-        _http->get(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::SimulationInfo));
+    if (_requesting.find(RequestType::SimulationInfo) != _requesting.end()) {
+        return;
     }
+    _http->get(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::SimulationInfo));
 }
 
 void WebControllerImpl::requestConnectToSimulation(std::string const & simulationId, std::string const & password)
 {
+    auto const apiMethodeName = "connect"s;
+
+    if (_requesting.find(RequestType::Connect) != _requesting.end()) {
+        return;
+    }
+    _http->post(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::Connect), QByteArray::fromStdString(password));
+
 }
 
 void WebControllerImpl::requestTask(std::string const & simulationId)

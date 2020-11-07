@@ -290,9 +290,33 @@ void ActionController::onNewSimulation()
 
 void ActionController::onWebSimulation()
 {
-    WebSimulationSelectionController dialog(_webController, _mainView);
-    if (dialog.execute()) {
+    auto dialog = new WebSimulationSelectionController(_webController, _mainView);
+    if (!dialog->execute()) {
+        delete dialog;
+        return;
     }
+    auto const simulationInfo = dialog->getSelectedSimulation();
+    auto const title = "Connecting to " + QString::fromStdString(simulationInfo.simulationName);
+    auto const label = "Enter password for " + QString::fromStdString(simulationInfo.userName);
+    auto const password = QInputDialog::getText(_mainView, title, label, QLineEdit::Password);
+    delete dialog;
+
+    QEventLoop loop;
+    bool error = false;
+    connect(_webController, &WebController::connectToSimulationReceived, &loop, &QEventLoop::quit);
+    connect(_webController, &WebController::error, [&](auto const& message) {
+        QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
+        msgBox.exec();
+        error = true;
+        loop.quit();
+    });
+    _webController->requestConnectToSimulation(simulationInfo.simulationId, password.toStdString());
+    loop.exec();
+    if (error) {
+        return;
+    }
+
+
 }
 
 void ActionController::onSaveSimulation()

@@ -20,6 +20,7 @@ public:
         int role = Qt::DisplayRole) const override;
 
     void setSimulationInfos(vector<SimulationInfo> const& value);
+    SimulationInfo getSimulationInfo(int index) const;
 
 private:
     vector<SimulationInfo> _simulationInfos;

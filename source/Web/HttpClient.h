@@ -11,6 +11,7 @@ public:
     HttpClient(QObject* parent = nullptr);
 
     void get(QUrl const& url, int handler);
+    void post(QUrl const& url, int handler, QByteArray const& data);
     Q_SIGNAL void dataReceived(int handler, QByteArray data);
 
     Q_SIGNAL void error(string message);

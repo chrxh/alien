@@ -12,6 +12,8 @@ class WebSimulationSelectionController
 public:
     WebSimulationSelectionController(WebController* webController, QWidget *parent = nullptr);
 
+    SimulationInfo getSelectedSimulation() const;
+
     int execute();
 
     void refresh();
