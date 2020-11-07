@@ -74,3 +74,8 @@ void WebSimulationTableModel::setSimulationInfos(vector<SimulationInfo> const & 
     _simulationInfos = value;
     endResetModel();
 }
+
+SimulationInfo WebSimulationTableModel::getSimulationInfo(int index) const
+{
+    return _simulationInfos.at(index);
+}
