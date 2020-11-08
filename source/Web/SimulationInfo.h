@@ -4,7 +4,7 @@
 
 struct SimulationInfo
 {
-    string simulationId;
+    int simulationId;
     bool isActive = false;
     string simulationName;
     string userName;

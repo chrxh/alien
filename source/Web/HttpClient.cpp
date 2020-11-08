@@ -19,7 +19,11 @@ void HttpClient::get(QUrl const& url, int handler)
 
 void HttpClient::post(QUrl const & url, int handler, QByteArray const & data)
 {
-    auto reply = _networkManager.post(QNetworkRequest(url), data);
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    request.setHeader(QNetworkRequest::UserAgentHeader, "alien");
+
+    auto reply = _networkManager.post(request, data);
     _handlerByReply.insert_or_assign(reply, handler);
 }
 
