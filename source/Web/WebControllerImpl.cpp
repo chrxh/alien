@@ -1,3 +1,5 @@
+#include <QUrlQuery>
+
 #include "HttpClient.h"
 #include "Parser.h"
 
@@ -27,14 +29,22 @@ void WebControllerImpl::requestSimulationInfos()
     _http->get(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::SimulationInfo));
 }
 
-void WebControllerImpl::requestConnectToSimulation(std::string const & simulationId, std::string const & password)
+void WebControllerImpl::requestConnectToSimulation(int simulationId, std::string const & password)
 {
     auto const apiMethodeName = "connect"s;
 
     if (_requesting.find(RequestType::Connect) != _requesting.end()) {
         return;
     }
-    _http->post(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::Connect), QByteArray::fromStdString(password));
+
+    QUrlQuery params;
+    params.addQueryItem("simulationId", QString("%1").arg(simulationId));
+    params.addQueryItem("password", QString::fromStdString(password));
+
+    _http->post(
+        QUrl(QString::fromStdString(host + apiMethodeName)), 
+        static_cast<int>(RequestType::Connect), 
+        params.query().toUtf8());
 
 }
 

@@ -9,7 +9,7 @@ public:
     virtual ~WebControllerImpl() = default;
 
     void requestSimulationInfos() override;
-    void requestConnectToSimulation(std::string const& simulationId, std::string const& password) override;
+    void requestConnectToSimulation(int simulationId, std::string const& password) override;
     void requestTask(std::string const& simulationId) override;
     void requestDisconnect(std::string const& simulationId) override;
 
