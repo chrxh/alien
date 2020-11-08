@@ -11,7 +11,7 @@ public:
     virtual ~WebController() = default;
 
     virtual void requestSimulationInfos() = 0;
-    virtual void requestConnectToSimulation(string const& simulationId, string const& password) = 0;
+    virtual void requestConnectToSimulation(int simulationId, string const& password) = 0;
     virtual void requestTask(string const& simulationId) = 0;
     virtual void requestDisconnect(string const& simulationId) = 0;
 
