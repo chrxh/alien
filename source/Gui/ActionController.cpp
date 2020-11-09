@@ -301,6 +301,10 @@ void ActionController::onWebSimulation()
     auto const password = QInputDialog::getText(_mainView, title, label, QLineEdit::Password);
     delete dialog;
 
+    if (password.isEmpty()) {
+        return;
+    }
+
     QEventLoop loop;
     bool error = false;
     connect(_webController, &WebController::connectToSimulationReceived, &loop, &QEventLoop::quit);
