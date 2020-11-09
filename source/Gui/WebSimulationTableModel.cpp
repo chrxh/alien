@@ -27,7 +27,7 @@ QVariant WebSimulationTableModel::data(const QModelIndex &index, int role) const
         auto const simulationInfo = _simulationInfos.at(index.row());
         switch (index.column()) {
         case 0:
-            return simulationInfo.isActive;
+            return simulationInfo.isActive ? "connected" : "waiting for connection...";
         case 1:
             return QString::fromStdString(simulationInfo.simulationName);
         case 2:
@@ -51,7 +51,7 @@ QVariant WebSimulationTableModel::headerData(int section, Qt::Orientation orient
         if (Qt::Orientation::Horizontal == orientation) {
             switch (section) {
             case 0:
-                return QString("Active");
+                return QString("State");
             case 1:
                 return QString("Simulation name");
             case 2:
