@@ -28,5 +28,6 @@ private:
 
     Ui::WebSimulationSelectionView *_ui;
     WebSimulationSelectionController* _controller;
+    WebSimulationTableModel* _model;
 };
 

@@ -14,6 +14,7 @@ WebSimulationSelectionView::WebSimulationSelectionView(
     : QDialog(parent)
     , _ui(new Ui::WebSimulationSelectionView)
     , _controller(controller)
+    , _model(model)
 {
     _ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
@@ -27,6 +28,11 @@ WebSimulationSelectionView::WebSimulationSelectionView(
 
     connect(_ui->refreshButton, &QPushButton::clicked, _controller, &WebSimulationSelectionController::refresh);
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &WebSimulationSelectionView::simulationSelectionChanged);
+    connect(_ui->webSimulationTreeView, &QTreeView::doubleClicked, [&] {
+        if (_ui->okButton->isEnabled()) {
+            Q_EMIT _ui->okButton->clicked();
+        }
+    });
 }
 
 
@@ -44,5 +50,13 @@ int WebSimulationSelectionView::getIndexOfSelectedSimulation() const
 void WebSimulationSelectionView::simulationSelectionChanged(QItemSelection const& selected, QItemSelection const& deselected)
 {
     auto const anyRowSelected = selected.indexes().size() > 0;
-    _ui->okButton->setEnabled(anyRowSelected);
+
+    if (anyRowSelected) {
+        auto const index = selected.indexes().front().row();
+        auto const simulationInfo = _model->getSimulationInfo(index);
+        _ui->okButton->setEnabled(!simulationInfo.isActive);
+    }
+    else {
+        _ui->okButton->setEnabled(false);
+    }
 }
