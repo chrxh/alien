@@ -32,7 +32,7 @@ vector<SimulationInfo> Parser::parse(QByteArray const & raw)
 
         SimulationInfo simulationInfo;
         simulationInfo.simulationId = simulationInfoObject.value("id").toInt();
-        simulationInfo.isActive= simulationInfoObject.value("isActive").toBool();
+        simulationInfo.isActive = simulationInfoObject.value("isActive").toBool();
         simulationInfo.simulationName = simulationInfoObject.value("simulationName").toString().toStdString();
         simulationInfo.userName = simulationInfoObject.value("userName").toString().toStdString();
         simulationInfo.timestep = simulationInfoObject.value("timestep").toInt();
