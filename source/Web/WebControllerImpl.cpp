@@ -10,6 +10,11 @@ using namespace std::string_literals;
 namespace
 {
     auto const host = "http://localhost/api/"s;
+
+    auto const apiGetSimulation = "getsimulation"s;
+    auto const apiConnect = "connect"s;
+    auto const apiDisconnect = "disconnect"s;
+
 }
 
 WebControllerImpl::WebControllerImpl()
@@ -21,39 +26,21 @@ WebControllerImpl::WebControllerImpl()
 
 void WebControllerImpl::requestSimulationInfos()
 {
-    auto const apiMethodeName = "getsimulation"s;
-
-    if (_requesting.find(RequestType::SimulationInfo) != _requesting.end()) {
-        return;
-    }
-    _http->get(QUrl(QString::fromStdString(host + apiMethodeName)), static_cast<int>(RequestType::SimulationInfo));
+    get(apiGetSimulation, RequestType::SimulationInfo);
 }
 
-void WebControllerImpl::requestConnectToSimulation(int simulationId, std::string const & password)
+void WebControllerImpl::requestConnectToSimulation(string const& simulationId, string const& password)
 {
-    auto const apiMethodeName = "connect"s;
-
-    if (_requesting.find(RequestType::Connect) != _requesting.end()) {
-        return;
-    }
-
-    QUrlQuery params;
-    params.addQueryItem("simulationId", QString("%1").arg(simulationId));
-    params.addQueryItem("password", QString::fromStdString(password));
-
-    _http->post(
-        QUrl(QString::fromStdString(host + apiMethodeName)), 
-        static_cast<int>(RequestType::Connect), 
-        params.query().toUtf8());
-
+    post(apiConnect, RequestType::Connect, { { "simulationId", simulationId },{ "password", password } });
 }
 
 void WebControllerImpl::requestTask(std::string const & simulationId)
 {
 }
 
-void WebControllerImpl::requestDisconnect(std::string const & simulationId)
+void WebControllerImpl::requestDisconnect(std::string const & simulationId, string const& token)
 {
+    post(apiDisconnect, RequestType::Disconnect, {{"simulationId", simulationId}, {"token", token}});
 }
 
 void WebControllerImpl::dataReceived(int handler, QByteArray data)
@@ -78,4 +65,32 @@ void WebControllerImpl::dataReceived(int handler, QByteArray data)
     }
     break;
     }
+}
+
+void WebControllerImpl::get(string const & apiMethodName, RequestType requestType)
+{
+    if (_requesting.find(requestType) != _requesting.end()) {
+        return;
+    }
+    _requesting.insert(requestType);
+
+    _http->get(QUrl(QString::fromStdString(host + apiMethodName)), static_cast<int>(requestType));
+}
+
+void WebControllerImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> keyValues)
+{
+    if (_requesting.find(requestType) != _requesting.end()) {
+        return;
+    }
+    _requesting.insert(requestType);
+
+    QUrlQuery params;
+    for (auto const& keyValue : keyValues) {
+        params.addQueryItem(QString::fromStdString(keyValue.first), QString::fromStdString(keyValue.second));
+    }
+
+    _http->post(
+        QUrl(QString::fromStdString(host + apiMethodName)),
+        static_cast<int>(requestType),
+        params.query().toUtf8());
 }
