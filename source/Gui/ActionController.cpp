@@ -291,12 +291,14 @@ void ActionController::onNewSimulation()
 
 void ActionController::onWebSimulation()
 {
-    auto const prevToken = _webSimController->getConnectionToken();
+    auto const prevSimulationId = _webSimController->getCurrentSimulationId();
+    auto const prevToken = _webSimController->getCurrentToken();
     
-    _webSimController->onConnectToSimulation();
+    if (_webSimController->onConnectToSimulation()) {
 
-    if (prevToken) {
-        _webSimController->onDisconnectToSimulation(*prevToken);
+        if (prevToken && prevSimulationId) {
+            _webSimController->onDisconnectToSimulation(*prevSimulationId, *prevToken);
+        }
     }
 }
 
