@@ -146,6 +146,12 @@ void ActionController::init(
 	connect(actions->actionRestrictTPS, &QAction::triggered, this, &ActionController::onToggleRestrictTPS);
 }
 
+void ActionController::close()
+{
+    auto const actions = _model->getActionHolder();
+    actions->actionWebSimulation->setChecked(false);
+}
+
 ActionHolder * ActionController::getActionHolder()
 {
 	return _model->getActionHolder();
