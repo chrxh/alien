@@ -61,7 +61,8 @@ void WebControllerImpl::dataReceived(int handler, QByteArray data)
     auto requestType = static_cast<RequestType>(handler);
     _requesting.erase(requestType);
 
-    if (RequestType::SimulationInfo == requestType) {
+    switch (requestType) {
+    case RequestType::SimulationInfo : {
         try {
             auto simulationInfos = Parser::parse(data);
             Q_EMIT simulationInfosReceived(simulationInfos);
@@ -69,5 +70,12 @@ void WebControllerImpl::dataReceived(int handler, QByteArray data)
         catch (std::exception const& exception) {
             Q_EMIT error(exception.what());
         }
+    }
+    break;
+    case RequestType::Connect: {
+        auto const token = !data.isEmpty() ? optional<string>(data.toStdString()) : optional<string>();
+        Q_EMIT connectToSimulationReceived(token);
+    }
+    break;
     }
 }
