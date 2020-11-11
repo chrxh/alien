@@ -1,6 +1,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QString>
 
 #include "Parser.h"
 
@@ -31,7 +32,7 @@ vector<SimulationInfo> Parser::parse(QByteArray const & raw)
         auto simulationInfoObject = simulationInfoValue.toObject();
 
         SimulationInfo simulationInfo;
-        simulationInfo.simulationId = simulationInfoObject.value("id").toInt();
+        simulationInfo.simulationId = std::to_string(simulationInfoObject.value("id").toInt());
         simulationInfo.isActive = simulationInfoObject.value("isActive").toBool();
         simulationInfo.simulationName = simulationInfoObject.value("simulationName").toString().toStdString();
         simulationInfo.userName = simulationInfoObject.value("userName").toString().toStdString();
