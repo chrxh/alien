@@ -75,6 +75,8 @@ class WebSimulationTableModel;
 class _SimulationConfigGpu;
 using SimulationConfigGpu = boost::shared_ptr<_SimulationConfigGpu>;
 
+class WebSimulationController;
+
 enum class ModelComputationType
 {
 	Gpu = 1
