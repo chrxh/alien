@@ -101,6 +101,7 @@ void MainView::resizeEvent(QResizeEvent *event)
 
 void MainView::closeEvent(QCloseEvent * event)
 {
+    _actions->close();
 	_controller->autoSave();
 	QMainWindow::closeEvent(event);
 }

@@ -13,11 +13,13 @@ public:
 	ActionController(QObject * parent = nullptr);
 	virtual ~ActionController() = default;
 
-	virtual void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
+	void init(MainController* mainController, MainModel* mainModel, MainView* mainView, VisualEditController* visualEditor
 		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
 		, MonitorController* monitor, DataRepository* repository, Notifier* notifier, WebController* webController);
 
-	virtual ActionHolder* getActionHolder();
+    void close();
+
+	ActionHolder* getActionHolder();
 
 private:
 	Q_SLOT void onNewSimulation();
