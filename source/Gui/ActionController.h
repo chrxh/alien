@@ -21,7 +21,7 @@ public:
 
 private:
 	Q_SLOT void onNewSimulation();
-    Q_SLOT void onWebSimulation();
+    Q_SLOT void onWebSimulation(bool toogled);
     Q_SLOT void onSaveSimulation();
 	Q_SLOT void onLoadSimulation();
 	Q_SLOT void onRunClicked(bool toggled);

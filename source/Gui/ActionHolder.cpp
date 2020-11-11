@@ -11,6 +11,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionNewSimulation->setShortcut(Qt::CTRL + Qt::Key_N);
     actionWebSimulation = new QAction("Web access", this);
     actionWebSimulation->setEnabled(true);
+    actionWebSimulation->setCheckable(true);
+    actionWebSimulation->setChecked(false);
     actionWebSimulation->setShortcut(Qt::CTRL + Qt::Key_W);
     actionLoadSimulation = new QAction("Load", this);
 	actionLoadSimulation->setEnabled(true);

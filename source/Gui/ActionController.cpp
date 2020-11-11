@@ -88,7 +88,7 @@ void ActionController::init(
 
 	auto actions = _model->getActionHolder();
 	connect(actions->actionNewSimulation, &QAction::triggered, this, &ActionController::onNewSimulation);
-    connect(actions->actionWebSimulation, &QAction::triggered, this, &ActionController::onWebSimulation);
+    connect(actions->actionWebSimulation, &QAction::toggled, this, &ActionController::onWebSimulation);
     connect(actions->actionSaveSimulation, &QAction::triggered, this, &ActionController::onSaveSimulation);
 	connect(actions->actionLoadSimulation, &QAction::triggered, this, &ActionController::onLoadSimulation);
 	connect(actions->actionComputationSettings, &QAction::triggered, this, &ActionController::onConfigureGrid);
@@ -289,15 +289,19 @@ void ActionController::onNewSimulation()
 	}
 }
 
-void ActionController::onWebSimulation()
+void ActionController::onWebSimulation(bool toogled)
 {
-    auto const prevSimulationId = _webSimController->getCurrentSimulationId();
-    auto const prevToken = _webSimController->getCurrentToken();
-    
-    if (_webSimController->onConnectToSimulation()) {
-
-        if (prevToken && prevSimulationId) {
-            _webSimController->onDisconnectToSimulation(*prevSimulationId, *prevToken);
+    if (toogled) {
+        if (!_webSimController->onConnectToSimulation()) {
+            auto actions = _model->getActionHolder();
+            actions->actionWebSimulation->setChecked(false);
+        }
+    }
+    else {
+        auto const currentSimulationId = _webSimController->getCurrentSimulationId();
+        auto const currentToken = _webSimController->getCurrentToken();
+        if (currentSimulationId && currentToken) {
+            _webSimController->onDisconnectToSimulation(*currentSimulationId, *currentToken);
         }
     }
 }
@@ -878,6 +882,7 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
     actions->actionDisplayLink->setChecked(true);
     actions->actionGlowEffect->setEnabled(true);
     actions->actionSimulationChanger->setChecked(false);
+    actions->actionWebSimulation->setChecked(false);
     onRunClicked(false);
 	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
 	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
