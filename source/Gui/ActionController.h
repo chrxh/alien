@@ -98,5 +98,5 @@ private:
 	ToolbarController* _toolbar = nullptr;
 	MonitorController* _monitor = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
-    WebController* _webController = nullptr;
+    WebSimulationController* _webSimController = nullptr;
 };
