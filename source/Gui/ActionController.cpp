@@ -43,7 +43,7 @@
 #include "ActionController.h"
 #include "ActionHolder.h"
 #include "SimulationConfig.h"
-#include "WebSimulationSelectionController.h"
+#include "WebSimulationController.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -80,7 +80,8 @@ void ActionController::init(
 	_monitor = monitor;
 	_repository = repository;
 	_notifier = notifier;
-    _webController = webController;
+    delete _webSimController;
+    _webSimController = new WebSimulationController(webController, _mainView);
 	SET_CHILD(_numberGenerator, numberGenerator);
 
 	connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ActionController::receivedNotifications);
@@ -290,37 +291,13 @@ void ActionController::onNewSimulation()
 
 void ActionController::onWebSimulation()
 {
-    auto dialog = new WebSimulationSelectionController(_webController, _mainView);
-    if (!dialog->execute()) {
-        delete dialog;
-        return;
+    auto const prevToken = _webSimController->getConnectionToken();
+    
+    _webSimController->onConnectToSimulation();
+
+    if (prevToken) {
+        _webSimController->onDisconnectToSimulation(*prevToken);
     }
-    auto const simulationInfo = dialog->getSelectedSimulation();
-    auto const title = "Connecting to " + QString::fromStdString(simulationInfo.simulationName);
-    auto const label = "Enter password for " + QString::fromStdString(simulationInfo.userName);
-    auto const password = QInputDialog::getText(_mainView, title, label, QLineEdit::Password);
-    delete dialog;
-
-    if (password.isEmpty()) {
-        return;
-    }
-
-    QEventLoop loop;
-    bool error = false;
-    connect(_webController, &WebController::connectToSimulationReceived, &loop, &QEventLoop::quit);
-    connect(_webController, &WebController::error, [&](auto const& message) {
-        QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
-        msgBox.exec();
-        error = true;
-        loop.quit();
-    });
-    _webController->requestConnectToSimulation(simulationInfo.simulationId, password.toStdString());
-    loop.exec();
-    if (error) {
-        return;
-    }
-
-
 }
 
 void ActionController::onSaveSimulation()
