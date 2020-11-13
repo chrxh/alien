@@ -4,6 +4,7 @@
 #include "Parser.h"
 
 #include "WebAccessImpl.h"
+#include "Task.h"
 
 using namespace std::string_literals;
 
@@ -14,7 +15,7 @@ namespace
     auto const apiGetSimulation = "getsimulation"s;
     auto const apiConnect = "connect"s;
     auto const apiDisconnect = "disconnect"s;
-
+    auto const apiGetUnprocessedTasks = "getunprocessedtasks"s;
 }
 
 WebAccessImpl::WebAccessImpl()
@@ -34,8 +35,9 @@ void WebAccessImpl::requestConnectToSimulation(string const& simulationId, strin
     post(apiConnect, RequestType::Connect, { { "simulationId", simulationId },{ "password", password } });
 }
 
-void WebAccessImpl::requestTask(std::string const & simulationId)
+void WebAccessImpl::requestUnprocessedTasks(std::string const & simulationId, string const& token)
 {
+    post(apiGetUnprocessedTasks, RequestType::UnprocessedTasks, { { "simulationId", simulationId }, {"token", token} });
 }
 
 void WebAccessImpl::requestDisconnect(std::string const & simulationId, string const& token)
@@ -51,7 +53,7 @@ void WebAccessImpl::dataReceived(int handler, QByteArray data)
     switch (requestType) {
     case RequestType::SimulationInfo : {
         try {
-            auto simulationInfos = Parser::parse(data);
+            auto simulationInfos = Parser::parseForSimulationInfos(data);
             Q_EMIT simulationInfosReceived(simulationInfos);
         }
         catch (std::exception const& exception) {
@@ -62,6 +64,11 @@ void WebAccessImpl::dataReceived(int handler, QByteArray data)
     case RequestType::Connect: {
         auto const token = !data.isEmpty() ? optional<string>(data.toStdString()) : optional<string>();
         Q_EMIT connectToSimulationReceived(token);
+    }
+    break;
+    case RequestType::UnprocessedTasks: {
+        auto tasks = Parser::parseForUnprocessedTasks(data);
+        Q_EMIT unprocessedTasksReceived(tasks);
     }
     break;
     }

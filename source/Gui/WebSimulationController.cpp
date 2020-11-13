@@ -94,5 +94,6 @@ optional<string> WebSimulationController::getCurrentToken() const
 
 void WebSimulationController::checkIfSimulationImageIsRequired() const
 {
+    _webAccess->requestUnprocessedTasks(*_currentSimulationId, *_currentToken);
 }
 
