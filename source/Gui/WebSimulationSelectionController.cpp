@@ -1,20 +1,20 @@
 #include <QMessageBox>
 #include <QString>
 
-#include "Web/WebController.h"
+#include "Web/WebAccess.h"
 
 #include "WebSimulationSelectionView.h"
 #include "WebSimulationTableModel.h"
 
 #include "WebSimulationSelectionController.h"
 
-WebSimulationSelectionController::WebSimulationSelectionController(WebController* webController, QWidget * parent)
+WebSimulationSelectionController::WebSimulationSelectionController(WebAccess* webController, QWidget * parent)
     : QObject(parent), _webController(webController)
 {
     _model = new WebSimulationTableModel(parent);
     _view = new WebSimulationSelectionView(this, _model, parent);
-    connect(webController, &WebController::simulationInfosReceived, this, &WebSimulationSelectionController::simulationInfosReceived);
-    connect(webController, &WebController::error, this, &WebSimulationSelectionController::error);
+    connect(webController, &WebAccess::simulationInfosReceived, this, &WebSimulationSelectionController::simulationInfosReceived);
+    connect(webController, &WebAccess::error, this, &WebSimulationSelectionController::error);
 
     webController->requestSimulationInfos();
 }

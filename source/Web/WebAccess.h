@@ -4,11 +4,11 @@
 
 #include "SimulationInfo.h"
 
-class WEB_EXPORT WebController : public QObject
+class WEB_EXPORT WebAccess : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~WebController() = default;
+    virtual ~WebAccess() = default;
 
     virtual void requestSimulationInfos() = 0;
     virtual void requestConnectToSimulation(string const& simulationId, string const& password) = 0;

@@ -27,7 +27,7 @@ public:
         DataRepository* repository,
         SimulationMonitor* simMonitor,
         Notifier* notifier, 
-        WebController* webController);
+        WebSimulationController* webSimController);
 
     virtual void refresh();
 

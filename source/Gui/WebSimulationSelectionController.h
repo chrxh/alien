@@ -10,7 +10,7 @@ class WebSimulationSelectionController
 {
     Q_OBJECT
 public:
-    WebSimulationSelectionController(WebController* webController, QWidget *parent = nullptr);
+    WebSimulationSelectionController(WebAccess* webController, QWidget *parent = nullptr);
 
     SimulationInfo getSelectedSimulation() const;
 
@@ -25,5 +25,5 @@ private:
 private:
     WebSimulationTableModel* _model = nullptr;
     WebSimulationSelectionView* _view = nullptr;
-    WebController* _webController = nullptr;
+    WebAccess* _webController = nullptr;
 };
