@@ -10,9 +10,9 @@
 
 #include "WebSimulationSelectionController.h"
 
-WebSimulationController::WebSimulationController(WebAccess * webController, QWidget* parent /*= nullptr*/)
+WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget* parent /*= nullptr*/)
     : QObject(parent)
-    , _webController(webController)
+    , _webAccess(webAccess)
     , _parent(parent)
     , _timer(new QTimer(this))
 {
@@ -27,7 +27,7 @@ void WebSimulationController::init(SimulationAccess * access)
 
 bool WebSimulationController::onConnectToSimulation()
 {
-    auto const dialog = new WebSimulationSelectionController(_webController, _parent);
+    auto const dialog = new WebSimulationSelectionController(_webAccess, _parent);
     if (!dialog->execute()) {
         delete dialog;
         return false;
@@ -44,18 +44,18 @@ bool WebSimulationController::onConnectToSimulation()
 
     QEventLoop loop;
     bool error = false;
-    connect(_webController, &WebAccess::connectToSimulationReceived, [&, this](auto const& token) {
+    connect(_webAccess, &WebAccess::connectToSimulationReceived, [&, this](auto const& token) {
         _currentSimulationId = simulationInfo.simulationId;
         _currentToken = token;
         loop.quit();
     });
-    connect(_webController, &WebAccess::error, [&](auto const& message) {
+    connect(_webAccess, &WebAccess::error, [&](auto const& message) {
         QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
         msgBox.exec();
         error = true;
         loop.quit();
     });
-    _webController->requestConnectToSimulation(simulationInfo.simulationId, password.toStdString());
+    _webAccess->requestConnectToSimulation(simulationInfo.simulationId, password.toStdString());
     loop.exec();
     if (error) {
         return false;
@@ -78,7 +78,7 @@ bool WebSimulationController::onConnectToSimulation()
 bool WebSimulationController::onDisconnectToSimulation(string const& simulationId, string const & token)
 {
     _timer->stop();
-    _webController->requestDisconnect(simulationId, token);
+    _webAccess->requestDisconnect(simulationId, token);
     return true;
 }
 
