@@ -3,16 +3,26 @@
 #include <QInputDialog>
 #include <QEventLoop>
 #include <QMessageBox>
+#include <QTimer>
 
-#include "Web/WebController.h"
+#include "ModelBasic/SimulationAccess.h"
+#include "Web/WebAccess.h"
 
 #include "WebSimulationSelectionController.h"
 
-WebSimulationController::WebSimulationController(WebController * webController, QWidget* parent /*= nullptr*/)
+WebSimulationController::WebSimulationController(WebAccess * webController, QWidget* parent /*= nullptr*/)
     : QObject(parent)
     , _webController(webController)
     , _parent(parent)
+    , _timer(new QTimer(this))
 {
+    connect(_timer, &QTimer::timeout, this, &WebSimulationController::checkIfSimulationImageIsRequired);
+
+}
+
+void WebSimulationController::init(SimulationAccess * access)
+{
+    SET_CHILD(_access, access);
 }
 
 bool WebSimulationController::onConnectToSimulation()
@@ -34,12 +44,12 @@ bool WebSimulationController::onConnectToSimulation()
 
     QEventLoop loop;
     bool error = false;
-    connect(_webController, &WebController::connectToSimulationReceived, [&, this](auto const& token) {
+    connect(_webController, &WebAccess::connectToSimulationReceived, [&, this](auto const& token) {
         _currentSimulationId = simulationInfo.simulationId;
         _currentToken = token;
         loop.quit();
     });
-    connect(_webController, &WebController::error, [&](auto const& message) {
+    connect(_webController, &WebAccess::error, [&](auto const& message) {
         QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
         msgBox.exec();
         error = true;
@@ -55,6 +65,7 @@ bool WebSimulationController::onConnectToSimulation()
         QMessageBox msgBox(QMessageBox::Information, "Connection successful", "You are connected to "
             + QString::fromStdString(simulationInfo.simulationName) + ".");
         msgBox.exec();
+        _timer->start(1000);
         return true;
     }
     else {
@@ -66,6 +77,7 @@ bool WebSimulationController::onConnectToSimulation()
 
 bool WebSimulationController::onDisconnectToSimulation(string const& simulationId, string const & token)
 {
+    _timer->stop();
     _webController->requestDisconnect(simulationId, token);
     return true;
 }
@@ -78,5 +90,9 @@ optional<string> WebSimulationController::getCurrentSimulationId() const
 optional<string> WebSimulationController::getCurrentToken() const
 {
     return _currentToken;
+}
+
+void WebSimulationController::checkIfSimulationImageIsRequired() const
+{
 }
 

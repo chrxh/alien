@@ -28,7 +28,7 @@
 #include "ModelGpu/ModelGpuData.h"
 #include "ModelGpu/SimulationMonitorGpu.h"
 
-#include "Web/WebController.h"
+#include "Web/WebAccess.h"
 #include "Web/WebBuilderFacade.h"
 
 #include "MessageHelper.h"
@@ -43,6 +43,7 @@
 #include "DataAnalyzer.h"
 #include "QApplicationHelper.h"
 #include "Worker.h"
+#include "WebSimulationController.h"
 
 namespace Const
 {
@@ -119,8 +120,11 @@ void MainController::init()
     auto webController = webFacade->buildWebController();
     SET_CHILD(_webController, webController);
 
+    auto webSimController = new WebSimulationController(webController, _view);
+    SET_CHILD(_webSimController, webSimController);
+
     _serializer->init(_controllerBuildFunc, _accessBuildFunc);
-    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _webController);
+    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _webSimController);
     _worker->init(_serializer);
 
     if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
@@ -249,15 +253,12 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 	connectSimController();
 
-    delete _simAccess;  //to reduce memory usage delete old object first
-    _simAccess = nullptr;
-	auto simAccess = _accessBuildFunc(_simController);
-    SET_CHILD(_simAccess, simAccess);
 	auto context = _simController->getContext();
 	_descHelper->init(context);
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
-	_repository->init(_notifier, _simAccess, _descHelper, context);
+	_repository->init(_notifier, _accessBuildFunc(_simController), _descHelper, context);
     _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier);
+    _webSimController->init(_accessBuildFunc(_simController));
 
 	auto simMonitor = _monitorBuildFunc(_simController);
 	SET_CHILD(_simMonitor, simMonitor);

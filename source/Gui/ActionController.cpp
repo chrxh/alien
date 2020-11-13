@@ -16,7 +16,7 @@
 #include "ModelBasic/SerializationHelper.h"
 #include "ModelBasic/DescriptionFactory.h"
 
-#include "Web/WebController.h"
+#include "Web/WebAccess.h"
 
 #include "ToolbarController.h"
 #include "ToolbarContext.h"
@@ -63,7 +63,7 @@ void ActionController::init(
     MonitorController* monitor,
     DataRepository* repository,
     Notifier* notifier,
-    WebController* webController)
+    WebSimulationController* webSimController)
 {
     auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
     auto numberGenerator = factory->buildRandomNumberGenerator();
@@ -80,8 +80,7 @@ void ActionController::init(
 	_monitor = monitor;
 	_repository = repository;
 	_notifier = notifier;
-    delete _webSimController;
-    _webSimController = new WebSimulationController(webController, _mainView);
+    _webSimController = webSimController;
 	SET_CHILD(_numberGenerator, numberGenerator);
 
 	connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ActionController::receivedNotifications);

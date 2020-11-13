@@ -12,8 +12,11 @@ public:
 	DataRepository(QObject* parent = nullptr) : QObject(parent) {}
 	virtual ~DataRepository() = default;
 
-	virtual void init(Notifier* notifier, SimulationAccess* access, DescriptionHelper* connector
-		, SimulationContext* context);
+	virtual void init(
+        Notifier* notifier, 
+        SimulationAccess* access, 
+        DescriptionHelper* connector, 
+        SimulationContext* context);
 
 	virtual DataDescription& getDataRef();
 	virtual CellDescription& getCellDescRef(uint64_t cellId);
