@@ -10,7 +10,7 @@ public:
 
     void requestSimulationInfos() override;
     void requestConnectToSimulation(string const& simulationId, string const& password) override;
-    void requestTask(string const& simulationId) override;
+    void requestUnprocessedTasks(string const& simulationId, string const& token) override;
     void requestDisconnect(string const& simulationId, string const& token) override;
 
 private:
@@ -19,7 +19,8 @@ private:
     enum class RequestType {
         SimulationInfo,
         Connect,
-        Disconnect
+        Disconnect,
+        UnprocessedTasks
     };
 
     void get(string const& apiMethodName, RequestType requestType);

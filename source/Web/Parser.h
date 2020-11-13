@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimulationInfo.h"
+#include "Task.h"
 
 class ParseErrorException : public std::exception
 {
@@ -11,5 +12,6 @@ public:
 class Parser
 {
 public:
-    static vector<SimulationInfo> parse(QByteArray const& raw);
+    static vector<SimulationInfo> parseForSimulationInfos(QByteArray const& raw);
+    static vector<UnprocessedTask> parseForUnprocessedTasks(QByteArray const& raw);
 };
