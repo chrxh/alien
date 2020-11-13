@@ -33,8 +33,8 @@ private:
     optional<string> _currentSimulationId;
     optional<string> _currentToken;
 
-    list<UnprocessedTask> _tasks;
-    bool _processingTasks = false;  //true = first element of _tasks is currently processed
+    map<string, UnprocessedTask> _taskById;
+    optional<string> _processingTaskId;
     QImagePtr _targetImage;
     std::mutex _mutex;
 
