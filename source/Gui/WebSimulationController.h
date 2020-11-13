@@ -10,7 +10,7 @@ class WebSimulationController
 {
     Q_OBJECT
 public:
-    WebSimulationController(WebAccess* webController, QWidget* parent = nullptr);
+    WebSimulationController(WebAccess* webAccess, QWidget* parent = nullptr);
 
     void init(SimulationAccess* access);
 
@@ -28,6 +28,6 @@ private:
 
     SimulationAccess* _access = nullptr;
     QWidget* _parent = nullptr;
-    WebAccess* _webController = nullptr;
+    WebAccess* _webAccess = nullptr;
     QTimer* _timer = nullptr;
 };
