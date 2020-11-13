@@ -1,5 +1,7 @@
 #include "WebSimulationController.h"
 
+#include <iostream>
+
 #include <QInputDialog>
 #include <QEventLoop>
 #include <QMessageBox>
@@ -17,12 +19,14 @@ WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget*
     , _timer(new QTimer(this))
 {
     connect(_timer, &QTimer::timeout, this, &WebSimulationController::checkIfSimulationImageIsRequired);
+    connect(_webAccess, &WebAccess::unprocessedTasksReceived, this, &WebSimulationController::unprocessedTasksReceived);
 
 }
 
 void WebSimulationController::init(SimulationAccess * access)
 {
     SET_CHILD(_access, access);
+    connect(_access, &SimulationAccess::imageReady, this, &WebSimulationController::tasksProcessed);
 }
 
 bool WebSimulationController::onConnectToSimulation()
@@ -95,5 +99,37 @@ optional<string> WebSimulationController::getCurrentToken() const
 void WebSimulationController::checkIfSimulationImageIsRequired() const
 {
     _webAccess->requestUnprocessedTasks(*_currentSimulationId, *_currentToken);
+}
+
+void WebSimulationController::unprocessedTasksReceived(vector<UnprocessedTask> tasks)
+{
+    if (tasks.empty()) {
+        return;
+    }
+    _tasks.insert(_tasks.end(), tasks.begin(), tasks.end());
+    std::cerr << "[Web] " << tasks.size() << " task(s) received" << std::endl;
+    processTasks();
+}
+
+void WebSimulationController::processTasks()
+{
+    if (_processingTasks || _tasks.empty()) {
+        return;
+    }
+    _processingTasks = true;
+    auto task = _tasks.front();
+
+    _targetImage = boost::make_shared<QImage>(task.size.x, task.size.y, QImage::Format_RGB32);
+    auto rect = IntRect{ task.pos, IntVector2D{task.pos.x + task.size.x, task.pos.y + task.size.y } };
+    _access->requireImage(rect, _targetImage, _mutex);
+}
+
+void WebSimulationController::tasksProcessed()
+{
+    std::cerr << "[Web] task processed" << std::endl;
+    _tasks.pop_front();
+    _processingTasks = false;
+
+    processTasks();
 }
 
