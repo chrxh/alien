@@ -5,7 +5,7 @@
 
 #include "Parser.h"
 
-vector<SimulationInfo> Parser::parse(QByteArray const & raw)
+vector<SimulationInfo> Parser::parseForSimulationInfos(QByteArray const & raw)
 {
     vector<SimulationInfo> result;
 
@@ -46,6 +46,52 @@ vector<SimulationInfo> Parser::parse(QByteArray const & raw)
         simulationInfo.worldSize = IntVector2D{ worldSizeArray.at(0).toInt(), worldSizeArray.at(1).toInt() };
 
         result.emplace_back(simulationInfo);
+    }
+    return result;
+}
+
+vector<UnprocessedTask> Parser::parseForUnprocessedTasks(QByteArray const & raw)
+{
+    vector<UnprocessedTask> result;
+
+    auto jsonDoc = QJsonDocument::fromJson(raw);
+    if (!jsonDoc.isObject()) {
+        throw ParseErrorException("Parser error.");
+    }
+    auto jsonObject = jsonDoc.object();
+
+    if (1 != jsonObject.size()) {
+        throw ParseErrorException("Parser error.");
+    }
+    auto dataValue = jsonObject.value(jsonObject.keys().front());
+    if (!dataValue.isArray()) {
+        throw ParseErrorException("Parser error.");
+    }
+
+    auto taskArray = dataValue.toArray();
+    for (auto taskIndex = 0; taskIndex < taskArray.size(); ++taskIndex) {
+        auto taskValue = taskArray.at(taskIndex);
+        if (!taskValue.isObject()) {
+            throw ParseErrorException("Parser error.");
+        }
+        auto taskObject = taskValue.toObject();
+
+        UnprocessedTask task;
+        task.id = std::to_string(taskObject.value("id").toInt());
+
+        auto posValue = taskObject.value("pos");
+        if (!posValue.isArray()) {
+            throw ParseErrorException("Parser error.");
+        }
+        auto posArray = posValue.toArray();
+        task.pos = { posArray.at(0).toInt(), posArray.at(1).toInt() };
+
+        auto sizeValue = taskObject.value("size");
+        if (!sizeValue.isArray()) {
+            throw ParseErrorException("Parser error.");
+        }
+        auto sizeArray = sizeValue.toArray();
+        task.size = { sizeArray.at(0).toInt(), sizeArray.at(1).toInt() };
     }
     return result;
 }
