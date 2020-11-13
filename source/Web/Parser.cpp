@@ -92,6 +92,7 @@ vector<UnprocessedTask> Parser::parseForUnprocessedTasks(QByteArray const & raw)
         }
         auto sizeArray = sizeValue.toArray();
         task.size = { sizeArray.at(0).toInt(), sizeArray.at(1).toInt() };
+        result.emplace_back(task);
     }
     return result;
 }
