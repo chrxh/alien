@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+#include "ModelBasic/Definitions.h"
 #include "Web/Definitions.h"
 
 class WebSimulationController
@@ -9,7 +10,9 @@ class WebSimulationController
 {
     Q_OBJECT
 public:
-    WebSimulationController(WebController* webController, QWidget* parent = nullptr);
+    WebSimulationController(WebAccess* webController, QWidget* parent = nullptr);
+
+    void init(SimulationAccess* access);
 
     bool onConnectToSimulation();
     bool onDisconnectToSimulation(string const& simulationId, string const& token);
@@ -18,9 +21,13 @@ public:
     optional<string> getCurrentToken() const;
 
 private:
+    Q_SLOT void checkIfSimulationImageIsRequired() const;
+
     optional<string> _currentSimulationId;
     optional<string> _currentToken;
 
+    SimulationAccess* _access = nullptr;
     QWidget* _parent = nullptr;
-    WebController* _webController = nullptr;
+    WebAccess* _webController = nullptr;
+    QTimer* _timer = nullptr;
 };
