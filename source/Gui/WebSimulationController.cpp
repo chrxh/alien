@@ -106,18 +106,21 @@ void WebSimulationController::unprocessedTasksReceived(vector<UnprocessedTask> t
     if (tasks.empty()) {
         return;
     }
-    _tasks.insert(_tasks.end(), tasks.begin(), tasks.end());
-    std::cerr << "[Web] " << tasks.size() << " task(s) received" << std::endl;
+    auto numPrevTask = _taskById.size();
+    for (auto const& task : tasks) {
+        _taskById.insert_or_assign(task.id, task);
+    }
+    std::cerr << "[Web] " << tasks.size() - numPrevTask << " new task(s) received" << std::endl;
     processTasks();
 }
 
 void WebSimulationController::processTasks()
 {
-    if (_processingTasks || _tasks.empty()) {
+    if (_processingTaskId || _taskById.empty()) {
         return;
     }
-    _processingTasks = true;
-    auto task = _tasks.front();
+    auto task = _taskById.begin()->second;
+    _processingTaskId = task.id;
 
     _targetImage = boost::make_shared<QImage>(task.size.x, task.size.y, QImage::Format_RGB32);
     auto rect = IntRect{ task.pos, IntVector2D{task.pos.x + task.size.x, task.pos.y + task.size.y } };
@@ -127,8 +130,8 @@ void WebSimulationController::processTasks()
 void WebSimulationController::tasksProcessed()
 {
     std::cerr << "[Web] task processed" << std::endl;
-    _tasks.pop_front();
-    _processingTasks = false;
+    _taskById.erase(*_processingTaskId);
+    _processingTaskId = boost::none;
 
     processTasks();
 }
