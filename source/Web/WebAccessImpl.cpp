@@ -3,7 +3,7 @@
 #include "HttpClient.h"
 #include "Parser.h"
 
-#include "WebControllerImpl.h"
+#include "WebAccessImpl.h"
 
 using namespace std::string_literals;
 
@@ -17,33 +17,33 @@ namespace
 
 }
 
-WebControllerImpl::WebControllerImpl()
+WebAccessImpl::WebAccessImpl()
 {
     _http = new HttpClient(this);
-    connect(_http, &HttpClient::dataReceived, this, &WebControllerImpl::dataReceived);
-    connect(_http, &HttpClient::error, this, &WebController::error);
+    connect(_http, &HttpClient::dataReceived, this, &WebAccessImpl::dataReceived);
+    connect(_http, &HttpClient::error, this, &WebAccess::error);
 }
 
-void WebControllerImpl::requestSimulationInfos()
+void WebAccessImpl::requestSimulationInfos()
 {
     get(apiGetSimulation, RequestType::SimulationInfo);
 }
 
-void WebControllerImpl::requestConnectToSimulation(string const& simulationId, string const& password)
+void WebAccessImpl::requestConnectToSimulation(string const& simulationId, string const& password)
 {
     post(apiConnect, RequestType::Connect, { { "simulationId", simulationId },{ "password", password } });
 }
 
-void WebControllerImpl::requestTask(std::string const & simulationId)
+void WebAccessImpl::requestTask(std::string const & simulationId)
 {
 }
 
-void WebControllerImpl::requestDisconnect(std::string const & simulationId, string const& token)
+void WebAccessImpl::requestDisconnect(std::string const & simulationId, string const& token)
 {
     post(apiDisconnect, RequestType::Disconnect, {{"simulationId", simulationId}, {"token", token}});
 }
 
-void WebControllerImpl::dataReceived(int handler, QByteArray data)
+void WebAccessImpl::dataReceived(int handler, QByteArray data)
 {
     auto requestType = static_cast<RequestType>(handler);
     _requesting.erase(requestType);
@@ -67,7 +67,7 @@ void WebControllerImpl::dataReceived(int handler, QByteArray data)
     }
 }
 
-void WebControllerImpl::get(string const & apiMethodName, RequestType requestType)
+void WebAccessImpl::get(string const & apiMethodName, RequestType requestType)
 {
     if (_requesting.find(requestType) != _requesting.end()) {
         return;
@@ -77,7 +77,7 @@ void WebControllerImpl::get(string const & apiMethodName, RequestType requestTyp
     _http->get(QUrl(QString::fromStdString(host + apiMethodName)), static_cast<int>(requestType));
 }
 
-void WebControllerImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> keyValues)
+void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> keyValues)
 {
     if (_requesting.find(requestType) != _requesting.end()) {
         return;

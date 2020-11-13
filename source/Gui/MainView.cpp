@@ -44,8 +44,14 @@ MainView::~MainView()
 	delete ui;
 }
 
-void MainView::init(MainModel* model, MainController* mainController, Serializer* serializer, DataRepository* repository
-	, SimulationMonitor* simMonitor, Notifier* notifier, WebController* webController)
+void MainView::init(
+    MainModel* model, 
+    MainController* mainController, 
+    Serializer* serializer, 
+    DataRepository* repository, 
+    SimulationMonitor* simMonitor, 
+    Notifier* notifier, 
+    WebSimulationController* webSimController)
 {
 	_model = model;
 	_controller = mainController;
@@ -54,8 +60,18 @@ void MainView::init(MainModel* model, MainController* mainController, Serializer
 
 	_infoController->init(ui->infoLabel, mainController);
 	_monitor->init(mainController);
-	_actions->init(_controller, _model, this, _visualEditor, serializer, _infoController, _dataEditor, _toolbar
-		, _monitor, repository, notifier, webController);
+	_actions->init(_controller, 
+        _model, 
+        this, 
+        _visualEditor, 
+        serializer, 
+        _infoController, 
+        _dataEditor, 
+        _toolbar, 
+        _monitor, 
+        repository, 
+        notifier, 
+        webSimController);
 
 	setupMenuAndToolbar();
 	setupFontsAndColors();

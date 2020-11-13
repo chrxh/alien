@@ -72,7 +72,8 @@ private:
 	Serializer* _serializer = nullptr;
 	DescriptionHelper* _descHelper = nullptr;
     DataAnalyzer* _dataAnalyzer = nullptr;
-    WebController* _webController = nullptr;
+    WebAccess* _webController = nullptr;
+    WebSimulationController* _webSimController = nullptr;
 
 	SimulationControllerBuildFunc _controllerBuildFunc;
 	SimulationAccessBuildFunc _accessBuildFunc;

@@ -46,9 +46,6 @@
     <ClInclude Include="..\..\source\Web\WebBuilderFacadeImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Web\WebControllerImpl.h">
-      <Filter>Source Files\Impl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Web\SimulationInfo.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -58,19 +55,13 @@
     <ClInclude Include="..\..\source\Web\Parser.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Web\WebAccessImpl.h">
+      <Filter>Source Files\Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Web\WebBuilderFacadeImpl.cpp">
       <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Web\WebControllerImpl.cpp">
-      <Filter>Source Files\Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_WebController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_WebController.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Web\HttpClient.cpp">
       <Filter>Source Files\Impl</Filter>
@@ -87,13 +78,22 @@
     <ClCompile Include="..\..\source\Web\Parser.cpp">
       <Filter>Source Files\Impl</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_WebAccess.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_WebAccess.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Web\WebAccessImpl.cpp">
+      <Filter>Source Files\Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\source\Web\WebController.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Web\HttpClient.h">
       <Filter>Source Files\Impl</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Web\WebAccess.h">
+      <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

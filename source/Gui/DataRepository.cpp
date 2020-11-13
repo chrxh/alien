@@ -11,11 +11,16 @@
 #include "DataRepository.h"
 #include "Notifier.h"
 
-void DataRepository::init(Notifier* notifier, SimulationAccess * access, DescriptionHelper * connector
-	, SimulationContext* context)
+void DataRepository::init(
+    Notifier* notifier, 
+    SimulationAccess * access, 
+    DescriptionHelper * connector, 
+    SimulationContext* context)
 {
+    delete _access;  //to reduce memory usage delete old object first
+    _access = nullptr;
+    SET_CHILD(_access, access);
 	_descHelper = connector;
-	_access = access;
 	_notifier = notifier;
 	_numberGenerator = context->getNumberGenerator();
 	_parameters = context->getSimulationParameters();

@@ -4,5 +4,5 @@
 
 #include "DllExport.h"
 
-class WebController;
+class WebAccess;
 class HttpClient;

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "WebController.h"
+#include "WebAccess.h"
 
-class WebControllerImpl : public WebController
+class WebAccessImpl : public WebAccess
 {
 public:
-    WebControllerImpl();
-    virtual ~WebControllerImpl() = default;
+    WebAccessImpl();
+    virtual ~WebAccessImpl() = default;
 
     void requestSimulationInfos() override;
     void requestConnectToSimulation(string const& simulationId, string const& password) override;
