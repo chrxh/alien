@@ -58,6 +58,9 @@
     <ClInclude Include="..\..\source\Web\WebAccessImpl.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Web\Task.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Web\WebBuilderFacadeImpl.cpp">
