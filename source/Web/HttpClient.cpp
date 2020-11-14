@@ -1,5 +1,6 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QHttpMultiPart>
 
 #include "HttpClient.h"
 
@@ -17,13 +18,24 @@ void HttpClient::get(QUrl const& url, int handler)
     _handlerByReply.insert_or_assign(reply, handler);
 }
 
-void HttpClient::post(QUrl const & url, int handler, QByteArray const & data)
+void HttpClient::postText(QUrl const & url, int handler, QByteArray const & data)
 {
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     request.setHeader(QNetworkRequest::UserAgentHeader, "alien");
 
     auto reply = _networkManager.post(request, data);
+    _handlerByReply.insert_or_assign(reply, handler);
+}
+
+void HttpClient::postBinary(QUrl const & url, int handler, QHttpMultiPart* data)
+{
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+    request.setHeader(QNetworkRequest::UserAgentHeader, "alien");
+
+    auto reply = _networkManager.post(request, data);
+    data->setParent(reply);
     _handlerByReply.insert_or_assign(reply, handler);
 }
 
