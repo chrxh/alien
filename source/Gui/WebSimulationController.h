@@ -8,6 +8,8 @@
 #include "Web/Definitions.h"
 #include "Web/Task.h"
 
+#include "Definitions.h"
+
 class WebSimulationController
     : public QObject
 {
@@ -25,7 +27,7 @@ public:
 
 private:
     Q_SLOT void checkIfSimulationImageIsRequired() const;
-    Q_SLOT void unprocessedTasksReceived(vector<UnprocessedTask> tasks);
+    Q_SLOT void unprocessedTasksReceived(vector<Task> tasks);
 
     void processTasks();
     Q_SLOT void tasksProcessed();
@@ -33,12 +35,15 @@ private:
     optional<string> _currentSimulationId;
     optional<string> _currentToken;
 
-    map<string, UnprocessedTask> _taskById;
+    map<string, Task> _taskById;
     optional<string> _processingTaskId;
-    QImagePtr _targetImage;
+    QImagePtr _image;
+    QByteArray _encodedImageData;
+    QBuffer* _buffer = nullptr;
+
     std::mutex _mutex;
 
-    SimulationAccess* _access = nullptr;
+    SimulationAccess* _simAccess = nullptr;
     QWidget* _parent = nullptr;
     WebAccess* _webAccess = nullptr;
     QTimer* _timer = nullptr;

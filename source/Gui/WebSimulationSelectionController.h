@@ -20,10 +20,9 @@ public:
 
 private:
     Q_SLOT void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
-    Q_SLOT void error(string message);
 
 private:
     WebSimulationTableModel* _model = nullptr;
     WebSimulationSelectionView* _view = nullptr;
-    WebAccess* _webController = nullptr;
+    WebAccess* _webAccess = nullptr;
 };

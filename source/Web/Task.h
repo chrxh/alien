@@ -2,15 +2,8 @@
 
 #include "Definitions.h"
 
-struct UnprocessedTask {
+struct Task {
     string id;
     IntVector2D pos;
     IntVector2D size;
-};
-
-struct ProcessedTask {
-    string id;
-    IntVector2D pos;
-    IntVector2D size;
-    QByteArray data;
 };
