@@ -1,4 +1,5 @@
 #include <QUrlQuery>
+#include <QHttpMultiPart>
 
 #include "HttpClient.h"
 #include "Parser.h"
@@ -10,39 +11,57 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const host = "http://localhost/api/"s;
+    auto const HostAddress = "http://localhost/api/backend/"s;
 
-    auto const apiGetSimulation = "getsimulation"s;
-    auto const apiConnect = "connect"s;
-    auto const apiDisconnect = "disconnect"s;
-    auto const apiGetUnprocessedTasks = "getunprocessedtasks"s;
+    auto const ApiGetSimulation = "getsimulation"s;
+    auto const ApiConnect = "connect"s;
+    auto const ApiDisconnect = "disconnect"s;
+    auto const ApiGetUnprocessedTasks = "getunprocessedtasks"s;
+    auto const ApiSendProcessedTask = "sendprocessedtask"s;
 }
 
 WebAccessImpl::WebAccessImpl()
 {
+    init();
+}
+
+void WebAccessImpl::init()
+{
+    for (auto const& connection : _connections) {
+        disconnect(connection);
+    }
+    _connections.clear();
+
+    delete _http;
     _http = new HttpClient(this);
-    connect(_http, &HttpClient::dataReceived, this, &WebAccessImpl::dataReceived);
-    connect(_http, &HttpClient::error, this, &WebAccess::error);
+
+    _connections.emplace_back(connect(_http, &HttpClient::dataReceived, this, &WebAccessImpl::dataReceived));
+    _connections.emplace_back(connect(_http, &HttpClient::error, this, &WebAccess::error));
 }
 
 void WebAccessImpl::requestSimulationInfos()
 {
-    get(apiGetSimulation, RequestType::SimulationInfo);
+    get(ApiGetSimulation, RequestType::SimulationInfo);
 }
 
 void WebAccessImpl::requestConnectToSimulation(string const& simulationId, string const& password)
 {
-    post(apiConnect, RequestType::Connect, { { "simulationId", simulationId },{ "password", password } });
+    post(ApiConnect, RequestType::Connect, { { "simulationId", simulationId },{ "password", password } });
 }
 
 void WebAccessImpl::requestUnprocessedTasks(std::string const & simulationId, string const& token)
 {
-    post(apiGetUnprocessedTasks, RequestType::UnprocessedTasks, { { "simulationId", simulationId }, {"token", token} });
+    post(ApiGetUnprocessedTasks, RequestType::UnprocessedTasks, { { "simulationId", simulationId }, {"token", token} });
+}
+
+void WebAccessImpl::sendProcessedTask(string const & simulationId, string const & token, QBuffer* data)
+{
+    post(ApiSendProcessedTask, RequestType::ProcessedTask, { { "simulationId", simulationId },{ "token", token } }, data);
 }
 
 void WebAccessImpl::requestDisconnect(std::string const & simulationId, string const& token)
 {
-    post(apiDisconnect, RequestType::Disconnect, {{"simulationId", simulationId}, {"token", token}});
+    post(ApiDisconnect, RequestType::Disconnect, {{"simulationId", simulationId}, {"token", token}});
 }
 
 void WebAccessImpl::dataReceived(int handler, QByteArray data)
@@ -81,10 +100,10 @@ void WebAccessImpl::get(string const & apiMethodName, RequestType requestType)
     }
     _requesting.insert(requestType);
 
-    _http->get(QUrl(QString::fromStdString(host + apiMethodName)), static_cast<int>(requestType));
+    _http->get(QUrl(QString::fromStdString(HostAddress + apiMethodName)), static_cast<int>(requestType));
 }
 
-void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> keyValues)
+void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> const& keyValues)
 {
     if (_requesting.find(requestType) != _requesting.end()) {
         return;
@@ -96,8 +115,40 @@ void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, 
         params.addQueryItem(QString::fromStdString(keyValue.first), QString::fromStdString(keyValue.second));
     }
 
-    _http->post(
-        QUrl(QString::fromStdString(host + apiMethodName)),
+    _http->postText(
+        QUrl(QString::fromStdString(HostAddress + apiMethodName)),
         static_cast<int>(requestType),
         params.query().toUtf8());
+}
+
+void WebAccessImpl::post(
+    string const & apiMethodName, 
+    RequestType requestType, 
+    std::map<string, string> const& keyValues, 
+    QBuffer* data)
+{
+    if (_requesting.find(requestType) != _requesting.end()) {
+        return;
+    }
+    _requesting.insert(requestType);
+
+
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    QHttpPart textPart;
+    textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"text\""));
+    textPart.setBody("my text");
+
+    QHttpPart imagePart;
+    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
+    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"image\""));
+    imagePart.setBodyDevice(data);
+
+    multiPart->append(textPart);
+    multiPart->append(imagePart);
+
+    _http->postBinary(
+        QUrl(QString::fromStdString(HostAddress + apiMethodName)),
+        static_cast<int>(requestType),
+        multiPart);
 }

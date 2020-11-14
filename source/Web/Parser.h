@@ -13,5 +13,5 @@ class Parser
 {
 public:
     static vector<SimulationInfo> parseForSimulationInfos(QByteArray const& raw);
-    static vector<UnprocessedTask> parseForUnprocessedTasks(QByteArray const& raw);
+    static vector<Task> parseForUnprocessedTasks(QByteArray const& raw);
 };
