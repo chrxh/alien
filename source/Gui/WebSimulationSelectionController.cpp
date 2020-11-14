@@ -8,15 +8,14 @@
 
 #include "WebSimulationSelectionController.h"
 
-WebSimulationSelectionController::WebSimulationSelectionController(WebAccess* webController, QWidget * parent)
-    : QObject(parent), _webController(webController)
+WebSimulationSelectionController::WebSimulationSelectionController(WebAccess* webAccess, QWidget * parent)
+    : QObject(parent), _webAccess(webAccess)
 {
     _model = new WebSimulationTableModel(parent);
     _view = new WebSimulationSelectionView(this, _model, parent);
-    connect(webController, &WebAccess::simulationInfosReceived, this, &WebSimulationSelectionController::simulationInfosReceived);
-    connect(webController, &WebAccess::error, this, &WebSimulationSelectionController::error);
+    connect(webAccess, &WebAccess::simulationInfosReceived, this, &WebSimulationSelectionController::simulationInfosReceived);
 
-    webController->requestSimulationInfos();
+    refresh();
 }
 
 SimulationInfo WebSimulationSelectionController::getSelectedSimulation() const
@@ -32,16 +31,12 @@ int WebSimulationSelectionController::execute()
 
 void WebSimulationSelectionController::refresh()
 {
-    _webController->requestSimulationInfos();
+    _view->setWindowTitle("Select a simulation to connect (requesting data from server)");
+    _webAccess->requestSimulationInfos();
 }
 
 void WebSimulationSelectionController::simulationInfosReceived(vector<SimulationInfo> simulationInfos)
 {
+    _view->setWindowTitle("Select a simulation to connect");
     _model->setSimulationInfos(simulationInfos);
-}
-
-void WebSimulationSelectionController::error(string message)
-{
-    QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
-    msgBox.exec();
 }

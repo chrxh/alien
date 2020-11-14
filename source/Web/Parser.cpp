@@ -50,9 +50,9 @@ vector<SimulationInfo> Parser::parseForSimulationInfos(QByteArray const & raw)
     return result;
 }
 
-vector<UnprocessedTask> Parser::parseForUnprocessedTasks(QByteArray const & raw)
+vector<Task> Parser::parseForUnprocessedTasks(QByteArray const & raw)
 {
-    vector<UnprocessedTask> result;
+    vector<Task> result;
 
     auto jsonDoc = QJsonDocument::fromJson(raw);
     if (!jsonDoc.isObject()) {
@@ -76,7 +76,7 @@ vector<UnprocessedTask> Parser::parseForUnprocessedTasks(QByteArray const & raw)
         }
         auto taskObject = taskValue.toObject();
 
-        UnprocessedTask task;
+        Task task;
         task.id = std::to_string(taskObject.value("id").toInt());
 
         auto posValue = taskObject.value("pos");
