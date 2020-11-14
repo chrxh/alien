@@ -11,9 +11,9 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const HostAddress = "http://localhost/api/backend/"s;
+    auto const HostAddress = "http://localhost/api/"s;
 
-    auto const ApiGetSimulation = "getsimulation"s;
+    auto const ApiGetSimulation = "getsimulationinfos"s;
     auto const ApiConnect = "connect"s;
     auto const ApiDisconnect = "disconnect"s;
     auto const ApiGetUnprocessedTasks = "getunprocessedtasks"s;
@@ -54,9 +54,13 @@ void WebAccessImpl::requestUnprocessedTasks(std::string const & simulationId, st
     post(ApiGetUnprocessedTasks, RequestType::UnprocessedTasks, { { "simulationId", simulationId }, {"token", token} });
 }
 
-void WebAccessImpl::sendProcessedTask(string const & simulationId, string const & token, QBuffer* data)
+void WebAccessImpl::sendProcessedTask(string const & simulationId, string const & token, string const& taskId, QBuffer* data)
 {
-    post(ApiSendProcessedTask, RequestType::ProcessedTask, { { "simulationId", simulationId },{ "token", token } }, data);
+    postImage(
+        ApiSendProcessedTask, 
+        RequestType::ProcessedTask, 
+        {{"simulationId", simulationId}, {"token", token}, {"taskId", taskId}}, 
+        data);
 }
 
 void WebAccessImpl::requestDisconnect(std::string const & simulationId, string const& token)
@@ -121,7 +125,7 @@ void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, 
         params.query().toUtf8());
 }
 
-void WebAccessImpl::post(
+void WebAccessImpl::postImage(
     string const & apiMethodName, 
     RequestType requestType, 
     std::map<string, string> const& keyValues, 
@@ -135,16 +139,19 @@ void WebAccessImpl::post(
 
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart textPart;
-    textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"text\""));
-    textPart.setBody("my text");
+    for (auto const& keyValue : keyValues) {
+        QHttpPart textPart;
+        textPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+            QVariant("form-data; name=\""+ QString::fromStdString(keyValue.first) + "\""));
+        textPart.setBody(QByteArray::fromStdString(keyValue.second));
+        multiPart->append(textPart);
+    }
 
     QHttpPart imagePart;
     imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
     imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"image\""));
     imagePart.setBodyDevice(data);
 
-    multiPart->append(textPart);
     multiPart->append(imagePart);
 
     _http->postBinary(

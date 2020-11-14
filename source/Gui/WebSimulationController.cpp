@@ -139,7 +139,6 @@ void WebSimulationController::processTasks()
     _simAccess->requireImage(rect, _image, _mutex);
 }
 
-#include <QDebug>
 void WebSimulationController::tasksProcessed()
 {
     if (!_currentSimulationId) {
@@ -150,7 +149,7 @@ void WebSimulationController::tasksProcessed()
 
     std::cerr << "[Web] task processed" << std::endl;
 
-    auto const taskId = _taskById.at(*_processingTaskId);
+    auto const taskId = *_processingTaskId;
 
     _encodedImageData.clear();
 
@@ -160,13 +159,7 @@ void WebSimulationController::tasksProcessed()
 
     _image->save(_buffer, "PNG");
     _buffer->seek(0);
-
-/*
-    auto const imageSize = _targetImage->size();
-    auto const numBytes = imageSize.width() * imageSize.height() * 4;
-    QByteArray imageData(reinterpret_cast<const char*>(_targetImage->bits()), numBytes);
-*/
-    _webAccess->sendProcessedTask(*_currentSimulationId, *_currentToken, _buffer);
+    _webAccess->sendProcessedTask(*_currentSimulationId, *_currentToken, taskId, _buffer);
 
     _taskById.erase(*_processingTaskId);
     _processingTaskId = boost::none;

@@ -18,7 +18,7 @@ public:
     virtual void requestSimulationInfos() = 0;
     virtual void requestConnectToSimulation(string const& simulationId, string const& password) = 0;
     virtual void requestUnprocessedTasks(string const& simulationId, string const& token) = 0;
-    virtual void sendProcessedTask(string const& simulationId, string const& token, QBuffer* data) = 0;
+    virtual void sendProcessedTask(string const& simulationId, string const& token, string const& taskId, QBuffer* data) = 0;
     virtual void requestDisconnect(string const& simulationId, string const& token) = 0;
 
     Q_SIGNAL void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
