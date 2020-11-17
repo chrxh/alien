@@ -26,21 +26,23 @@ public:
     optional<string> getCurrentToken() const;
 
 private:
-    Q_SLOT void checkIfSimulationImageIsRequired() const;
+    Q_SLOT void requestUnprocessedTasks() const;
     Q_SLOT void unprocessedTasksReceived(vector<Task> tasks);
 
     void processTasks();
-    Q_SLOT void tasksProcessed();
+    Q_SLOT void tasksProcessedStep1();
+    Q_SLOT void tasksProcessedStep2();
 
     optional<string> _currentSimulationId;
     optional<string> _currentToken;
 
     map<string, Task> _taskById;
     optional<string> _processingTaskId;
-    QImagePtr _image;
+
     QByteArray _encodedImageData;
     QBuffer* _buffer = nullptr;
 
+    QImagePtr _image;
     std::mutex _mutex;
 
     SimulationAccess* _simAccess = nullptr;
