@@ -13,24 +13,30 @@
 
 #include "WebSimulationSelectionController.h"
 
+namespace
+{
+    auto const POLLING_INTERVAL = 300;
+}
+
 WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget* parent /*= nullptr*/)
     : QObject(parent)
     , _webAccess(webAccess)
     , _parent(parent)
     , _timer(new QTimer(this))
 {
-    connect(_timer, &QTimer::timeout, this, &WebSimulationController::checkIfSimulationImageIsRequired);
+    connect(_timer, &QTimer::timeout, this, &WebSimulationController::requestUnprocessedTasks);
     connect(_webAccess, &WebAccess::unprocessedTasksReceived, this, &WebSimulationController::unprocessedTasksReceived);
     connect(_webAccess, &WebAccess::error, [&](auto const& message) {
         QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
         msgBox.exec();
     });
+    connect(_webAccess, &WebAccess::sendProcessedTaskReceived, this, &WebSimulationController::tasksProcessedStep2);
 }
 
 void WebSimulationController::init(SimulationAccess * access)
 {
     SET_CHILD(_simAccess, access);
-    connect(_simAccess, &SimulationAccess::imageReady, this, &WebSimulationController::tasksProcessed);
+    connect(_simAccess, &SimulationAccess::imageReady, this, &WebSimulationController::tasksProcessedStep1);
 }
 
 bool WebSimulationController::onConnectToSimulation()
@@ -75,7 +81,7 @@ bool WebSimulationController::onConnectToSimulation()
         QMessageBox msgBox(QMessageBox::Information, "Connection successful", "You are connected to "
             + QString::fromStdString(simulationInfo.simulationName) + ".");
         msgBox.exec();
-        _timer->start(1000);
+        _timer->start(POLLING_INTERVAL);
         return true;
     }
     else {
@@ -102,7 +108,7 @@ optional<string> WebSimulationController::getCurrentToken() const
     return _currentToken;
 }
 
-void WebSimulationController::checkIfSimulationImageIsRequired() const
+void WebSimulationController::requestUnprocessedTasks() const
 {
     _webAccess->requestUnprocessedTasks(*_currentSimulationId, *_currentToken);
 }
@@ -120,6 +126,7 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
 
     auto numPrevTask = _taskById.size();
     for (auto const& task : tasks) {
+        std::cerr << "TaskId " << task.id << std::endl;
         _taskById.insert_or_assign(task.id, task);
     }
     std::cerr << "[Web] " << tasks.size() - numPrevTask << " new task(s) received" << std::endl;
@@ -139,7 +146,7 @@ void WebSimulationController::processTasks()
     _simAccess->requireImage(rect, _image, _mutex);
 }
 
-void WebSimulationController::tasksProcessed()
+void WebSimulationController::tasksProcessedStep1()
 {
     if (!_currentSimulationId) {
         _processingTaskId = boost::none;
@@ -147,21 +154,30 @@ void WebSimulationController::tasksProcessed()
         return;
     }
 
-    std::cerr << "[Web] task processed" << std::endl;
-
     auto const taskId = *_processingTaskId;
-
-    _encodedImageData.clear();
-
+    
     delete _buffer;
     _buffer = new QBuffer(&_encodedImageData);
     _buffer->open(QIODevice::ReadWrite);
-
     _image->save(_buffer, "PNG");
     _buffer->seek(0);
+    
     _webAccess->sendProcessedTask(*_currentSimulationId, *_currentToken, taskId, _buffer);
 
-    _taskById.erase(*_processingTaskId);
+}
+
+void WebSimulationController::tasksProcessedStep2()
+{
+    if (!_currentSimulationId) {
+        _processingTaskId = boost::none;
+        _taskById.clear();
+        return;
+    }
+    auto const taskId = *_processingTaskId;
+
+    std::cerr << "[Web] task "<< taskId << " processed" << std::endl;
+
+    _taskById.erase(taskId);
     _processingTaskId = boost::none;
     processTasks();
 }

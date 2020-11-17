@@ -94,6 +94,10 @@ void WebAccessImpl::dataReceived(int handler, QByteArray data)
         Q_EMIT unprocessedTasksReceived(tasks);
     }
     break;
+    case RequestType::ProcessedTask: {
+        Q_EMIT sendProcessedTaskReceived();
+    }
+    break;
     }
 }
 
