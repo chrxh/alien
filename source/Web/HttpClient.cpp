@@ -15,6 +15,7 @@ HttpClient::HttpClient(QObject* parent /*= nullptr*/)
 void HttpClient::get(QUrl const& url, int handler)
 {
     QNetworkRequest request(url);
+    request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
     request.setHeader(QNetworkRequest::UserAgentHeader, "alien");
 
     auto reply = _networkManager.get(request);
@@ -24,6 +25,7 @@ void HttpClient::get(QUrl const& url, int handler)
 void HttpClient::postText(QUrl const & url, int handler, QByteArray const & data)
 {
     QNetworkRequest request(url);
+    request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     request.setHeader(QNetworkRequest::UserAgentHeader, "alien");
 
@@ -34,6 +36,7 @@ void HttpClient::postText(QUrl const & url, int handler, QByteArray const & data
 void HttpClient::postBinary(QUrl const & url, int handler, QHttpMultiPart* data)
 {
     QNetworkRequest request(url);
+    request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
     request.setHeader(QNetworkRequest::UserAgentHeader, "alien");
 
     auto reply = _networkManager.post(request, data);
