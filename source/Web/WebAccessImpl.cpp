@@ -11,7 +11,7 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const HostAddress = "http://localhost/api/"s;
+    auto const ServerAddress = "http://localhost/api/"s;
 
     auto const ApiGetSimulation = "getsimulationinfos"s;
     auto const ApiConnect = "connect"s;
@@ -108,7 +108,7 @@ void WebAccessImpl::get(string const & apiMethodName, RequestType requestType)
     }
     _requesting.insert(requestType);
 
-    _http->get(QUrl(QString::fromStdString(HostAddress + apiMethodName)), static_cast<int>(requestType));
+    _http->get(QUrl(QString::fromStdString(ServerAddress + apiMethodName)), static_cast<int>(requestType));
 }
 
 void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> const& keyValues)
@@ -124,7 +124,7 @@ void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, 
     }
 
     _http->postText(
-        QUrl(QString::fromStdString(HostAddress + apiMethodName)),
+        QUrl(QString::fromStdString(ServerAddress + apiMethodName)),
         static_cast<int>(requestType),
         params.query().toUtf8());
 }
@@ -159,7 +159,7 @@ void WebAccessImpl::postImage(
     multiPart->append(imagePart);
 
     _http->postBinary(
-        QUrl(QString::fromStdString(HostAddress + apiMethodName)),
+        QUrl(QString::fromStdString(ServerAddress + apiMethodName)),
         static_cast<int>(requestType),
         multiPart);
 }
