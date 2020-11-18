@@ -82,6 +82,7 @@ bool WebSimulationController::onConnectToSimulation()
             + QString::fromStdString(simulationInfo.simulationName) + ".");
         msgBox.exec();
         _timer->start(POLLING_INTERVAL);
+        std::cerr << "[Web] connected" << std::endl;
         return true;
     }
     else {
@@ -95,6 +96,7 @@ bool WebSimulationController::onDisconnectToSimulation(string const& simulationI
 {
     _timer->stop();
     _webAccess->requestDisconnect(simulationId, token);
+    std::cerr << "[Web] disconnected" << std::endl;
     return true;
 }
 
@@ -126,7 +128,6 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
 
     auto numPrevTask = _taskById.size();
     for (auto const& task : tasks) {
-        std::cerr << "TaskId " << task.id << std::endl;
         _taskById.insert_or_assign(task.id, task);
     }
     std::cerr << "[Web] " << tasks.size() - numPrevTask << " new task(s) received" << std::endl;
@@ -143,6 +144,14 @@ void WebSimulationController::processTasks()
 
     _image = boost::make_shared<QImage>(task.size.x, task.size.y, QImage::Format_RGB32);
     auto const rect = IntRect{ task.pos, IntVector2D{task.pos.x + task.size.x, task.pos.y + task.size.y } };
+    std::cerr 
+        << "[Web] processing task " 
+        << task.id 
+        << ": request image with size " 
+        << task.size.x 
+        << " x " 
+        << task.size.y 
+        << std::endl;
     _simAccess->requireImage(rect, _image, _mutex);
 }
 
