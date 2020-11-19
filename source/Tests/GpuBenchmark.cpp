@@ -33,7 +33,7 @@ TEST_F(GpuBenchmark, testClusterAndParticleMovement)
     QElapsedTimer timer;
     timer.start();
     IntegrationTestHelper::runSimulation(200, _controller);
-    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms"<< std::endl;
+    std::cerr << "Time elapsed during simulation: " << timer.elapsed() << " ms"<< std::endl;
 }
 
 TEST_F(GpuBenchmark, testOnlyClusterMovement)
@@ -59,7 +59,7 @@ TEST_F(GpuBenchmark, testOnlyClusterMovement)
     QElapsedTimer timer;
     timer.start();
     IntegrationTestHelper::runSimulation(200, _controller);
-    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
+    std::cerr << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 }
 
 namespace
@@ -107,5 +107,5 @@ TEST_F(GpuBenchmarkForClusterDecomposition, testClusterDecomposition)
     QElapsedTimer timer;
     timer.start();
     IntegrationTestHelper::runSimulation(1, _controller);
-    std::cout << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
+    std::cerr << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 }

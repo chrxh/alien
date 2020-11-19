@@ -52,6 +52,8 @@ private:
     void autoSaveIntern(std::string const& filename);
     void saveSimulationIntern(string const& filename);
 
+    string getPathToApp() const;
+
 
     Worker* _worker = nullptr;
 

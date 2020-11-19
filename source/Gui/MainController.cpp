@@ -127,7 +127,7 @@ void MainController::init()
     _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _webSimController);
     _worker->init(_serializer);
 
-    if (!onLoadSimulation(Const::AutoSaveFilename, LoadOption::Non)) {
+    if (!onLoadSimulation(getPathToApp() + Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
         auto const modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
@@ -157,7 +157,7 @@ void MainController::init()
 void MainController::autoSave()
 {
     auto progress = MessageHelper::createProgressDialog("Autosaving...", _view);
-    autoSaveIntern(Const::AutoSaveFilename);
+    autoSaveIntern(getPathToApp() + Const::AutoSaveFilename);
     delete progress;
 }
 
@@ -191,6 +191,15 @@ void MainController::saveSimulationIntern(string const & filename)
 {
     serializeSimulationAndWaitUntilFinished();
     SerializationHelper::saveToFile(filename, [&]() { return _serializer->retrieveSerializedSimulation(); });
+}
+
+string MainController::getPathToApp() const
+{
+    auto result = qApp->applicationDirPath();
+    if (!result.endsWith("/") && !result.endsWith("\\")) {
+        result += "/";
+    }
+    return result.toStdString();
 }
 
 void MainController::onRunSimulation(bool run)
@@ -331,7 +340,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     auto progress = MessageHelper::createProgressDialog("Loading...", _view);
 
     if (LoadOption::SaveOldSim == option) {
-        autoSaveIntern(Const::AutoSaveForLoadingFilename);
+        autoSaveIntern(getPathToApp() + Const::AutoSaveForLoadingFilename);
     }
 	delete _simController;
     _simController = nullptr;
@@ -340,7 +349,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 
         //load old simulation
         if (LoadOption::SaveOldSim == option) {
-            CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+            CHECK(SerializationHelper::loadFromFile<SimulationController*>(getPathToApp() +
                 Const::AutoSaveForLoadingFilename,
                 [&](string const& data) { return _serializer->deserializeSimulation(data); },
                 _simController));
