@@ -232,7 +232,7 @@ void MainController::onRestoreSnapshot()
 {
 	_versionController->restoreSnapshot();
     Q_EMIT _notifier->notifyDataRepositoryChanged({
-        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
+        Receiver::DataEditor, Receiver::VisualEditor,Receiver::ActionController
     }, UpdateDescription::All);
 }
 
