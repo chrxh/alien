@@ -45,7 +45,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_internalEnergy);
     }
 
-    __host__ MonitorData getMonitorData()
+    __host__ MonitorData getMonitorData(int timeStep)
     {
         MonitorData result;
         checkCudaErrors(cudaMemcpy(&result.numClusters, _numClusters, sizeof(int), cudaMemcpyDeviceToHost));
@@ -56,6 +56,7 @@ public:
         checkCudaErrors(cudaMemcpy(&result.totalRotationalKineticEnergy, _rotationalKineticEnergy, sizeof(double), cudaMemcpyDeviceToHost));
         checkCudaErrors(cudaMemcpy(&result.totalLinearKineticEnergy, _linearKineticEnergy, sizeof(double), cudaMemcpyDeviceToHost));
         checkCudaErrors(cudaMemcpy(&result.totalInternalEnergy, _internalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
+        result.timeStep = timeStep;
         return result;
     }
 

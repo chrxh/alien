@@ -17,7 +17,7 @@ class WebSimulationController
 public:
     WebSimulationController(WebAccess* webAccess, QWidget* parent = nullptr);
 
-    void init(SimulationAccess* access);
+    void init(SimulationAccess* access, SimulationMonitor* monitor);
 
     bool onConnectToSimulation();
     bool onDisconnectToSimulation(string const& simulationId, string const& token);
@@ -33,6 +33,9 @@ private:
     Q_SLOT void tasksProcessedStep1();
     Q_SLOT void tasksProcessedStep2();
 
+    Q_SLOT void sendStatistics();
+    Q_SLOT void statisticsReadyToRetrieve();
+
     optional<string> _currentSimulationId;
     optional<string> _currentToken;
 
@@ -46,7 +49,11 @@ private:
     std::mutex _mutex;
 
     SimulationAccess* _simAccess = nullptr;
+    SimulationMonitor* _monitor = nullptr;
     QWidget* _parent = nullptr;
     WebAccess* _webAccess = nullptr;
-    QTimer* _timer = nullptr;
+    QTimer* _pollingTimer = nullptr;
+    QTimer* _updateStatisticsTimer = nullptr;
+
+    list<QMetaObject::Connection> _connections;
 };
