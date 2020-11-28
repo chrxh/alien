@@ -2,6 +2,7 @@
 
 struct MonitorData
 {
+    int timeStep = 0;
     int numClusters = 0;
     int numClustersWithTokens = 0;
     int numCells = 0;
