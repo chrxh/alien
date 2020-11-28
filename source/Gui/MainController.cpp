@@ -124,7 +124,7 @@ void MainController::init()
     SET_CHILD(_webSimController, webSimController);
 
     _serializer->init(_controllerBuildFunc, _accessBuildFunc);
-    _view->init(_model, this, _serializer, _repository, _simMonitor, _notifier, _webSimController);
+    _view->init(_model, this, _serializer, _repository, _notifier, _webSimController);
     _worker->init(_serializer);
 
     if (!onLoadSimulation(getPathToApp() + Const::AutoSaveFilename, LoadOption::Non)) {
@@ -267,10 +267,12 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _accessBuildFunc(_simController), _descHelper, context);
     _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier);
-    _webSimController->init(_accessBuildFunc(_simController));
 
 	auto simMonitor = _monitorBuildFunc(_simController);
 	SET_CHILD(_simMonitor, simMonitor);
+
+    auto webSimMonitor = _monitorBuildFunc(_simController);
+    _webSimController->init(_accessBuildFunc(_simController), webSimMonitor);
 
     auto simChanger = modelBasicFacade->buildSimulationChanger(simMonitor, context->getNumberGenerator());
     for (auto const& connection : _simChangerConnections) {
@@ -441,7 +443,7 @@ SimulationConfig MainController::getSimulationConfig() const
 
 SimulationMonitor * MainController::getSimulationMonitor() const
 {
-	return _simMonitor;
+    return _simMonitor;
 }
 
 void MainController::connectSimController() const

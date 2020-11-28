@@ -15,6 +15,7 @@ public:
     void requestUnprocessedTasks(string const& simulationId, string const& token) override;
     void sendProcessedTask(string const& simulationId, string const& token, string const& taskId, QBuffer* data) override;
     void requestDisconnect(string const& simulationId, string const& token) override;
+    void sendStatistics(string const& simulationId, string const& token, map<string, string> monitorData) override;
 
 private:
     Q_SLOT void dataReceived(int handler, QByteArray data);
@@ -24,7 +25,8 @@ private:
         Connect,
         Disconnect,
         UnprocessedTasks,
-        ProcessedTask
+        ProcessedTask,
+        SendStatistics
     };
 
     void get(string const& apiMethodName, RequestType requestType);
