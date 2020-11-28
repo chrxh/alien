@@ -11,6 +11,7 @@ using namespace std::string_literals;
 
 namespace
 {
+//    auto const ServerAddress = "https://alien-project.org/world-explorer/api/"s;
     auto const ServerAddress = "http://localhost/api/"s;
 
     auto const ApiGetSimulation = "getsimulationinfos"s;
@@ -18,6 +19,7 @@ namespace
     auto const ApiDisconnect = "disconnect"s;
     auto const ApiGetUnprocessedTasks = "getunprocessedtasks"s;
     auto const ApiSendProcessedTask = "sendprocessedtask"s;
+    auto const ApiSendStatistics = "sendstatistics"s;
 }
 
 WebAccessImpl::WebAccessImpl()
@@ -54,7 +56,11 @@ void WebAccessImpl::requestUnprocessedTasks(std::string const & simulationId, st
     post(ApiGetUnprocessedTasks, RequestType::UnprocessedTasks, { { "simulationId", simulationId }, {"token", token} });
 }
 
-void WebAccessImpl::sendProcessedTask(string const & simulationId, string const & token, string const& taskId, QBuffer* data)
+void WebAccessImpl::sendProcessedTask(
+    string const & simulationId, 
+    string const & token, 
+    string const& taskId, 
+    QBuffer* data)
 {
     postImage(
         ApiSendProcessedTask, 
@@ -66,6 +72,16 @@ void WebAccessImpl::sendProcessedTask(string const & simulationId, string const 
 void WebAccessImpl::requestDisconnect(std::string const & simulationId, string const& token)
 {
     post(ApiDisconnect, RequestType::Disconnect, {{"simulationId", simulationId}, {"token", token}});
+}
+
+void WebAccessImpl::sendStatistics(
+    string const & simulationId, 
+    string const & token, 
+    map<string, string> monitorData)
+{
+    monitorData.insert_or_assign("simulationId", simulationId);
+    monitorData.insert_or_assign("token", token);
+    post(ApiSendStatistics, RequestType::SendStatistics, monitorData);
 }
 
 void WebAccessImpl::dataReceived(int handler, QByteArray data)

@@ -49,7 +49,6 @@ void MainView::init(
     MainController* mainController, 
     Serializer* serializer, 
     DataRepository* repository, 
-    SimulationMonitor* simMonitor, 
     Notifier* notifier, 
     WebSimulationController* webSimController)
 {
@@ -59,7 +58,7 @@ void MainView::init(
 	_notifier = notifier;
 
 	_infoController->init(ui->infoLabel, mainController);
-	_monitor->init(mainController);
+	_monitor->init(_controller);
 	_actions->init(_controller, 
         _model, 
         this, 

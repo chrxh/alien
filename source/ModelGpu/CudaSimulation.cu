@@ -135,8 +135,8 @@ void CudaSimulation::DEBUG_printNumEntries()
 
 void CudaSimulation::getSimulationImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)
 {
-    int width = rectLowerRight.x - rectUpperLeft.x + 1;
-    int height = rectLowerRight.y - rectUpperLeft.y + 1;
+    int width = min(rectLowerRight.x - rectUpperLeft.x + 1, _cudaSimulationData->MAX_SIZE.x);
+    int height = min(rectLowerRight.y - rectUpperLeft.y + 1, _cudaSimulationData->MAX_SIZE.y);
     int numPixels = width * height;
 
     GPU_FUNCTION(drawImage, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
@@ -185,7 +185,7 @@ void CudaSimulation::applyForce(ApplyForceData const& applyData)
 MonitorData CudaSimulation::getMonitorData()
 {
     GPU_FUNCTION(getCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
-    return _cudaMonitorData->getMonitorData();
+    return _cudaMonitorData->getMonitorData(getTimestep());
 }
 
 int CudaSimulation::getTimestep() const

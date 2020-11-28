@@ -25,7 +25,6 @@ public:
         MainController* controller,
         Serializer* serializer,
         DataRepository* repository,
-        SimulationMonitor* simMonitor,
         Notifier* notifier, 
         WebSimulationController* webSimController);
 

@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QBuffer>
 
+#include "ModelBasic/SimulationMonitor.h"
 #include "ModelBasic/SimulationAccess.h"
 #include "Web/WebAccess.h"
 
@@ -16,15 +17,18 @@
 namespace
 {
     auto const POLLING_INTERVAL = 300;
+    auto const UPDATE_STATISTICS_INTERVAL = 10000;
 }
 
 WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget* parent /*= nullptr*/)
     : QObject(parent)
     , _webAccess(webAccess)
     , _parent(parent)
-    , _timer(new QTimer(this))
+    , _pollingTimer(new QTimer(this))
+    , _updateStatisticsTimer(new QTimer(this))
 {
-    connect(_timer, &QTimer::timeout, this, &WebSimulationController::requestUnprocessedTasks);
+    connect(_pollingTimer, &QTimer::timeout, this, &WebSimulationController::requestUnprocessedTasks);
+    connect(_updateStatisticsTimer, &QTimer::timeout, this, &WebSimulationController::sendStatistics);
     connect(_webAccess, &WebAccess::unprocessedTasksReceived, this, &WebSimulationController::unprocessedTasksReceived);
     connect(_webAccess, &WebAccess::error, [&](auto const& message) {
         QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
@@ -33,10 +37,18 @@ WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget*
     connect(_webAccess, &WebAccess::sendProcessedTaskReceived, this, &WebSimulationController::tasksProcessedStep2);
 }
 
-void WebSimulationController::init(SimulationAccess * access)
+void WebSimulationController::init(SimulationAccess * access, SimulationMonitor* monitor)
 {
+    for (auto const& connection : _connections) {
+        disconnect(connection);
+    }
+
     SET_CHILD(_simAccess, access);
-    connect(_simAccess, &SimulationAccess::imageReady, this, &WebSimulationController::tasksProcessedStep1);
+    _connections.emplace_back(connect(_simAccess, &SimulationAccess::imageReady, this, &WebSimulationController::tasksProcessedStep1));
+
+    SET_CHILD(_monitor, monitor);
+    _connections.emplace_back(connect(_monitor, &SimulationMonitor::dataReadyToRetrieve, this, &WebSimulationController::statisticsReadyToRetrieve));
+
 }
 
 bool WebSimulationController::onConnectToSimulation()
@@ -81,7 +93,8 @@ bool WebSimulationController::onConnectToSimulation()
         QMessageBox msgBox(QMessageBox::Information, "Connection successful", "You are connected to "
             + QString::fromStdString(simulationInfo.simulationName) + ".");
         msgBox.exec();
-        _timer->start(POLLING_INTERVAL);
+        _pollingTimer->start(POLLING_INTERVAL);
+        _updateStatisticsTimer->start(UPDATE_STATISTICS_INTERVAL);
         std::cerr << "[Web] connected" << std::endl;
         return true;
     }
@@ -94,7 +107,8 @@ bool WebSimulationController::onConnectToSimulation()
 
 bool WebSimulationController::onDisconnectToSimulation(string const& simulationId, string const & token)
 {
-    _timer->stop();
+    _pollingTimer->stop();
+    _updateStatisticsTimer->stop();
     _webAccess->requestDisconnect(simulationId, token);
     std::cerr << "[Web] disconnected" << std::endl;
     return true;
@@ -130,8 +144,10 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
     for (auto const& task : tasks) {
         _taskById.insert_or_assign(task.id, task);
     }
-    std::cerr << "[Web] " << tasks.size() - numPrevTask << " new task(s) received" << std::endl;
-    processTasks();
+    if (tasks.size() - numPrevTask > 0) {
+        std::cerr << "[Web] " << tasks.size() - numPrevTask << " new task(s) received" << std::endl;
+        processTasks();
+    }
 }
 
 void WebSimulationController::processTasks()
@@ -189,5 +205,28 @@ void WebSimulationController::tasksProcessedStep2()
     _taskById.erase(taskId);
     _processingTaskId = boost::none;
     processTasks();
+}
+
+void WebSimulationController::sendStatistics()
+{
+    _monitor->requireData();
+}
+
+void WebSimulationController::statisticsReadyToRetrieve()
+{
+    if (!_currentSimulationId || !_currentToken) {
+        return;
+    }
+
+    auto monitorData = _monitor->retrieveData();
+
+    _webAccess->sendStatistics(*_currentSimulationId, *_currentToken, {
+        { "timestep", std::to_string(monitorData.timeStep) },
+        { "numCells", std::to_string(monitorData.numCells) },
+        { "numParticles", std::to_string(monitorData.numParticles) },
+        { "numClusters", std::to_string(monitorData.numClusters) },
+        { "numActiveClusters", std::to_string(monitorData.numClustersWithTokens) },
+        { "numTokens", std::to_string(monitorData.numTokens) },
+    });
 }
 
