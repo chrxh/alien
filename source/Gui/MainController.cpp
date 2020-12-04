@@ -272,7 +272,8 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	SET_CHILD(_simMonitor, simMonitor);
 
     auto webSimMonitor = _monitorBuildFunc(_simController);
-    _webSimController->init(_accessBuildFunc(_simController), webSimMonitor);
+    auto space = context->getSpaceProperties();
+    _webSimController->init(_accessBuildFunc(_simController), webSimMonitor, space);
 
     auto simChanger = modelBasicFacade->buildSimulationChanger(simMonitor, context->getNumberGenerator());
     for (auto const& connection : _simChangerConnections) {
