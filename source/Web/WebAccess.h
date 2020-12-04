@@ -21,11 +21,13 @@ public:
     virtual void sendProcessedTask(string const& simulationId, string const& token, string const& taskId, QBuffer* data) = 0;
     virtual void requestDisconnect(string const& simulationId, string const& token) = 0;
     virtual void sendStatistics(string const& simulationId, string const& token, map<string, string> monitorData) = 0;
+    virtual void sendLastImage(string const& simulationId, string const& token, QBuffer* data) = 0;
 
     Q_SIGNAL void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
     Q_SIGNAL void connectToSimulationReceived(optional<string> token);
     Q_SIGNAL void unprocessedTasksReceived(vector<Task> tasks);
     Q_SIGNAL void sendProcessedTaskReceived();
+    Q_SIGNAL void sendLastImageReceived();
     Q_SIGNAL void error(string message);
 
 };

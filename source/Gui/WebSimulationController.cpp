@@ -10,6 +10,7 @@
 
 #include "ModelBasic/SimulationMonitor.h"
 #include "ModelBasic/SimulationAccess.h"
+#include "ModelBasic/SpaceProperties.h"
 #include "Web/WebAccess.h"
 
 #include "WebSimulationSelectionController.h"
@@ -17,7 +18,7 @@
 namespace
 {
     auto const POLLING_INTERVAL = 300;
-    auto const UPDATE_STATISTICS_INTERVAL = 10000;
+    auto const UPDATE_STATISTICS_INTERVAL = 1000;
 }
 
 WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget* parent /*= nullptr*/)
@@ -34,17 +35,21 @@ WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget*
         QMessageBox msgBox(QMessageBox::Critical, "Error", QString::fromStdString(message));
         msgBox.exec();
     });
-    connect(_webAccess, &WebAccess::sendProcessedTaskReceived, this, &WebSimulationController::tasksProcessedStep2);
+    connect(_webAccess, &WebAccess::sendProcessedTaskReceived, this, &WebSimulationController::imageSent);
+    connect(_webAccess, &WebAccess::sendLastImageReceived, this, &WebSimulationController::imageSent);
 }
 
-void WebSimulationController::init(SimulationAccess * access, SimulationMonitor* monitor)
+void WebSimulationController::init(SimulationAccess * access, SimulationMonitor* monitor, SpaceProperties* space)
 {
+    _requestImageType = RequestImageType::LiveUpdate;
+    _space = space;
+
     for (auto const& connection : _connections) {
         disconnect(connection);
     }
 
     SET_CHILD(_simAccess, access);
-    _connections.emplace_back(connect(_simAccess, &SimulationAccess::imageReady, this, &WebSimulationController::tasksProcessedStep1));
+    _connections.emplace_back(connect(_simAccess, &SimulationAccess::imageReady, this, &WebSimulationController::imageReceived));
 
     SET_CHILD(_monitor, monitor);
     _connections.emplace_back(connect(_monitor, &SimulationMonitor::dataReadyToRetrieve, this, &WebSimulationController::statisticsReadyToRetrieve));
@@ -109,8 +114,8 @@ bool WebSimulationController::onDisconnectToSimulation(string const& simulationI
 {
     _pollingTimer->stop();
     _updateStatisticsTimer->stop();
-    _webAccess->requestDisconnect(simulationId, token);
-    std::cerr << "[Web] disconnected" << std::endl;
+
+    requestLastImage();
     return true;
 }
 
@@ -168,10 +173,11 @@ void WebSimulationController::processTasks()
         << " x " 
         << task.size.y 
         << std::endl;
+
     _simAccess->requireImage(rect, _image, _mutex);
 }
 
-void WebSimulationController::tasksProcessedStep1()
+void WebSimulationController::imageReceived()
 {
     if (!_currentSimulationId) {
         _processingTaskId = boost::none;
@@ -179,32 +185,41 @@ void WebSimulationController::tasksProcessedStep1()
         return;
     }
 
-    auto const taskId = *_processingTaskId;
-    
     delete _buffer;
     _buffer = new QBuffer(&_encodedImageData);
     _buffer->open(QIODevice::ReadWrite);
     _image->save(_buffer, "PNG");
     _buffer->seek(0);
-    
-    _webAccess->sendProcessedTask(*_currentSimulationId, *_currentToken, taskId, _buffer);
 
+    if (RequestImageType::LastImage == _requestImageType) {
+        _webAccess->sendLastImage(*_currentSimulationId, *_currentToken, _buffer);
+    }
+    else {
+        _webAccess->sendProcessedTask(*_currentSimulationId, *_currentToken, *_processingTaskId, _buffer);
+    }
 }
 
-void WebSimulationController::tasksProcessedStep2()
+void WebSimulationController::imageSent()
 {
     if (!_currentSimulationId) {
         _processingTaskId = boost::none;
         _taskById.clear();
         return;
     }
-    auto const taskId = *_processingTaskId;
 
-    std::cerr << "[Web] task "<< taskId << " processed" << std::endl;
+    if (RequestImageType::LastImage == _requestImageType) {
+        _webAccess->requestDisconnect(*_currentSimulationId, *_currentToken);
+        std::cerr << "[Web] disconnected" << std::endl;
+    }
+    else {
+        auto const taskId = *_processingTaskId;
 
-    _taskById.erase(taskId);
-    _processingTaskId = boost::none;
-    processTasks();
+        std::cerr << "[Web] task " << taskId << " processed" << std::endl;
+
+        _taskById.erase(taskId);
+        _processingTaskId = boost::none;
+        processTasks();
+    }
 }
 
 void WebSimulationController::sendStatistics()
@@ -228,5 +243,17 @@ void WebSimulationController::statisticsReadyToRetrieve()
         { "numActiveClusters", std::to_string(monitorData.numClustersWithTokens) },
         { "numTokens", std::to_string(monitorData.numTokens) },
     });
+}
+
+void WebSimulationController::requestLastImage()
+{
+    auto size = _space->getSize();
+    _image = boost::make_shared<QImage>(size.x, size.y, QImage::Format_RGB32);
+    auto const rect = IntRect{ {0,0}, {size.x - 1, size.y - 1} };
+    std::cerr
+        << "[Web] request last image"
+        << std::endl;
+    _requestImageType = RequestImageType::LastImage;
+    _simAccess->requireImage(rect, _image, _mutex);
 }
 
