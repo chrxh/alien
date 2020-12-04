@@ -20,6 +20,7 @@ namespace
     auto const ApiGetUnprocessedTasks = "getunprocessedtasks"s;
     auto const ApiSendProcessedTask = "sendprocessedtask"s;
     auto const ApiSendStatistics = "sendstatistics"s;
+    auto const ApiSendLastImage = "sendlastimage"s;
 }
 
 WebAccessImpl::WebAccessImpl()
@@ -84,6 +85,15 @@ void WebAccessImpl::sendStatistics(
     post(ApiSendStatistics, RequestType::SendStatistics, monitorData);
 }
 
+void WebAccessImpl::sendLastImage(string const & simulationId, string const & token, QBuffer * data)
+{
+    postImage(
+        ApiSendLastImage,
+        RequestType::LastImage,
+        { { "simulationId", simulationId },{ "token", token } },
+        data);
+}
+
 void WebAccessImpl::dataReceived(int handler, QByteArray data)
 {
     auto requestType = static_cast<RequestType>(handler);
@@ -112,6 +122,10 @@ void WebAccessImpl::dataReceived(int handler, QByteArray data)
     break;
     case RequestType::ProcessedTask: {
         Q_EMIT sendProcessedTaskReceived();
+    }
+    break;
+    case RequestType::LastImage: {
+        Q_EMIT sendLastImageReceived();
     }
     break;
     }
