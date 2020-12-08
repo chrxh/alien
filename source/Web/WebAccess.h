@@ -26,7 +26,7 @@ public:
     Q_SIGNAL void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
     Q_SIGNAL void connectToSimulationReceived(optional<string> token);
     Q_SIGNAL void unprocessedTasksReceived(vector<Task> tasks);
-    Q_SIGNAL void sendProcessedTaskReceived();
+    Q_SIGNAL void sendProcessedTaskReceived(string taskId);
     Q_SIGNAL void sendLastImageReceived();
     Q_SIGNAL void error(string message);
 

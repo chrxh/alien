@@ -19,7 +19,7 @@ public:
     void sendLastImage(string const& simulationId, string const& token, QBuffer* data) override;
 
 private:
-    Q_SLOT void dataReceived(int handler, QByteArray data);
+    Q_SLOT void dataReceived(string handler, QByteArray data);
 
     enum class RequestType {
         SimulationInfo,
@@ -33,7 +33,8 @@ private:
 
     void get(string const& apiMethodName, RequestType requestType);
     void post(string const& apiMethodName, RequestType requestType, std::map<string, string> const& keyValues);
-    void postImage(string const& apiMethodName, RequestType requestType, std::map<string, string> const& keyValues, QBuffer* data);
+    void postImage(string const& apiMethodName, RequestType requestType, string const& id, 
+        std::map<string, string> const& keyValues, QBuffer* data);
 
 private:
 

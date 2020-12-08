@@ -3,17 +3,17 @@
 
 #include "Jobs.h"
 
-class Worker
+class Queue
     : public QObject
 {
     Q_OBJECT
 public:
-    Worker(QObject * parent = nullptr);
-    virtual ~Worker() = default;
+    Queue(QObject * parent = nullptr);
+    virtual ~Queue() = default;
 
     void init(Serializer* serializer);
 
-    void addJob(Job const& job);
+    void add(ExecuteLaterFunc const& job);
 
 private:
     Q_SLOT void processingJobs();
@@ -22,5 +22,5 @@ private:
     list<QMetaObject::Connection> _connections;
 
     Serializer* _serializer;
-    list<Job> _jobs;
+    list<ExecuteLaterFunc> _jobs;
 };
