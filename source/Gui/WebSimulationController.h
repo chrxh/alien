@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mutex>
-
 #include <QObject>
 
+#include "Base/Definitions.h"
 #include "ModelBasic/Definitions.h"
 #include "Web/Definitions.h"
 #include "Web/Task.h"
@@ -29,39 +29,25 @@ private:
     Q_SLOT void requestUnprocessedTasks() const;
     Q_SLOT void unprocessedTasksReceived(vector<Task> tasks);
 
-    void processTasks();
-    Q_SLOT void imageReceived();
-    Q_SLOT void imageSent();
-
+    void processJobs();
     Q_SLOT void sendStatistics();
     Q_SLOT void statisticsReadyToRetrieve();
-
-    void requestLastImage();
 
     optional<string> _currentSimulationId;
     optional<string> _currentToken;
 
-    map<string, Task> _taskById;
-    optional<string> _processingTaskId;
+    Worker _worker;
 
     QByteArray _encodedImageData;
     QBuffer* _buffer = nullptr;
 
-    QImagePtr _image;
-    std::mutex _mutex;
-
-    enum class RequestImageType
-    {
-        LiveUpdate,
-        LastImage
-    };
-    RequestImageType _requestImageType = RequestImageType::LiveUpdate;
     SimulationAccess* _simAccess = nullptr;
     SimulationMonitor* _monitor = nullptr;
     SpaceProperties* _space = nullptr;
     QWidget* _parent = nullptr;
     WebAccess* _webAccess = nullptr;
     QTimer* _pollingTimer = nullptr;
+    QTimer* _processJobsTimer = nullptr;
     QTimer* _updateStatisticsTimer = nullptr;
 
     list<QMetaObject::Connection> _connections;

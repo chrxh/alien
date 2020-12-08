@@ -65,7 +65,8 @@ void WebAccessImpl::sendProcessedTask(
 {
     postImage(
         ApiSendProcessedTask, 
-        RequestType::ProcessedTask, 
+        RequestType::ProcessedTask,
+        taskId,
         {{"simulationId", simulationId}, {"token", token}, {"taskId", taskId}}, 
         data);
 }
@@ -90,13 +91,17 @@ void WebAccessImpl::sendLastImage(string const & simulationId, string const & to
     postImage(
         ApiSendLastImage,
         RequestType::LastImage,
+        "",
         { { "simulationId", simulationId },{ "token", token } },
         data);
 }
 
-void WebAccessImpl::dataReceived(int handler, QByteArray data)
+void WebAccessImpl::dataReceived(string handler, QByteArray data)
 {
-    auto requestType = static_cast<RequestType>(handler);
+    QStringList const handlerParts = QString::fromStdString(handler).split(QChar(':'));
+    auto requestType = static_cast<RequestType>(handlerParts.first().toUInt());
+    auto id = handlerParts.last().toStdString();
+
     _requesting.erase(requestType);
 
     switch (requestType) {
@@ -121,7 +126,7 @@ void WebAccessImpl::dataReceived(int handler, QByteArray data)
     }
     break;
     case RequestType::ProcessedTask: {
-        Q_EMIT sendProcessedTaskReceived();
+        Q_EMIT sendProcessedTaskReceived(id);
     }
     break;
     case RequestType::LastImage: {
@@ -138,7 +143,8 @@ void WebAccessImpl::get(string const & apiMethodName, RequestType requestType)
     }
     _requesting.insert(requestType);
 
-    _http->get(QUrl(QString::fromStdString(ServerAddress + apiMethodName)), static_cast<int>(requestType));
+    auto const handler = std::to_string(static_cast<int>(requestType)) + ":";
+    _http->get(QUrl(QString::fromStdString(ServerAddress + apiMethodName)), handler);
 }
 
 void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> const& keyValues)
@@ -153,15 +159,17 @@ void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, 
         params.addQueryItem(QString::fromStdString(keyValue.first), QString::fromStdString(keyValue.second));
     }
 
+    auto const handler = std::to_string(static_cast<int>(requestType)) + ":";
     _http->postText(
         QUrl(QString::fromStdString(ServerAddress + apiMethodName)),
-        static_cast<int>(requestType),
+        handler,
         params.query().toUtf8());
 }
 
 void WebAccessImpl::postImage(
     string const & apiMethodName, 
     RequestType requestType, 
+    string const& id,
     std::map<string, string> const& keyValues, 
     QBuffer* data)
 {
@@ -188,8 +196,9 @@ void WebAccessImpl::postImage(
 
     multiPart->append(imagePart);
 
+    auto const handler = std::to_string(static_cast<int>(requestType)) + ":" + id;
     _http->postBinary(
         QUrl(QString::fromStdString(ServerAddress + apiMethodName)),
-        static_cast<int>(requestType),
+        handler,
         multiPart);
 }

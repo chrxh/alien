@@ -12,7 +12,7 @@ HttpClient::HttpClient(QObject* parent /*= nullptr*/)
     //TODO: QNetworkAccessManager::authenticationRequired
 }
 
-void HttpClient::get(QUrl const& url, int handler)
+void HttpClient::get(QUrl const& url, string const& handler)
 {
     QNetworkRequest request(url);
     request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
@@ -22,7 +22,7 @@ void HttpClient::get(QUrl const& url, int handler)
     _handlerByReply.insert_or_assign(reply, handler);
 }
 
-void HttpClient::postText(QUrl const & url, int handler, QByteArray const & data)
+void HttpClient::postText(QUrl const & url, string const& handler, QByteArray const & data)
 {
     QNetworkRequest request(url);
     request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
@@ -33,7 +33,7 @@ void HttpClient::postText(QUrl const & url, int handler, QByteArray const & data
     _handlerByReply.insert_or_assign(reply, handler);
 }
 
-void HttpClient::postBinary(QUrl const & url, int handler, QHttpMultiPart* data)
+void HttpClient::postBinary(QUrl const & url, string const& handler, QHttpMultiPart* data)
 {
     QNetworkRequest request(url);
     request.setSslConfiguration(QSslConfiguration::defaultConfiguration());

@@ -10,11 +10,11 @@ class HttpClient : public QObject
 public:
     HttpClient(QObject* parent = nullptr);
 
-    void get(QUrl const& url, int handler);
-    void postText(QUrl const& url, int handler, QByteArray const& data);
-    void postBinary(QUrl const& url, int handler, QHttpMultiPart* data);
+    void get(QUrl const& url, string const& handler);
+    void postText(QUrl const& url, string const& handler, QByteArray const& data);
+    void postBinary(QUrl const& url, string const& handler, QHttpMultiPart* data);
 
-    Q_SIGNAL void dataReceived(int handler, QByteArray data);
+    Q_SIGNAL void dataReceived(string handler, QByteArray data);
 
     Q_SIGNAL void error(string message);
 
@@ -22,5 +22,5 @@ private:
     Q_SLOT void finished(QNetworkReply* reply);
 
     QNetworkAccessManager _networkManager;
-    std::unordered_map<QNetworkReply*, int> _handlerByReply;
+    std::unordered_map<QNetworkReply*, string> _handlerByReply;
 };
