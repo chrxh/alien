@@ -42,7 +42,7 @@
 #include "SimulationConfig.h"
 #include "DataAnalyzer.h"
 #include "QApplicationHelper.h"
-#include "Worker.h"
+#include "Queue.h"
 #include "WebSimulationController.h"
 
 namespace Const
@@ -113,7 +113,7 @@ void MainController::init()
     _repository = new DataRepository(this);
     _notifier = new Notifier(this);
     _dataAnalyzer = new DataAnalyzer(this);
-    auto worker = new Worker(this);
+    auto worker = new Queue(this);
     SET_CHILD(_worker, worker);
 
     auto webFacade = ServiceLocator::getInstance().getService<WebBuilderFacade>();
@@ -373,7 +373,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
     auto const recreateFunction = [&](Serializer* serializer) {
         recreateSimulation(serializer->retrieveSerializedSimulation());
     };
-    _worker->addJob(boost::make_shared<_Job>(recreateFunction));
+    _worker->add(boost::make_shared<_ExecuteLaterFunc>(recreateFunction));
 
     if (auto const configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
         auto data = ModelGpuData(configGpu->cudaConstants);

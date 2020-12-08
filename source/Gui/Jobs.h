@@ -2,12 +2,12 @@
 
 #include "Definitions.h"
 
-class _Job
+class _ExecuteLaterFunc
 {
 public:
-    virtual ~_Job() = default;
+    virtual ~_ExecuteLaterFunc() = default;
     using ExecutionFunc = std::function<void(Serializer*)>;
-    _Job(ExecutionFunc const& executionFunc)
+    _ExecuteLaterFunc(ExecutionFunc const& executionFunc)
         : _executionFunc(executionFunc)
     {}
 
@@ -19,4 +19,4 @@ public:
 private:
     std::function<void(Serializer*)> _executionFunc;
 };
-using Job = shared_ptr<_Job>;
+using ExecuteLaterFunc = shared_ptr<_ExecuteLaterFunc>;

@@ -1,13 +1,13 @@
 #include "ModelBasic/Serializer.h"
 
-#include "Worker.h"
+#include "Queue.h"
 
-Worker::Worker(QObject * parent)
+Queue::Queue(QObject * parent)
     : QObject(parent)
 {
 }
 
-void Worker::init(Serializer * serializer)
+void Queue::init(Serializer * serializer)
 {
     _serializer = serializer;
 
@@ -17,15 +17,15 @@ void Worker::init(Serializer * serializer)
     _connections.clear();
 
     _connections.push_back(
-        connect(_serializer, &Serializer::serializationFinished, this, &Worker::processingJobs));
+        connect(_serializer, &Serializer::serializationFinished, this, &Queue::processingJobs));
 }
 
-void Worker::addJob(Job const & job)
+void Queue::add(ExecuteLaterFunc const & job)
 {
     _jobs.emplace_back(job);
 }
 
-void Worker::processingJobs()
+void Queue::processingJobs()
 {
     for (auto const& job : _jobs) {
         auto const executionJob = job->getExecutionFunction();
