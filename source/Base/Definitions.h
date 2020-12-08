@@ -44,6 +44,11 @@ using std::string;
 using boost::optional;
 using boost::shared_ptr;
 
+class _Worker;
+using Worker = boost::shared_ptr<_Worker>;
+
+class Job;
+
 const double FLOATINGPOINT_HIGH_PRECISION = 1.0e-7;
 const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
 const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1;

@@ -55,7 +55,7 @@ private:
     string getPathToApp() const;
 
 
-    Worker* _worker = nullptr;
+    Queue* _worker = nullptr;
 
 	MainView* _view = nullptr;
 	MainModel* _model = nullptr;

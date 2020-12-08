@@ -84,5 +84,4 @@ enum class ModelComputationType
 };
 
 class DataAnalyzer;
-
-class Worker;
+class Queue;
