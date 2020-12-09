@@ -11,13 +11,12 @@
 SendLastImageJob::SendLastImageJob(
     string const& currentSimulationId,
     string const& currentToken,
-    string const& taskId,
     IntVector2D const& pos,
     IntVector2D const& size,
     SimulationAccess* simAccess,
     WebAccess* webAccess,
     QObject* parent)
-    : Job(taskId, parent)
+    : Job("LastImageJob", parent)
     , _currentSimulationId(currentSimulationId)
     , _currentToken(currentToken)
     , _pos(pos)
@@ -43,7 +42,7 @@ void SendLastImageJob::process()
     case State::ImageFromGpuRequested:
         sendImageToServer();
         break;
-    case State::ImageToServeSent:
+    case State::ImageToServerSent:
         finish();
         break;
     default:
@@ -88,7 +87,7 @@ void SendLastImageJob::sendImageToServer()
 
     _webAccess->sendLastImage(_currentSimulationId, _currentToken, _buffer);
 
-    _state = State::ImageToServeSent;
+    _state = State::ImageToServerSent;
     _isReady = false;
 }
 
@@ -112,7 +111,7 @@ void SendLastImageJob::imageFromGpuReceived()
 
 void SendLastImageJob::serverReceivedImage()
 {
-    if (State::ImageToServeSent != _state) {
+    if (State::ImageToServerSent != _state) {
         return;
     }
     std::cerr << "[Web] last image sent" << std::endl;

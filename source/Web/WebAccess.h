@@ -29,5 +29,4 @@ public:
     Q_SIGNAL void sendProcessedTaskReceived(string taskId);
     Q_SIGNAL void sendLastImageReceived();
     Q_SIGNAL void error(string message);
-
 };
