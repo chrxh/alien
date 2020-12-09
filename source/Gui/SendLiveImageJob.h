@@ -37,7 +37,7 @@ private:
     {
         Init,
         ImageFromGpuRequested,
-        ImageToServeSent,
+        ImageToServerSent,
         Finished
     };
 
