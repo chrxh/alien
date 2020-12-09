@@ -6,18 +6,15 @@
 
 #include "Definitions.h"
 
-class SendLiveImageJob
+class SendStatisticsJob
     : public Job
 {
     Q_OBJECT
 public:
-    SendLiveImageJob(
+    SendStatisticsJob(
         string const& currentSimulationId,
         string const& currentToken,
-        string const& taskId,
-        IntVector2D const& pos,
-        IntVector2D const& size,
-        SimulationAccess* simAccess,
+        SimulationMonitor* simMonitor,
         WebAccess* webAccess,
         QObject* parent);
 
@@ -26,35 +23,24 @@ public:
     bool isBlocking() const override;
 
 private:
-    void requestImage();
-    void sendImageToServer();
-    void finish();
+    void requestStatistics();
+    void sendStatisticsToServer();
 
-    Q_SLOT void imageFromGpuReceived();
-    Q_SLOT void serverReceivedImage(string taskId);
+    Q_SLOT void statisticsFromGpuReceived();
 
     enum class State
     {
         Init,
-        ImageFromGpuRequested,
-        ImageToServerSent,
+        StatisticsFromGpuRequested,
         Finished
     };
 
     bool _isReady = true;
     State _state = State::Init;
 
-    IntVector2D _pos;
-    IntVector2D _size;
     string _currentSimulationId;
     string _currentToken;
 
-    QImagePtr _image;
-    QBuffer* _buffer = nullptr;
-    QByteArray _encodedImageData;
-
-    std::mutex _mutex;
-
-    SimulationAccess* _simAccess = nullptr;
+    SimulationMonitor* _simMonitor = nullptr;
     WebAccess* _webAccess = nullptr;
 };

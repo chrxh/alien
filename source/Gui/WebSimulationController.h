@@ -31,7 +31,6 @@ private:
 
     void processJobs();
     Q_SLOT void sendStatistics();
-    Q_SLOT void statisticsReadyToRetrieve();
 
     optional<string> _currentSimulationId;
     optional<string> _currentToken;

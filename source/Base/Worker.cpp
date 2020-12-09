@@ -7,8 +7,9 @@ bool _Worker::contains(string const& id)
 
 bool _Worker::add(Job* job)
 {
-    auto numNewJobs = 0;
-    CHECK(_jobById.find(job->getId()) == _jobById.end());
+    if (_jobById.find(job->getId()) != _jobById.end()) {
+        return false;
+    }
 
     _jobs.emplace_back(job);
     _jobById.emplace(job->getId(), job);

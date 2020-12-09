@@ -16,6 +16,7 @@
 
 #include "SendLiveImageJob.h"
 #include "SendLastImageJob.h"
+#include "SendStatisticsJob.h"
 #include "WebSimulationSelectionController.h"
 
 namespace
@@ -23,8 +24,6 @@ namespace
     auto const POLLING_INTERVAL = 300;
     auto const PROCESS_JOBS_INTERVAL = 50;
     auto const UPDATE_STATISTICS_INTERVAL = 1000;
-
-    auto const LastImageJobId = "LastImage";
 }
 
 WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget* parent /*= nullptr*/)
@@ -55,7 +54,6 @@ void WebSimulationController::init(SimulationAccess * access, SimulationMonitor*
 
     SET_CHILD(_simAccess, access);
     SET_CHILD(_monitor, monitor);
-    _connections.emplace_back(connect(_monitor, &SimulationMonitor::dataReadyToRetrieve, this, &WebSimulationController::statisticsReadyToRetrieve));
 
     _worker = boost::make_shared<_Worker>();
     _processJobsTimer->stop();
@@ -124,7 +122,6 @@ bool WebSimulationController::onDisconnectToSimulation(string const& simulationI
     auto newJob = new SendLastImageJob(
         *_currentSimulationId, 
         *_currentToken, 
-        LastImageJobId, 
         IntVector2D{ 0, 0 }, 
         _space->getSize(), 
         _simAccess, 
@@ -152,10 +149,7 @@ void WebSimulationController::requestUnprocessedTasks() const
 
 void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
 {
-    if (tasks.empty()) {
-        return;
-    }
-    if (!_currentSimulationId) {
+    if (tasks.empty() || !_currentSimulationId) {
         return;
     }
 
@@ -181,23 +175,12 @@ void WebSimulationController::processJobs()
 
 void WebSimulationController::sendStatistics()
 {
-    _monitor->requireData();
-}
-
-void WebSimulationController::statisticsReadyToRetrieve()
-{
-    if (!_currentSimulationId || !_currentToken) {
+    if (!_currentSimulationId) {
         return;
     }
 
-    auto monitorData = _monitor->retrieveData();
-
-    _webAccess->sendStatistics(*_currentSimulationId, *_currentToken, {
-        { "timestep", std::to_string(monitorData.timeStep) },
-        { "numCells", std::to_string(monitorData.numCells) },
-        { "numParticles", std::to_string(monitorData.numParticles) },
-        { "numClusters", std::to_string(monitorData.numClusters) },
-        { "numActiveClusters", std::to_string(monitorData.numClustersWithTokens) },
-        { "numTokens", std::to_string(monitorData.numTokens) },
-    });
+    auto newJob = new SendStatisticsJob(
+        *_currentSimulationId, *_currentToken, _monitor, _webAccess, this);
+    _worker->add(newJob);
 }
+

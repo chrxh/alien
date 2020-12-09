@@ -14,7 +14,6 @@ public:
     SendLastImageJob(
         string const& currentSimulationId,
         string const& currentToken,
-        string const& taskId,
         IntVector2D const& pos,
         IntVector2D const& size,
         SimulationAccess* simAccess,
@@ -37,7 +36,7 @@ private:
     {
         Init,
         ImageFromGpuRequested,
-        ImageToServeSent,
+        ImageToServerSent,
         Finished
     };
 
