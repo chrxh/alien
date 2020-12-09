@@ -7,8 +7,6 @@
 
 struct SimulationData
 {
-    const int2 MAX_SIZE{ 4000, 4000 };
-
     int2 size;
     int timestep;
 
@@ -38,8 +36,8 @@ struct SimulationData
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
 
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(MAX_SIZE.x * MAX_SIZE.y, rawImageData);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(MAX_SIZE.x * MAX_SIZE.y, finalImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(size.x * size.y, rawImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(size.x * size.y, finalImageData);
     }
 
     void free()

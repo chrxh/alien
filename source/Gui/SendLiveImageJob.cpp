@@ -43,7 +43,7 @@ void SendLiveImageJob::process()
     case State::ImageFromGpuRequested:
         sendImageToServer();
         break;
-    case State::ImageToServeSent:
+    case State::ImageToServerSent:
         finish();
         break;
     default:
@@ -90,7 +90,7 @@ void SendLiveImageJob::sendImageToServer()
 
     _webAccess->sendProcessedTask(_currentSimulationId, _currentToken, getId(), _buffer);
 
-    _state = State::ImageToServeSent;
+    _state = State::ImageToServerSent;
     _isReady = false;
 }
 
@@ -110,7 +110,7 @@ void SendLiveImageJob::imageFromGpuReceived()
 
 void SendLiveImageJob::serverReceivedImage(string taskId)
 {
-    if (State::ImageToServeSent != _state || taskId != getId()) {
+    if (State::ImageToServerSent != _state || taskId != getId()) {
         return;
     }
     std::cerr << "[Web] task " << getId() << " processed" << std::endl;
