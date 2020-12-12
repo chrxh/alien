@@ -156,8 +156,20 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
     auto numNewJobs = 0;
     for (auto const& task : tasks) {
         if (!_worker->contains(task.id)) {
+            auto worldSize = _space->getSize();
+            if (task.pos.x >= worldSize.x || task.pos.y >= worldSize.y) {
+                return;
+            }
+
+            auto taskSize = task.size;
+            if (taskSize.x + task.pos.x >= worldSize.x) {
+                taskSize.x = worldSize.x - task.pos.x;
+            }
+            if (taskSize.y + task.pos.y >= worldSize.y) {
+                taskSize.y = worldSize.y - task.pos.y;
+            }
             auto newJob = new SendLiveImageJob(
-                *_currentSimulationId, *_currentToken, task.id, task.pos, task.size, _simAccess, _webAccess, this);
+                *_currentSimulationId, *_currentToken, task.id, task.pos, taskSize, _simAccess, _webAccess, this);
             _worker->add(newJob);
 
             ++numNewJobs;
