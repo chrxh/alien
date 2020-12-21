@@ -11,8 +11,8 @@ using namespace std::string_literals;
 
 namespace
 {
-//    auto const ServerAddress = "https://alien-project.org/world-explorer/api/"s;
-    auto const ServerAddress = "http://localhost/api/"s;
+    auto const ServerAddress = "https://alien-project.org/world-explorer/api/"s;
+//    auto const ServerAddress = "http://localhost/api/"s;
 
     auto const ApiGetSimulation = "getsimulationinfos"s;
     auto const ApiConnect = "connect"s;

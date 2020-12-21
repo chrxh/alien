@@ -338,15 +338,14 @@ void ActionController::onConfigureGrid()
 	ComputationSettingsDialog dialog(_mainController->getSimulationConfig(), _mainView);
     if (dialog.exec()) {
 
-        if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(_mainController->getSimulationConfig())) {
+        auto config = _mainController->getSimulationConfig();
 
-            configGpu->universeSize = dialog.getUniverseSize();
-            configGpu->cudaConstants = dialog.getCudaConstants();
+        config->universeSize = dialog.getUniverseSize();
+        config->cudaConstants = dialog.getCudaConstants();
 
-            auto const extrapolateContent = dialog.isExtrapolateContent();
-            _mainController->onRecreateUniverse(configGpu, extrapolateContent);
-            settingUpNewSimulation(configGpu);
-        }
+        auto const extrapolateContent = dialog.isExtrapolateContent();
+        _mainController->onRecreateUniverse(config, extrapolateContent);
+        settingUpNewSimulation(config);
 	}
 }
 
@@ -878,26 +877,20 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 
 void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
-	updateZoomFactor();
-	auto actions = _model->getActionHolder();
-	actions->actionRunSimulation->setChecked(false);
-	actions->actionRestore->setEnabled(false);
-	actions->actionRunStepBackward->setEnabled(false);
+    updateZoomFactor();
+    auto actions = _model->getActionHolder();
+    actions->actionRunSimulation->setChecked(false);
+    actions->actionRestore->setEnabled(false);
+    actions->actionRunStepBackward->setEnabled(false);
     actions->actionDisplayLink->setEnabled(true);
     actions->actionDisplayLink->setChecked(true);
     actions->actionGlowEffect->setEnabled(true);
     actions->actionSimulationChanger->setChecked(false);
     actions->actionWebSimulation->setChecked(false);
     onRunClicked(false);
-	onToggleCellInfo(actions->actionShowCellInfo->isChecked());
-	onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
-
-	if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-		_infoController->setDevice(InfoController::Device::Gpu);
-	}
-    else {
-        THROW_NOT_IMPLEMENTED();
-    }
+    onToggleCellInfo(actions->actionShowCellInfo->isChecked());
+    onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
+    _infoController->setDevice(InfoController::Device::Gpu);
 }
 
 void ActionController::updateZoomFactor()

@@ -17,6 +17,7 @@
 #include "SendLiveImageJob.h"
 #include "SendLastImageJob.h"
 #include "SendStatisticsJob.h"
+#include "SimulationConfig.h"
 #include "WebSimulationSelectionController.h"
 
 namespace
@@ -44,9 +45,12 @@ WebSimulationController::WebSimulationController(WebAccess * webAccess, QWidget*
     });
 }
 
-void WebSimulationController::init(SimulationAccess * access, SimulationMonitor* monitor, SpaceProperties* space)
+void WebSimulationController::init(
+    SimulationAccess * access, 
+    SimulationMonitor* monitor, 
+    SimulationConfig const& config)
 {
-    _space = space;
+    _config = config;
 
     for (auto const& connection : _connections) {
         disconnect(connection);
@@ -123,7 +127,7 @@ bool WebSimulationController::onDisconnectToSimulation(string const& simulationI
         *_currentSimulationId, 
         *_currentToken, 
         IntVector2D{ 0, 0 }, 
-        _space->getSize(), 
+        _config->universeSize, 
         _simAccess, 
         _webAccess, 
         this);
@@ -156,7 +160,7 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
     auto numNewJobs = 0;
     for (auto const& task : tasks) {
         if (!_worker->contains(task.id)) {
-            auto worldSize = _space->getSize();
+            auto worldSize = _config->universeSize;
             if (task.pos.x >= worldSize.x || task.pos.y >= worldSize.y) {
                 return;
             }
@@ -191,8 +195,8 @@ void WebSimulationController::sendStatistics()
         return;
     }
 
-    auto newJob = new SendStatisticsJob(
-        *_currentSimulationId, *_currentToken, _monitor, _webAccess, this);
+    auto const newJob = new SendStatisticsJob(
+        *_currentSimulationId, *_currentToken, _monitor, _webAccess, _config, this);
     _worker->add(newJob);
 }
 

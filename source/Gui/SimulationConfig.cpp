@@ -2,7 +2,7 @@
 
 #include "SimulationConfig.h"
 
- auto _SimulationConfigGpu::validate(string & errorMsg) const -> ValidationResult
+ auto _SimulationConfig::validate(string & errorMsg) const -> ValidationResult
 {
 	 return ValidationResult::Ok;
 }
