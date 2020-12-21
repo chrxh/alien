@@ -62,6 +62,12 @@ bool SendLastImageJob::isBlocking() const
 
 void SendLastImageJob::requestImage()
 {
+    std::cerr
+        << "[Web] get last image with size "
+        << _size.x << " x "
+        << _size.y
+        << std::endl;
+
     _image = boost::make_shared<QImage>(_size.x, _size.y, QImage::Format_RGB32);
     auto const rect = IntRect{ _pos, IntVector2D{ _pos.x + _size.x, _pos.y + _size.y } };
     _simAccess->requireImage(rect, _image, _mutex);

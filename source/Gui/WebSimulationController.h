@@ -17,7 +17,7 @@ class WebSimulationController
 public:
     WebSimulationController(WebAccess* webAccess, QWidget* parent = nullptr);
 
-    void init(SimulationAccess* access, SimulationMonitor* monitor, SpaceProperties* space);
+    void init(SimulationAccess* access, SimulationMonitor* monitor, SimulationConfig const& config);
 
     bool onConnectToSimulation();
     bool onDisconnectToSimulation(string const& simulationId, string const& token);
@@ -42,7 +42,7 @@ private:
 
     SimulationAccess* _simAccess = nullptr;
     SimulationMonitor* _monitor = nullptr;
-    SpaceProperties* _space = nullptr;
+    SimulationConfig _config;
     QWidget* _parent = nullptr;
     WebAccess* _webAccess = nullptr;
     QTimer* _pollingTimer = nullptr;

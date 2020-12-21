@@ -16,6 +16,7 @@ public:
         string const& currentToken,
         SimulationMonitor* simMonitor,
         WebAccess* webAccess,
+        SimulationConfig const& config,
         QObject* parent);
 
     void process() override;
@@ -43,4 +44,5 @@ private:
 
     SimulationMonitor* _simMonitor = nullptr;
     WebAccess* _webAccess = nullptr;
+    SimulationConfig _config;
 };
