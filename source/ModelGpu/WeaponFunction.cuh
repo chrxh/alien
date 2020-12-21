@@ -42,6 +42,11 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                 continue;
             }
             if (otherCell->tryLock()) {
+/*
+                auto const mass = static_cast<float>(cell->cluster->numCellPointers);
+                auto const otherMass = static_cast<float>(otherCell->cluster->numCellPointers);
+                auto const energyToTransfer = / *sqrt* /(mass / otherMass)*(mass / otherMass)*cudaSimulationParameters.cellFunctionWeaponStrength;
+*/
                 auto const energyToTransfer =
                     otherCell->getEnergy_safe() * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
                 if (otherCell->getEnergy_safe() > energyToTransfer) {

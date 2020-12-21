@@ -14,19 +14,10 @@ public:
 		Error
 	};
 
-	virtual ValidationResult validate(string& errorMsg) const = 0;
+	virtual ValidationResult validate(string& errorMsg) const;
 
 	IntVector2D universeSize;
 	SymbolTable* symbolTable;
 	SimulationParameters parameters;
-};
-
-
-class _SimulationConfigGpu
-	: public _SimulationConfig
-{
-public:
-	virtual ValidationResult validate(string& errorMsg) const override;
-
     CudaConstants cudaConstants;
 };
