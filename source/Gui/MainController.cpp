@@ -132,7 +132,7 @@ void MainController::init()
         //default simulation
         auto const modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
 
-        auto config = boost::make_shared<_SimulationConfigGpu>();
+        auto config = boost::make_shared<_SimulationConfig>();
         config->cudaConstants = modelGpuFacade->getDefaultCudaConstants();
         config->universeSize = IntVector2D({ 2000 , 1000 });
         config->symbolTable = modelBasicFacade->getDefaultSymbolTable();
@@ -141,12 +141,7 @@ void MainController::init()
     }
 
     auto config = getSimulationConfig();
-    if (boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-        _view->getInfoController()->setDevice(InfoController::Device::Gpu);
-    }
-    else {
-        THROW_NOT_IMPLEMENTED();
-    }
+    _view->getInfoController()->setDevice(InfoController::Device::Gpu);
 
     //auto save every 20 min
     _autosaveTimer = new QTimer(this);
@@ -273,7 +268,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
     auto webSimMonitor = _monitorBuildFunc(_simController);
     auto space = context->getSpaceProperties();
-    _webSimController->init(_accessBuildFunc(_simController), webSimMonitor, space);
+    _webSimController->init(_accessBuildFunc(_simController), webSimMonitor, getSimulationConfig());
 
     auto simChanger = modelBasicFacade->buildSimulationChanger(simMonitor, context->getNumberGenerator());
     for (auto const& connection : _simChangerConnections) {
@@ -310,16 +305,11 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 void MainController::onNewSimulation(SimulationConfig const& config, double energyAtBeginning)
 {
 	delete _simController;
-	if (auto configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-		auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-        auto simulationControllerConfig =
-            ModelGpuBuilderFacade::Config{configGpu->universeSize, configGpu->symbolTable, configGpu->parameters};
-        auto data = ModelGpuData(configGpu->cudaConstants);
-		_simController = facade->buildSimulationController(simulationControllerConfig, data);
-	}
-	else {
-		THROW_NOT_IMPLEMENTED();
-	}
+	auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+    auto simulationControllerConfig =
+        ModelGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
+    auto data = ModelGpuData(config->cudaConstants);
+	_simController = facade->buildSimulationController(simulationControllerConfig, data);
 
 	initSimulation(config->symbolTable, config->parameters);
 
@@ -375,15 +365,10 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
     };
     _worker->add(boost::make_shared<_ExecuteLaterFunc>(recreateFunction));
 
-    if (auto const configGpu = boost::dynamic_pointer_cast<_SimulationConfigGpu>(config)) {
-        auto data = ModelGpuData(configGpu->cudaConstants);
+    auto data = ModelGpuData(config->cudaConstants);
 
-        Serializer::Settings settings{ configGpu->universeSize, data.getData(), extrapolateContent };
-        _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
-    }
-    else {
-        THROW_NOT_IMPLEMENTED();
-    }
+    Serializer::Settings settings{ config->universeSize, data.getData(), extrapolateContent };
+    _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
 }
 
 void MainController::onUpdateSimulationParameters(SimulationParameters const& parameters)
@@ -430,7 +415,7 @@ SimulationConfig MainController::getSimulationConfig() const
 
 	if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
         auto data = ModelGpuData(context->getSpecificData());
-        auto result = boost::make_shared<_SimulationConfigGpu>();
+        auto result = boost::make_shared<_SimulationConfig>();
         result->cudaConstants = data.getCudaConstants();
         result->universeSize = context->getSpaceProperties()->getSize();
 		result->symbolTable = context->getSymbolTable();

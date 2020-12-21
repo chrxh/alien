@@ -11,9 +11,8 @@ ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& con
 	ui.setupUi(this);
 	setFont(GuiSettings::getGlobalFont());
 
-    auto const configGpu = boost::static_pointer_cast<_SimulationConfigGpu>(config);
     ui.computationSettingsWidget->setUniverseSize(config->universeSize);
-    ui.computationSettingsWidget->setCudaConstants(configGpu->cudaConstants);
+    ui.computationSettingsWidget->setCudaConstants(config->cudaConstants);
     ui.extrapolateContentCheckBox->setChecked(
         GuiSettings::getSettingsValue(Const::ExtrapolateContentKey, Const::ExtrapolateContentDefault));
 

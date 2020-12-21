@@ -49,7 +49,7 @@ namespace
 
 SimulationConfig NewSimulationDialog::getConfig() const
 {
-	auto config = boost::make_shared<_SimulationConfigGpu>();
+	auto config = boost::make_shared<_SimulationConfig>();
 	config->universeSize = ui->computationSettings->getUniverseSize();
 	config->parameters = getSimulationParameters();
 	config->symbolTable = getSymbolTable();
