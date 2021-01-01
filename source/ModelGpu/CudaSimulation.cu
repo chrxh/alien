@@ -133,13 +133,23 @@ void CudaSimulation::DEBUG_printNumEntries()
         << std::endl;
 }
 
-void CudaSimulation::getSimulationImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)
+void CudaSimulation::getSimulationImage_pixelStyle(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)
 {
     int width = rectLowerRight.x - rectUpperLeft.x + 1;
     int height = rectLowerRight.y - rectUpperLeft.y + 1;
     int numPixels = width * height;
 
-    GPU_FUNCTION(drawImage, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
+    GPU_FUNCTION(drawImage_pixelStyle, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
+    checkCudaErrors(cudaMemcpy(
+        imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
+}
+
+void CudaSimulation::getSimulationImage_vectorStyle(int2 const & rectUpperLeft, int2 const & rectLowerRight, int2 const& imageSize, 
+    unsigned char * imageData)
+{
+    int numPixels = imageSize.x * imageSize.y;
+
+    GPU_FUNCTION(drawImage_vectorStyle, rectUpperLeft, rectLowerRight, imageSize, *_cudaSimulationData);
     checkCudaErrors(cudaMemcpy(
         imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
 }
