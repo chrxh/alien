@@ -103,7 +103,8 @@ void CudaWorker::processJobs()
             auto& mutex = _job->getMutex();
 
             std::lock_guard<std::mutex> lock(mutex);
-            _cudaSimulation->getSimulationImage({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, image->bits());
+            int zoom = 8;
+            _cudaSimulation->getSimulationImage_vectorStyle({ rect.p1.x / zoom, rect.p1.y / zoom }, { rect.p2.x / zoom, rect.p2.y / zoom }, {image->width(), image->height()}, image->bits());
         }
 
 		if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {

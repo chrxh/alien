@@ -47,11 +47,11 @@ void PixelUniverseView::init(
     auto const viewportRect = _viewport->getRect();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-    _imageSectionItem = new ImageSectionItem(_viewport, QRectF(0,0, size.x, size.y), repository->getImageMutex());
+    _imageSectionItem = new ImageSectionItem(_viewport, QRectF(0,0, size.x*8, size.y*8), repository->getImageMutex());
 
     addItem(_imageSectionItem);
 
-    QGraphicsScene::setSceneRect(0, 0, size.x, size.y);
+    QGraphicsScene::setSceneRect(0, 0, size.x*8, size.y*8);
 
     update();
 }
