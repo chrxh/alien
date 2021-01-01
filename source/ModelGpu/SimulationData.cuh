@@ -36,8 +36,8 @@ struct SimulationData
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
 
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(size.x * size.y, rawImageData);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(size.x * size.y, finalImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(1920 * 1080, size.x * size.y), rawImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(1920 * 1080, size.x * size.y), finalImageData);
     }
 
     void free()
