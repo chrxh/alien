@@ -829,7 +829,7 @@ void ActionController::onNewParticles()
 
 void ActionController::onShowAbout()
 {
-	QMessageBox msgBox(QMessageBox::Information, "about artificial life environment (alien)", "Developed by Christian Heinemann.");
+	QMessageBox msgBox(QMessageBox::Information, "about artificial life environment (ALiEn)", "Developed by Christian Heinemann.");
 	msgBox.exec();
 }
 
