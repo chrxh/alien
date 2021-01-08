@@ -208,7 +208,8 @@ void MainView::setupMenuAndToolbar()
 
 	ui->menuHelp->addAction(actions->actionAbout);
 	ui->menuEntity->addSeparator();
-	ui->menuHelp->addAction(actions->actionDocumentation);
+    ui->menuHelp->addAction(actions->actionGettingStarted);
+    ui->menuHelp->addAction(actions->actionDocumentation);
 }
 
 void MainView::setupFontsAndColors()

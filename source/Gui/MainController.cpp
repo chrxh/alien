@@ -44,6 +44,7 @@
 #include "QApplicationHelper.h"
 #include "Queue.h"
 #include "WebSimulationController.h"
+#include "StartWindow.h"
 
 namespace Const
 {
@@ -142,6 +143,9 @@ void MainController::init()
 
     auto config = getSimulationConfig();
     _view->getInfoController()->setDevice(InfoController::Device::Gpu);
+
+    auto* startWindow = new StartWindow(_view);
+    startWindow->setVisible(true);
 
     //auto save every 20 min
     _autosaveTimer = new QTimer(this);

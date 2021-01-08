@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title></title>
+<meta name="author" content="Customer">
+<meta name="editor" content="html-editor phase 5">
+    <style type="text/css">
+        .auto-style1 {
+            height: 22px;
+        }
+        .auto-style2 {
+            height: 41px;
+        }
+    </style>
+</head>
+<body text="#7070FF" bgcolor="#00001b" link="#FF0000" alink="#FF0000" vlink="#FF0000">
+	<font face="Courier" color="#70B070">
+		<p><h2>What is ALiEn ?</h2></p>
+	</font>
+	<font face="Courier" color="#FFFFFF" size="4">
+		<p>
+			ALiEn is a GPU-accelerated physics engine with focus on artificial life computations.
+			It provides an abstraction of a physical world in 2D and offers the capability to programm matter building blocks.
+			Each simulated machine (named cell cluster) has an internal structure of building blocks (named cells) modeled and visualized as a graph.
+			They can perform both physical actions and information processing by circulating tokens along the nodes.
+		</p>
+	</font>
+	
+	<font face="Courier" color="#70B070">
+		<p><h2>First steps</h2></p>
+	</font>
+	<font face="Courier" color="#70B070">
+		<p><h3>Playing with existing simulations</h3></p>
+	</font>
+	<font face="Courier" color="#FFFFFF" size="4">
+		<p>
+			The easiest way to get to know the ALiEn simulator is to load and run an existing example file.
+			You find various demos in <i>examples/*</i> demonstrating capabilities of the engine ranging from physics
+			examples, building machines, replicators to small ecosystems.
+		</p>
+		<p>
+			To this end, go to <i>Simulation -> Load</i> and then on <i>Simulation -> Run</i> in the menu or use the toolbar.
+			During running simulations you can get to know the navigation and monitoring functions:
+			<ul>
+			  <li>&#8226; zooming (and scrolling): <i>View -> Zoom in</i> as well as <i>View -> Zoom out</i></li>
+			  <li>&#8226; toggle edit mode: <i>View -> Editor</i></li>
+			  <li>&#8226; toggle monitor: <i>View -> Monitor</i></li>
+			</ul>
+			By toggling again <i>Simulation -> Run</i> the simulation paused.
+		</p>
+		<p>
+			Further useful global functions:
+			<ul>
+			  <li>
+				&#8226; snapshots: By clicking on <i>Simulation -> Snapshot</i> the current simulation state is saved in memory.
+				You can continue running the simulation and return to the saved state by invoking <i>Simulation -> Restore</i>.
+			  </li>
+			  <li>
+				&#8226; accelerate active clusters: It is possible to assign active clusters (cell clusters with tokens) more computing power
+				by periodically freezing the remaining content for certain amount of time steps. This can be achieved by toggling <i>Simulation -> Accelerate active clusters</i>.
+			  </li>
+			  <li>
+				&#8226; single step forward and backward: If a simulation is paused a single time step can be calculated via <i>Simulation -> Step forward</i>.
+				The special thing about this feature is that the old state is saved and you can go back one time step by <i>Simulation -> Step backward</i>.
+				This also works several times in a row.
+			  </li>
+			<br />
+		</p>
+	</font>
+	<font face="Courier" color="#70B070">
+		<p><h3>Assemble own simulations with existing collections</h3></p>
+	</font>
+	<font face="Courier" color="#70B070">
+		<p><h3>Creating own collections</h3></p>
+	</font>
+</body>
+</html>
