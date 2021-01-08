@@ -28,5 +28,6 @@
         <file>Tutorial/logo.png</file>
         <file>Icons/display_link_off.png</file>
         <file>Icons/display_link_on.png</file>
+        <file>Tutorial/StartWindow.html</file>
     </qresource>
 </RCC>
