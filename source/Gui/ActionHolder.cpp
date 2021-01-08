@@ -264,6 +264,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionAbout = new QAction("About artificial life environment (alien)", this);
 	actionAbout->setEnabled(true);
+    
+    actionGettingStarted = new QAction("Getting started", this);
+    actionGettingStarted->setCheckable(true);
+    actionGettingStarted->setChecked(true);
+    actionGettingStarted->setEnabled(true);
+
 	actionDocumentation = new QAction("Documentation", this);
 	actionDocumentation->setEnabled(true);
 	actionDocumentation->setCheckable(false);
