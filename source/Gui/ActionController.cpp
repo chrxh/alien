@@ -3,6 +3,7 @@
 #include <QAction>
 #include <QInputDialog>
 #include <QClipboard>
+#include <QTextStream>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -830,8 +831,16 @@ void ActionController::onNewParticles()
 
 void ActionController::onShowAbout()
 {
-	QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version 2.1.0.\nDeveloped by Christian Heinemann.");
-	msgBox.exec();
+    QFile file("://Version.txt");
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(nullptr, "error", file.errorString());
+    }
+    else {
+        QTextStream in(&file);
+        auto version = in.readLine();
+        QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version " + version + "\nDeveloped by Christian Heinemann.");
+        msgBox.exec();
+    }
 }
 
 void ActionController::onToggleGettingStarted(bool toggled)

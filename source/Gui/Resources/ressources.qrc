@@ -29,5 +29,6 @@
         <file>Icons/display_link_on.png</file>
         <file>GettingStartedWindow.html</file>
         <file>logo.png</file>
+        <file>Version.txt</file>
     </qresource>
 </RCC>
