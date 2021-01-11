@@ -36,34 +36,52 @@
 		<p>
 			The easiest way to get to know the ALiEn simulator is to load and run an existing example file.
 			You find various demos in <i>examples/*</i> demonstrating capabilities of the engine ranging from physics
-			examples, building machines, replicators to small ecosystems.
+			examples, building machines, replicators to modeling small ecosystems.
 		</p>
 		<p>
 			To this end, go to <i>Simulation -> Load</i> and then on <i>Simulation -> Run</i> in the menu or use the toolbar.
 			During running simulations you can get to know the navigation and monitoring functions:
 			<ul>
-			  <li>&#8226; zooming (and scrolling): <i>View -> Zoom in</i> as well as <i>View -> Zoom out</i></li>
-			  <li>&#8226; toggle edit mode: <i>View -> Editor</i></li>
+			  <li>&#8226; zooming and visualization mode: <i>View -> Zoom in</i> as well as <i>View -> Zoom out</i></li>.
+				after reaching a certain zoom level the view switches to edit mode.
 			  <li>&#8226; toggle monitor: <i>View -> Monitor</i></li>
 			</ul>
 			By toggling again <i>Simulation -> Run</i> the simulation paused.
 		</p>
 		<p>
-			Further useful global functions:
+			Further useful computation functions:
 			<ul>
 			  <li>
 				&#8226; snapshots: By clicking on <i>Simulation -> Snapshot</i> the current simulation state is saved in memory.
 				You can continue running the simulation and return to the saved state by invoking <i>Simulation -> Restore</i>.
 			  </li>
 			  <li>
-				&#8226; accelerate active clusters: It is possible to assign active clusters (cell clusters with tokens) more computing power
-				by periodically freezing the remaining content for certain amount of time steps. This can be achieved by toggling <i>Simulation -> Accelerate active clusters</i>.
-			  </li>
-			  <li>
 				&#8226; single step forward and backward: If a simulation is paused a single time step can be calculated via <i>Simulation -> Step forward</i>.
 				The special thing about this feature is that the old state is saved and you can go back one time step by <i>Simulation -> Step backward</i>.
 				This also works several times in a row.
 			  </li>
+			  <li>
+				&#8226; display link: By disabling via <i>View -> Display link</i> one can disable rendering and thus accelerate the entire simulation.
+			  </li>
+			  <li>
+				&#8226; accelerate active clusters: It is possible to assign active clusters (cell clusters with tokens) more computing power
+				by periodically freezing the remaining content for certain amount of time steps. This can be achieved by toggling <i>Simulation -> Accelerate active clusters</i>.
+			  </li>
+		</p>
+		<p>
+			One of the most important manipulation functions are the simulation and computations parameters:
+			<ul>
+			  <li>&#8226; simulation parameters: 
+			  <li>&#8226; computation parameters: 
+			</ul>
+		</p>
+		<p>
+			<b>
+				Fun functions:
+			</b>
+			One feature that is a lot of fun is applying forces to bodies in a running simulation. During a simulation one can press hold the left mouse button and move the cursor
+			in a certain direction. Forces are exerted on every body on the path.
+			By pressing the right mouse button, only rotational forces are applied.
 			<br />
 		</p>
 	</font>

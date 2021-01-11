@@ -22,6 +22,7 @@
 #include "MainModel.h"
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
+#include "GettingStartedWindow.h"
 
 #include "ui_MainView.h"
 
@@ -36,6 +37,8 @@ MainView::MainView(QWidget * parent)
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
+    _gettingStartedWindow = new GettingStartedWindow(this);
+    connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
 }
 
@@ -101,7 +104,12 @@ InfoController * MainView::getInfoController() const
 	return _infoController;
 }
 
-void MainView::showDocumentation(bool show)
+void MainView::toggleGettingStarted(bool show)
+{
+    _gettingStartedWindow->setVisible(show);
+}
+
+void MainView::showDocumentation()
 {
     QDesktopServices::openUrl(QUrl("https://alien-project.org/documentation.html"));
 }
@@ -264,6 +272,11 @@ void MainView::setupFullScreen()
 void MainView::monitorClosed()
 {
 	_actions->getActionHolder()->actionMonitor->setChecked(false);
+}
+
+void MainView::gettingStartedWindowClosed()
+{
+    _actions->getActionHolder()->actionGettingStarted->setChecked(false);
 }
 
 

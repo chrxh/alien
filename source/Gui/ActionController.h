@@ -75,7 +75,8 @@ private:
     Q_SLOT void onMostFrequentCluster();
 
 	Q_SLOT void onShowAbout();
-	Q_SLOT void onShowDocumentation(bool show);
+    Q_SLOT void onToggleGettingStarted(bool toggled);
+	Q_SLOT void onShowDocumentation();
 
 	Q_SLOT void onToggleRestrictTPS(bool toggled);
 
