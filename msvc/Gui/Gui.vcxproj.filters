@@ -606,14 +606,14 @@
     <ClCompile Include="Release\moc_SendStatisticsJob.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_StartWindow.cpp">
+    <ClCompile Include="..\..\source\Gui\GettingStartedWindow.cpp">
+      <Filter>Source Files\Assistance</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GettingStartedWindow.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Release\moc_StartWindow.cpp">
+    <ClCompile Include="Release\moc_GettingStartedWindow.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\StartWindow.cpp">
-      <Filter>Source Files\Assistance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -871,10 +871,10 @@
     <CustomBuild Include="..\..\source\Gui\SendStatisticsJob.h">
       <Filter>Source Files\WebSimulation</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartWindow.ui">
+    <CustomBuild Include="..\..\source\Gui\GettingStartedWindow.h">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\StartWindow.h">
+    <CustomBuild Include="..\..\source\Gui\GettingStartedWindow.ui">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -1067,7 +1067,7 @@
     <ClInclude Include="ui_WebSimulationSelectionView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_StartWindow.h">
+    <ClInclude Include="ui_GettingStartedWindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

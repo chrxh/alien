@@ -1,6 +1,9 @@
 #include "CoordinateSystem.h"
 
-const qreal GRAPHICS_ITEM_SIZE = 10.0;
+namespace
+{
+    const qreal GRAPHICS_ITEM_SIZE = 10.0;
+}
 
 QVector2D CoordinateSystem::sceneToModel(QVector2D const & vec)
 {

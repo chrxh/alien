@@ -44,7 +44,6 @@
 #include "QApplicationHelper.h"
 #include "Queue.h"
 #include "WebSimulationController.h"
-#include "StartWindow.h"
 
 namespace Const
 {
@@ -128,6 +127,8 @@ void MainController::init()
     _view->init(_model, this, _serializer, _repository, _notifier, _webSimController);
     _worker->init(_serializer);
 
+    QApplicationHelper::processEventsForMilliSec(1000);
+
     if (!onLoadSimulation(getPathToApp() + Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
@@ -144,8 +145,7 @@ void MainController::init()
     auto config = getSimulationConfig();
     _view->getInfoController()->setDevice(InfoController::Device::Gpu);
 
-    auto* startWindow = new StartWindow(_view);
-    startWindow->setVisible(true);
+    _view->toggleGettingStarted(true);
 
     //auto save every 20 min
     _autosaveTimer = new QTimer(this);
