@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>StartWindow</class>
- <widget class="QMainWindow" name="StartWindow">
+ <class>GettingStartedWindow</class>
+ <widget class="QMainWindow" name="GettingStartedWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -44,7 +44,7 @@
   <connection>
    <sender>pushButton</sender>
    <signal>clicked()</signal>
-   <receiver>StartWindow</receiver>
+   <receiver>GettingStartedWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

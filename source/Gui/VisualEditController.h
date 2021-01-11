@@ -25,7 +25,6 @@ public:
 
 	virtual void setActiveScene(ActiveScene activeScene);
 	virtual QVector2D getViewCenterWithIncrement ();
-	virtual QGraphicsView* getGraphicsView ();
 	virtual double getZoomFactor ();
 
     virtual void zoom (double factor);

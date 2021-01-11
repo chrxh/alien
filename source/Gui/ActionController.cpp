@@ -140,7 +140,8 @@ void ActionController::init(
     connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
-	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
+    connect(actions->actionGettingStarted, &QAction::triggered, this, &ActionController::onToggleGettingStarted);
+    connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
 
 	connect(actions->actionRestrictTPS, &QAction::triggered, this, &ActionController::onToggleRestrictTPS);
 }
@@ -829,13 +830,18 @@ void ActionController::onNewParticles()
 
 void ActionController::onShowAbout()
 {
-	QMessageBox msgBox(QMessageBox::Information, "about artificial life environment (ALiEn)", "Developed by Christian Heinemann.");
+	QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version 2.1.0.\nDeveloped by Christian Heinemann.");
 	msgBox.exec();
 }
 
-void ActionController::onShowDocumentation(bool show)
+void ActionController::onToggleGettingStarted(bool toggled)
 {
-	_mainView->showDocumentation(show);
+    _mainView->toggleGettingStarted(toggled);
+}
+
+void ActionController::onShowDocumentation()
+{
+	_mainView->showDocumentation();
 }
 
 void ActionController::onToggleRestrictTPS(bool toggled)

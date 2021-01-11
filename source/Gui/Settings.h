@@ -50,17 +50,6 @@ namespace Const
     const std::string ModelComputationTypeKey = "newSim/modelComputationType";
     const ModelComputationType ModelComputationTypeDefault = ModelComputationType::Gpu;
 
-	const std::string CpuGridSizeXKey = "newSim/cpu/gridSize/x";
-	const int CpuGridSizeXDefault = 12;
-	const std::string CpuGridSizeYKey = "newSim/cpu/gridSize/y";
-	const int CpuGridSizeYDefault = 6;
-	const std::string CpuUnitSizeXKey = "newSim/cpu/unitSize/x";
-	const int CpuUnitSizeXDefault = 100;
-	const std::string CpuUnitSizeYKey = "newSim/cpu/unitSize/y";
-	const int CpuUnitSizeYDefault = 100;
-	const std::string CpuMaxThreadsKey = "newSim/cpu/maxThreads";
-	const int CpuMaxThreadsDefault = 8;
-    
     const std::string GpuUniverseSizeXKey = "newSim/gpu/universeSize/x";
     const int GpuUniverseSizeXDefault = 4000;
     const std::string GpuUniverseSizeYKey = "newSim/gpu/universeSize/y";

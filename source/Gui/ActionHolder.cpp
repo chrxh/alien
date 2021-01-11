@@ -262,7 +262,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionMostFrequentCluster = new QAction("Most frequent active cluster", this);
     actionMostFrequentCluster->setEnabled(true);
 
-	actionAbout = new QAction("About artificial life environment (alien)", this);
+	actionAbout = new QAction("About", this);
 	actionAbout->setEnabled(true);
     
     actionGettingStarted = new QAction("Getting started", this);
