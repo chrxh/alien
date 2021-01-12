@@ -145,7 +145,7 @@ void MainController::init()
     auto config = getSimulationConfig();
     _view->getInfoController()->setDevice(InfoController::Device::Gpu);
 
-    _view->toggleGettingStarted(true);
+    _view->initGettingStartedWindow();
 
     //auto save every 20 min
     _autosaveTimer = new QTimer(this);
