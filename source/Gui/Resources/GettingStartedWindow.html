@@ -13,83 +13,134 @@
         }
     </style>
 </head>
-<body text="#7070FF" bgcolor="#00001b" link="#FF0000" alink="#FF0000" vlink="#FF0000">
-	<font face="Courier" color="#70B070">
+<body text="#7070FF" bgcolor="#D0D0D0" link="#FF0000" alink="#FF0000" vlink="#FF0000">
+	<font face="Courier" color="#407040">
 		<p><h2>What is Articial Life Environment (ALiEn) ?</h2></p>
 	</font>
-	<font face="Courier" color="#FFFFFF" size="4">
+	<font face="Courier" color="#000000" size="4">
 		<p>
 			ALiEn is a GPU-accelerated physics engine with focus on artificial life computations.
 			It provides an abstraction of a physical world in 2D and offers the capability to programm matter building blocks.
-			Each simulated machine (named cell cluster) has an internal structure of building blocks (named cells) modeled and visualized as a graph.
+			Each simulated machine (named <i>cell cluster</i>) has an internal structure of building blocks (named <i>cells</i>) modeled and visualized as a graph.
 			They can perform both physical actions and information processing by circulating tokens along the nodes.
 		</p>
 	</font>
 	
-	<font face="Courier" color="#70B070">
+	<font face="Courier" color="#407040">
 		<p><h2>First steps</h2></p>
 	</font>
-	<font face="Courier" color="#70B070">
-		<p><h3>Playing with existing simulations</h3></p>
-	</font>
-	<font face="Courier" color="#FFFFFF" size="4">
+	<font face="Courier" color="#000000" size="4">
 		<p>
-			The easiest way to get to know the ALiEn simulator is to load and run an existing example file.
-			You find various demos in <i>examples/*</i> demonstrating capabilities of the engine ranging from physics
+			The easiest way to get to know the ALiEn simulator is to load and run an existing simulation file.
+			You find various demos in <i>examples/simulations/*</i> demonstrating capabilities of the engine ranging from physics
 			examples, building machines, replicators to small ecosystems.
 		</p>
 		<p>
-			To this end, go to <i>Simulation -> Load</i> and then on <i>Simulation -> Run</i> in the menu or use the toolbar.
-			During running simulations you can get to know the navigation and monitoring functions:
+			To this end, go to <i>Simulation -> Load</i> and select a file. Once the simulation is loaded, click <i>Simulation -> Run</i> from the menu or toolbar.
+			During the running simulations you can get to know the following navigation and monitoring functions:
 			<ul>
-			  <li>&#8226; zooming and visualization mode: <i>View -> Zoom in</i> as well as <i>View -> Zoom out</i></li>.
-				after reaching a certain zoom level the view switches to edit mode.
-			  <li>&#8226; toggle monitor: <i>View -> Monitor</i></li>
+				<li>
+					<b>zooming and visualization modes</b>: Zooming is done by clicking <i>View -> Zoom in</i> as well as <i>View -> Zoom out</i>.
+					After reaching a certain zoom level, the view switches to the editor mode.
+				</li>
+				<li>
+					<b>toggling monitor</b>: <i>View -> Monitor</i>
+				</li> 
 			</ul>
-			By toggling again <i>Simulation -> Run</i> the simulation paused.
+			Clicking <i>Simulation -> Run</i> again pauses the simulation.
 		</p>
 		<p>
 			Further useful computation functions:
 			<ul>
 			  <li>
-				&#8226; snapshots: By clicking on <i>Simulation -> Snapshot</i> the current simulation state is saved in memory.
+				<b>snapshots</b>: Clicking <i>Simulation -> Snapshot</i> saves the current simulation state in memory.
 				You can continue running the simulation and return to the saved state by invoking <i>Simulation -> Restore</i>.
 			  </li>
 			  <li>
-				&#8226; single step forward and backward: If a simulation is paused a single time step can be calculated via <i>Simulation -> Step forward</i>.
-				The special thing about this feature is that the old state is saved and you can go back one time step by <i>Simulation -> Step backward</i>.
+				<b>single time step forward and backward</b>: If a simulation is paused, a single time step can be calculated via <i>Simulation -> Step forward</i>.
+				The special feature of this function is that the old state is saved and one can go back one time step with <i>Simulation -> Step back</i>.
 				This also works several times in a row.
 			  </li>
 			  <li>
-				&#8226; display link: By disabling via <i>View -> Display link</i> one can disable rendering and thus accelerate the entire simulation.
+				<b>display link</b>: By switching off <i>View -> Display link</i> you can disable the rendering and thus speed up the whole simulation.
 			  </li>
 			  <li>
-				&#8226; accelerate active clusters: It is possible to assign active clusters (cell clusters with tokens) more computing power
-				by periodically freezing the remaining content for certain amount of time steps. This can be achieved by toggling <i>Simulation -> Accelerate active clusters</i>.
+				<b>accelerate active clusters</b>: It is possible to allocate more computing power to active clusters (cell clusters with tokens)
+				by periodically freezing the remaining content for a certain number of time steps. This can be achieved by toggling <i>Simulation -> Accelerate active clusters</i>.
 			  </li>
 		</p>
 		<p>
 			One of the most important manipulation functions are the simulation and computations parameters:
 			<ul>
-			  <li>&#8226; simulation parameters: 
-			  <li>&#8226; computation parameters: 
+				<li><b>simulation parameters</b>: The parameters can be set by opening the <i>Settings -> Simulation parameters</i> dialog. 
+					Let us give some selected examples to play around with:
+					<ul>
+						<li>
+							<b>cell properties -> max force</b>: Sets the threshold at which damage occurs. If you lower the value, the bodies can break more easily.
+						</li>
+						<li>
+							<b>cell properties -> fusion velocity</b>: Sets the threshold at which fusion occurs. If you lower the value, the bodies can fuse more easily.
+						</li>
+						<li>
+							<b>radiation -> factor</b>: Corresponds to the amount of energy that a cell emits from time to time. Higher values mean that the cells are destroyed more quickly.
+						</li>
+						<li>
+							<b>weapon -> energy cost</b>: Corresponds to the amount of energy a cell loses when it tries to attack its surroundings.
+							Higher values make it more difficult for energy-consuming cell clusters to survive.
+						</li>
+						<li>
+							<b>cell function properties -> constructor -> * mutation probability</b>: Sets the different mutation rates. This is mainly relevant for replicator simulations.
+						</li>
+					</ul>
+					An overview of all parameters can be found in <i>Help -> Documentation</i>.
+				</li>
+				<li>
+					<b>computation parameters</b>: The sizes of a simulation can be changed in <i>Settings -> Computation</i>. There are many more technical parameters that we can leave unchanged for now.
+					They are used for the CUDA api and specify the number of threads and sizes of arrays.
+					If <i>scale content</i> is enabled in the dialog, additional space created by a possible world
+					enlargement will be periodically augmented with the existing cells and particles. 
+				</li>
 			</ul>
 		</p>
 		<p>
-			<b>
-				Fun functions:
-			</b>
+			<b>Fun functions:</b>
 			One feature that is a lot of fun is applying forces to bodies in a running simulation. During a simulation one can press hold the left mouse button and move the cursor
-			in a certain direction. Forces are exerted on every body on the path.
+			in a certain direction. Forces are exerted on every body on its path.
 			By pressing the right mouse button, only rotational forces are applied.
 			<br />
 		</p>
 	</font>
-	<font face="Courier" color="#70B070">
-		<p><h3>Assemble own simulations with existing collections</h3></p>
+	<font face="Courier" color="#407040">
+		<p><h2>Creating own simulations</h2></p>
 	</font>
-	<font face="Courier" color="#70B070">
-		<p><h3>Creating own collections</h3></p>
+	<font face="Courier" color="#000000" size="4">
+		<p>
+			After you have learned the most important global functions, you can start to build your own world. We will show how to do this with an example:
+			<br/>
+			Create a new simulation by clicking on <i>Simulation -> New</i>. There you can choose the computation and simulation parameter settings. We may continue with the default values.
+			Now we are able to add cell clusters. A primitive such as a hexagon can be added by <i>Collection -> New Hexagon</i>. After doing this, we can simply
+			multiply the structure by invoking <i>Collection -> Random multiplier</i>. In the dialog that appears we can set random velocities for the copies. For example, a (angular) velocity range of -0.3 to 0.3
+			could be chosen.
+			In the next step, more clusters could be added. To do this, we scroll to a free position and add a saved collection with <i>Collection -> Load</i>.
+			We select <i>examples/collections/spiral builder.aco</i> and multiply it again as described above.
+			If you want to move certain cell clusters by hand, you can do it by dragging and dropping with the mouse pointer.
+			<br/>
+			When our construction is ready, we can take a snapshot (or save the simulation as a file) and run it to see the result.
+			<br />
+		</p>
+	</font>
+	<font face="Courier" color="#407040">
+		<p><h2>Creating simulations with own machines</h2></p>
+	</font>
+	<font face="Courier" color="#000000" size="4">
+		<p>
+			In order to assemble your own machines, you need a detailed knowledge of the cell functions and the information processing model described in <i>Help -> Documentation</i>.
+			As a good starting point, one can load an example collection, e.g. <i>examples/collections/spiral builder.aco</i>, and study and manipulate it with the editor.
+			The editor allows you to add, delete, rotate, and move cells as well as entire cell clusters using the mouse pointer and toolbar buttons.
+			In addition, cells are equipped with functions. For example, a cell can be programmed with a <i>computer function</i> through a kind of machine language, or a <i>weapon function</i> can
+			attack its environment to steal energy from possible other cells.
+			The information about the type of cell function can be visualized by enabling <i>View -> Cell info</i>.
+		</p>
 	</font>
 </body>
 </html>
