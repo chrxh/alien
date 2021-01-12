@@ -84,6 +84,13 @@ void MainView::init(
 	_initialied = true;
 }
 
+void MainView::initGettingStartedWindow()
+{
+    auto show = GuiSettings::getSettingsValue(Const::GettingStartedWindowKey, Const::GettingStartedWindowKeyDefault);
+    _actions->getActionHolder()->actionGettingStarted->setChecked(show);
+    toggleGettingStarted(show);
+}
+
 void MainView::refresh()
 {
 	_visualEditor->refresh();
