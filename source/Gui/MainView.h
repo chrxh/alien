@@ -28,6 +28,8 @@ public:
         Notifier* notifier, 
         WebSimulationController* webSimController);
 
+    virtual void initGettingStartedWindow();
+
     virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);

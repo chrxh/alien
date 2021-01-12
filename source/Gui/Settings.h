@@ -47,6 +47,9 @@ namespace Const
 	const std::string MainViewFullScreenKey = "mainView/fullScreen";
 	const bool MainViewFullScreenDefault = true;
 
+    const std::string GettingStartedWindowKey = "mainView/gettingStartedWindow";
+    const bool GettingStartedWindowKeyDefault = true;
+
     const std::string ModelComputationTypeKey = "newSim/modelComputationType";
     const ModelComputationType ModelComputationTypeDefault = ModelComputationType::Gpu;
 
