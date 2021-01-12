@@ -1,34 +1,31 @@
 <RCC>
     <qresource prefix="/">
-        <file>Icons/editor.png</file>
-        <file>Icons/step.png</file>
-        <file>Icons/play.png</file>
-        <file>Icons/zoom_in.png</file>
-        <file>Icons/zoom_out.png</file>
-        <file>Icons/pause.png</file>
-        <file>Icons/step_back.png</file>
-        <file>Icons/add_cell.png</file>
-        <file>Icons/del_cell.png</file>
-        <file>Icons/add_cluster.png</file>
-        <file>Icons/add_token.png</file>
-        <file>Icons/del_token.png</file>
-        <file>Icons/add_energy.png</file>
-        <file>Icons/editor_active.png</file>
-        <file>Icons/snapshot.png</file>
-        <file>Icons/restore_active.png</file>
-        <file>Icons/info_on.png</file>
-        <file>Icons/info_off.png</file>
-        <file>Icons/EditorView.png</file>
-        <file>Icons/PixelView.png</file>
-        <file>Icons/center_off.png</file>
-        <file>Icons/center_on.png</file>
-        <file>Icons/accelerate.png</file>
-        <file>Icons/monitor.png</file>
-        <file>Icons/monitor_active.png</file>
-        <file>Icons/display_link_off.png</file>
-        <file>Icons/display_link_on.png</file>
         <file>logo.png</file>
         <file>Version.txt</file>
         <file>GettingStartedWindow.html</file>
+        <file>Icons/editor/add_cell.png</file>
+        <file>Icons/editor/add_cluster.png</file>
+        <file>Icons/editor/add_energy.png</file>
+        <file>Icons/editor/add_token.png</file>
+        <file>Icons/editor/center_off.png</file>
+        <file>Icons/editor/center_on.png</file>
+        <file>Icons/editor/del_cell.png</file>
+        <file>Icons/editor/del_token.png</file>
+        <file>Icons/editor/info_off.png</file>
+        <file>Icons/editor/info_on.png</file>
+        <file>Icons/main/zoom in.png</file>
+        <file>Icons/main/zoom out.png</file>
+        <file>Icons/main/pause.png</file>
+        <file>Icons/main/item view.png</file>
+        <file>Icons/main/monitor.png</file>
+        <file>Icons/main/pixel view.png</file>
+        <file>Icons/main/visual on.png</file>
+        <file>Icons/main/visual off.png</file>
+        <file>Icons/main/accelerate.png</file>
+        <file>Icons/main/restore.png</file>
+        <file>Icons/main/run.png</file>
+        <file>Icons/main/snapshot.png</file>
+        <file>Icons/main/step backward.png</file>
+        <file>Icons/main/step forward.png</file>
     </qresource>
 </RCC>
