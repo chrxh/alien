@@ -161,7 +161,7 @@
       </size>
      </property>
      <property name="title">
-      <string>simulation parameters</string>
+      <string>simulation settings</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
@@ -174,7 +174,7 @@
       <item>
        <widget class="QPushButton" name="symbolTableButton">
         <property name="text">
-         <string>symbol table</string>
+         <string>symbol map</string>
         </property>
        </widget>
       </item>
