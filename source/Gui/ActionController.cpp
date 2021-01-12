@@ -162,11 +162,9 @@ void ActionController::onRunClicked(bool toggled)
 {
 	auto actions = _model->getActionHolder();
 	if (toggled) {
-		actions->actionRunSimulation->setIcon(QIcon("://Icons/play.png"));
 		actions->actionRunStepForward->setEnabled(false);
 	}
 	else {
-		actions->actionRunSimulation->setIcon(QIcon("://Icons/pause.png"));
 		actions->actionRunStepForward->setEnabled(true);
 	}
 	actions->actionRunStepBackward->setEnabled(false);

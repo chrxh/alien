@@ -136,95 +136,97 @@ void MainView::closeEvent(QCloseEvent * event)
 	QMainWindow::closeEvent(event);
 }
 
+#include <QDebug>
 void MainView::setupMenuAndToolbar()
 {
 	auto actions = _actions->getActionHolder();
-	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(actions->actionEditor);
-	ui->toolBar->addAction(actions->actionMonitor);
-	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(actions->actionZoomIn);
-	ui->toolBar->addAction(actions->actionZoomOut);
-	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(actions->actionSnapshot);
-	ui->toolBar->addAction(actions->actionRestore);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction(actions->actionRunSimulation);
-	ui->toolBar->addAction(actions->actionRunStepBackward);
-	ui->toolBar->addAction(actions->actionRunStepForward);
-    ui->toolBar->addAction(actions->actionAcceleration);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction(actions->actionDisplayLink);
-    ui->toolBar->addSeparator();
 
-	ui->menuSimulation->addAction(actions->actionNewSimulation);
+    ui->menuSimulation->addAction(actions->actionNewSimulation);
     ui->menuSimulation->addAction(actions->actionLoadSimulation);
-	ui->menuSimulation->addAction(actions->actionSaveSimulation);
+    ui->menuSimulation->addAction(actions->actionSaveSimulation);
     ui->menuSimulation->addSeparator();
     ui->menuSimulation->addAction(actions->actionWebSimulation);
-	ui->menuSimulation->addSeparator();
-	ui->menuSimulation->addAction(actions->actionRunSimulation);
-	ui->menuSimulation->addAction(actions->actionRunStepForward);
-	ui->menuSimulation->addAction(actions->actionRunStepBackward);
+    ui->menuSimulation->addSeparator();
+    ui->menuSimulation->addAction(actions->actionRunSimulation);
+    ui->menuSimulation->addAction(actions->actionRunStepForward);
+    ui->menuSimulation->addAction(actions->actionRunStepBackward);
     ui->menuSimulation->addAction(actions->actionAcceleration);
     ui->menuSimulation->addAction(actions->actionSnapshot);
-	ui->menuSimulation->addAction(actions->actionRestore);
+    ui->menuSimulation->addAction(actions->actionRestore);
     ui->menuSimulation->addSeparator();
-	ui->menuSimulation->addAction(actions->actionExit);
+    ui->menuSimulation->addAction(actions->actionExit);
 
-	ui->menuSettings->addAction(actions->actionComputationSettings);
+    ui->menuSettings->addAction(actions->actionComputationSettings);
     ui->menuSettings->addAction(actions->actionEditSimParameters);
     ui->menuSettings->addAction(actions->actionEditSymbols);
 
-	ui->menuView->addAction(actions->actionEditor);
-	ui->menuView->addAction(actions->actionMonitor);
-	ui->menuView->addSeparator();
-	ui->menuView->addAction(actions->actionZoomIn);
-	ui->menuView->addAction(actions->actionZoomOut);
+    ui->menuView->addAction(actions->actionEditor);
+    ui->menuView->addAction(actions->actionMonitor);
+    ui->menuView->addSeparator();
+    ui->menuView->addAction(actions->actionZoomIn);
+    ui->menuView->addAction(actions->actionZoomOut);
     ui->menuView->addAction(actions->actionDisplayLink);
     ui->menuView->addAction(actions->actionFullscreen);
     ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionGlowEffect);
     ui->menuView->addSeparator();
-	ui->menuView->addAction(actions->actionShowCellInfo);
-	ui->menuView->addAction(actions->actionCenterSelection);
+    ui->menuView->addAction(actions->actionShowCellInfo);
+    ui->menuView->addAction(actions->actionCenterSelection);
 
-	ui->menuEntity->addAction(actions->actionNewCell);
-	ui->menuEntity->addAction(actions->actionNewParticle);
-	ui->menuEntity->addSeparator();
-	ui->menuEntity->addAction(actions->actionCopyEntity);
-	ui->menuEntity->addAction(actions->actionPasteEntity);
-	ui->menuEntity->addAction(actions->actionDeleteEntity);
-	ui->menuEntity->addSeparator();
-	ui->menuEntity->addAction(actions->actionNewToken);
-	ui->menuEntity->addAction(actions->actionCopyToken);
-	ui->menuEntity->addAction(actions->actionPasteToken);
-	ui->menuEntity->addAction(actions->actionDeleteToken);
+    ui->menuEntity->addAction(actions->actionNewCell);
+    ui->menuEntity->addAction(actions->actionNewParticle);
+    ui->menuEntity->addSeparator();
+    ui->menuEntity->addAction(actions->actionCopyEntity);
+    ui->menuEntity->addAction(actions->actionPasteEntity);
+    ui->menuEntity->addAction(actions->actionDeleteEntity);
+    ui->menuEntity->addSeparator();
+    ui->menuEntity->addAction(actions->actionNewToken);
+    ui->menuEntity->addAction(actions->actionCopyToken);
+    ui->menuEntity->addAction(actions->actionPasteToken);
+    ui->menuEntity->addAction(actions->actionDeleteToken);
     ui->menuEntity->addSeparator();
     ui->menuEntity->addAction(actions->actionCopyToClipboard);
     ui->menuEntity->addAction(actions->actionPasteFromClipboard);
 
-	ui->menuCollection->addAction(actions->actionNewRectangle);
-	ui->menuCollection->addAction(actions->actionNewHexagon);
-	ui->menuCollection->addAction(actions->actionNewParticles);
-	ui->menuCollection->addSeparator();
-	ui->menuCollection->addAction(actions->actionLoadCol);
-	ui->menuCollection->addAction(actions->actionSaveCol);
-	ui->menuCollection->addAction(actions->actionCopyCol);
-	ui->menuCollection->addAction(actions->actionPasteCol);
-	ui->menuCollection->addAction(actions->actionDeleteSel);
-	ui->menuCollection->addAction(actions->actionDeleteCol);
-	ui->menuCollection->addSeparator();
-	ui->menuCollection->addAction(actions->actionRandomMultiplier);
-	ui->menuCollection->addAction(actions->actionGridMultiplier);
+    ui->menuCollection->addAction(actions->actionNewRectangle);
+    ui->menuCollection->addAction(actions->actionNewHexagon);
+    ui->menuCollection->addAction(actions->actionNewParticles);
+    ui->menuCollection->addSeparator();
+    ui->menuCollection->addAction(actions->actionLoadCol);
+    ui->menuCollection->addAction(actions->actionSaveCol);
+    ui->menuCollection->addAction(actions->actionCopyCol);
+    ui->menuCollection->addAction(actions->actionPasteCol);
+    ui->menuCollection->addAction(actions->actionDeleteSel);
+    ui->menuCollection->addAction(actions->actionDeleteCol);
+    ui->menuCollection->addSeparator();
+    ui->menuCollection->addAction(actions->actionRandomMultiplier);
+    ui->menuCollection->addAction(actions->actionGridMultiplier);
 
     ui->menuTools->addAction(actions->actionMostFrequentCluster);
     ui->menuTools->addAction(actions->actionSimulationChanger);
 
-	ui->menuHelp->addAction(actions->actionAbout);
-	ui->menuEntity->addSeparator();
+    ui->menuHelp->addAction(actions->actionAbout);
+    ui->menuEntity->addSeparator();
     ui->menuHelp->addAction(actions->actionGettingStarted);
     ui->menuHelp->addAction(actions->actionDocumentation);
+
+    ui->toolBar->setIconSize(QSize(48, 48));
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(actions->actionZoomIn);
+	ui->toolBar->addAction(actions->actionZoomOut);
+    ui->toolBar->addAction(actions->actionEditor);
+    ui->toolBar->addAction(actions->actionMonitor);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(actions->actionRunSimulation);
+    ui->toolBar->addAction(actions->actionAcceleration);
+	ui->toolBar->addAction(actions->actionRunStepBackward);
+	ui->toolBar->addAction(actions->actionRunStepForward);
+    ui->toolBar->addSeparator();
+	ui->toolBar->addAction(actions->actionSnapshot);
+	ui->toolBar->addAction(actions->actionRestore);
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(actions->actionDisplayLink);
+    ui->toolBar->addSeparator();
 }
 
 void MainView::setupFontsAndColors()
