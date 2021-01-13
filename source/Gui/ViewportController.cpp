@@ -112,6 +112,7 @@ void ViewportController::disconnectAll()
 	for (auto const& connection : _connections) {
 		QObject::disconnect(connection);
 	}
+    _connections.clear();
 }
 
 void ViewportController::scrollToPos(QVector2D pos, NotifyScrollChanged notify)
@@ -136,6 +137,8 @@ void ViewportController::saveScrollPos()
 
 void ViewportController::restoreScrollPos()
 {
+    disconnectAll();
 	_view->horizontalScrollBar()->setValue(_sceneScrollbarPos.x);
 	_view->verticalScrollBar()->setValue(_sceneScrollbarPos.y);
+    connectAll();
 }
