@@ -137,8 +137,6 @@ void ViewportController::saveScrollPos()
 
 void ViewportController::restoreScrollPos()
 {
-    disconnectAll();
 	_view->horizontalScrollBar()->setValue(_sceneScrollbarPos.x);
 	_view->verticalScrollBar()->setValue(_sceneScrollbarPos.y);
-    connectAll();
 }
