@@ -217,9 +217,6 @@ void MainController::onStepBackward(bool& emptyStack)
 {
 	_versionController->loadSimulationContentFromStack();
 	emptyStack = _versionController->isStackEmpty();
-    Q_EMIT _notifier->notifyDataRepositoryChanged({
-        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
-    }, UpdateDescription::All);
 }
 
 void MainController::onMakeSnapshot()
@@ -230,9 +227,6 @@ void MainController::onMakeSnapshot()
 void MainController::onRestoreSnapshot()
 {
 	_versionController->restoreSnapshot();
-    Q_EMIT _notifier->notifyDataRepositoryChanged({
-        Receiver::DataEditor, Receiver::VisualEditor,Receiver::ActionController
-    }, UpdateDescription::All);
 }
 
 void MainController::onDisplayLink(bool toggled)
