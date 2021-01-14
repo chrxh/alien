@@ -1,7 +1,11 @@
+#include "CudaController.h"
+
+#include "Base/ServiceLocator.h"
+#include "Base/GlobalFactory.h"
+#include "Base/NumberGenerator.h"
+
 #include "CudaWorker.h"
 #include "CudaJobs.h"
-
-#include "CudaController.h"
 #include "ModelGpuData.h"
 
 namespace
@@ -12,6 +16,11 @@ namespace
 CudaController::CudaController(QObject* parent /*= nullptr*/)
 	: QObject(parent)
 {
+    auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
+    auto numberGenerator = factory->buildRandomNumberGenerator();
+    numberGenerator->init(1323781, 2);
+    SET_CHILD(_numberGenerator, numberGenerator);
+
 	_worker = new CudaWorker();
 	_worker->moveToThread(&_thread);
 	connect(_worker, &CudaWorker::timestepCalculated, this, &CudaController::timestepCalculatedWithGpu);
@@ -38,7 +47,7 @@ void CudaController::init(
     SimulationParameters const& parameters,
     CudaConstants const& cudaConstants)
 {
-	_worker->init(space, timestep, parameters, cudaConstants);
+	_worker->init(space, timestep, parameters, cudaConstants, _numberGenerator);
 }
 
 CudaWorker * CudaController::getCudaWorker() const

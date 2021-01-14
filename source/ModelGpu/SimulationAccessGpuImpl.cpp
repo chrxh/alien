@@ -58,9 +58,9 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 	auto updateDescCorrected = updateDesc;
 	metricCorrection(updateDescCorrected);
 
-	auto job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), updateDescCorrected);
+	auto job = boost::make_shared<_UpdateDataJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), 
+        updateDescCorrected, _context->getSimulationParameters());
     scheduleJob(job);
-    _updateInProgress = true;
 }
 
 void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc)
@@ -71,7 +71,7 @@ void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
-	auto job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache->getDataTO());
+	auto job = boost::make_shared<_GetDataJob>(getObjectId(), rect, _dataTOCache->getDataTO());
     scheduleJob(job);
 }
 
@@ -95,13 +95,7 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 void SimulationAccessGpuImpl::scheduleJob(CudaJob const & job)
 {
     auto worker = _context->getCudaController()->getCudaWorker();
-
-    if (!_updateInProgress) {
-        worker->addJob(job);
-    }
-    else {
-        _waitingJobs.push_back(job);
-    }
+    worker->addJob(job);
 }
 
 void SimulationAccessGpuImpl::jobsFinished()
@@ -110,9 +104,7 @@ void SimulationAccessGpuImpl::jobsFinished()
 	auto finishedJobs = worker->getFinishedJobs(getObjectId());
 	for (auto const& job : finishedJobs) {
 
-		if (auto const& getDataForUpdateJob = boost::dynamic_pointer_cast<_GetDataForUpdateJob>(job)) {
-			auto dataToUpdateTO = getDataForUpdateJob->getDataTO();
-			updateDataToGpu(dataToUpdateTO, getDataForUpdateJob->getRect(), getDataForUpdateJob->getUpdateDescription());
+		if (auto const& getUpdateJob = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
 			Q_EMIT dataUpdated();
 		}
 
@@ -120,20 +112,15 @@ void SimulationAccessGpuImpl::jobsFinished()
 			Q_EMIT imageReady();
 		}
 
-		if (auto const& getDataForEditJob = boost::dynamic_pointer_cast<_GetDataForEditJob>(job)) {
-			auto dataTO = getDataForEditJob->getDataTO();
-			createDataFromGpuModel(dataTO, getDataForEditJob->getRect());
+		if (auto const& getDataJob = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
+			auto dataTO = getDataJob->getDataTO();
+			createDataFromGpuModel(dataTO, getDataJob->getRect());
 			_dataTOCache->releaseDataTO(dataTO);
 			Q_EMIT dataReadyToRetrieve();
 		}
 
 		if (auto const& setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
 			_dataTOCache->releaseDataTO(setDataJob->getDataTO());
-			_updateInProgress = false;
-			for (auto const& job : _waitingJobs) {
-				worker->addJob(job);
-			}
-			_waitingJobs.clear();
 		}
 	}
 }
