@@ -124,33 +124,43 @@ private:
     std::mutex& _mutex;
 };
 
-class _GetDataForEditJob
-	: public _GetDataJob
+class _UpdateDataJob
+	: public _CudaJob
 {
 public:
-	_GetDataForEditJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO)
-		: _GetDataJob(originId, rect, dataTO) { }
+	_UpdateDataJob(
+        string const& originId, IntRect const& rect, DataAccessTO const& dataTO, 
+        DataChangeDescription const& updateDesc, SimulationParameters const& parameters)
+    : _CudaJob(originId, true), _rect(rect), _dataTO(dataTO), _updateDesc(updateDesc), _parameters(parameters) { }
 
-	virtual ~_GetDataForEditJob() = default;
+	virtual ~_UpdateDataJob() = default;
 
-};
+    IntRect getRect() const
+    {
+        return _rect;
+    }
 
-class _GetDataForUpdateJob
-	: public _GetDataJob
-{
-public:
-	_GetDataForUpdateJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO, DataChangeDescription const& updateDesc)
-		: _GetDataJob(originId, rect, dataTO), _updateDesc(updateDesc) { }
-
-	virtual ~_GetDataForUpdateJob() = default;
+    DataAccessTO getDataTO() const
+    {
+        return _dataTO;
+    }
 
 	DataChangeDescription const& getUpdateDescription() const
 	{
 		return _updateDesc;
 	}
 
+    SimulationParameters const& getSimulationParameters() const
+    {
+        return _parameters;
+    }
+
 private:
 	DataChangeDescription _updateDesc;
+    SimulationParameters _parameters;
+
+    DataAccessTO _dataTO;
+    IntRect _rect;
 };
 
 class _SetDataJob
