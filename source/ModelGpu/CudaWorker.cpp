@@ -3,6 +3,7 @@
 #include <QElapsedTimer>
 #include <QThread>
 
+#include "Base/NumberGenerator.h"
 #include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/PhysicalActions.h"
 
@@ -10,6 +11,7 @@
 #include "CudaJobs.h"
 #include "CudaWorker.h"
 #include "ModelGpuData.h"
+#include "DataConverter.h"
 
 CudaWorker::~CudaWorker()
 {
@@ -20,12 +22,15 @@ void CudaWorker::init(
     SpaceProperties* space,
     int timestep,
     SimulationParameters const& parameters,
-    CudaConstants const& cudaConstants)
+    CudaConstants const& cudaConstants,
+    NumberGenerator* numberGenerator)
 {
 	_space = space;
 	auto size = space->getSize();
 	delete _cudaSimulation;
 	_cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
+
+    _numberGenerator = numberGenerator;
 }
 
 void CudaWorker::terminateWorker()
@@ -111,6 +116,18 @@ void CudaWorker::processJobs()
 			auto dataTO = _job->getDataTO();
 			_cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 		}
+
+        if (auto _job = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
+            auto rect = _job->getRect();
+            auto dataTO = _job->getDataTO();
+            _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+
+            DataConverter converter(dataTO, _numberGenerator, _job->getSimulationParameters());
+            converter.updateData(_job->getUpdateDescription());
+
+            _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+
+        }
 
 		if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
             auto rect = _job->getRect();

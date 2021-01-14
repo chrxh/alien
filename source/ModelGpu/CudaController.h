@@ -36,5 +36,6 @@ private:
 
 	QThread _thread;
 	CudaWorker* _worker = nullptr;
+    NumberGenerator* _numberGenerator = nullptr;
 	bool _gpuThreadWorking = false;
 };
