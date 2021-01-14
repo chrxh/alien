@@ -15,11 +15,9 @@
         <file>Icons/editor/info_on.png</file>
         <file>Icons/main/zoom in.png</file>
         <file>Icons/main/zoom out.png</file>
-        <file>Icons/main/pause.png</file>
         <file>Icons/main/item view.png</file>
         <file>Icons/main/monitor.png</file>
         <file>Icons/main/pixel view.png</file>
-        <file>Icons/main/visual on.png</file>
         <file>Icons/main/visual off.png</file>
         <file>Icons/main/accelerate.png</file>
         <file>Icons/main/restore.png</file>
@@ -27,5 +25,7 @@
         <file>Icons/main/snapshot.png</file>
         <file>Icons/main/step backward.png</file>
         <file>Icons/main/step forward.png</file>
+        <file>Icons/main/pause.png</file>
+        <file>Icons/main/visual on.png</file>
     </qresource>
 </RCC>
