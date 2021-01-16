@@ -88,6 +88,7 @@ void PixelUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
     if (!_controller->getRun()) {
         QVector2D pos(event->scenePos().x(), event->scenePos().y());
         _access->selectEntities(pos);
+        requestImage();
     }
 }
 
