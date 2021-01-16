@@ -144,7 +144,7 @@ __global__ void particleProcessingStep3(SimulationData data)
 /* Main      															*/
 /************************************************************************/
 
-__global__ void calcSimulationTimestep(SimulationData data)
+__global__ void cudaCalcSimulationTimestep(SimulationData data)
 {
     data.cellMap.reset();
     data.particleMap.reset();

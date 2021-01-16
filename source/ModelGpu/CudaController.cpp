@@ -61,7 +61,7 @@ void CudaController::calculate(RunningMode mode)
 		CudaJob job = boost::make_shared<_CalcSingleTimestepJob>(ThreadControllerId, false);
 		_worker->addJob(job);
 	}
-	if (mode == RunningMode::OpenEndedSimulation) {
+	if (mode == RunningMode::OpenEnded) {
 		CudaJob job = boost::make_shared<_RunSimulationJob>(ThreadControllerId, false);
 		_worker->addJob(job);
 	}

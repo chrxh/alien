@@ -44,6 +44,11 @@ __inline__ __device__ float2 operator-(float2 const& p, float2 const& q)
     return{ p.x - q.x, p.y - q.y };
 }
 
+__inline__ __device__ float2 operator-(float2 const& p, int2 const& q)
+{
+    return{ p.x - q.x, p.y - q.y };
+}
+
 __inline__ __device__ int2 operator-(int2 const& p, int2 const& q)
 {
     return{ p.x - q.x, p.y - q.y };

@@ -95,9 +95,12 @@ __device__ __inline__ void addingColor(unsigned int& color, unsigned int const& 
     color = newColor | 0xff000000;
 }
 
-__device__ __inline__ void drawEntity(unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color)
+__device__ __inline__ void drawEntity(
+    unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color, bool selected)
 {
-    color = (color >> 1) & 0x7e7e7e;
+    if (!selected) {
+        color = (color >> 1) & 0x7e7e7e;
+    }
     addingColor(imageData[index], color);
 
     color = (color >> 1) & 0x7e7e7e;
@@ -139,7 +142,7 @@ __global__ void drawClusters(
             if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
                 auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
                 auto const color = calcColor(cell);
-                drawEntity(imageData, imageSize, index, color);
+                drawEntity(imageData, imageSize, index, color, cell->cluster->isSelected());
             }
         }
         __syncthreads();
@@ -153,7 +156,7 @@ __global__ void drawClusters(
             if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
                 auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
                 auto const color = calcColor(token);
-                drawEntity(imageData, imageSize, index, color);
+                drawEntity(imageData, imageSize, index, color, cell->cluster->isSelected());
             }
         }
         __syncthreads();
@@ -177,7 +180,7 @@ __global__ void drawParticles(
         if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
             auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
             auto const color = calcColor(particle);
-            drawEntity(imageData, imageSize, index, color);
+            drawEntity(imageData, imageSize, index, color, particle->isSelected());
         }
     }
 }
@@ -236,7 +239,7 @@ __global__ void blurImage(
 /* Main      															*/
 /************************************************************************/
 
-__global__ void drawImage(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void cudaDrawImage(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     int width = rectLowerRight.x - rectUpperLeft.x + 1;
     int height = rectLowerRight.y - rectUpperLeft.y + 1;

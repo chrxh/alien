@@ -260,11 +260,60 @@ __global__ void createDataFromTO(SimulationData data, DataAccessTO simulationTO)
     }
 }
 
+#define SELECTION_RADIUS 100
+
+__global__ void selectClusters(int2 pos, Array<Cluster*> clusters)
+{
+    auto const clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        auto& cluster = clusters.at(clusterIndex);
+
+        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+        for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
+            auto const& cell = cluster->cellPointers[cellIndex];
+            if (Math::lengthSquared(cell->absPos - pos) < SELECTION_RADIUS) {
+                cell->cluster->setSelected(true);
+            }
+        }
+    }
+}
+
+__global__ void selectParticles(int2 pos, Array<Particle*> particles)
+{
+    auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = particles.at(index);
+
+        if (Math::lengthSquared(particle->absPos - pos) < SELECTION_RADIUS) {
+            particle->setSelected(true);
+        }
+    }
+}
+
+__global__ void deselectClusters(Array<Cluster*> clusters)
+{
+    auto const clusterBlock = calcPartition(clusters.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+        auto const& cluster = clusters.at(clusterIndex);
+        cluster->setSelected(false);
+    }
+}
+
+__global__ void deselectParticles(Array<Particle*> particles)
+{
+    auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = particles.at(index);
+        particle->setSelected(false);
+    }
+}
+
+
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
 
-__global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
+__global__ void cudaGetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     *access.numClusters = 0;
@@ -278,7 +327,7 @@ __global__ void getSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
 }
 
-__global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
+__global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     KERNEL_CALL_1_1(unfreeze, data);
@@ -291,7 +340,7 @@ __global__ void setSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
 }
 
-__global__ void clearData(SimulationData data)
+__global__ void cudaClearData(SimulationData data)
 {
     data.entities.clusterFreezedPointers.reset();
     data.entities.clusterPointers.reset();
@@ -302,4 +351,18 @@ __global__ void clearData(SimulationData data)
     data.entities.cells.reset();
     data.entities.tokens.reset();
     data.entities.particles.reset();
+}
+
+__global__ void cudaSelectData(int2 pos, SimulationData data)
+{
+    KERNEL_CALL(selectClusters, pos, data.entities.clusterPointers);
+    KERNEL_CALL(selectClusters, pos, data.entities.clusterFreezedPointers);
+    KERNEL_CALL(selectParticles, pos, data.entities.particlePointers);
+}
+
+__global__ void cudaDeselectData(SimulationData data)
+{
+    KERNEL_CALL(deselectClusters, data.entities.clusterPointers);
+    KERNEL_CALL(deselectClusters, data.entities.clusterFreezedPointers);
+    KERNEL_CALL(deselectParticles, data.entities.particlePointers);
 }

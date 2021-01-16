@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>logo.png</file>
         <file>Version.txt</file>
         <file>GettingStartedWindow.html</file>
         <file>Icons/editor/add_cell.png</file>
@@ -27,5 +26,6 @@
         <file>Icons/main/step forward.png</file>
         <file>Icons/main/pause.png</file>
         <file>Icons/main/visual on.png</file>
+        <file>logo.png</file>
     </qresource>
 </RCC>
