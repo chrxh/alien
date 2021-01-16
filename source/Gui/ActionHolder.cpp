@@ -61,7 +61,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionAcceleration->setChecked(false);
     actionAcceleration->setToolTip("Accelerate computation of active clusters");
     QIcon iconAccelerate;
-    iconAccelerate.addFile(":/Icons/main/accelerate.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconAccelerate.addFile(":/Icons/main/accelerate on.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconAccelerate.addFile(":/Icons/main/accelerate off.png", QSize(), QIcon::Normal, QIcon::On);
     actionAcceleration->setIcon(iconAccelerate);
     actionAcceleration->setIconVisibleInMenu(false);
 
