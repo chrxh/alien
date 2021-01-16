@@ -276,6 +276,34 @@ private:
     ExecutionParameters _parameters;
 };
 
+class _SelectDataJob
+    : public _CudaJob
+{
+public:
+    _SelectDataJob(string const& originId, IntVector2D const& pos)
+        : _CudaJob(originId, true), _pos(pos) { }
+
+    virtual ~_SelectDataJob() = default;
+
+    IntVector2D getPosition() const
+    {
+        return _pos;
+    }
+
+private:
+    IntVector2D _pos;
+};
+
+class _DeselectDataJob
+    : public _CudaJob
+{
+public:
+    _DeselectDataJob(string const& originId)
+        : _CudaJob(originId, true){ }
+
+    virtual ~_DeselectDataJob() = default;
+};
+
 class _PhysicalActionJob
     : public _CudaJob
 {
