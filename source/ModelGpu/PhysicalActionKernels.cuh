@@ -123,9 +123,8 @@ __global__ void moveSelectedParticles(float2 displacement, Array<Particle*> part
 
         auto const& particle = particles.at(index);
         if (particle->isSelected()) {
-                particle->absPos = particle->absPos + displacement;
+            particle->absPos = particle->absPos + displacement;
         }
-        __syncthreads();
     }
 }
 

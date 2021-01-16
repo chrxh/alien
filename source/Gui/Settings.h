@@ -8,6 +8,8 @@
 
 namespace Const
 {
+    auto const zoomLevelForAutomaticSwitch = 16.0;
+
 	//visual editor
 	const QColor BackgroundColor(0x00, 0x00, 0x00);
 	const QColor UniverseColor(0x00, 0x00, 0x1b);
