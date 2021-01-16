@@ -18,7 +18,6 @@
         <file>Icons/main/monitor.png</file>
         <file>Icons/main/pixel view.png</file>
         <file>Icons/main/visual off.png</file>
-        <file>Icons/main/accelerate.png</file>
         <file>Icons/main/restore.png</file>
         <file>Icons/main/run.png</file>
         <file>Icons/main/snapshot.png</file>
@@ -27,5 +26,7 @@
         <file>Icons/main/pause.png</file>
         <file>Icons/main/visual on.png</file>
         <file>logo.png</file>
+        <file>Icons/main/accelerate off.png</file>
+        <file>Icons/main/accelerate on.png</file>
     </qresource>
 </RCC>
