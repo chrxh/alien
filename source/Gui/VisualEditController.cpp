@@ -92,6 +92,11 @@ double VisualEditController::getZoomFactor ()
 	return _viewport->getZoomFactor();
 }
 
+void VisualEditController::scrollToPos(QVector2D const & pos)
+{
+    _viewport->scrollToPos(pos, NotifyScrollChanged::No);
+}
+
 void VisualEditController::zoom (double factor)
 {
 	_viewport->zoom(factor);

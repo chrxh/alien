@@ -5,6 +5,8 @@
 #include "ModelBasic/Serializer.h"
 #include "ModelBasic/SymbolTable.h"
 #include "ModelBasic/SerializationHelper.h"
+#include "ModelBasic/SpaceProperties.h"
+#include "ModelBasic/SimulationContext.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -103,6 +105,8 @@ void MainView::setupEditors(SimulationController * controller, SimulationAccess*
 	_visualEditor->init(_notifier, controller, access, _repository);
 
 	_visualEditor->setActiveScene(ActiveScene::PixelScene);
+    auto size = controller->getContext()->getSpaceProperties()->getSize();
+    _visualEditor->scrollToPos(QVector2D(size.x/2, size.y/2));
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 }
 
