@@ -168,6 +168,15 @@ void CudaWorker::processJobs()
             _cudaSimulation->clear();
         }
 
+        if (auto _job = boost::dynamic_pointer_cast<_SelectDataJob>(job)) {
+            auto const pos = _job->getPosition();
+            _cudaSimulation->selectData({ pos.x, pos.y });
+        }
+
+        if (auto _job = boost::dynamic_pointer_cast<_DeselectDataJob>(job)) {
+            _cudaSimulation->deselectData();
+        }
+
         if (auto _job = boost::dynamic_pointer_cast<_PhysicalActionJob>(job)) {
             auto action = _job->getAction();
             if (auto _action = boost::dynamic_pointer_cast<_ApplyForceAction>(action)) {
@@ -181,6 +190,10 @@ void CudaWorker::processJobs()
                 float2 endPos = { _action->getEndPos().x(), _action->getEndPos().y() };
                 float2 force = { _action->getForce().x(), _action->getForce().y() };
                 _cudaSimulation->applyForce({ startPos, endPos, force, true });
+            }
+            if (auto _action = boost::dynamic_pointer_cast<_MoveSelectionAction>(action)) {
+                float2 displacement = { _action->getDisplacement().x(), _action->getDisplacement().y() };
+                _cudaSimulation->moveSelection(displacement);
             }
         }
 

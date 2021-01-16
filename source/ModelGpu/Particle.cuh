@@ -43,7 +43,17 @@ struct Particle
         atomicAdd(&_energy, changeValue);
     }
 
+    __device__ __inline__ bool isSelected()
+    {
+        return _selected;
+    }
+
+    __device__ __inline__ void setSelected(bool value)
+    {
+        _selected = value;
+    }
 
 private:
     float _energy;
+    bool _selected;
 };
