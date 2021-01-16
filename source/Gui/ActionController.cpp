@@ -228,18 +228,20 @@ void ActionController::onZoomInClicked()
 {
 	_visualEditor->zoom(2.0);
 	updateZoomFactor();
-    if (_visualEditor->getZoomFactor() > Const::zoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && !_model->isEditMode()) {
+    if (_visualEditor->getZoomFactor() > Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && !_model->isEditMode()) {
         _model->getActionHolder()->actionEditor->toggle();
     }
+    updateActionsEnableState();
 }
 
 void ActionController::onZoomOutClicked()
 {
 	_visualEditor->zoom(0.5);
 	updateZoomFactor();
-    if (_visualEditor->getZoomFactor() < Const::zoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && _model->isEditMode()) {
+    if (_visualEditor->getZoomFactor() < Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && _model->isEditMode()) {
         _model->getActionHolder()->actionEditor->toggle();
     }
+    updateActionsEnableState();
 }
 
 Q_SLOT void ActionController::onToggleDisplayLink(bool toggled)
@@ -929,6 +931,7 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
+    actions->actionEditor->setEnabled(_visualEditor->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
     actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
     actions->actionCenterSelection->setEnabled(editMode);
