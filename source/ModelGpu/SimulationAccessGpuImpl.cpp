@@ -43,8 +43,7 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 
 void SimulationAccessGpuImpl::clear()
 {
-    auto job = boost::make_shared<_ClearDataJob>(getObjectId());
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_ClearDataJob>(getObjectId()));
 }
 
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc)
@@ -58,9 +57,8 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 	auto updateDescCorrected = updateDesc;
 	metricCorrection(updateDescCorrected);
 
-	auto job = boost::make_shared<_UpdateDataJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), 
-        updateDescCorrected, _context->getSimulationParameters());
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_UpdateDataJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(),
+        updateDescCorrected, _context->getSimulationParameters()));
 }
 
 void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc)
@@ -71,20 +69,27 @@ void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
-	auto job = boost::make_shared<_GetDataJob>(getObjectId(), rect, _dataTOCache->getDataTO());
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_GetDataJob>(getObjectId(), rect, _dataTOCache->getDataTO()));
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex)
 {
-	auto job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target, mutex);
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_GetImageJob>(getObjectId(), rect, target, mutex));
+}
+
+void SimulationAccessGpuImpl::selectEntities(IntVector2D const & pos)
+{
+    scheduleJob(boost::make_shared<_SelectDataJob>(getObjectId(), pos));
+}
+
+void SimulationAccessGpuImpl::deselectAll()
+{
+    scheduleJob(boost::make_shared<_DeselectDataJob>(getObjectId()));
 }
 
 void SimulationAccessGpuImpl::applyAction(PhysicalAction const & action)
 {
-    auto job = boost::make_shared<_PhysicalActionJob>(getObjectId(), action);
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_PhysicalActionJob>(getObjectId(), action));
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
