@@ -5,6 +5,7 @@
 - usability: showing first steps window after startup
 - allow moving objects with the mouse pointer
 - ability to connect to a server and send simulation real-time data (still experimental)
+- automatic switching between editor and pixel view depending on zoom level
 
 ### Changed
 - nicer and larger toolbar icons
