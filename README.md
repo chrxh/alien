@@ -38,7 +38,5 @@ The following third-party libaries are necessary and should be installed:
 - [boost library version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1
 - [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive)
 
-gtest framework is already contained in the repository.
-
 ## License
 alien is licensed under the [GPLv3](LICENSE).
