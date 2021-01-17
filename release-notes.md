@@ -6,6 +6,7 @@
 - allow moving objects with the mouse pointer
 - ability to connect to a server and send simulation real-time data (still experimental)
 - automatic switching between editor and pixel view depending on zoom level
+- new examples
 
 ### Changed
 - nicer and larger toolbar icons
