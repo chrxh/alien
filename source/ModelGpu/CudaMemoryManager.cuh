@@ -2,6 +2,9 @@
 
 #include <helper_cuda.h>
 
+#include "Base.cuh"
+#include "Macros.cuh"
+
 class CudaMemoryManager
 {
 public:
@@ -22,14 +25,14 @@ public:
     template<typename T>
     void acquireMemory(uint64_t arraySize, T*& result)
     {
-        checkCudaErrors(cudaMalloc(&result, sizeof(T)*arraySize));
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&result, sizeof(T)*arraySize));
         _bytes += sizeof(T)*arraySize;
     }
 
     template<typename T>
     void freeMemory(T& memory)
     {
-        checkCudaErrors(cudaFree(memory));
+        CHECK_FOR_CUDA_ERROR(cudaFree(memory));
     }
 
     uint64_t getSizeOfAcquiredMemory() const

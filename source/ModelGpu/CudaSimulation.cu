@@ -27,7 +27,7 @@
 
 #define GPU_FUNCTION(func, ...) func<<<1, 1>>>(##__VA_ARGS__); \
     cudaDeviceSynchronize(); \
-    checkCudaErrors(cudaGetLastError());
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
 namespace
 {
@@ -59,7 +59,6 @@ CudaSimulation::CudaSimulation(
     SimulationParameters const& parameters,
     CudaConstants const& cudaConstants)
 {
-
     CudaInitializer::init();
     CudaMemoryManager::getInstance().reset();
 
@@ -140,7 +139,7 @@ void CudaSimulation::getSimulationImage(int2 const & rectUpperLeft, int2 const &
     int numPixels = width * height;
 
     GPU_FUNCTION(cudaDrawImage, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
-    checkCudaErrors(cudaMemcpy(
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
         imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
 }
 
@@ -148,30 +147,30 @@ void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& re
 {
     GPU_FUNCTION(cudaGetSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
-    checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.tokens, _cudaAccessTO->tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dataTO.stringBytes, _cudaAccessTO->stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.clusters, _cudaAccessTO->clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.particles, _cudaAccessTO->particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.tokens, _cudaAccessTO->tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.stringBytes, _cudaAccessTO->stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->numClusters, dataTO.numClusters, sizeof(int), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->clusters, dataTO.clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(_cudaAccessTO->stringBytes, dataTO.stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numClusters, dataTO.numClusters, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->clusters, dataTO.clusters, sizeof(ClusterAccessTO) * (*dataTO.numClusters), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->particles, dataTO.particles, sizeof(ParticleAccessTO) * (*dataTO.numParticles), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->stringBytes, dataTO.stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyHostToDevice));
 
     GPU_FUNCTION(cudaSetSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 }
@@ -197,6 +196,11 @@ void CudaSimulation::moveSelection(float2 const & displacement)
     GPU_FUNCTION(cudaMoveSelection, displacement, *_cudaSimulationData);
 }
 
+CudaConstants CudaSimulation::getCudaConstants() const
+{
+    return _cudaConstants;
+}
+
 MonitorData CudaSimulation::getMonitorData()
 {
     GPU_FUNCTION(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
@@ -215,13 +219,13 @@ void CudaSimulation::setTimestep(int timestep)
 
 void CudaSimulation::setSimulationParameters(SimulationParameters const & parameters)
 {
-    checkCudaErrors(cudaMemcpyToSymbol(
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
 void CudaSimulation::setExecutionParameters(ExecutionParameters const & parameters)
 {
-    checkCudaErrors(cudaMemcpyToSymbol(
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaExecutionParameters,
         &parameters,
         sizeof(ExecutionParameters),
@@ -261,9 +265,11 @@ namespace
 
 void CudaSimulation::setCudaConstants(CudaConstants const & cudaConstants_)
 {
-    checkCudaErrors(cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));
+    _cudaConstants = cudaConstants_;
+
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));
 
     int imageBlurFactors[7];
     calcImageBlurFactors(imageBlurFactors);
-    checkCudaErrors(cudaMemcpyToSymbol(cudaImageBlurFactors, &imageBlurFactors, sizeof(int) * 7, 0, cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaImageBlurFactors, &imageBlurFactors, sizeof(int) * 7, 0, cudaMemcpyHostToDevice));
 }
