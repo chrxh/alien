@@ -112,6 +112,7 @@ void ViewportController::disconnectAll()
 	for (auto const& connection : _connections) {
 		QObject::disconnect(connection);
 	}
+    _connections.clear();
 }
 
 void ViewportController::scrollToPos(QVector2D pos, NotifyScrollChanged notify)

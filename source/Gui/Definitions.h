@@ -82,3 +82,4 @@ enum class ModelComputationType
 
 class DataAnalyzer;
 class Queue;
+class GettingStartedWindow;

@@ -24,32 +24,32 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionRunSimulation->setEnabled(true);
 	actionRunSimulation->setCheckable(true);
     QIcon iconRunSimulation;
-    iconRunSimulation.addFile(":/Icons/pause.png", QSize(), QIcon::Normal, QIcon::On);
-    iconRunSimulation.addFile(":/Icons/play.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconRunSimulation.addFile(":/Icons/main/pause.png", QSize(), QIcon::Normal, QIcon::On);
+    iconRunSimulation.addFile(":/Icons/main/run.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRunSimulation->setIcon(iconRunSimulation);
 	actionRunSimulation->setIconVisibleInMenu(false);
 	actionRunStepForward = new QAction("Step forward", this);
 	actionRunStepForward->setEnabled(true);
 	QIcon iconStepForward;
-	iconStepForward.addFile(":/Icons/step.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconStepForward.addFile(":/Icons/main/step forward.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRunStepForward->setIcon(iconStepForward);
 	actionRunStepForward->setIconVisibleInMenu(false);
 	actionRunStepBackward = new QAction("Step backward", this);
 	actionRunStepBackward->setEnabled(false);
 	QIcon iconStepBackward;
-	iconStepBackward.addFile(":/Icons/step_back.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconStepBackward.addFile(":/Icons/main/step backward.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRunStepBackward->setIcon(iconStepBackward);
 	actionRunStepBackward->setIconVisibleInMenu(false);
 	actionSnapshot = new QAction("Snapshot", this);
 	actionSnapshot->setEnabled(true);
 	QIcon iconSnapshot;
-	iconSnapshot.addFile(":/Icons/snapshot.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconSnapshot.addFile(":/Icons/main/snapshot.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionSnapshot->setIcon(iconSnapshot);
 	actionSnapshot->setIconVisibleInMenu(false);
 	actionRestore = new QAction("Restore", this);
 	actionRestore->setEnabled(false);
 	QIcon iconRestore;
-	iconRestore.addFile(":/Icons/restore_active.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconRestore.addFile(":/Icons/main/restore.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRestore->setIcon(iconRestore);
 	actionRestore->setIconVisibleInMenu(false);
 	actionExit = new QAction("Exit", this);
@@ -61,7 +61,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionAcceleration->setChecked(false);
     actionAcceleration->setToolTip("Accelerate computation of active clusters");
     QIcon iconAccelerate;
-    iconAccelerate.addFile(":/Icons/accelerate.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconAccelerate.addFile(":/Icons/main/accelerate on.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconAccelerate.addFile(":/Icons/main/accelerate off.png", QSize(), QIcon::Normal, QIcon::On);
     actionAcceleration->setIcon(iconAccelerate);
     actionAcceleration->setIconVisibleInMenu(false);
 
@@ -86,16 +87,16 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionEditor->setChecked(false);
 	actionEditor->setEnabled(true);
 	QIcon iconEditor;
-	iconEditor.addFile(":/Icons/PixelView.png", QSize(), QIcon::Normal, QIcon::On);
-	iconEditor.addFile(":/Icons/EditorView.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconEditor.addFile(":/Icons/main/pixel view.png", QSize(), QIcon::Normal, QIcon::On);
+	iconEditor.addFile(":/Icons/main/item view.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionEditor->setIcon(iconEditor);
 	actionEditor->setIconVisibleInMenu(false);
 
 	actionMonitor = new QAction("Monitor", this);
 	actionMonitor->setEnabled(true);
 	QIcon iconMonitor;
-	iconMonitor.addFile(":/Icons/monitor_active.png", QSize(), QIcon::Normal, QIcon::On);
-	iconMonitor.addFile(":/Icons/monitor.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconMonitor.addFile(":/Icons/main/monitor.png", QSize(), QIcon::Normal, QIcon::On);
+	iconMonitor.addFile(":/Icons/main/monitor.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionMonitor->setIcon(iconMonitor);
 	actionMonitor->setIconVisibleInMenu(false);
 	actionMonitor->setCheckable(true);
@@ -103,14 +104,14 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionZoomIn = new QAction("Zoom in", this);
 	actionZoomIn->setEnabled(true);
 	QIcon iconZoomIn;
-	iconZoomIn.addFile(":/Icons/zoom_in.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconZoomIn.addFile(":/Icons/main/zoom in.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionZoomIn->setIcon(iconZoomIn);
 	actionZoomIn->setIconVisibleInMenu(false);
 
 	actionZoomOut = new QAction("Zoom out", this);
 	actionZoomOut->setEnabled(true);
 	QIcon iconZoomOut;
-	iconZoomOut.addFile(":/Icons/zoom_out.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconZoomOut.addFile(":/Icons/main/zoom out.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionZoomOut->setIcon(iconZoomOut);
 	actionZoomOut->setIconVisibleInMenu(false);
 
@@ -119,8 +120,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionDisplayLink->setChecked(true);
     actionDisplayLink->setEnabled(true);
     QIcon iconDisplayLink;
-    iconDisplayLink.addFile(":/Icons/display_link_on.png", QSize(), QIcon::Normal, QIcon::On);
-    iconDisplayLink.addFile(":/Icons/display_link_off.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconDisplayLink.addFile(":/Icons/main/visual on.png", QSize(), QIcon::Normal, QIcon::On);
+    iconDisplayLink.addFile(":/Icons/main/visual off.png", QSize(), QIcon::Normal, QIcon::Off);
     actionDisplayLink->setIcon(iconDisplayLink);
     actionDisplayLink->setIconVisibleInMenu(false);
 
@@ -139,8 +140,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionShowCellInfo = new QAction("Cell info", this);
 	QIcon iconCellInfo;
-	iconCellInfo.addFile("://Icons/info_off.png", QSize(), QIcon::Normal, QIcon::Off);
-	iconCellInfo.addFile("://Icons/info_on.png", QSize(), QIcon::Normal, QIcon::On);
+	iconCellInfo.addFile("://Icons/editor/info_off.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconCellInfo.addFile("://Icons/editor/info_on.png", QSize(), QIcon::Normal, QIcon::On);
 	actionShowCellInfo->setIcon(iconCellInfo);
 	actionShowCellInfo->setIconVisibleInMenu(false);
 	actionShowCellInfo->setEnabled(false);
@@ -150,8 +151,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionCenterSelection = new QAction("Center selection", this);
 	QIcon iconCenterSelection;
-	iconCenterSelection.addFile("://Icons/center_off.png", QSize(), QIcon::Normal, QIcon::Off);
-	iconCenterSelection.addFile("://Icons/center_on.png", QSize(), QIcon::Normal, QIcon::On);
+	iconCenterSelection.addFile("://Icons/editor/center_off.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconCenterSelection.addFile("://Icons/editor/center_on.png", QSize(), QIcon::Normal, QIcon::On);
 	actionCenterSelection->setIcon(iconCenterSelection);
 	actionCenterSelection->setIconVisibleInMenu(false);
 	actionCenterSelection->setEnabled(false);
@@ -161,7 +162,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionNewCell = new QAction("New cell", this);
 	QIcon iconNewCell;
-	iconNewCell.addFile("://Icons/add_cell.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconNewCell.addFile("://Icons/editor/add_cell.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionNewCell->setIcon(iconNewCell);
 	actionNewCell->setIconVisibleInMenu(false);
 	actionNewCell->setEnabled(true);
@@ -169,7 +170,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionNewParticle = new QAction("New particle", this);;
 	QIcon iconNewParticle;
-	iconNewParticle.addFile("://Icons/add_energy.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconNewParticle.addFile("://Icons/editor/add_energy.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionNewParticle->setIcon(iconNewParticle);
 	actionNewParticle->setIconVisibleInMenu(false);
 	actionNewParticle->setEnabled(true);
@@ -187,7 +188,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionNewToken = new QAction("New token", this);
 	QIcon iconNewToken;
-	iconNewToken.addFile("://Icons/add_token.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconNewToken.addFile("://Icons/editor/add_token.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionNewToken->setIcon(iconNewToken);
 	actionNewToken->setIconVisibleInMenu(false);
 	actionNewToken->setEnabled(false);
@@ -201,7 +202,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionDeleteToken = new QAction("Delete token", this);
 	QIcon iconDelToken;
-	iconDelToken.addFile("://Icons/del_token.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconDelToken.addFile("://Icons/editor/del_token.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionDeleteToken->setIcon(iconDelToken);
 	actionDeleteToken->setIconVisibleInMenu(false);
 	actionDeleteToken->setEnabled(false);
@@ -238,7 +239,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionDeleteSel = new QAction("Delete selection", this);
 	QIcon iconDeleteSel;
-	iconDeleteSel.addFile("://Icons/del_cell.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconDeleteSel.addFile("://Icons/editor/del_cell.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionDeleteSel->setIcon(iconDeleteSel);
 	actionDeleteSel->setIconVisibleInMenu(false);
 	actionDeleteSel->setEnabled(false);
@@ -247,7 +248,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
 	actionDeleteCol = new QAction("Delete extended selection", this);
 	QIcon iconDeleteCol;
-	iconDeleteCol.addFile("://Icons/add_cluster.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconDeleteCol.addFile("://Icons/editor/add_cluster.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionDeleteCol->setIcon(iconDeleteCol);
 	actionDeleteCol->setIconVisibleInMenu(false);
 	actionDeleteCol->setEnabled(false);
@@ -262,8 +263,14 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionMostFrequentCluster = new QAction("Most frequent active cluster", this);
     actionMostFrequentCluster->setEnabled(true);
 
-	actionAbout = new QAction("About artificial life environment (alien)", this);
+	actionAbout = new QAction("About", this);
 	actionAbout->setEnabled(true);
+    
+    actionGettingStarted = new QAction("Getting started", this);
+    actionGettingStarted->setCheckable(true);
+    actionGettingStarted->setChecked(true);
+    actionGettingStarted->setEnabled(true);
+
 	actionDocumentation = new QAction("Documentation", this);
 	actionDocumentation->setEnabled(true);
 	actionDocumentation->setCheckable(false);

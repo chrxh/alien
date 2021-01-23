@@ -127,6 +127,8 @@ void MainController::init()
     _view->init(_model, this, _serializer, _repository, _notifier, _webSimController);
     _worker->init(_serializer);
 
+    QApplicationHelper::processEventsForMilliSec(1000);
+
     if (!onLoadSimulation(getPathToApp() + Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
@@ -142,6 +144,8 @@ void MainController::init()
 
     auto config = getSimulationConfig();
     _view->getInfoController()->setDevice(InfoController::Device::Gpu);
+
+    _view->initGettingStartedWindow();
 
     //auto save every 20 min
     _autosaveTimer = new QTimer(this);
@@ -213,9 +217,6 @@ void MainController::onStepBackward(bool& emptyStack)
 {
 	_versionController->loadSimulationContentFromStack();
 	emptyStack = _versionController->isStackEmpty();
-    Q_EMIT _notifier->notifyDataRepositoryChanged({
-        Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
-    }, UpdateDescription::All);
 }
 
 void MainController::onMakeSnapshot()
@@ -226,9 +227,6 @@ void MainController::onMakeSnapshot()
 void MainController::onRestoreSnapshot()
 {
 	_versionController->restoreSnapshot();
-    Q_EMIT _notifier->notifyDataRepositoryChanged({
-        Receiver::DataEditor, Receiver::VisualEditor,Receiver::ActionController
-    }, UpdateDescription::All);
 }
 
 void MainController::onDisplayLink(bool toggled)

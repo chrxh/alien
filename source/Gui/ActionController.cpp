@@ -3,6 +3,7 @@
 #include <QAction>
 #include <QInputDialog>
 #include <QClipboard>
+#include <QTextStream>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -140,7 +141,8 @@ void ActionController::init(
     connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
-	connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
+    connect(actions->actionGettingStarted, &QAction::triggered, this, &ActionController::onToggleGettingStarted);
+    connect(actions->actionDocumentation, &QAction::triggered, this, &ActionController::onShowDocumentation);
 
 	connect(actions->actionRestrictTPS, &QAction::triggered, this, &ActionController::onToggleRestrictTPS);
 }
@@ -160,11 +162,9 @@ void ActionController::onRunClicked(bool toggled)
 {
 	auto actions = _model->getActionHolder();
 	if (toggled) {
-		actions->actionRunSimulation->setIcon(QIcon("://Icons/play.png"));
 		actions->actionRunStepForward->setEnabled(false);
 	}
 	else {
-		actions->actionRunSimulation->setIcon(QIcon("://Icons/pause.png"));
 		actions->actionRunStepForward->setEnabled(true);
 	}
 	actions->actionRunStepBackward->setEnabled(false);
@@ -228,12 +228,20 @@ void ActionController::onZoomInClicked()
 {
 	_visualEditor->zoom(2.0);
 	updateZoomFactor();
+    if (_visualEditor->getZoomFactor() > Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && !_model->isEditMode()) {
+        _model->getActionHolder()->actionEditor->toggle();
+    }
+    updateActionsEnableState();
 }
 
 void ActionController::onZoomOutClicked()
 {
 	_visualEditor->zoom(0.5);
 	updateZoomFactor();
+    if (_visualEditor->getZoomFactor() < Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && _model->isEditMode()) {
+        _model->getActionHolder()->actionEditor->toggle();
+    }
+    updateActionsEnableState();
 }
 
 Q_SLOT void ActionController::onToggleDisplayLink(bool toggled)
@@ -829,13 +837,26 @@ void ActionController::onNewParticles()
 
 void ActionController::onShowAbout()
 {
-	QMessageBox msgBox(QMessageBox::Information, "about artificial life environment (alien)", "Developed by Christian Heinemann.");
-	msgBox.exec();
+    QFile file("://Version.txt");
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(nullptr, "error", file.errorString());
+    }
+    else {
+        QTextStream in(&file);
+        auto version = in.readLine();
+        QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version " + version + "\nDeveloped by Christian Heinemann.");
+        msgBox.exec();
+    }
 }
 
-void ActionController::onShowDocumentation(bool show)
+void ActionController::onToggleGettingStarted(bool toggled)
 {
-	_mainView->showDocumentation(show);
+    _mainView->toggleGettingStarted(toggled);
+}
+
+void ActionController::onShowDocumentation()
+{
+	_mainView->showDocumentation();
 }
 
 void ActionController::onToggleRestrictTPS(bool toggled)
@@ -910,6 +931,7 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
+    actions->actionEditor->setEnabled(_visualEditor->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
     actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
     actions->actionCenterSelection->setEnabled(editMode);

@@ -18,18 +18,18 @@ public:
     VisualEditController(QWidget *parent = 0);
     virtual ~VisualEditController();
 
-	virtual void init(Notifier* notifier, SimulationController* controller
+	void init(Notifier* notifier, SimulationController* controller
 		, SimulationAccess* access, DataRepository* manipulator);
 
-	virtual void refresh();
+	void refresh();
 
-	virtual void setActiveScene(ActiveScene activeScene);
-	virtual QVector2D getViewCenterWithIncrement ();
-	virtual QGraphicsView* getGraphicsView ();
-	virtual double getZoomFactor ();
+	void setActiveScene(ActiveScene activeScene);
+	QVector2D getViewCenterWithIncrement ();
+	double getZoomFactor ();
+    void scrollToPos(QVector2D const& pos);
 
-    virtual void zoom (double factor);
-	virtual void toggleCenterSelection(bool value);
+    void zoom (double factor);
+	void toggleCenterSelection(bool value);
 
 private:
     Ui::VisualEditController *ui;

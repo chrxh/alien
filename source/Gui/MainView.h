@@ -28,12 +28,15 @@ public:
         Notifier* notifier, 
         WebSimulationController* webSimController);
 
+    virtual void initGettingStartedWindow();
+
     virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
 	virtual InfoController* getInfoController() const;
 
-	virtual void showDocumentation(bool show);
+    virtual void toggleGettingStarted(bool show);
+    virtual void showDocumentation();
 
 protected:
 	virtual void resizeEvent(QResizeEvent *event);
@@ -47,6 +50,7 @@ private:
 
 private:
 	Q_SLOT void monitorClosed();
+    Q_SLOT void gettingStartedWindowClosed();
 
 private:
 	Ui::MainView* ui = nullptr;
@@ -62,6 +66,8 @@ private:
 	ToolbarController* _toolbar = nullptr;
 	InfoController* _infoController = nullptr;
 	MonitorController* _monitor = nullptr;
+
+    GettingStartedWindow* _gettingStartedWindow = nullptr;
 
 	bool _initialied = false;
 };

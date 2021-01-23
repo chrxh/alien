@@ -48,4 +48,18 @@ private:
     QVector2D _force;
 };
 
+class _MoveSelectionAction : public _PhysicalAction
+{
+public:
+    _MoveSelectionAction(QVector2D const& displacement)
+        : _displacement(displacement)
+    {}
+    virtual ~_MoveSelectionAction() = default;
+
+    QVector2D getDisplacement() const { return _displacement; }
+
+private:
+    QVector2D _displacement;
+};
+
 

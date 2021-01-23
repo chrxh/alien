@@ -31,5 +31,5 @@ using CalcSingleTimestepJob = boost::shared_ptr<_CalcSingleTimestepJob>;
 enum RunningMode {
 	DoNothing, 
 	CalcSingleTimestep, 
-	OpenEndedSimulation
+	OpenEnded
 };
