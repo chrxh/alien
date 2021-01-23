@@ -20,7 +20,8 @@ public:
         SpaceProperties* space,
         int timestep,
         SimulationParameters const& parameters,
-        CudaConstants const& cudaConstants);
+        CudaConstants const& cudaConstants,
+        NumberGenerator* numberGenerator);
     void terminateWorker();
 	bool isSimulationRunning();
     int getTimestep() const;
@@ -41,10 +42,11 @@ private:
 private:
 	SpaceProperties* _space = nullptr;
 	CudaSimulation* _cudaSimulation = nullptr;
+    NumberGenerator* _numberGenerator = nullptr;
 
 	mutable std::mutex _mutex;
 	std::condition_variable _condition;
-	vector<CudaJob> _jobs;
+	list<CudaJob> _jobs;
 	vector<CudaJob> _finishedJobs;
 
 	bool _simulationRunning = false;

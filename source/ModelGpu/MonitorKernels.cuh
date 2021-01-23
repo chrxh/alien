@@ -80,7 +80,7 @@ __global__ void getMonitorDataForParticles(SimulationData data, CudaMonitorData 
 /* Main      															*/
 /************************************************************************/
 
-__global__ void getCudaMonitorData(SimulationData data, CudaMonitorData monitorData)
+__global__ void cudaGetCudaMonitorData(SimulationData data, CudaMonitorData monitorData)
 {
     monitorData.reset();
 

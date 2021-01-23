@@ -124,33 +124,43 @@ private:
     std::mutex& _mutex;
 };
 
-class _GetDataForEditJob
-	: public _GetDataJob
+class _UpdateDataJob
+	: public _CudaJob
 {
 public:
-	_GetDataForEditJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO)
-		: _GetDataJob(originId, rect, dataTO) { }
+	_UpdateDataJob(
+        string const& originId, IntRect const& rect, DataAccessTO const& dataTO, 
+        DataChangeDescription const& updateDesc, SimulationParameters const& parameters)
+    : _CudaJob(originId, true), _rect(rect), _dataTO(dataTO), _updateDesc(updateDesc), _parameters(parameters) { }
 
-	virtual ~_GetDataForEditJob() = default;
+	virtual ~_UpdateDataJob() = default;
 
-};
+    IntRect getRect() const
+    {
+        return _rect;
+    }
 
-class _GetDataForUpdateJob
-	: public _GetDataJob
-{
-public:
-	_GetDataForUpdateJob(string const& originId, IntRect const& rect, DataAccessTO const& dataTO, DataChangeDescription const& updateDesc)
-		: _GetDataJob(originId, rect, dataTO), _updateDesc(updateDesc) { }
-
-	virtual ~_GetDataForUpdateJob() = default;
+    DataAccessTO getDataTO() const
+    {
+        return _dataTO;
+    }
 
 	DataChangeDescription const& getUpdateDescription() const
 	{
 		return _updateDesc;
 	}
 
+    SimulationParameters const& getSimulationParameters() const
+    {
+        return _parameters;
+    }
+
 private:
 	DataChangeDescription _updateDesc;
+    SimulationParameters _parameters;
+
+    DataAccessTO _dataTO;
+    IntRect _rect;
 };
 
 class _SetDataJob
@@ -264,6 +274,34 @@ public:
 
 private:
     ExecutionParameters _parameters;
+};
+
+class _SelectDataJob
+    : public _CudaJob
+{
+public:
+    _SelectDataJob(string const& originId, IntVector2D const& pos)
+        : _CudaJob(originId, true), _pos(pos) { }
+
+    virtual ~_SelectDataJob() = default;
+
+    IntVector2D getPosition() const
+    {
+        return _pos;
+    }
+
+private:
+    IntVector2D _pos;
+};
+
+class _DeselectDataJob
+    : public _CudaJob
+{
+public:
+    _DeselectDataJob(string const& originId)
+        : _CudaJob(originId, true){ }
+
+    virtual ~_DeselectDataJob() = default;
 };
 
 class _PhysicalActionJob

@@ -27,7 +27,7 @@ VisualEditController::VisualEditController(QWidget *parent)
     auto emptyScene = new QGraphicsScene(this);
     emptyScene->setBackgroundBrush(QBrush(Const::UniverseColor));
 
-    QPixmap startScreenPixmap("://Tutorial/logo.png");
+    QPixmap startScreenPixmap("://logo.png");
     emptyScene->addPixmap(startScreenPixmap);
     ui->simulationView->setScene(emptyScene);
 }
@@ -87,14 +87,14 @@ QVector2D VisualEditController::getViewCenterWithIncrement ()
     return center + posIncrement;
 }
 
-QGraphicsView* VisualEditController::getGraphicsView ()
-{
-    return ui->simulationView;
-}
-
 double VisualEditController::getZoomFactor ()
 {
 	return _viewport->getZoomFactor();
+}
+
+void VisualEditController::scrollToPos(QVector2D const & pos)
+{
+    _viewport->scrollToPos(pos, NotifyScrollChanged::No);
 }
 
 void VisualEditController::zoom (double factor)

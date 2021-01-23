@@ -8,13 +8,14 @@ InfoController::InfoController(QObject * parent)
 	, _oneSecondTimer(new QTimer(this))
 {
 	connect(_oneSecondTimer, &QTimer::timeout, this, &InfoController::oneSecondTimerTimeout);
-	_oneSecondTimer->start(1000);
 }
 
 void InfoController::init(QLabel * infoLabel, MainController* mainController)
 {
 	_infoLabel = infoLabel;
 	_mainController = mainController;
+    _oneSecondTimer->stop();
+    _oneSecondTimer->start(1000);
 }
 
 void InfoController::increaseTimestep()
