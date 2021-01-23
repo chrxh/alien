@@ -1,3 +1,5 @@
+#include <QMessageBox>
+
 #include "CudaController.h"
 
 #include "Base/ServiceLocator.h"
@@ -24,7 +26,8 @@ CudaController::CudaController(QObject* parent /*= nullptr*/)
 	_worker = new CudaWorker();
 	_worker->moveToThread(&_thread);
 	connect(_worker, &CudaWorker::timestepCalculated, this, &CudaController::timestepCalculatedWithGpu);
-	connect(this, &CudaController::runWorker, _worker, &CudaWorker::run);
+    connect(_worker, &CudaWorker::errorThrown, this, &CudaController::showErrorMessageAndTerminate);
+    connect(this, &CudaController::runWorker, _worker, &CudaWorker::run);
 	_thread.start();
 	_thread.setPriority(QThread::TimeCriticalPriority);
 	Q_EMIT runWorker();
@@ -47,7 +50,7 @@ void CudaController::init(
     SimulationParameters const& parameters,
     CudaConstants const& cudaConstants)
 {
-	_worker->init(space, timestep, parameters, cudaConstants, _numberGenerator);
+    _worker->init(space, timestep, parameters, cudaConstants, _numberGenerator);
 }
 
 CudaWorker * CudaController::getCudaWorker() const
@@ -94,3 +97,11 @@ void CudaController::timestepCalculatedWithGpu()
 	Q_EMIT timestepCalculated();
 }
 
+void CudaController::showErrorMessageAndTerminate(QString what) const
+{
+    QMessageBox messageBox;
+    messageBox.critical(0, "CUDA error",
+        QString("An error has occurred in CUDA. Please restart the program and check the array sizes.\n\nError message:\n\"%1\"")
+        .arg(what));
+    exit(EXIT_FAILURE);
+}

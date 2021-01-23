@@ -1,7 +1,9 @@
 #include <functional>
+
 #include <QImage>
 #include <QElapsedTimer>
 #include <QThread>
+#include <QString>
 
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/SpaceProperties.h"
@@ -25,12 +27,17 @@ void CudaWorker::init(
     CudaConstants const& cudaConstants,
     NumberGenerator* numberGenerator)
 {
-	_space = space;
-	auto size = space->getSize();
-	delete _cudaSimulation;
-	_cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
-
     _numberGenerator = numberGenerator;
+
+    auto size = space->getSize();
+	delete _cudaSimulation;
+    try {
+    	_cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
+    }
+    catch (std::exception const& exception) {
+        terminateWorker();
+        Q_EMIT errorThrown(exception.what());
+    }
 }
 
 void CudaWorker::terminateWorker()
@@ -66,41 +73,49 @@ vector<CudaJob> CudaWorker::getFinishedJobs(string const & originId)
 
 void CudaWorker::run()
 {
-	do {
-		QElapsedTimer timer;
-		timer.start();
+    try {
+        do {
+		    QElapsedTimer timer;
+		    timer.start();
 
-		processJobs();
+            processJobs();
 
-		if (isSimulationRunning()) {
-			_cudaSimulation->calcCudaTimestep();
-			if (_tpsRestriction) {
-				int remainingTime = 1000000 / (*_tpsRestriction) - timer.nsecsElapsed() / 1000;
-				if (remainingTime > 0) {
-					QThread::usleep(remainingTime);
-				}
-			}
-			Q_EMIT timestepCalculated();
-		}
+            if (isSimulationRunning()) {
+                _cudaSimulation->calcCudaTimestep();
 
-		std::unique_lock<std::mutex> uniqueLock(_mutex);
-		if (!_jobs.empty() && !_terminate) {
-			_condition.wait(uniqueLock, [this]() {
-				return !_jobs.empty() || _terminate;
-			});
-		}
-	} while (!isTerminate());
+                if (_tpsRestriction) {
+                    int remainingTime = 1000000 / (*_tpsRestriction) - timer.nsecsElapsed() / 1000;
+                    if (remainingTime > 0) {
+                        QThread::usleep(remainingTime);
+                    }
+                }
+                Q_EMIT timestepCalculated();
+            }
+
+		    std::unique_lock<std::mutex> uniqueLock(_mutex);
+		    if (!_jobs.empty() && !_terminate) {
+			    _condition.wait(uniqueLock, [this]() {
+				    return !_jobs.empty() || _terminate;
+			    });
+		    }
+	    } while (!isTerminate());
+    }
+    catch (std::exception const& exeception)
+    {
+        terminateWorker();
+        Q_EMIT errorThrown(exeception.what());
+    }
 }
 
 void CudaWorker::processJobs()
 {
-	std::lock_guard<std::mutex> lock(_mutex);
-	if (_jobs.empty()) {
-		return;
-	}
-	bool notify = false;
+    std::lock_guard<std::mutex> lock(_mutex);
+    if (_jobs.empty()) {
+        return;
+    }
+    bool notify = false;
 
-	for (auto const& job : _jobs) {
+    for (auto const& job : _jobs) {
 
         if (auto _job = boost::dynamic_pointer_cast<_GetImageJob>(job)) {
             auto rect = _job->getRect();
@@ -111,50 +126,50 @@ void CudaWorker::processJobs()
             _cudaSimulation->getSimulationImage({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, image->bits());
         }
 
-		if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
-			auto rect = _job->getRect();
-			auto dataTO = _job->getDataTO();
-			_cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
-		}
+        if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
+            auto rect = _job->getRect();
+            auto dataTO = _job->getDataTO();
+            _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+        }
 
         if (auto _job = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
             auto rect = _job->getRect();
             auto dataTO = _job->getDataTO();
             _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 
-            DataConverter converter(dataTO, _numberGenerator, _job->getSimulationParameters());
+            DataConverter converter(dataTO, _numberGenerator, _job->getSimulationParameters(), _cudaSimulation->getCudaConstants());
             converter.updateData(_job->getUpdateDescription());
 
             _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 
         }
 
-		if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
+        if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
             auto rect = _job->getRect();
-			auto dataTO = _job->getDataTO();
-			_cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
-		}
+            auto dataTO = _job->getDataTO();
+            _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+        }
 
-		if (auto _job = boost::dynamic_pointer_cast<_RunSimulationJob>(job)) {
-			_simulationRunning = true;
-		}
+        if (auto _job = boost::dynamic_pointer_cast<_RunSimulationJob>(job)) {
+            _simulationRunning = true;
+        }
 
-		if (auto _job = boost::dynamic_pointer_cast<_StopSimulationJob>(job)) {
-			_simulationRunning = false;
-		}
+        if (auto _job = boost::dynamic_pointer_cast<_StopSimulationJob>(job)) {
+            _simulationRunning = false;
+        }
 
-		if (auto _job = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
-			_cudaSimulation->calcCudaTimestep();
-			Q_EMIT timestepCalculated();
-		}
+        if (auto _job = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
+            _cudaSimulation->calcCudaTimestep();
+            Q_EMIT timestepCalculated();
+        }
 
-		if (auto _job = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
-			_tpsRestriction = _job->getTpsRestriction();
-		}
+        if (auto _job = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
+            _tpsRestriction = _job->getTpsRestriction();
+        }
 
-		if (auto _job = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
-			_cudaSimulation->setSimulationParameters(_job->getSimulationParameters());
-		}
+        if (auto _job = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
+            _cudaSimulation->setSimulationParameters(_job->getSimulationParameters());
+        }
 
         if (auto _job = boost::dynamic_pointer_cast<_SetExecutionParametersJob>(job)) {
             _cudaSimulation->setExecutionParameters(_job->getSimulationExecutionParameters());
@@ -197,18 +212,18 @@ void CudaWorker::processJobs()
             }
         }
 
-		if (job->isNotifyFinish()) {
-			notify = true;
-		}
-	}
-	if (notify) {
-		_finishedJobs.insert(_finishedJobs.end(), _jobs.begin(), _jobs.end());
-		_jobs.clear();
-		Q_EMIT jobsFinished();
-	}
-	else {
-		_jobs.clear();
-	}
+        if (job->isNotifyFinish()) {
+            notify = true;
+        }
+    }
+    if (notify) {
+        _finishedJobs.insert(_finishedJobs.end(), _jobs.begin(), _jobs.end());
+        _jobs.clear();
+        Q_EMIT jobsFinished();
+    }
+    else {
+        _jobs.clear();
+    }
 }
 
 bool CudaWorker::isTerminate()
@@ -223,14 +238,20 @@ bool CudaWorker::isSimulationRunning()
 	return _simulationRunning;
 }
 
-int CudaWorker::getTimestep() const
+int CudaWorker::getTimestep()
 {
+    if (isTerminate()) {
+        return 0;
+    }
     std::lock_guard<std::mutex> lock(_mutex);
     return _cudaSimulation->getTimestep();
 }
 
 void CudaWorker::setTimestep(int timestep)
 {
+    if (isTerminate()) {
+        return;
+    }
     std::lock_guard<std::mutex> lock(_mutex);
     return _cudaSimulation->setTimestep(timestep);
 }

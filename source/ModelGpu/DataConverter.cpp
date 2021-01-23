@@ -5,8 +5,8 @@
 
 #include "DataConverter.h"
 
-DataConverter::DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters)
-	: _dataTO(dataTO), _numberGen(numberGen), _parameters(parameters)
+DataConverter::DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters, CudaConstants const& cudaConstants)
+	: _dataTO(dataTO), _numberGen(numberGen), _parameters(parameters), _cudaConstants(cudaConstants)
 {}
 
 void DataConverter::updateData(DataChangeDescription const & data)
@@ -162,7 +162,12 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 		return;
 	}
 
-	ClusterAccessTO& clusterTO = _dataTO.clusters[(*_dataTO.numClusters)++];
+    auto clusterIndex = (*_dataTO.numClusters)++;
+    if (clusterIndex >= _cudaConstants.MAX_CLUSTERS) {
+        throw std::exception("Array size for clusters is too small.");
+    }
+
+	ClusterAccessTO& clusterTO = _dataTO.clusters[clusterIndex];
 	clusterTO.id = clusterDesc.id == 0 ? _numberGen->getId() : clusterDesc.id;
 	QVector2D clusterPos = clusterDesc.pos ? clusterPos = *clusterDesc.pos : clusterPos = clusterDesc.getClusterPosFromCells();
 	clusterTO.pos = { clusterPos.x(), clusterPos.y() };
@@ -200,7 +205,12 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 
 void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
-	ParticleAccessTO& particleTO = _dataTO.particles[(*_dataTO.numParticles)++];
+    auto particleIndex = (*_dataTO.numParticles)++;
+    if (particleIndex >= _cudaConstants.MAX_PARTICLES) {
+        throw std::exception("Array size for particles is too small.");
+    }
+
+	ParticleAccessTO& particleTO = _dataTO.particles[particleIndex];
 	particleTO.id = particleDesc.id == 0 ? _numberGen->getId() : particleDesc.id;
 	particleTO.pos = { particleDesc.pos->x(), particleDesc.pos->y() };
 	particleTO.vel = { particleDesc.vel->x(), particleDesc.vel->y() };
@@ -378,6 +388,10 @@ void DataConverter::processModifications()
 					clusterTO.numTokens += tokens->size();
 					for (int sourceTokenIndex = 0; sourceTokenIndex < tokens->size(); ++sourceTokenIndex) {
 						int targetTokenIndex = (*_dataTO.numTokens)++;
+                        if (targetTokenIndex >= _cudaConstants.MAX_TOKENS) {
+                            throw std::exception("Array size for tokens is too small.");
+                        }
+
 						auto& targetToken = _dataTO.tokens[targetTokenIndex];
 						auto const& sourceToken = tokens->at(sourceTokenIndex);
 						targetToken.cellIndex = cellIndex;
@@ -391,6 +405,10 @@ void DataConverter::processModifications()
 				clusterTO.numTokens += tokens.size();
 				for (int sourceTokenIndex = 0; sourceTokenIndex < tokens.size(); ++sourceTokenIndex) {
 					int targetTokenIndex = (*_dataTO.numTokens)++;
+                    if (targetTokenIndex >= _cudaConstants.MAX_TOKENS) {
+                        throw std::exception("Array size for tokens is too small.");
+                    }
+
 					auto& targetToken = _dataTO.tokens[targetTokenIndex];
 					auto const& sourceToken = tokens[sourceTokenIndex];
 					targetToken = sourceToken;
@@ -424,6 +442,9 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 	, unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
 	int cellIndex = (*_dataTO.numCells)++;
+    if (cellIndex >= _cudaConstants.MAX_CELLS) {
+        throw std::exception("Array size for cells is too small.");
+    }
 	CellAccessTO& cellTO = _dataTO.cells[cellIndex];
 	cellTO.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
