@@ -25,10 +25,10 @@ __device__ __inline__ int mapUniversePosToImageIndex(int2 const& imageSize, int2
     return (intPos.x - rectUpperLeft.x) + (intPos.y - rectUpperLeft.y) * imageSize.x;
 }
 
-__device__ __inline__ int2 mapUniversePosToImagePos(int2 const& rectUpperLeft, float2 const& pos, float2 zoom)
+__device__ __inline__ int2 mapUniversePosToImagePos(int2 const& rectUpperLeft, float2 const& pos, float zoom)
 {
-    return{ static_cast<int>((pos.x - rectUpperLeft.x)*zoom.x),
-            static_cast<int>((pos.y - rectUpperLeft.y)*zoom.y) };
+    return{ static_cast<int>((pos.x - rectUpperLeft.x)*zoom),
+            static_cast<int>((pos.y - rectUpperLeft.y)*zoom) };
 }
 
 __device__ __inline__ unsigned int calcColor(Cell* cell)
@@ -101,7 +101,7 @@ __device__ __inline__ void addingColor(unsigned int& color, unsigned int const& 
     color = newColor | 0xff000000;
 }
 
-__device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color)
+__device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color, bool selected)
 {
     if (!selected) {
         color = (color >> 1) & 0x7e7e7e;
@@ -115,37 +115,37 @@ __device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSiz
     addingColor(imageData[index + imageSize.x], color);
 }
 
-__device__ __inline__ void drawCircle(unsigned int* imageData, int2 const& imageSize, int index, unsigned int color)
+__device__ __inline__ void drawCircle(unsigned int* imageData, int2 const& imageSize, int index, unsigned int color, bool selected)
 {
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
 
     index -= 1 + 2 * imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     ++index;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     ++index;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
 
     index += 1 + imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     index += imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     index += imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
 
     index += imageSize.x - 1;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     --index;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     --index;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
 
     index -= 1 + imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     index -= imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
     index -= imageSize.x;
-    drawDot(imageData, imageSize, index, color);
+    drawDot(imageData, imageSize, index, color, selected);
 }
 
 __global__ void drawClusters_pixelStyle(
@@ -208,7 +208,7 @@ __global__ void drawClusters_vectorStyle(
     Array<Cluster*> clusters,
     unsigned int* imageData,
     int2 imageSize,
-    float2 zoom
+    float zoom
     )
 {
     auto const clusterBlock =
@@ -222,8 +222,10 @@ __global__ void drawClusters_vectorStyle(
         }
 
         __shared__ MapInfo map;
+        __shared__ bool isSelected;
         if (0 == threadIdx.x) {
             map.init(universeSize);
+            isSelected = cluster->isSelected();
         }
         __syncthreads();
 
@@ -239,13 +241,13 @@ __global__ void drawClusters_vectorStyle(
                 if (isContainedInRect({ 0, 0 }, imageSize, cellImagePos, 3)) {
                     auto index = cellImagePos.x - 1 + cellImagePos.y * imageSize.x;
 //                    drawCircle(imageData, imageSize, index, color);
-                    drawDot(imageData, imageSize, index, color);
+                    drawDot(imageData, imageSize, index, color, isSelected);
                     index += 2;
-                    drawDot(imageData, imageSize, index, color);
+                    drawDot(imageData, imageSize, index, color, isSelected);
                     index -= 1 + imageSize.x;
-                    drawDot(imageData, imageSize, index, color);
+                    drawDot(imageData, imageSize, index, color, isSelected);
                     index += 2 * imageSize.x;
-                    drawDot(imageData, imageSize, index, color);
+                    drawDot(imageData, imageSize, index, color, isSelected);
                 }
 
                 auto const posCorrection = cellPos - cell->absPos;
@@ -263,7 +265,7 @@ __global__ void drawClusters_vectorStyle(
                         auto const intPos = toInt2(pos);
                         if (isContainedInRect({ 0, 0 }, imageSize, intPos, 2)) {
                             auto const index = intPos.x + intPos.y * imageSize.x;
-                            drawDot(imageData, imageSize, index, color);
+                            drawDot(imageData, imageSize, index, color, isSelected);
                         }
                         pos = pos + v;
                     }
@@ -280,11 +282,11 @@ __global__ void drawClusters_vectorStyle(
             auto cellPos = cell->absPos;
             map.mapPosCorrection(cellPos);
             auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, cellPos, zoom);
-            if (isContainedInRect({ 0, 0 }, imageSize, cellImagePos, 4)) {
+            if (isContainedInRect(rectUpperLeft, rectLowerRight, cellImagePos, 4)) {
                 auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
                 auto const color = calcColor(token);
 
-                drawCircle(imageData, imageSize, index, color);
+                drawCircle(imageData, imageSize, index, color, cell->cluster->isSelected());
             }
         }
         __syncthreads();
@@ -321,7 +323,7 @@ __global__ void drawParticles_vectorStyle(
     Array<Particle*> particles,
     unsigned int* imageData,
     int2 imageSize,
-    float2 zoom)
+    float zoom)
 {
     auto const particleBlock =
         calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -331,10 +333,10 @@ __global__ void drawParticles_vectorStyle(
 
         auto pos = particle->absPos;
         auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, pos, zoom);
-        if (isContainedInRect({ 0, 0 }, imageSize, cellImagePos, 4)) {
+        if (isContainedInRect(rectUpperLeft, rectLowerRight, cellImagePos, 4)) {
             auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
             auto const color = calcColor(particle);
-            drawCircle(imageData, imageSize, index, color);
+            drawCircle(imageData, imageSize, index, color, particle->isSelected());
         }
     }
 }
@@ -421,8 +423,11 @@ __global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight
     }
 }
 
-__global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, int2 imageSize, SimulationData data)
+__global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
 {
+    rectLowerRight.x = rectUpperLeft.x + 50;
+    rectLowerRight.y = rectUpperLeft.y + 50;
+    printf("drawImage_vectorStyle: %d; %d \n", rectUpperLeft.x, rectLowerRight.x);
     int numPixels = imageSize.x * imageSize.y;
 
     unsigned int* targetImage;
@@ -432,10 +437,6 @@ __global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, i
     else {
         targetImage = data.finalImageData;
     }
-
-    float2 zoom = {
-        static_cast<float>(imageSize.x) / static_cast<float>(rectLowerRight.x - rectUpperLeft.x + 1),
-        static_cast<float>(imageSize.y) / static_cast<float>(rectLowerRight.y - rectUpperLeft.y + 1) };
 
     KERNEL_CALL(clearImageMap, targetImage, numPixels);
     KERNEL_CALL(drawClusters_vectorStyle, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, targetImage, imageSize, zoom);

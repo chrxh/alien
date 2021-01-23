@@ -86,11 +86,18 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionEditor->setCheckable(true);
 	actionEditor->setChecked(false);
 	actionEditor->setEnabled(true);
-	QIcon iconEditor;
+    QIcon iconEditor;
 	iconEditor.addFile(":/Icons/main/pixel view.png", QSize(), QIcon::Normal, QIcon::On);
 	iconEditor.addFile(":/Icons/main/item view.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionEditor->setIcon(iconEditor);
 	actionEditor->setIconVisibleInMenu(false);
+    actionVector = new QAction("Vector", this);
+    actionVector->setCheckable(true);
+    actionVector->setChecked(false);
+    actionVector->setEnabled(true);
+    QIcon iconVector;
+    iconVector.addFile(":/Icons/main/monitor.png", QSize(), QIcon::Normal, QIcon::On);
+    actionVector->setIcon(iconVector);
 
 	actionMonitor = new QAction("Monitor", this);
 	actionMonitor->setEnabled(true);

@@ -16,30 +16,30 @@
 
 #include "CoordinateSystem.h"
 #include "DataRepository.h"
-#include "PixelImageSectionItem.h"
-#include "PixelUniverseView.h"
+#include "VectorImageSectionItem.h"
+#include "VectorUniverseView.h"
 
-PixelUniverseView::PixelUniverseView(QObject* parent)
+VectorUniverseView::VectorUniverseView(QObject* parent)
 {
-	setBackgroundBrush(QBrush(Const::BackgroundColor));
+    setBackgroundBrush(QBrush(Const::BackgroundColor));
     update();
 }
 
-PixelUniverseView::~PixelUniverseView()
+VectorUniverseView::~VectorUniverseView()
 {
 }
 
-void PixelUniverseView::init(
+void VectorUniverseView::init(
     Notifier* notifier,
     SimulationController* controller,
     SimulationAccess* access,
     DataRepository* repository,
     ViewportInterface* viewport)
 {
-	_controller = controller;
-	_viewport = viewport;
-	_repository = repository;
-	_notifier = notifier;
+    _controller = controller;
+    _viewport = viewport;
+    _repository = repository;
+    _notifier = notifier;
 
     SET_CHILD(_access, access);
 
@@ -47,45 +47,46 @@ void PixelUniverseView::init(
     auto const viewportRect = _viewport->getRect();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-    _imageSectionItem = new PixelImageSectionItem(_viewport, QRectF(0,0, size.x, size.y), repository->getImageMutex());
+    _imageSectionItem = new VectorImageSectionItem(_viewport, QRectF(0, 0, size.x, size.y), 8, repository->getImageMutex());
 
     addItem(_imageSectionItem);
 
-    QGraphicsScene::setSceneRect(0, 0, size.x, size.y);
+    QGraphicsScene::setSceneRect(0, 0, size.x * 8, size.y * 8);
 
     update();
 }
+#include <iostream>
 
-void PixelUniverseView::activate()
+void VectorUniverseView::activate()
 {
-	deactivate();
-	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &PixelUniverseView::requestImage));
-	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &PixelUniverseView::receivedNotifications));
-	_connections.push_back(connect(_repository, &DataRepository::imageReady, this, &PixelUniverseView::imageReady, Qt::QueuedConnection));
-	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &PixelUniverseView::scrolled));
+    deactivate();
+    _connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &VectorUniverseView::requestImage));
+    _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &VectorUniverseView::receivedNotifications));
+    _connections.push_back(connect(_repository, &DataRepository::imageReady, this, &VectorUniverseView::imageReady, Qt::QueuedConnection));
+    _connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &VectorUniverseView::scrolled));
 
-	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
+    IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     auto image = _imageSectionItem->getImageOfVisibleRect();
-    _repository->requirePixelImageFromSimulation(
-        {{0, 0}, {image->width(), image->height()}}, image);
+    _repository->requireVectorImageFromSimulation(
+        { { 0, 0 },{ image->width() / 8, image->height()/ 8 } }, image);
     _isActived = true;
 }
 
-void PixelUniverseView::deactivate()
+void VectorUniverseView::deactivate()
 {
     _isActived = false;
     for (auto const& connection : _connections) {
-		disconnect(connection);
-	}
-	_connections.clear();
+        disconnect(connection);
+    }
+    _connections.clear();
 }
 
-void PixelUniverseView::refresh()
+void VectorUniverseView::refresh()
 {
-	requestImage();
+    requestImage();
 }
 
-void PixelUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
+void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
     if (!_controller->getRun()) {
         QVector2D pos(event->scenePos().x(), event->scenePos().y());
@@ -94,7 +95,7 @@ void PixelUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
     }
 }
 
-void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
+void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
     auto const pos = QVector2D(e->scenePos().x(), e->scenePos().y());
     auto const lastPos = QVector2D(e->lastScenePos().x(), e->lastScenePos().y());
@@ -118,7 +119,7 @@ void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
     }
 }
 
-void PixelUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
+void VectorUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
     if (!_controller->getRun()) {
         _access->deselectAll();
@@ -126,30 +127,31 @@ void PixelUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
     }
 }
 
-void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
+void VectorUniverseView::receivedNotifications(set<Receiver> const & targets)
 {
-	if (targets.find(Receiver::VisualEditor) == targets.end()) {
-		return;
-	}
+    if (targets.find(Receiver::VisualEditor) == targets.end()) {
+        return;
+    }
 
-	requestImage();
+    requestImage();
 }
 
-void PixelUniverseView::requestImage()
+void VectorUniverseView::requestImage()
 {
     if (_isActived) {
+        std::cerr << "request image" << std::endl;
         IntRect rect = _viewport->getRect();
-        _repository->requirePixelImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
+        _repository->requireVectorImageFromSimulation({ { rect.p1.x, rect.p1.y }, { rect.p1.x + 50, rect.p1.y + 50 } }, _imageSectionItem->getImageOfVisibleRect());
     }
 }
 
-void PixelUniverseView::imageReady()
+void VectorUniverseView::imageReady()
 {
-	update();
+    update();
 }
 
-void PixelUniverseView::scrolled()
+void VectorUniverseView::scrolled()
 {
-	requestImage();
+    requestImage();
 }
 

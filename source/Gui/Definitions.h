@@ -21,6 +21,7 @@ class ItemConfig;
 class MonitorView;
 class MetadataManager;
 class PixelUniverseView;
+class VectorUniverseView;
 class ItemUniverseView;
 class ItemManager;
 class DataRepository;
@@ -52,16 +53,21 @@ class MainView;
 class MainModel;
 class MainController;
 class VersionController;
-class VisualEditController;
+class SimulationViewWidget;
 class ActionHolder;
 class ActionController;
 class MonitorController;
-class ImageSectionItem;
+class PixelImageSectionItem;
+class VectorImageSectionItem;
 
 struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;
 
-enum class ActiveScene { PixelScene, ItemScene };
+enum class ActiveScene {
+    PixelScene,
+    VectorScene,
+    ItemScene
+};
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
 enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
 enum class NotifyScrollChanged { No, Yes };

@@ -595,10 +595,16 @@ void DataRepository::requireDataUpdateFromSimulation(IntRect const& rect)
 	_access->requireData(rect, resolveDesc);
 }
 
-void DataRepository::requireImageFromSimulation(IntRect const & rect, QImagePtr const& target)
+void DataRepository::requirePixelImageFromSimulation(IntRect const & rect, QImagePtr const& target)
 {
 	_rect = rect;
-	_access->requireImage(rect, target, _mutex);
+	_access->requirePixelImage(rect, target, _mutex);
+}
+
+void DataRepository::requireVectorImageFromSimulation(IntRect const & rect, QImagePtr const & target)
+{
+    _rect = { { rect.p1.x / 8, rect.p1.y / 8 },{ rect.p2.x / 8, rect.p2.y / 8 } };
+    _access->requireVectorImage(rect, 8, target, _mutex);
 }
 
 std::mutex & DataRepository::getImageMutex()
