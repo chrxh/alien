@@ -11,7 +11,8 @@ public:
 	ViewportController(QObject* parent = nullptr) : ViewportInterface(parent) {}
 	virtual ~ViewportController() = default;
 
-	virtual void init(QGraphicsView* view, QGraphicsScene* pixelScene, QGraphicsScene* shapeScene, ActiveScene activeScene);
+	virtual void init(QGraphicsView* view, QGraphicsScene* pixelScene, QGraphicsScene* vectorScene, 
+        QGraphicsScene* itemScene, ActiveScene activeScene);
 
 	virtual void setModeToUpdate() override;
 	virtual void setModeToNoUpdate() override;
@@ -39,9 +40,11 @@ private:
 
 	QGraphicsView* _view = nullptr;
 	QGraphicsScene* _pixelScene = nullptr;
-	QGraphicsScene* _itemScene = nullptr;
+    QGraphicsScene* _vectorScene = nullptr;
+    QGraphicsScene* _itemScene = nullptr;
 
 	IntVector2D _sceneScrollbarPos;
-
 	optional<ActiveScene> _activeScene;
+
+    double _zoom = 1.0;
 };

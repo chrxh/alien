@@ -102,14 +102,23 @@ void CudaWorker::processJobs()
 
 	for (auto const& job : _jobs) {
 
-        if (auto _job = boost::dynamic_pointer_cast<_GetImageJob>(job)) {
+        if (auto _job = boost::dynamic_pointer_cast<_GetPixelImageJob>(job)) {
             auto rect = _job->getRect();
             auto image = _job->getTargetImage();
             auto& mutex = _job->getMutex();
 
             std::lock_guard<std::mutex> lock(mutex);
-            int zoom = 8;
-            _cudaSimulation->getSimulationImage_vectorStyle({ rect.p1.x / zoom, rect.p1.y / zoom }, { rect.p2.x / zoom, rect.p2.y / zoom }, {image->width(), image->height()}, image->bits());
+            _cudaSimulation->getPixelImage({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, image->bits());
+        }
+
+        if (auto _job = boost::dynamic_pointer_cast<_GetVectorImageJob>(job)) {
+            auto rect = _job->getRect();
+            auto zoom = _job->getZoom();
+            auto image = _job->getTargetImage();
+            auto& mutex = _job->getMutex();
+
+            std::lock_guard<std::mutex> lock(mutex);
+            _cudaSimulation->getVectorImage({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, { image->width(), image->height() }, zoom, image->bits());
         }
 
 		if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
@@ -127,7 +136,6 @@ void CudaWorker::processJobs()
             converter.updateData(_job->getUpdateDescription());
 
             _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
-
         }
 
 		if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {

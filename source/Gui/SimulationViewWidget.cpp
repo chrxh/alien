@@ -6,18 +6,20 @@
 #include "Gui/Settings.h"
 #include "ModelBasic/SimulationAccess.h"
 #include "PixelUniverseView.h"
+#include "VectorUniverseView.h"
 #include "ItemUniverseView.h"
 #include "ViewportController.h"
 
-#include "VisualEditController.h"
-#include "ui_VisualEditController.h"
+#include "SimulationViewWidget.h"
+#include "ui_SimulationViewWidget.h"
 
 
-VisualEditController::VisualEditController(QWidget *parent)
+SimulationViewWidget::SimulationViewWidget(QWidget *parent)
 	: QWidget(parent)
-	, ui(new Ui::VisualEditController)
+	, ui(new Ui::SimulationViewWidget)
 	, _pixelUniverse(new PixelUniverseView(this))
-	, _itemUniverse(new ItemUniverseView(this))
+    , _vectorUniverse(new VectorUniverseView(this))
+    , _itemUniverse(new ItemUniverseView(this))
 	, _viewport(new ViewportController(this))
 {
     ui->setupUi(this);
@@ -32,51 +34,59 @@ VisualEditController::VisualEditController(QWidget *parent)
     ui->simulationView->setScene(emptyScene);
 }
 
-VisualEditController::~VisualEditController()
+SimulationViewWidget::~SimulationViewWidget()
 {
     delete ui;
 }
 
-void VisualEditController::init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* repository)
+void SimulationViewWidget::init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* repository)
 {
 	_pixelUniverseInit = false;
 	_itemUniverseInit = false;
 	_controller = controller;
 	_activeScene = ActiveScene::PixelScene;
-    _viewport->init(ui->simulationView, _pixelUniverse, _itemUniverse, _activeScene);
+    _viewport->init(ui->simulationView, _pixelUniverse, _vectorUniverse, _itemUniverse, _activeScene);
     _pixelUniverse->init(notifier, controller, access, repository, _viewport);
-	_itemUniverse->init(notifier, controller, repository, _viewport);
+    _vectorUniverse->init(notifier, controller, access, repository, _viewport);
+    _itemUniverse->init(notifier, controller, repository, _viewport);
 }
 
-void VisualEditController::refresh()
+void SimulationViewWidget::refresh()
 {
 	_pixelUniverse->refresh();
-	_itemUniverse->refresh();
+    _vectorUniverse->refresh();
+    _itemUniverse->refresh();
 }
 
 
-void VisualEditController::setActiveScene (ActiveScene activeScene)
+void SimulationViewWidget::setActiveScene (ActiveScene activeScene)
 {
 	_viewport->saveScrollPos();
-	if (activeScene == ActiveScene::PixelScene) {
+	if (_activeScene == ActiveScene::PixelScene) {
+        _pixelUniverse->deactivate();
+	}
+    if (_activeScene == ActiveScene::VectorScene) {
+        _vectorUniverse->deactivate();
+    }
+	if (_activeScene == ActiveScene::ItemScene) {
 		_itemUniverse->deactivate();
 	}
-	if (activeScene == ActiveScene::ItemScene) {
-		_pixelUniverse->deactivate();
-	}
-	_activeScene = activeScene;
+    _activeScene = activeScene;
 	_viewport->setActiveScene(activeScene);
 
 	if (activeScene == ActiveScene::PixelScene) {
 		_pixelUniverse->activate();
 	}
-	if (activeScene == ActiveScene::ItemScene) {
+    if (activeScene == ActiveScene::VectorScene) {
+        _vectorUniverse->activate();
+    }
+    if (activeScene == ActiveScene::ItemScene) {
 		_itemUniverse->activate();
 	}
 	_viewport->restoreScrollPos();
 }
 
-QVector2D VisualEditController::getViewCenterWithIncrement ()
+QVector2D SimulationViewWidget::getViewCenterWithIncrement ()
 {
 	QVector2D center = _viewport->getCenter();
 
@@ -87,22 +97,22 @@ QVector2D VisualEditController::getViewCenterWithIncrement ()
     return center + posIncrement;
 }
 
-double VisualEditController::getZoomFactor ()
+double SimulationViewWidget::getZoomFactor ()
 {
 	return _viewport->getZoomFactor();
 }
 
-void VisualEditController::scrollToPos(QVector2D const & pos)
+void SimulationViewWidget::scrollToPos(QVector2D const & pos)
 {
     _viewport->scrollToPos(pos, NotifyScrollChanged::No);
 }
 
-void VisualEditController::zoom (double factor)
+void SimulationViewWidget::zoom (double factor)
 {
 	_viewport->zoom(factor);
 }
 
-void VisualEditController::toggleCenterSelection(bool value)
+void SimulationViewWidget::toggleCenterSelection(bool value)
 {
 	_itemUniverse->toggleCenterSelection(value);
 }
