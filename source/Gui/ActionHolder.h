@@ -67,7 +67,8 @@ public:
     QAction* actionMostFrequentCluster = nullptr;
 
 	QAction* actionAbout = nullptr;
-	QAction* actionDocumentation = nullptr;
+    QAction* actionGettingStarted = nullptr;
+    QAction* actionDocumentation = nullptr;
 
 	QAction* actionRestrictTPS = nullptr;
 };

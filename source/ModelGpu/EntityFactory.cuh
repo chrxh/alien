@@ -81,6 +81,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         _map.mapPosCorrection(cluster->pos);
         posCorrection = cluster->pos - clusterTO.pos;
         cluster->setVelocity(clusterTO.vel);
+        cluster->setSelected(false);
         cluster->angle = clusterTO.angle;
         cluster->setAngularVelocity(clusterTO.angularVel);
         cluster->numCellPointers = clusterTO.numCells;
@@ -249,6 +250,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     particle->locked = 0;
     particle->alive = 1;
     particle->metadata.color = particleTO.metadata.color;
+    particle->setSelected(false);
     return particle;
 }
 
@@ -265,6 +267,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cluster->id = _data->numberGen.createNewId_kernel();
     cluster->pos = pos;
     cluster->setVelocity(vel);
+    cluster->setSelected(false);
     cluster->angle = 0.0f;
     cluster->setAngularVelocity(0);
     cluster->angularMass = 0.0f;
@@ -347,5 +350,6 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     particle->absPos = pos;
     particle->vel = vel;
     particle->metadata = metadata;
+    particle->setSelected(false);
     return particle;
 }
