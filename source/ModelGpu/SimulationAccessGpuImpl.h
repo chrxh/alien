@@ -13,15 +13,17 @@ public:
 	SimulationAccessGpuImpl(QObject* parent = nullptr);
 	virtual ~SimulationAccessGpuImpl();
 
-	virtual void init(SimulationControllerGpu* controller) override;
+	void init(SimulationControllerGpu* controller) override;
 
-	virtual void clear() override;
-	virtual void updateData(DataChangeDescription const &dataToUpdate) override;
-    virtual void requireData(ResolveDescription const& resolveDesc) override;
-    virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
-	virtual void requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
-    virtual void applyAction(PhysicalAction const& action) override;
-    virtual DataDescription const& retrieveData() override;
+	void clear() override;
+	void updateData(DataChangeDescription const &dataToUpdate) override;
+    void requireData(ResolveDescription const& resolveDesc) override;
+    void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
+	void requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
+    void selectEntities(IntVector2D const& pos) override;
+    void deselectAll() override;
+    void applyAction(PhysicalAction const& action) override;
+    DataDescription const& retrieveData() override;
 
 private:
     void scheduleJob(CudaJob const& job);
@@ -63,9 +65,5 @@ private:
 	DataDescription _dataCollected;
 	DataTOCache _dataTOCache;
 	IntRect _lastDataRect;
-
-	bool _updateInProgress = false;
-	vector<CudaJob> _waitingJobs;
-
 };
 

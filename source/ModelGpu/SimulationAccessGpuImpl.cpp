@@ -43,8 +43,7 @@ void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 
 void SimulationAccessGpuImpl::clear()
 {
-    auto job = boost::make_shared<_ClearDataJob>(getObjectId());
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_ClearDataJob>(getObjectId()));
 }
 
 void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc)
@@ -58,9 +57,8 @@ void SimulationAccessGpuImpl::updateData(DataChangeDescription const& updateDesc
 	auto updateDescCorrected = updateDesc;
 	metricCorrection(updateDescCorrected);
 
-	auto job = boost::make_shared<_GetDataForUpdateJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(), updateDescCorrected);
-    scheduleJob(job);
-    _updateInProgress = true;
+    scheduleJob(boost::make_shared<_UpdateDataJob>(getObjectId(), _lastDataRect, _dataTOCache->getDataTO(),
+        updateDescCorrected, _context->getSimulationParameters()));
 }
 
 void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc)
@@ -71,20 +69,27 @@ void SimulationAccessGpuImpl::requireData(ResolveDescription const & resolveDesc
 
 void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const & resolveDesc)
 {
-	auto job = boost::make_shared<_GetDataForEditJob>(getObjectId(), rect, _dataTOCache->getDataTO());
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_GetDataJob>(getObjectId(), rect, _dataTOCache->getDataTO()));
 }
 
 void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex)
 {
-	auto job = boost::make_shared<_GetImageJob>(getObjectId(), rect, target, mutex);
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_GetImageJob>(getObjectId(), rect, target, mutex));
+}
+
+void SimulationAccessGpuImpl::selectEntities(IntVector2D const & pos)
+{
+    scheduleJob(boost::make_shared<_SelectDataJob>(getObjectId(), pos));
+}
+
+void SimulationAccessGpuImpl::deselectAll()
+{
+    scheduleJob(boost::make_shared<_DeselectDataJob>(getObjectId()));
 }
 
 void SimulationAccessGpuImpl::applyAction(PhysicalAction const & action)
 {
-    auto job = boost::make_shared<_PhysicalActionJob>(getObjectId(), action);
-    scheduleJob(job);
+    scheduleJob(boost::make_shared<_PhysicalActionJob>(getObjectId(), action));
 }
 
 DataDescription const & SimulationAccessGpuImpl::retrieveData()
@@ -95,13 +100,7 @@ DataDescription const & SimulationAccessGpuImpl::retrieveData()
 void SimulationAccessGpuImpl::scheduleJob(CudaJob const & job)
 {
     auto worker = _context->getCudaController()->getCudaWorker();
-
-    if (!_updateInProgress) {
-        worker->addJob(job);
-    }
-    else {
-        _waitingJobs.push_back(job);
-    }
+    worker->addJob(job);
 }
 
 void SimulationAccessGpuImpl::jobsFinished()
@@ -110,9 +109,7 @@ void SimulationAccessGpuImpl::jobsFinished()
 	auto finishedJobs = worker->getFinishedJobs(getObjectId());
 	for (auto const& job : finishedJobs) {
 
-		if (auto const& getDataForUpdateJob = boost::dynamic_pointer_cast<_GetDataForUpdateJob>(job)) {
-			auto dataToUpdateTO = getDataForUpdateJob->getDataTO();
-			updateDataToGpu(dataToUpdateTO, getDataForUpdateJob->getRect(), getDataForUpdateJob->getUpdateDescription());
+		if (auto const& getUpdateJob = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
 			Q_EMIT dataUpdated();
 		}
 
@@ -120,20 +117,15 @@ void SimulationAccessGpuImpl::jobsFinished()
 			Q_EMIT imageReady();
 		}
 
-		if (auto const& getDataForEditJob = boost::dynamic_pointer_cast<_GetDataForEditJob>(job)) {
-			auto dataTO = getDataForEditJob->getDataTO();
-			createDataFromGpuModel(dataTO, getDataForEditJob->getRect());
+		if (auto const& getDataJob = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
+			auto dataTO = getDataJob->getDataTO();
+			createDataFromGpuModel(dataTO, getDataJob->getRect());
 			_dataTOCache->releaseDataTO(dataTO);
 			Q_EMIT dataReadyToRetrieve();
 		}
 
 		if (auto const& setDataJob = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
 			_dataTOCache->releaseDataTO(setDataJob->getDataTO());
-			_updateInProgress = false;
-			for (auto const& job : _waitingJobs) {
-				worker->addJob(job);
-			}
-			_waitingJobs.clear();
 		}
 	}
 }

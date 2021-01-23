@@ -103,7 +103,9 @@ __device__ __inline__ void addingColor(unsigned int& color, unsigned int const& 
 
 __device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color)
 {
-    color = (color >> 1) & 0x7e7e7e;
+    if (!selected) {
+        color = (color >> 1) & 0x7e7e7e;
+    }
     addingColor(imageData[index], color);
 
     color = (color >> 1) & 0x7e7e7e;
@@ -178,7 +180,7 @@ __global__ void drawClusters_pixelStyle(
             if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
                 auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
                 auto const color = calcColor(cell);
-                drawDot(imageData, imageSize, index, color);
+                drawDot(imageData, imageSize, index, color, cell->cluster->isSelected());
             }
         }
         __syncthreads();
@@ -192,7 +194,7 @@ __global__ void drawClusters_pixelStyle(
             if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
                 auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
                 auto const color = calcColor(token);
-                drawDot(imageData, imageSize, index, color);
+                drawDot(imageData, imageSize, index, color, cell->cluster->isSelected());
             }
         }
         __syncthreads();
@@ -307,7 +309,7 @@ __global__ void drawParticles_pixelStyle(
         if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
             auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
             auto const color = calcColor(particle);
-            drawDot(imageData, imageSize, index, color);
+            drawDot(imageData, imageSize, index, color, particle->isSelected());
         }
     }
 }
@@ -391,7 +393,7 @@ __global__ void blurImage(
 /* Main      															*/
 /************************************************************************/
 
-__global__ void drawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     int width = rectLowerRight.x - rectUpperLeft.x + 1;
     int height = rectLowerRight.y - rectUpperLeft.y + 1;

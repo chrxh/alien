@@ -117,7 +117,7 @@ CudaSimulation::~CudaSimulation()
 
 void CudaSimulation::calcCudaTimestep()
 {
-    GPU_FUNCTION(calcSimulationTimestep, *_cudaSimulationData);
+    GPU_FUNCTION(cudaCalcSimulationTimestep, *_cudaSimulationData);
     ++_cudaSimulationData->timestep;
 }
 
@@ -139,7 +139,7 @@ void CudaSimulation::getSimulationImage_pixelStyle(int2 const & rectUpperLeft, i
     int height = rectLowerRight.y - rectUpperLeft.y + 1;
     int numPixels = width * height;
 
-    GPU_FUNCTION(drawImage_pixelStyle, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
+    GPU_FUNCTION(cudaDrawImage_pixelStyle, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
     checkCudaErrors(cudaMemcpy(
         imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
 }
@@ -156,7 +156,7 @@ void CudaSimulation::getSimulationImage_vectorStyle(int2 const & rectUpperLeft, 
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    GPU_FUNCTION(getSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    GPU_FUNCTION(cudaGetSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
     checkCudaErrors(cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
@@ -183,7 +183,17 @@ void CudaSimulation::setSimulationData(int2 const& rectUpperLeft, int2 const& re
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(_cudaAccessTO->stringBytes, dataTO.stringBytes, sizeof(char) * (*dataTO.numStringBytes), cudaMemcpyHostToDevice));
 
-    GPU_FUNCTION(setSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    GPU_FUNCTION(cudaSetSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+}
+
+void CudaSimulation::selectData(int2 const & pos)
+{
+    GPU_FUNCTION(cudaSelectData, pos, *_cudaSimulationData);
+}
+
+void CudaSimulation::deselectData()
+{
+    GPU_FUNCTION(cudaDeselectData, *_cudaSimulationData);
 }
 
 void CudaSimulation::applyForce(ApplyForceData const& applyData)
@@ -192,9 +202,14 @@ void CudaSimulation::applyForce(ApplyForceData const& applyData)
     GPU_FUNCTION(cudaApplyForce, cudaApplyData, *_cudaSimulationData);
 }
 
+void CudaSimulation::moveSelection(float2 const & displacement)
+{
+    GPU_FUNCTION(cudaMoveSelection, displacement, *_cudaSimulationData);
+}
+
 MonitorData CudaSimulation::getMonitorData()
 {
-    GPU_FUNCTION(getCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
+    GPU_FUNCTION(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
     return _cudaMonitorData->getMonitorData(getTimestep());
 }
 
@@ -226,7 +241,7 @@ void CudaSimulation::setExecutionParameters(ExecutionParameters const & paramete
 
 void CudaSimulation::clear()
 {
-    GPU_FUNCTION(clearData, *_cudaSimulationData);
+    GPU_FUNCTION(cudaClearData, *_cudaSimulationData);
 }
 
 namespace

@@ -43,6 +43,9 @@
     <Filter Include="Source Files\WebSimulation">
       <UniqueIdentifier>{16f72f2b-4f63-402a-9692-20511a2f0187}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Assistance">
+      <UniqueIdentifier>{9f60ef3d-46cc-42b4-8dfb-8ec9f8f3bd84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
@@ -603,6 +606,15 @@
     <ClCompile Include="Release\moc_SendStatisticsJob.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\GettingStartedWindow.cpp">
+      <Filter>Source Files\Assistance</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_GettingStartedWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_GettingStartedWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -859,6 +871,12 @@
     <CustomBuild Include="..\..\source\Gui\SendStatisticsJob.h">
       <Filter>Source Files\WebSimulation</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\GettingStartedWindow.h">
+      <Filter>Source Files\Assistance</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\GettingStartedWindow.ui">
+      <Filter>Source Files\Assistance</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\Gui\resources\tutorial\angle.png">
@@ -918,9 +936,6 @@
     <None Include="..\..\source\Gui\resources\Icons\step_back.png">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\..\source\Gui\resources\tutorial\tutorial.html">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="..\..\source\Gui\resources\Icons\zoom_in.png">
       <Filter>Resources</Filter>
     </None>
@@ -940,6 +955,9 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="..\..\source\Gui\resources\Icons\EditorView.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\source\Gui\Resources\Tutorial\StartWindow.html">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>
@@ -1047,6 +1065,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_WebSimulationSelectionView.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_GettingStartedWindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

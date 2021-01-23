@@ -3,6 +3,7 @@
 #include <QElapsedTimer>
 #include <QThread>
 
+#include "Base/NumberGenerator.h"
 #include "ModelBasic/SpaceProperties.h"
 #include "ModelBasic/PhysicalActions.h"
 
@@ -10,6 +11,7 @@
 #include "CudaJobs.h"
 #include "CudaWorker.h"
 #include "ModelGpuData.h"
+#include "DataConverter.h"
 
 CudaWorker::~CudaWorker()
 {
@@ -20,12 +22,15 @@ void CudaWorker::init(
     SpaceProperties* space,
     int timestep,
     SimulationParameters const& parameters,
-    CudaConstants const& cudaConstants)
+    CudaConstants const& cudaConstants,
+    NumberGenerator* numberGenerator)
 {
 	_space = space;
 	auto size = space->getSize();
 	delete _cudaSimulation;
 	_cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
+
+    _numberGenerator = numberGenerator;
 }
 
 void CudaWorker::terminateWorker()
@@ -113,6 +118,18 @@ void CudaWorker::processJobs()
 			_cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 		}
 
+        if (auto _job = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
+            auto rect = _job->getRect();
+            auto dataTO = _job->getDataTO();
+            _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+
+            DataConverter converter(dataTO, _numberGenerator, _job->getSimulationParameters());
+            converter.updateData(_job->getUpdateDescription());
+
+            _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+
+        }
+
 		if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
             auto rect = _job->getRect();
 			auto dataTO = _job->getDataTO();
@@ -152,6 +169,15 @@ void CudaWorker::processJobs()
             _cudaSimulation->clear();
         }
 
+        if (auto _job = boost::dynamic_pointer_cast<_SelectDataJob>(job)) {
+            auto const pos = _job->getPosition();
+            _cudaSimulation->selectData({ pos.x, pos.y });
+        }
+
+        if (auto _job = boost::dynamic_pointer_cast<_DeselectDataJob>(job)) {
+            _cudaSimulation->deselectData();
+        }
+
         if (auto _job = boost::dynamic_pointer_cast<_PhysicalActionJob>(job)) {
             auto action = _job->getAction();
             if (auto _action = boost::dynamic_pointer_cast<_ApplyForceAction>(action)) {
@@ -165,6 +191,10 @@ void CudaWorker::processJobs()
                 float2 endPos = { _action->getEndPos().x(), _action->getEndPos().y() };
                 float2 force = { _action->getForce().x(), _action->getForce().y() };
                 _cudaSimulation->applyForce({ startPos, endPos, force, true });
+            }
+            if (auto _action = boost::dynamic_pointer_cast<_MoveSelectionAction>(action)) {
+                float2 displacement = { _action->getDisplacement().x(), _action->getDisplacement().y() };
+                _cudaSimulation->moveSelection(displacement);
             }
         }
 

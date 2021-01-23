@@ -22,6 +22,9 @@ public:
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
+    void selectData(int2 const& pos);
+    void deselectData();
+
     struct ApplyForceData
     {
         float2 startPos;
@@ -30,6 +33,7 @@ public:
         bool onlyRotation;
     };
     void applyForce(ApplyForceData const& applyData);
+    void moveSelection(float2 const& displacement);
 
     MonitorData getMonitorData();
     int getTimestep() const;

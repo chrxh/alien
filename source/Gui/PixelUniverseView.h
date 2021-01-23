@@ -27,7 +27,9 @@ public:
 	virtual void refresh();
 
 protected:
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);

@@ -8,6 +8,9 @@
 
 namespace Const
 {
+    auto const ZoomLevelForAutomaticSwitch = 16.0;
+    auto const MinZoomLevelForEditor = 8.0;
+
 	//visual editor
 	const QColor BackgroundColor(0x00, 0x00, 0x00);
 	const QColor UniverseColor(0x00, 0x00, 0x1b);
@@ -47,20 +50,12 @@ namespace Const
 	const std::string MainViewFullScreenKey = "mainView/fullScreen";
 	const bool MainViewFullScreenDefault = true;
 
+    const std::string GettingStartedWindowKey = "mainView/gettingStartedWindow";
+    const bool GettingStartedWindowKeyDefault = true;
+
     const std::string ModelComputationTypeKey = "newSim/modelComputationType";
     const ModelComputationType ModelComputationTypeDefault = ModelComputationType::Gpu;
 
-	const std::string CpuGridSizeXKey = "newSim/cpu/gridSize/x";
-	const int CpuGridSizeXDefault = 12;
-	const std::string CpuGridSizeYKey = "newSim/cpu/gridSize/y";
-	const int CpuGridSizeYDefault = 6;
-	const std::string CpuUnitSizeXKey = "newSim/cpu/unitSize/x";
-	const int CpuUnitSizeXDefault = 100;
-	const std::string CpuUnitSizeYKey = "newSim/cpu/unitSize/y";
-	const int CpuUnitSizeYDefault = 100;
-	const std::string CpuMaxThreadsKey = "newSim/cpu/maxThreads";
-	const int CpuMaxThreadsDefault = 8;
-    
     const std::string GpuUniverseSizeXKey = "newSim/gpu/universeSize/x";
     const int GpuUniverseSizeXDefault = 4000;
     const std::string GpuUniverseSizeYKey = "newSim/gpu/universeSize/y";

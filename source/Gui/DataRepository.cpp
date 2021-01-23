@@ -471,7 +471,7 @@ namespace
 		set<T> orderedSet2(set2.begin(), set2.end());
 
 		set<T> result;
-		std::set_difference(orderedSet1.begin(), orderedSet1.end(), set2.begin(), set2.begin(), std::inserter(result, result.begin()));
+		std::set_difference(orderedSet1.begin(), orderedSet1.end(), set2.begin(), set2.end(), std::inserter(result, result.begin()));
 		return unordered_set<T>(result.begin(), result.end());
 	}
 }

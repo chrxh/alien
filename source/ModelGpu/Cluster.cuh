@@ -31,6 +31,7 @@ struct Cluster
         _timestepsUntilFreezing = 30;
         _freezed = 0;
         _pointerArrayElement = nullptr;
+        _selected = false;
     }
 
     __device__ __inline__ float2& getVelocity()
@@ -141,6 +142,16 @@ struct Cluster
         return static_cast<float>(numCellPointers);
     }
 
+    __device__ __inline__ bool isSelected()
+    {
+        return _selected;
+    }
+
+    __device__ __inline__ void setSelected(bool value)
+    {
+        _selected = value;
+    }
+
 private:
     float2 vel;
     float angularVel;
@@ -148,4 +159,5 @@ private:
     int _freezed;       // 0 = unfreezed, 1 = freezed
     int _timestepsUntilFreezing;
     Cluster** _pointerArrayElement;
+    bool _selected;
 };

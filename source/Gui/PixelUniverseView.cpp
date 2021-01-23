@@ -83,22 +83,45 @@ void PixelUniverseView::refresh()
 	requestImage();
 }
 
+void PixelUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
+{
+    if (!_controller->getRun()) {
+        QVector2D pos(event->scenePos().x(), event->scenePos().y());
+        _access->selectEntities(pos);
+        requestImage();
+    }
+}
+
 void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
-	if (e->buttons() == Qt::MouseButton::LeftButton) {
-		QVector2D pos(e->scenePos().x(), e->scenePos().y());
-        QVector2D lastPos(e->lastScenePos().x(), e->lastScenePos().y());
-        auto const force = (pos - lastPos) / 10;
-        auto const action = boost::make_shared<_ApplyForceAction>(lastPos, pos, force);
-        _access->applyAction(action);
-	}
-	if (e->buttons() == Qt::MouseButton::RightButton) {
-        QVector2D pos(e->scenePos().x(), e->scenePos().y());
-        QVector2D lastPos(e->lastScenePos().x(), e->lastScenePos().y());
-        auto const force = (pos - lastPos) / 10;
-        auto const action = boost::make_shared<_ApplyRotationAction>(lastPos, pos, force);
-        _access->applyAction(action);
-	}
+    auto const pos = QVector2D(e->scenePos().x(), e->scenePos().y());
+    auto const lastPos = QVector2D(e->lastScenePos().x(), e->lastScenePos().y());
+
+    if (_controller->getRun()) {
+        if (e->buttons() == Qt::MouseButton::LeftButton) {
+            auto const force = (pos - lastPos) / 10;
+            _access->applyAction(boost::make_shared<_ApplyForceAction>(lastPos, pos, force));
+        }
+        if (e->buttons() == Qt::MouseButton::RightButton) {
+            auto const force = (pos - lastPos) / 10;
+            _access->applyAction(boost::make_shared<_ApplyRotationAction>(lastPos, pos, force));
+        }
+    }
+    else {
+        if (e->buttons() == Qt::MouseButton::LeftButton) {
+            auto const displacement = pos - lastPos;
+            _access->applyAction(boost::make_shared<_MoveSelectionAction>(displacement));
+            requestImage();
+        }
+    }
+}
+
+void PixelUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
+{
+    if (!_controller->getRun()) {
+        _access->deselectAll();
+        requestImage();
+    }
 }
 
 void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
