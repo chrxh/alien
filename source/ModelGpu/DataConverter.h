@@ -7,7 +7,7 @@
 class DataConverter
 {
 public:
-	DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters);
+	DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters, CudaConstants const& cudaConstants);
 
 	void updateData(DataChangeDescription const& data);
 
@@ -39,6 +39,7 @@ private:
 	DataAccessTO& _dataTO;
 	NumberGenerator* _numberGen;
 	SimulationParameters _parameters;
+    CudaConstants _cudaConstants;
 
 	std::unordered_set<uint64_t> _clusterIdsToDelete;
 	std::unordered_map<uint64_t, ClusterChangeDescription> _clusterToModifyById;

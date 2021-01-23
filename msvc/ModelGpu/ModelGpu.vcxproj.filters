@@ -207,6 +207,9 @@
     <ClInclude Include="..\..\source\ModelGpu\ModelGpuSettings.h">
       <Filter>Source Files\Impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\ModelGpu\Macros.cuh">
+      <Filter>Source Files\Impl\CudaInterface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\ModelGpu\ModelGpuServices.cpp">

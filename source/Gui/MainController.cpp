@@ -290,6 +290,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 void MainController::recreateSimulation(string const & serializedSimulation)
 {
 	delete _simController;
+    _simController = nullptr;
 	_simController = _serializer->deserializeSimulation(serializedSimulation);
 
 	auto symbolTable = _simController->getContext()->getSymbolTable();
@@ -303,7 +304,8 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 void MainController::onNewSimulation(SimulationConfig const& config, double energyAtBeginning)
 {
 	delete _simController;
-	auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+    _simController = nullptr;
+    auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
     auto simulationControllerConfig =
         ModelGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
     auto data = ModelGpuData(config->cudaConstants);
@@ -447,6 +449,5 @@ void MainController::addRandomEnergy(double amount)
 		Receiver::VisualEditor,
 		Receiver::ActionController
 	}, UpdateDescription::All);
-
 }
 
