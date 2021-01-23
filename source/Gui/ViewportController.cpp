@@ -5,16 +5,19 @@
 #include "ViewportController.h"
 #include "CoordinateSystem.h"
 
-void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* itemScene, ActiveScene activeScene)
+void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, QGraphicsScene* vectorScene,
+    QGraphicsScene* itemScene, ActiveScene activeScene)
 {
 	disconnectAll();
 
 	_view = view;
 	_pixelScene = pixelScene;
+    _vectorScene = vectorScene;
 	_itemScene = itemScene;
 	_activeScene = activeScene;
     _view->resetTransform();
-	zoom(2.0, false);
+    _zoom = 1.0;
+	zoom(_zoom, false);
 	setSceneToView(boost::none, activeScene);
 
 	connectAll();
@@ -50,7 +53,11 @@ QRectF ViewportController::getRect() const
 		p1 = CoordinateSystem::sceneToModel(p1);
 		p2 = CoordinateSystem::sceneToModel(p2);
 	}
-	return{ p1, p2 };
+    if (_activeScene == ActiveScene::VectorScene) {
+        p1 /= _zoom;
+        p2 /= _zoom;
+    }
+    return{ p1, p2 };
 }
 
 QVector2D ViewportController::getCenter() const
@@ -65,6 +72,7 @@ QVector2D ViewportController::getCenter() const
 
 void ViewportController::zoom(double factor, bool notify)
 {
+    _zoom *= factor;
 	disconnectAll();
 	_view->scale(factor, factor);
     connectAll();
@@ -76,10 +84,7 @@ void ViewportController::zoom(double factor, bool notify)
 
 qreal ViewportController::getZoomFactor() const
 {
-	if (_activeScene == ActiveScene::PixelScene) {
-		return  _view->matrix().m11();
-	}
-	return CoordinateSystem::modelToScene(_view->matrix().m11());
+    return _zoom;
 }
 
 void ViewportController::setSceneToView(optional<ActiveScene> origActiveScene, ActiveScene activeScene)
@@ -90,14 +95,35 @@ void ViewportController::setSceneToView(optional<ActiveScene> origActiveScene, A
 	if (activeScene == ActiveScene::PixelScene) {
 		_view->setScene(_pixelScene);
 		if (origActiveScene) {
-			_view->scale(CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0));
-		}
+            if (*origActiveScene == ActiveScene::VectorScene) {
+                _view->scale(_zoom, _zoom);
+            }
+            if (*origActiveScene == ActiveScene::ItemScene) {
+                _view->scale(CoordinateSystem::modelToScene(1.0), CoordinateSystem::modelToScene(1.0));
+            }
+        }
 	}
-	if (activeScene == ActiveScene::ItemScene) {
+    if (activeScene == ActiveScene::VectorScene) {
+        _view->setScene(_vectorScene);
+        if (origActiveScene) {
+            if (*origActiveScene == ActiveScene::PixelScene) {
+                _view->scale(1 / _zoom, 1 / _zoom);
+            }
+            if (*origActiveScene == ActiveScene::ItemScene) {
+                _view->scale(CoordinateSystem::modelToScene(1.0/_zoom), CoordinateSystem::modelToScene(1.0 / _zoom));
+            }
+        }
+    }
+    if (activeScene == ActiveScene::ItemScene) {
 		_view->setScene(_itemScene);
-		if (origActiveScene) {
-			_view->scale(CoordinateSystem::sceneToModel(1.0), CoordinateSystem::sceneToModel(1.0));
-		}
+        if (origActiveScene) {
+            if (*origActiveScene == ActiveScene::PixelScene) {
+                _view->scale(CoordinateSystem::sceneToModel(1.0), CoordinateSystem::sceneToModel(1.0));
+            }
+            if (*origActiveScene == ActiveScene::VectorScene) {
+                _view->scale(CoordinateSystem::sceneToModel(_zoom), CoordinateSystem::sceneToModel(_zoom));
+            }
+        }
 	}
 }
 

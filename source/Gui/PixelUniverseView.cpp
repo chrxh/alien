@@ -16,7 +16,7 @@
 
 #include "CoordinateSystem.h"
 #include "DataRepository.h"
-#include "ImageSectionItem.h"
+#include "PixelImageSectionItem.h"
 #include "PixelUniverseView.h"
 
 PixelUniverseView::PixelUniverseView(QObject* parent)
@@ -47,11 +47,11 @@ void PixelUniverseView::init(
     auto const viewportRect = _viewport->getRect();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-    _imageSectionItem = new ImageSectionItem(_viewport, QRectF(0,0, size.x*8, size.y*8), repository->getImageMutex());
+    _imageSectionItem = new PixelImageSectionItem(_viewport, QRectF(0,0, size.x, size.y), repository->getImageMutex());
 
     addItem(_imageSectionItem);
 
-    QGraphicsScene::setSceneRect(0, 0, size.x*8, size.y*8);
+    QGraphicsScene::setSceneRect(0, 0, size.x, size.y);
 
     update();
 }
@@ -66,13 +66,15 @@ void PixelUniverseView::activate()
 
 	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     auto image = _imageSectionItem->getImageOfVisibleRect();
-    _repository->requireImageFromSimulation(
-        {{0, 0}, {image->width(), image->height()}}, _imageSectionItem->getImageOfVisibleRect());
+    _repository->requirePixelImageFromSimulation(
+        {{0, 0}, {image->width(), image->height()}}, image);
+    _isActived = true;
 }
 
 void PixelUniverseView::deactivate()
 {
-	for (auto const& connection : _connections) {
+    _isActived = false;
+    for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
 	_connections.clear();
@@ -135,8 +137,10 @@ void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
 
 void PixelUniverseView::requestImage()
 {
-	IntRect rect = _viewport->getRect();
-	_repository->requireImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
+    if (_isActived) {
+        IntRect rect = _viewport->getRect();
+        _repository->requirePixelImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
+    }
 }
 
 void PixelUniverseView::imageReady()

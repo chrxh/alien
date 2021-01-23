@@ -44,7 +44,8 @@ private:
 	SimulationController* _controller = nullptr;
 	ViewportInterface* _viewport = nullptr;
 
-    ImageSectionItem* _imageSectionItem = nullptr;
+    PixelImageSectionItem* _imageSectionItem = nullptr;
+    bool _isActived = false;
 
 	Notifier* _notifier = nullptr;
 };

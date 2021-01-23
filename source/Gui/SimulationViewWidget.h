@@ -5,18 +5,18 @@
 #include <QMatrix>
 
 #include "ModelBasic/Definitions.h"
-#include "Gui/Definitions.h"
+#include "Definitions.h"
 
 namespace Ui {
-	class VisualEditController;
+	class SimulationViewWidget;
 }
 
-class VisualEditController : public QWidget
+class SimulationViewWidget : public QWidget
 {
     Q_OBJECT
 public:
-    VisualEditController(QWidget *parent = 0);
-    virtual ~VisualEditController();
+    SimulationViewWidget(QWidget *parent = 0);
+    virtual ~SimulationViewWidget();
 
 	void init(Notifier* notifier, SimulationController* controller
 		, SimulationAccess* access, DataRepository* manipulator);
@@ -32,10 +32,11 @@ public:
 	void toggleCenterSelection(bool value);
 
 private:
-    Ui::VisualEditController *ui;
+    Ui::SimulationViewWidget *ui;
 
 	SimulationController* _controller = nullptr;
     PixelUniverseView* _pixelUniverse = nullptr;
+    VectorUniverseView* _vectorUniverse = nullptr;
     ItemUniverseView* _itemUniverse = nullptr;
 	ViewportController* _viewport = nullptr;
 
