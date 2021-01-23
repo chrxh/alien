@@ -36,7 +36,7 @@ public:
 	virtual CudaController* getCudaController() const;
 
 private:
-	SpaceProperties *_metric = nullptr;
+    SpaceProperties *_metric = nullptr;
 	SymbolTable *_symbolTable = nullptr;
 	SimulationParameters _parameters;
 	CudaController *_cudaController = nullptr;

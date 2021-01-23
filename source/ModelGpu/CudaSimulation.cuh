@@ -4,6 +4,7 @@
 #include "ModelBasic/ExecutionParameters.h"
 
 #include "Definitions.cuh"
+#include "CudaConstants.h"
 
 class CudaSimulation
 {
@@ -34,6 +35,7 @@ public:
     void applyForce(ApplyForceData const& applyData);
     void moveSelection(float2 const& displacement);
 
+    CudaConstants getCudaConstants() const;
     MonitorData getMonitorData();
     int getTimestep() const;
     void setTimestep(int timestep);
@@ -48,6 +50,7 @@ private:
     void DEBUG_printNumEntries();
 
 private:
+    CudaConstants _cudaConstants;
     SimulationData* _cudaSimulationData;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
