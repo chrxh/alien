@@ -88,11 +88,11 @@ private:
 	IntRect _rect;
 };
 
-class _GetImageJob
+class _GetPixelImageJob
 	: public _CudaJob
 {
 public:
-    _GetImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage, std::mutex& mutex)
+    _GetPixelImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage, std::mutex& mutex)
 		: _CudaJob(originId, true), _targetImage(targetImage), _mutex(mutex)
     {
         auto imageSize = targetImage->size();
@@ -101,7 +101,7 @@ public:
         _rect = { upperLeft, {upperLeft.x + imageSize.width() - 1, upperLeft.y + imageSize.height() - 1 } };
     }
 
-    virtual ~_GetImageJob() = default;
+    virtual ~_GetPixelImageJob() = default;
 
     IntRect getRect() const
     {
@@ -120,6 +120,59 @@ public:
 
 private:
     IntRect _rect;
+    QImagePtr _targetImage;
+    std::mutex& _mutex;
+};
+
+#include <iostream>
+
+class _GetVectorImageJob
+    : public _CudaJob
+{
+public:
+    _GetVectorImageJob(string const& originId, IntRect const& rect, int zoom, QImagePtr const& targetImage, std::mutex& mutex)
+        : _CudaJob(originId, true), _zoom(zoom), _targetImage(targetImage), _mutex(mutex)
+    {
+        auto imageSize = targetImage->size();
+
+        std::cerr
+            << "rect.p1: "
+            << rect.p1.x << ", "
+            << rect.p1.y << "; "
+            << "rect.p2: "
+            << rect.p2.x << ", "
+            << rect.p2.y << "; "
+            << std::endl;
+
+//        IntVector2D upperLeft = { std::max(0, rect.p1.x), std::max(0, rect.p1.y) };
+        _rect = rect;// { upperLeft, { upperLeft.x + imageSize.width() - 1, upperLeft.y + imageSize.height() - 1 } };
+    }
+
+    virtual ~_GetVectorImageJob() = default;
+
+    IntRect getRect() const
+    {
+        return _rect;
+    }
+
+    int getZoom() const
+    {
+        return _zoom;
+    }
+
+    QImagePtr getTargetImage() const
+    {
+        return _targetImage;
+    }
+
+    std::mutex& getMutex()
+    {
+        return _mutex;
+    }
+
+private:
+    IntRect _rect;
+    int _zoom;
     QImagePtr _targetImage;
     std::mutex& _mutex;
 };

@@ -133,7 +133,7 @@ void CudaSimulation::DEBUG_printNumEntries()
         << std::endl;
 }
 
-void CudaSimulation::getSimulationImage_pixelStyle(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)
+void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)
 {
     int width = rectLowerRight.x - rectUpperLeft.x + 1;
     int height = rectLowerRight.y - rectUpperLeft.y + 1;
@@ -144,14 +144,31 @@ void CudaSimulation::getSimulationImage_pixelStyle(int2 const & rectUpperLeft, i
         imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
 }
 
-void CudaSimulation::getSimulationImage_vectorStyle(int2 const & rectUpperLeft, int2 const & rectLowerRight, int2 const& imageSize, 
-    unsigned char * imageData)
+void CudaSimulation::getVectorImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, int2 const& imageSize, 
+    float zoom, unsigned char * imageData)
 {
     int numPixels = imageSize.x * imageSize.y;
 
-    GPU_FUNCTION(drawImage_vectorStyle, rectUpperLeft, rectLowerRight, imageSize, *_cudaSimulationData);
+    std::cerr
+        << "rectUpperLeft: "
+        << rectUpperLeft.x << ", "
+        << rectUpperLeft.y << "; "
+        << "rectLowerRight: "
+        << rectLowerRight.x << ", "
+        << rectLowerRight.y << "; "
+        << "imageSize: "
+        << imageSize.x << ", "
+        << imageSize.y << "; "
+        << "zoom: "
+        << zoom << ", "
+        << std::endl;
+
+    GPU_FUNCTION(drawImage_vectorStyle, rectUpperLeft, rectLowerRight, imageSize, zoom, *_cudaSimulationData);
+    std::cerr << "fertig0" << std::endl;
+
     checkCudaErrors(cudaMemcpy(
         imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
+    std::cerr << "fertig1" << std::endl;
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)

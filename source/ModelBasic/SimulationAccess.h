@@ -17,7 +17,8 @@ public:
 	virtual void updateData(DataChangeDescription const &desc) = 0;
 	virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
     virtual void requireData(ResolveDescription const& resolveDesc) = 0;
-    virtual void requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) = 0;
+    virtual void requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) = 0;
+    virtual void requireVectorImage(IntRect rect, int zoom, QImagePtr const& target, std::mutex& mutex) = 0;
     virtual void selectEntities(IntVector2D const& pos) = 0;
     virtual void deselectAll() = 0;
     virtual void applyAction(PhysicalAction const& action) = 0;

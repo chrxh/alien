@@ -21,7 +21,7 @@
 
 #include "ToolbarController.h"
 #include "ToolbarContext.h"
-#include "VisualEditController.h"
+#include "SimulationViewWidget.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
 #include "NewSimulationDialog.h"
@@ -56,7 +56,7 @@ void ActionController::init(
     MainController* mainController,
     MainModel* mainModel,
     MainView* mainView,
-    VisualEditController* visualEditor,
+    SimulationViewWidget* visualEditor,
     Serializer* serializer,
     InfoController* infoController,
     DataEditController* dataEditor,
@@ -107,7 +107,8 @@ void ActionController::init(
     connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
 
-	connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
+    connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
+    connect(actions->actionVector, &QAction::toggled, this, &ActionController::onToggleVectorMode);
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleMonitor);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
 	connect(actions->actionEditSymbols, &QAction::triggered, this, &ActionController::onEditSymbolTable);
@@ -279,12 +280,27 @@ void ActionController::onToggleEditorMode(bool toggled)
 		_visualEditor->setActiveScene(ActiveScene::ItemScene);
 	}
 	else {
-		_visualEditor->setActiveScene(ActiveScene::PixelScene);
+        if (getActionHolder()->actionVector->isChecked()) {
+            _visualEditor->setActiveScene(ActiveScene::VectorScene);
+        }
+        else {
+            _visualEditor->setActiveScene(ActiveScene::PixelScene);
+        }
 	}
 	updateActionsEnableState();
 
 	Q_EMIT _toolbar->getContext()->show(toggled);
 	Q_EMIT _dataEditor->getContext()->show(toggled);
+}
+
+void ActionController::onToggleVectorMode(bool toggled)
+{
+    if (toggled) {
+        _visualEditor->setActiveScene(ActiveScene::VectorScene);
+    }
+    else {
+        _visualEditor->setActiveScene(ActiveScene::PixelScene);
+    }
 }
 
 void ActionController::onToggleMonitor(bool toggled)
