@@ -136,21 +136,11 @@ void SimulationAccessGpuImpl::jobsFinished()
 	}
 }
 
-void SimulationAccessGpuImpl::updateDataToGpu(DataAccessTO dataToUpdateTO, IntRect const& rect, DataChangeDescription const& updateDesc)
-{
-	DataConverter converter(dataToUpdateTO, _numberGen, _context->getSimulationParameters());
-	converter.updateData(updateDesc);
-
-	auto cudaWorker = _context->getCudaController()->getCudaWorker();
-	CudaJob job = boost::make_shared<_SetDataJob>(getObjectId(), true, rect, dataToUpdateTO);
-	cudaWorker->addJob(job);
-}
-
 void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect)
 {
 	_lastDataRect = rect;
 
-	DataConverter converter(dataTO, _numberGen, _context->getSimulationParameters());
+	DataConverter converter(dataTO, _numberGen, _context->getSimulationParameters(), _cudaConstants);
 	_dataCollected = converter.getDataDescription();
 }
 
