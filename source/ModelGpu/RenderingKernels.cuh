@@ -425,9 +425,6 @@ __global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight
 
 __global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
 {
-    rectLowerRight.x = rectUpperLeft.x + 50;
-    rectLowerRight.y = rectUpperLeft.y + 50;
-    printf("drawImage_vectorStyle: %d; %d \n", rectUpperLeft.x, rectLowerRight.x);
     int numPixels = imageSize.x * imageSize.y;
 
     unsigned int* targetImage;

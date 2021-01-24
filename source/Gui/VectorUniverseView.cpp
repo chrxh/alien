@@ -44,7 +44,6 @@ void VectorUniverseView::init(
     SET_CHILD(_access, access);
 
     delete _imageSectionItem;
-    auto const viewportRect = _viewport->getRect();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     _imageSectionItem = new VectorImageSectionItem(_viewport, QRectF(0, 0, size.x, size.y), 8, repository->getImageMutex());
@@ -55,7 +54,6 @@ void VectorUniverseView::init(
 
     update();
 }
-#include <iostream>
 
 void VectorUniverseView::activate()
 {
@@ -68,13 +66,13 @@ void VectorUniverseView::activate()
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     auto image = _imageSectionItem->getImageOfVisibleRect();
     _repository->requireVectorImageFromSimulation(
-        { { 0, 0 },{ image->width() / 8, image->height()/ 8 } }, image);
-    _isActived = true;
+        { { 0, 0 },{ image->width(), image->height() } }, image);
+    _isActivated = true;
 }
 
 void VectorUniverseView::deactivate()
 {
-    _isActived = false;
+    _isActivated = false;
     for (auto const& connection : _connections) {
         disconnect(connection);
     }
@@ -138,10 +136,9 @@ void VectorUniverseView::receivedNotifications(set<Receiver> const & targets)
 
 void VectorUniverseView::requestImage()
 {
-    if (_isActived) {
-        std::cerr << "request image" << std::endl;
+    if (_isActivated) {
         IntRect rect = _viewport->getRect();
-        _repository->requireVectorImageFromSimulation({ { rect.p1.x, rect.p1.y }, { rect.p1.x + 50, rect.p1.y + 50 } }, _imageSectionItem->getImageOfVisibleRect());
+        _repository->requireVectorImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
     }
 }
 
