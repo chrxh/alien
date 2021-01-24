@@ -24,7 +24,7 @@ public:
         NumberGenerator* numberGenerator);
     void terminateWorker();
 	bool isSimulationRunning();
-    int getTimestep() const;
+    int getTimestep();
     void setTimestep(int timestep);
 
 	void addJob(CudaJob const& job);
@@ -33,6 +33,8 @@ public:
 
 	Q_SIGNAL void timestepCalculated();
 
+    Q_SIGNAL void errorThrown(QString message);
+
 	Q_SLOT void run();
 
 private:
@@ -40,7 +42,6 @@ private:
 	bool isTerminate();
 
 private:
-	SpaceProperties* _space = nullptr;
 	CudaSimulation* _cudaSimulation = nullptr;
     NumberGenerator* _numberGenerator = nullptr;
 

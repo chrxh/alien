@@ -860,7 +860,7 @@ void ActionController::onShowAbout()
     else {
         QTextStream in(&file);
         auto version = in.readLine();
-        QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version " + version + "\nDeveloped by Christian Heinemann.");
+        QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version " + version + ".\nDeveloped by Christian Heinemann.");
         msgBox.exec();
     }
 }

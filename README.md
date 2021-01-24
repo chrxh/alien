@@ -29,7 +29,7 @@ The development is driven by the desire to better understand the conditions for 
 Please visit [alien-project.org](https://alien-project.org/documentation.html) for a comprehensive documentation of the program and the underlying model.
 
 ## Installer
-For Windows 10 an installer for 64-bit binaries is provided: [download link](https://alien-project.org/downloads.html).
+An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
 ## How to build the sources
 To build alien you need Microsoft Visual Studio 2015 or higher. You find the solution file in msvc/Gui/alien.sln.
