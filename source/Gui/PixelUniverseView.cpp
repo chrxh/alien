@@ -44,7 +44,6 @@ void PixelUniverseView::init(
     SET_CHILD(_access, access);
 
     delete _imageSectionItem;
-    auto const viewportRect = _viewport->getRect();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     _imageSectionItem = new PixelImageSectionItem(_viewport, QRectF(0,0, size.x, size.y), repository->getImageMutex());
@@ -68,12 +67,12 @@ void PixelUniverseView::activate()
     auto image = _imageSectionItem->getImageOfVisibleRect();
     _repository->requirePixelImageFromSimulation(
         {{0, 0}, {image->width(), image->height()}}, image);
-    _isActived = true;
+    _isActivated = true;
 }
 
 void PixelUniverseView::deactivate()
 {
-    _isActived = false;
+    _isActivated = false;
     for (auto const& connection : _connections) {
 		disconnect(connection);
 	}
@@ -137,9 +136,8 @@ void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)
 
 void PixelUniverseView::requestImage()
 {
-    if (_isActived) {
-        IntRect rect = _viewport->getRect();
-        _repository->requirePixelImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
+    if (_isActivated) {
+        _repository->requirePixelImageFromSimulation(_viewport->getRect(), _imageSectionItem->getImageOfVisibleRect());
     }
 }
 

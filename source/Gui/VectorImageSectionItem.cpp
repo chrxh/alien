@@ -8,7 +8,6 @@ VectorImageSectionItem::VectorImageSectionItem(ViewportInterface* viewport, QRec
 {
     auto const viewportRect = _viewport->getRect();
     _imageOfVisibleRect = boost::make_shared<QImage>(viewportRect.width()*zoom, viewportRect.height()*zoom, QImage::Format_RGB32);
-    _imageOfVisibleRect->fill(QColor(0, 0, 0));
 }
 
 VectorImageSectionItem::~VectorImageSectionItem()
@@ -25,7 +24,6 @@ QImagePtr VectorImageSectionItem::getImageOfVisibleRect()
     };
     if (_imageOfVisibleRect->width() != imageSize.x || _imageOfVisibleRect->height() != imageSize.y) {
         _imageOfVisibleRect = boost::make_shared<QImage>(imageSize.x, imageSize.y, QImage::Format_ARGB32);
-        _imageOfVisibleRect->fill(QColor(0, 0, 0));
     }
 
     return _imageOfVisibleRect;
