@@ -45,7 +45,7 @@ private:
 	ViewportInterface* _viewport = nullptr;
 
     PixelImageSectionItem* _imageSectionItem = nullptr;
-    bool _isActived = false;
+    bool _isActivated = false;
 
 	Notifier* _notifier = nullptr;
 };

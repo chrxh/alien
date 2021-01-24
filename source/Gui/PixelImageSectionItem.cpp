@@ -8,7 +8,6 @@ PixelImageSectionItem::PixelImageSectionItem(ViewportInterface* viewport, QRectF
 {
     auto const viewportRect = _viewport->getRect();
     _imageOfVisibleRect = boost::make_shared<QImage>(viewportRect.width(), viewportRect.height(), QImage::Format_RGB32);
-    _imageOfVisibleRect->fill(QColor(0, 0, 0));
 }
 
 PixelImageSectionItem::~PixelImageSectionItem()
@@ -24,7 +23,6 @@ QImagePtr PixelImageSectionItem::getImageOfVisibleRect()
     viewportSize.y = std::min(static_cast<int>(_boundingRect.height()), viewportSize.y);
     if (_imageOfVisibleRect->width() != viewportSize.x || _imageOfVisibleRect->height() != viewportSize.y) {
         _imageOfVisibleRect = boost::make_shared<QImage>(viewportSize.x, viewportSize.y, QImage::Format_ARGB32);
-        _imageOfVisibleRect->fill(QColor(0, 0, 0));
     }
 
     return _imageOfVisibleRect;

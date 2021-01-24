@@ -603,8 +603,8 @@ void DataRepository::requirePixelImageFromSimulation(IntRect const & rect, QImag
 
 void DataRepository::requireVectorImageFromSimulation(IntRect const & rect, QImagePtr const & target)
 {
-    _rect = { { rect.p1.x / 8, rect.p1.y / 8 },{ rect.p2.x / 8, rect.p2.y / 8 } };
-    _access->requireVectorImage(rect, 8, target, _mutex);
+    _rect = rect;
+   _access->requireVectorImage(rect, 8, target, _mutex);
 }
 
 std::mutex & DataRepository::getImageMutex()

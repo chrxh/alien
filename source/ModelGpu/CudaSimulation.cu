@@ -136,38 +136,19 @@ void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rect
 {
     int width = rectLowerRight.x - rectUpperLeft.x + 1;
     int height = rectLowerRight.y - rectUpperLeft.y + 1;
-    int numPixels = width * height;
 
     GPU_FUNCTION(cudaDrawImage_pixelStyle, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
+        imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * width * height, cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::getVectorImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, int2 const& imageSize, 
     float zoom, unsigned char * imageData)
 {
-    int numPixels = imageSize.x * imageSize.y;
-
-    std::cerr
-        << "rectUpperLeft: "
-        << rectUpperLeft.x << ", "
-        << rectUpperLeft.y << "; "
-        << "rectLowerRight: "
-        << rectLowerRight.x << ", "
-        << rectLowerRight.y << "; "
-        << "imageSize: "
-        << imageSize.x << ", "
-        << imageSize.y << "; "
-        << "zoom: "
-        << zoom << ", "
-        << std::endl;
-
     GPU_FUNCTION(drawImage_vectorStyle, rectUpperLeft, rectLowerRight, imageSize, zoom, *_cudaSimulationData);
-    std::cerr << "fertig0" << std::endl;
 
-    checkCudaErrors(cudaMemcpy(
-        imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * numPixels, cudaMemcpyDeviceToHost));
-    std::cerr << "fertig1" << std::endl;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * imageSize.x * imageSize.y, cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)

@@ -54,7 +54,7 @@ private:
 
 private:
 	Ui::MainView* ui = nullptr;
-	SimulationViewWidget* _visualEditor = nullptr;
+	SimulationViewWidget* _simulationViewWidget = nullptr;
 
 	MainModel* _model = nullptr;
 	MainController* _controller = nullptr;
