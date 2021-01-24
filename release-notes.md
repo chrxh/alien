@@ -1,4 +1,4 @@
-# Changelog
+# Release notes
 
 ## [2.1.0] - 2021-01-17
 ### Added
