@@ -124,28 +124,13 @@ private:
     std::mutex& _mutex;
 };
 
-#include <iostream>
-
 class _GetVectorImageJob
     : public _CudaJob
 {
 public:
     _GetVectorImageJob(string const& originId, IntRect const& rect, int zoom, QImagePtr const& targetImage, std::mutex& mutex)
-        : _CudaJob(originId, true), _zoom(zoom), _targetImage(targetImage), _mutex(mutex)
+        : _CudaJob(originId, true), _zoom(zoom), _targetImage(targetImage), _mutex(mutex), _rect(rect)
     {
-        auto imageSize = targetImage->size();
-
-        std::cerr
-            << "rect.p1: "
-            << rect.p1.x << ", "
-            << rect.p1.y << "; "
-            << "rect.p2: "
-            << rect.p2.x << ", "
-            << rect.p2.y << "; "
-            << std::endl;
-
-//        IntVector2D upperLeft = { std::max(0, rect.p1.x), std::max(0, rect.p1.y) };
-        _rect = rect;// { upperLeft, { upperLeft.x + imageSize.width() - 1, upperLeft.y + imageSize.height() - 1 } };
     }
 
     virtual ~_GetVectorImageJob() = default;

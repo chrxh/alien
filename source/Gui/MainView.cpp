@@ -33,9 +33,9 @@ MainView::MainView(QWidget * parent)
 	, ui(new Ui::MainView)
 {
 	ui->setupUi(this);
-	_visualEditor = ui->visualEditController;
-	_toolbar = new ToolbarController(_visualEditor);
-	_dataEditor = new DataEditController(_visualEditor);
+	_simulationViewWidget = ui->simulationViewWidget;
+	_toolbar = new ToolbarController(_simulationViewWidget);
+	_dataEditor = new DataEditController(_simulationViewWidget);
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
@@ -67,7 +67,7 @@ void MainView::init(
 	_actions->init(_controller, 
         _model, 
         this, 
-        _visualEditor, 
+        _simulationViewWidget, 
         serializer, 
         _infoController, 
         _dataEditor, 
@@ -95,18 +95,18 @@ void MainView::initGettingStartedWindow()
 
 void MainView::refresh()
 {
-	_visualEditor->refresh();
+	_simulationViewWidget->refresh();
 }
 
 void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)
 {
 	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
-	_visualEditor->init(_notifier, controller, access, _repository);
+	_simulationViewWidget->init(_notifier, controller, access, _repository);
 
-	_visualEditor->setActiveScene(ActiveScene::PixelScene);
+	_simulationViewWidget->setActiveScene(ActiveScene::PixelScene);
     auto size = controller->getContext()->getSpaceProperties()->getSize();
-    _visualEditor->scrollToPos(QVector2D(size.x/2, size.y/2));
+    _simulationViewWidget->scrollToPos(QVector2D(size.x/2, size.y/2));
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 }
 

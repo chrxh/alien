@@ -119,9 +119,13 @@ void SimulationAccessGpuImpl::jobsFinished()
 			Q_EMIT dataUpdated();
 		}
 
-		if (auto const& getImageJob = boost::dynamic_pointer_cast<_GetPixelImageJob>(job)) {
+		if (auto const& getPixelImageJob = boost::dynamic_pointer_cast<_GetPixelImageJob>(job)) {
 			Q_EMIT imageReady();
 		}
+
+        if (auto const& getVectorImageJob = boost::dynamic_pointer_cast<_GetVectorImageJob>(job)) {
+            Q_EMIT imageReady();
+        }
 
 		if (auto const& getDataJob = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
 			auto dataTO = getDataJob->getDataTO();
