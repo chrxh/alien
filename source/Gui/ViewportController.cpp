@@ -74,11 +74,13 @@ void ViewportController::zoom(double factor, bool notify)
 {
     _zoom *= factor;
 	disconnectAll();
-	_view->scale(factor, factor);
+    if (_activeScene != ActiveScene::VectorScene) {
+        _view->scale(factor, factor);
+    }
     connectAll();
 
     if (notify) {
-        Q_EMIT scrolled();
+        Q_EMIT zoomed();
     }
 }
 
