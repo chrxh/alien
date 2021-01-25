@@ -601,10 +601,10 @@ void DataRepository::requirePixelImageFromSimulation(IntRect const & rect, QImag
 	_access->requirePixelImage(rect, target, _mutex);
 }
 
-void DataRepository::requireVectorImageFromSimulation(IntRect const & rect, QImagePtr const & target)
+void DataRepository::requireVectorImageFromSimulation(IntRect const & rect, double zoom, QImagePtr const & target)
 {
     _rect = rect;
-   _access->requireVectorImage(rect, 8, target, _mutex);
+   _access->requireVectorImage(rect, zoom, target, _mutex);
 }
 
 std::mutex & DataRepository::getImageMutex()
