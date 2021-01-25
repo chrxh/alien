@@ -36,6 +36,7 @@ private:
     Q_SLOT void requestImage();
     Q_SLOT void imageReady();
     Q_SLOT void scrolled();
+    Q_SLOT void zoomUpdated();
 
     list<QMetaObject::Connection> _connections;
 

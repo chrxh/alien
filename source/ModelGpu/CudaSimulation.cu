@@ -143,7 +143,7 @@ void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rect
 }
 
 void CudaSimulation::getVectorImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, int2 const& imageSize, 
-    float zoom, unsigned char * imageData)
+    double zoom, unsigned char * imageData)
 {
     GPU_FUNCTION(drawImage_vectorStyle, rectUpperLeft, rectLowerRight, imageSize, zoom, *_cudaSimulationData);
 
