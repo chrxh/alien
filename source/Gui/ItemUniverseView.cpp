@@ -50,6 +50,7 @@ void ItemUniverseView::activate()
 	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
 	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemUniverseView::receivedNotifications));
 	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
+    _connections.push_back(connect(_viewport, &ViewportInterface::zoomed, this, &ItemUniverseView::scrolled));
 
 	requestData();
 	_activated = true;
