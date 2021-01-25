@@ -15,8 +15,10 @@ public:
 
 	virtual QRectF getRect() const = 0;
 	virtual QVector2D getCenter() const = 0;
+    virtual qreal getZoomFactor() const = 0;
 
 	virtual void scrollToPos(QVector2D pos, NotifyScrollChanged notify) = 0;
 
 	Q_SIGNAL void scrolled();
+    Q_SIGNAL void zoomed();
 };

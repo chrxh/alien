@@ -20,7 +20,7 @@ public:
     void requireData(ResolveDescription const& resolveDesc) override;
     void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
 	void requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
-    void requireVectorImage(IntRect rect, int zoom, QImagePtr const& target, std::mutex& mutex) override;
+    void requireVectorImage(IntRect rect, double zoom, QImagePtr const& target, std::mutex& mutex) override;
     void selectEntities(IntVector2D const& pos) override;
     void deselectAll() override;
     void applyAction(PhysicalAction const& action) override;

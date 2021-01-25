@@ -17,7 +17,7 @@ void ViewportController::init(QGraphicsView * view, QGraphicsScene* pixelScene, 
 	_activeScene = activeScene;
     _view->resetTransform();
     _zoom = 1.0;
-	zoom(_zoom, false);
+	zoom(2.0, false);
 	setSceneToView(boost::none, activeScene);
 
 	connectAll();

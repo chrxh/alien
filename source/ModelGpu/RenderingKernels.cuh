@@ -208,8 +208,7 @@ __global__ void drawClusters_vectorStyle(
     Array<Cluster*> clusters,
     unsigned int* imageData,
     int2 imageSize,
-    float zoom
-    )
+    float zoom)
 {
     auto const clusterBlock =
         calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
@@ -282,7 +281,7 @@ __global__ void drawClusters_vectorStyle(
             auto cellPos = cell->absPos;
             map.mapPosCorrection(cellPos);
             auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, cellPos, zoom);
-            if (isContainedInRect(rectUpperLeft, rectLowerRight, cellImagePos, 4)) {
+            if (isContainedInRect({ 0, 0 }, imageSize, cellImagePos, 4)) {
                 auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
                 auto const color = calcColor(token);
 
@@ -331,10 +330,9 @@ __global__ void drawParticles_vectorStyle(
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
 
-        auto pos = particle->absPos;
-        auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, pos, zoom);
-        if (isContainedInRect(rectUpperLeft, rectLowerRight, cellImagePos, 4)) {
-            auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
+        auto const particleImagePos = mapUniversePosToImagePos(rectUpperLeft, particle->absPos, zoom);
+        if (isContainedInRect({ 0, 0 }, imageSize, particleImagePos, 4)) {
+            auto index = particleImagePos.x + particleImagePos.y * imageSize.x;
             auto const color = calcColor(particle);
             drawCircle(imageData, imageSize, index, color, particle->isSelected());
         }
@@ -425,8 +423,6 @@ __global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight
 
 __global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
 {
-    int numPixels = imageSize.x * imageSize.y;
-
     unsigned int* targetImage;
     if (cudaExecutionParameters.imageGlow) {
         targetImage = data.rawImageData;
@@ -435,7 +431,7 @@ __global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, i
         targetImage = data.finalImageData;
     }
 
-    KERNEL_CALL(clearImageMap, targetImage, numPixels);
+    KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
     KERNEL_CALL(drawClusters_vectorStyle, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterPointers, targetImage, imageSize, zoom);
     if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
         KERNEL_CALL(drawClusters_vectorStyle, data.size, rectUpperLeft, rectLowerRight, data.entities.clusterFreezedPointers, targetImage, imageSize, zoom);
