@@ -157,5 +157,6 @@ void VectorUniverseView::zoomUpdated()
     auto const zoom = _viewport->getZoomFactor();
     _imageSectionItem->setZoom(zoom);
     QGraphicsScene::setSceneRect(0, 0, size.x * zoom, size.y * zoom);
+    requestImage();
 }
 
