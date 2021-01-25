@@ -46,12 +46,10 @@ void VectorUniverseView::init(
     delete _imageSectionItem;
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-    _imageSectionItem = new VectorImageSectionItem(_viewport, QRectF(0, 0, size.x, size.y), 8, repository->getImageMutex());
+    _imageSectionItem = new VectorImageSectionItem(_viewport, QRectF(0, 0, size.x, size.y), repository->getImageMutex());
 
     addItem(_imageSectionItem);
-
-    QGraphicsScene::setSceneRect(0, 0, size.x * 8, size.y * 8);
-
+    zoomUpdated();
     update();
 }
 
@@ -62,12 +60,14 @@ void VectorUniverseView::activate()
     _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &VectorUniverseView::receivedNotifications));
     _connections.push_back(connect(_repository, &DataRepository::imageReady, this, &VectorUniverseView::imageReady, Qt::QueuedConnection));
     _connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &VectorUniverseView::scrolled));
+    _connections.push_back(connect(_viewport, &ViewportInterface::zoomed, this, &VectorUniverseView::zoomUpdated));
 
-    IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-    auto image = _imageSectionItem->getImageOfVisibleRect();
-    _repository->requireVectorImageFromSimulation(
-        { { 0, 0 },{ image->width(), image->height() } }, image);
     _isActivated = true;
+    zoomUpdated();
+    auto image = _imageSectionItem->getImageOfVisibleRect();
+    auto const zoom = _viewport->getZoomFactor();
+    _repository->requireVectorImageFromSimulation(
+        { { 0, 0 },{ static_cast<int>(image->width() / zoom), static_cast<int>(image->height()/zoom) } }, zoom, image);
 }
 
 void VectorUniverseView::deactivate()
@@ -137,8 +137,7 @@ void VectorUniverseView::receivedNotifications(set<Receiver> const & targets)
 void VectorUniverseView::requestImage()
 {
     if (_isActivated) {
-        IntRect rect = _viewport->getRect();
-        _repository->requireVectorImageFromSimulation(rect, _imageSectionItem->getImageOfVisibleRect());
+        _repository->requireVectorImageFromSimulation(_viewport->getRect(), _viewport->getZoomFactor(), _imageSectionItem->getImageOfVisibleRect());
     }
 }
 
@@ -150,5 +149,13 @@ void VectorUniverseView::imageReady()
 void VectorUniverseView::scrolled()
 {
     requestImage();
+}
+
+void VectorUniverseView::zoomUpdated()
+{
+    auto const size = _controller->getContext()->getSpaceProperties()->getSize();
+    auto const zoom = _viewport->getZoomFactor();
+    _imageSectionItem->setZoom(zoom);
+    QGraphicsScene::setSceneRect(0, 0, size.x * zoom, size.y * zoom);
 }
 
