@@ -73,7 +73,7 @@ void ActionController::init(
 	_mainController = mainController;
 	_mainModel = mainModel;
 	_mainView = mainView;
-	_visualEditor = visualEditor;
+	_simulationViewWidget = visualEditor;
 	_serializer = serializer;
 	_infoController = infoController;
 	_dataEditor = dataEditor;
@@ -108,7 +108,6 @@ void ActionController::init(
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
 
     connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
-    connect(actions->actionVector, &QAction::toggled, this, &ActionController::onToggleVectorMode);
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleMonitor);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
 	connect(actions->actionEditSymbols, &QAction::triggered, this, &ActionController::onEditSymbolTable);
@@ -186,7 +185,7 @@ void ActionController::onStepBackward()
 	if (emptyStack) {
 		_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
 	}
-	_visualEditor->refresh();
+	_simulationViewWidget->refresh();
 }
 
 void ActionController::onMakeSnapshot()
@@ -198,7 +197,7 @@ void ActionController::onMakeSnapshot()
 void ActionController::onRestoreSnapshot()
 {
 	_mainController->onRestoreSnapshot();
-	_visualEditor->refresh();
+	_simulationViewWidget->refresh();
 }
 
 void ActionController::onAcceleration(bool toggled)
@@ -227,18 +226,32 @@ void ActionController::onSimulationChanger(bool toggled)
 
 void ActionController::onZoomInClicked()
 {
-	_visualEditor->zoom(2.0);
-    if (_visualEditor->getZoomFactor() > Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && !_model->isEditMode()) {
-        _model->getActionHolder()->actionEditor->toggle();
+	_simulationViewWidget->zoom(2.0);
+    
+    if(!_model->isEditMode()) {
+        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
+            _model->getActionHolder()->actionEditor->toggle();
+        }
+        else {
+            setPixelOrVectorView();
+        }
     }
+
     updateActionsEnableState();
 }
 
 void ActionController::onZoomOutClicked()
 {
-	_visualEditor->zoom(0.5);
-    if (_visualEditor->getZoomFactor() < Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && _model->isEditMode()) {
-        _model->getActionHolder()->actionEditor->toggle();
+    _simulationViewWidget->zoom(0.5);
+    if (_model->isEditMode()) {
+        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
+        }
+        else {
+            _model->getActionHolder()->actionEditor->toggle();
+        }
+    }
+    else {
+        setPixelOrVectorView();
     }
     updateActionsEnableState();
 }
@@ -273,32 +286,17 @@ void ActionController::onToggleGlowEffect(bool toogled)
 
 void ActionController::onToggleEditorMode(bool toggled)
 {
-	_model->setEditMode(toggled);
-	if (toggled) {
-		_visualEditor->setActiveScene(ActiveScene::ItemScene);
-	}
+    _model->setEditMode(toggled);
+    if (toggled) {
+		_simulationViewWidget->setActiveScene(ActiveScene::ItemScene);
+    }
 	else {
-        if (getActionHolder()->actionVector->isChecked()) {
-            _visualEditor->setActiveScene(ActiveScene::VectorScene);
-        }
-        else {
-            _visualEditor->setActiveScene(ActiveScene::PixelScene);
-        }
+        setPixelOrVectorView();
 	}
 	updateActionsEnableState();
 
 	Q_EMIT _toolbar->getContext()->show(toggled);
 	Q_EMIT _dataEditor->getContext()->show(toggled);
-}
-
-void ActionController::onToggleVectorMode(bool toggled)
-{
-    if (toggled) {
-        _visualEditor->setActiveScene(ActiveScene::VectorScene);
-    }
-    else {
-        _visualEditor->setActiveScene(ActiveScene::PixelScene);
-    }
 }
 
 void ActionController::onToggleMonitor(bool toggled)
@@ -689,7 +687,7 @@ void ActionController::onToggleCellInfo(bool show)
 
 void ActionController::onCenterSelection(bool centerSelection)
 {
-	_visualEditor->toggleCenterSelection(centerSelection);
+	_simulationViewWidget->toggleCenterSelection(centerSelection);
 }
 
 void ActionController::onCopyToClipboard()
@@ -942,7 +940,7 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
-    actions->actionEditor->setEnabled(_visualEditor->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
+    actions->actionEditor->setEnabled(_simulationViewWidget->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
     actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
     actions->actionCenterSelection->setEnabled(editMode);
@@ -970,4 +968,18 @@ void ActionController::updateActionsEnableState()
 	actions->actionDeleteCol->setEnabled(editMode && collectionSelected);
 	actions->actionRandomMultiplier->setEnabled(collectionSelected);
 	actions->actionGridMultiplier->setEnabled(collectionSelected);
+}
+
+void ActionController::setPixelOrVectorView()
+{
+    if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticVectorViewSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
+        if (ActiveScene::VectorScene != _simulationViewWidget->getActiveScene()) {
+            _simulationViewWidget->setActiveScene(ActiveScene::VectorScene);
+        }
+    }
+    else {
+        if (ActiveScene::PixelScene != _simulationViewWidget->getActiveScene()) {
+            _simulationViewWidget->setActiveScene(ActiveScene::PixelScene);
+        }
+    }
 }
