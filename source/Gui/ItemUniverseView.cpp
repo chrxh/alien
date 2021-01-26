@@ -29,7 +29,7 @@ ItemUniverseView::ItemUniverseView(QObject *parent)
 
 void ItemUniverseView::init(Notifier* notifier, SimulationController * controller, DataRepository* manipulator, ViewportInterface * viewport)
 {
-	_controller = controller;
+    _controller = controller;
 	_viewport = viewport;
 	_repository = manipulator;
 	_notifier = notifier;
