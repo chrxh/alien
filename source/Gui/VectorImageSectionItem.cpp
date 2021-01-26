@@ -41,8 +41,8 @@ void VectorImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphics
     std::lock_guard<std::mutex> lock(_mutex);
 
     painter->drawImage(
-        std::max(0.0, static_cast<float>(viewportRect.x())*_zoom),
-        std::max(0.0, static_cast<float>(viewportRect.y())*_zoom),
+        static_cast<float>(viewportRect.x())*_zoom,
+        static_cast<float>(viewportRect.y())*_zoom,
         *_imageOfVisibleRect);
 }
 
