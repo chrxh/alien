@@ -916,6 +916,7 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
     updateZoomFactor();
     auto actions = _model->getActionHolder();
+    actions->actionVector->setChecked(false);
     actions->actionRunSimulation->setChecked(false);
     actions->actionRestore->setEnabled(false);
     actions->actionRunStepBackward->setEnabled(false);
@@ -932,7 +933,7 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 
 void ActionController::updateZoomFactor()
 {
-	_infoController->setZoomFactor(_visualEditor->getZoomFactor());
+    _infoController->setZoomFactor(_visualEditor->getZoomFactor());
 }
 
 void ActionController::updateActionsEnableState()

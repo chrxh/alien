@@ -96,6 +96,7 @@ void MainView::initGettingStartedWindow()
 void MainView::refresh()
 {
 	_simulationViewWidget->refresh();
+    _infoController->setZoomFactor(_simulationViewWidget->getZoomFactor());
 }
 
 void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)
