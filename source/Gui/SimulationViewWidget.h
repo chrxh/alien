@@ -31,6 +31,8 @@ public:
     void zoom (double factor);
 	void toggleCenterSelection(bool value);
 
+    Q_SIGNAL void zoomChanged(double zoom);
+
 private:
     Ui::SimulationViewWidget *ui;
 
@@ -41,9 +43,6 @@ private:
 	ViewportController* _viewport = nullptr;
 
 	ActiveScene _activeScene = ActiveScene::PixelScene;
-
-    bool _pixelUniverseInit = false;
-    bool _itemUniverseInit = false;
 
     qreal _posIncrement = 0.0;
 };
