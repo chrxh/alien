@@ -57,6 +57,10 @@ QRectF ViewportController::getRect() const
         p1 /= _zoom;
         p2 /= _zoom;
     }
+    p1.setX(std::max(0.0, p1.x()));
+    p1.setY(std::max(0.0, p1.y()));
+    p2.setX(std::max(0.0, p2.x()));
+    p2.setY(std::max(0.0, p2.y()));
     return{ p1, p2 };
 }
 
@@ -76,6 +80,10 @@ void ViewportController::zoom(double factor, bool notify)
 	disconnectAll();
     if (_activeScene != ActiveScene::VectorScene) {
         _view->scale(factor, factor);
+    }
+    else {
+        auto center = getCenter();
+        scrollToPos(center * factor, NotifyScrollChanged::No);
     }
     connectAll();
 
