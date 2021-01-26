@@ -228,7 +228,6 @@ void ActionController::onSimulationChanger(bool toggled)
 void ActionController::onZoomInClicked()
 {
 	_visualEditor->zoom(2.0);
-	updateZoomFactor();
     if (_visualEditor->getZoomFactor() > Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && !_model->isEditMode()) {
         _model->getActionHolder()->actionEditor->toggle();
     }
@@ -238,7 +237,6 @@ void ActionController::onZoomInClicked()
 void ActionController::onZoomOutClicked()
 {
 	_visualEditor->zoom(0.5);
-	updateZoomFactor();
     if (_visualEditor->getZoomFactor() < Const::ZoomLevelForAutomaticSwitch - FLOATINGPOINT_MEDIUM_PRECISION && _model->isEditMode()) {
         _model->getActionHolder()->actionEditor->toggle();
     }
@@ -914,9 +912,10 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 
 void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
-    updateZoomFactor();
     auto actions = _model->getActionHolder();
+    bool oldState = actions->actionVector->blockSignals(true);
     actions->actionVector->setChecked(false);
+    actions->actionVector->blockSignals(oldState);
     actions->actionRunSimulation->setChecked(false);
     actions->actionRestore->setEnabled(false);
     actions->actionRunStepBackward->setEnabled(false);
@@ -929,11 +928,6 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
     onToggleCellInfo(actions->actionShowCellInfo->isChecked());
     onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
     _infoController->setDevice(InfoController::Device::Gpu);
-}
-
-void ActionController::updateZoomFactor()
-{
-    _infoController->setZoomFactor(_visualEditor->getZoomFactor());
 }
 
 void ActionController::updateActionsEnableState()
