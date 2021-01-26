@@ -7,7 +7,6 @@ VectorImageSectionItem::VectorImageSectionItem(ViewportInterface* viewport, QRec
     : QGraphicsItem(), _viewport(viewport), _boundingRect(boundingRect), _mutex(mutex)
 {
     auto const viewportRect = _viewport->getRect();
-//    _imageOfVisibleRect = boost::make_shared<QImage>(viewportRect.width()*zoom, viewportRect.height()*zoom, QImage::Format_RGB32);
 }
 
 VectorImageSectionItem::~VectorImageSectionItem()
@@ -22,6 +21,7 @@ QImagePtr VectorImageSectionItem::getImageOfVisibleRect()
         static_cast<int>(std::min(_boundingRect.width(), rect.width()) * _zoom),
         static_cast<int>(std::min(_boundingRect.height(), rect.height()) * _zoom),
     };
+
     if (!_imageOfVisibleRect || (_imageOfVisibleRect->width() != imageSize.x || _imageOfVisibleRect->height() != imageSize.y)) {
         _imageOfVisibleRect = boost::make_shared<QImage>(imageSize.x, imageSize.y, QImage::Format_ARGB32);
     }
