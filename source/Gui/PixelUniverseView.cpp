@@ -36,7 +36,7 @@ void PixelUniverseView::init(
     DataRepository* repository,
     ViewportInterface* viewport)
 {
-	_controller = controller;
+    _controller = controller;
 	_viewport = viewport;
 	_repository = repository;
 	_notifier = notifier;

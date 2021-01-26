@@ -41,10 +41,13 @@ SimulationViewWidget::~SimulationViewWidget()
 
 void SimulationViewWidget::init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* repository)
 {
-	_pixelUniverseInit = false;
+    _pixelUniverseInit = false;
 	_itemUniverseInit = false;
 	_controller = controller;
 	_activeScene = ActiveScene::PixelScene;
+    _pixelUniverse->deactivate();
+    _vectorUniverse->deactivate();
+    _itemUniverse->deactivate();
     _viewport->init(ui->simulationView, _pixelUniverse, _vectorUniverse, _itemUniverse, _activeScene);
     _pixelUniverse->init(notifier, controller, access, repository, _viewport);
     _vectorUniverse->init(notifier, controller, access, repository, _viewport);
