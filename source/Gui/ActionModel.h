@@ -17,8 +17,8 @@ public:
 
 	virtual QVector2D getPositionDeltaForNewEntity();
 
-	bool isEditMode() const;
-	void setEditMode(bool value);
+    bool isEditMode() const;
+    void setEditMode(bool value);
 
 	virtual bool isEntitySelected() const;
 	virtual void setEntitySelected(bool value);
