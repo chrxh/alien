@@ -23,7 +23,8 @@ public:
 
 	void refresh();
 
-	void setActiveScene(ActiveScene activeScene);
+    ActiveScene getActiveScene() const;
+    void setActiveScene(ActiveScene activeScene);
 	QVector2D getViewCenterWithIncrement ();
 	double getZoomFactor ();
     void scrollToPos(QVector2D const& pos);

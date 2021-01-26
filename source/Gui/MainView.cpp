@@ -217,7 +217,6 @@ void MainView::setupMenuAndToolbar()
 
     ui->toolBar->setIconSize(QSize(48, 48));
 	ui->toolBar->addSeparator();
-    ui->toolBar->addAction(actions->actionVector);
     ui->toolBar->addAction(actions->actionZoomIn);
 	ui->toolBar->addAction(actions->actionZoomOut);
     ui->toolBar->addAction(actions->actionEditor);

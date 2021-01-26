@@ -61,6 +61,10 @@ void SimulationViewWidget::refresh()
     _itemUniverse->refresh();
 }
 
+ActiveScene SimulationViewWidget::getActiveScene() const
+{
+    return _activeScene;
+}
 
 void SimulationViewWidget::setActiveScene (ActiveScene activeScene)
 {
