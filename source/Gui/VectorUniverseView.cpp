@@ -87,7 +87,8 @@ void VectorUniverseView::refresh()
 void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
     if (!_controller->getRun()) {
-        QVector2D pos(event->scenePos().x(), event->scenePos().y());
+        auto const zoom = _viewport->getZoomFactor();
+        QVector2D pos(event->scenePos().x() / zoom, event->scenePos().y() / zoom);
         _access->selectEntities(pos);
         requestImage();
     }
@@ -95,8 +96,9 @@ void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 
 void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
-    auto const pos = QVector2D(e->scenePos().x(), e->scenePos().y());
-    auto const lastPos = QVector2D(e->lastScenePos().x(), e->lastScenePos().y());
+    auto const zoom = _viewport->getZoomFactor();
+    auto const pos = QVector2D(e->scenePos().x() / zoom, e->scenePos().y() / zoom);
+    auto const lastPos = QVector2D(e->lastScenePos().x() / zoom, e->lastScenePos().y() / zoom);
 
     if (_controller->getRun()) {
         if (e->buttons() == Qt::MouseButton::LeftButton) {
