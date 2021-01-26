@@ -42,6 +42,7 @@ MainView::MainView(QWidget * parent)
     _gettingStartedWindow = new GettingStartedWindow(this);
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
+    connect(_simulationViewWidget, &SimulationViewWidget::zoomChanged, _infoController, &InfoController::setZoomFactor);
 }
 
 MainView::~MainView()
@@ -96,7 +97,6 @@ void MainView::initGettingStartedWindow()
 void MainView::refresh()
 {
 	_simulationViewWidget->refresh();
-    _infoController->setZoomFactor(_simulationViewWidget->getZoomFactor());
 }
 
 void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)

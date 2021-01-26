@@ -41,10 +41,9 @@ SimulationViewWidget::~SimulationViewWidget()
 
 void SimulationViewWidget::init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* repository)
 {
-    _pixelUniverseInit = false;
-	_itemUniverseInit = false;
-	_controller = controller;
 	_activeScene = ActiveScene::PixelScene;
+
+	_controller = controller;
     _pixelUniverse->deactivate();
     _vectorUniverse->deactivate();
     _itemUniverse->deactivate();
@@ -52,6 +51,7 @@ void SimulationViewWidget::init(Notifier* notifier, SimulationController* contro
     _pixelUniverse->init(notifier, controller, access, repository, _viewport);
     _vectorUniverse->init(notifier, controller, access, repository, _viewport);
     _itemUniverse->init(notifier, controller, repository, _viewport);
+    Q_EMIT zoomChanged(getZoomFactor());
 }
 
 void SimulationViewWidget::refresh()
@@ -113,6 +113,7 @@ void SimulationViewWidget::scrollToPos(QVector2D const & pos)
 void SimulationViewWidget::zoom (double factor)
 {
 	_viewport->zoom(factor);
+    Q_EMIT zoomChanged(getZoomFactor());
 }
 
 void SimulationViewWidget::toggleCenterSelection(bool value)

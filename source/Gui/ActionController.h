@@ -85,7 +85,6 @@ private:
 
 private:
 	void settingUpNewSimulation(SimulationConfig const& config);
-	void updateZoomFactor();
 	void updateActionsEnableState();
 
 	ActionModel* _model = nullptr;
