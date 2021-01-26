@@ -39,7 +39,6 @@ private:
 	Q_SLOT void onEditSymbolTable();
 
 	Q_SLOT void onToggleEditorMode(bool toggled);
-    Q_SLOT void onToggleVectorMode(bool toggled);
     Q_SLOT void onToggleMonitor(bool toggled);
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
@@ -86,6 +85,7 @@ private:
 private:
 	void settingUpNewSimulation(SimulationConfig const& config);
 	void updateActionsEnableState();
+    void setPixelOrVectorView();
 
 	ActionModel* _model = nullptr;
 	MainController* _mainController = nullptr;
@@ -95,7 +95,7 @@ private:
 	Notifier* _notifier = nullptr;
 	Serializer* _serializer = nullptr;
 
-	SimulationViewWidget* _visualEditor = nullptr;
+	SimulationViewWidget* _simulationViewWidget = nullptr;
 	DataEditController* _dataEditor = nullptr;
 	InfoController* _infoController = nullptr;
 	ToolbarController* _toolbar = nullptr;
