@@ -911,9 +911,6 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
     auto actions = _model->getActionHolder();
-    bool oldState = actions->actionVector->blockSignals(true);
-    actions->actionVector->setChecked(false);
-    actions->actionVector->blockSignals(oldState);
     actions->actionRunSimulation->setChecked(false);
     actions->actionRestore->setEnabled(false);
     actions->actionRunStepBackward->setEnabled(false);
