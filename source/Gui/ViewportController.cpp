@@ -77,17 +77,23 @@ QVector2D ViewportController::getCenter() const
 void ViewportController::zoom(double factor, bool notify)
 {
     _zoom *= factor;
-	disconnectAll();
+
+    if (notify && factor > 1.0) {
+        Q_EMIT zoomed();
+    }
+
+    disconnectAll();
     if (_activeScene != ActiveScene::VectorScene) {
         _view->scale(factor, factor);
     }
     else {
         auto center = getCenter();
+        printf("center: %f, %f\n", center.x(), center.y());
         scrollToPos(center * factor, NotifyScrollChanged::No);
     }
     connectAll();
 
-    if (notify) {
+    if (notify && factor < 1.0) {
         Q_EMIT zoomed();
     }
 }
