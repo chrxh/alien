@@ -4,32 +4,44 @@
 #include <QVector2D>
 #include <QTimer>
 
-#include "Gui/Definitions.h"
 #include "ModelBasic/Definitions.h"
 #include "ModelBasic/Descriptions.h"
 
-class PixelUniverseView : public QGraphicsScene
+#include "Gui/Definitions.h"
+#include "UniverseView.h"
+
+class PixelUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
-    PixelUniverseView(QObject* parent = nullptr);
-    virtual ~PixelUniverseView();
+    PixelUniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
+    virtual ~PixelUniverseView() = default;
 
-    virtual void init(
+    void init(
         Notifier* notifier,
         SimulationController* controller,
         SimulationAccess* access,
-        DataRepository* manipulator,
-        ViewportInterface* viewport);
-    virtual void activate();
-	virtual void deactivate();
+        DataRepository* manipulator);
 
-	virtual void refresh();
+    void connectView() override;
+    void disconnectView() override;
+    void refresh() override;
+
+    bool isActivated() const override;
+    void activate(double zoomFactor) override;
+
+    double getZoomFactor() const override;
+    void setZoomFactor(double zoomFactor) override;
+
+    QVector2D getCenterPositionOfScreen() const override;
+
+    void centerTo(QVector2D const& position) override;
 
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* e) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) ;
 
 private:
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
@@ -39,14 +51,17 @@ private:
 
 	list<QMetaObject::Connection> _connections;
 
+    QGraphicsView* _graphicsView = nullptr;
+    QGraphicsScene* _scene = nullptr;
+
     SimulationAccess* _access = nullptr;
 	DataRepository* _repository = nullptr;
 	SimulationController* _controller = nullptr;
-	ViewportInterface* _viewport = nullptr;
+    PixelViewport* _viewport = nullptr;
 
     PixelImageSectionItem* _imageSectionItem = nullptr;
-    bool _isActivated = false;
 
 	Notifier* _notifier = nullptr;
+    double _zoomFactor = 0.0;
 };
 

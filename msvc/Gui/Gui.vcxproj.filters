@@ -46,6 +46,15 @@
     <Filter Include="Source Files\SimulationView">
       <UniqueIdentifier>{84149345-9237-4d47-b641-14dc7df60a87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SimulationView\PixelView">
+      <UniqueIdentifier>{cfe0819d-1f47-4db0-952f-e1f5bb395c7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SimulationView\VectorView">
+      <UniqueIdentifier>{33471dba-acf7-42d6-b611-eb4f2e73f7fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SimulationView\ItemView">
+      <UniqueIdentifier>{f089720f-2fc9-4dfd-b2bd-46663e2e4dc5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="qrc_ressources.cpp">
@@ -417,19 +426,7 @@
     <ClCompile Include="Release\moc_ToolbarView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\AbstractItem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\CellConnectionItem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\CellItem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\CoordinateSystem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ItemConfig.cpp">
       <Filter>Source Files\SimulationView</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ItemConfig.cpp">
@@ -438,32 +435,11 @@
     <ClCompile Include="Release\moc_ItemConfig.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ItemManager.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_ItemManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_ItemManager.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ItemUniverseView.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ItemUniverseView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ItemUniverseView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\MarkerItem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ParticleItem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Gui\PixelUniverseView.cpp">
-      <Filter>Source Files\SimulationView</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_PixelUniverseView.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -473,12 +449,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\ViewportController.cpp">
       <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_ViewportController.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_ViewportController.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\ViewportInterface.cpp">
       <Filter>Source Files\SimulationView</Filter>
@@ -603,15 +573,6 @@
     <ClCompile Include="Release\moc_GettingStartedWindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\VectorUniverseView.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_VectorUniverseView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_VectorUniverseView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\SimulationViewWidget.cpp">
       <Filter>Source Files\SimulationView</Filter>
     </ClCompile>
@@ -621,11 +582,74 @@
     <ClCompile Include="Release\moc_SimulationViewWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ItemManager.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ItemUniverseView.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ItemConfig.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\CellItem.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\CellConnectionItem.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\AbstractItem.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ParticleItem.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MarkerItem.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\source\Gui\PixelImageSectionItem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
+      <Filter>Source Files\SimulationView\PixelView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\PixelUniverseView.cpp">
+      <Filter>Source Files\SimulationView\PixelView</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\VectorImageSectionItem.cpp">
+      <Filter>Source Files\SimulationView\VectorView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VectorUniverseView.cpp">
+      <Filter>Source Files\SimulationView\VectorView</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\PixelViewport.cpp">
+      <Filter>Source Files\SimulationView\PixelView</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_PixelViewport.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_UniverseView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\UniverseView.cpp">
       <Filter>Source Files\SimulationView</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_UniverseView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_PixelViewport.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\VectorViewport.cpp">
+      <Filter>Source Files\SimulationView\VectorView</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_VectorViewport.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_VectorViewport.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_VectorUniverseView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_VectorUniverseView.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -817,18 +841,6 @@
     <CustomBuild Include="..\..\source\Gui\ToolbarView.ui">
       <Filter>Source Files\Toolbar</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ItemConfig.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ItemManager.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ItemUniverseView.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\PixelUniverseView.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\ViewportController.h">
       <Filter>Source Files\SimulationView</Filter>
     </CustomBuild>
@@ -883,14 +895,35 @@
     <CustomBuild Include="..\..\source\Gui\GettingStartedWindow.ui">
       <Filter>Source Files\Assistance</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\VectorUniverseView.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\SimulationViewWidget.h">
       <Filter>Source Files\SimulationView</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\SimulationViewWidget.ui">
       <Filter>Source Files\SimulationView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ItemUniverseView.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ItemManager.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\ItemConfig.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\PixelUniverseView.h">
+      <Filter>Source Files\SimulationView\PixelView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VectorUniverseView.h">
+      <Filter>Source Files\SimulationView\VectorView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\PixelViewport.h">
+      <Filter>Source Files\SimulationView\PixelView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\UniverseView.h">
+      <Filter>Source Files\SimulationView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\source\Gui\VectorViewport.h">
+      <Filter>Source Files\SimulationView\VectorView</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1037,22 +1070,7 @@
     <ClInclude Include="ui_ToolbarView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\AbstractItem.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\CellConnectionItem.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\CellItem.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\CoordinateSystem.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\MarkerItem.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Gui\ParticleItem.h">
       <Filter>Source Files\SimulationView</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\SimulationConfig.h">
@@ -1082,11 +1100,26 @@
     <ClInclude Include="ui_SimulationViewWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\CellItem.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\CellConnectionItem.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\AbstractItem.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ParticleItem.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MarkerItem.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\source\Gui\PixelImageSectionItem.h">
-      <Filter>Source Files\SimulationView</Filter>
+      <Filter>Source Files\SimulationView\PixelView</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\VectorImageSectionItem.h">
-      <Filter>Source Files\SimulationView</Filter>
+      <Filter>Source Files\SimulationView\VectorView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
