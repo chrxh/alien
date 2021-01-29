@@ -1,3 +1,4 @@
+/*
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QMatrix4x4>
@@ -255,3 +256,4 @@ void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 	}
 }
 
+*/

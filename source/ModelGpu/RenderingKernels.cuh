@@ -101,9 +101,13 @@ __device__ __inline__ void addingColor(unsigned int& color, unsigned int const& 
     color = newColor | 0xff000000;
 }
 
-__device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color, bool selected)
+__device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSize, int const& index, unsigned int color,
+    bool selected, bool darken = false)
 {
     if (!selected) {
+        color = (color >> 1) & 0x7e7e7e;
+    }
+    if (darken) {
         color = (color >> 1) & 0x7e7e7e;
     }
     addingColor(imageData[index], color);
@@ -115,37 +119,38 @@ __device__ __inline__ void drawDot(unsigned int* imageData, int2 const& imageSiz
     addingColor(imageData[index + imageSize.x], color);
 }
 
-__device__ __inline__ void drawCircle(unsigned int* imageData, int2 const& imageSize, int index, unsigned int color, bool selected)
+__device__ __inline__ void drawCircle(unsigned int* imageData, int2 const& imageSize, int index, unsigned int color, 
+    bool selected, bool darken)
 {
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
 
     index -= 1 + 2 * imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     ++index;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     ++index;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
 
     index += 1 + imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     index += imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     index += imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
 
     index += imageSize.x - 1;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     --index;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     --index;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
 
     index -= 1 + imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     index -= imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
     index -= imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected);
+    drawDot(imageData, imageSize, index, color, selected, darken);
 }
 
 __global__ void drawClusters_pixelStyle(
@@ -222,9 +227,11 @@ __global__ void drawClusters_vectorStyle(
 
         __shared__ MapInfo map;
         __shared__ bool isSelected;
+        __shared__ bool isDarken;
         if (0 == threadIdx.x) {
             map.init(universeSize);
             isSelected = cluster->isSelected();
+            isDarken = zoom < 6;
         }
         __syncthreads();
 
@@ -239,14 +246,13 @@ __global__ void drawClusters_vectorStyle(
                 auto const color = calcColor(cell);
                 if (isContainedInRect({ 0, 0 }, imageSize, cellImagePos, 3)) {
                     auto index = cellImagePos.x - 1 + cellImagePos.y * imageSize.x;
-//                    drawCircle(imageData, imageSize, index, color);
-                    drawDot(imageData, imageSize, index, color, isSelected);
+                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
                     index += 2;
-                    drawDot(imageData, imageSize, index, color, isSelected);
+                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
                     index -= 1 + imageSize.x;
-                    drawDot(imageData, imageSize, index, color, isSelected);
+                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
                     index += 2 * imageSize.x;
-                    drawDot(imageData, imageSize, index, color, isSelected);
+                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
                 }
 
                 auto const posCorrection = cellPos - cell->absPos;
@@ -264,7 +270,7 @@ __global__ void drawClusters_vectorStyle(
                         auto const intPos = toInt2(pos);
                         if (isContainedInRect({ 0, 0 }, imageSize, intPos, 2)) {
                             auto const index = intPos.x + intPos.y * imageSize.x;
-                            drawDot(imageData, imageSize, index, color, isSelected);
+                            drawDot(imageData, imageSize, index, color, isSelected, isDarken);
                         }
                         pos = pos + v;
                     }
@@ -285,7 +291,7 @@ __global__ void drawClusters_vectorStyle(
                 auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
                 auto const color = calcColor(token);
 
-                drawCircle(imageData, imageSize, index, color, cell->cluster->isSelected());
+                drawCircle(imageData, imageSize, index, color, cell->cluster->isSelected(), isDarken);
             }
         }
         __syncthreads();
@@ -334,7 +340,7 @@ __global__ void drawParticles_vectorStyle(
         if (isContainedInRect({ 0, 0 }, imageSize, particleImagePos, 4)) {
             auto index = particleImagePos.x + particleImagePos.y * imageSize.x;
             auto const color = calcColor(particle);
-            drawCircle(imageData, imageSize, index, color, particle->isSelected());
+            drawCircle(imageData, imageSize, index, color, particle->isSelected(), zoom < 6);
         }
     }
 }

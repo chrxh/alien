@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include <QMatrix>
@@ -12,13 +13,13 @@ public:
 	virtual ~ViewportController() = default;
 
 	virtual void init(QGraphicsView* view, QGraphicsScene* pixelScene, QGraphicsScene* vectorScene, 
-        QGraphicsScene* itemScene, ActiveScene activeScene);
+        QGraphicsScene* itemScene, ActiveView activeScene);
 
 	virtual void setModeToUpdate() override;
 	virtual void setModeToNoUpdate() override;
 
-	virtual void setActiveScene(ActiveScene activeScene);
-	virtual ActiveScene getActiveScene() const;
+	virtual void setActiveScene(ActiveView activeScene);
+	virtual ActiveView getActiveScene() const;
 
 	virtual QRectF getRect() const override;
 	virtual QVector2D getCenter() const override;
@@ -34,7 +35,7 @@ private:
 	void connectAll();
 	void disconnectAll();
 
-	void setSceneToView(optional<ActiveScene> oldActiveScene, ActiveScene activeScene);
+	void setSceneToView(optional<ActiveView> oldActiveScene, ActiveView activeScene);
 
 	list<QMetaObject::Connection> _connections;
 
@@ -43,8 +44,10 @@ private:
     QGraphicsScene* _vectorScene = nullptr;
     QGraphicsScene* _itemScene = nullptr;
 
-	IntVector2D _sceneScrollbarPos;
-	optional<ActiveScene> _activeScene;
+	double _sceneScrollbarPosX;
+    double _sceneScrollbarPosY;
+    optional<ActiveView> _activeScene;
 
     double _zoom = 1.0;
 };
+*/
