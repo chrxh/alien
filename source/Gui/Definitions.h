@@ -20,6 +20,7 @@ class CellConnectionItem;
 class ItemConfig;
 class MonitorView;
 class MetadataManager;
+class UniverseView;
 class PixelUniverseView;
 class VectorUniverseView;
 class ItemUniverseView;
@@ -59,11 +60,13 @@ class ActionController;
 class MonitorController;
 class PixelImageSectionItem;
 class VectorImageSectionItem;
+class VectorViewport;
+class PixelViewport;
 
 struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;
 
-enum class ActiveScene {
+enum class ActiveView {
     PixelScene,
     VectorScene,
     ItemScene

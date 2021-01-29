@@ -3,11 +3,9 @@
 #include "PixelImageSectionItem.h"
 #include "ViewportInterface.h"
 
-PixelImageSectionItem::PixelImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect, std::mutex& mutex)
-    : QGraphicsItem(), _viewport(viewport), _boundingRect(boundingRect), _mutex(mutex)
+PixelImageSectionItem::PixelImageSectionItem(ViewportInterface* viewport, IntVector2D const& universeSize, std::mutex& mutex)
+    : QGraphicsItem(), _viewport(viewport), _universeSize(universeSize), _mutex(mutex)
 {
-    auto const viewportRect = _viewport->getRect();
-    _imageOfVisibleRect = boost::make_shared<QImage>(viewportRect.width(), viewportRect.height(), QImage::Format_RGB32);
 }
 
 PixelImageSectionItem::~PixelImageSectionItem()
@@ -19,9 +17,9 @@ QImagePtr PixelImageSectionItem::getImageOfVisibleRect()
     //resize image?
     auto rect = _viewport->getRect();
     IntVector2D viewportSize{ static_cast<int>(rect.width()), static_cast<int>(rect.height()) };
-    viewportSize.x = std::min(static_cast<int>(_boundingRect.width()), viewportSize.x);
-    viewportSize.y = std::min(static_cast<int>(_boundingRect.height()), viewportSize.y);
-    if (_imageOfVisibleRect->width() != viewportSize.x || _imageOfVisibleRect->height() != viewportSize.y) {
+    viewportSize.x = std::min(_universeSize.x, viewportSize.x);
+    viewportSize.y = std::min(_universeSize.y, viewportSize.y);
+    if (!_imageOfVisibleRect || (_imageOfVisibleRect->width() != viewportSize.x || _imageOfVisibleRect->height() != viewportSize.y)) {
         _imageOfVisibleRect = boost::make_shared<QImage>(viewportSize.x, viewportSize.y, QImage::Format_ARGB32);
     }
 
@@ -30,7 +28,7 @@ QImagePtr PixelImageSectionItem::getImageOfVisibleRect()
 
 QRectF PixelImageSectionItem::boundingRect() const
 {
-    return _boundingRect;
+    return QRectF(0, 0, _universeSize.x, _universeSize.y);
 }
 
 void PixelImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget /*= Q_NULLPTR*/)
