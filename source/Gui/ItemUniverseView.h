@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include <QGraphicsScene>
@@ -8,21 +9,38 @@
 
 #include "ModelBasic/Definitions.h"
 #include "ModelBasic/Descriptions.h"
-#include "Gui/Definitions.h"
-#include "Gui/DataRepository.h"
+#include "Definitions.h"
+#include "DataRepository.h"
+#include "UniverseView.h"
 
-class ItemUniverseView : public QGraphicsScene
+class ItemUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
     ItemUniverseView (QObject *parent = nullptr);
 	virtual ~ItemUniverseView() = default;
 
+    void connectView() override;
+    void disconnectView() override;
+    void refresh() override;
+
+    bool isActivated() const override;
+    void activate(double zoomFactor) override;
+
+    double getZoomFactor() const override;
+    void setZoomFactor(double zoomFactor) override;
+
+    QVector2D getCenterPositionOfScreen() const override;
+
+    void centerTo(QVector2D const& position) override;
+
+/ *
 	virtual void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
 	virtual void activate();
 	virtual void deactivate();
 
 	virtual void refresh();
+* /
 
 	virtual void toggleCenterSelection(bool value);
 
@@ -62,3 +80,4 @@ private:
 	bool _mouseButtonPressed = true;
 	bool _centerSelection = false;
 };
+*/

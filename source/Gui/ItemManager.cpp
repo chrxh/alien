@@ -158,6 +158,7 @@ void ItemManager::updateConnections(DataRepository* repository)
 
 void ItemManager::update(DataRepository* repository)
 {
+/*
 	_viewport->setModeToNoUpdate();
 
 	updateCells(repository);
@@ -166,6 +167,7 @@ void ItemManager::update(DataRepository* repository)
 
 	_viewport->setModeToUpdate();
 	_scene->update();
+*/
 }
 
 void ItemManager::setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRight)

@@ -3,10 +3,9 @@
 #include "VectorImageSectionItem.h"
 #include "ViewportInterface.h"
 
-VectorImageSectionItem::VectorImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect, std::mutex& mutex)
-    : QGraphicsItem(), _viewport(viewport), _boundingRect(boundingRect), _mutex(mutex)
+VectorImageSectionItem::VectorImageSectionItem(ViewportInterface* viewport, IntVector2D const& universeSize, std::mutex& mutex)
+    : QGraphicsItem(), _viewport(viewport), _universeSize(universeSize), _mutex(mutex)
 {
-    auto const viewportRect = _viewport->getRect();
 }
 
 VectorImageSectionItem::~VectorImageSectionItem()
@@ -18,8 +17,8 @@ QImagePtr VectorImageSectionItem::getImageOfVisibleRect()
     //resize image?
     auto const rect = _viewport->getRect();
     IntVector2D imageSize = {
-        static_cast<int>(std::min(_boundingRect.width(), rect.width()) * _zoom),
-        static_cast<int>(std::min(_boundingRect.height(), rect.height()) * _zoom),
+        static_cast<int>(std::min(static_cast<double>(_universeSize.x) * _zoom, rect.width() * _zoom)),
+        static_cast<int>(std::min(static_cast<double>(_universeSize.y) * _zoom, rect.height() * _zoom)),
     };
 
     if (!_imageOfVisibleRect || (_imageOfVisibleRect->width() != imageSize.x || _imageOfVisibleRect->height() != imageSize.y)) {
@@ -31,7 +30,7 @@ QImagePtr VectorImageSectionItem::getImageOfVisibleRect()
 
 QRectF VectorImageSectionItem::boundingRect() const
 {
-    return QRectF(_boundingRect.left()*_zoom, _boundingRect.top()*_zoom, _boundingRect.width()*_zoom, _boundingRect.height()*_zoom);
+    return QRectF(0, 0, static_cast<double>(_universeSize.x) * _zoom, static_cast<double>(_universeSize.y) * _zoom);
 }
 
 void VectorImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget /*= Q_NULLPTR*/)
@@ -41,12 +40,12 @@ void VectorImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphics
     std::lock_guard<std::mutex> lock(_mutex);
 
     painter->drawImage(
-        static_cast<float>(viewportRect.x())*_zoom,
-        static_cast<float>(viewportRect.y())*_zoom,
+        static_cast<float>(viewportRect.x() * _zoom),
+        static_cast<float>(viewportRect.y() * _zoom),
         *_imageOfVisibleRect);
 }
 
-void VectorImageSectionItem::setZoom(double zoom)
+void VectorImageSectionItem::setZoomFactor(double zoom)
 {
     _zoom = zoom;
 }

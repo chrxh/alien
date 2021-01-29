@@ -42,7 +42,7 @@ MainView::MainView(QWidget * parent)
     _gettingStartedWindow = new GettingStartedWindow(this);
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
 	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
-    connect(_simulationViewWidget, &SimulationViewWidget::zoomChanged, _infoController, &InfoController::setZoomFactor);
+    connect(_simulationViewWidget, &SimulationViewWidget::zoomFactorChanged, _infoController, &InfoController::setZoomFactor);
 }
 
 MainView::~MainView()
@@ -105,9 +105,7 @@ void MainView::setupEditors(SimulationController * controller, SimulationAccess*
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
 	_simulationViewWidget->init(_notifier, controller, access, _repository);
 
-	_simulationViewWidget->setActiveScene(ActiveScene::PixelScene);
-    auto size = controller->getContext()->getSpaceProperties()->getSize();
-    _simulationViewWidget->scrollToPos(QVector2D(size.x/2, size.y/2));
+	_simulationViewWidget->setActiveScene(ActiveView::PixelScene);
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 }
 
