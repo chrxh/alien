@@ -46,6 +46,7 @@ private:
 
     PixelUniverseView* _pixelUniverse = nullptr;
     VectorUniverseView* _vectorUniverse = nullptr;
+    ItemUniverseView* _itemUniverse = nullptr;
 
     qreal _posIncrement = 0.0;
 };
