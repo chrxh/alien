@@ -16,7 +16,6 @@
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 
-#include "ViewportController.h"
 #include "ItemUniverseView.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
@@ -116,35 +115,6 @@ void ItemUniverseView::centerTo(QVector2D const & position)
     auto const scenePosition = CoordinateSystem::modelToScene(position);
     _graphicsView->centerOn(scenePosition.x(), scenePosition.y());
 }
-
-/*
-void ItemUniverseView::activate()
-{
-	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-	_itemManager->activate(size);
-
-	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
-	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemUniverseView::receivedNotifications));
-	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
-    _connections.push_back(connect(_viewport, &ViewportInterface::zoomed, this, &ItemUniverseView::scrolled));
-
-	requestData();
-	_activated = true;
-}
-
-void ItemUniverseView::deactivate()
-{
-	for (auto const& connection : _connections) {
-		disconnect(connection);
-	}
-	_activated = false;
-}
-
-void ItemUniverseView::refresh()
-{
-	requestData();
-}
-*/
 
 void ItemUniverseView::toggleCenterSelection(bool value)
 {
