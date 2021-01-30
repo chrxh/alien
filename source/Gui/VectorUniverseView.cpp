@@ -37,6 +37,7 @@ void VectorUniverseView::init(
     SimulationAccess* access,
     DataRepository* repository)
 {
+    disconnectView();
     _controller = controller;
     _repository = repository;
     _notifier = notifier;
@@ -88,8 +89,6 @@ void VectorUniverseView::activate(double zoomFactor)
     _graphicsView->setScene(_scene);
     _graphicsView->resetTransform();
 
-    auto const size = _controller->getContext()->getSpaceProperties()->getSize();
-    _scene->setSceneRect(0, 0, size.x * zoomFactor, size.y * zoomFactor);
     setZoomFactor(zoomFactor);
 }
 

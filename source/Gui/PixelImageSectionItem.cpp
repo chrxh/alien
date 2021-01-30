@@ -36,10 +36,11 @@ void PixelImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     auto const viewportRect = _viewport->getRect();
 
     std::lock_guard<std::mutex> lock(_mutex);
-
-    painter->drawImage(
-        std::max(0.0f, static_cast<float>(viewportRect.x())),
-        std::max(0.0f, static_cast<float>(viewportRect.y())),
-        *_imageOfVisibleRect);
+    if (_imageOfVisibleRect) {
+        painter->drawImage(
+            std::max(0.0f, static_cast<float>(viewportRect.x())),
+            std::max(0.0f, static_cast<float>(viewportRect.y())),
+            *_imageOfVisibleRect);
+    }
 }
 

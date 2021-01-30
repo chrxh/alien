@@ -1,4 +1,3 @@
-/*
 #pragma once
 
 #include <QGraphicsScene>
@@ -17,8 +16,10 @@ class ItemUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
-    ItemUniverseView (QObject *parent = nullptr);
+    ItemUniverseView (QGraphicsView* graphicsView, QObject *parent = nullptr);
 	virtual ~ItemUniverseView() = default;
+
+    void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator);
 
     void connectView() override;
     void disconnectView() override;
@@ -34,25 +35,26 @@ public:
 
     void centerTo(QVector2D const& position) override;
 
-/ *
-	virtual void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator, ViewportInterface* viewport);
+/*
 	virtual void activate();
 	virtual void deactivate();
 
 	virtual void refresh();
-* /
+*/
 
 	virtual void toggleCenterSelection(bool value);
 
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent* e);
+    bool eventFilter(QObject* object, QEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
 	void requestData();
 	optional<QVector2D> getCenterPosOfSelection() const;
-	void centerSelectionIfEnabled(NotifyScrollChanged notify);
+	void centerSelectionIfEnabled();
+    void updateItems();
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void cellInfoToggled(bool showInfo);
@@ -67,17 +69,19 @@ private:
 	void delegateSelection(Selection const& selection);
 	void startMarking(QPointF const& scenePos);
 
-	bool _activated = false;
+    QGraphicsView* _graphicsView = nullptr;
+    QGraphicsScene* _scene = nullptr;
+
 	list<QMetaObject::Connection> _connections;
 
 	SimulationController* _controller = nullptr;
-	ViewportInterface* _viewport = nullptr;
+	ItemViewport* _viewport = nullptr;
 
 	ItemManager* _itemManager = nullptr;
 	DataRepository* _repository = nullptr;
 	Notifier* _notifier = nullptr;
 
-	bool _mouseButtonPressed = true;
+    double _zoomFactor = 0.0;
+    bool _mouseButtonPressed = true;
 	bool _centerSelection = false;
 };
-*/

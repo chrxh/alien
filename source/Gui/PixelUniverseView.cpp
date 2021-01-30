@@ -37,6 +37,8 @@ void PixelUniverseView::init(
     SimulationAccess* access,
     DataRepository* repository)
 {
+    disconnectView();
+
     _controller = controller;
 
     delete _viewport;
