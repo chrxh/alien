@@ -229,7 +229,6 @@ void ActionController::onZoomInClicked()
     auto zoomFactor = _simulationViewWidget->getZoomFactor();
 	_simulationViewWidget->setZoomFactor(zoomFactor * 2);
 
-///    setPixelOrVectorView();
     if(!_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {            _model->getActionHolder()->actionEditor->toggle();        }        else {            setPixelOrVectorView();        }    }
     _simulationViewWidget->refresh();
@@ -241,7 +240,6 @@ void ActionController::onZoomOutClicked()
     auto zoomFactor = _simulationViewWidget->getZoomFactor();
     _simulationViewWidget->setZoomFactor(zoomFactor / 2);
 
-//    setPixelOrVectorView();
     if (_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         }
@@ -689,6 +687,7 @@ void ActionController::onToggleCellInfo(bool show)
 void ActionController::onCenterSelection(bool centerSelection)
 {
 	_simulationViewWidget->toggleCenterSelection(centerSelection);
+    _simulationViewWidget->refresh();
 }
 
 void ActionController::onCopyToClipboard()
