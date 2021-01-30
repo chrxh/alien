@@ -38,11 +38,12 @@ void VectorImageSectionItem::paint(QPainter *painter, const QStyleOptionGraphics
     auto const viewportRect = _viewport->getRect();
 
     std::lock_guard<std::mutex> lock(_mutex);
-
-    painter->drawImage(
-        static_cast<float>(viewportRect.x() * _zoom),
-        static_cast<float>(viewportRect.y() * _zoom),
-        *_imageOfVisibleRect);
+    if (_imageOfVisibleRect) {
+        painter->drawImage(
+            static_cast<float>(viewportRect.x() * _zoom),
+            static_cast<float>(viewportRect.y() * _zoom),
+            *_imageOfVisibleRect);
+    }
 }
 
 void VectorImageSectionItem::setZoomFactor(double zoom)

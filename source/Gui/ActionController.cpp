@@ -229,18 +229,10 @@ void ActionController::onZoomInClicked()
     auto zoomFactor = _simulationViewWidget->getZoomFactor();
 	_simulationViewWidget->setZoomFactor(zoomFactor * 2);
 
-    setPixelOrVectorView();    _simulationViewWidget->refresh();
-/*
+///    setPixelOrVectorView();
     if(!_model->isEditMode()) {
-        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-            _model->getActionHolder()->actionEditor->toggle();
-        }
-        else {
-            setPixelOrVectorView();
-        }
-    }
-*/
-
+        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {            _model->getActionHolder()->actionEditor->toggle();        }        else {            setPixelOrVectorView();        }    }
+    _simulationViewWidget->refresh();
     updateActionsEnableState();
 }
 
@@ -249,8 +241,7 @@ void ActionController::onZoomOutClicked()
     auto zoomFactor = _simulationViewWidget->getZoomFactor();
     _simulationViewWidget->setZoomFactor(zoomFactor / 2);
 
-    setPixelOrVectorView();
-    _simulationViewWidget->refresh();    /*
+//    setPixelOrVectorView();
     if (_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         }
@@ -261,8 +252,7 @@ void ActionController::onZoomOutClicked()
     else {
         setPixelOrVectorView();
     }
-    updateActionsEnableState();
-*/
+    _simulationViewWidget->refresh();    updateActionsEnableState();
 }
 
 Q_SLOT void ActionController::onToggleDisplayLink(bool toggled)
@@ -295,19 +285,19 @@ void ActionController::onToggleGlowEffect(bool toogled)
 
 void ActionController::onToggleEditorMode(bool toggled)
 {
-/*
     _model->setEditMode(toggled);
     if (toggled) {
-		_simulationViewWidget->setActiveScene(ActiveView::ItemScene);
+        _simulationViewWidget->disconnectView();
+        _simulationViewWidget->setActiveScene(ActiveView::ItemScene);
+        _simulationViewWidget->connectView();
     }
 	else {
         setPixelOrVectorView();
 	}
-	updateActionsEnableState();
+    _simulationViewWidget->refresh();    updateActionsEnableState();
 
 	Q_EMIT _toolbar->getContext()->show(toggled);
 	Q_EMIT _dataEditor->getContext()->show(toggled);
-*/
 }
 
 void ActionController::onToggleMonitor(bool toggled)
