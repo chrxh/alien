@@ -447,9 +447,6 @@
     <ClCompile Include="Release\moc_PixelUniverseView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\ViewportController.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\ViewportInterface.cpp">
       <Filter>Source Files\SimulationView</Filter>
     </ClCompile>
@@ -855,9 +852,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\ToolbarView.ui">
       <Filter>Source Files\Toolbar</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\source\Gui\ViewportController.h">
-      <Filter>Source Files\SimulationView</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\source\Gui\ViewportInterface.h">
       <Filter>Source Files\SimulationView</Filter>

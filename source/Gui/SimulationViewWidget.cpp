@@ -12,7 +12,6 @@
 #include "PixelUniverseView.h"
 #include "VectorUniverseView.h"
 #include "ItemUniverseView.h"
-#include "ViewportController.h"
 
 #include "SimulationViewWidget.h"
 #include "ui_SimulationViewWidget.h"
