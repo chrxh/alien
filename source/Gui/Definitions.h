@@ -62,6 +62,7 @@ class PixelImageSectionItem;
 class VectorImageSectionItem;
 class VectorViewport;
 class PixelViewport;
+class ItemViewport;
 
 struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;

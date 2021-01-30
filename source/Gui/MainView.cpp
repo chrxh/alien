@@ -105,7 +105,6 @@ void MainView::setupEditors(SimulationController * controller, SimulationAccess*
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
 	_simulationViewWidget->init(_notifier, controller, access, _repository);
 
-	_simulationViewWidget->setActiveScene(ActiveView::PixelScene);
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 }
 
