@@ -14,6 +14,8 @@
 - experimental feature "Web access" disabled (will be enabled when finished)
 
 ### Fixed
+- showing messages in case of CUDA errors instead of immediate termination
+- fix typos
 
 ## [2.1.0] - 2021-01-17
 ### Added
