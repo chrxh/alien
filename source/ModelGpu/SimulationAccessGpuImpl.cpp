@@ -72,9 +72,15 @@ void SimulationAccessGpuImpl::requireData(IntRect rect, ResolveDescription const
     scheduleJob(boost::make_shared<_GetDataJob>(getObjectId(), rect, _dataTOCache->getDataTO()));
 }
 
-void SimulationAccessGpuImpl::requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex)
+void SimulationAccessGpuImpl::requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex)
 {
-    scheduleJob(boost::make_shared<_GetImageJob>(getObjectId(), rect, target, mutex));
+    scheduleJob(boost::make_shared<_GetPixelImageJob>(getObjectId(), rect, target, mutex));
+}
+
+void SimulationAccessGpuImpl::requireVectorImage(IntRect rect, double zoom, QImagePtr const & target, std::mutex & mutex)
+{
+
+    scheduleJob(boost::make_shared<_GetVectorImageJob>(getObjectId(), rect, zoom, target, mutex));
 }
 
 void SimulationAccessGpuImpl::selectEntities(IntVector2D const & pos)
@@ -113,9 +119,13 @@ void SimulationAccessGpuImpl::jobsFinished()
 			Q_EMIT dataUpdated();
 		}
 
-		if (auto const& getImageJob = boost::dynamic_pointer_cast<_GetImageJob>(job)) {
+		if (auto const& getPixelImageJob = boost::dynamic_pointer_cast<_GetPixelImageJob>(job)) {
 			Q_EMIT imageReady();
 		}
+
+        if (auto const& getVectorImageJob = boost::dynamic_pointer_cast<_GetVectorImageJob>(job)) {
+            Q_EMIT imageReady();
+        }
 
 		if (auto const& getDataJob = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
 			auto dataTO = getDataJob->getDataTO();

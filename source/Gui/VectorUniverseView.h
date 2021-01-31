@@ -6,22 +6,21 @@
 
 #include "ModelBasic/Definitions.h"
 #include "ModelBasic/Descriptions.h"
-
-#include "Gui/Definitions.h"
 #include "UniverseView.h"
+#include "Definitions.h"
 
-class PixelUniverseView : public UniverseView
+class VectorUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
-    PixelUniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
-    virtual ~PixelUniverseView() = default;
+    VectorUniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
+    virtual ~VectorUniverseView() = default;
 
-    void init(
+    virtual void init(
         Notifier* notifier,
         SimulationController* controller,
         SimulationAccess* access,
-        DataRepository* manipulator);
+        DataRepository* repository);
 
     void connectView() override;
     void disconnectView() override;
@@ -40,28 +39,28 @@ public:
 protected:
     bool eventFilter(QObject* object, QEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) ;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
-	Q_SLOT void requestImage();
-	Q_SLOT void imageReady();
-	Q_SLOT void scrolled();
+    Q_SLOT void receivedNotifications(set<Receiver> const& targets);
+    Q_SLOT void requestImage();
+    Q_SLOT void imageReady();
+    Q_SLOT void scrolled();
 
-	list<QMetaObject::Connection> _connections;
+    list<QMetaObject::Connection> _connections;
 
     QGraphicsView* _graphicsView = nullptr;
     QGraphicsScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;
-	DataRepository* _repository = nullptr;
-	SimulationController* _controller = nullptr;
-    PixelViewport* _viewport = nullptr;
+    DataRepository* _repository = nullptr;
+    SimulationController* _controller = nullptr;
+    VectorViewport* _viewport = nullptr;
 
-    PixelImageSectionItem* _imageSectionItem = nullptr;
+    VectorImageSectionItem* _imageSectionItem = nullptr;
 
-	Notifier* _notifier = nullptr;
+    Notifier* _notifier = nullptr;
     double _zoomFactor = 0.0;
 };
 

@@ -4,12 +4,12 @@
 
 #include "Definitions.h"
 
-class ImageSectionItem
+class PixelImageSectionItem
     : public QGraphicsItem
 {
 public:
-    ImageSectionItem(ViewportInterface* viewport, QRectF const& boundingRect, std::mutex& mutex);
-    ~ImageSectionItem();
+    PixelImageSectionItem(ViewportInterface* viewport, IntVector2D const& universeSize, std::mutex& mutex);
+    ~PixelImageSectionItem();
 
     QImagePtr getImageOfVisibleRect();
     QRectF boundingRect() const override;
@@ -18,6 +18,6 @@ public:
 private:
     QImagePtr _imageOfVisibleRect = nullptr;
     ViewportInterface* _viewport = nullptr;
-    QRectF _boundingRect;
+    IntVector2D _universeSize;
     std::mutex& _mutex;
 };

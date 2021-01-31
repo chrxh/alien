@@ -86,7 +86,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionEditor->setCheckable(true);
 	actionEditor->setChecked(false);
 	actionEditor->setEnabled(true);
-	QIcon iconEditor;
+    QIcon iconEditor;
 	iconEditor.addFile(":/Icons/main/pixel view.png", QSize(), QIcon::Normal, QIcon::On);
 	iconEditor.addFile(":/Icons/main/item view.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionEditor->setIcon(iconEditor);
