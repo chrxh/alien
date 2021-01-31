@@ -34,35 +34,32 @@ NewSimulationDialog::~NewSimulationDialog()
     delete ui;
 }
 
-namespace
-{
-    uint getUIntOrZero(QString const& string)
-    {
-        bool ok(true);
-        auto const value = string.toUInt(&ok);
-        if (!ok) {
-            return 0;
-        }
-        return value;
-    }
-}
-
-SimulationConfig NewSimulationDialog::getConfig() const
+optional<SimulationConfig> NewSimulationDialog::getConfig() const
 {
 	auto config = boost::make_shared<_SimulationConfig>();
-	config->universeSize = ui->computationSettings->getUniverseSize();
+    if (auto const value = ui->computationSettings->getUniverseSize()) {
+        config->universeSize = *value;
+    }
+    else {
+        return boost::none;
+    }
 	config->parameters = getSimulationParameters();
 	config->symbolTable = getSymbolTable();
-    config->cudaConstants = ui->computationSettings->getCudaConstants();
+    if (auto const value = ui->computationSettings->getCudaConstants()) {
+        config->cudaConstants = *value;
+    }
+    else {
+        return boost::none;
+    }
     return config;
 }
 
-double NewSimulationDialog::getEnergy () const
+optional<double> NewSimulationDialog::getEnergy () const
 {
     bool ok(true);
 	double energy = ui->energyEdit->text().toDouble(&ok);
 	if (!ok) {
-		return 0.0;
+		return boost::none;
 	}
     return energy;
 }
@@ -79,8 +76,7 @@ SimulationParameters const& NewSimulationDialog::getSimulationParameters() const
 
 void NewSimulationDialog::simulationParametersButtonClicked ()
 {
-
-	SimulationParametersDialog d(getConfig(), _serializer, this);
+	SimulationParametersDialog d(getSimulationParameters(), _serializer, this);
 	if (d.exec()) {
 		_parameters = d.getSimulationParameters();
 	}
@@ -96,21 +92,18 @@ void NewSimulationDialog::symbolTableButtonClicked ()
 
 void NewSimulationDialog::okClicked()
 {
-	SimulationConfig config = getConfig();
-	string errorMsg;
-	auto valResult = config->validate(errorMsg);
-	if (valResult == _SimulationConfig::ValidationResult::Ok) {
-        ui->computationSettings->saveSettings();
-        GuiSettings::setSettingsValue(Const::InitialEnergyKey, getEnergy());
-        accept();
-	}
-	else if (valResult == _SimulationConfig::ValidationResult::Error) {
-		QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
-		msgBox.exec();
-	}
-	else {
-		THROW_NOT_IMPLEMENTED();
-	}
+	auto const config = getConfig();
+    auto const energy = getEnergy();
+
+    if (!config || !energy) {
+        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", "The values you entered are not valid.");
+        msgBox.exec();
+        return;
+    }
+
+    ui->computationSettings->saveSettings();
+    GuiSettings::setSettingsValue(Const::InitialEnergyKey, *getEnergy());
+    accept();
 }
 
 

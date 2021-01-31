@@ -16,7 +16,7 @@ class SimulationParametersDialog
     Q_OBJECT
 
 public:
-    SimulationParametersDialog(SimulationConfig const& config, Serializer* serializer, QWidget *parent = nullptr);
+    SimulationParametersDialog(SimulationParameters const& parameters, Serializer* serializer, QWidget *parent = nullptr);
     virtual ~SimulationParametersDialog();
 
 	SimulationParameters const& getSimulationParameters () const;
@@ -41,6 +41,4 @@ private:
 	Ui::SimulationParametersDialog *ui;
 	Serializer* _serializer = nullptr;
     SimulationParameters _simulationParameters;
-
-	SimulationConfig _config;
 };

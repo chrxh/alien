@@ -316,7 +316,7 @@ void ActionController::onNewSimulation()
 {
 	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
 	if (dialog.exec()) {
-		_mainController->onNewSimulation(dialog.getConfig(), dialog.getEnergy());
+		_mainController->onNewSimulation(*dialog.getConfig(), *dialog.getEnergy());
 
 		settingUpNewSimulation(_mainController->getSimulationConfig());
 	}
@@ -367,11 +367,10 @@ void ActionController::onConfigureGrid()
     if (dialog.exec()) {
 
         auto config = _mainController->getSimulationConfig();
+        config->universeSize = *dialog.getUniverseSize();
+        config->cudaConstants = *dialog.getCudaConstants();
 
-        config->universeSize = dialog.getUniverseSize();
-        config->cudaConstants = dialog.getCudaConstants();
-
-        auto const extrapolateContent = dialog.isExtrapolateContent();
+        auto const extrapolateContent = *dialog.isExtrapolateContent();
         _mainController->onRecreateUniverse(config, extrapolateContent);
         settingUpNewSimulation(config);
 	}
@@ -379,8 +378,8 @@ void ActionController::onConfigureGrid()
 
 void ActionController::onEditSimulationParameters()
 {
-	auto config = _mainController->getSimulationConfig();
-	SimulationParametersDialog dialog(config, _serializer, _mainView);
+    auto const config = _mainController->getSimulationConfig();
+    SimulationParametersDialog dialog(config->parameters, _serializer, _mainView);
 	if (dialog.exec()) {
         auto const parameters = dialog.getSimulationParameters();
 		_mainModel->setSimulationParameters(parameters);
