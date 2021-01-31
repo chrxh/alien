@@ -15,10 +15,10 @@ public:
 	ComputationSettingsWidget(QWidget * parent = nullptr);
 	~ComputationSettingsWidget() = default;
 
-    IntVector2D getUniverseSize() const;
+    optional<IntVector2D> getUniverseSize() const;
     void setUniverseSize(IntVector2D const& value) const;
 
-    CudaConstants getCudaConstants() const;
+    optional<CudaConstants> getCudaConstants() const;
     void setCudaConstants(CudaConstants const& value);
 
     void saveSettings();
