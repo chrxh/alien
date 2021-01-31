@@ -96,7 +96,7 @@ void NewSimulationDialog::okClicked()
     auto const energy = getEnergy();
 
     if (!config || !energy) {
-        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", "The values you entered are not valid.");
+        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", Const::ErrorInvalidValues);
         msgBox.exec();
         return;
     }

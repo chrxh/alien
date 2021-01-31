@@ -204,7 +204,7 @@ void SimulationParametersDialog::loadButtonClicked ()
 			updateWidgetsFromSimulationParameters();
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified simulation parameter file could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadSimulationParameters);
 			msgBox.exec();
 			_simulationParameters = origSimulationParameters;
 		}
@@ -217,7 +217,7 @@ void SimulationParametersDialog::saveButtonClicked ()
     if( !filename.isEmpty() ) {
 		updateSimulationParametersFromWidgets();
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_simulationParameters); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Simulation parameters could not saved.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorSaveSimulationParameters);
 			msgBox.exec();
 		}
     }
