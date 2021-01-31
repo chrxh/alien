@@ -53,7 +53,7 @@ private:
     void saveSimulationIntern(string const& filename);
 
     string getPathToApp() const;
-
+    void showErrorMessageAndTerminate(QString what) const;
 
     Queue* _worker = nullptr;
 

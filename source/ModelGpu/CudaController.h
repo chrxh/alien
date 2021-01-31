@@ -27,11 +27,11 @@ public:
     void setExecutionParameters(ExecutionParameters const& parameters);
 
 	Q_SIGNAL void timestepCalculated();
+    Q_SIGNAL void errorThrown(QString message);
 
 private:
 	Q_SIGNAL void runWorker();
 	Q_SLOT void timestepCalculatedWithGpu();
-    Q_SLOT void showErrorMessageAndTerminate(QString what) const;
 
 	SpaceProperties *_metric = nullptr;
 
