@@ -98,7 +98,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="VisualEditController" name="visualEditController" native="true">
+     <widget class="SimulationViewWidget" name="simulationViewWidget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -798,9 +798,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>VisualEditController</class>
+   <class>SimulationViewWidget</class>
    <extends>QWidget</extends>
-   <header>Gui/VisualEditController.h</header>
+   <header>Gui/SimulationViewWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

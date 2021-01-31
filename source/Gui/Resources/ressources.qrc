@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>GettingStartedWindow.html</file>
         <file>Icons/editor/add_cell.png</file>
         <file>Icons/editor/add_cluster.png</file>
         <file>Icons/editor/add_energy.png</file>
@@ -28,5 +27,6 @@
         <file>Icons/main/accelerate off.png</file>
         <file>Icons/main/accelerate on.png</file>
         <file>Version.txt</file>
+        <file>GettingStartedWindow.html</file>
     </qresource>
 </RCC>

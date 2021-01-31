@@ -19,7 +19,8 @@ public:
 	void updateData(DataChangeDescription const &dataToUpdate) override;
     void requireData(ResolveDescription const& resolveDesc) override;
     void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
-	void requireImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
+	void requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
+    void requireVectorImage(IntRect rect, double zoom, QImagePtr const& target, std::mutex& mutex) override;
     void selectEntities(IntVector2D const& pos) override;
     void deselectAll() override;
     void applyAction(PhysicalAction const& action) override;

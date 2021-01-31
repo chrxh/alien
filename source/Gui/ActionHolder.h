@@ -31,7 +31,7 @@ public:
 	QAction* actionEditSymbols = nullptr;
 
 	QAction* actionEditor = nullptr;
-	QAction* actionMonitor = nullptr;
+    QAction* actionMonitor = nullptr;
 	QAction* actionZoomIn = nullptr;
 	QAction* actionZoomOut = nullptr;
     QAction* actionDisplayLink = nullptr;

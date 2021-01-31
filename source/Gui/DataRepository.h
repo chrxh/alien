@@ -62,7 +62,8 @@ public:
 	virtual bool isCellPresent(uint64_t cellId);
 
 	virtual void requireDataUpdateFromSimulation(IntRect const& rect);
-	virtual void requireImageFromSimulation(IntRect const& rect, QImagePtr const& target);
+	virtual void requirePixelImageFromSimulation(IntRect const& rect, QImagePtr const& target);
+    virtual void requireVectorImageFromSimulation(IntRect const& rect, double zoom, QImagePtr const& target);
     virtual std::mutex& getImageMutex();
 
 	Q_SIGNAL void imageReady();
