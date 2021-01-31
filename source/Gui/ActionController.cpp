@@ -292,6 +292,7 @@ void ActionController::onToggleEditorMode(bool toggled)
 {
     _model->setEditMode(toggled);
     if (toggled) {
+        _infoController->setRendering(InfoController::Rendering::Item);
         _simulationViewWidget->disconnectView();
         _simulationViewWidget->setActiveScene(ActiveView::ItemScene);
         _simulationViewWidget->connectView();
@@ -930,7 +931,6 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
     onRunClicked(false);
     onToggleCellInfo(actions->actionShowCellInfo->isChecked());
     onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
-    _infoController->setDevice(InfoController::Device::Gpu);
 }
 
 void ActionController::updateActionsEnableState()
@@ -979,6 +979,7 @@ void ActionController::setPixelOrVectorView()
 {
     if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticVectorViewSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         if (ActiveView::VectorScene != _simulationViewWidget->getActiveView()) {
+            _infoController->setRendering(InfoController::Rendering::Vector);
             _simulationViewWidget->disconnectView();
             _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
             _simulationViewWidget->connectView();
@@ -986,6 +987,7 @@ void ActionController::setPixelOrVectorView()
     }
     else {
         if (ActiveView::PixelScene != _simulationViewWidget->getActiveView()) {
+            _infoController->setRendering(InfoController::Rendering::Pixel);
             _simulationViewWidget->disconnectView();
             _simulationViewWidget->setActiveScene(ActiveView::PixelScene);
             _simulationViewWidget->connectView();
