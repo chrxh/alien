@@ -50,7 +50,7 @@
    <item row="1" column="0">
     <widget class="QCheckBox" name="extrapolateContentCheckBox">
      <property name="text">
-      <string>scale content</string>
+      <string>scale content when world size is changed</string>
      </property>
     </widget>
    </item>

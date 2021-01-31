@@ -4,6 +4,7 @@
 ### Added
 - vector graphic view mode is active from zoom level 4 onwards
 - startup screen shows version
+- validation of values in "General settings" and "New simulation" dialog
 
 ### Changed
 - info banner shows rendering mode

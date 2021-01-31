@@ -19,24 +19,33 @@ ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& con
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationSettingsDialog::okClicked);
 }
 
-IntVector2D ComputationSettingsDialog::getUniverseSize() const
+optional<IntVector2D> ComputationSettingsDialog::getUniverseSize() const
 {
 	return ui.computationSettingsWidget->getUniverseSize();
 }
 
-CudaConstants ComputationSettingsDialog::getCudaConstants() const
+optional<CudaConstants> ComputationSettingsDialog::getCudaConstants() const
 {
     return ui.computationSettingsWidget->getCudaConstants();
 }
 
-bool ComputationSettingsDialog::isExtrapolateContent() const
+optional<bool> ComputationSettingsDialog::isExtrapolateContent() const
 {
     return ui.extrapolateContentCheckBox->isChecked();
 }
 
 void ComputationSettingsDialog::okClicked()
 {
-    GuiSettings::setSettingsValue(Const::ExtrapolateContentKey, isExtrapolateContent());
+    auto const extrapolateContent = isExtrapolateContent();
+    auto const size = getUniverseSize();
+    auto const cudaConstants = getCudaConstants();
+    if (!extrapolateContent || !size || !cudaConstants) {
+        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", "The values you entered are not valid.");
+        msgBox.exec();
+        return;
+    }
+    GuiSettings::setSettingsValue(Const::ExtrapolateContentKey, *isExtrapolateContent());
+    ui.computationSettingsWidget->saveSettings();
     accept();
 }
 
