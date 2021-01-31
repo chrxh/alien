@@ -230,7 +230,13 @@ void ActionController::onZoomInClicked()
 	_simulationViewWidget->setZoomFactor(zoomFactor * 2);
 
     if(!_model->isEditMode()) {
-        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {            _model->getActionHolder()->actionEditor->toggle();        }        else {            setPixelOrVectorView();        }    }
+        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
+            _model->getActionHolder()->actionEditor->toggle();
+        }
+        else {
+            setPixelOrVectorView();
+        }
+    }
     _simulationViewWidget->refresh();
     updateActionsEnableState();
 }
@@ -250,10 +256,11 @@ void ActionController::onZoomOutClicked()
     else {
         setPixelOrVectorView();
     }
-    _simulationViewWidget->refresh();    updateActionsEnableState();
+    _simulationViewWidget->refresh();
+    updateActionsEnableState();
 }
 
-Q_SLOT void ActionController::onToggleDisplayLink(bool toggled)
+void ActionController::onToggleDisplayLink(bool toggled)
 {
     _mainController->onDisplayLink(toggled);
 }
@@ -292,7 +299,8 @@ void ActionController::onToggleEditorMode(bool toggled)
 	else {
         setPixelOrVectorView();
 	}
-    _simulationViewWidget->refresh();    updateActionsEnableState();
+    _simulationViewWidget->refresh();
+    updateActionsEnableState();
 
 	Q_EMIT _toolbar->getContext()->show(toggled);
 	Q_EMIT _dataEditor->getContext()->show(toggled);

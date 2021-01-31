@@ -426,9 +426,6 @@
     <ClCompile Include="Release\moc_ToolbarView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\CoordinateSystem.cpp">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_ItemConfig.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -662,6 +659,9 @@
     </ClCompile>
     <ClCompile Include="Release\moc_ItemViewport.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\CoordinateSystem.cpp">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1082,9 +1082,6 @@
     <ClInclude Include="ui_ToolbarView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\CoordinateSystem.h">
-      <Filter>Source Files\SimulationView</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\SimulationConfig.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -1132,6 +1129,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\VectorImageSectionItem.h">
       <Filter>Source Files\SimulationView\VectorView</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\CoordinateSystem.h">
+      <Filter>Source Files\SimulationView\ItemView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

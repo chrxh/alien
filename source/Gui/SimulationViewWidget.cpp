@@ -95,13 +95,16 @@ ActiveView SimulationViewWidget::getActiveView() const
 
 void SimulationViewWidget::setActiveScene (ActiveView activeScene)
 {
-    auto screenCenterPos = getActiveUniverseView()->getCenterPositionOfScreen();
+    auto scrollPosX = ui->simulationView->horizontalScrollBar()->value();
+    auto scrollPosY = ui->simulationView->verticalScrollBar()->value();
+
     auto zoom = getZoomFactor();
 
     auto view = getView(activeScene);
     view->activate(zoom);
 
-    view->centerTo(screenCenterPos);
+    ui->simulationView->horizontalScrollBar()->setValue(scrollPosX); //workaround since UniverseView::centerTo has bad precision
+    ui->simulationView->verticalScrollBar()->setValue(scrollPosY);
 }
 
 double SimulationViewWidget::getZoomFactor()
