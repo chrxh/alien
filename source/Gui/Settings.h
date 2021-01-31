@@ -12,7 +12,10 @@ namespace Const
     auto const ZoomLevelForAutomaticVectorViewSwitch = 4.0;
     auto const MinZoomLevelForEditor = 8.0;
 
-	//visual editor
+    //startup
+    const QColor StartupTextColor(0x00, 0x00, 0x00);
+
+    //visual viewport
 	const QColor BackgroundColor(0x00, 0x00, 0x00);
 	const QColor UniverseColor(0x00, 0x00, 0x1b);
 	const QColor CellColor(0x6F, 0x90, 0xFF, 0xA0);

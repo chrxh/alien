@@ -7,9 +7,10 @@
 
 ### Changed
 - info banner shows rendering mode
+- "Computation settings" dialog restructured and renamed to "General settings"
 
 ### Removed
-- experimental feature "Web access" disabled
+- experimental feature "Web access" disabled (will be enabled when finished)
 
 ### Fixed
 
