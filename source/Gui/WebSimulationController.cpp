@@ -19,6 +19,7 @@
 #include "SendStatisticsJob.h"
 #include "SimulationConfig.h"
 #include "WebSimulationSelectionController.h"
+#include "Settings.h"
 
 namespace
 {
@@ -103,8 +104,8 @@ bool WebSimulationController::onConnectToSimulation()
     }
 
     if (_currentToken) {
-        QMessageBox msgBox(QMessageBox::Information, "Connection successful", "You are connected to "
-            + QString::fromStdString(simulationInfo.simulationName) + ".");
+        QMessageBox msgBox(QMessageBox::Information, "Connection successful",
+            QString(Const::InfoConnectedTo).arg(QString::fromStdString(simulationInfo.simulationName)));
         msgBox.exec();
         _pollingTimer->start(POLLING_INTERVAL);
         _updateStatisticsTimer->start(UPDATE_STATISTICS_INTERVAL);
@@ -112,7 +113,7 @@ bool WebSimulationController::onConnectToSimulation()
         return true;
     }
     else {
-        QMessageBox msgBox(QMessageBox::Critical, "Error", "The password you entered is incorrect.");
+        QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorInvalidPassword);
         msgBox.exec();
         return false;
     }

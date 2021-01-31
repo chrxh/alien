@@ -38,6 +38,7 @@ void SimulationContextGpuImpl::init(
 	SET_CHILD(_cudaController, cudaController);
 
 	_cudaController->init(space, timestep, parameters, specificData.getCudaConstants());
+    connect(_cudaController, &CudaController::errorThrown, this, &SimulationContext::errorThrown);
 }
 
 SpaceProperties * SimulationContextGpuImpl::getSpaceProperties() const

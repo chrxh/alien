@@ -26,7 +26,7 @@ CudaController::CudaController(QObject* parent /*= nullptr*/)
 	_worker = new CudaWorker();
 	_worker->moveToThread(&_thread);
 	connect(_worker, &CudaWorker::timestepCalculated, this, &CudaController::timestepCalculatedWithGpu);
-    connect(_worker, &CudaWorker::errorThrown, this, &CudaController::showErrorMessageAndTerminate);
+    connect(_worker, &CudaWorker::errorThrown, this, &CudaController::errorThrown);
     connect(this, &CudaController::runWorker, _worker, &CudaWorker::run);
 	_thread.start();
 	_thread.setPriority(QThread::TimeCriticalPriority);
@@ -95,13 +95,4 @@ void CudaController::setExecutionParameters(ExecutionParameters const & paramete
 void CudaController::timestepCalculatedWithGpu()
 {
 	Q_EMIT timestepCalculated();
-}
-
-void CudaController::showErrorMessageAndTerminate(QString what) const
-{
-    QMessageBox messageBox;
-    messageBox.critical(0, "CUDA error",
-        QString("An error has occurred. Please restart the program and check the CUDA parameters.\n\nError message:\n\"%1\"")
-        .arg(what));
-    exit(EXIT_FAILURE);
 }

@@ -355,7 +355,7 @@ void ActionController::onLoadSimulation()
 			settingUpNewSimulation(_mainController->getSimulationConfig());
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified simulation could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadSimulation);
 			msgBox.exec();
 		}
 	}
@@ -454,7 +454,7 @@ void ActionController::onLoadCollection()
 			}, UpdateDescription::All);
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Specified collection could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadCollection);
 			msgBox.exec();
 		}
 	}
@@ -465,7 +465,7 @@ void ActionController::onSaveCollection()
 	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Collection", "", "Alien Collection (*.aco)");
 	if (!filename.isEmpty()) {
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeDataDescription(_repository->getExtendedSelection()); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. Collection could not saved.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorSaveCollection);
 			msgBox.exec();
 			return;
 		}
@@ -735,7 +735,7 @@ void ActionController::onPasteFromClipboard()
 
     auto const tokenMemorySize = _mainModel->getSimulationParameters().tokenMemorySize;
     if (tokenMemorySize != tokenMemory.size()) {
-        QMessageBox msgBox(QMessageBox::Critical, "Error", "Clipboard memory does not fit to token memory.");
+        QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorPasteFromClipboard);
         msgBox.exec();
         return;
     }
@@ -864,7 +864,7 @@ void ActionController::onShowAbout()
     else {
         QTextStream in(&file);
         auto version = in.readLine();
-        QMessageBox msgBox(QMessageBox::Information, "About", "Artificial Life Environment, version " + version + ".\nDeveloped by Christian Heinemann.");
+        QMessageBox msgBox(QMessageBox::Information, "About", QString(Const::InfoAbout).arg(version));
         msgBox.exec();
     }
 }

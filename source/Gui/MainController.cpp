@@ -44,6 +44,7 @@
 #include "QApplicationHelper.h"
 #include "Queue.h"
 #include "WebSimulationController.h"
+#include "Settings.h"
 
 namespace Const
 {
@@ -198,6 +199,13 @@ string MainController::getPathToApp() const
     return result.toStdString();
 }
 
+void MainController::showErrorMessageAndTerminate(QString what) const
+{
+    QMessageBox messageBox;
+    messageBox.critical(0, "CUDA error", QString(Const::ErrorCuda).arg(what));
+    exit(EXIT_FAILURE);
+}
+
 void MainController::onRunSimulation(bool run)
 {
 	_simController->setRun(run);
@@ -251,6 +259,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
+    connect(_simController->getContext(), &SimulationContext::errorThrown, this, &MainController::showErrorMessageAndTerminate);
 
 	auto context = _simController->getContext();
 	_descHelper->init(context);

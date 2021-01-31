@@ -40,7 +40,7 @@ void ComputationSettingsDialog::okClicked()
     auto const size = getUniverseSize();
     auto const cudaConstants = getCudaConstants();
     if (!extrapolateContent || !size || !cudaConstants) {
-        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", "The values you entered are not valid.");
+        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", Const::ErrorInvalidValues);
         msgBox.exec();
         return;
     }
