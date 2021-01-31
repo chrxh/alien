@@ -138,7 +138,6 @@ void MainView::closeEvent(QCloseEvent * event)
 	QMainWindow::closeEvent(event);
 }
 
-#include <QDebug>
 void MainView::setupMenuAndToolbar()
 {
 	auto actions = _actions->getActionHolder();
@@ -146,8 +145,10 @@ void MainView::setupMenuAndToolbar()
     ui->menuSimulation->addAction(actions->actionNewSimulation);
     ui->menuSimulation->addAction(actions->actionLoadSimulation);
     ui->menuSimulation->addAction(actions->actionSaveSimulation);
+/*
     ui->menuSimulation->addSeparator();
     ui->menuSimulation->addAction(actions->actionWebSimulation);
+*/
     ui->menuSimulation->addSeparator();
     ui->menuSimulation->addAction(actions->actionRunSimulation);
     ui->menuSimulation->addAction(actions->actionRunStepForward);
