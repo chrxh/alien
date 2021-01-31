@@ -11,6 +11,8 @@
 
 #include "SimulationData.cuh"
 
+#define SELECTION_RADIUS 30
+
 __device__ void copyString(
     int& targetLen,
     int& targetStringIndex,
@@ -259,8 +261,6 @@ __global__ void createDataFromTO(SimulationData data, DataAccessTO simulationTO)
         factory.createParticleFromTO(simulationTO.particles[particleIndex]);
     }
 }
-
-#define SELECTION_RADIUS 100
 
 __global__ void selectClusters(int2 pos, Array<Cluster*> clusters)
 {
