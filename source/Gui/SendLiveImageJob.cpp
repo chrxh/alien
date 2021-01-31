@@ -74,7 +74,7 @@ void SendLiveImageJob::requestImage()
         << _size.y
         << std::endl;
 
-    _simAccess->requireImage(rect, _image, _mutex);
+    _simAccess->requirePixelImage(rect, _image, _mutex);
 
     _state = State::ImageFromGpuRequested;
     _isReady = false;

@@ -8,7 +8,8 @@
 
 namespace Const
 {
-    auto const ZoomLevelForAutomaticSwitch = 16.0;
+    auto const ZoomLevelForAutomaticEditorSwitch = 16.0;
+    auto const ZoomLevelForAutomaticVectorViewSwitch = 4.0;
     auto const MinZoomLevelForEditor = 8.0;
 
 	//visual editor

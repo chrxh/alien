@@ -70,7 +70,7 @@ void SendLastImageJob::requestImage()
 
     _image = boost::make_shared<QImage>(_size.x, _size.y, QImage::Format_RGB32);
     auto const rect = IntRect{ _pos, IntVector2D{ _pos.x + _size.x, _pos.y + _size.y } };
-    _simAccess->requireImage(rect, _image, _mutex);
+    _simAccess->requirePixelImage(rect, _image, _mutex);
 
     _state = State::ImageFromGpuRequested;
     _isReady = false;

@@ -88,11 +88,11 @@ private:
 	IntRect _rect;
 };
 
-class _GetImageJob
+class _GetPixelImageJob
 	: public _CudaJob
 {
 public:
-    _GetImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage, std::mutex& mutex)
+    _GetPixelImageJob(string const& originId, IntRect const& rect, QImagePtr const& targetImage, std::mutex& mutex)
 		: _CudaJob(originId, true), _targetImage(targetImage), _mutex(mutex)
     {
         auto imageSize = targetImage->size();
@@ -101,7 +101,7 @@ public:
         _rect = { upperLeft, {upperLeft.x + imageSize.width() - 1, upperLeft.y + imageSize.height() - 1 } };
     }
 
-    virtual ~_GetImageJob() = default;
+    virtual ~_GetPixelImageJob() = default;
 
     IntRect getRect() const
     {
@@ -120,6 +120,44 @@ public:
 
 private:
     IntRect _rect;
+    QImagePtr _targetImage;
+    std::mutex& _mutex;
+};
+
+class _GetVectorImageJob
+    : public _CudaJob
+{
+public:
+    _GetVectorImageJob(string const& originId, IntRect const& rect, double zoom, QImagePtr const& targetImage, std::mutex& mutex)
+        : _CudaJob(originId, true), _zoom(zoom), _targetImage(targetImage), _mutex(mutex), _rect(rect)
+    {
+    }
+
+    virtual ~_GetVectorImageJob() = default;
+
+    IntRect const& getRect() const
+    {
+        return _rect;
+    }
+
+    double const& getZoom() const
+    {
+        return _zoom;
+    }
+
+    QImagePtr getTargetImage() const
+    {
+        return _targetImage;
+    }
+
+    std::mutex& getMutex()
+    {
+        return _mutex;
+    }
+
+private:
+    IntRect _rect;
+    double _zoom;
     QImagePtr _targetImage;
     std::mutex& _mutex;
 };

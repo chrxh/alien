@@ -1,6 +1,9 @@
+#include <QGraphicsView>
+#include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QMatrix4x4>
+#include <QScrollbar>
 
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
@@ -13,65 +16,110 @@
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
 
-#include "ViewportController.h"
 #include "ItemUniverseView.h"
 #include "CellItem.h"
 #include "ParticleItem.h"
 #include "ItemManager.h"
 #include "CoordinateSystem.h"
+#include "ItemViewport.h"
 
-ItemUniverseView::ItemUniverseView(QObject *parent)
-	: QGraphicsScene(parent)
+ItemUniverseView::ItemUniverseView(QGraphicsView* graphicsView, QObject *parent)
+	: UniverseView(parent), _graphicsView(graphicsView)
 {
-    setBackgroundBrush(QBrush(Const::UniverseColor));
+    _scene = new QGraphicsScene(parent);
+    _scene->setBackgroundBrush(QBrush(Const::UniverseColor));
+    _scene->installEventFilter(this);
 }
 
 
-void ItemUniverseView::init(Notifier* notifier, SimulationController * controller, DataRepository* manipulator, ViewportInterface * viewport)
+void ItemUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator)
 {
-	_controller = controller;
-	_viewport = viewport;
+    disconnectView();
+
+    _controller = controller;
 	_repository = manipulator;
 	_notifier = notifier;
+
+    delete _viewport;
+    _viewport = new ItemViewport(_graphicsView, this);
 
 	auto itemManager = new ItemManager();
 	SET_CHILD(_itemManager, itemManager);
 
-	_itemManager->init(this, viewport, _controller->getContext()->getSimulationParameters());
+	_itemManager->init(_scene, _viewport, _controller->getContext()->getSimulationParameters());
 
 	connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled);
 }
 
-void ItemUniverseView::activate()
+void ItemUniverseView::connectView()
 {
-	IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
-	_itemManager->activate(size);
-
-	_connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
-	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemUniverseView::receivedNotifications));
-	_connections.push_back(connect(_viewport, &ViewportInterface::scrolled, this, &ItemUniverseView::scrolled));
-
-	requestData();
-	_activated = true;
+    disconnectView();
+    _connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
+    _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemUniverseView::receivedNotifications));
+    _connections.push_back(QObject::connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ItemUniverseView::scrolled));
+    _connections.push_back(QObject::connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &ItemUniverseView::scrolled));
 }
 
-void ItemUniverseView::deactivate()
+void ItemUniverseView::disconnectView()
 {
-	for (auto const& connection : _connections) {
-		disconnect(connection);
-	}
-	_activated = false;
+    for (auto const& connection : _connections) {
+        disconnect(connection);
+    }
+    _connections.clear();
 }
 
 void ItemUniverseView::refresh()
 {
-	requestData();
+    requestData();
+}
+
+bool ItemUniverseView::isActivated() const
+{
+    return _graphicsView->scene() == _scene;
+}
+
+void ItemUniverseView::activate(double zoomFactor)
+{
+    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    _graphicsView->setScene(_scene);
+    _graphicsView->resetTransform();
+
+    IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
+    _itemManager->activate(size);
+    setZoomFactor(zoomFactor);
+}
+
+double ItemUniverseView::getZoomFactor() const
+{
+    return _zoomFactor;
+}
+
+void ItemUniverseView::setZoomFactor(double zoomFactor)
+{
+    _zoomFactor = zoomFactor;
+    _graphicsView->resetTransform();
+    _graphicsView->scale(CoordinateSystem::sceneToModel(_zoomFactor), CoordinateSystem::sceneToModel(_zoomFactor));
+}
+
+QVector2D ItemUniverseView::getCenterPositionOfScreen() const
+{
+    auto const width = static_cast<double>(_graphicsView->width());
+    auto const height = static_cast<double>(_graphicsView->height());
+    auto const sceneCoordinates = _graphicsView->mapToScene(width / 2.0, height / 2.0);
+    auto const modelCoordinates = CoordinateSystem::sceneToModel(QVector2D(sceneCoordinates.x(), sceneCoordinates.y()));
+    return modelCoordinates;
+}
+
+void ItemUniverseView::centerTo(QVector2D const & position)
+{
+    auto const scenePosition = CoordinateSystem::modelToScene(position);
+    _graphicsView->centerOn(scenePosition.x(), scenePosition.y());
 }
 
 void ItemUniverseView::toggleCenterSelection(bool value)
 {
 	_centerSelection = value;
-	centerSelectionIfEnabled(NotifyScrollChanged::Yes);
+	centerSelectionIfEnabled();
 }
 
 void ItemUniverseView::requestData()
@@ -100,15 +148,26 @@ optional<QVector2D> ItemUniverseView::getCenterPosOfSelection() const
 	return result;
 }
 
-void ItemUniverseView::centerSelectionIfEnabled(NotifyScrollChanged notify)
+void ItemUniverseView::centerSelectionIfEnabled()
 {
 	if (_centerSelection && !_mouseButtonPressed) {
-		if (auto const& centerPos = getCenterPosOfSelection()) {
-			_viewport->setModeToNoUpdate();
-			_viewport->scrollToPos(*centerPos, notify);
-			_viewport->setModeToNoUpdate();
-		}
+        if (auto const& centerPos = getCenterPosOfSelection()) {
+            disconnectView();
+            _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+            auto const scenePos = CoordinateSystem::modelToScene(*centerPos);
+            _graphicsView->centerOn(scenePos.x(), scenePos.y());
+            _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+            connectView();
+        }
 	}
+}
+
+void ItemUniverseView::updateItems()
+{
+    _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+    _itemManager->update(_repository);
+    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    _scene->update();
 }
 
 void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
@@ -116,15 +175,16 @@ void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
 	if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
-	centerSelectionIfEnabled(NotifyScrollChanged::No);
-	_itemManager->update(_repository);
+
+	centerSelectionIfEnabled();
+    updateItems();
 }
 
 void ItemUniverseView::cellInfoToggled(bool showInfo)
 {
 	_itemManager->toggleCellInfo(showInfo);
-	if (_activated) {
-		_itemManager->update(_repository);
+	if (!_connections.empty()) {
+        updateItems();
 	}
 }
 
@@ -150,7 +210,7 @@ ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(std::list<QG
 void ItemUniverseView::delegateSelection(Selection const & selection)
 {
 	_repository->setSelection(selection.cellIds, selection.particleIds);
-	_itemManager->update(_repository);
+    updateItems();
 }
 
 void ItemUniverseView::startMarking(QPointF const& scenePos)
@@ -158,7 +218,7 @@ void ItemUniverseView::startMarking(QPointF const& scenePos)
 	_repository->setSelection(list<uint64_t>(), list<uint64_t>());
 	auto pos = CoordinateSystem::sceneToModel(scenePos);
 	_itemManager->setMarkerItem(pos, pos);
-	_itemManager->update(_repository);
+    updateItems();
 }
 
 namespace
@@ -174,10 +234,31 @@ namespace
 	}
 }
 
+bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
+{
+    if (object != _scene) {
+        return false;
+    }
+
+    if (event->type() == QEvent::GraphicsSceneMousePress) {
+        mousePressEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+    }
+
+    if (event->type() == QEvent::GraphicsSceneMouseMove) {
+        mouseMoveEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+    }
+
+    if (event->type() == QEvent::GraphicsSceneMouseRelease) {
+        mouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+    }
+
+    return false;
+}
+
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	_mouseButtonPressed = true;
-	auto itemsClicked = QGraphicsScene::items(e->scenePos()).toStdList();
+	auto itemsClicked = _scene->items(e->scenePos()).toStdList();
 	list<QGraphicsItem*> frontItem = !itemsClicked.empty() ? list<QGraphicsItem*>({ itemsClicked.front() }) : list<QGraphicsItem*>();
 	Selection selection = getSelectionFromItems(frontItem);
 
@@ -214,8 +295,8 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 			int dummy = 0;
 		}
 		_repository->setSelection(selection.cellIds, selection.particleIds);
-		_itemManager->update(_repository);
-	}
+        updateItems();
+    }
 	if (!_itemManager->isMarkerActive()) {
 		auto lastPos = e->lastScenePos();
 		auto pos = e->scenePos();
@@ -224,16 +305,16 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		if (leftButton && !rightButton) {
 			_repository->moveSelection(delta);
 			_repository->reconnectSelectedCells();
-			_itemManager->update(_repository);
-		}
+            updateItems();
+        }
 		if (rightButton && !leftButton) {
 			_repository->moveExtendedSelection(delta);
-			_itemManager->update(_repository);
-		}
+            updateItems();
+        }
 		if (leftButton && rightButton) {
 			_repository->rotateSelection(delta.y()*10);
-			_itemManager->update(_repository);
-		}
+            updateItems();
+        }
 	}
 	if (leftButton || rightButton) {
 		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
