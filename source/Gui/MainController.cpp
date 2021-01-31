@@ -438,7 +438,7 @@ void MainController::connectSimController() const
 
 void MainController::addRandomEnergy(double amount)
 {
-	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters().cellMinEnergy;
+	double maxEnergyPerCell = _simController->getContext()->getSimulationParameters().cellMinEnergy * 10;
 	_repository->addRandomParticles(amount, maxEnergyPerCell);
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor,

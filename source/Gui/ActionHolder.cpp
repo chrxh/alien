@@ -73,7 +73,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionSimulationChanger->setChecked(false);
     actionSimulationChanger->setToolTip("Change simulation parameters automatically");
 
-	actionComputationSettings = new QAction("Computation", this);
+	actionComputationSettings = new QAction("General settings", this);
 	actionComputationSettings->setEnabled(true);
 
 	actionEditSimParameters = new QAction("Simulation parameters", this);
