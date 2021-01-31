@@ -29,6 +29,6 @@ private:
 	MainController* _mainController = nullptr;
 	int _tpsCounting = 0;
 	int _tps = 0;
-	double _zoomFactor = 2.0;
+	double _zoomFactor = 4.0;
 	Device _device = Device::Gpu;
 };
