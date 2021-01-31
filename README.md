@@ -6,7 +6,7 @@
 <img src="img/alien.png" width=100%>
 </h1>
 
-ALiEn is an artificial life simulation program powered by a specialized physics and rendering engine in CUDA.
+ALiEn is an artificial life simulation program based on a specialized physics and rendering engine in CUDA.
 Each simulated body has an internal structure modeled by a graph and can perform both physical actions and information processing by circulating tokens along nodes.
 The simulator includes a world-building tool that allows you to easily construct universes according to your own ideas.
 
