@@ -161,7 +161,7 @@ void SimulationViewWidget::setStartupScene()
     font.setPixelSize(15);
     versionTextItem->setFont(font);
     versionTextItem->setPos(440, 480);
-    versionTextItem->setBrush(QColor(0x89, 0x94, 0xc4));
+    versionTextItem->setBrush(Const::StartupTextColor);
     startupScene->addItem(versionTextItem);
 
     ui->simulationView->setScene(startupScene);
