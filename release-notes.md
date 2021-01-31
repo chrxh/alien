@@ -1,5 +1,18 @@
 # Release notes
 
+## [2.2.0] - 2021-01-31
+### Added
+- vector graphic view mode is active from zoom level 4 onwards
+- startup screen shows version
+
+### Changed
+- info banner shows rendering mode
+
+### Removed
+- experimental feature "Web access" disabled
+
+### Fixed
+
 ## [2.1.0] - 2021-01-17
 ### Added
 - usability: showing first steps window after startup
