@@ -142,9 +142,6 @@ void MainController::init()
         onNewSimulation(config, 0);
     }
 
-    auto config = getSimulationConfig();
-    _view->getInfoController()->setDevice(InfoController::Device::Gpu);
-
     _view->initGettingStartedWindow();
 
     //auto save every 20 min

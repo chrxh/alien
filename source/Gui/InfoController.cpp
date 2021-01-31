@@ -16,6 +16,7 @@ void InfoController::init(QLabel * infoLabel, MainController* mainController)
 	_mainController = mainController;
     _oneSecondTimer->stop();
     _oneSecondTimer->start(1000);
+    _rendering = Rendering::Vector;
 }
 
 void InfoController::increaseTimestep()
@@ -30,9 +31,10 @@ void InfoController::setZoomFactor(double factor)
 	updateInfoLabel();
 }
 
-void InfoController::setDevice(Device value)
+void InfoController::setRendering(Rendering value)
 {
-	_device = value;
+    _rendering = value;
+    updateInfoLabel();
 }
 
 void InfoController::oneSecondTimerTimeout()
@@ -44,16 +46,23 @@ void InfoController::oneSecondTimerTimeout()
 
 void InfoController::updateInfoLabel()
 {
-	QString deviceString;
-	if (Device::Gpu == _device) {
-		deviceString = "Device: <font color=#80FF80><b>G P U </b></font>";
+	QString renderingString;
+	if (Rendering::Pixel == _rendering) {
+		renderingString = "Rendering: <font color=#FFB080><b>pixel graphic&nbsp;</b></font>";
 	}
+    else if (Rendering::Vector== _rendering) {
+        renderingString = "Rendering: <font color=#B0FF80><b>vector graphic</b></font>";
+    }
+    else if (Rendering::Item == _rendering) {
+        renderingString = "Rendering: <font color=#80B0FF><b>item graphic&nbsp;&nbsp;</b></font>";
+    }
     else {
         THROW_NOT_IMPLEMENTED();
     }
 	auto separator = QString("&nbsp;&nbsp;<font color=#7070FF>&#10072;</font>&nbsp;&nbsp;");
-	auto infoString = deviceString + separator + QString("Timestep: %1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
-		+ separator + QString("TPS: %2").arg(_tps, 5, 10, QLatin1Char('0'))
-		+ separator + QString("Zoom factor: %3x").arg(_zoomFactor);
+    auto infoString = renderingString
+        + separator + QString("Zoom factor: %3x").arg(_zoomFactor)
+        + separator + QString("Timestep: %1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
+        + separator + QString("TPS: %2").arg(_tps, 5, 10, QLatin1Char('0'));
 	_infoLabel->setText(infoString);
 }

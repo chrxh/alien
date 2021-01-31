@@ -16,8 +16,10 @@ public:
 
 	void increaseTimestep();
 	void setZoomFactor(double factor);
-	enum class Device { Gpu };
-	void setDevice(Device value);
+
+    enum class Rendering
+    { Pixel, Vector, Item};
+    void setRendering(Rendering value);
 
 private:
 	Q_SLOT void oneSecondTimerTimeout();
@@ -30,5 +32,5 @@ private:
 	int _tpsCounting = 0;
 	int _tps = 0;
 	double _zoomFactor = 4.0;
-	Device _device = Device::Gpu;
+    Rendering _rendering = Rendering::Vector;
 };
