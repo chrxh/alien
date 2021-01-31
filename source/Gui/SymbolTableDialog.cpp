@@ -140,7 +140,7 @@ void SymbolTableDialog::loadButtonClicked ()
 			updateWidgetsFromSymbolTable();
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadSymbolMap);
 			msgBox.exec();
 		}
     }
@@ -152,7 +152,7 @@ void SymbolTableDialog::saveButtonClicked ()
     if( !filename.isEmpty() ) {
 		updateSymbolTableFromWidgets();
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSymbolTable(_symbolTable); })) {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The symbol table could not saved.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorSaveSymbolMap);
 			msgBox.exec();
 			return;
 		}
@@ -171,7 +171,7 @@ void SymbolTableDialog::mergeWithButtonClicked ()
 			updateWidgetsFromSymbolTable();
 		}
 		else {
-			QMessageBox msgBox(QMessageBox::Critical, "Error", "An error occurred. The specified symbol table could not loaded.");
+			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadSymbolMap);
 			msgBox.exec();
 		}
     }

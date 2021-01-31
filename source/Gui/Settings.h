@@ -184,6 +184,21 @@ namespace Const
     const std::string ExtrapolateContentKey = "computation/extrapolateContent";
     const bool ExtrapolateContentDefault = false;
 
+    //messages
+    QString const InfoAbout = "Artificial Life Environment, version %1.\nDeveloped by Christian Heinemann.";
+    QString const InfoConnectedTo = "You are connected to %1.";
+
+    QString const ErrorCuda = "An error has occurred. Please restart the program and check the CUDA parameters.\n\nError message (press CTRL+C to copy the message):\n\"%1\"";
+    QString const ErrorLoadSimulation = "Specified simulation could not be loaded.";
+    QString const ErrorLoadCollection = "Specified collection could not be loaded.";
+    QString const ErrorSaveCollection = "Collection could not be saved.";
+    QString const ErrorPasteFromClipboard = "The clipboard memory does not match the token memory pattern.";
+    QString const ErrorInvalidValues = "The values you entered are not valid.";
+    QString const ErrorLoadSimulationParameters = "The specified simulation parameter file could not be loaded.";
+    QString const ErrorSaveSimulationParameters = "Simulation parameters could not be saved.";
+    QString const ErrorLoadSymbolMap = "The specified symbol map could not be loaded.";
+    QString const ErrorSaveSymbolMap = "The symbol map could not be saved.";
+    QString const ErrorInvalidPassword = "The password you entered is incorrect.";
 }
 
 class GuiSettings
