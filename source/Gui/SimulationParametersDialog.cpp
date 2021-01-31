@@ -30,9 +30,9 @@ namespace {
     };
 }
 
-SimulationParametersDialog::SimulationParametersDialog(SimulationConfig const& config, Serializer* serializer, QWidget *parent)
-	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(config->parameters)
-	, _serializer(serializer), _config(config)
+SimulationParametersDialog::SimulationParametersDialog(SimulationParameters const&  parameters, Serializer* serializer, QWidget *parent)
+	: QDialog(parent), ui(new Ui::SimulationParametersDialog), _simulationParameters(parameters)
+	, _serializer(serializer)
 {
     ui->setupUi(this);
     setFont(GuiSettings::getGlobalFont());
@@ -43,7 +43,6 @@ SimulationParametersDialog::SimulationParametersDialog(SimulationConfig const& c
     updateWidgetsFromSimulationParameters ();
 
     //connections
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(updateSimulationParametersFromWidgets()));
     connect(ui->defaultButton, SIGNAL(clicked()), this, SLOT(defaultButtonClicked()));
     connect(ui->loadButton, SIGNAL(clicked()), this, SLOT(loadButtonClicked()));
     connect(ui->saveButton, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
@@ -62,18 +61,8 @@ SimulationParameters const& SimulationParametersDialog::getSimulationParameters 
 
 void SimulationParametersDialog::okClicked()
 {
-	string errorMsg;
-	auto valResult = _config->validate(errorMsg);
-	if (valResult == _SimulationConfig::ValidationResult::Ok) {
-		accept();
-	}
-	else if (valResult == _SimulationConfig::ValidationResult::Error) {
-		QMessageBox msgBox(QMessageBox::Critical, "error", errorMsg.c_str());
-		msgBox.exec();
-	}
-	else {
-		THROW_NOT_IMPLEMENTED();
-	}
+    updateSimulationParametersFromWidgets();
+	accept();
 }
 
 void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()

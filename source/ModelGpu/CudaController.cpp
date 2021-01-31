@@ -101,7 +101,7 @@ void CudaController::showErrorMessageAndTerminate(QString what) const
 {
     QMessageBox messageBox;
     messageBox.critical(0, "CUDA error",
-        QString("An error has occurred. Please restart the program and check the CUDA setting.\n\nError message:\n\"%1\"")
+        QString("An error has occurred. Please restart the program and check the CUDA parameters.\n\nError message:\n\"%1\"")
         .arg(what));
     exit(EXIT_FAILURE);
 }

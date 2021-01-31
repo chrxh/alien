@@ -4,12 +4,12 @@
 
 namespace
 {
-    uint getUIntOrZero(QString const& string)
+    optional<uint> getUIntOrZero(QString const& string)
     {
         bool ok(true);
         auto const value = string.toUInt(&ok);
         if (!ok) {
-            return 0;
+            return boost::none;
         }
         return value;
     }
@@ -43,18 +43,18 @@ ComputationSettingsWidget::ComputationSettingsWidget(QWidget* parent)
         GuiSettings::getSettingsValue(Const::GpuMetadataDynamicMemorySizeKey, Const::GpuDynamicMemorySizeDefault)));
 }
 
-IntVector2D ComputationSettingsWidget::getUniverseSize() const
+optional<IntVector2D> ComputationSettingsWidget::getUniverseSize() const
 {
     IntVector2D result;
     bool ok;
     result.x = ui.gpuUniverseSizeXEdit->text().toUInt(&ok);
     if (!ok) {
-        result.x = 100;
+        return boost::none;
     }
 
     result.y = ui.gpuUniverseSizeYEdit->text().toUInt(&ok);
     if (!ok) {
-        result.y = 100;
+        return boost::none;
     }
 
     return result;
@@ -66,21 +66,69 @@ void ComputationSettingsWidget::setUniverseSize(IntVector2D const & value) const
     ui.gpuUniverseSizeYEdit->setText(QString::number(value.y));
 }
 
-CudaConstants ComputationSettingsWidget::getCudaConstants() const
+optional<CudaConstants> ComputationSettingsWidget::getCudaConstants() const
 {
     CudaConstants result;
-    result.NUM_BLOCKS = getUIntOrZero(ui.gpuNumBlocksEdit->text());
-    result.NUM_THREADS_PER_BLOCK = getUIntOrZero(ui.gpuNumThreadsPerBlockEdit->text());
-    result.MAX_CLUSTERS = getUIntOrZero(ui.gpuMaxClustersEdit->text());
-    result.MAX_CLUSTERPOINTERS = result.MAX_CLUSTERS * 10;
-    result.MAX_CELLS = getUIntOrZero(ui.gpuMaxCellsEdit->text());
-    result.MAX_CELLPOINTERS = result.MAX_CELLS * 10;
-    result.MAX_TOKENS = getUIntOrZero(ui.gpuMaxTokensEdit->text());
-    result.MAX_TOKENPOINTERS = result.MAX_TOKENS * 10;
-    result.MAX_PARTICLES = getUIntOrZero(ui.gpuMaxParticlesEdit->text());
-    result.MAX_PARTICLEPOINTERS = result.MAX_PARTICLES * 10;
-    result.DYNAMIC_MEMORY_SIZE = getUIntOrZero(ui.gpuDynamicMemorySizeEdit->text());
-    result.METADATA_DYNAMIC_MEMORY_SIZE = getUIntOrZero(ui.gpuMetadataDynamicMemorySizeEdit->text());
+    if (auto const value = getUIntOrZero(ui.gpuNumBlocksEdit->text())) {
+        result.NUM_BLOCKS = *value;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuNumThreadsPerBlockEdit->text())) {
+        result.NUM_THREADS_PER_BLOCK = *value;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuMaxClustersEdit->text())) {
+        result.MAX_CLUSTERS = *value;
+        result.MAX_CLUSTERPOINTERS = result.MAX_CLUSTERS * 10;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuMaxCellsEdit->text())) {
+        result.MAX_CELLS = *value;
+        result.MAX_CELLPOINTERS = result.MAX_CELLS * 10;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuMaxTokensEdit->text())) {
+        result.MAX_TOKENS = *value;
+        result.MAX_TOKENPOINTERS = result.MAX_TOKENS * 10;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuMaxParticlesEdit->text())) {
+        result.MAX_PARTICLES = *value;
+        result.MAX_PARTICLEPOINTERS = result.MAX_PARTICLES * 10;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuDynamicMemorySizeEdit->text())) {
+        result.DYNAMIC_MEMORY_SIZE = *value;
+    }
+    else {
+        return boost::none;
+    }
+
+    if (auto const value = getUIntOrZero(ui.gpuMetadataDynamicMemorySizeEdit->text())) {
+        result.METADATA_DYNAMIC_MEMORY_SIZE = *value;
+    }
+    else {
+        return boost::none;
+    }
+
     return result;
 }
 
@@ -98,15 +146,16 @@ void ComputationSettingsWidget::setCudaConstants(CudaConstants const & value)
 
 void ComputationSettingsWidget::saveSettings()
 {
-    auto cudaConstants = getCudaConstants();
-    GuiSettings::setSettingsValue(Const::GpuUniverseSizeXKey, getUniverseSize().x);
-    GuiSettings::setSettingsValue(Const::GpuUniverseSizeYKey, getUniverseSize().y);
-    GuiSettings::setSettingsValue(Const::GpuNumBlocksKey, cudaConstants.NUM_BLOCKS);
-    GuiSettings::setSettingsValue(Const::GpuNumThreadsPerBlockKey, cudaConstants.NUM_THREADS_PER_BLOCK);
-    GuiSettings::setSettingsValue(Const::GpuMaxClustersKey, cudaConstants.MAX_CLUSTERS);
-    GuiSettings::setSettingsValue(Const::GpuMaxCellsKey, cudaConstants.MAX_CELLS);
-    GuiSettings::setSettingsValue(Const::GpuMaxTokensKey, cudaConstants.MAX_TOKENS);
-    GuiSettings::setSettingsValue(Const::GpuMaxParticlesKey, cudaConstants.MAX_PARTICLES);
-    GuiSettings::setSettingsValue(Const::GpuDynamicMemorySizeKey, cudaConstants.DYNAMIC_MEMORY_SIZE);
-    GuiSettings::setSettingsValue(Const::GpuMetadataDynamicMemorySizeKey, cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE);
+    auto const cudaConstants = getCudaConstants();
+    auto const size = getUniverseSize();
+    GuiSettings::setSettingsValue(Const::GpuUniverseSizeXKey, size->x);
+    GuiSettings::setSettingsValue(Const::GpuUniverseSizeYKey, size->y);
+    GuiSettings::setSettingsValue(Const::GpuNumBlocksKey, cudaConstants->NUM_BLOCKS);
+    GuiSettings::setSettingsValue(Const::GpuNumThreadsPerBlockKey, cudaConstants->NUM_THREADS_PER_BLOCK);
+    GuiSettings::setSettingsValue(Const::GpuMaxClustersKey, cudaConstants->MAX_CLUSTERS);
+    GuiSettings::setSettingsValue(Const::GpuMaxCellsKey, cudaConstants->MAX_CELLS);
+    GuiSettings::setSettingsValue(Const::GpuMaxTokensKey, cudaConstants->MAX_TOKENS);
+    GuiSettings::setSettingsValue(Const::GpuMaxParticlesKey, cudaConstants->MAX_PARTICLES);
+    GuiSettings::setSettingsValue(Const::GpuDynamicMemorySizeKey, cudaConstants->DYNAMIC_MEMORY_SIZE);
+    GuiSettings::setSettingsValue(Const::GpuMetadataDynamicMemorySizeKey, cudaConstants->METADATA_DYNAMIC_MEMORY_SIZE);
 }
