@@ -13,7 +13,7 @@ namespace Const
     auto const MinZoomLevelForEditor = 8.0;
 
     //startup
-    const QColor StartupTextColor(0x00, 0x00, 0x00);
+    const QColor StartupTextColor(0x89, 0x94, 0xc4);
 
     //visual viewport
 	const QColor BackgroundColor(0x00, 0x00, 0x00);
