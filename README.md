@@ -10,7 +10,7 @@ ALiEn is an artificial life simulation program based on a specialized physics an
 Each simulated body has an internal structure modeled by a graph and can perform both physical actions and information processing by circulating tokens along nodes.
 The simulator includes a world-building tool that allows you to easily construct universes according to your own ideas.
 
-**Main features**
+## Main features
 - realistic physical calculations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
 - programmable matter approach for simulating digital organisms and evolution
 - built-in graph editor for designing own machines 
@@ -37,6 +37,33 @@ The following third-party libaries are necessary and should be installed:
 - [Qt 5.8 or higher](https://www.qt.io/download)
 - [boost library version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1
 - [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive)
+
+## Screenshots
+
+#### Startup screen
+<h1 align="center">
+<img src="img/screenshot1.png" width=100%>
+</h1>
+
+#### Evolving replicating machines in action
+<h1 align="center">
+<img src="img/screenshot3.png" width=100%>
+</h1>
+
+#### Debris after heavy impact
+<h1 align="center">
+<img src="img/screenshot5.png" width=100%>
+</h1>
+
+### Graph structure of the bodies
+<h1 align="center">
+<img src="img/screenshot7.png" width=100%>
+</h1>
+
+#### Visual editor for programming the machines
+<h1 align="center">
+<img src="img/screenshot8.png" width=100%>
+</h1>
 
 ## License
 alien is licensed under the [GPLv3](LICENSE).
