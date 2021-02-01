@@ -48,7 +48,7 @@ An installer for 64-bit binaries is provided for Windows 10: [download link](htt
 <img src="img/screenshot5.png" width=100%>
 </h1>
 
-### Graph structure of the bodies
+#### Graph structure of the bodies
 <h1 align="center">
 <img src="img/screenshot7.png" width=100%>
 </h1>
