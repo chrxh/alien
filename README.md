@@ -25,14 +25,13 @@ The development is driven by the desire to better understand the conditions for 
 * [Website](https://alien-project.org)
 * [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 
-## Documentation
-Please visit [alien-project.org](https://alien-project.org/documentation.html) for a comprehensive documentation of the program and the underlying model.
-
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
-## Screenshots
+## Documentation
+Please visit [alien-project.org](https://alien-project.org/documentation.html) for a comprehensive documentation of the program and the underlying model.
 
+## Screenshots
 #### Startup screen
 <h1 align="center">
 <img src="img/screenshot1.png" width=100%>
