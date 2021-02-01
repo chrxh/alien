@@ -31,13 +31,6 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
-## How to build the sources
-To build alien you need Microsoft Visual Studio 2015 or higher. You find the solution file in msvc/Gui/alien.sln.
-The following third-party libaries are necessary and should be installed:
-- [Qt 5.8 or higher](https://www.qt.io/download)
-- [boost library version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1
-- [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive)
-
 ## Screenshots
 
 #### Startup screen
@@ -64,6 +57,13 @@ The following third-party libaries are necessary and should be installed:
 <h1 align="center">
 <img src="img/screenshot8.png" width=100%>
 </h1>
+
+## How to build the sources
+To build alien you need Microsoft Visual Studio 2015 or higher. You find the solution file in msvc/Gui/alien.sln.
+The following third-party libaries are necessary and should be installed:
+- [Qt 5.8 or higher](https://www.qt.io/download)
+- [boost library version 1.65.1](https://www.boost.org/users/history/version_1_65_1.html) needs to be installed in external/boost_1_65_1
+- [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive)
 
 ## License
 alien is licensed under the [GPLv3](LICENSE).
