@@ -1,6 +1,6 @@
 # Release notes
 
-## [2.2.0] - 2021-01-31
+## [2.2.0] - 2021-02-01
 ### Added
 - vector graphic view mode is active from zoom level 4 onwards
 - startup screen shows version
@@ -9,6 +9,7 @@
 ### Changed
 - info banner shows rendering mode
 - "Computation settings" dialog restructured and renamed to "General settings"
+- startup simulation changed
 
 ### Removed
 - experimental feature "Web access" disabled (will be enabled when finished)
