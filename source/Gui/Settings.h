@@ -10,7 +10,7 @@ namespace Const
 {
     auto const ZoomLevelForAutomaticEditorSwitch = 16.0;
     auto const ZoomLevelForAutomaticVectorViewSwitch = 4.0;
-    auto const MinZoomLevelForEditor = 8.0;
+    auto const MinZoomLevelForEditor = 4.0;
 
     //startup
     const QColor StartupTextColor(0x89, 0x94, 0xc4);
