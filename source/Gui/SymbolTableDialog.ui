@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>edit symbol table</string>
+   <string>symbol map</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
