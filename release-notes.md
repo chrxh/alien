@@ -1,10 +1,11 @@
 # Release notes
 
-## [2.2.0] - 2021-02-01
+## [2.2.0] - 2021-02-03
 ### Added
 - vector graphic view mode is active from zoom level 4 onwards
 - startup screen shows version
 - validation of values in "General settings" and "New simulation" dialog
+- examples (simulation and collections)
 
 ### Changed
 - info banner shows rendering mode
