@@ -1,5 +1,9 @@
 # Release notes
 
+## [2.2.1] - 2021-02-05
+### Fixed
+- fixed crash at display resolutions higher than Full HD
+
 ## [2.2.0] - 2021-02-03
 ### Added
 - vector graphic view mode is active from zoom level 4 onwards
