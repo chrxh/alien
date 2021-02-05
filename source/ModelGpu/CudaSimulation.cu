@@ -146,6 +146,9 @@ void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rect
 void CudaSimulation::getVectorImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, int2 const& imageSize, 
     double zoom, unsigned char * imageData)
 {
+    if (imageSize.x * imageSize.y > _cudaSimulationData->numImageBytes) {
+        _cudaSimulationData->resizeImage(imageSize);
+    }
     GPU_FUNCTION(drawImage_vectorStyle, rectUpperLeft, rectLowerRight, imageSize, zoom, *_cudaSimulationData);
 
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
