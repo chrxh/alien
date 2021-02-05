@@ -10,7 +10,8 @@ class CudaSimulation
 {
 public:
     CudaSimulation(
-        int2 const& size,
+        int2 const& worldSize,
+        int2 const& displaySize,
         int timestep,
         SimulationParameters const& parameters,
         CudaConstants const& cudaConstants);

@@ -4,6 +4,8 @@
 #include <QElapsedTimer>
 #include <QThread>
 #include <QString>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include "Base/NumberGenerator.h"
 #include "ModelBasic/SpaceProperties.h"
@@ -32,7 +34,8 @@ void CudaWorker::init(
     auto size = space->getSize();
 	delete _cudaSimulation;
     try {
-    	_cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
+        auto displaySize = QApplication::desktop()->screenGeometry();
+        _cudaSimulation = new CudaSimulation({ size.x, size.y }, {displaySize.width(), displaySize.height()}, timestep, parameters, cudaConstants);
     }
     catch (std::exception const& exception) {
         terminateWorker();
