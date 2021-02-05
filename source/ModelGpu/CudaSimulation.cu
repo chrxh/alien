@@ -54,7 +54,8 @@ namespace
 }
 
 CudaSimulation::CudaSimulation(
-    int2 const& size,
+    int2 const& worldSize,
+    int2 const& displaySize,
     int timestep,
     SimulationParameters const& parameters,
     CudaConstants const& cudaConstants)
@@ -71,7 +72,7 @@ CudaSimulation::CudaSimulation(
 
     auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    _cudaSimulationData->init(size, cudaConstants, timestep);
+    _cudaSimulationData->init(worldSize, displaySize, cudaConstants, timestep);
     _cudaMonitorData->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
