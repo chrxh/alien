@@ -4,6 +4,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
+#include <sstream>
 
 
 #define KERNEL_CALL(func, ...)  \
@@ -14,7 +15,6 @@
         func<<<1, 1>>>(##__VA_ARGS__); \
         cudaDeviceSynchronize();
 
-#include <sstream>
 template< typename T >
 void checkAndThrowError(T result, char const *const func, const char *const file, int const line)
 {
@@ -27,5 +27,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
     }
 }
 
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
 #define CHECK_FOR_CUDA_ERROR(val) \
-    checkAndThrowError( (val), #val, __FILE__, __LINE__ )
+    checkAndThrowError( (val), #val, __FILENAME__, __LINE__ )
