@@ -20,6 +20,7 @@ struct SimulationData
     DynamicMemory dynamicMemory;
 
     CudaNumberGenerator numberGen;
+    int numImageBytes;
     unsigned int* rawImageData;
     unsigned int* finalImageData;
 
@@ -36,8 +37,18 @@ struct SimulationData
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
 
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(displaySize.x * displaySize.y, size.x * size.y), rawImageData);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(displaySize.x * displaySize.y, size.x * size.y), finalImageData);
+        numImageBytes = max(displaySize.x * displaySize.y, size.x * size.y);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numImageBytes, rawImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numImageBytes, finalImageData);
+    }
+
+    void resizeImage(int2 const& newSize)
+    {
+        CudaMemoryManager::getInstance().freeMemory(rawImageData);
+        CudaMemoryManager::getInstance().freeMemory(finalImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(newSize.x * newSize.y, size.x * size.y), rawImageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(newSize.x * newSize.y, size.x * size.y), finalImageData);
+        numImageBytes = newSize.x * newSize.y;
     }
 
     void free()
