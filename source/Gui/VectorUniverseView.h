@@ -4,8 +4,8 @@
 #include <QVector2D>
 #include <QTimer>
 
-#include "ModelBasic/Definitions.h"
-#include "ModelBasic/Descriptions.h"
+#include "EngineInterface/Definitions.h"
+#include "EngineInterface/Descriptions.h"
 #include "UniverseView.h"
 #include "Definitions.h"
 

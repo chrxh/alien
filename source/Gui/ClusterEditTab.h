@@ -3,8 +3,8 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "ModelBasic/Descriptions.h"
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Definitions.h"
 #include "Gui/Definitions.h"
 
 class ClusterEditTab

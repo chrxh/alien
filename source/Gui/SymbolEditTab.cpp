@@ -1,6 +1,6 @@
 #include <QScrollBar>
 
-#include "ModelBasic/SymbolTable.h"
+#include "EngineInterface/SymbolTable.h"
 #include "Gui/Settings.h"
 
 #include "DataEditModel.h"
@@ -65,8 +65,8 @@ void SymbolEditTab::updateDisplay()
 		string value = keyAndValue.second;
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(key)));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(value)));
-        ui->tableWidget->item(i, 0)->setTextColor(Const::CellEditDataColor1);
-        ui->tableWidget->item(i, 1)->setTextColor(Const::CellEditDataColor1);
+        ui->tableWidget->item(i, 0)->setForeground(Const::CellEditDataColor1);
+        ui->tableWidget->item(i, 1)->setForeground(Const::CellEditDataColor1);
         ++i;
     }
 
@@ -89,13 +89,13 @@ void SymbolEditTab::addSymbolButtonClicked()
 	ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 	{
 		QTableWidgetItem* item = new QTableWidgetItem("");
-		item->setTextColor(Const::CellEditDataColor1);
+        item->setForeground(Const::CellEditDataColor1);
 		ui->tableWidget->setItem(row, 0, item);
 		ui->tableWidget->editItem(item);
 	}
 	{
 		QTableWidgetItem* item = new QTableWidgetItem("");
-		item->setTextColor(Const::CellEditDataColor1);
+        item->setForeground(Const::CellEditDataColor1);
 		ui->tableWidget->setItem(row, 1, item);
 		ui->tableWidget->setCurrentCell(row, 0);
 	}

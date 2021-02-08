@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QObject>
 
-#include "ModelBasic/MonitorData.h"
+#include "EngineInterface/MonitorData.h"
 
 #include "Definitions.h"
 

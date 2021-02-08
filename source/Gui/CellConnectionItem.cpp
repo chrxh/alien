@@ -1,7 +1,7 @@
 #include <QPainter>
 #include <qmath.h>
 
-#include "ModelBasic/ChangeDescriptions.h"
+#include "EngineInterface/ChangeDescriptions.h"
 #include "Gui/Settings.h"
 
 #include "ItemConfig.h"

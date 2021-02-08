@@ -3,8 +3,8 @@
 #include <QTextEdit>
 #include <QVector2D>
 
-#include "ModelBasic/Definitions.h"
-#include "ModelBasic/Descriptions.h"
+#include "EngineInterface/Definitions.h"
+#include "EngineInterface/Descriptions.h"
 #include "Gui/Definitions.h"
 
 class CellEditTab

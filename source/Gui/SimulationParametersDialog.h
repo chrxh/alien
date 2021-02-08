@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "ModelBasic/SimulationParameters.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "Gui/Definitions.h"
 

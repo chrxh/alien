@@ -6,10 +6,10 @@
 #include <QTextStream>
 
 #include "Gui/Settings.h"
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/SimulationContext.h"
-#include "ModelBasic/SpaceProperties.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationContext.h"
+#include "EngineInterface/SpaceProperties.h"
 
 #include "PixelUniverseView.h"
 #include "VectorUniverseView.h"

@@ -1,6 +1,6 @@
 #include <QPaintEvent>
 
-#include "ModelBasic/MonitorData.h"
+#include "EngineInterface/MonitorData.h"
 #include "Gui/StringHelper.h"
 
 #include "MonitorView.h"
