@@ -77,7 +77,7 @@ public:
 
     __device__ __inline__ Value at(Key const& key)
     {
-        do {
+        for (int i = 0; i < _size; ++i) {
             int index = _hash(key) % _size;
             auto& entry = _entries[index];
             entry.getLock(3);
@@ -93,7 +93,7 @@ public:
             entry.releaseLock();
             index = (++index) % _size;
         }
-        while (true);
+        return Value();
     }
 
 private:
