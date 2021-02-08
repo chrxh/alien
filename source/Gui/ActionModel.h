@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "ModelBasic/Descriptions.h"
+#include "EngineInterface/Descriptions.h"
 #include "Gui/Definitions.h"
 
 class ActionModel

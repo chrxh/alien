@@ -3,7 +3,7 @@
 #include <mutex>
 
 #include "Base/Definitions.h"
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Definitions.h"
 
 class QGraphicsItem;
 class QGraphicsView;

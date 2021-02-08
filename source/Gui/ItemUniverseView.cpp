@@ -7,10 +7,10 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/SimulationContext.h"
-#include "ModelBasic/SpaceProperties.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/SimulationContext.h"
+#include "EngineInterface/SpaceProperties.h"
 #include "Gui/ViewportInterface.h"
 #include "Gui/Settings.h"
 #include "Gui/DataRepository.h"
@@ -193,7 +193,7 @@ void ItemUniverseView::scrolled()
 	requestData();
 }
 
-ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(std::list<QGraphicsItem*> const &items) const
+ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(QList<QGraphicsItem*> const &items) const
 {
 	ItemUniverseView::Selection result;
 	for (auto item : items) {
@@ -223,7 +223,7 @@ void ItemUniverseView::startMarking(QPointF const& scenePos)
 
 namespace
 {
-	bool clickedOnSpace(std::list<QGraphicsItem*> const &items)
+	bool clickedOnSpace(QList<QGraphicsItem*> const &items)
 	{
 		for (auto item : items) {
 			if (qgraphicsitem_cast<CellItem*>(item) || qgraphicsitem_cast<ParticleItem*>(item)) {
@@ -258,8 +258,8 @@ bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
 	_mouseButtonPressed = true;
-	auto itemsClicked = _scene->items(e->scenePos()).toStdList();
-	list<QGraphicsItem*> frontItem = !itemsClicked.empty() ? list<QGraphicsItem*>({ itemsClicked.front() }) : list<QGraphicsItem*>();
+	auto itemsClicked = _scene->items(e->scenePos());
+	QList<QGraphicsItem*> frontItem = !itemsClicked.empty() ? QList<QGraphicsItem*>({ itemsClicked.front() }) : QList<QGraphicsItem*>();
 	Selection selection = getSelectionFromItems(frontItem);
 
 	bool alreadySelected = _repository->isInSelection(selection.cellIds) && _repository->isInSelection(selection.particleIds);

@@ -2,7 +2,7 @@
 
 #include <QTextEdit>
 
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Definitions.h"
 #include "Gui/Definitions.h"
 
 class CodeEditWidget : public QTextEdit

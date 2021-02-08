@@ -4,7 +4,7 @@
 #include <QBuffer>
 #include <QImage>
 
-#include "ModelBasic/SimulationAccess.h"
+#include "EngineInterface/SimulationAccess.h"
 
 #include "Web/WebAccess.h"
 

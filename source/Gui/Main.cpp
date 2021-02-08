@@ -5,14 +5,14 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/SimulationParameters.h"
-#include "ModelBasic/SymbolTable.h"
-#include "ModelBasic/ModelBasicServices.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/SymbolTable.h"
+#include "EngineInterface/ModelBasicServices.h"
 
-#include "ModelGpu/ModelGpuServices.h"
+#include "EngineGpu/ModelGpuServices.h"
 
 #include "Web/WebServices.h"
 

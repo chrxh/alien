@@ -3,7 +3,7 @@
 #include <QTextLayout>
 #include <qmath.h>
 
-#include "ModelBasic/SimulationParameters.h"
+#include "EngineInterface/SimulationParameters.h"
 #include "Gui/StringHelper.h"
 
 #include "CellEditTab.h"

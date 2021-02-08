@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{02A2A49E-340C-4994-B90F-A6C05742CB0D}</ProjectGuid>
+    <RootNamespace>EngineGpuKernels</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\external\cuda;$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\external\boost_1_75_0\stage\lib;%(AdditionalLibraryDirectories);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <Include>$(SolutionDir)..\..\external\cuda;$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;</Include>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <Defines>ENGINEGPUKERNELS_LIB</Defines>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\external\cuda;$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\external\boost_1_75_0\stage\lib;%(AdditionalLibraryDirectories);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <Include>$(SolutionDir)..\..\external\cuda;$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;</Include>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <Defines>ENGINEGPUKERNELS_LIB</Defines>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\..\..\source\EngineGpuKernels\CudaSimulation.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\AccessKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\AccessTOs.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Array.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Base.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Cell.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CellComputerFunction.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CellFunctionData.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CleanupKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Cluster.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\ClusterProcessor.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CommunicatorFunction.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\ConstantMemory.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\ConstructorFunction.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CudaConstants.h" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CudaMemoryManager.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CudaMonitorData.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CudaSimulation.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\DebugKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\DEBUG_cluster.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Definitions.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\DllExport.h" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\DynamicMemory.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\EnergyGuidance.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Entities.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\EntityFactory.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\FreezingKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\HashMap.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\HashSet.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\List.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Macros.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Map.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\MapSectionCollector.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Math.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\MonitorKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Particle.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\ParticleProcessor.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\PhysicalActionKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Physics.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\PropulsionFunction.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\QuantityConverter.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\RenderingKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\ScannerFunction.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\SensorFunction.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationData.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationExecutionParameters.h" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationKernels.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Tagger.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\Token.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\TokenProcessor.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\WeaponFunction.cuh" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.targets" />
+  </ImportGroup>
+</Project>

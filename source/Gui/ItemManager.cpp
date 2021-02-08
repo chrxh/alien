@@ -1,6 +1,6 @@
 #include <QGraphicsScene>
 
-#include "ModelBasic/ChangeDescriptions.h"
+#include "EngineInterface/ChangeDescriptions.h"
 #include "Gui/Settings.h"
 #include "Gui/DataRepository.h"
 #include "Gui/ViewportInterface.h"
@@ -197,9 +197,9 @@ bool ItemManager::isMarkerActive() const
 	return (bool)_marker;
 }
 
-std::list<QGraphicsItem*> ItemManager::getItemsWithinMarker() const
+QList<QGraphicsItem*> ItemManager::getItemsWithinMarker() const
 {
-	return _marker->collidingItems().toStdList();
+	return _marker->collidingItems();
 }
 
 void ItemManager::toggleCellInfo(bool showInfo)

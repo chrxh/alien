@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "ModelGpu/CudaConstants.h"
+#include "EngineGpuKernels/CudaConstants.h"
 
 #include "Definitions.h"
 #include "ui_ComputationSettingsWidget.h"

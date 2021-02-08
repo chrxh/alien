@@ -1,8 +1,8 @@
 #include <boost/range/adaptors.hpp>
 #include <QMessageBox>
 
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/Descriptions.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/Descriptions.h"
 
 #include "Notifier.h"
 #include "DataRepository.h"

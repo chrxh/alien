@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Definitions.h"
 #include "Gui/Definitions.h"
 
 #include "ItemConfig.h"
@@ -22,7 +22,7 @@ public:
 	virtual void setMarkerLowerRight(QPointF const &lowerRight);
 	virtual void deleteMarker();
 	virtual bool isMarkerActive() const;
-	virtual std::list<QGraphicsItem*> getItemsWithinMarker() const;
+    virtual QList<QGraphicsItem*> getItemsWithinMarker() const;
 
 	virtual void toggleCellInfo(bool showInfo);
 
