@@ -1,4 +1,6 @@
-#include <QRectF>
+#include <ostream>
+
+#include <QtCore/QRectF>
 
 #include "Definitions.h"
 

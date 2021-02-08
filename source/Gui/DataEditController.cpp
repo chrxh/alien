@@ -2,10 +2,10 @@
 
 #include "Base/ServiceLocator.h"
 
-#include "ModelBasic/ChangeDescriptions.h"
-#include "ModelBasic/SymbolTable.h"
-#include "ModelBasic/SimulationContext.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "EngineInterface/ChangeDescriptions.h"
+#include "EngineInterface/SymbolTable.h"
+#include "EngineInterface/SimulationContext.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
 
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"

@@ -1,12 +1,12 @@
 ﻿#include <QDesktopServices>
 #include <QUrl>
 
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/Serializer.h"
-#include "ModelBasic/SymbolTable.h"
-#include "ModelBasic/SerializationHelper.h"
-#include "ModelBasic/SpaceProperties.h"
-#include "ModelBasic/SimulationContext.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SymbolTable.h"
+#include "EngineInterface/SerializationHelper.h"
+#include "EngineInterface/SpaceProperties.h"
+#include "EngineInterface/SimulationContext.h"
 
 #include "Gui/ToolbarController.h"
 #include "Gui/ToolbarContext.h"
@@ -253,7 +253,7 @@ void MainView::setupFontsAndColors()
 
 	{
 		QPalette p = palette();
-		p.setColor(QPalette::Background, QColor(0, 0, 0));
+        p.setColor(QPalette::Window, QColor(0, 0, 0));
 		setPalette(p);
 	}
 

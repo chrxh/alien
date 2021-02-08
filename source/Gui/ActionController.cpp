@@ -9,13 +9,13 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 
-#include "ModelBasic/Descriptions.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/Serializer.h"
-#include "ModelBasic/SymbolTable.h"
-#include "ModelBasic/Physics.h"
-#include "ModelBasic/SerializationHelper.h"
-#include "ModelBasic/DescriptionFactory.h"
+#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SymbolTable.h"
+#include "EngineInterface/Physics.h"
+#include "EngineInterface/SerializationHelper.h"
+#include "EngineInterface/DescriptionFactory.h"
 
 #include "Web/WebAccess.h"
 
@@ -711,7 +711,7 @@ void ActionController::onCopyToClipboard()
     auto tokenMemoryInHex = tokenMemory.toHex();
 
     for (int index = 255 * 2; index > 0; index -= 2) {
-        tokenMemoryInHex.insert(index, QChar(' ' ));
+        tokenMemoryInHex.insert(index, char(' '));
     }
     
     auto clipboard = QApplication::clipboard();
