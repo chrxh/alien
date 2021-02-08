@@ -1344,7 +1344,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
         }
     }
     __syncthreads();
-    /*
+    
     //check obstacle for cell to be constructed
     if (0 == threadIdx.x) {
         auto const absPosForNewCell = _cluster->pos + Math::applyMatrix(relPosOfNewCell - newCenter, clusterMatrix);
@@ -1352,7 +1352,6 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
             result = true;
         }
     }
-    */
 }
 
 __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
