@@ -6,10 +6,10 @@
 
 #include "Base/ServiceLocator.h"
 
-#include "ModelBasic/SimulationParameters.h"
-#include "ModelBasic/Serializer.h"
-#include "ModelBasic/SerializationHelper.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
+#include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializationHelper.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
 
 #include "Settings.h"
 #include "SimulationParametersDialog.h"

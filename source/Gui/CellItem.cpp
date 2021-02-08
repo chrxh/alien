@@ -1,8 +1,8 @@
 #include <QPainter>
 #include <QGraphicsBlurEffect>
 
-#include "ModelBasic/ChangeDescriptions.h"
-#include "ModelBasic/Colors.h"
+#include "EngineInterface/ChangeDescriptions.h"
+#include "EngineInterface/Colors.h"
 
 #include "Gui/Settings.h"
 

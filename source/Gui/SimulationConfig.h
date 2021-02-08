@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelGpu/CudaConstants.h"
+#include "EngineGpuKernels/CudaConstants.h"
 
 #include "Definitions.h"
 

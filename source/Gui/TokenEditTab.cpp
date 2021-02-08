@@ -1,7 +1,7 @@
 #include <QScrollBar>
 #include <QSignalMapper>
 
-#include "ModelBasic/SymbolTable.h"
+#include "EngineInterface/SymbolTable.h"
 #include "Gui/Settings.h"
 #include "Gui/Settings.h"
 
@@ -41,9 +41,21 @@ TokenEditTab::TokenEditTab(QWidget *parent) :
     ui->tableWidget->horizontalHeader()->resizeSection(2, 100);
     ui->tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    connect(_signalMapper, (void(QSignalMapper::*)(int))&QSignalMapper::mapped, this, &TokenEditTab::tokenMemoryChanged);
-    connect(_signalMapper2, (void(QSignalMapper::*)(int))&QSignalMapper::mapped, this, &TokenEditTab::tokenMemoryCursorReachedBeginning);
-    connect(_signalMapper3, (void(QSignalMapper::*)(int))&QSignalMapper::mapped, this, &TokenEditTab::tokenMemoryCursorReachedEnd);
+    connect(
+        _signalMapper,
+        &QSignalMapper::mappedInt,
+        this,
+        &TokenEditTab::tokenMemoryChanged);
+    connect(
+        _signalMapper2,
+        &QSignalMapper::mappedInt,
+        this,
+        &TokenEditTab::tokenMemoryCursorReachedBeginning);
+    connect(
+        _signalMapper3,
+        &QSignalMapper::mappedInt,
+        this,
+        &TokenEditTab::tokenMemoryCursorReachedEnd);
 }
 
 TokenEditTab::~TokenEditTab()
@@ -131,10 +143,10 @@ void TokenEditTab::updateDisplay()
 			ui->tableWidget->setItem(row, 1, new QTableWidgetItem(v.join(QChar('\n'))));
 			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 0)->setTextColor(Const::CellEditTextColor1);
+			ui->tableWidget->item(row, 0)->setForeground(Const::CellEditTextColor1);
 			ui->tableWidget->item(row, 1)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 1)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 1)->setTextColor(Const::CellEditTextColor2);
+            ui->tableWidget->item(row, 1)->setForeground(Const::CellEditTextColor2);
 			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
 			//create hex editor
@@ -187,10 +199,10 @@ void TokenEditTab::updateDisplay()
 			ui->tableWidget->setItem(row, 1, new QTableWidgetItem("(pure data block)"));
 			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 0)->setTextColor(Const::CellEditTextColor1);
+            ui->tableWidget->item(row, 0)->setForeground(Const::CellEditTextColor1);
 			ui->tableWidget->item(row, 1)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 1)->setTextAlignment(Qt::AlignTop);
-			ui->tableWidget->item(row, 1)->setTextColor(Const::CellEditTextColor2);
+            ui->tableWidget->item(row, 1)->setForeground(Const::CellEditTextColor2);
 			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
 			int size = (kNew - k) / 6;

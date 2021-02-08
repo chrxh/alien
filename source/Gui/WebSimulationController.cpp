@@ -9,9 +9,9 @@
 
 #include "Base/Job.h"
 #include "Base/Worker.h"
-#include "ModelBasic/SimulationMonitor.h"
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/SpaceProperties.h"
+#include "EngineInterface/SimulationMonitor.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SpaceProperties.h"
 #include "Web/WebAccess.h"
 
 #include "SendLiveImageJob.h"

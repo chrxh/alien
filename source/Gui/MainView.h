@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QMainWindow>
 
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Definitions.h"
 
 #include "Web/Definitions.h"
 

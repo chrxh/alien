@@ -6,8 +6,8 @@
 #include <QMap>
 #include <QVector2D>
 
-#include "ModelBasic/Definitions.h"
-#include "ModelBasic/Descriptions.h"
+#include "EngineInterface/Definitions.h"
+#include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
 #include "DataRepository.h"
 #include "UniverseView.h"
@@ -35,13 +35,6 @@ public:
 
     void centerTo(QVector2D const& position) override;
 
-/*
-	virtual void activate();
-	virtual void deactivate();
-
-	virtual void refresh();
-*/
-
 	virtual void toggleCenterSelection(bool value);
 
 protected:
@@ -65,7 +58,7 @@ private:
 		list<uint64_t> cellIds;
 		list<uint64_t> particleIds;
 	};
-	Selection getSelectionFromItems(std::list<QGraphicsItem*> const &items) const;
+	Selection getSelectionFromItems(QList<QGraphicsItem*> const &items) const;
 	void delegateSelection(Selection const& selection);
 	void startMarking(QPointF const& scenePos);
 

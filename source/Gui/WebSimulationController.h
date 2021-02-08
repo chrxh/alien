@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "Base/Definitions.h"
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Definitions.h"
 #include "Web/Definitions.h"
 #include "Web/Task.h"
 

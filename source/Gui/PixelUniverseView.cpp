@@ -6,12 +6,12 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
-#include "ModelBasic/PhysicalActions.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/SimulationContext.h"
-#include "ModelBasic/SpaceProperties.h"
+#include "EngineInterface/PhysicalActions.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationContext.h"
+#include "EngineInterface/SpaceProperties.h"
 #include "Gui/ViewportInterface.h"
 #include "Gui/Settings.h"
 #include "Gui/Notifier.h"
