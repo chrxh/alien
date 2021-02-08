@@ -1183,7 +1183,6 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
         result = false;
     }
     __syncthreads();
-
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = _cluster->cellPointers[cellIndex];
         auto relPos = getTransformedCellRelPos(cell, centerOfRotation, rotationMatrices, {0, 0});
@@ -1309,7 +1308,6 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
         result = false;
     }
     __syncthreads();
-
     for (auto cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto const& cell = _cluster->cellPointers[cellIndex];
         atomicAdd_block(&newCenter.x, cell->relPos.x);
@@ -1358,7 +1356,7 @@ __inline__ __device__ bool ConstructorFunction::isObstaclePresent_helper(
     bool ignoreOwnCluster,
     Cell* cell,
     float2 const& absPos,
-    HashMap<int2, CellAndNewAbsPos>& tempMap)
+    HashMap<int2, CellAndNewAbsPos, HashFunctor<int2>>& tempMap)
 {
     auto const map = _data->cellMap;
     for (int dx = -1; dx <= 1; ++dx) {
