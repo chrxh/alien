@@ -91,6 +91,7 @@
       <Defines>ENGINEGPUKERNELS_LIB</Defines>
       <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
       <FastMath>true</FastMath>
+      <Optimization>O3</Optimization>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
