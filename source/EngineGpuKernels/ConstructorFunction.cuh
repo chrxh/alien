@@ -145,7 +145,7 @@ private:
         bool ignoreOwnCluster,
         Cell* cell,
         float2 const& absPos,
-        HashMap<int2, CellAndNewAbsPos>& tempMap);
+        HashMap<int2, CellAndNewAbsPos, HashFunctor<int2>>& tempMap);
 
     __inline__ __device__ void constructNewCell(
         float2 const& relPosOfNewCell,
@@ -199,7 +199,7 @@ private:
     {
         Cell** cellPointerArray1;
         Cell** cellPointerArray2;
-        HashMap<int2, CellAndNewAbsPos> cellPosMap;
+        HashMap<int2, CellAndNewAbsPos, HashFunctor<int2>> cellPosMap;
     };
     DynamicMemory _dynamicMemory;
 };
@@ -1168,7 +1168,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_onlyRotation(
     RotationMatrices const& rotationMatrices,
     bool& result)
 {
-    __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
+    __shared__ HashMap<int2, CellAndNewAbsPos, HashFunctor<int2>> tempCellMap;
     if (0 == threadIdx.x) {
         tempCellMap = _dynamicMemory.cellPosMap;
     }
@@ -1231,7 +1231,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_rotationAndCre
     bool& result)
 {
 
-    __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
+    __shared__ HashMap<int2, CellAndNewAbsPos, HashFunctor<int2>> tempCellMap;
     if (0 == threadIdx.x) {
         tempCellMap = _dynamicMemory.cellPosMap;
     }
@@ -1293,7 +1293,7 @@ __inline__ __device__ void ConstructorFunction::isObstaclePresent_firstCreation(
     float2 const& relPosOfNewCell,
     bool& result)
 {
-    __shared__ HashMap<int2, CellAndNewAbsPos> tempCellMap;
+    __shared__ HashMap<int2, CellAndNewAbsPos, HashFunctor<int2>> tempCellMap;
     if (0 == threadIdx.x) {
         tempCellMap = _dynamicMemory.cellPosMap;
     }

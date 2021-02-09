@@ -3,7 +3,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelBasic/Physics.h"
+#include "EngineInterface/Physics.h"
 
 #include "Predicates.h"
 
