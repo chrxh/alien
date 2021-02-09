@@ -32,13 +32,7 @@ void CudaWorker::init(
 
     auto size = space->getSize();
 	delete _cudaSimulation;
-    try {
-        _cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
-    }
-    catch (std::exception const& exception) {
-        terminateWorker();
-        Q_EMIT errorThrown(exception.what());
-    }
+    _cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
 }
 
 void CudaWorker::terminateWorker()

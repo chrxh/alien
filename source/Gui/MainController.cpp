@@ -297,7 +297,14 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 {
 	delete _simController;
     _simController = nullptr;
-	_simController = _serializer->deserializeSimulation(serializedSimulation);
+
+    try {
+	    _simController = _serializer->deserializeSimulation(serializedSimulation);
+    }
+    catch (std::exception const& exception)
+    {
+        showErrorMessageAndTerminate(exception.what());
+    }
 
 	auto symbolTable = _simController->getContext()->getSymbolTable();
 	auto simulationParameters = _simController->getContext()->getSimulationParameters();
@@ -315,7 +322,11 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
     auto simulationControllerConfig =
         ModelGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
     auto data = ModelGpuData(config->cudaConstants);
-	_simController = facade->buildSimulationController(simulationControllerConfig, data);
+    try {
+	    _simController = facade->buildSimulationController(simulationControllerConfig, data);
+    } catch (std::exception const& e) {
+        showErrorMessageAndTerminate(e.what());
+    }
 
 	initSimulation(config->symbolTable, config->parameters);
 
@@ -344,18 +355,25 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 	delete _simController;
     _simController = nullptr;
 
-    if (!SerializationHelper::loadFromFile<SimulationController*>(filename, [&](string const& data) { return _serializer->deserializeSimulation(data); }, _simController)) {
-
-        //load old simulation
-        if (LoadOption::SaveOldSim == option) {
-            CHECK(SerializationHelper::loadFromFile<SimulationController*>(getPathToApp() +
-                Const::AutoSaveForLoadingFilename,
+    try {
+        if (!SerializationHelper::loadFromFile<SimulationController*>(
+                filename,
                 [&](string const& data) { return _serializer->deserializeSimulation(data); },
-                _simController));
+                _simController)) {
+
+            //load old simulation
+            if (LoadOption::SaveOldSim == option) {
+                CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+                    getPathToApp() + Const::AutoSaveForLoadingFilename,
+                    [&](string const& data) { return _serializer->deserializeSimulation(data); },
+                    _simController));
+            }
+            delete progress;
+            return false;
         }
-        delete progress;
-        return false;
-	}
+    } catch (std::exception const& exception) {
+        showErrorMessageAndTerminate(exception.what());
+    }
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
 	_view->refresh();
