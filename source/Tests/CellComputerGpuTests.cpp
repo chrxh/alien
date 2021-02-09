@@ -1,5 +1,7 @@
+#include "gtest/gtest.h"
+
 #include "Base/ServiceLocator.h"
-#include "ModelBasic/CellComputerCompiler.h"
+#include "EngineInterface/CellComputerCompiler.h"
 
 #include "IntegrationGpuTestFramework.h"
 

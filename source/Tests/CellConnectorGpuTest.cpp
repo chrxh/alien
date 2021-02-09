@@ -3,15 +3,15 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/DescriptionHelper.h"
-#include "ModelBasic/SimulationParameters.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/SimulationParameters.h"
 
-#include "ModelGpu/SimulationContextGpuImpl.h"
-#include "ModelGpu/SimulationControllerGpu.h"
-#include "ModelGpu/ModelGpuBuilderFacade.h"
-#include "ModelGpu/ModelGpuData.h"
+#include "EngineGpu/SimulationContextGpuImpl.h"
+#include "EngineGpu/SimulationControllerGpu.h"
+#include "EngineGpu/ModelGpuBuilderFacade.h"
+#include "EngineGpu/ModelGpuData.h"
 
 #include "tests/Predicates.h"
 
@@ -67,7 +67,7 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellAway)
 			CellDescription().setPos({ 100, 100 }).setId(cellIds[0]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 			CellDescription().setPos({ 101, 100 }).setId(cellIds[1]).setConnectingCells({ cellIds[0] }).setMaxConnections(1)
 		}));
-	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 103, 100 });
+	_data.clusters->at(0).cells->at(1).pos = QVector2D(103, 100);
 
 	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(1).id });
 
@@ -93,7 +93,7 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellWithinCluster)
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[2]).setConnectingCells({ cellIds[1] }).setMaxConnections(1),
 		})
 	});
-	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 200, 101.1f });
+	_data.clusters->at(0).cells->at(1).pos = QVector2D( 200, 101.1f);
 
 	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(1).id });
 
@@ -121,7 +121,7 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellToAnOtherCluster)
 			CellDescription().setPos({ 201, 100 }).setId(cellIds[3]).setConnectingCells({ cellIds[2] }).setMaxConnections(1)
 		})
 	});
-	_data.clusters->at(0).cells->at(1).pos = QVector2D({ 199, 100 });
+	_data.clusters->at(0).cells->at(1).pos = QVector2D(199, 100);
 
 	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(1).id });
 
@@ -155,7 +155,7 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellToUniteClusters)
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
-	_data.clusters->at(0).cells->at(0).pos = QVector2D({ 200, 100 });
+	_data.clusters->at(0).cells->at(0).pos = QVector2D(200, 100);
 
 	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(0).id });
 	_navi.update(_data);
@@ -186,13 +186,13 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellToUniteAndDevideClusters)
 			CellDescription().setPos({ 200, 102 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(1)
 		})
 	});
-	_data.clusters->at(0).cells->at(0).pos = QVector2D({ 200, 100 });
+	_data.clusters->at(0).cells->at(0).pos = QVector2D(200, 100);
 
 	_descHelper->reconnect(_data, _data, { _data.clusters->at(0).cells->at(0).id });
 	_navi.update(_data);
 	uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 	uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
-	_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
+	_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D(100, 100);
 	_descHelper->reconnect(_data, _data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 
 	_navi.update(_data);
@@ -232,7 +232,7 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters
 	for (int i = 0; i < 10; ++i) {
 		uint64_t clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		uint64_t cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
-		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 200, 100 });
+		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D(200, 100);
 		_descHelper->reconnect(_data, _data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 		_navi.update(_data);
 
@@ -242,7 +242,7 @@ TEST_F(CellConnectorGpuTest, testMoveOneCellSeveralTimesToUniteAndDevideClusters
 
 		clusterIndex = _navi.clusterIndicesByCellIds.at(cellIds[0]);
 		cellIndex = _navi.cellIndicesByCellIds.at(cellIds[0]);
-		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D({ 100, 100 });
+		_data.clusters->at(clusterIndex).cells->at(cellIndex).pos = QVector2D(100, 100);
 		_descHelper->reconnect(_data, _data, { _data.clusters->at(clusterIndex).cells->at(cellIndex).id });
 		_navi.update(_data);
 
@@ -271,7 +271,7 @@ TEST_F(CellConnectorGpuTest, testMoveSeveralCells)
 			CellDescription().setPos({ 104, 100 }).setId(cellIds[4]).setConnectingCells({ cellIds[3] }).setMaxConnections(4)
 		}));
 	for (int i = 0; i < 5; ++i) {
-		_data.clusters->at(0).cells->at(i).pos = QVector2D({ 200 + static_cast<float>(i), 100 });
+		_data.clusters->at(0).cells->at(i).pos = QVector2D(200 + static_cast<float>(i), 100 );
 	}
 
 	_descHelper->reconnect(_data, _data,

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <QApplication>
 
-#include "ModelBasic/ModelBasicServices.h"
-#include "ModelGpu/ModelGpuServices.h"
+#include "EngineInterface/ModelBasicServices.h"
+#include "EngineGpu/ModelGpuServices.h"
 
 int main(int argc, char** argv) {
 	ModelBasicServices _modelBasicServices;

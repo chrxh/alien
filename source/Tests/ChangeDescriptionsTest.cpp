@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "ModelBasic/ChangeDescriptions.h"
+#include "EngineInterface/ChangeDescriptions.h"
 
 #include "tests/Predicates.h"
 

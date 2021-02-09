@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QtCore/QString>
+#include <QString>
 #include <mutex>
 #include <typeinfo>
 #include "Definitions.h"

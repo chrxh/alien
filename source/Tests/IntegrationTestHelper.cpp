@@ -1,8 +1,8 @@
 #include <QEventLoop>
 
-#include "ModelBasic/Physics.h"
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/SimulationController.h"
+#include "EngineInterface/Physics.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SimulationController.h"
 
 
 #include "IntegrationTestHelper.h"

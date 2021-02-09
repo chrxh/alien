@@ -1,7 +1,7 @@
 #include "Base/ServiceLocator.h"
 #include "IntegrationGpuTestFramework.h"
-#include "ModelBasic/DescriptionFactory.h"
-#include "ModelBasic/QuantityConverter.h"
+#include "EngineInterface/DescriptionFactory.h"
+#include "EngineInterface/QuantityConverter.h"
 
 class CommunicatorGpuTests : public IntegrationGpuTestFramework
 {
