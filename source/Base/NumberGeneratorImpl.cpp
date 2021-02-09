@@ -5,6 +5,11 @@
 
 #include "NumberGeneratorImpl.h"
 
+namespace
+{
+    double const RandMax = 4294967296.0;
+}
+
 NumberGeneratorImpl::NumberGeneratorImpl(QObject * parent)
 	: NumberGenerator(parent)
 {
@@ -38,7 +43,7 @@ uint32_t NumberGeneratorImpl::getRandomInt(uint32_t min, uint32_t max)
 
 uint32_t NumberGeneratorImpl::getLargeRandomInt(uint32_t range)
 {
-	return static_cast<uint32_t>((static_cast<double>(range) * static_cast<double>(getNumberFromArray()) / RAND_MAX));
+	return getNumberFromArray() % (range + 1);
 }
 
 double NumberGeneratorImpl::getRandomReal(double min, double max)
@@ -48,7 +53,7 @@ double NumberGeneratorImpl::getRandomReal(double min, double max)
 
 double NumberGeneratorImpl::getRandomReal()
 {
-	return static_cast<double>(getNumberFromArray()) / RAND_MAX;
+    return static_cast<double>(getNumberFromArray()) / RandMax;
 }
 
 QByteArray NumberGeneratorImpl::getRandomArray(int length)
