@@ -52,7 +52,7 @@ namespace
         QByteArray result;
         result.reserve(size);
         for (int i = 0; i < size; ++i) {
-            result[i] = data[i];
+            result.append(data[i]);
         }
         return result;
     }
