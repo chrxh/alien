@@ -3,8 +3,8 @@
 
 #include "Base/ServiceLocator.h"
 #include "IntegrationGpuTestFramework.h"
-#include "ModelBasic/CellComputerCompiler.h"
-#include "ModelBasic/QuantityConverter.h"
+#include "EngineInterface/CellComputerCompiler.h"
+#include "EngineInterface/QuantityConverter.h"
 
 class ConstructorGpuTests : public IntegrationGpuTestFramework
 {
@@ -1291,7 +1291,7 @@ void ConstructorGpuTests::_ResultChecker::checkIfNoDestructionAndSuccess(
     TestResult const& testResult,
     Expectations const& expectations) const
 {
-    EXPECT_TRUE(testResult.getFirstCellOfConstructionSiteAfterCreation());
+    EXPECT_TRUE(testResult.getFirstCellOfConstructionSiteAfterCreation().is_initialized());
     EXPECT_EQ(1, testResult.constructionSite.size() - testResult.origConstructionSite.size());
 
     checkCellPositionAfterCreation(testResult, expectations);

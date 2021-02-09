@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ModelGpu/Definitions.h"
+#include "EngineGpu/Definitions.h"
 
 #include "TestSettings.h"
 
