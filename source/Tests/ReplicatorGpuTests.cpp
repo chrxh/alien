@@ -46,14 +46,14 @@ TEST_F(ReplicatorGpuTests, testManyReplicators)
 
     SimulationParameters parameters;
     {
-        auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.par" };
+        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.par" };
         SerializationHelper::loadFromFile<SimulationParameters>(
             filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
     }
     _context->setSimulationParameters(parameters);
 
     DataDescription loadData;
-    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
+    auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.aco" };
     SerializationHelper::loadFromFile<DataDescription>(
         filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
 
@@ -80,14 +80,14 @@ TEST_F(ReplicatorGpuTests, testManyConcentratedReplicators)
 
     SimulationParameters parameters;
     {
-        auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.par" };
+        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.par" };
         SerializationHelper::loadFromFile<SimulationParameters>(
             filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
     }
     _context->setSimulationParameters(parameters);
 
     DataDescription loadData;
-    auto filename = string{ "..\\..\\source\\Tests\\TestData\\replicator.aco" };
+    auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.aco" };
     SerializationHelper::loadFromFile<DataDescription>(
         filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
 
@@ -145,7 +145,7 @@ TEST_F(ReplicatorGpuTestsWithManyThreads, testManyReplicators)
 
     SimulationParameters parameters;
     {
-        auto filename = string{ "..\\..\\source\\Tests\\TestData\\dna-replicator.par" };
+        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\dna-replicator.par" };
         SerializationHelper::loadFromFile<SimulationParameters>(
             filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
     }
@@ -153,7 +153,7 @@ TEST_F(ReplicatorGpuTestsWithManyThreads, testManyReplicators)
 
     DataDescription loadData;
     {
-        auto filename = string{ "..\\..\\source\\Tests\\TestData\\dna-replicator.aco" };
+        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\dna-replicator.aco" };
         SerializationHelper::loadFromFile<DataDescription>(
             filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
     }
