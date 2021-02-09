@@ -120,7 +120,7 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell * cell, C
     SpiralLookupResult result;
 
     Cell * visitedCellData[256*2];
-    HashSet<Cell *> visitedCell(depth*2, visitedCellData);
+    HashSet<Cell*, HashFunctor<Cell*>> visitedCell(depth * 2, visitedCellData);
 
     result.cell = cell;
     result.prevCell = sourceCell;

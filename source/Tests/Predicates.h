@@ -3,7 +3,7 @@
 #include <QVector2D>
 #include <gtest/gtest.h>
 
-#include "ModelBasic/Definitions.h"
+#include "EngineInterface/Definitions.h"
 #include "TestSettings.h"
 
 bool predEqualIntVector(IntVector2D a, IntVector2D b);

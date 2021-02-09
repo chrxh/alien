@@ -1,5 +1,5 @@
-#include "ModelBasic/Serializer.h"
-#include "ModelBasic/SerializationHelper.h"
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializationHelper.h"
 
 #include "IntegrationGpuTestFramework.h"
 

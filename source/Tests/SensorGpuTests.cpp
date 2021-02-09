@@ -1,5 +1,5 @@
 #include "IntegrationGpuTestFramework.h"
-#include "ModelBasic/QuantityConverter.h"
+#include "EngineInterface/QuantityConverter.h"
 
 class SensorGpuTests : public IntegrationGpuTestFramework
 {

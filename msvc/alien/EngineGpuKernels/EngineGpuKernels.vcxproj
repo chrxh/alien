@@ -89,6 +89,8 @@
       <CodeGeneration>compute_60,sm_60</CodeGeneration>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <Defines>ENGINEGPUKERNELS_LIB</Defines>
+      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
+      <FastMath>true</FastMath>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

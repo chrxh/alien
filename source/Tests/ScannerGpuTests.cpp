@@ -1,6 +1,6 @@
 #include "Base/ServiceLocator.h"
-#include "ModelBasic/QuantityConverter.h"
-#include "ModelBasic/DescriptionFactory.h"
+#include "EngineInterface/QuantityConverter.h"
+#include "EngineInterface/DescriptionFactory.h"
 
 #include "IntegrationGpuTestFramework.h"
 

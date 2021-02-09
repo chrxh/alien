@@ -3,19 +3,19 @@
 #include <QEventLoop>
 
 #include "Base/NumberGenerator.h"
-#include "ModelBasic/ModelBasicBuilderFacade.h"
-#include "ModelBasic/Physics.h"
-#include "ModelBasic/SimulationController.h"
-#include "ModelBasic/DescriptionHelper.h"
-#include "ModelBasic/SimulationParameters.h"
-#include "ModelBasic/SpaceProperties.h"
-#include "ModelBasic/SimulationAccess.h"
-#include "ModelBasic/SimulationContext.h"
+#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/Physics.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/SpaceProperties.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SimulationContext.h"
 
-#include "ModelGpu/SimulationControllerGpu.h"
-#include "ModelGpu/SimulationAccessGpu.h"
-#include "ModelGpu/ModelGpuData.h"
-#include "ModelGpu/ModelGpuBuilderFacade.h"
+#include "EngineGpu/SimulationControllerGpu.h"
+#include "EngineGpu/SimulationAccessGpu.h"
+#include "EngineGpu/ModelGpuData.h"
+#include "EngineGpu/ModelGpuBuilderFacade.h"
 
 #include "Tests/Predicates.h"
 
