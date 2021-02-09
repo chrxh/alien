@@ -43,8 +43,12 @@ namespace
 
         CudaInitializer()
         {
-            cudaSetDevice(0);
-            std::cerr << "[CUDA] initialized" << std::endl;
+            std::cerr << "[CUDA] start initialization" << std::endl;
+            auto result = cudaSetDevice(0);
+            if (result != cudaSuccess) {
+                throw std::exception("CUDA could not be initialized.");
+            }
+            std::cerr << "[CUDA] initialization finished" << std::endl;
         }
 
         ~CudaInitializer()

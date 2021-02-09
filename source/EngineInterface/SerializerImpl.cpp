@@ -312,17 +312,17 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
     specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
     specificData.insert_or_assign("dynamicMemorySize", 100000000);
 */
-    auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
+	auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
-	simController->setParent(this);
+    simController->setParent(this);
 
     _descHelper->init(simController->getContext());
     _descHelper->makeValid(data);
 
-	buildAccess(simController);
-	_access->clear();
-	_access->updateData(data);
-	return simController;
+    buildAccess(simController);
+    _access->clear();
+    _access->updateData(data);
+    return simController;
 }
 
 string SerializerImpl::serializeDataDescription(DataDescription const & desc) const
