@@ -34,6 +34,7 @@ public:
 
 	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
 	virtual InfoController* getInfoController() const;
+    virtual MonitorController* getMonitorController() const;
 
     virtual void toggleGettingStarted(bool show);
     virtual void showDocumentation();

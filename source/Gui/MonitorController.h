@@ -14,9 +14,12 @@ public:
 	MonitorController(QWidget* parent = nullptr);
 	virtual ~MonitorController() = default;
 
-	virtual void init(MainController* mainController);
+	void init(MainController* mainController);
 
-	virtual void onShow(bool show);
+	void onShow(bool show);
+    void pauseTimer();
+    void continueTimer();
+	
 
 	Q_SIGNAL void closed();
 

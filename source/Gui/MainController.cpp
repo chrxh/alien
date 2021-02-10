@@ -45,6 +45,7 @@
 #include "Queue.h"
 #include "WebSimulationController.h"
 #include "Settings.h"
+#include "MonitorController.h"
 
 namespace Const
 {
@@ -309,14 +310,17 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 	auto symbolTable = _simController->getContext()->getSymbolTable();
 	auto simulationParameters = _simController->getContext()->getSimulationParameters();
 
-	initSimulation(symbolTable, simulationParameters);
+    initSimulation(symbolTable, simulationParameters);
 
+    _view->getMonitorController()->continueTimer();
 	_view->refresh();
 }
 
 void MainController::onNewSimulation(SimulationConfig const& config, double energyAtBeginning)
 {
-	delete _simController;
+    _view->getMonitorController()->pauseTimer();
+
+    delete _simController;
     _simController = nullptr;
     auto facade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
     auto simulationControllerConfig =
@@ -329,6 +333,7 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
     }
 
 	initSimulation(config->symbolTable, config->parameters);
+    _view->getMonitorController()->continueTimer();
 
 	addRandomEnergy(energyAtBeginning);
 
@@ -347,6 +352,8 @@ void MainController::onSaveSimulation(string const& filename)
 
 bool MainController::onLoadSimulation(string const & filename, LoadOption option)
 {
+    _view->getMonitorController()->pauseTimer();
+
     auto progress = MessageHelper::createProgressDialog("Loading...", _view);
 
     if (LoadOption::SaveOldSim == option) {
@@ -376,6 +383,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     }
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
+    _view->getMonitorController()->continueTimer();
 	_view->refresh();
 
     delete progress;
@@ -384,6 +392,8 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 
 void MainController::onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent)
 {
+    _view->getMonitorController()->pauseTimer();
+
     auto const recreateFunction = [&](Serializer* serializer) {
         recreateSimulation(serializer->retrieveSerializedSimulation());
     };

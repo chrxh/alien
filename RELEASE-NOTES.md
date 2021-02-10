@@ -8,6 +8,7 @@
 
 ### Fixed
 - timeout problem during simulation run
+- fix crash when monitor is open and simulation or general settings are changed 
 
 ## [2.2.1] - 2021-02-05
 ### Fixed
