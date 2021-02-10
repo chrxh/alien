@@ -58,7 +58,7 @@ namespace
                        << prop.name
                        << " has compute capability of " 
                        << prop.major << "." << prop.minor
-                       << ". A compute capability of 6.* is needed.";
+                       << ". A compute capability of 6.0 is needed.";
                 throw std::exception(stream.str().c_str());
             }
 
