@@ -3,6 +3,7 @@
 #include "EngineInterface/Physics.h"
 #include "EngineInterface/SimulationAccess.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationContext.h"
 
 
 #include "IntegrationTestHelper.h"
@@ -38,6 +39,27 @@ void IntegrationTestHelper::updateData(SimulationAccess* access, DataChangeDescr
         pause.exec();
     }
     QObject::disconnect(connection);
+}
+
+void IntegrationTestHelper::updateData(SimulationAccess* access, SimulationContext* context, 
+    DataChangeDescription const& data)
+{
+    QEventLoop pause;
+    bool finished = false;
+    auto connection1 = access->connect(access, &SimulationAccess::dataUpdated, [&]() {
+        finished = true;
+        pause.quit();
+    });
+    auto connection2 =
+        context->connect(context, &SimulationContext::errorThrown, [&](QString what) {
+            throw std::exception(what.toStdString().c_str());
+        });
+    access->updateData(data);
+    while (!finished) {
+        pause.exec();
+    }
+    QObject::disconnect(connection1);
+    QObject::disconnect(connection2);
 }
 
 void IntegrationTestHelper::runSimulation(int timesteps, SimulationController* controller)

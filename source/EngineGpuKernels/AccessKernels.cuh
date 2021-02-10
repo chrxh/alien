@@ -335,9 +335,8 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
 
     KERNEL_CALL(filterClusters, rectUpperLeft, rectLowerRight, data.entities.clusterPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
-    KERNEL_CALL(createDataFromTO, data, access);
-
     KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
+    KERNEL_CALL(createDataFromTO, data, access);
 }
 
 __global__ void cudaClearData(SimulationData data)
