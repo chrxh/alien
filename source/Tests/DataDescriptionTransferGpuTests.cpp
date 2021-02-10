@@ -40,7 +40,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
 {
 	DataDescription dataBefore;
 	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
-	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -64,8 +64,8 @@ TEST_F(DataDescriptionTransferGpuTests, testAddToken)
 	cluster.cells->at(0).addToken(token);
 	dataChanged.addCluster(cluster);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -90,8 +90,8 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_changeClusterId)
 	otherCluster.id = _numberGen->getId();
 	dataChanged.addCluster(otherCluster);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -122,8 +122,8 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_addSecondToken)
 	DataDescription dataChanged;
 	dataChanged.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -154,8 +154,8 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeClusterWithToken_addSecondToke
 	DataDescription dataChanged;
 	dataChanged.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -194,8 +194,8 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithSeveralTokens)
 	dataChanged.addCluster(cluster3);
 	dataChanged.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -228,8 +228,8 @@ TEST_F(DataDescriptionTransferGpuTests, testRemoveCellWithToken)
 	DataDescription dataChanged;
 	dataChanged.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -253,8 +253,8 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeParticle)
 	auto particleChange = ParticleDescription().setId(particleId).setEnergy(particleEnergy2).setPos({ 150, 150 }).setVel({ 0.0f, -0.3f });
 	dataChanged.addParticle(particleChange);
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
-	IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataChanged));
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataChanged));
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
 
@@ -272,7 +272,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateDataOutsideBoundaries)
 	dataBefore.addCluster(createHorizontalCluster(3, QVector2D{ 2.5f * universeSize.x, 2.5f * universeSize.y}));
 	dataBefore.addParticle(createParticle(QVector2D{ 2.5f * universeSize.x + 2.0f, 2.5f * universeSize.y + 2.0f }));
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 }, { _universeSize.x, _universeSize.y } });
 
 	EXPECT_EQ(1, dataAfter.clusters->size());
@@ -310,7 +310,7 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestChangeData)
 	dataBefore.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ size.x / 2.0f, size.y / 2.0f }, QVector2D{}));
 	dataBefore.addParticle(createParticle(QVector2D{ 0, 0 }));
 
-	IntegrationTestHelper::updateData(_access, dataBefore);
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
 
 	auto dataModified = dataBefore;
 	unordered_set<uint64_t> idsOfChangedCells;
@@ -324,7 +324,7 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestChangeData)
 	particle.pos->setX(particle.pos->x() + 50.0f);
 
 	descHelper->reconnect(dataModified, dataBefore, idsOfChangedCells);
-	EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, DataChangeDescription(dataBefore, dataModified)));
+	EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataModified)));
 }
 
 /**
@@ -342,12 +342,12 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken)
     cell.addToken(token);
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     DataDescription changedData = origData;
     auto& changedCluster = changedData.clusters->at(0);
     setCenterPos(changedCluster, QVector2D{ 1.0f, 0 });
-    IntegrationTestHelper::updateData(_access, DataChangeDescription(origData, changedData));
+    IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(origData, changedData));
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -378,13 +378,13 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken_partialU
         firstCell.addToken(token);
         origData.addCluster(cluster);
     }
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     auto intermediateData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ 20, _universeSize.y } });
     auto changedData = intermediateData;
     auto& changedCluster = changedData.clusters->at(0);
     setCenterPos(changedCluster, QVector2D{ 5, 0 });
-    IntegrationTestHelper::updateData(_access, DataChangeDescription(intermediateData, changedData));
+    IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(intermediateData, changedData));
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
     ASSERT_EQ(2, newData.clusters->size());
@@ -408,13 +408,13 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestRepeatingPartialUpdateAndR
 {
     DataDescription origData;
     origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 100, 100 }, QVector2D{}));
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     for (int i = 0; i < 10; ++i) {
         auto const data = IntegrationTestHelper::getContent(_access, { { 70, 70 },{ 130, 130 } });
         auto newData = data;
         *newData.clusters->at(0).angularVel = _numberGen->getRandomReal(-0.01, 0.01);
-        IntegrationTestHelper::updateData(_access, DataChangeDescription(data, newData));
+        IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(data, newData));
         IntegrationTestHelper::runSimulation(100, _controller);
     }
 

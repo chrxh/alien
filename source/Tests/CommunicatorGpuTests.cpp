@@ -119,7 +119,7 @@ void CommunicatorGpuTests::runStandardTest(TestParameters const& testParameters,
         origData.addCluster(origCommunicator);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(3, _controller);
 
     auto const data = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});

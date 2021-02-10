@@ -45,7 +45,7 @@ TEST_F(ClusterGpuTests, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOv
 	cluster2.setPos(cluster2.getClusterPosFromCells());
 	origData.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(150, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -94,7 +94,7 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_horizontal)
 	cluster2.setPos(cluster2.getClusterPosFromCells());
 	origData.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(150, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -142,7 +142,7 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_vertical)
 	cluster2.setPos(cluster2.getClusterPosFromCells());
 	origData.addCluster(cluster2);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(150, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -181,7 +181,7 @@ TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(150, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -221,7 +221,7 @@ TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUn
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(20, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -263,7 +263,7 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -302,7 +302,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfParallelLineClusters)
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(120, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -342,7 +342,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters)
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(23, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -386,7 +386,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters_withAngularVelo
 	uint64_t clusterId1 = cluster1.id;
 	uint64_t clusterId2 = cluster2.id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -412,7 +412,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(120, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -454,7 +454,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters)
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(40, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -497,7 +497,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters_waitUntilSe
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(200, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -533,7 +533,7 @@ TEST_F(ClusterGpuTests, DISABLED_testSidewiseCollisionOfTraversalLineClusters_wa
 	uint64_t clusterId1 = origData.clusters->at(0).id;
 	uint64_t clusterId2 = origData.clusters->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(200, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -601,7 +601,7 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy)
 		origData.addCluster(cluster);
 	}
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(3, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -645,7 +645,7 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 	origData.clusters->at(0).cells->at(2).energy = lowEnergy;
 	origData.clusters->at(0).angle = 90;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -692,7 +692,7 @@ TEST_F(ClusterGpuTests, testDestructionOfTooCloseCells)
 	origData.addCluster(createHorizontalCluster(5, QVector2D{ 100.5f, 100.5f }, QVector2D{ 0, 0 }, 0.0));
 	origData.addCluster(createHorizontalCluster(3, QVector2D{ 100.5f, 100.5f + closeDistance }, QVector2D{ 0, 0 }, 0.0));
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -715,7 +715,7 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters)
 	setMaxConnections(origData.clusters->at(0), 3);
 	setMaxConnections(origData.clusters->at(1), 3);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	int duration = static_cast<int>((5.0f / velocity) + 5);
 	IntegrationTestHelper::runSimulation(duration, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -739,7 +739,7 @@ TEST_F(ClusterGpuTests, testNoFusionOfHorizontalClusters)
 	setMaxConnections(origData.clusters->at(0), 3);
 	setMaxConnections(origData.clusters->at(1), 3);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	int duration = static_cast<int>((5.0f / velocity) + 5);
 	IntegrationTestHelper::runSimulation(duration, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -763,7 +763,7 @@ TEST_F(ClusterGpuTests, testFusionOfLineClusters_duringRotation)
 	setMaxConnections(origData.clusters->at(1), 3);
 	origData.clusters->at(0).angle = 90;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -795,7 +795,7 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_partialContact)
 	setMaxConnections(origData.clusters->at(1), 3);
 	origData.clusters->at(0).angle = 90;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -826,7 +826,7 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_atUniverseBoundary)
 	setMaxConnections(origData.clusters->at(0), 3);
 	setMaxConnections(origData.clusters->at(1), 3);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -845,7 +845,7 @@ TEST_F(ClusterGpuTests, testFastMovingCluster)
 	DataDescription origData;
 	origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ _universeSize.x / 2.0f, _universeSize.y / 2.0f }, QVector2D{ cellMaxForce*3.0f, 0.0f }));
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -863,7 +863,7 @@ TEST_F(ClusterGpuTests, testFastRotatingCluster)
 	DataDescription origData;
 	origData.addCluster(createHorizontalCluster(51, QVector2D{ _universeSize.x / 2.0f, _universeSize.y / 2.0f }, QVector2D(), 20.0));
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(100, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -892,7 +892,7 @@ TEST_F(ClusterGpuTests, regressionTestOverlappingRectangleClusters_manyThreadsPe
 	origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 100, 100 }, QVector2D{ 0, 0 }));
 	origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 105.0f + closeDistance, 105 }, QVector2D{ 0, 0 }));
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1, _controller));
 }
 
@@ -912,7 +912,7 @@ TEST_F(ClusterGpuTests, regressionTestManyOverlappingRectangleClusters)
 		origData.addCluster(createRectangularCluster({ 20, 20 }, QVector2D{ 100.0f + 5.0f*i, 100 }, QVector2D{ -2.0f + 3.2f*i, -2.0f + 3.2f*i }));
 	}
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(300, _controller));
 }
 
@@ -962,7 +962,7 @@ TEST_F(ClusterGpuWithManyThreadsPerBlockTests, regressionTestManyRectangleCluste
 		origData.addCluster(createRectangularCluster({ 7, 40 }));
 	}
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(300, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 	checkCellConnections(newData);
@@ -984,7 +984,7 @@ TEST_F(ClusterGpuTests, regressionTestManyRectangleClusters_concentratedAtUniver
 			static_cast<float>(_numberGen->getRandomReal(-20, -20 + 40)) }));
 	}
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(50, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 	checkCellConnections(newData);
@@ -1005,7 +1005,7 @@ TEST_F(ClusterGpuTests, regressionTestEnergyBalanceDuringCollisionAndDecompositi
     origData.addCluster(cluster);
     origData.addCluster(createRectangularCluster({ 5, 5 }, QVector2D{ 105, 105 }, QVector2D{ -1, 0 }));
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -1060,7 +1060,7 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestThreeOverlappingClusters)
     origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 5, 5 }, QVector2D{ -1, -1 }));
     origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ -5, -5 }, QVector2D{ 1, -1 }));
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(2, _controller);
 
     IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -1090,7 +1090,7 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestFusionAndHeavyCollision)
     origData.addCluster(createRectangularCluster(
         {10, 10}, QVector2D{20, 0}, QVector2D{-destructionVelocity, 0}, IntegrationTestFramework::Boundary::NonSticky));
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(2, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
@@ -1107,7 +1107,7 @@ TEST_F(ClusterGpuTests, testSimultaneousCollisionOfBlocks)
     }
     auto clusterId = [&](int i) { return origData.clusters->at(i).id; };
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});

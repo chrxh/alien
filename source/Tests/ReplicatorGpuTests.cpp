@@ -70,7 +70,7 @@ TEST_F(ReplicatorGpuTests, testManyReplicators)
         origData.addCluster(replicator);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1000, _controller);
 }
 
@@ -104,7 +104,7 @@ TEST_F(ReplicatorGpuTests, testManyConcentratedReplicators)
         origData.addCluster(replicator);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 }
 
@@ -178,7 +178,7 @@ TEST_F(ReplicatorGpuTestsWithManyThreads, testManyReplicators)
         origData.addCluster(replicator);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(5000, _controller);
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
     check(origData, newData);
