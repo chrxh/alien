@@ -49,6 +49,19 @@ namespace
                 throw std::exception("CUDA could not be initialized.");
             }
             std::cerr << "[CUDA] initialization finished" << std::endl;
+
+            cudaDeviceProp prop;
+            CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, 0));
+            if (prop.major < 6) {
+                std::stringstream stream;
+                stream << "The found device "
+                       << prop.name
+                       << " has compute capability of " 
+                       << prop.major << "." << prop.minor
+                       << ". A compute capability of 6.* is needed.";
+                throw std::exception(stream.str().c_str());
+            }
+
         }
 
         ~CudaInitializer()
