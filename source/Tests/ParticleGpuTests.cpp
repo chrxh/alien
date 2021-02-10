@@ -62,7 +62,7 @@ TEST_F(ParticleGpuTests, testFusionOfTwoParticles)
 	auto particle2 = ParticleDescription().setId(particleId2).setEnergy(particleEnergy).setPos({ 110, 100 }).setVel({ -0.5, 0.0 });
 	origData.addParticle(particle2);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(30, _controller);
 
 	IntRect rect = { { 0, 0 },{ _universeSize.x, _universeSize.y } };
@@ -90,7 +90,7 @@ TEST_F(ParticleGpuTests, testFusionOfManyParticles)
 			ParticleDescription().setId(_numberGen->getId()).setEnergy(particleEnergy).setPos({ 100, 100 }).setVel({ 0.5, 0.0 }));
 	}
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(300, _controller);
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -108,7 +108,7 @@ TEST_F(ParticleGpuTests, testTransformationParticleToCell)
     float cellMinEnergy = static_cast<float>(_parameters.cellMinEnergy);
     origData.addParticle(ParticleDescription().setId(_numberGen->getId()).setPos({ 0, 0 }).setVel({ 0.5, 0 }).setEnergy(cellMinEnergy * 2));
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
@@ -144,7 +144,7 @@ TEST_F(ParticleGpuWithOneBlockTests, regressionTestFusionOfManyParticles)
     }
     origData.addCluster(createRectangularCluster({ 10, 10 }, QVector2D{ 0, 0 }, QVector2D{}));
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1000, _controller);
 
     IntRect rect = {{0, 0}, {_universeSize.x, _universeSize.y}};

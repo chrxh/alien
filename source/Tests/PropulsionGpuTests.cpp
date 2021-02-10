@@ -70,7 +70,7 @@ DataDescription PropulsionGpuTests::runStandardPropulsionTest(Enums::PropIn::Typ
     origData.addCluster(
         createClusterForPropulsionTest(command, propAngle, propPower, vel, angle, angularVel, 1));
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -257,7 +257,7 @@ TEST_F(PropulsionGpuTests, testPowerControl)
     origData.addCluster(cluster2);
     origData.addCluster(cluster3);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -302,7 +302,7 @@ TEST_F(PropulsionGpuTests, testParallelization1)
     origData.addCluster(cluster1);
     origData.addCluster(cluster2);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -365,7 +365,7 @@ TEST_F(PropulsionGpuTests, testParallelization2)
         origData.addCluster(cluster2);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });

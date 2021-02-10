@@ -27,7 +27,7 @@ TEST_F(GpuBenchmark, testClusterAndParticleMovement)
         ));
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(400, _controller);
 
     QElapsedTimer timer;
@@ -53,7 +53,7 @@ TEST_F(GpuBenchmark, testOnlyClusterMovement)
         ));
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(400, _controller);
 
     QElapsedTimer timer;
@@ -102,7 +102,7 @@ TEST_F(GpuBenchmarkForClusterDecomposition, testClusterDecomposition)
     cluster.cells->at(120).energy = lowEnergy;
     cluster.cells->at(5020).energy = lowEnergy;
     origData.addCluster(cluster);
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     QElapsedTimer timer;
     timer.start();

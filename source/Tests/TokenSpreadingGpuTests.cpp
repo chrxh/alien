@@ -71,7 +71,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
 	
 	uint64_t lastCellId = cluster.cells->at(9).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(9, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -126,7 +126,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_manyLargeClu
 		lastCellIds.insert(origData.clusters->at(clusterIndex).cells->at(99).id);
 	}
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(99, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -178,7 +178,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithEncounter)
 
 	uint64_t secondCellId = secondCell.id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -224,7 +224,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers)
 	firstCell.addToken(TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0)));
 	origData.addCluster(cluster);
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -258,7 +258,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers_negativeVa
     firstCell.addToken(TokenDescription().setEnergy(30).setData(memory));
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     auto const newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -294,7 +294,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementBlocked)
 
 	uint64_t lastCellId = cluster.cells->at(9).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(9, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -337,7 +337,7 @@ TEST_F(TokenSpreadingGpuTests, testForking)
 	uint64_t firstCellId = firstCell.id;
 	uint64_t thirdCellId = thirdCell.id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -390,7 +390,7 @@ TEST_F(TokenSpreadingGpuTests, testForking_lowCellEnergies)
     uint64_t firstCellId = firstCell.id;
     uint64_t thirdCellId = thirdCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -442,7 +442,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
 	auto& secondCellId = cluster.cells->at(1).id;
 	auto& fourthCellId = cluster.cells->at(3).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -497,7 +497,7 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterFusion)
     auto secondCellId = firstCluster.cells->at(1).id;
     auto thirdCellId = secondCluster.cells->at(0).id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -544,7 +544,7 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterSecondFusion)
     auto secondCellId = firstCluster.cells->at(1).id;
     auto thirdCellId = secondCluster.cells->at(0).id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(3, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -602,7 +602,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
     auto thirdCellId = secondCluster.cells->at(0).id;
     auto fourthCellId = secondCluster.cells->at(1).id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -649,7 +649,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithTooManyTokens)
 
 	uint64_t secondCellId = secondCell.id;
 
-	IntegrationTestHelper::updateData(_access, origData);
+	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(1, _controller);
 
 	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -695,7 +695,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementAveragingCellEnergies)
     firstCell.addToken(token);
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -736,7 +736,7 @@ TEST_F(TokenSpreadingGpuTests, testMassiveMovements)
     }
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -772,7 +772,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_lowEnergy)
     firstCell.addToken(token);
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -832,7 +832,7 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
         thirdCellOfSecondClusterId = thirdCell.id;
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -884,7 +884,7 @@ TEST_F(TokenSpreadingGpuTests, regressionTestManyStickyRotatingTokenClusters)
         origData.addCluster(cluster);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(100, _controller);
 }
 
@@ -912,7 +912,7 @@ TEST_F(TokenSpreadingGpuTests, regressionTestLowTokenEnergy)
     DataDescription origData;
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -960,7 +960,7 @@ TEST_F(TokenSpreadingGpuTests, regressionTestMovementOnLowEnergyCellWithSimultan
     origData.addCluster(cluster);
     origData.addCluster(otherCluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -986,7 +986,7 @@ TEST_F(TokenSpreadingGpuTests, testCellDecayDueToTokenUsage)
     }
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(2, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
