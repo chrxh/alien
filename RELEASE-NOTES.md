@@ -1,5 +1,13 @@
 # Release notes
 
+## [2.2.2] - 2021-02-10
+### Changed
+- upgrade to CUDA 11.2, Qt 6.0.1, boost 1.75.0 and VS 2019
+- parallel console window is not opened
+
+### Fixed
+- timeout problem during simulation run
+
 ## [2.2.1] - 2021-02-05
 ### Fixed
 - fixed crash at display resolutions higher than Full HD
@@ -35,8 +43,6 @@
 - nicer and larger toolbar icons
 - new logo
 - disable editor for low zoom levels
-
-### Removed
 
 ### Fixed
 - fix empty simulation after "step backward" or "restore snapshot"
