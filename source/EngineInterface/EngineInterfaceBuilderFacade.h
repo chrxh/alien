@@ -4,10 +4,10 @@
 
 #include "Definitions.h"
 
-class ModelBasicBuilderFacade
+class EngineInterfaceBuilderFacade
 {
 public:
-	virtual ~ModelBasicBuilderFacade() = default;
+	virtual ~EngineInterfaceBuilderFacade() = default;
 	
 	virtual Serializer* buildSerializer() const = 0;
 	virtual DescriptionHelper* buildDescriptionHelper() const = 0;

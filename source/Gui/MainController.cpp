@@ -10,7 +10,7 @@
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
 
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/SimulationContext.h"
 #include "EngineInterface/SpaceProperties.h"
@@ -24,8 +24,8 @@
 
 #include "EngineGpu/SimulationAccessGpu.h"
 #include "EngineGpu/SimulationControllerGpu.h"
-#include "EngineGpu/ModelGpuBuilderFacade.h"
-#include "EngineGpu/ModelGpuData.h"
+#include "EngineGpu/EngineGpuBuilderFacade.h"
+#include "EngineGpu/EngineGpuData.h"
 #include "EngineGpu/SimulationMonitorGpu.h"
 
 #include "Web/WebAccess.h"
@@ -71,8 +71,8 @@ void MainController::init()
         SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
     {
         if (ModelComputationType(typeId) == ModelComputationType::Gpu) {
-            auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-            ModelGpuData data(typeSpecificData);
+            auto facade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
+            EngineGpuData data(typeSpecificData);
             return facade->buildSimulationController({ universeSize, symbols, parameters }, data, timestepAtBeginning);
         }
         else {
@@ -82,8 +82,8 @@ void MainController::init()
     _accessBuildFunc = [](SimulationController* controller) -> SimulationAccess*
     {
         if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
-            auto modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
-            SimulationAccessGpu* access = modelGpuFacade->buildSimulationAccess();
+            auto EngineGpuFacade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
+            SimulationAccessGpu* access = EngineGpuFacade->buildSimulationAccess();
             access->init(controllerGpu);
             return access;
         }
@@ -94,7 +94,7 @@ void MainController::init()
     _monitorBuildFunc = [](SimulationController* controller) -> SimulationMonitor*
     {
         if (auto controllerGpu = dynamic_cast<SimulationControllerGpu*>(controller)) {
-            auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+            auto facade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
             SimulationMonitorGpu* moni = facade->buildSimulationMonitor();
             moni->init(controllerGpu);
             return moni;
@@ -104,9 +104,9 @@ void MainController::init()
         }
     };
 
-    auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-    auto serializer = modelBasicFacade->buildSerializer();
-    auto descHelper = modelBasicFacade->buildDescriptionHelper();
+    auto EngineInterfaceFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
+    auto serializer = EngineInterfaceFacade->buildSerializer();
+    auto descHelper = EngineInterfaceFacade->buildDescriptionHelper();
     auto versionController = new VersionController();
     SET_CHILD(_serializer, serializer);
     SET_CHILD(_descHelper, descHelper);
@@ -133,13 +133,13 @@ void MainController::init()
     if (!onLoadSimulation(getPathToApp() + Const::AutoSaveFilename, LoadOption::Non)) {
 
         //default simulation
-        auto const modelGpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+        auto const EngineGpuFacade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
 
         auto config = boost::make_shared<_SimulationConfig>();
-        config->cudaConstants = modelGpuFacade->getDefaultCudaConstants();
+        config->cudaConstants = EngineGpuFacade->getDefaultCudaConstants();
         config->universeSize = IntVector2D({ 2000 , 1000 });
-        config->symbolTable = modelBasicFacade->getDefaultSymbolTable();
-        config->parameters = modelBasicFacade->getDefaultSimulationParameters();
+        config->symbolTable = EngineInterfaceFacade->getDefaultSymbolTable();
+        config->parameters = EngineInterfaceFacade->getDefaultSimulationParameters();
         onNewSimulation(config, 0);
     }
 
@@ -252,10 +252,10 @@ void MainController::onSimulationChanger(bool toggled)
 
 void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)
 {
-    auto const modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto const EngineInterfaceFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 
 	_model->setSimulationParameters(parameters);
-    _model->setExecutionParameters(modelBasicFacade->getDefaultExecutionParameters());
+    _model->setExecutionParameters(EngineInterfaceFacade->getDefaultExecutionParameters());
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
@@ -274,7 +274,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
     auto space = context->getSpaceProperties();
     _webSimController->init(_accessBuildFunc(_simController), webSimMonitor, getSimulationConfig());
 
-    auto simChanger = modelBasicFacade->buildSimulationChanger(simMonitor, context->getNumberGenerator());
+    auto simChanger = EngineInterfaceFacade->buildSimulationChanger(simMonitor, context->getNumberGenerator());
     for (auto const& connection : _simChangerConnections) {
         QObject::disconnect(connection);
     }
@@ -318,10 +318,10 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 {
 	delete _simController;
     _simController = nullptr;
-    auto facade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+    auto facade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
     auto simulationControllerConfig =
-        ModelGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
-    auto data = ModelGpuData(config->cudaConstants);
+        EngineGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
+    auto data = EngineGpuData(config->cudaConstants);
     try {
 	    _simController = facade->buildSimulationController(simulationControllerConfig, data);
     } catch (std::exception const& e) {
@@ -389,7 +389,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
     };
     _worker->add(boost::make_shared<_ExecuteLaterFunc>(recreateFunction));
 
-    auto data = ModelGpuData(config->cudaConstants);
+    auto data = EngineGpuData(config->cudaConstants);
 
     Serializer::Settings settings{ config->universeSize, data.getData(), extrapolateContent };
     _serializer->serialize(_simController, static_cast<int>(ModelComputationType::Gpu), settings);
@@ -438,7 +438,7 @@ SimulationConfig MainController::getSimulationConfig() const
 	auto context = _simController->getContext();
 
 	if (dynamic_cast<SimulationControllerGpu*>(_simController)) {
-        auto data = ModelGpuData(context->getSpecificData());
+        auto data = EngineGpuData(context->getSpecificData());
         auto result = boost::make_shared<_SimulationConfig>();
         result->cudaConstants = data.getCudaConstants();
         result->universeSize = context->getSpaceProperties()->getSize();

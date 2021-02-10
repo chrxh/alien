@@ -2,9 +2,9 @@
 
 #include "SymbolTable.h"
 #include "SimulationParameters.h"
-#include "ModelBasicSettings.h"
+#include "EngineInterfaceSettings.h"
 
-SymbolTable* ModelBasicSettings::getDefaultSymbolTable()
+SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
 {
 	SymbolTable* symbolTable = new SymbolTable();
     symbolTable->clear();
@@ -146,7 +146,7 @@ SymbolTable* ModelBasicSettings::getDefaultSymbolTable()
 	return symbolTable;
 }
 
-SimulationParameters ModelBasicSettings::getDefaultSimulationParameters()
+SimulationParameters EngineInterfaceSettings::getDefaultSimulationParameters()
 {
 	SimulationParameters parameters;
 	parameters.clusterMaxRadius = 40.0f;
@@ -193,7 +193,7 @@ SimulationParameters ModelBasicSettings::getDefaultSimulationParameters()
 	return parameters;
 }
 
-ExecutionParameters ModelBasicSettings::getDefaultExecutionParameters()
+ExecutionParameters EngineInterfaceSettings::getDefaultExecutionParameters()
 {
     ExecutionParameters result;
     result.activateFreezing = false;

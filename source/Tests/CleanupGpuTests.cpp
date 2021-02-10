@@ -13,7 +13,7 @@ protected:
     virtual void SetUp();
 
 private:
-    ModelGpuData getModelDataForCleanup();
+    EngineGpuData getModelDataForCleanup();
 };
 
 
@@ -25,7 +25,7 @@ void CleanupGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-ModelGpuData CleanupGpuTests::getModelDataForCleanup()
+EngineGpuData CleanupGpuTests::getModelDataForCleanup()
 {
     CudaConstants cudaConstants;
     cudaConstants.NUM_THREADS_PER_BLOCK = 64;
@@ -40,7 +40,7 @@ ModelGpuData CleanupGpuTests::getModelDataForCleanup()
     cudaConstants.MAX_TOKENPOINTERS = 100 * 10;
     cudaConstants.DYNAMIC_MEMORY_SIZE = 1000000;
     cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 10000;
-    return ModelGpuData(cudaConstants);
+    return EngineGpuData(cudaConstants);
 }
 
 /**

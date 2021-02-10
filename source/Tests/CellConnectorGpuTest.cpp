@@ -3,15 +3,15 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "EngineGpu/SimulationContextGpuImpl.h"
 #include "EngineGpu/SimulationControllerGpu.h"
-#include "EngineGpu/ModelGpuBuilderFacade.h"
-#include "EngineGpu/ModelGpuData.h"
+#include "EngineGpu/EngineGpuBuilderFacade.h"
+#include "EngineGpu/EngineGpuData.h"
 
 #include "tests/Predicates.h"
 
@@ -36,7 +36,7 @@ protected:
 CellConnectorGpuTest::CellConnectorGpuTest()
     : IntegrationGpuTestFramework({ 600, 300 })
 {
-	auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	auto basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 	_descHelper = basicFacade->buildDescriptionHelper();
 	_descHelper->init(_context);
 }

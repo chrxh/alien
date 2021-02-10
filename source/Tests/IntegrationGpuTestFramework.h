@@ -3,7 +3,7 @@
 #include <QEventLoop>
 
 #include "Base/NumberGenerator.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/Physics.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/DescriptionHelper.h"
@@ -14,8 +14,8 @@
 
 #include "EngineGpu/SimulationControllerGpu.h"
 #include "EngineGpu/SimulationAccessGpu.h"
-#include "EngineGpu/ModelGpuData.h"
-#include "EngineGpu/ModelGpuBuilderFacade.h"
+#include "EngineGpu/EngineGpuData.h"
+#include "EngineGpu/EngineGpuBuilderFacade.h"
 
 #include "Tests/Predicates.h"
 
@@ -26,7 +26,7 @@ class IntegrationGpuTestFramework
 	: public IntegrationTestFramework
 {
 public:
-    IntegrationGpuTestFramework(IntVector2D const& universeSize = { 900, 600 }, optional<ModelGpuData> const& modelData = boost::none);
+    IntegrationGpuTestFramework(IntVector2D const& universeSize = { 900, 600 }, optional<EngineGpuData> const& modelData = boost::none);
 	virtual ~IntegrationGpuTestFramework();
 
 protected:

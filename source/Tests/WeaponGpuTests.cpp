@@ -9,7 +9,7 @@ class WeaponGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    WeaponGpuTests(IntVector2D const& universeSize = {50, 50}, optional<ModelGpuData> const& modelData = boost::none)
+    WeaponGpuTests(IntVector2D const& universeSize = {50, 50}, optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 

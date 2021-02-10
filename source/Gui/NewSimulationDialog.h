@@ -40,7 +40,7 @@ private:
 	SimulationParameters _parameters;
 	SymbolTable* _symbolTable = nullptr;
 
-	IntVector2D _universeSizeForModelGpu;
+	IntVector2D _universeSizeForEngineGpu;
 	IntVector2D _gridSize;
 };
 

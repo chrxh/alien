@@ -1,6 +1,6 @@
-#include "ModelGpuSettings.h"
+#include "EngineGpuSettings.h"
 
-CudaConstants ModelGpuSettings::getDefaultCudaConstants()
+CudaConstants EngineGpuSettings::getDefaultCudaConstants()
 {
     CudaConstants result;
     result.NUM_THREADS_PER_BLOCK = 32;

@@ -6,7 +6,7 @@ class GpuBenchmark
     : public IntegrationGpuTestFramework
 {
 public:
-    GpuBenchmark(IntVector2D const& universeSize = { 1008, 504 }, optional<ModelGpuData> const& modelData = boost::none)
+    GpuBenchmark(IntVector2D const& universeSize = { 1008, 504 }, optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
@@ -64,7 +64,7 @@ TEST_F(GpuBenchmark, testOnlyClusterMovement)
 
 namespace
 {
-    ModelGpuData getModelGpuDataWithOneBlock()
+    EngineGpuData getEngineGpuDataWithOneBlock()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 32;
@@ -79,7 +79,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -87,7 +87,7 @@ class GpuBenchmarkForClusterDecomposition
     : public GpuBenchmark
 {
 public:
-    GpuBenchmarkForClusterDecomposition() : GpuBenchmark({ 2010, 1000 }, getModelGpuDataWithOneBlock())
+    GpuBenchmarkForClusterDecomposition() : GpuBenchmark({ 2010, 1000 }, getEngineGpuDataWithOneBlock())
     {}
 
     virtual ~GpuBenchmarkForClusterDecomposition() = default;

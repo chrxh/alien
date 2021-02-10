@@ -2,7 +2,7 @@
 
 #include "Definitions.h"
 
-class ModelBasicSettings
+class EngineInterfaceSettings
 {
 public:
     static SymbolTable* getDefaultSymbolTable();

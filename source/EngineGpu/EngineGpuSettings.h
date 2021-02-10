@@ -2,7 +2,7 @@
 
 #include "EngineGpuKernels/CudaConstants.h"
 
-class ModelGpuSettings
+class EngineGpuSettings
 {
 public:
     static CudaConstants getDefaultCudaConstants();
