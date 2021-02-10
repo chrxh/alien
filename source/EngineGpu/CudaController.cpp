@@ -8,7 +8,7 @@
 
 #include "CudaWorker.h"
 #include "CudaJobs.h"
-#include "ModelGpuData.h"
+#include "EngineGpuData.h"
 
 namespace
 {

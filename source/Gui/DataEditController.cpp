@@ -5,7 +5,7 @@
 #include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/SymbolTable.h"
 #include "EngineInterface/SimulationContext.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 
 #include "Gui/DataRepository.h"
 #include "Gui/Notifier.h"
@@ -28,7 +28,7 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditModel(this);
 	_model->init(manipulator, context->getSimulationParameters(), context->getSymbolTable());
-	ModelBasicBuilderFacade* basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	EngineInterfaceBuilderFacade* basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 	CellComputerCompiler* compiler = basicFacade->buildCellComputerCompiler(context->getSymbolTable(), context->getSimulationParameters());
 	_view->init(upperLeftPosition, _model, this, compiler);
 	_repository = manipulator;

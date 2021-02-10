@@ -5,10 +5,10 @@
 
 #include "Definitions.h"
 
-class ModelGpuBuilderFacade
+class EngineGpuBuilderFacade
 {
 public:
-	virtual ~ModelGpuBuilderFacade() = default;
+	virtual ~EngineGpuBuilderFacade() = default;
 
 	struct Config {
 		IntVector2D universeSize;
@@ -16,7 +16,7 @@ public:
 		SimulationParameters parameters;
 	};
 	virtual SimulationControllerGpu* buildSimulationController(Config const& config
-		, ModelGpuData const& specificData
+		, EngineGpuData const& specificData
 		, uint timestepAtBeginning = 0) const = 0;
 	virtual SimulationAccessGpu* buildSimulationAccess() const = 0;
 	virtual SimulationMonitorGpu* buildSimulationMonitor() const = 0;

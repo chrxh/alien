@@ -27,8 +27,8 @@ SimulationAccessGpuImpl::~SimulationAccessGpuImpl()
 
 void SimulationAccessGpuImpl::init(SimulationControllerGpu* controller)
 {
-    auto modelGpuData = ModelGpuData(controller->getContext()->getSpecificData());
-    _cudaConstants = modelGpuData.getCudaConstants();
+    auto engineGpuData = EngineGpuData(controller->getContext()->getSpecificData());
+    _cudaConstants = engineGpuData.getCudaConstants();
     _dataTOCache = boost::make_shared<_DataTOCache>(_cudaConstants);
 	_context = static_cast<SimulationContextGpuImpl*>(controller->getContext());
 	_numberGen = _context->getNumberGenerator();

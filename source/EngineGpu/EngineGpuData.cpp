@@ -1,4 +1,4 @@
-#include "ModelGpuData.h"
+#include "EngineGpuData.h"
 
 #include "EngineGpuKernels/CudaConstants.h"
 
@@ -20,12 +20,12 @@ namespace
 }
 
 
-ModelGpuData::ModelGpuData(map<string, int> const & data)
+EngineGpuData::EngineGpuData(map<string, int> const & data)
 	: _data(data)
 {
 }
 
-ModelGpuData::ModelGpuData(CudaConstants const & value)
+EngineGpuData::EngineGpuData(CudaConstants const & value)
 {
     _data.insert_or_assign(numThreadsPerBlock_key, value.NUM_THREADS_PER_BLOCK);
     _data.insert_or_assign(numBlocks_key, value.NUM_BLOCKS);
@@ -41,7 +41,7 @@ ModelGpuData::ModelGpuData(CudaConstants const & value)
     _data.insert_or_assign(metadataDynamicMemorySize_key, value.METADATA_DYNAMIC_MEMORY_SIZE);
 }
 
-CudaConstants ModelGpuData::getCudaConstants() const
+CudaConstants EngineGpuData::getCudaConstants() const
 {
     CudaConstants result;
     result.NUM_THREADS_PER_BLOCK = _data.at(numThreadsPerBlock_key);
@@ -59,7 +59,7 @@ CudaConstants ModelGpuData::getCudaConstants() const
     return result;
 }
 
-map<string, int> ModelGpuData::getData() const
+map<string, int> EngineGpuData::getData() const
 {
     return _data;
 }

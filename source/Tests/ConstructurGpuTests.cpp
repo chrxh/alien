@@ -11,7 +11,7 @@ class ConstructorGpuTests : public IntegrationGpuTestFramework
 public:
     ConstructorGpuTests(
         IntVector2D const& universeSize = { 900, 600 }, 
-        optional<ModelGpuData> const& modelData = boost::none)
+        optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
@@ -278,7 +278,7 @@ protected:
 
 namespace
 {
-    ModelGpuData getModelGpuDataWithHighBlockCount()
+    EngineGpuData getEngineGpuDataWithHighBlockCount()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 16;
@@ -293,7 +293,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -301,7 +301,7 @@ class ConstructorGpuWithHighBlockCountTests : public ConstructorGpuTests
 {
 public:
     ConstructorGpuWithHighBlockCountTests()
-        : ConstructorGpuTests({ 64 * 8 * 6 * 4 * 2 + 100, 20 }, getModelGpuDataWithHighBlockCount())
+        : ConstructorGpuTests({ 64 * 8 * 6 * 4 * 2 + 100, 20 }, getEngineGpuDataWithHighBlockCount())
     { }
 
     virtual ~ConstructorGpuWithHighBlockCountTests() = default;
@@ -1746,7 +1746,7 @@ TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_nonStandar
 
 TEST_F(ConstructorGpuTests, testConstructFirstCellOnHorizontalCluster_nonStandardParameters2)
 {
-    auto const basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto const basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
     auto const compiler =
         basicFacade->buildCellComputerCompiler(_context->getSymbolTable(), _context->getSimulationParameters());
 

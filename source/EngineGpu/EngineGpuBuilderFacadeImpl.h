@@ -1,16 +1,16 @@
 #pragma once
 
-#include "ModelGpuBuilderFacade.h"
+#include "EngineGpuBuilderFacade.h"
 
-class ModelGpuBuilderFacadeImpl
-	: public ModelGpuBuilderFacade
+class EngineGpuBuilderFacadeImpl
+	: public EngineGpuBuilderFacade
 {
 public:
-	virtual ~ModelGpuBuilderFacadeImpl() = default;
+	virtual ~EngineGpuBuilderFacadeImpl() = default;
 
     SimulationControllerGpu* buildSimulationController(
         Config const& config,
-        ModelGpuData const& specificData,
+        EngineGpuData const& specificData,
         uint timestepAtBeginning) const override;
     SimulationAccessGpu* buildSimulationAccess() const override;
 	SimulationMonitorGpu* buildSimulationMonitor() const override;

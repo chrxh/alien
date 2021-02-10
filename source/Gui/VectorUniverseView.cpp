@@ -7,7 +7,7 @@
 
 #include "Base/ServiceLocator.h"
 #include "EngineInterface/PhysicalActions.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationAccess.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/SimulationContext.h"

@@ -3,12 +3,12 @@
 #include "Definitions.h"
 #include "DefinitionsImpl.h"
 
-class ENGINEGPU_EXPORT ModelGpuData
+class ENGINEGPU_EXPORT EngineGpuData
 {
 public:
-    ModelGpuData() = default;
-    explicit ModelGpuData(map<string, int> const& data);
-	explicit ModelGpuData(CudaConstants const& value);
+    EngineGpuData() = default;
+    explicit EngineGpuData(map<string, int> const& data);
+	explicit EngineGpuData(CudaConstants const& value);
 
     CudaConstants getCudaConstants() const;
 

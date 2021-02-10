@@ -4,11 +4,11 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SimulationAccess.h"
-#include "EngineGpu/ModelGpuBuilderFacade.h"
+#include "EngineGpu/EngineGpuBuilderFacade.h"
 
 #include "Predicates.h"
 #include "IntegrationTestFramework.h"
@@ -17,8 +17,8 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	: _universeSize(universeSize)
 {
 	GlobalFactory* factory = ServiceLocator::getInstance().getService<GlobalFactory>();
-	_basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	_gpuFacade = ServiceLocator::getInstance().getService<ModelGpuBuilderFacade>();
+	_basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
+	_gpuFacade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
 	_symbols = _basicFacade->getDefaultSymbolTable();
 	_parameters = _basicFacade->getDefaultSimulationParameters();
 }

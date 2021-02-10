@@ -45,8 +45,8 @@ protected:
     //prevent indeterminism when position is between two pixels
     QVector2D addSmallDisplacement(QVector2D const& value) const;
 
-    ModelBasicBuilderFacade* _basicFacade = nullptr;
-	ModelGpuBuilderFacade* _gpuFacade = nullptr;
+    EngineInterfaceBuilderFacade* _basicFacade = nullptr;
+	EngineGpuBuilderFacade* _gpuFacade = nullptr;
 	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;
 	SymbolTable* _symbols = nullptr;
