@@ -6,11 +6,11 @@
 #include "SimulationContextGpuImpl.h"
 #include "SimulationAccessGpuImpl.h"
 #include "SimulationMonitorGpuImpl.h"
-#include "ModelGpuBuilderFacadeImpl.h"
-#include "ModelGpuSettings.h"
+#include "EngineGpuBuilderFacadeImpl.h"
+#include "EngineGpuSettings.h"
 
-SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(Config const & config, 
-	ModelGpuData const & specificData, uint timestepAtBeginning) const
+SimulationControllerGpu * EngineGpuBuilderFacadeImpl::buildSimulationController(Config const & config, 
+	EngineGpuData const & specificData, uint timestepAtBeginning) const
 {
 	auto context = new SimulationContextGpuImpl();
 
@@ -23,17 +23,17 @@ SimulationControllerGpu * ModelGpuBuilderFacadeImpl::buildSimulationController(C
 	return controller;
 }
 
-SimulationAccessGpu * ModelGpuBuilderFacadeImpl::buildSimulationAccess() const
+SimulationAccessGpu * EngineGpuBuilderFacadeImpl::buildSimulationAccess() const
 {
 	return new SimulationAccessGpuImpl();
 }
 
-SimulationMonitorGpu * ModelGpuBuilderFacadeImpl::buildSimulationMonitor() const
+SimulationMonitorGpu * EngineGpuBuilderFacadeImpl::buildSimulationMonitor() const
 {
 	return new SimulationMonitorGpuImpl();
 }
 
-CudaConstants ModelGpuBuilderFacadeImpl::getDefaultCudaConstants() const
+CudaConstants EngineGpuBuilderFacadeImpl::getDefaultCudaConstants() const
 {
-    return ModelGpuSettings::getDefaultCudaConstants();
+    return EngineGpuSettings::getDefaultCudaConstants();
 }

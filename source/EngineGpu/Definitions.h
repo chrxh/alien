@@ -3,9 +3,9 @@
 #include "Base/Definitions.h"
 #include "DllExport.h"
 
-class ModelGpuBuilderFacade;
+class EngineGpuBuilderFacade;
 class SimulationControllerGpu;
 class SimulationAccessGpu;
-class ModelGpuData;
+class EngineGpuData;
 class SimulationMonitorGpu;
 struct DataAccessTO;

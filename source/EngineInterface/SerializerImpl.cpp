@@ -18,7 +18,7 @@
 #include "ChangeDescriptions.h"
 #include "SimulationParameters.h"
 #include "SymbolTable.h"
-#include "ModelBasicBuilderFacade.h"
+#include "EngineInterfaceBuilderFacade.h"
 #include "DescriptionHelper.h"
 
 #include "SerializerImpl.h"
@@ -231,7 +231,7 @@ void SerializerImpl::init(SimulationControllerBuildFunc const& controllerBuilder
 	_controllerBuilder = controllerBuilder;
 	_accessBuilder = accessBuilder;
 
-    auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto facade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
     auto descHelper = facade->buildDescriptionHelper();
     SET_CHILD(_descHelper, descHelper);
 }
@@ -294,7 +294,7 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
 	map<string, int> specificData;
 	ia >> data >> universeSize >> typeId >> specificData >> parameters >> *symbolTable >> timestep;
 
-	auto facade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+	auto facade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 
     //use following code for old simulation formats
 /*

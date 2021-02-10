@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include <QApplication>
 
-#include "EngineInterface/ModelBasicServices.h"
-#include "EngineGpu/ModelGpuServices.h"
+#include "EngineInterface/EngineInterfaceServices.h"
+#include "EngineGpu/EngineGpuServices.h"
 
 int main(int argc, char** argv) {
-	ModelBasicServices _modelBasicServices;
-	ModelGpuServices _modelGpuServices;
+	EngineInterfaceServices _EngineInterfaceServices;
+	EngineGpuServices _EngineGpuServices;
 
     QApplication app(argc, argv);
 

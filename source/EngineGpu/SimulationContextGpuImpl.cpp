@@ -10,7 +10,7 @@
 #include "CudaWorker.h"
 #include "CudaController.h"
 #include "SimulationContextGpuImpl.h"
-#include "ModelGpuData.h"
+#include "EngineGpuData.h"
 
 SimulationContextGpuImpl::SimulationContextGpuImpl(QObject* parent /*= nullptr*/)
 	: SimulationContext(parent)
@@ -22,7 +22,7 @@ void SimulationContextGpuImpl::init(
     int timestep,
     SymbolTable* symbolTable,
     SimulationParameters const& parameters,
-    ModelGpuData const& specificData)
+    EngineGpuData const& specificData)
 {
 	auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
 	auto numberGen = factory->buildRandomNumberGenerator();

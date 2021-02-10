@@ -1,11 +1,11 @@
 ﻿#pragma once
-#include "ModelBasicBuilderFacade.h"
+#include "EngineInterfaceBuilderFacade.h"
 
-class ModelBasicBuilderFacadeImpl
-	: public ModelBasicBuilderFacade
+class EngineInterfaceBuilderFacadeImpl
+	: public EngineInterfaceBuilderFacade
 {
 public:
-	~ModelBasicBuilderFacadeImpl() = default;
+	~EngineInterfaceBuilderFacadeImpl() = default;
 
 	Serializer* buildSerializer() const override;
     DescriptionHelper* buildDescriptionHelper() const override;

@@ -88,7 +88,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -101,7 +101,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -110,7 +110,6 @@
     <QtUic Include="..\..\..\source\Gui\CellComputerEditTab.ui" />
     <QtUic Include="..\..\..\source\Gui\ComputationSettingsDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\ComputationSettingsWidget.ui" />
-    <QtUic Include="..\..\..\source\Gui\DuplicationDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\GettingStartedWindow.ui" />
     <QtUic Include="..\..\..\source\Gui\GridMultiplierDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\MainView.ui" />
