@@ -4,6 +4,7 @@
 ### Changed
 - upgrade to CUDA 11.2, Qt 6.0.1, boost 1.75.0 and VS 2019
 - parallel console window is not opened
+- examples renamed
 
 ### Fixed
 - timeout problem during simulation run
