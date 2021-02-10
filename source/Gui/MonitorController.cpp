@@ -42,11 +42,26 @@ void MonitorController::onShow(bool show)
 	}
 }
 
+void MonitorController::pauseTimer()
+{
+    if (_view->isVisible()) {
+        _updateTimer->stop();
+	}
+}
+
+void MonitorController::continueTimer()
+{
+    if (_view->isVisible()) {
+        _updateTimer->start(millisec);
+    }
+}
+
 void MonitorController::timerTimeout()
 {
 	for (auto const& connection : _monitorConnections) {
 		disconnect(connection);
 	}
+    _monitorConnections.clear();
 	SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
 	_monitorConnections.push_back(connect(simMonitor, &SimulationMonitor::dataReadyToRetrieve, this, &MonitorController::dataReadyToRetrieve, Qt::QueuedConnection));
 	simMonitor->requireData();
@@ -54,7 +69,7 @@ void MonitorController::timerTimeout()
 
 void MonitorController::dataReadyToRetrieve()
 {
-	SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
+    SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
 	MonitorData const& data = simMonitor->retrieveData();
     *_model = data;
 	_view->update();

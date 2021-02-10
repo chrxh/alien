@@ -113,6 +113,11 @@ InfoController * MainView::getInfoController() const
 	return _infoController;
 }
 
+MonitorController* MainView::getMonitorController() const
+{
+    return _monitor;
+}
+
 void MainView::toggleGettingStarted(bool show)
 {
     _gettingStartedWindow->setVisible(show);
