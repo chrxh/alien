@@ -427,3 +427,50 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestRepeatingPartialUpdateAndR
         }
     }
 }
+
+namespace
+{
+    EngineGpuData getEngineGpuDataForMinClusterArraySizes()
+    {
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 32;
+        cudaConstants.NUM_BLOCKS = 32;
+        cudaConstants.MAX_CLUSTERS = 4;
+        cudaConstants.MAX_CELLS = 100;
+        cudaConstants.MAX_PARTICLES = 10;
+        cudaConstants.MAX_TOKENS = 10;
+        cudaConstants.MAX_CELLPOINTERS = 100 * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = 10 * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = 100;
+        cudaConstants.MAX_TOKENPOINTERS = 100;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 1000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
+        return EngineGpuData(cudaConstants);
+    }
+}
+
+class DataDescriptionTransferGpuTestsWithMinClusterArraySizes : public IntegrationGpuTestFramework
+{
+public:
+    DataDescriptionTransferGpuTestsWithMinClusterArraySizes()
+        : IntegrationGpuTestFramework({1000, 1000}, getEngineGpuDataForMinClusterArraySizes())
+    {}
+
+    virtual ~DataDescriptionTransferGpuTestsWithMinClusterArraySizes() = default;
+};
+
+TEST_F(DataDescriptionTransferGpuTestsWithMinClusterArraySizes, testMaxCluster)
+{
+    {
+        DataDescription data;
+        data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
+        data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
+        data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
+        IntegrationTestHelper::updateData(_access, _context, data);
+    }
+	{
+        DataDescription data;
+        data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
+        IntegrationTestHelper::updateData(_access, _context, data);
+    }
+}
