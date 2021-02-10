@@ -435,7 +435,7 @@ namespace
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 32;
         cudaConstants.NUM_BLOCKS = 32;
-        cudaConstants.MAX_CLUSTERS = 4;
+        cudaConstants.MAX_CLUSTERS = 3;
         cudaConstants.MAX_CELLS = 100;
         cudaConstants.MAX_PARTICLES = 10;
         cudaConstants.MAX_TOKENS = 10;
@@ -463,7 +463,6 @@ TEST_F(DataDescriptionTransferGpuTestsWithMinClusterArraySizes, testMaxCluster)
 {
     {
         DataDescription data;
-        data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
         data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
         data.addCluster(createHorizontalCluster(1, QVector2D{}, QVector2D{}, 0));
         IntegrationTestHelper::updateData(_access, _context, data);
