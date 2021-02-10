@@ -370,7 +370,7 @@ auto ConstructorGpuTests::runStartConstructionOnHorizontalClusterTest(
         }
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -477,7 +477,7 @@ auto ConstructorGpuTests::runStartConstructionOnWedgeClusterTest(
     DataDescription origData;
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -584,7 +584,7 @@ auto ConstructorGpuTests::runStartConstructionOnTriangleClusterTest(
     DataDescription origData;
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -705,7 +705,7 @@ auto ConstructorGpuTests::runSecondConstructionOnLineClusterTest(
         }
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -828,7 +828,7 @@ auto ConstructorGpuTests::runSecondCellConstructionOnSelfTouchingClusterTest(
     DataDescription origData;
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -970,7 +970,7 @@ auto ConstructorGpuTests::runFurtherCellConstructionOnLineClusterTest(
         }
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -1044,7 +1044,7 @@ auto ConstructorGpuTests::runConstructionSiteConnectedToConstructorTwiceTest(Tok
     DataDescription origData;
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -1126,7 +1126,7 @@ auto ConstructorGpuTests::runMassiveParallelClustersTest(MassiveParallelClusters
         origData.addCluster(cluster);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);
@@ -2888,7 +2888,7 @@ TEST_F(ConstructorGpuTests, testMultipleConnectedConstructionSites_errorConnecti
     }
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
 
     //perform test
     IntegrationTestHelper::runSimulation(1, _controller);

@@ -73,7 +73,7 @@ void SensorGpuTests::runStandardTest(TestParameters const& testParameters, Expec
         }
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     auto const data = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});

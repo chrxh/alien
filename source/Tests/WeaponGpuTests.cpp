@@ -78,7 +78,7 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
         origData.addCluster(*target2);
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -200,7 +200,7 @@ TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
             QVector2D(_numberGen->getRandomReal(-0.3, 0.3), _numberGen->getRandomReal(-0.3, 0.3))));
     }
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(200, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });

@@ -45,7 +45,7 @@ QByteArray CellComputerGpuTests::runSimpleCellComputer(string const & program) c
     firstCell.addToken(token);
     origData.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
