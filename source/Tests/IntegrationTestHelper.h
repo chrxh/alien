@@ -5,7 +5,6 @@ class IntegrationTestHelper
 {
 public:
     static DataDescription getContent(SimulationAccess* access, IntRect const& rect);
-    static void updateData(SimulationAccess* access, DataChangeDescription const& data);
     static void IntegrationTestHelper::updateData(
         SimulationAccess* access,
         SimulationContext* context,

@@ -26,21 +26,6 @@ DataDescription IntegrationTestHelper::getContent(SimulationAccess* access, IntR
     return access->retrieveData();
 }
 
-void IntegrationTestHelper::updateData(SimulationAccess* access, DataChangeDescription const& data)
-{
-    QEventLoop pause;
-    bool finished = false;
-    auto connection = access->connect(access, &SimulationAccess::dataUpdated, [&]() {
-        finished = true;
-        pause.quit();
-    });
-    access->updateData(data);
-    while (!finished) {
-        pause.exec();
-    }
-    QObject::disconnect(connection);
-}
-
 void IntegrationTestHelper::updateData(SimulationAccess* access, SimulationContext* context, 
     DataChangeDescription const& data)
 {
@@ -65,17 +50,22 @@ void IntegrationTestHelper::updateData(SimulationAccess* access, SimulationConte
 void IntegrationTestHelper::runSimulation(int timesteps, SimulationController* controller)
 {
     QEventLoop pause;
+    auto context = controller->getContext();
     for (int t = 0; t < timesteps; ++t) {
         bool finished = false;
-        auto connection = controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
+        auto connection1 = controller->connect(controller, &SimulationController::nextTimestepCalculated, [&]() {
             finished = true;
             pause.quit();
+        });
+        auto connection2 = context->connect(context, &SimulationContext::errorThrown, [&](QString what) {
+            throw std::exception(what.toStdString().c_str());
         });
         controller->calculateSingleTimestep();
         if (!finished) {
             pause.exec();
         }
-        QObject::disconnect(connection);
+        QObject::disconnect(connection1);
+        QObject::disconnect(connection2);
     }
 }
 

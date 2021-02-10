@@ -46,7 +46,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -99,7 +99,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -142,7 +142,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -189,7 +189,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -236,7 +236,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowC
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -283,7 +283,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highC
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -326,7 +326,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -369,7 +369,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -413,7 +413,7 @@ TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, origData);
+    IntegrationTestHelper::updateData(_access, _context, origData);
     IntegrationTestHelper::runSimulation(1, _controller);
 
     DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
