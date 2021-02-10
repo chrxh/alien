@@ -8,7 +8,7 @@ class CudaWorker;
 class GpuObserver;
 class CudaController;
 struct CudaConstants;
-class ModelGpuData;
+class EngineGpuData;
 
 class _CudaJob;
 using CudaJob = boost::shared_ptr<_CudaJob>;

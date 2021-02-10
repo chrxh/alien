@@ -5,10 +5,10 @@
 
 IntegrationGpuTestFramework::IntegrationGpuTestFramework(
     IntVector2D const& universeSize,
-    optional<ModelGpuData> const& modelData)
+    optional<EngineGpuData> const& modelData)
     : IntegrationTestFramework(universeSize)
 {
-    ModelGpuData data;
+    EngineGpuData data;
     if (modelData) {
         data = *modelData;
     }
@@ -27,7 +27,7 @@ IntegrationGpuTestFramework::IntegrationGpuTestFramework(
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        data = ModelGpuData(cudaConstants);
+        data = EngineGpuData(cudaConstants);
     }
 
 	_controller = _gpuFacade->buildSimulationController({ _universeSize, _symbols, _parameters }, data, 0);

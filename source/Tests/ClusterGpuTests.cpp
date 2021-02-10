@@ -6,7 +6,7 @@ class ClusterGpuTests
 public:
     ClusterGpuTests(
         IntVector2D const& universeSize = { 900, 600 },
-        optional<ModelGpuData> const& modelData = boost::none)
+        optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
     
@@ -918,7 +918,7 @@ TEST_F(ClusterGpuTests, regressionTestManyOverlappingRectangleClusters)
 
 namespace
 {
-    ModelGpuData getModelGpuDataWithManyThreadsPerBlock()
+    EngineGpuData getEngineGpuDataWithManyThreadsPerBlock()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 256;
@@ -933,7 +933,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -941,7 +941,7 @@ class ClusterGpuWithManyThreadsPerBlockTests : public ClusterGpuTests
 {
 public:
     ClusterGpuWithManyThreadsPerBlockTests()
-        : ClusterGpuTests({ 900, 600 }, getModelGpuDataWithManyThreadsPerBlock())
+        : ClusterGpuTests({ 900, 600 }, getEngineGpuDataWithManyThreadsPerBlock())
     { }
 
     virtual ~ClusterGpuWithManyThreadsPerBlockTests() = default;
@@ -1014,7 +1014,7 @@ TEST_F(ClusterGpuTests, regressionTestEnergyBalanceDuringCollisionAndDecompositi
 
 namespace
 {
-    ModelGpuData getModelGpuDataWithOneBlock()
+    EngineGpuData getEngineGpuDataWithOneBlock()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 16;
@@ -1029,7 +1029,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -1037,7 +1037,7 @@ class ClusterGpuWithOneBlockTests : public ClusterGpuTests
 {
 public:
     ClusterGpuWithOneBlockTests()
-        : ClusterGpuTests({ 100, 100 }, getModelGpuDataWithOneBlock())
+        : ClusterGpuTests({ 100, 100 }, getEngineGpuDataWithOneBlock())
     { }
 
     virtual ~ClusterGpuWithOneBlockTests() = default;

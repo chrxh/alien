@@ -4,7 +4,7 @@
 
 #include "EngineInterface/SimulationContext.h"
 #include "DefinitionsImpl.h"
-#include "ModelGpuData.h"
+#include "EngineGpuData.h"
 
 class SimulationContextGpuImpl
 	: public SimulationContext
@@ -19,7 +19,7 @@ public:
         int timestep,
         SymbolTable* symbolTable,
         SimulationParameters const& parameters,
-        ModelGpuData const& specificData);
+        EngineGpuData const& specificData);
 
     virtual SpaceProperties* getSpaceProperties() const override;
 	virtual SymbolTable* getSymbolTable() const override;
@@ -41,5 +41,5 @@ private:
 	SimulationParameters _parameters;
 	CudaController *_cudaController = nullptr;
 	NumberGenerator* _numberGen = nullptr;
-    ModelGpuData _specificData;
+    EngineGpuData _specificData;
 };

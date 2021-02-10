@@ -29,7 +29,7 @@ void CellComputerGpuTests::SetUp()
 
 QByteArray CellComputerGpuTests::runSimpleCellComputer(string const & program) const
 {
-    auto basicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
+    auto basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
     CellComputerCompiler* compiler = basicFacade->buildCellComputerCompiler(_context->getSymbolTable(), _context->getSimulationParameters());
 
     CompilationResult compiledProgram = compiler->compileSourceCode(program);

@@ -13,7 +13,7 @@
 
 #include "CudaJobs.h"
 #include "CudaWorker.h"
-#include "ModelGpuData.h"
+#include "EngineGpuData.h"
 #include "DataConverter.h"
 
 CudaWorker::~CudaWorker()

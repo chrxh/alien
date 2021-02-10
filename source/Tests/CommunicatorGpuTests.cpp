@@ -13,7 +13,7 @@ public:
     virtual ~CommunicatorGpuTests() = default;
 
 protected:
-    ModelGpuData getModelData()
+    EngineGpuData getModelData()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 64 * 2;
@@ -28,7 +28,7 @@ protected:
         cudaConstants.MAX_TOKENPOINTERS = 50 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 1000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 
     virtual void SetUp();

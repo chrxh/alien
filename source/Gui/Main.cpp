@@ -6,13 +6,13 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/SimulationAccess.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SymbolTable.h"
-#include "EngineInterface/ModelBasicServices.h"
+#include "EngineInterface/EngineInterfaceServices.h"
 
-#include "EngineGpu/ModelGpuServices.h"
+#include "EngineGpu/EngineGpuServices.h"
 
 #include "Web/WebServices.h"
 
@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("alien");
 	QCoreApplication::setApplicationName("alien");
 
-	ModelBasicServices modelBasicServices;
-	ModelGpuServices modelGpuServices;
+	EngineInterfaceServices EngineInterfaceServices;
+	EngineGpuServices EngineGpuServices;
     WebServices webServices;
 
     MainController controller;

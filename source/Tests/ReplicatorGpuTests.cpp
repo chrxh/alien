@@ -7,7 +7,7 @@
 
 namespace
 {
-    ModelGpuData getModelGpuDataForReplicatorGpuTests()
+    EngineGpuData getEngineGpuDataForReplicatorGpuTests()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 16;
@@ -22,7 +22,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 500000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 200000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 100000000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -31,7 +31,7 @@ class ReplicatorGpuTests
 {
 public:
     ReplicatorGpuTests()
-        : IntegrationGpuTestFramework({ 1000, 1000 }, getModelGpuDataForReplicatorGpuTests())
+        : IntegrationGpuTestFramework({ 1000, 1000 }, getEngineGpuDataForReplicatorGpuTests())
     {}
 
     virtual ~ReplicatorGpuTests() = default;
@@ -110,7 +110,7 @@ TEST_F(ReplicatorGpuTests, testManyConcentratedReplicators)
 
 namespace
 {
-    ModelGpuData getModelGpuDataWithManyThreads()
+    EngineGpuData getEngineGpuDataWithManyThreads()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 256;
@@ -125,7 +125,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -133,7 +133,7 @@ class ReplicatorGpuTestsWithManyThreads : public IntegrationGpuTestFramework
 {
 public:
     ReplicatorGpuTestsWithManyThreads()
-        : IntegrationGpuTestFramework({ 1000, 1000 }, getModelGpuDataForReplicatorGpuTests())
+        : IntegrationGpuTestFramework({ 1000, 1000 }, getEngineGpuDataForReplicatorGpuTests())
     { }
 
     virtual ~ReplicatorGpuTestsWithManyThreads() = default;

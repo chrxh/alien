@@ -9,7 +9,7 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SerializationHelper.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 
 #include "Settings.h"
 #include "SimulationParametersDialog.h"
@@ -190,8 +190,8 @@ bool SimulationParametersDialog::saveSimulationParameters(string filename)
 
 void SimulationParametersDialog::defaultButtonClicked ()
 {
-    auto modelBasicFacade = ServiceLocator::getInstance().getService<ModelBasicBuilderFacade>();
-	_simulationParameters = modelBasicFacade->getDefaultSimulationParameters();
+    auto EngineInterfaceFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
+	_simulationParameters = EngineInterfaceFacade->getDefaultSimulationParameters();
     updateWidgetsFromSimulationParameters();
 }
 

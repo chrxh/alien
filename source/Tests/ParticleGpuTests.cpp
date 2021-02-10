@@ -6,7 +6,7 @@ class ParticleGpuTests
 public:
     ParticleGpuTests(
         IntVector2D const& universeSize = { 900, 600 },
-        optional<ModelGpuData> const& modelData = boost::none)
+        optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
@@ -15,7 +15,7 @@ public:
 
 namespace
 {
-    ModelGpuData getModelGpuDataWithOneBlock()
+    EngineGpuData getEngineGpuDataWithOneBlock()
     {
         CudaConstants cudaConstants;
         cudaConstants.NUM_THREADS_PER_BLOCK = 16;
@@ -30,7 +30,7 @@ namespace
         cudaConstants.MAX_TOKENPOINTERS = 50000 * 10;
         cudaConstants.DYNAMIC_MEMORY_SIZE = 100000000;
         cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 1000;
-        return ModelGpuData(cudaConstants);
+        return EngineGpuData(cudaConstants);
     }
 }
 
@@ -38,7 +38,7 @@ class ParticleGpuWithOneBlockTests : public ParticleGpuTests
 {
 public:
     ParticleGpuWithOneBlockTests()
-        : ParticleGpuTests({ 100, 100}, getModelGpuDataWithOneBlock())
+        : ParticleGpuTests({ 100, 100}, getEngineGpuDataWithOneBlock())
     { }
 
     virtual ~ParticleGpuWithOneBlockTests() = default;

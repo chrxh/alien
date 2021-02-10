@@ -5,7 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
-#include "EngineInterface/ModelBasicBuilderFacade.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -15,8 +15,8 @@
 
 #include "EngineGpu/SimulationControllerGpu.h"
 #include "EngineGpu/SimulationAccessGpu.h"
-#include "EngineGpu/ModelGpuData.h"
-#include "EngineGpu/ModelGpuBuilderFacade.h"
+#include "EngineGpu/EngineGpuData.h"
+#include "EngineGpu/EngineGpuBuilderFacade.h"
 
 #include "Tests/Predicates.h"
 
