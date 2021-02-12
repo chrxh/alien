@@ -8,10 +8,10 @@
 Artificial Life Environment (ALiEn) is a simulation program based on a specialized 2D physics and rendering engine in CUDA. Each simulated body has a graph-like structure of connected building blocks that can either be programmed or equipped with devices to act physically (accelerators, sensors, weapons, constructors, etc.). These internal body processes are triggered by signals coming from circulating tokens. Therefore, it is more appropriate to think of them as small machines or agents.
 
 ## Main features
-- realistic physical calculations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
-- programmable matter approach for simulating digital organisms and evolution
-- built-in code and graph editor for designing own machines 
-- simulation and rendering on GPU
+- Realistic physical calculations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
+- Programmable matter approach for simulating digital organisms and evolution
+- Built-in code and graph editor for designing own machines 
+- Simulation and rendering on GPU
 
 The simulation code is written entirely in CUDA and highly optimized for large-scale real-time simulations of millions of bodies and particles.
 The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
