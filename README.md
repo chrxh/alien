@@ -5,19 +5,21 @@
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
-
-ALiEn is an artificial life simulation program based on a specialized physics and rendering engine in CUDA.
-Each simulated body has an internal structure modeled by a graph and can perform both physical actions and information processing by circulating tokens along nodes.
-The simulator includes a world-building tool that allows you to easily construct universes according to your own ideas.
+Artificial Life Environment (ALiEn) is a simulation program based on a specialized 2D physics and rendering engine in CUDA. Each simulated body has a graph-like structure of connected building blocks that can either be programmed or equipped with devices to act physically (accelerators, sensors, weapons, constructors, etc.). These internal body processes are triggered by signals coming from circulating tokens. Therefore, it is more appropriate to think of them as small machines or agents.
 
 ## Main features
 - realistic physical calculations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
 - programmable matter approach for simulating digital organisms and evolution
-- built-in graph editor for designing own machines 
+- built-in code and graph editor for designing own machines 
 - simulation and rendering on GPU
 
 The simulation code is written entirely in CUDA and highly optimized for large-scale real-time simulations of millions of bodies and particles.
 The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
+
+## But for what is this useful?
+- A first attempt to answer:  Watch evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
+- Second best answer is: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles offer a fascinating visual insight into the events. There are a lot of videos on the YouTube channel for illustration.
+- A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
 
 <img src="img/engine.gif" width=100%>
 
