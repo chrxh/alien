@@ -18,7 +18,7 @@ The development is driven by the desire to better understand the conditions for 
 
 ## But for what is this useful?
 - A first attempt to answer:  Watch evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
-- Second best answer is: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles offer a fascinating visual insight into the events. There are a lot of videos on the YouTube channel for illustration.
+- Second best answer is: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles offer a fascinating visual insight into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
 - A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
 
 <img src="img/engine.gif" width=100%>
