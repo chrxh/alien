@@ -52,8 +52,6 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	iconRestore.addFile(":/Icons/main/restore.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionRestore->setIcon(iconRestore);
 	actionRestore->setIconVisibleInMenu(false);
-	actionExit = new QAction("Exit", this);
-	actionExit->setEnabled(true);
     actionAcceleration = new QAction("Accelerate active clusters", this);
     actionAcceleration->setIconVisibleInMenu(false);
     actionAcceleration->setEnabled(true);
@@ -65,6 +63,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     iconAccelerate.addFile(":/Icons/main/accelerate off.png", QSize(), QIcon::Normal, QIcon::On);
     actionAcceleration->setIcon(iconAccelerate);
     actionAcceleration->setIconVisibleInMenu(false);
+    actionRestrictTPS = new QAction("Restrict TPS", this);
+    actionRestrictTPS->setCheckable(true);
+    actionRestrictTPS->setChecked(false);
+    actionRestrictTPS->setEnabled(true);
+    actionExit = new QAction("Exit", this);
+    actionExit->setEnabled(true);
 
     actionSimulationChanger = new QAction("Parameter changer", this);
     actionSimulationChanger->setIconVisibleInMenu(false);
@@ -274,10 +278,5 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDocumentation = new QAction("Documentation", this);
 	actionDocumentation->setEnabled(true);
 	actionDocumentation->setCheckable(false);
-
-	actionRestrictTPS = new QAction("restrict TPS", this);
-	actionRestrictTPS->setCheckable(true);
-	actionRestrictTPS->setChecked(false);
-	actionRestrictTPS->setEnabled(true);
 }
 
