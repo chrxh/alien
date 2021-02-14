@@ -309,7 +309,7 @@ void ActionController::onToggleEditorMode(bool toggled)
 
 void ActionController::onToggleMonitor(bool toggled)
 {
-	_monitor->onShow(toggled);
+    _mainView->toggleInfobar(toggled);
 }
 
 void ActionController::onNewSimulation()

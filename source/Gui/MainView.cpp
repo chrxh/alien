@@ -1,5 +1,7 @@
 ﻿#include <QDesktopServices>
 #include <QUrl>
+#include <QTimer>
+#include <QDockWidget>
 
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Serializer.h"
@@ -41,7 +43,7 @@ MainView::MainView(QWidget * parent)
 	_monitor = new MonitorController(this);
     _gettingStartedWindow = new GettingStartedWindow(this);
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
-	connect(_monitor, &MonitorController::closed, this, &MainView::monitorClosed);
+    connect(ui->infobar, &QDockWidget::visibilityChanged, this, &MainView::infobarChanged);
     connect(_simulationViewWidget, &SimulationViewWidget::zoomFactorChanged, _infoController, &InfoController::setZoomFactor);
 }
 
@@ -121,6 +123,12 @@ MonitorController* MainView::getMonitorController() const
 void MainView::toggleGettingStarted(bool show)
 {
     _gettingStartedWindow->setVisible(show);
+}
+
+void MainView::toggleInfobar(bool show)
+{
+    ui->infobar->setVisible(show);
+    QTimer::singleShot(1, [&] { refresh(); });
 }
 
 void MainView::showDocumentation()
@@ -250,7 +258,7 @@ void MainView::setupFontsAndColors()
     ui->menuTools->setFont(GuiSettings::getGlobalFont());
 
 	ui->toolBar->setStyleSheet(Const::ToolbarStyleSheet);
-    ui->infoWidget->setStyleSheet(Const::ToolbarStyleSheet);
+    ui->infobar->setStyleSheet(Const::InfobarStyleSheet);
 	{
         QPalette p = palette();
         p.setColor(QPalette::Window, QColor(7, 7, 21));
@@ -262,15 +270,6 @@ void MainView::setupFontsAndColors()
 void MainView::setupWidgets()
 {
 	auto actions = _actions->getActionHolder();
-    /*
-	ui->tpsSpinBox->setValue(_model->getTPS());
-	connect(ui->tpsSpinBox, (void(QSpinBox::*)(int))(&QSpinBox::valueChanged), [this](int value) {
-        value = std::max(1, value);
-		_model->setTPS(value);
-		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
-		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);
-	});
-    */
 }
 
 void MainView::setupFullScreen()
@@ -281,14 +280,14 @@ void MainView::setupFullScreen()
 	}
 }
 
-void MainView::monitorClosed()
+void MainView::infobarChanged(bool show)
 {
-	_actions->getActionHolder()->actionMonitor->setChecked(false);
+    if (!show) {
+        _actions->getActionHolder()->actionMonitor->setChecked(false);
+    }
 }
 
 void MainView::gettingStartedWindowClosed()
 {
     _actions->getActionHolder()->actionGettingStarted->setChecked(false);
 }
-
-
