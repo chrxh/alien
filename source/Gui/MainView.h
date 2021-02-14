@@ -37,6 +37,7 @@ public:
     virtual MonitorController* getMonitorController() const;
 
     virtual void toggleGettingStarted(bool show);
+    virtual void toggleInfobar(bool show);
     virtual void showDocumentation();
 
 protected:
@@ -50,7 +51,7 @@ private:
 	void setupFullScreen();
 
 private:
-	Q_SLOT void monitorClosed();
+    Q_SLOT void infobarChanged(bool show);
     Q_SLOT void gettingStartedWindowClosed();
 
 private:
