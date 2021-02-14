@@ -32,13 +32,3 @@ void MainModel::setSymbolTable(SymbolTable * symbols)
 {
 	_symbols = symbols;
 }
-
-int MainModel::getTPS() const
-{
-	return _tps;
-}
-
-void MainModel::setTPS(int value)
-{
-	_tps = value;
-}

@@ -161,6 +161,7 @@ void MainView::setupMenuAndToolbar()
     ui->menuSimulation->addAction(actions->actionAcceleration);
     ui->menuSimulation->addAction(actions->actionSnapshot);
     ui->menuSimulation->addAction(actions->actionRestore);
+    ui->menuSimulation->addAction(actions->actionRestrictTPS);
     ui->menuSimulation->addSeparator();
     ui->menuSimulation->addAction(actions->actionExit);
 
@@ -248,17 +249,11 @@ void MainView::setupFontsAndColors()
 	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
     ui->menuTools->setFont(GuiSettings::getGlobalFont());
 
-	ui->tpsForcingButton->setStyleSheet(Const::ButtonStyleSheet);
-	ui->toolBar->setStyleSheet("background-color: #151540");
+	ui->toolBar->setStyleSheet(Const::ToolbarStyleSheet);
+    ui->infoWidget->setStyleSheet(Const::ToolbarStyleSheet);
 	{
-		QPalette p = ui->tpsForcingButton->palette();
-		p.setColor(QPalette::ButtonText, Const::ButtonTextColor);
-		ui->tpsForcingButton->setPalette(p);
-	}
-
-	{
-		QPalette p = palette();
-        p.setColor(QPalette::Window, QColor(0, 0, 0));
+        QPalette p = palette();
+        p.setColor(QPalette::Window, QColor(7, 7, 21));
 		setPalette(p);
 	}
 
@@ -267,8 +262,7 @@ void MainView::setupFontsAndColors()
 void MainView::setupWidgets()
 {
 	auto actions = _actions->getActionHolder();
-	ui->tpsForcingButton->setDefaultAction(actions->actionRestrictTPS);
-
+    /*
 	ui->tpsSpinBox->setValue(_model->getTPS());
 	connect(ui->tpsSpinBox, (void(QSpinBox::*)(int))(&QSpinBox::valueChanged), [this](int value) {
         value = std::max(1, value);
@@ -276,6 +270,7 @@ void MainView::setupWidgets()
 		_actions->getActionHolder()->actionRestrictTPS->setChecked(true);
 		Q_EMIT _actions->getActionHolder()->actionRestrictTPS->triggered(true);
 	});
+    */
 }
 
 void MainView::setupFullScreen()

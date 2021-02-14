@@ -207,7 +207,7 @@ void ActionController::onAcceleration(bool toggled)
     if (toggled) {
         bool ok;
         auto const accelerationTimesteps = QInputDialog::getInt(
-            _mainView, "Acceleration", "Enter number of frames of acceleration", parameters.freezingTimesteps, 1, 100, 1, &ok);
+            _mainView, "Acceleration", "Enter the number of frames of acceleration", parameters.freezingTimesteps, 1, 100, 1, &ok);
         if (!ok) {
             auto const actionHolder = _model->getActionHolder();
             actionHolder->actionAcceleration->setChecked(false);
@@ -882,7 +882,22 @@ void ActionController::onShowDocumentation()
 void ActionController::onToggleRestrictTPS(bool toggled)
 {
 	if (toggled) {
-		_mainController->onRestrictTPS(_mainModel->getTPS());
+        bool ok;
+        auto restrictTPS = QInputDialog::getInt(
+            _mainView,
+            "Restrict TPS",
+            "Enter the time steps per seconds",
+            50,
+            1,
+            1000,
+            1,
+            &ok);
+        if (!ok) {
+            auto const actionHolder = _model->getActionHolder();
+            actionHolder->actionRestrictTPS->setChecked(false);
+            return;
+        }
+        _mainController->onRestrictTPS(restrictTPS);
 	}
 	else {
 		_mainController->onRestrictTPS(boost::none);
