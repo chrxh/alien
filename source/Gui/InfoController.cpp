@@ -59,11 +59,10 @@ void InfoController::updateInfoLabel()
     else {
         THROW_NOT_IMPLEMENTED();
     }
-    auto separator = QString("<br/>");  //QString("&nbsp;&nbsp;<font color=#7070FF>&#10072;</font>&nbsp;&nbsp;");
-    auto infoString = renderingString
-        + separator + QString("Zoom factor: %3x").arg(_zoomFactor)
-        + separator + QString("Timestep: &nbsp;&nbsp;&nbsp;%1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
-        + separator + QString("TPS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%2").arg(_tps, 5, 10, QLatin1Char('0'))
-        + separator+ QString("&nbsp;");
+    auto separator = QString("<br/>");  
+    auto infoString = renderingString + separator + QString("Zoom factor: %3x").arg(_zoomFactor) + separator
+        + QString("Timestep: &nbsp;&nbsp;&nbsp;%1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
+        + separator
+        + QString("TPS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%2").arg(_tps, 5, 10, QLatin1Char('0'));
 	_infoLabel->setText(infoString);
 }
