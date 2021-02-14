@@ -48,21 +48,22 @@ void InfoController::updateInfoLabel()
 {
 	QString renderingString;
 	if (Rendering::Pixel == _rendering) {
-		renderingString = "Rendering: <font color=#FFB080><b>pixel graphic&nbsp;</b></font>";
+		renderingString = "Rendering: &nbsp;&nbsp;<font color=#FFB080><b>pixel graphic&nbsp;</b></font>";
 	}
     else if (Rendering::Vector== _rendering) {
-        renderingString = "Rendering: <font color=#B0FF80><b>vector graphic</b></font>";
+        renderingString = "Rendering: &nbsp;&nbsp;<font color=#B0FF80><b>vector graphic</b></font>";
     }
     else if (Rendering::Item == _rendering) {
-        renderingString = "Rendering: <font color=#80B0FF><b>item graphic&nbsp;&nbsp;</b></font>";
+        renderingString = "Rendering: &nbsp;&nbsp;<font color=#80B0FF><b>item graphic&nbsp;&nbsp;</b></font>";
     }
     else {
         THROW_NOT_IMPLEMENTED();
     }
-	auto separator = QString("&nbsp;&nbsp;<font color=#7070FF>&#10072;</font>&nbsp;&nbsp;");
+    auto separator = QString("<br/>");  //QString("&nbsp;&nbsp;<font color=#7070FF>&#10072;</font>&nbsp;&nbsp;");
     auto infoString = renderingString
         + separator + QString("Zoom factor: %3x").arg(_zoomFactor)
-        + separator + QString("Timestep: %1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
-        + separator + QString("TPS: %2").arg(_tps, 5, 10, QLatin1Char('0'));
+        + separator + QString("Timestep: &nbsp;&nbsp;&nbsp;%1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
+        + separator + QString("TPS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%2").arg(_tps, 5, 10, QLatin1Char('0'))
+        + separator+ QString("&nbsp;");
 	_infoLabel->setText(infoString);
 }
