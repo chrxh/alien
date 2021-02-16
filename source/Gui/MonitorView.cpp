@@ -28,7 +28,7 @@ void MonitorView::init(MonitorDataSP const& model)
 
 void MonitorView::update()
 {
-	ui->infoLabel->setText(generateString());
+    ui->contentLabel->setText(generateString());
 }
 
 bool MonitorView::event(QEvent* event)

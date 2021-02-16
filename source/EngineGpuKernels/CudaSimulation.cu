@@ -63,7 +63,7 @@ namespace
                        << " has compute capability of " 
                        << prop.major << "." << prop.minor
                        << ". A compute capability of 6.0 is needed.";
-                loggingService->logMessage(stream.str().c_str());
+                loggingService->logMessage(stream.str());
                 throw std::exception(stream.str().c_str());
             }
 
@@ -116,7 +116,7 @@ CudaSimulation::CudaSimulation(
     stream << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired";
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(stream.str().c_str());
+    loggingService->logMessage(stream.str());
 }
 
 CudaSimulation::~CudaSimulation()
@@ -161,7 +161,7 @@ void CudaSimulation::DEBUG_printNumEntries()
            << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; ";
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(stream.str().c_str());
+    loggingService->logMessage(stream.str());
 }
 
 void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)
