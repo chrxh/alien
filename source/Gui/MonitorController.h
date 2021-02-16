@@ -15,11 +15,11 @@ public:
 	virtual ~MonitorController() = default;
 
 	void init(MainController* mainController);
+    QWidget* getWidget() const;
 
-	void onShow(bool show);
     void pauseTimer();
     void continueTimer();
-	
+
 
 	Q_SIGNAL void closed();
 

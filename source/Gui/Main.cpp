@@ -5,6 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
+#include "Base/BaseServices.h"
 #include "EngineInterface/SimulationAccess.h"
 #include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
@@ -24,8 +25,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("alien");
 	QCoreApplication::setApplicationName("alien");
 
-	EngineInterfaceServices EngineInterfaceServices;
-	EngineGpuServices EngineGpuServices;
+    BaseServices baseServices;
+    EngineInterfaceServices engineInterfaceServices;
+	EngineGpuServices engineGpuServices;
     WebServices webServices;
 
     MainController controller;
