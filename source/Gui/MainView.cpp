@@ -27,6 +27,7 @@
 #include "SimulationParametersDialog.h"
 #include "SymbolTableDialog.h"
 #include "GettingStartedWindow.h"
+#include "LoggingController.h"
 
 #include "ui_MainView.h"
 
@@ -41,14 +42,23 @@ MainView::MainView(QWidget * parent)
 	_infoController = new InfoController(this);
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
+    _logging = new LoggingController(this);
     _gettingStartedWindow = new GettingStartedWindow(this);
 
-    auto gridLayout = new QGridLayout(ui->monitorGroupBox);
-    gridLayout->setSpacing(6);
-    gridLayout->setObjectName(QString::fromUtf8("monitorGridLayout"));
-    gridLayout->setVerticalSpacing(0);
-    gridLayout->setContentsMargins(9, 9, 9, 9);
-    gridLayout->addWidget(_monitor->getWidget(), 0, 0, 1, 1);
+    {
+        auto gridLayout = new QGridLayout(ui->monitorGroupBox);
+        gridLayout->setSpacing(6);
+        gridLayout->setVerticalSpacing(0);
+        gridLayout->setContentsMargins(9, 9, 9, 9);
+        gridLayout->addWidget(_monitor->getWidget(), 0, 0, 1, 1);
+    }
+    {
+        auto gridLayout = new QGridLayout(ui->loggingGroupBox);
+        gridLayout->setSpacing(6);
+        gridLayout->setVerticalSpacing(0);
+        gridLayout->setContentsMargins(9, 9, 9, 9);
+        gridLayout->addWidget(_logging->getWidget(), 0, 0, 1, 1);
+    }
 
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
     connect(ui->infobar, &QDockWidget::visibilityChanged, this, &MainView::infobarChanged);

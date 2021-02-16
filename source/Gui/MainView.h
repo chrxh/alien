@@ -68,6 +68,7 @@ private:
 	ToolbarController* _toolbar = nullptr;
 	InfoController* _infoController = nullptr;
 	MonitorController* _monitor = nullptr;
+    LoggingController* _logging = nullptr;
 
     GettingStartedWindow* _gettingStartedWindow = nullptr;
 

@@ -114,6 +114,9 @@
     <QtUic Include="..\..\..\source\Gui\SimulationViewWidget.ui">
       <Filter>Impl\SimulationView</Filter>
     </QtUic>
+    <QtUic Include="..\..\..\source\Gui\LoggingView.ui">
+      <Filter>Impl\Infobar</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\Gui\DataRepository.cpp">
@@ -339,6 +342,12 @@
       <Filter>Impl\WebAdapter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\InfoController.cpp">
+      <Filter>Impl\Infobar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\LoggingController.cpp">
+      <Filter>Impl\Infobar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\LoggingView.cpp">
       <Filter>Impl\Infobar</Filter>
     </ClCompile>
   </ItemGroup>
@@ -583,6 +592,12 @@
       <Filter>Impl\WebAdapter</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\InfoController.h">
+      <Filter>Impl\Infobar</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\LoggingController.h">
+      <Filter>Impl\Infobar</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\LoggingView.h">
       <Filter>Impl\Infobar</Filter>
     </QtMoc>
   </ItemGroup>
