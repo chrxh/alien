@@ -149,6 +149,14 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\TokenProcessor.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\WeaponFunction.cuh" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Base\Base.vcxproj">
+      <Project>{d21fec07-76d6-417f-96b7-19d424778a5c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\EngineInterface\EngineInterface.vcxproj">
+      <Project>{29f70c63-c87a-42ae-98de-b6a5353bc2f3}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.targets" />
