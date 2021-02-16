@@ -28,7 +28,6 @@ void MonitorController::init(MainController* mainController)
 	_model = boost::make_shared<MonitorData>();
 	_mainController = mainController;
 	_view->init(_model);
-    _updateTimer->start(millisec);
 }
 
 QWidget* MonitorController::getWidget() const
