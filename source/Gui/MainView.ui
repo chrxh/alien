@@ -30,9 +30,39 @@
   </property>
   <property name="palette">
    <palette>
-    <active/>
-    <inactive/>
-    <disabled/>
+    <active>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </active>
+    <inactive>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </inactive>
+    <disabled>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>240</red>
+        <green>240</green>
+        <blue>240</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </disabled>
    </palette>
   </property>
   <property name="windowTitle">
@@ -260,7 +290,7 @@
       <number>0</number>
      </property>
      <item row="0" column="0">
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="generalInfoGroupBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>1</horstretch>
@@ -288,16 +318,16 @@
          <number>9</number>
         </property>
         <property name="topMargin">
-         <number>0</number>
+         <number>9</number>
         </property>
         <property name="rightMargin">
-         <number>0</number>
+         <number>9</number>
         </property>
         <property name="bottomMargin">
-         <number>0</number>
+         <number>9</number>
         </property>
         <property name="verticalSpacing">
-         <number>0</number>
+         <number>6</number>
         </property>
         <item row="0" column="0">
          <widget class="QLabel" name="infoLabel">
@@ -416,8 +446,11 @@
           <property name="text">
            <string/>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
           <property name="wordWrap">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="margin">
            <number>0</number>
@@ -428,7 +461,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QGroupBox" name="groupBox_2">
+      <widget class="QGroupBox" name="monitorGroupBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>1</horstretch>

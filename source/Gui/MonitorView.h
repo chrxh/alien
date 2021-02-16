@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QMainWindow>
+#include <QWidget>
 
 #include "Gui/Definitions.h"
 
@@ -9,7 +9,7 @@ class MonitorView;
 }
 
 class MonitorView
-	: public QMainWindow
+	: public QWidget
 {
     Q_OBJECT
 

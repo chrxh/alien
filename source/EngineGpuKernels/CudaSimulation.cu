@@ -5,6 +5,8 @@
 #include <iostream>
 #include <functional>
 
+#include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "Base.cuh"
 
@@ -43,12 +45,14 @@ namespace
 
         CudaInitializer()
         {
-            std::cerr << "[CUDA] start initialization" << std::endl;
+            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+            loggingService->logMessage("[CUDA] start initialization");
             auto result = cudaSetDevice(0);
             if (result != cudaSuccess) {
+                loggingService->logMessage("CUDA could not be initialized.");
                 throw std::exception("CUDA could not be initialized.");
             }
-            std::cerr << "[CUDA] initialization finished" << std::endl;
+            loggingService->logMessage("[CUDA] initialization finished");
 
             cudaDeviceProp prop;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, 0));
@@ -59,6 +63,7 @@ namespace
                        << " has compute capability of " 
                        << prop.major << "." << prop.minor
                        << ". A compute capability of 6.0 is needed.";
+                loggingService->logMessage(stream.str().c_str());
                 throw std::exception(stream.str().c_str());
             }
 
@@ -67,7 +72,8 @@ namespace
         ~CudaInitializer()
         {
             cudaDeviceReset();
-            std::cerr << "[CUDA] closed" << std::endl;
+            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+            loggingService->logMessage("[CUDA] closed");
         }
     };
 }
@@ -106,7 +112,11 @@ CudaSimulation::CudaSimulation(
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    std::cerr << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired" << std::endl;
+    std::stringstream stream;
+    stream << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired";
+
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(stream.str().c_str());
 }
 
 CudaSimulation::~CudaSimulation()
@@ -125,7 +135,8 @@ CudaSimulation::~CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
-    std::cerr << "[CUDA] memory released" << std::endl;
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage("[CUDA] memory released");
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
@@ -141,14 +152,16 @@ void CudaSimulation::calcCudaTimestep()
 
 void CudaSimulation::DEBUG_printNumEntries()
 {
-    std::cerr
-        << "Particles: " << _cudaSimulationData->entities.particles.retrieveNumEntries() << "; "
-        << "Cells: " << _cudaSimulationData->entities.cells.retrieveNumEntries() << "; "
-        << "Clusters: " << _cudaSimulationData->entities.clusters.retrieveNumEntries() << "; "
-        << "CellPointers: " << _cudaSimulationData->entities.cellPointers.retrieveNumEntries() << "; "
-        << "Tokens: " << _cudaSimulationData->entities.tokens.retrieveNumEntries() << "; "
-        << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; "
-        << std::endl;
+    std::stringstream stream;
+    stream << "Particles: " << _cudaSimulationData->entities.particles.retrieveNumEntries() << "; "
+           << "Cells: " << _cudaSimulationData->entities.cells.retrieveNumEntries() << "; "
+           << "Clusters: " << _cudaSimulationData->entities.clusters.retrieveNumEntries() << "; "
+           << "CellPointers: " << _cudaSimulationData->entities.cellPointers.retrieveNumEntries() << "; "
+           << "Tokens: " << _cudaSimulationData->entities.tokens.retrieveNumEntries() << "; "
+           << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; ";
+
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(stream.str().c_str());
 }
 
 void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)

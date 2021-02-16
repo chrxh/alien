@@ -2,6 +2,8 @@
 
 #include "MainController.h"
 #include "InfoController.h"
+#include "Settings.h"
+#include "StringHelper.h"
 
 InfoController::InfoController(QObject * parent)
 	: QObject(parent)
@@ -46,23 +48,34 @@ void InfoController::oneSecondTimerTimeout()
 
 void InfoController::updateInfoLabel()
 {
-	QString renderingString;
-	if (Rendering::Pixel == _rendering) {
-		renderingString = "Rendering: &nbsp;&nbsp;<font color=#FFB080><b>pixel graphic&nbsp;</b></font>";
-	}
-    else if (Rendering::Vector== _rendering) {
-        renderingString = "Rendering: &nbsp;&nbsp;<font color=#B0FF80><b>vector graphic</b></font>";
-    }
-    else if (Rendering::Item == _rendering) {
-        renderingString = "Rendering: &nbsp;&nbsp;<font color=#80B0FF><b>item graphic&nbsp;&nbsp;</b></font>";
-    }
-    else {
+    QString renderModeString;
+    QString renderModeColorString;
+    if (Rendering::Pixel == _rendering) {
+        renderModeString = "pixel";
+        renderModeColorString = "<font color = #FFB080>";
+    } else if (Rendering::Vector == _rendering) {
+        renderModeString = "vector";
+        renderModeColorString = "<font color = #B0FF80>";
+    } else if (Rendering::Item == _rendering) {
+        renderModeString = "item";
+        renderModeColorString = "<font color = #80B0FF>";
+    } else {
         THROW_NOT_IMPLEMENTED();
     }
+
+    auto timestepString = StringHelper::generateFormattedIntString(_mainController->getTimestep(), true);
+    auto tpsString = StringHelper::generateFormattedIntString(_tps, true);
+
+    QString colorTextStart = "<font color = " + Const::CellEditTextColor1.name() + ">";
+    QString colorDataStart = "<font color = " + Const::CellEditDataColor1.name() + ">";
+    QString colorEnd = "</font>";
+
+	QString renderingString = colorTextStart + "Render style: " +  colorEnd + renderModeColorString + "<b>" + renderModeString + "</b>" + colorEnd;
+
     auto separator = QString("<br/>");  
-    auto infoString = renderingString + separator + QString("Zoom factor: %3x").arg(_zoomFactor) + separator
-        + QString("Timestep: &nbsp;&nbsp;&nbsp;%1").arg(_mainController->getTimestep(), 9, 10, QLatin1Char('0'))
-        + separator
-        + QString("TPS: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%2").arg(_tps, 5, 10, QLatin1Char('0'));
+    auto infoString = renderingString + separator + colorTextStart + "Zoom level: &nbsp;&nbsp;" + colorEnd + colorDataStart
+        + QString("%1x").arg(_zoomFactor) + colorEnd + separator + colorTextStart + "Time step: " + colorEnd
+        + colorDataStart + "&nbsp;&nbsp;&nbsp;" + timestepString + colorEnd + separator + colorTextStart + "TPS: " + colorEnd
+        + colorDataStart + QString("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") + tpsString + colorEnd;
 	_infoLabel->setText(infoString);
 }
