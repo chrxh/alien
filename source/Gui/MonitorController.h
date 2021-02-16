@@ -20,7 +20,6 @@ public:
     void pauseTimer();
     void continueTimer();
 
-
 	Q_SIGNAL void closed();
 
 private:

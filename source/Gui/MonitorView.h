@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "Gui/Definitions.h"
+#include "Definitions.h"
 
 namespace Ui {
 class MonitorView;
@@ -18,7 +18,7 @@ public:
     virtual ~MonitorView();
 
 	void init(MonitorDataSP const& model);
-
+		
 	void update();
 
 	Q_SIGNAL void closed ();
