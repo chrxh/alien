@@ -46,13 +46,12 @@ namespace
         CudaInitializer()
         {
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-            loggingService->logMessage("[CUDA] start initialization");
             auto result = cudaSetDevice(0);
             if (result != cudaSuccess) {
                 loggingService->logMessage("CUDA could not be initialized.");
                 throw std::exception("CUDA could not be initialized.");
             }
-            loggingService->logMessage("[CUDA] initialization finished");
+            loggingService->logMessage("CUDA device found and set");
 
             cudaDeviceProp prop;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, 0));
@@ -73,7 +72,7 @@ namespace
         {
             cudaDeviceReset();
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-            loggingService->logMessage("[CUDA] closed");
+            loggingService->logMessage("reset CUDA device");
         }
     };
 }
@@ -113,7 +112,7 @@ CudaSimulation::CudaSimulation(
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
     std::stringstream stream;
-    stream << "[CUDA] " << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb memory acquired";
+    stream << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb GPU memory acquired";
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(stream.str());
@@ -136,7 +135,7 @@ CudaSimulation::~CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("[CUDA] memory released");
+    loggingService->logMessage("GPU memory released");
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
