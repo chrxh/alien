@@ -23,4 +23,5 @@ void LoggingView::setNewLogMessage(std::string const& message)
     auto text = ui->contentLabel->text();
     text = colorTextStart + QString::fromStdString(message) + colorEnd + "<br/>" + text;
     ui->contentLabel->setText(text);
+    repaint();
 }
