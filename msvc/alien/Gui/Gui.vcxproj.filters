@@ -28,9 +28,6 @@
     <Filter Include="Impl\Dialogs">
       <UniqueIdentifier>{8b22a986-3246-4030-b443-945482122617}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Impl\Monitoring">
-      <UniqueIdentifier>{517e4671-661c-4337-98a9-56fd7582d989}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Impl\SimulationView">
       <UniqueIdentifier>{c3413457-7ffe-4597-9ba9-f5bdb7c2819b}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,9 @@
     </Filter>
     <Filter Include="Impl\WebAdapter">
       <UniqueIdentifier>{0c82d516-3ebd-4478-971b-0762dd6d0729}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Impl\Infobar">
+      <UniqueIdentifier>{517e4671-661c-4337-98a9-56fd7582d989}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -106,7 +106,7 @@
       <Filter>Impl</Filter>
     </QtUic>
     <QtUic Include="..\..\..\source\Gui\MonitorView.ui">
-      <Filter>Impl\Monitoring</Filter>
+      <Filter>Impl\Infobar</Filter>
     </QtUic>
     <QtUic Include="..\..\..\source\Gui\GettingStartedWindow.ui">
       <Filter>Impl\Help</Filter>
@@ -117,9 +117,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\source\Gui\DataRepository.cpp">
-      <Filter>Impl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\InfoController.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\Main.cpp">
@@ -249,10 +246,10 @@
       <Filter>Impl\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\MonitorController.cpp">
-      <Filter>Impl\Monitoring</Filter>
+      <Filter>Impl\Infobar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\MonitorView.cpp">
-      <Filter>Impl\Monitoring</Filter>
+      <Filter>Impl\Infobar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\SimulationViewWidget.cpp">
       <Filter>Impl\SimulationView</Filter>
@@ -341,6 +338,9 @@
     <ClCompile Include="..\..\..\source\Gui\WebSimulationTableModel.cpp">
       <Filter>Impl\WebAdapter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\InfoController.cpp">
+      <Filter>Impl\Infobar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -397,9 +397,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\..\source\Gui\DataRepository.h">
-      <Filter>Impl</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\InfoController.h">
       <Filter>Impl</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\MainController.h">
@@ -517,10 +514,10 @@
       <Filter>Impl\Dialogs</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\MonitorController.h">
-      <Filter>Impl\Monitoring</Filter>
+      <Filter>Impl\Infobar</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\MonitorView.h">
-      <Filter>Impl\Monitoring</Filter>
+      <Filter>Impl\Infobar</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\SimulationViewWidget.h">
       <Filter>Impl\SimulationView</Filter>
@@ -584,6 +581,9 @@
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\WebSimulationTableModel.h">
       <Filter>Impl\WebAdapter</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\InfoController.h">
+      <Filter>Impl\Infobar</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

@@ -11,18 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\source\Base\BaseServices.cpp" />
     <ClCompile Include="..\..\..\source\Base\Definitions.cpp" />
     <ClCompile Include="..\..\..\source\Base\GlobalFactoryImpl.cpp" />
     <ClCompile Include="..\..\..\source\Base\Job.cpp" />
+    <ClCompile Include="..\..\..\source\Base\LoggingServiceImpl.cpp" />
     <ClCompile Include="..\..\..\source\Base\NumberGeneratorImpl.cpp" />
     <ClCompile Include="..\..\..\source\Base\ServiceLocator.cpp" />
     <ClCompile Include="..\..\..\source\Base\Worker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\source\Base\BaseServices.h" />
     <ClInclude Include="..\..\..\source\Base\Definitions.h" />
     <ClInclude Include="..\..\..\source\Base\DllExport.h" />
     <ClInclude Include="..\..\..\source\Base\GlobalFactory.h" />
     <ClInclude Include="..\..\..\source\Base\GlobalFactoryImpl.h" />
+    <ClInclude Include="..\..\..\source\Base\LoggingService.h" />
+    <ClInclude Include="..\..\..\source\Base\LoggingServiceImpl.h" />
     <ClInclude Include="..\..\..\source\Base\NumberGeneratorImpl.h" />
     <ClInclude Include="..\..\..\source\Base\ServiceLocator.h" />
     <ClInclude Include="..\..\..\source\Base\Tracker.h" />

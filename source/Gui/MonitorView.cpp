@@ -1,18 +1,17 @@
 #include <QPaintEvent>
 
 #include "EngineInterface/MonitorData.h"
-#include "Gui/StringHelper.h"
+#include "StringHelper.h"
 
 #include "MonitorView.h"
 #include "ui_MonitorView.h"
 
 
 MonitorView::MonitorView(QWidget *parent) :
-    QMainWindow(parent),
+    QWidget(parent),
     ui(new Ui::MonitorView)
 {
     ui->setupUi(this);
-	ui->infoLabel->setText("number of clusters");
 }
 
 
@@ -37,7 +36,7 @@ bool MonitorView::event(QEvent* event)
     if( event->type() == QEvent::Close) {
         Q_EMIT closed();
     }
-    QMainWindow::event(event);
+    QWidget::event(event);
     return false;
 }
 
@@ -63,6 +62,7 @@ QString MonitorView::generateString() const
     text += " " + StringHelper::generateFormattedIntString(_model->numTokens, true) + " " + parEnd;
     text += parStart + colorTextStart + "number of active clusters:" + StringHelper::ws(5) + colorEnd;
     text += " " + StringHelper::generateFormattedIntString(_model->numClustersWithTokens, true) + " " + parEnd;
+/*
     text += parStart + colorTextStart + "total internal energy:" + StringHelper::ws(9) + colorEnd;
 	text += " " + StringHelper::generateFormattedRealString(_model->totalInternalEnergy, true) + " " + parEnd;
 	text += parStart + colorTextStart + "total kinetic energy:" + StringHelper::ws(10) + colorEnd;
@@ -75,6 +75,7 @@ QString MonitorView::generateString() const
 	text += parStart + colorTextStart + "overall energy:" + StringHelper::ws(16) + colorEnd;
 	double totalEnergy = _model->totalInternalEnergy + totalKineticEnergy;
 	text += " " + StringHelper::generateFormattedRealString(totalEnergy, true) + " " + parEnd;
+*/
 	return text;
 }
 

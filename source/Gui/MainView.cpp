@@ -42,6 +42,14 @@ MainView::MainView(QWidget * parent)
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
     _gettingStartedWindow = new GettingStartedWindow(this);
+
+    auto gridLayout = new QGridLayout(ui->monitorGroupBox);
+    gridLayout->setSpacing(6);
+    gridLayout->setObjectName(QString::fromUtf8("monitorGridLayout"));
+    gridLayout->setVerticalSpacing(0);
+    gridLayout->setContentsMargins(9, 9, 9, 9);
+    gridLayout->addWidget(_monitor->getWidget(), 0, 0, 1, 1);
+
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
     connect(ui->infobar, &QDockWidget::visibilityChanged, this, &MainView::infobarChanged);
     connect(_simulationViewWidget, &SimulationViewWidget::zoomFactorChanged, _infoController, &InfoController::setZoomFactor);

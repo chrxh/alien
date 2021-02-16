@@ -16,7 +16,6 @@ MonitorController::MonitorController(QWidget* parent)
 	: QObject(parent)
 {
 	_view = new MonitorView(parent);
-	_view->setVisible(false);
 
 	_updateTimer = new QTimer(this);
 
@@ -29,31 +28,22 @@ void MonitorController::init(MainController* mainController)
 	_model = boost::make_shared<MonitorData>();
 	_mainController = mainController;
 	_view->init(_model);
+    _updateTimer->start(millisec);
 }
 
-void MonitorController::onShow(bool show)
+QWidget* MonitorController::getWidget() const
 {
-	_view->setVisible(show);
-	if (show) {
-		_updateTimer->start(millisec);
-	}
-	else {
-		_updateTimer->stop();
-	}
+    return _view;
 }
 
 void MonitorController::pauseTimer()
 {
-    if (_view->isVisible()) {
-        _updateTimer->stop();
-	}
+    _updateTimer->stop();
 }
 
 void MonitorController::continueTimer()
 {
-    if (_view->isVisible()) {
-        _updateTimer->start(millisec);
-    }
+    _updateTimer->start(millisec);
 }
 
 void MonitorController::timerTimeout()
@@ -62,9 +52,16 @@ void MonitorController::timerTimeout()
 		disconnect(connection);
 	}
     _monitorConnections.clear();
-	SimulationMonitor* simMonitor = _mainController->getSimulationMonitor();
-	_monitorConnections.push_back(connect(simMonitor, &SimulationMonitor::dataReadyToRetrieve, this, &MonitorController::dataReadyToRetrieve, Qt::QueuedConnection));
-	simMonitor->requireData();
+
+    if (SimulationMonitor* simMonitor = _mainController->getSimulationMonitor()) {
+        _monitorConnections.push_back(connect(
+            simMonitor,
+            &SimulationMonitor::dataReadyToRetrieve,
+            this,
+            &MonitorController::dataReadyToRetrieve,
+            Qt::QueuedConnection));
+        simMonitor->requireData();
+    }
 }
 
 void MonitorController::dataReadyToRetrieve()

@@ -32,6 +32,12 @@
     <ClCompile Include="..\..\..\source\Base\Worker.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Base\LoggingServiceImpl.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Base\BaseServices.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Base\GlobalFactoryImpl.h">
@@ -56,6 +62,15 @@
       <Filter>Interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Base\Worker.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Base\LoggingService.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Base\LoggingServiceImpl.h">
+      <Filter>Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Base\BaseServices.h">
       <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,3 +1,16 @@
+#pragma once
+
+#ifndef ALIEN_STATIC
+#ifdef BASE_LIB
+#define BASE_EXPORT __declspec(dllexport)
+#else
+#define BASE_EXPORT __declspec(dllimport)
+#endif
+#else
+#define BASE_EXPORT
+#endif
+
+/*
 #ifndef BASE_DLLEXPORT_H
 #define BASE_DLLEXPORT_H
 
@@ -14,3 +27,4 @@
 #endif
 
 #endif // BASE_DLLEXPORT_H
+*/
