@@ -89,6 +89,9 @@ CudaSimulation::CudaSimulation(
     setSimulationParameters(parameters);
     setCudaConstants(cudaConstants);
 
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage("acquire GPU memory");
+
     _cudaSimulationData = new SimulationData();
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
@@ -112,9 +115,8 @@ CudaSimulation::CudaSimulation(
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
     std::stringstream stream;
-    stream << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << "mb GPU memory acquired";
+    stream << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << " MB GPU memory acquired";
 
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(stream.str());
 }
 
