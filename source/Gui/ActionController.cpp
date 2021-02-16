@@ -933,6 +933,8 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 
 void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
+    _infoController->setRendering(InfoController::Rendering::Vector);
+
     auto actions = _model->getActionHolder();
     actions->actionRunSimulation->setChecked(false);
     actions->actionRestore->setEnabled(false);
