@@ -93,3 +93,6 @@ enum class ModelComputationType
 class DataAnalyzer;
 class Queue;
 class GettingStartedWindow;
+
+class LoggingView;
+class LoggingController;
