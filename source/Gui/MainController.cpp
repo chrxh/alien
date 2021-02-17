@@ -202,9 +202,6 @@ string MainController::getPathToApp() const
 
 void MainController::showErrorMessageAndTerminate(QString what) const
 {
-    QMessageBox messageBox;
-    messageBox.critical(0, "CUDA error", QString(Const::ErrorCuda).arg(what));
-    exit(EXIT_FAILURE);
 }
 
 void MainController::onRunSimulation(bool run)
@@ -260,7 +257,6 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_model->setSymbolTable(symbolTable);
 
 	connectSimController();
-    connect(_simController->getContext(), &SimulationContext::errorThrown, this, &MainController::showErrorMessageAndTerminate);
 
 	auto context = _simController->getContext();
 	_descHelper->init(context);
@@ -299,13 +295,7 @@ void MainController::recreateSimulation(string const & serializedSimulation)
 	delete _simController;
     _simController = nullptr;
 
-    try {
-	    _simController = _serializer->deserializeSimulation(serializedSimulation);
-    }
-    catch (std::exception const& exception)
-    {
-        showErrorMessageAndTerminate(exception.what());
-    }
+	_simController = _serializer->deserializeSimulation(serializedSimulation);
 
 	auto symbolTable = _simController->getContext()->getSymbolTable();
 	auto simulationParameters = _simController->getContext()->getSimulationParameters();
@@ -326,11 +316,7 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
     auto simulationControllerConfig =
         EngineGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
     auto data = EngineGpuData(config->cudaConstants);
-    try {
-	    _simController = facade->buildSimulationController(simulationControllerConfig, data);
-    } catch (std::exception const& e) {
-        showErrorMessageAndTerminate(e.what());
-    }
+	_simController = facade->buildSimulationController(simulationControllerConfig, data);
 
 	initSimulation(config->symbolTable, config->parameters);
     _view->getMonitorController()->continueTimer();
@@ -362,24 +348,20 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 	delete _simController;
     _simController = nullptr;
 
-    try {
-        if (!SerializationHelper::loadFromFile<SimulationController*>(
-                filename,
-                [&](string const& data) { return _serializer->deserializeSimulation(data); },
-                _simController)) {
+    if (!SerializationHelper::loadFromFile<SimulationController*>(
+            filename,
+            [&](string const& data) { return _serializer->deserializeSimulation(data); },
+            _simController)) {
 
-            //load old simulation
-            if (LoadOption::SaveOldSim == option) {
-                CHECK(SerializationHelper::loadFromFile<SimulationController*>(
-                    getPathToApp() + Const::AutoSaveForLoadingFilename,
-                    [&](string const& data) { return _serializer->deserializeSimulation(data); },
-                    _simController));
-            }
-            delete progress;
-            return false;
+        //load old simulation
+        if (LoadOption::SaveOldSim == option) {
+            CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+                getPathToApp() + Const::AutoSaveForLoadingFilename,
+                [&](string const& data) { return _serializer->deserializeSimulation(data); },
+                _simController));
         }
-    } catch (std::exception const& exception) {
-        showErrorMessageAndTerminate(exception.what());
+        delete progress;
+        return false;
     }
 
 	initSimulation(_simController->getContext()->getSymbolTable(), _simController->getContext()->getSimulationParameters());
