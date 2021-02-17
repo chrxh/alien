@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QtCore/qmath.h>
 #include <QVector2D>
+#include <QMessageBox>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -12,12 +13,12 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SymbolTable.h"
 #include "EngineInterface/EngineInterfaceServices.h"
-
 #include "EngineGpu/EngineGpuServices.h"
 
 #include "Web/WebServices.h"
 
-#include "Gui/MainController.h"
+#include "MainController.h"
+#include "Settings.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,6 +33,13 @@ int main(int argc, char *argv[])
 
     MainController controller;
 	controller.init();
-	return a.exec();
+    try {
+	    return a.exec();
+    }
+    catch(std::exception const& e) {
+        QMessageBox messageBox;
+        messageBox.critical(0, "CUDA error", QString(Const::ErrorCuda).arg(e.what()));
+        exit(EXIT_FAILURE);
+    }
 }
 

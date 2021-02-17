@@ -96,3 +96,8 @@ void CudaController::timestepCalculatedWithGpu()
 {
 	Q_EMIT timestepCalculated();
 }
+
+void CudaController::errorThrown(QString message)
+{
+    throw std::exception(message.toStdString().c_str());
+}
