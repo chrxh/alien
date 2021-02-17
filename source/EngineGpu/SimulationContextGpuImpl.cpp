@@ -37,7 +37,6 @@ void SimulationContextGpuImpl::init(
 	auto cudaController = new CudaController;
     SET_CHILD(_cudaController, cudaController);
 
-    connect(_cudaController, &CudaController::errorThrown, this, &SimulationContext::errorThrown);
 	_cudaController->init(space, timestep, parameters, specificData.getCudaConstants());
 }
 
