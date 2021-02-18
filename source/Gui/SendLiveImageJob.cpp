@@ -1,8 +1,12 @@
 #include "SendLiveImageJob.h"
 
 #include <iostream>
+#include <sstream>
 #include <QBuffer>
 #include <QImage>
+
+#include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
 
 #include "EngineInterface/SimulationAccess.h"
 
@@ -65,14 +69,12 @@ void SendLiveImageJob::requestImage()
 {
     _image = boost::make_shared<QImage>(_size.x, _size.y, QImage::Format_RGB32);
     auto const rect = IntRect{ _pos, IntVector2D{ _pos.x + _size.x, _pos.y + _size.y } };
-    std::cerr
-        << "[Web] processing task "
-        << getId()
-        << ": request image with size "
-        << _size.x
-        << " x "
-        << _size.y
-        << std::endl;
+
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+    std::stringstream stream;
+    stream << "Web: processing task " << getId() << ": request image with size " << _size.x << " x " << _size.y;
+    loggingService->logMessage(stream.str());
 
     _simAccess->requirePixelImage(rect, _image, _mutex);
 
@@ -113,6 +115,12 @@ void SendLiveImageJob::serverReceivedImage(string taskId)
     if (State::ImageToServerSent != _state || taskId != getId()) {
         return;
     }
-    std::cerr << "[Web] task " << getId() << " processed" << std::endl;
+
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+    std::stringstream stream;
+    stream << "Web: task " << getId() << " processed";
+    loggingService->logMessage(stream.str());
+
     _isReady = true;
 }
