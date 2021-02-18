@@ -1,8 +1,12 @@
 #include "SendLastImageJob.h"
 
 #include <iostream>
+#include <sstream>
 #include <QBuffer>
 #include <QImage>
+
+#include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
 
 #include "EngineInterface/SimulationAccess.h"
 
@@ -62,11 +66,11 @@ bool SendLastImageJob::isBlocking() const
 
 void SendLastImageJob::requestImage()
 {
-    std::cerr
-        << "[Web] get last image with size "
-        << _size.x << " x "
-        << _size.y
-        << std::endl;
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+    std::stringstream stream;
+    stream << "Web: get last image with size " << _size.x << " x " << _size.y;
+    loggingService->logMessage(stream.str());
 
     _image = boost::make_shared<QImage>(_size.x, _size.y, QImage::Format_RGB32);
     auto const rect = IntRect{ _pos, IntVector2D{ _pos.x + _size.x, _pos.y + _size.y } };
@@ -84,12 +88,12 @@ void SendLastImageJob::sendImageToServer()
     _image->save(_buffer, "PNG");
     _buffer->seek(0);
 
-    std::cerr
-        << "[Web] sending last image with size "
-        << _size.x << " x "
-        << _size.y << ": "
-        << _encodedImageData.size() << " bytes"
-        << std::endl;
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+    std::stringstream stream;
+    stream << "Web: sending last image with size " << _size.x << " x " << _size.y << ": " << _encodedImageData.size()
+           << " bytes";
+    loggingService->logMessage(stream.str());
 
     _webAccess->sendLastImage(_currentSimulationId, _currentToken, _buffer);
 
@@ -100,7 +104,9 @@ void SendLastImageJob::sendImageToServer()
 void SendLastImageJob::finish()
 {
     _webAccess->requestDisconnect(_currentSimulationId, _currentToken);
-    std::cerr << "[Web] disconnected" << std::endl;
+
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage("Web: disconnected");
 
     _state = State::Finished;
     _isReady = true;
@@ -120,6 +126,7 @@ void SendLastImageJob::serverReceivedImage()
     if (State::ImageToServerSent != _state) {
         return;
     }
-    std::cerr << "[Web] last image sent" << std::endl;
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage("Web: last image sent");
     _isReady = true;
 }
