@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include <QTime>
 #include <QTimer>
@@ -9,6 +10,7 @@
 
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
 
 #include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
@@ -131,7 +133,16 @@ void MainController::init()
 
     QApplicationHelper::processEventsForMilliSec(1000);
 
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    std::stringstream stream;
+    stream << "loading simulation '" << Const::AutoSaveFilename << "'";
+    loggingService->logMessage(stream.str());
+
     if (!onLoadSimulation(getPathToApp() + Const::AutoSaveFilename, LoadOption::Non)) {
+
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage("simulation could not be loaded");
+        loggingService->logMessage("creating new simulation instead");
 
         //default simulation
         auto const EngineGpuFacade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
@@ -181,6 +192,9 @@ void MainController::serializeSimulationAndWaitUntilFinished()
 
 void MainController::autoSaveIntern(std::string const& filename)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage("auto saving");
+    
     saveSimulationIntern(filename);
 	QApplicationHelper::processEventsForMilliSec(1000);
 }
@@ -405,7 +419,7 @@ void MainController::onUpdateExecutionParameters(ExecutionParameters const & par
 
 void MainController::onRestrictTPS(optional<int> const& tps)
 {
-	_simController->setRestrictTimestepsPerSecond(tps);
+    _simController->setRestrictTimestepsPerSecond(tps);
 }
 
 void MainController::onAddMostFrequentClusterToSimulation()
