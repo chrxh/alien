@@ -19,6 +19,7 @@
 
 #include "MainController.h"
 #include "Settings.h"
+#include "FileLogger.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +31,8 @@ int main(int argc, char *argv[])
     EngineInterfaceServices engineInterfaceServices;
 	EngineGpuServices engineGpuServices;
     WebServices webServices;
+
+    FileLogger fileLogger;
 
     MainController controller;
 	controller.init();

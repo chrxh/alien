@@ -7,7 +7,6 @@
 
 class LoggingController
     : public QObject
-    , public LoggingCallBack
 {
     Q_OBJECT
 
@@ -17,8 +16,7 @@ public:
 
     QWidget* getWidget() const;
 
-    void newLogMessage(std::string const& message) override;
-
 private:
+    GuiLogger* _guiLogger = nullptr;
     LoggingView* _view = nullptr;
 };
