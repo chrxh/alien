@@ -200,10 +200,6 @@ string MainController::getPathToApp() const
     return result.toStdString();
 }
 
-void MainController::showErrorMessageAndTerminate(QString what) const
-{
-}
-
 void MainController::onRunSimulation(bool run)
 {
 	_simController->setRun(run);
