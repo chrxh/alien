@@ -350,6 +350,12 @@
     <ClCompile Include="..\..\..\source\Gui\LoggingView.cpp">
       <Filter>Impl\Infobar</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\GuiLogger.cpp">
+      <Filter>Impl\Infobar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\FileLogger.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -402,6 +408,9 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Gui\FileLogger.h">
+      <Filter>Impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -598,6 +607,9 @@
       <Filter>Impl\Infobar</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\LoggingView.h">
+      <Filter>Impl\Infobar</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\GuiLogger.h">
       <Filter>Impl\Infobar</Filter>
     </QtMoc>
   </ItemGroup>
