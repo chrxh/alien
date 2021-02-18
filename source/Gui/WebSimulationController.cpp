@@ -1,6 +1,7 @@
 #include "WebSimulationController.h"
 
 #include <iostream>
+#include <sstream>
 
 #include <QInputDialog>
 #include <QEventLoop>
@@ -9,6 +10,8 @@
 
 #include "Base/Job.h"
 #include "Base/Worker.h"
+#include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
 #include "EngineInterface/SimulationMonitor.h"
 #include "EngineInterface/SimulationAccess.h"
 #include "EngineInterface/SpaceProperties.h"
@@ -109,7 +112,10 @@ bool WebSimulationController::onConnectToSimulation()
         msgBox.exec();
         _pollingTimer->start(POLLING_INTERVAL);
         _updateStatisticsTimer->start(UPDATE_STATISTICS_INTERVAL);
-        std::cerr << "[Web] connected" << std::endl;
+
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage("Web: connected");
+
         return true;
     }
     else {
@@ -181,7 +187,11 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
         }
     }
     if (numNewJobs > 0) {
-        std::cerr << "[Web] " << numNewJobs << " new task(s) received" << std::endl;
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+        std::stringstream stream;
+        stream << "Web: " << numNewJobs << " new task(s) received";
+        loggingService->logMessage(stream.str().c_str());
     }
 }
 
