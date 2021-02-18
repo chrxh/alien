@@ -167,8 +167,15 @@
     <ClCompile Include="..\..\..\source\Gui\DataEditModel.cpp" />
     <ClCompile Include="..\..\..\source\Gui\DataEditView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\DataRepository.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\FileLogger.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\GettingStartedWindow.cpp" />
     <ClCompile Include="..\..\..\source\Gui\GridMultiplierDialog.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\GuiLogger.cpp" />
     <ClCompile Include="..\..\..\source\Gui\HexEditWidget.cpp" />
     <ClCompile Include="..\..\..\source\Gui\InfoController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemConfig.cpp" />
@@ -232,6 +239,8 @@
     <ClInclude Include="..\..\..\source\Gui\CellItem.h" />
     <ClInclude Include="..\..\..\source\Gui\CoordinateSystem.h" />
     <ClInclude Include="..\..\..\source\Gui\Definitions.h" />
+    <QtMoc Include="..\..\..\source\Gui\GuiLogger.h" />
+    <ClInclude Include="..\..\..\source\Gui\FileLogger.h" />
     <ClInclude Include="..\..\..\source\Gui\Jobs.h" />
     <QtMoc Include="..\..\..\source\Gui\LoggingController.h" />
     <QtMoc Include="..\..\..\source\Gui\LoggingView.h" />
