@@ -14,7 +14,7 @@ public:
     GuiLogger(LoggingView* view);
     virtual ~GuiLogger() = default;
 
-    void newLogMessage(std::string const& message) override;
+    void newLogMessage(Priority priority, std::string const& message) override;
 
 private:
     LoggingView* _view = nullptr;

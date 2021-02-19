@@ -3,14 +3,14 @@
 
 #include "Definitions.h"
 
-class InfoController
+class GeneralInfoController
 	: public QObject
 {
 	Q_OBJECT
 
 public:
-	InfoController(QObject * parent = nullptr);
-	~InfoController() = default;
+	GeneralInfoController(QObject * parent = nullptr);
+	~GeneralInfoController() = default;
 
 	void init(QLabel* infoLabel, MainController* mainController);
 

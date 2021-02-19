@@ -14,7 +14,7 @@ public:
 	virtual ~ActionController() = default;
 
 	void init(MainController* mainController, MainModel* mainModel, MainView* mainView, SimulationViewWidget* visualEditor
-		, Serializer* serializer, InfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
+		, Serializer* serializer, GeneralInfoController* infoController, DataEditController* dataEditor, ToolbarController* toolbar
 		, MonitorController* monitor, DataRepository* repository, Notifier* notifier, WebSimulationController* websimController);
 
     void close();
@@ -97,7 +97,7 @@ private:
 
 	SimulationViewWidget* _simulationViewWidget = nullptr;
 	DataEditController* _dataEditor = nullptr;
-	InfoController* _infoController = nullptr;
+	GeneralInfoController* _infoController = nullptr;
 	ToolbarController* _toolbar = nullptr;
 	MonitorController* _monitor = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;

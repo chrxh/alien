@@ -8,7 +8,7 @@ class LoggingServiceImpl : public LoggingService
 public:
     virtual ~LoggingServiceImpl() = default;
 
-    void logMessage(std::string const& message) const override;
+    void logMessage(Priority priority, std::string const& message) const override;
 
     void registerCallBack(LoggingCallBack* callback) override;
 

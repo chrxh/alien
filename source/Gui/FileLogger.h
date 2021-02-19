@@ -1,4 +1,7 @@
 #pragma once
+
+#include <fstream>
+
 #include "Base/LoggingService.h"
 #include "Definitions.h"
 
@@ -9,5 +12,8 @@ public:
     FileLogger();
     virtual ~FileLogger() = default;
 
-    void newLogMessage(std::string const& message) override;
+    void newLogMessage(Priority priority, std::string const& message) override;
+
+private:
+    std::ofstream _outfile;
 };

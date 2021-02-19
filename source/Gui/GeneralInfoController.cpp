@@ -1,18 +1,18 @@
 ﻿#include <QTimer>
 
 #include "MainController.h"
-#include "InfoController.h"
+#include "GeneralInfoController.h"
 #include "Settings.h"
 #include "StringHelper.h"
 
-InfoController::InfoController(QObject * parent)
+GeneralInfoController::GeneralInfoController(QObject * parent)
 	: QObject(parent)
 	, _oneSecondTimer(new QTimer(this))
 {
-	connect(_oneSecondTimer, &QTimer::timeout, this, &InfoController::oneSecondTimerTimeout);
+	connect(_oneSecondTimer, &QTimer::timeout, this, &GeneralInfoController::oneSecondTimerTimeout);
 }
 
-void InfoController::init(QLabel * infoLabel, MainController* mainController)
+void GeneralInfoController::init(QLabel * infoLabel, MainController* mainController)
 {
 	_infoLabel = infoLabel;
 	_mainController = mainController;
@@ -21,32 +21,32 @@ void InfoController::init(QLabel * infoLabel, MainController* mainController)
     _rendering = Rendering::Vector;
 }
 
-void InfoController::increaseTimestep()
+void GeneralInfoController::increaseTimestep()
 {
 	++_tpsCounting;
 	updateInfoLabel();
 }
 
-void InfoController::setZoomFactor(double factor)
+void GeneralInfoController::setZoomFactor(double factor)
 {
 	_zoomFactor = factor;
 	updateInfoLabel();
 }
 
-void InfoController::setRendering(Rendering value)
+void GeneralInfoController::setRendering(Rendering value)
 {
     _rendering = value;
     updateInfoLabel();
 }
 
-void InfoController::oneSecondTimerTimeout()
+void GeneralInfoController::oneSecondTimerTimeout()
 {
 	_tps = _tpsCounting;
 	_tpsCounting = 0;
 	updateInfoLabel();
 }
 
-void InfoController::updateInfoLabel()
+void GeneralInfoController::updateInfoLabel()
 {
     QString renderModeString;
     QString renderModeColorString;

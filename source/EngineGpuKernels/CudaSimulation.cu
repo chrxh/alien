@@ -48,10 +48,10 @@ namespace
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
             auto result = cudaSetDevice(0);
             if (result != cudaSuccess) {
-                loggingService->logMessage("CUDA could not be initialized.");
+                loggingService->logMessage(Priority::Important, "CUDA could not be initialized.");
                 throw std::exception("CUDA could not be initialized.");
             }
-            loggingService->logMessage("CUDA device found and set");
+            loggingService->logMessage(Priority::Important, "CUDA device found and set");
 
             cudaDeviceProp prop;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, 0));
@@ -62,7 +62,7 @@ namespace
                        << " has compute capability of " 
                        << prop.major << "." << prop.minor
                        << ". A compute capability of 6.0 is needed.";
-                loggingService->logMessage(stream.str());
+                loggingService->logMessage(Priority::Important, stream.str());
                 throw std::exception(stream.str().c_str());
             }
 
@@ -72,7 +72,7 @@ namespace
         {
             cudaDeviceReset();
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-            loggingService->logMessage("reset CUDA device");
+            loggingService->logMessage(Priority::Important, "reset CUDA device");
         }
     };
 }
@@ -90,7 +90,7 @@ CudaSimulation::CudaSimulation(
     setCudaConstants(cudaConstants);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("acquire GPU memory");
+    loggingService->logMessage(Priority::Important, "acquire GPU memory");
 
     _cudaSimulationData = new SimulationData();
     _cudaAccessTO = new DataAccessTO();
@@ -117,7 +117,7 @@ CudaSimulation::CudaSimulation(
     std::stringstream stream;
     stream << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << " MB GPU memory acquired";
 
-    loggingService->logMessage(stream.str());
+    loggingService->logMessage(Priority::Important, stream.str());
 }
 
 CudaSimulation::~CudaSimulation()
@@ -137,7 +137,7 @@ CudaSimulation::~CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("GPU memory released");
+    loggingService->logMessage(Priority::Important, "GPU memory released");
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
@@ -162,7 +162,7 @@ void CudaSimulation::DEBUG_printNumEntries()
            << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; ";
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(stream.str());
+    loggingService->logMessage(Priority::Important, stream.str());
 }
 
 void CudaSimulation::getPixelImage(int2 const & rectUpperLeft, int2 const & rectLowerRight, unsigned char* imageData)

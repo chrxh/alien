@@ -74,7 +74,7 @@ void SendLiveImageJob::requestImage()
 
     std::stringstream stream;
     stream << "Web: processing task " << getId() << ": request image with size " << _size.x << " x " << _size.y;
-    loggingService->logMessage(stream.str());
+    loggingService->logMessage(Priority::Important, stream.str());
 
     _simAccess->requirePixelImage(rect, _image, _mutex);
 
@@ -120,7 +120,7 @@ void SendLiveImageJob::serverReceivedImage(string taskId)
 
     std::stringstream stream;
     stream << "Web: task " << getId() << " processed";
-    loggingService->logMessage(stream.str());
+    loggingService->logMessage(Priority::Important, stream.str());
 
     _isReady = true;
 }
