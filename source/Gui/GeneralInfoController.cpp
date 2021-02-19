@@ -49,25 +49,31 @@ void GeneralInfoController::oneSecondTimerTimeout()
 
 void GeneralInfoController::updateInfoLabel()
 {
-    auto config = _mainController->getSimulationConfig();
-    if (!config) {
-        return;
-    }
+    QString renderModeValueString;
+    QString worldSizeValueString;
+    QString zoomLevelValueString;
+    QString timestepValueString;
+    QString tpsValueString;
 
-    auto renderModeValueString = [&] {
-        if (Rendering::Pixel == _rendering) {
-            return QString("pixel");
-        } else if (Rendering::Vector == _rendering) {
-            return QString("vector");
-        }
-        return QString("item");
-    }();
-    auto worldSizeValueString = QString("%1 x %2").arg(
-        StringHelper::generateFormattedIntString(config->universeSize.x, true),
-        StringHelper::generateFormattedIntString(config->universeSize.y, true));
-    auto zoomLevelValueString = QString("%1x").arg(_zoomFactor);
-    auto timestepValueString = StringHelper::generateFormattedIntString(_mainController->getTimestep(), true);
-    auto tpsValueString = StringHelper::generateFormattedIntString(_tps, true);
+    
+    if (auto config = _mainController->getSimulationConfig()) {
+
+
+        renderModeValueString = [&] {
+            if (Rendering::Pixel == _rendering) {
+                return QString("pixel");
+            } else if (Rendering::Vector == _rendering) {
+                return QString("vector");
+            }
+            return QString("item");
+        }();
+        worldSizeValueString = QString("%1 x %2").arg(
+            StringHelper::generateFormattedIntString(config->universeSize.x, true),
+            StringHelper::generateFormattedIntString(config->universeSize.y, true));
+        zoomLevelValueString = QString("%1x").arg(_zoomFactor);
+        timestepValueString = StringHelper::generateFormattedIntString(_mainController->getTimestep(), true);
+        tpsValueString = StringHelper::generateFormattedIntString(_tps, true);
+    }
 
     auto renderModeColorString = [&] {
         if (Rendering::Pixel == _rendering) {

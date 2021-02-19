@@ -48,10 +48,8 @@ namespace
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
             auto result = cudaSetDevice(0);
             if (result != cudaSuccess) {
-                loggingService->logMessage(Priority::Important, "CUDA could not be initialized.");
                 throw std::exception("CUDA could not be initialized.");
             }
-            loggingService->logMessage(Priority::Important, "CUDA device found and set");
 
             cudaDeviceProp prop;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, 0));
@@ -62,10 +60,13 @@ namespace
                        << " has compute capability of " 
                        << prop.major << "." << prop.minor
                        << ". A compute capability of 6.0 is needed.";
-                loggingService->logMessage(Priority::Important, stream.str());
                 throw std::exception(stream.str().c_str());
             }
 
+            std::stringstream stream;
+            stream << prop.name << " with compute capability " << prop.major << "."
+                   << prop.minor << " found and set";
+            loggingService->logMessage(Priority::Important, stream.str());
         }
 
         ~CudaInitializer()
