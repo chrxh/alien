@@ -114,7 +114,7 @@ bool WebSimulationController::onConnectToSimulation()
         _updateStatisticsTimer->start(UPDATE_STATISTICS_INTERVAL);
 
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("Web: connected");
+        loggingService->logMessage(Priority::Important, "Web: connected");
 
         return true;
     }
@@ -191,7 +191,7 @@ void WebSimulationController::unprocessedTasksReceived(vector<Task> tasks)
 
         std::stringstream stream;
         stream << "Web: " << numNewJobs << " new task(s) received";
-        loggingService->logMessage(stream.str().c_str());
+        loggingService->logMessage(Priority::Important, stream.str().c_str());
     }
 }
 

@@ -26,7 +26,7 @@ class VectorUniverseView;
 class ItemUniverseView;
 class ItemManager;
 class DataRepository;
-class InfoController;
+class GeneralInfoController;
 class ViewportInterface;
 class ViewportController;
 class MarkerItem;

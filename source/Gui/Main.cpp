@@ -1,3 +1,4 @@
+#include <sstream>
 #include <QApplication>
 #include <QtCore/qmath.h>
 #include <QVector2D>
@@ -40,6 +41,13 @@ int main(int argc, char *argv[])
 	    return a.exec();
     }
     catch(std::exception const& e) {
+
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+        std::stringstream stream;
+        stream << "Error: " << e.what();
+        loggingService->logMessage(Priority::Important, stream.str());
+
         QMessageBox messageBox;
         messageBox.critical(0, "CUDA error", QString(Const::ErrorCuda).arg(e.what()));
         exit(EXIT_FAILURE);

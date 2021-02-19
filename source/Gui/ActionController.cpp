@@ -37,7 +37,7 @@
 #include "GridMultiplierDialog.h"
 #include "MonitorController.h"
 #include "Settings.h"
-#include "InfoController.h"
+#include "GeneralInfoController.h"
 #include "MainController.h"
 #include "MainModel.h"
 #include "MainView.h"
@@ -60,7 +60,7 @@ void ActionController::init(
     MainView* mainView,
     SimulationViewWidget* visualEditor,
     Serializer* serializer,
-    InfoController* infoController,
+    GeneralInfoController* infoController,
     DataEditController* dataEditor,
     ToolbarController* toolbar,
     MonitorController* monitor,
@@ -294,7 +294,7 @@ void ActionController::onToggleEditorMode(bool toggled)
 {
     _model->setEditMode(toggled);
     if (toggled) {
-        _infoController->setRendering(InfoController::Rendering::Item);
+        _infoController->setRendering(GeneralInfoController::Rendering::Item);
         _simulationViewWidget->disconnectView();
         _simulationViewWidget->setActiveScene(ActiveView::ItemScene);
         _simulationViewWidget->connectView();
@@ -319,7 +319,7 @@ void ActionController::onNewSimulation()
 	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("creating new simulation");
+        loggingService->logMessage(Priority::Important, "creating new simulation");
 
 		_mainController->onNewSimulation(*dialog.getConfig(), *dialog.getEnergy());
 
@@ -353,7 +353,7 @@ void ActionController::onSaveSimulation()
         std::stringstream stream;
         QFileInfo info(filename);
         stream << "saving simulation '" << info.fileName().toStdString() << "'";
-        loggingService->logMessage(stream.str());
+        loggingService->logMessage(Priority::Important, stream.str());
 
 		_mainController->onSaveSimulation(filename.toStdString());
 	}
@@ -368,13 +368,13 @@ void ActionController::onLoadSimulation()
         std::stringstream stream;
         QFileInfo info(filename);
         stream << "loading simulation '" << info.fileName().toStdString() << "'";
-        loggingService->logMessage(stream.str());
+        loggingService->logMessage(Priority::Important, stream.str());
 
 		if (_mainController->onLoadSimulation(filename.toStdString(), MainController::LoadOption::SaveOldSim)) {
 			settingUpNewSimulation(_mainController->getSimulationConfig());
 		}
 		else {
-            loggingService->logMessage("simulation could not be loaded");
+            loggingService->logMessage(Priority::Important, "simulation could not be loaded");
 
 			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadSimulation);
 			msgBox.exec();
@@ -388,7 +388,7 @@ void ActionController::onConfigureGrid()
     if (dialog.exec()) {
 
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("changing general settings");
+        loggingService->logMessage(Priority::Important, "changing general settings");
 
         auto config = _mainController->getSimulationConfig();
         config->universeSize = *dialog.getUniverseSize();
@@ -406,7 +406,7 @@ void ActionController::onEditSimulationParameters()
     SimulationParametersDialog dialog(config->parameters, _serializer, _mainView);
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("changing simulation parameters");
+        loggingService->logMessage(Priority::Important, "changing simulation parameters");
 
 		auto const parameters = dialog.getSimulationParameters();
 		_mainModel->setSimulationParameters(parameters);
@@ -427,7 +427,7 @@ void ActionController::onEditSymbolTable()
 void ActionController::onNewCell()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("adding cell");
+    loggingService->logMessage(Priority::Important, "adding cell");
 
 	_repository->addAndSelectCell(_model->getPositionDeltaForNewEntity());
 	_repository->reconnectSelectedCells();
@@ -442,7 +442,7 @@ void ActionController::onNewCell()
 void ActionController::onNewParticle()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("adding particle");
+    loggingService->logMessage(Priority::Important, "adding particle");
 
 	_repository->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
@@ -481,7 +481,7 @@ void ActionController::onLoadCollection()
         std::stringstream stream;
         QFileInfo info(filename);
         stream << "loading collection '" << info.fileName().toStdString() << "'";
-        loggingService->logMessage(stream.str());
+        loggingService->logMessage(Priority::Important, stream.str());
 
 		DataDescription desc;
 		if (SerializationHelper::loadFromFile<DataDescription>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeDataDescription(data); }, desc)) {
@@ -509,7 +509,7 @@ void ActionController::onSaveCollection()
         std::stringstream stream;
         QFileInfo info(filename);
         stream << "saving collection '" << info.fileName().toStdString() << "'";
-        loggingService->logMessage(stream.str());
+        loggingService->logMessage(Priority::Important, stream.str());
 
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeDataDescription(_repository->getExtendedSelection()); })) {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorSaveCollection);
@@ -529,7 +529,7 @@ void ActionController::onCopyCollection()
 void ActionController::onPasteCollection()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("pasting collection");
+    loggingService->logMessage(Priority::Important, "pasting collection");
 
 	DataDescription copiedData = _model->getCopiedCollection();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
@@ -541,7 +541,7 @@ void ActionController::onPasteCollection()
 void ActionController::onDeleteSelection()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("deleting selection");
+    loggingService->logMessage(Priority::Important, "deleting selection");
 
 	_repository->deleteSelection();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
@@ -552,7 +552,7 @@ void ActionController::onDeleteSelection()
 void ActionController::onDeleteCollection()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("deleting extended selection");
+    loggingService->logMessage(Priority::Important, "deleting extended selection");
 
 	_repository->deleteExtendedSelection();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
@@ -604,7 +604,7 @@ void ActionController::onRandomMultiplier()
 	if (dialog.exec()) {
 
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("executing random multiplier");
+        loggingService->logMessage(Priority::Important, "executing random multiplier");
 
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig()->universeSize;
@@ -648,7 +648,7 @@ void ActionController::onGridMultiplier()
 	GridMultiplierDialog dialog(center);
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("executing grid multiplier");
+        loggingService->logMessage(Priority::Important, "executing grid multiplier");
 
 		QVector2D initialDelta(dialog.getInitialPosX(), dialog.getInitialPosY());
 		initialDelta -= center;
@@ -696,7 +696,7 @@ void ActionController::onGridMultiplier()
 void ActionController::onMostFrequentCluster()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("finding most frequent active cluster");
+    loggingService->logMessage(Priority::Important, "finding most frequent active cluster");
 
     _mainController->onAddMostFrequentClusterToSimulation();
 }
@@ -709,7 +709,7 @@ void ActionController::onDeleteEntity()
 void ActionController::onPasteEntity()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("pasting entity");
+    loggingService->logMessage(Priority::Important, "pasting entity");
 
 	DataDescription copiedData = _model->getCopiedEntity();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
@@ -721,7 +721,7 @@ void ActionController::onPasteEntity()
 void ActionController::onNewToken()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("creating token");
+    loggingService->logMessage(Priority::Important, "creating token");
 
 	_repository->addToken();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
@@ -745,7 +745,7 @@ void ActionController::onCopyToken()
 void ActionController::onPasteToken()
 { 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("pasting token");
+    loggingService->logMessage(Priority::Important, "pasting token");
 
 	auto const& token = _model->getCopiedToken();
 	_repository->addToken(token);
@@ -757,7 +757,7 @@ void ActionController::onPasteToken()
 void ActionController::onDeleteToken()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("deleting token");
+    loggingService->logMessage(Priority::Important, "deleting token");
 
 	_repository->deleteToken();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
@@ -799,7 +799,7 @@ void ActionController::onCopyToClipboard()
 void ActionController::onPasteFromClipboard()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("pasting token memory from clipboard");
+    loggingService->logMessage(Priority::Important, "pasting token memory from clipboard");
 
     auto const cellIds = _repository->getSelectedCellIds();
     CHECK(cellIds.size() == 1);
@@ -830,7 +830,7 @@ void ActionController::onNewRectangle()
 	NewRectangleDialog dialog(_mainModel->getSimulationParameters());
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("creating rectangle");
+        loggingService->logMessage(Priority::Important, "creating rectangle");
 
 		IntVector2D size = dialog.getBlockSize();
 		double distance = dialog.getDistance();
@@ -903,7 +903,7 @@ void ActionController::onNewHexagon()
 	NewHexagonDialog dialog(_mainModel->getSimulationParameters());
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("creating hexagon");
+        loggingService->logMessage(Priority::Important, "creating hexagon");
 
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
@@ -929,7 +929,7 @@ void ActionController::onNewParticles()
 	NewParticlesDialog dialog;
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage("creating particles");
+        loggingService->logMessage(Priority::Important, "creating particles");
 
 		double totalEnergy = dialog.getTotalEnergy();
 		double maxEnergyPerParticle = dialog.getMaxEnergyPerParticle();
@@ -1022,7 +1022,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 
 void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
-    _infoController->setRendering(InfoController::Rendering::Vector);
+    _infoController->setRendering(GeneralInfoController::Rendering::Vector);
 
     auto actions = _model->getActionHolder();
     actions->actionRunSimulation->setChecked(false);
@@ -1084,7 +1084,7 @@ void ActionController::setPixelOrVectorView()
 {
     if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticVectorViewSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         if (ActiveView::VectorScene != _simulationViewWidget->getActiveView()) {
-            _infoController->setRendering(InfoController::Rendering::Vector);
+            _infoController->setRendering(GeneralInfoController::Rendering::Vector);
             _simulationViewWidget->disconnectView();
             _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
             _simulationViewWidget->connectView();
@@ -1092,7 +1092,7 @@ void ActionController::setPixelOrVectorView()
     }
     else {
         if (ActiveView::PixelScene != _simulationViewWidget->getActiveView()) {
-            _infoController->setRendering(InfoController::Rendering::Pixel);
+            _infoController->setRendering(GeneralInfoController::Rendering::Pixel);
             _simulationViewWidget->disconnectView();
             _simulationViewWidget->setActiveScene(ActiveView::PixelScene);
             _simulationViewWidget->connectView();
