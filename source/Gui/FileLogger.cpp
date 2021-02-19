@@ -1,7 +1,5 @@
 #include "FileLogger.h"
 
-#include <fstream>
-
 #include "Base/ServiceLocator.h"
 #include "Base/LoggingService.h"
 
@@ -16,12 +14,10 @@ FileLogger::FileLogger()
     loggingService->registerCallBack(this);
 
     std::remove(LogFilename);
+    _outfile.open(LogFilename, std::ios_base::app);
 }
 
-void FileLogger::newLogMessage(std::string const& message)
+void FileLogger::newLogMessage(Priority priority, std::string const& message)
 {
-    std::ofstream outfile;
-
-    outfile.open(LogFilename, std::ios_base::app);
-    outfile << message << std::endl;
+    _outfile << message << std::endl;
 }

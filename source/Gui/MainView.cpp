@@ -16,7 +16,7 @@
 #include "Gui/ActionHolder.h"
 #include "Gui/MonitorController.h"
 
-#include "InfoController.h"
+#include "GeneralInfoController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
 #include "NewSimulationDialog.h"
@@ -39,7 +39,7 @@ MainView::MainView(QWidget * parent)
 	_simulationViewWidget = ui->simulationViewWidget;
 	_toolbar = new ToolbarController(_simulationViewWidget);
 	_dataEditor = new DataEditController(_simulationViewWidget);
-	_infoController = new InfoController(this);
+	_infoController = new GeneralInfoController(this);
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
     _logging = new LoggingController(this);
@@ -62,7 +62,7 @@ MainView::MainView(QWidget * parent)
 
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
     connect(ui->infobar, &QDockWidget::visibilityChanged, this, &MainView::infobarChanged);
-    connect(_simulationViewWidget, &SimulationViewWidget::zoomFactorChanged, _infoController, &InfoController::setZoomFactor);
+    connect(_simulationViewWidget, &SimulationViewWidget::zoomFactorChanged, _infoController, &GeneralInfoController::setZoomFactor);
 }
 
 MainView::~MainView()
@@ -128,7 +128,7 @@ void MainView::setupEditors(SimulationController * controller, SimulationAccess*
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 }
 
-InfoController * MainView::getInfoController() const
+GeneralInfoController * MainView::getInfoController() const
 {
 	return _infoController;
 }
