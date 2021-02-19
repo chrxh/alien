@@ -5,7 +5,7 @@
 #include <ctime>
 #include <sstream>
 
-void LoggingServiceImpl::logMessage(std::string const& message) const
+void LoggingServiceImpl::logMessage(Priority priority, std::string const& message) const
 {
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
@@ -15,7 +15,7 @@ void LoggingServiceImpl::logMessage(std::string const& message) const
 
     auto enrichedMessage = stream.str();
     for (auto const& callback : _callbacks) {
-        callback->newLogMessage(enrichedMessage);
+        callback->newLogMessage(priority, enrichedMessage);
     }
 }
 

@@ -177,7 +177,7 @@
     <ClCompile Include="..\..\..\source\Gui\GridMultiplierDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\GuiLogger.cpp" />
     <ClCompile Include="..\..\..\source\Gui\HexEditWidget.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\InfoController.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\GeneralInfoController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemConfig.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemManager.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemUniverseView.cpp" />
@@ -299,7 +299,7 @@
     <QtMoc Include="..\..\..\source\Gui\ItemUniverseView.h" />
     <QtMoc Include="..\..\..\source\Gui\ItemManager.h" />
     <QtMoc Include="..\..\..\source\Gui\ItemConfig.h" />
-    <QtMoc Include="..\..\..\source\Gui\InfoController.h" />
+    <QtMoc Include="..\..\..\source\Gui\GeneralInfoController.h" />
     <QtMoc Include="..\..\..\source\Gui\HexEditWidget.h" />
     <QtMoc Include="..\..\..\source\Gui\GridMultiplierDialog.h" />
     <QtMoc Include="..\..\..\source\Gui\GettingStartedWindow.h" />

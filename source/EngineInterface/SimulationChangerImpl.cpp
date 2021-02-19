@@ -67,7 +67,7 @@ void SimulationChangerImpl::activate(SimulationParameters const & currentParamet
     _measurementsOfCurrentRetreat = 0;
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("parameter changer activated");
+    loggingService->logMessage(Priority::Important, "parameter changer activated");
 }
 
 void SimulationChangerImpl::deactivate()
@@ -79,7 +79,7 @@ void SimulationChangerImpl::deactivate()
     _state = State::Deactivated;
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage("parameter changer deactivated");
+    loggingService->logMessage(Priority::Important, "parameter changer deactivated");
 }
 
 SimulationParameters const & SimulationChangerImpl::retrieveSimulationParameters()
@@ -107,10 +107,10 @@ void SimulationChangerImpl::monitorDataAvailable()
 
             std::stringstream stream;
             stream << "parameter changer: measurement finished: " << *_activeClustersReference << " active clusters";
-            loggingService->logMessage(stream.str());
+            loggingService->logMessage(Priority::Important, stream.str());
 
             _state = State::FindEpochTarget;
-            loggingService->logMessage("parameter changer: find epoch target");
+            loggingService->logMessage(Priority::Important, "parameter changer: find epoch target");
         }
     }
     else if (State::FindEpochTarget == _state) {
@@ -119,17 +119,17 @@ void SimulationChangerImpl::monitorDataAvailable()
         _numRetreats = 0;
 
         _state = State::Epoch;
-        loggingService->logMessage("parameter changer: start epoch");
+        loggingService->logMessage(Priority::Important, "parameter changer: start epoch");
     }
     else if (State::Epoch == _state) {
         if (activeClusters < *_activeClustersReference * RetreatStartFactor) {
             std::stringstream stream;
             stream << "parameter changer: critical number of " << activeClusters << " active clusters reached ";
-            loggingService->logMessage(stream.str());
+            loggingService->logMessage(Priority::Important, stream.str());
 
             ++_numRetreats;
             _state = State::Retreat;
-            loggingService->logMessage("parameter changer: start retreat");
+            loggingService->logMessage(Priority::Important, "parameter changer: start retreat");
 
             while (!_calculator->isSourceReached()) {
                 _calculator->getPrevious();
@@ -142,11 +142,11 @@ void SimulationChangerImpl::monitorDataAvailable()
         else if (0 == ((_measurementsSinceBeginning - _measurementsOfCurrentEpoch) % StepDuration)) {
             _parameters = _calculator->getNext();
             Q_EMIT simulationParametersChanged();
-            loggingService->logMessage("parameter changer: epoch step");
+            loggingService->logMessage(Priority::Important, "parameter changer: epoch step");
 
             if (_calculator->isTargetReached()) {
                 _state = State::FindEpochTarget;
-                loggingService->logMessage("parameter changer: end epoch");
+                loggingService->logMessage(Priority::Important, "parameter changer: end epoch");
             }
         }
     }
@@ -155,34 +155,34 @@ void SimulationChangerImpl::monitorDataAvailable()
 
             std::stringstream stream;
             stream << "parameter changer: very critical number of " << activeClusters << " active clusters reached";
-            loggingService->logMessage(stream.str());
+            loggingService->logMessage(Priority::Important, stream.str());
 
             _state = State::EmergencyRetreat;
-            loggingService->logMessage("parameter changer: start emergency retreat");
+            loggingService->logMessage(Priority::Important, "parameter changer: start emergency retreat");
 
             _parameters = _initialParameters;
             Q_EMIT simulationParametersChanged();
         }
         if (activeClusters > *_activeClustersReference * RetreatEndFactor
             || _measurementsOfCurrentRetreat + RetreatDuration < _measurementsSinceBeginning) {
-            loggingService->logMessage("parameter changer: end retreat");
+            loggingService->logMessage(Priority::Important, "parameter changer: end retreat");
 
             if (_numRetreats == MaxRetreats) {
                 _state = State::FindEpochTarget;
-                loggingService->logMessage("parameter changer: find epoch target");
+                loggingService->logMessage(Priority::Important, "parameter changer: find epoch target");
             }
             else {
-                loggingService->logMessage("parameter changer: restart epoch");
+                loggingService->logMessage(Priority::Important, "parameter changer: restart epoch");
                 _state = State::Epoch;
             }
         }
     }
     else if (State::EmergencyRetreat == _state) {
         if (activeClusters > *_activeClustersReference * RetreatEndFactor) {
-            loggingService->logMessage("parameter changer: end emergency retreat");
+            loggingService->logMessage(Priority::Important, "parameter changer: end emergency retreat");
 
             _state = State::FindEpochTarget;
-            loggingService->logMessage("parameter changer: find epoch target");
+            loggingService->logMessage(Priority::Important, "parameter changer: find epoch target");
         }
     }
 }

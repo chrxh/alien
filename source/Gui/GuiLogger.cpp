@@ -13,7 +13,9 @@ GuiLogger::GuiLogger(LoggingView* view)
     loggingService->registerCallBack(this);
 }
 
-void GuiLogger::newLogMessage(std::string const& message)
+void GuiLogger::newLogMessage(Priority priority, std::string const& message)
 {
-    _view->setNewLogMessage(message);
+    if (Priority::Important == priority) {
+        _view->setNewLogMessage(message);
+    }
 }

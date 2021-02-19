@@ -33,7 +33,7 @@ public:
     virtual void refresh();
 
 	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
-	virtual InfoController* getInfoController() const;
+	virtual GeneralInfoController* getInfoController() const;
     virtual MonitorController* getMonitorController() const;
 
     virtual void toggleGettingStarted(bool show);
@@ -66,7 +66,7 @@ private:
 
 	DataEditController* _dataEditor = nullptr;
 	ToolbarController* _toolbar = nullptr;
-	InfoController* _infoController = nullptr;
+	GeneralInfoController* _infoController = nullptr;
 	MonitorController* _monitor = nullptr;
     LoggingController* _logging = nullptr;
 
