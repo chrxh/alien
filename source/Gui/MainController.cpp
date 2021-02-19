@@ -437,6 +437,9 @@ int MainController::getTimestep() const
 
 SimulationConfig MainController::getSimulationConfig() const
 {
+    if (!_simController) {
+        return nullptr;
+    }
 	auto context = _simController->getContext();
 
 	if (dynamic_cast<SimulationControllerGpu*>(_simController)) {

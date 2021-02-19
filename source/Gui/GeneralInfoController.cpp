@@ -1,6 +1,7 @@
 ﻿#include <QTimer>
 
 #include "MainController.h"
+#include "SimulationConfig.h"
 #include "GeneralInfoController.h"
 #include "Settings.h"
 #include "StringHelper.h"
@@ -48,34 +49,51 @@ void GeneralInfoController::oneSecondTimerTimeout()
 
 void GeneralInfoController::updateInfoLabel()
 {
-    QString renderModeString;
-    QString renderModeColorString;
-    if (Rendering::Pixel == _rendering) {
-        renderModeString = "pixel";
-        renderModeColorString = "<font color = #FFB080>";
-    } else if (Rendering::Vector == _rendering) {
-        renderModeString = "vector";
-        renderModeColorString = "<font color = #B0FF80>";
-    } else if (Rendering::Item == _rendering) {
-        renderModeString = "item";
-        renderModeColorString = "<font color = #80B0FF>";
-    } else {
-        THROW_NOT_IMPLEMENTED();
+    auto config = _mainController->getSimulationConfig();
+    if (!config) {
+        return;
     }
 
-    auto timestepString = StringHelper::generateFormattedIntString(_mainController->getTimestep(), true);
-    auto tpsString = StringHelper::generateFormattedIntString(_tps, true);
+    auto renderModeValueString = [&] {
+        if (Rendering::Pixel == _rendering) {
+            return QString("pixel");
+        } else if (Rendering::Vector == _rendering) {
+            return QString("vector");
+        }
+        return QString("item");
+    }();
+    auto worldSizeValueString = QString("%1 x %2").arg(
+        StringHelper::generateFormattedIntString(config->universeSize.x, true),
+        StringHelper::generateFormattedIntString(config->universeSize.y, true));
+    auto zoomLevelValueString = QString("%1x").arg(_zoomFactor);
+    auto timestepValueString = StringHelper::generateFormattedIntString(_mainController->getTimestep(), true);
+    auto tpsValueString = StringHelper::generateFormattedIntString(_tps, true);
 
-    QString colorTextStart = "<font color = " + Const::CellEditTextColor1.name() + ">";
-    QString colorDataStart = "<font color = " + Const::CellEditDataColor1.name() + ">";
-    QString colorEnd = "</font>";
+    auto renderModeColorString = [&] {
+        if (Rendering::Pixel == _rendering) {
+            return QString("<font color = #FFB080>");
+        } else if (Rendering::Vector == _rendering) {
+            return QString("<font color = #B0FF80>");
+        }
+        return QString("<font color = #80B0FF>");
+    }();
+    auto colorTextStart = QString("<font color = %1>").arg(Const::CellEditTextColor1.name());
+    auto colorDataStart = QString("<font color = %1>").arg(Const::CellEditDataColor1.name());
+    auto colorEnd = QString("</font>");
 
-	QString renderingString = colorTextStart + "Render style: " +  colorEnd + renderModeColorString + "<b>" + renderModeString + "</b>" + colorEnd;
+    QString renderingString = colorTextStart + "Render style: " + colorEnd + renderModeColorString + "<b>"
+        + renderModeValueString + "</b>" + colorEnd;
+    QString worldSizeString = colorTextStart + "World size: &nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
+        + worldSizeValueString + "</b>" + colorEnd;
+    QString zoomLevelString = colorTextStart + "Zoom level: &nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
+        + zoomLevelValueString + "</b>" + colorEnd;
+    QString timestepString = colorTextStart + "Time step: &nbsp;&nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
+        + timestepValueString + "</b>" + colorEnd;
+    QString tpsString = colorTextStart + "Time steps/s: " + colorEnd + colorDataStart + "<b>"
+        + tpsValueString + "</b>" + colorEnd;
 
     auto separator = QString("<br/>");  
-    auto infoString = renderingString + separator + colorTextStart + "Zoom level: &nbsp;&nbsp;" + colorEnd + colorDataStart
-        + QString("%1x").arg(_zoomFactor) + colorEnd + separator + colorTextStart + "Time step: " + colorEnd
-        + colorDataStart + "&nbsp;&nbsp;&nbsp;" + timestepString + colorEnd + separator + colorTextStart + "TPS: " + colorEnd
-        + colorDataStart + QString("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") + tpsString + colorEnd;
+    auto infoString = renderingString + separator + worldSizeString + separator + zoomLevelString + separator
+        + timestepString + separator + tpsString;
 	_infoLabel->setText(infoString);
 }

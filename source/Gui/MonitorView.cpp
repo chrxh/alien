@@ -52,15 +52,15 @@ QString MonitorView::generateString() const
 	QString text;
 
 	//generate formatted string
-	text += parStart + colorTextStart + "clusters:" + StringHelper::ws(12) + colorEnd;
+	text += parStart + colorTextStart + "Clusters:" + StringHelper::ws(12) + colorEnd;
 	text += " " + StringHelper::generateFormattedIntString(_model->numClusters, true)+ " " + parEnd;
-	text += parStart + colorTextStart + "cells:" + StringHelper::ws(15) + colorEnd;
+	text += parStart + colorTextStart + "Cells:" + StringHelper::ws(15) + colorEnd;
 	text += " " + StringHelper::generateFormattedIntString(_model->numCells, true) + " " + parEnd;
-	text += parStart + colorTextStart + "particles:" + StringHelper::ws(11) + colorEnd;
+	text += parStart + colorTextStart + "Particles:" + StringHelper::ws(11) + colorEnd;
 	text += " " + StringHelper::generateFormattedIntString(_model->numParticles, true) + " " + parEnd;
-	text += parStart + colorTextStart + "tokens:" + StringHelper::ws(14) + colorEnd;
+	text += parStart + colorTextStart + "Tokens:" + StringHelper::ws(14) + colorEnd;
     text += " " + StringHelper::generateFormattedIntString(_model->numTokens, true) + " " + parEnd;
-    text += parStart + colorTextStart + "active clusters:" + StringHelper::ws(5) + colorEnd;
+    text += parStart + colorTextStart + "Active clusters:" + StringHelper::ws(5) + colorEnd;
     text += " " + StringHelper::generateFormattedIntString(_model->numClustersWithTokens, true) + " " + parEnd;
 	return text;
 }
