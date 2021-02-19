@@ -20,8 +20,16 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 {
     if (result) {
         std::stringstream stream;
-        stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result)
-            << "(" << _cudaGetErrorEnum(result) << ") \"" << func << "\"";
+        stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("
+               << _cudaGetErrorEnum(result) << ") \"" << func << "\"" << std::endl
+               << std::endl
+               << "One of the following reasons may be responsible:" << std::endl
+               << "- the number of thread blocks may be too high (see 'General settings')" << std::endl
+               << "- the array sizes for the entities may be too low (see 'General settings')" << std::endl
+               << "- your graphics card has not enough memory" << std::endl
+               << std::endl
+               << "Please restart the program and try to adjust the setting. If the problem cannot be solved, please "
+                  "send the 'log.txt' file to info@alien-project.org.";
         DEVICE_RESET
         throw std::exception(stream.str().c_str());
     }

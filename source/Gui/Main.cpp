@@ -43,13 +43,10 @@ int main(int argc, char *argv[])
     catch(std::exception const& e) {
 
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-
-        std::stringstream stream;
-        stream << "Error: " << e.what();
-        loggingService->logMessage(Priority::Important, stream.str());
+        loggingService->logMessage(Priority::Important, e.what());
 
         QMessageBox messageBox;
-        messageBox.critical(0, "CUDA error", QString(Const::ErrorCuda).arg(e.what()));
+        messageBox.critical(0, "Critical error", QString::fromStdString(e.what()));
         exit(EXIT_FAILURE);
     }
 }
