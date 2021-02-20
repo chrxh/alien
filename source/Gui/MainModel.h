@@ -16,7 +16,7 @@ public:
     ExecutionParameters getExecutionParameters() const;
     void setExecutionParameters(ExecutionParameters const& parameters);
 
-	SymbolTable* getSymbolTable() const;
+	SymbolTable* getSymbolMap() const;
 	void setSymbolTable(SymbolTable* symbols);
 
 private:

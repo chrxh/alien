@@ -65,9 +65,6 @@ void SimulationChangerImpl::activate(SimulationParameters const & currentParamet
     _measurementsSinceBeginning = 0;
     _measurementsOfCurrentEpoch = 0;
     _measurementsOfCurrentRetreat = 0;
-
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "parameter changer activated");
 }
 
 void SimulationChangerImpl::deactivate()
@@ -77,9 +74,6 @@ void SimulationChangerImpl::deactivate()
     }
 
     _state = State::Deactivated;
-
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "parameter changer deactivated");
 }
 
 SimulationParameters const & SimulationChangerImpl::retrieveSimulationParameters()
