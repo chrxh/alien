@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>372</width>
-    <height>314</height>
+    <height>326</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,6 +63,9 @@
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
          <string>CUDA parameters</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="0" column="0">
@@ -220,6 +223,9 @@
         </property>
         <property name="title">
          <string>world size</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="0">

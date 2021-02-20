@@ -164,10 +164,14 @@ void ActionController::onRunClicked(bool toggled)
 {
 	auto actions = _model->getActionHolder();
 	if (toggled) {
-		actions->actionRunStepForward->setEnabled(false);
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, "running simulation");
+        actions->actionRunStepForward->setEnabled(false);
 	}
 	else {
-		actions->actionRunStepForward->setEnabled(true);
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, "stopping simulation");
+        actions->actionRunStepForward->setEnabled(true);
 	}
 	actions->actionRunStepBackward->setEnabled(false);
 
@@ -176,13 +180,19 @@ void ActionController::onRunClicked(bool toggled)
 
 void ActionController::onStepForward()
 {
-	_mainController->onStepForward();
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "moving one time step forward");
+
+    _mainController->onStepForward();
 	_model->getActionHolder()->actionRunStepBackward->setEnabled(true);
 }
 
 void ActionController::onStepBackward()
 {
-	bool emptyStack = false;
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "moving one time step backward");
+
+    bool emptyStack = false;
 	_mainController->onStepBackward(emptyStack);
 	if (emptyStack) {
 		_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
@@ -192,31 +202,45 @@ void ActionController::onStepBackward()
 
 void ActionController::onMakeSnapshot()
 {
-	_mainController->onMakeSnapshot();
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "making snapshot");
+
+    _mainController->onMakeSnapshot();
 	_model->getActionHolder()->actionRestore->setEnabled(true);
 }
 
 void ActionController::onRestoreSnapshot()
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "loading snapshot");
+
 	_mainController->onRestoreSnapshot();
 	_simulationViewWidget->refresh();
 }
 
 void ActionController::onAcceleration(bool toggled)
 {
-    auto parameters = _mainModel->getExecutionParameters();
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+	auto parameters = _mainModel->getExecutionParameters();
     parameters.activateFreezing = toggled;
     if (toggled) {
         bool ok;
         auto const accelerationTimesteps = QInputDialog::getInt(
-            _mainView, "Acceleration", "Enter the number of frames of acceleration", parameters.freezingTimesteps, 1, 100, 1, &ok);
+            _mainView, "Acceleration active clusters", "Enter the number of time steps of acceleration", parameters.freezingTimesteps, 1, 100, 1, &ok);
         if (!ok) {
             auto const actionHolder = _model->getActionHolder();
             actionHolder->actionAcceleration->setChecked(false);
             return;
         }
         parameters.freezingTimesteps = accelerationTimesteps;
-    }
+
+        std::stringstream stream;
+		stream << "accelerating active clusters by " << accelerationTimesteps << " time steps";
+        loggingService->logMessage(Priority::Important, stream.str());
+    } else {
+        loggingService->logMessage(Priority::Important, "accelerating active clusters deactivated");
+	}
     _mainModel->setExecutionParameters(parameters);
     _mainController->onUpdateExecutionParameters(parameters);
 }
@@ -264,6 +288,12 @@ void ActionController::onZoomOutClicked()
 
 void ActionController::onToggleDisplayLink(bool toggled)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (toggled) {
+        loggingService->logMessage(Priority::Important, "activating display link");
+    } else {
+        loggingService->logMessage(Priority::Important, "deactivating display link");
+    }
     _mainController->onDisplayLink(toggled);
 }
 
@@ -281,10 +311,16 @@ void ActionController::onToggleFullscreen(bool toogled)
 	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, toogled);
 }
 
-void ActionController::onToggleGlowEffect(bool toogled)
+void ActionController::onToggleGlowEffect(bool toggled)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (toggled) {
+        loggingService->logMessage(Priority::Important, "activating glow effect");
+    } else {
+        loggingService->logMessage(Priority::Important, "deactivating glow effect");
+    }
     auto parameters = _mainModel->getExecutionParameters();
-    parameters.imageGlow = toogled;
+    parameters.imageGlow = toggled;
     _mainModel->setExecutionParameters(parameters);
     _mainController->onUpdateExecutionParameters(parameters);
     _mainView->refresh();

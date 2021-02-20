@@ -1,7 +1,7 @@
 #include "WebBuilderFacadeImpl.h"
 #include "WebAccessImpl.h"
 
-WebAccess * WebBuilderFacadeImpl::buildWebController() const
+WebAccess * WebBuilderFacadeImpl::buildWebAccess() const
 {
     return new WebAccessImpl();
 }

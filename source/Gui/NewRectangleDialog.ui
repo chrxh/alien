@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>250</height>
+    <height>258</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -30,6 +30,9 @@
      </property>
      <property name="title">
       <string>dimensions</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_2" columnminimumwidth="200,0">
       <item row="0" column="0">
@@ -90,6 +93,9 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>cell properties</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
