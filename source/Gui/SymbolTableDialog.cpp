@@ -20,14 +20,11 @@ SymbolTableDialog::SymbolTableDialog(SymbolTable const* symbolTable, Serializer*
 	, _serializer(serializer)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
 
     //create headers
     ui->tableWidget->horizontalHeader()->resizeSection(0, 400);
-    ui->tableWidget->horizontalHeaderItem(0)->setFont(GuiSettings::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft);
     ui->tableWidget->horizontalHeader()->resizeSection(1, 100);
-    ui->tableWidget->horizontalHeaderItem(1)->setFont(GuiSettings::getGlobalFont());
     ui->tableWidget->horizontalHeaderItem(1)->setTextAlignment(Qt::AlignLeft);
 
     updateWidgetsFromSymbolTable();

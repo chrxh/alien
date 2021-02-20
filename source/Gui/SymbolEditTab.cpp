@@ -12,6 +12,7 @@ SymbolEditTab::SymbolEditTab(QWidget *parent)
 	: QWidget(parent), ui(new Ui::SymbolEditTab)
 {
     ui->setupUi(this);
+    ui->tableWidget->setFont(GuiSettings::getGlobalFont());
 
     setStyleSheet("background-color: #000000");
     ui->tableWidget->setStyleSheet(Const::TableStyleSheet);

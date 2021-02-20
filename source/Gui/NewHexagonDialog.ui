@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>add hexagon structure</string>
+   <string>Add hexagon structure</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">

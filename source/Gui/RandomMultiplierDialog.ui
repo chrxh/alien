@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>random multiplier</string>
+   <string>Random multiplier</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">

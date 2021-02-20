@@ -12,6 +12,7 @@
 TokenEditWidget::TokenEditWidget(QWidget *parent)
     : QTextEdit(parent)
 {
+    setFont(GuiSettings::getGlobalFont());
     QTextEdit::setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextEditable);
 }
 

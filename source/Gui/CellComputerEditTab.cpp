@@ -16,6 +16,8 @@ CellComputerEditTab::CellComputerEditTab(QWidget *parent) :
     _timer(new QTimer(this))
 {
     ui->setupUi(this);
+    ui->memoryEditWidget->setFont(GuiSettings::getGlobalFont());
+    ui->codeEditWidget->setFont(GuiSettings::getGlobalFont());
 
     //set colors
     ui->compileButton->setStyleSheet(Const::ButtonStyleSheet);

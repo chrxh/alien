@@ -9,7 +9,6 @@ ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& con
 	: QDialog(parent), _config(config)
 {
 	ui.setupUi(this);
-	setFont(GuiSettings::getGlobalFont());
 
     ui.computationSettingsWidget->setUniverseSize(config->universeSize);
     ui.computationSettingsWidget->setCudaConstants(config->cudaConstants);
