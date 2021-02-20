@@ -97,3 +97,4 @@ class GettingStartedWindow;
 class LoggingView;
 class LoggingController;
 class GuiLogger;
+class BugReportView;

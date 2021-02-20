@@ -107,6 +107,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <QtRcc Include="..\..\..\source\Gui\Resources/resources.qrc" />
+    <QtUic Include="..\..\..\source\Gui\BugReportDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\CellComputerEditTab.ui" />
     <QtUic Include="..\..\..\source\Gui\ComputationSettingsDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\ComputationSettingsWidget.ui" />
@@ -152,6 +153,9 @@
     <ClCompile Include="..\..\..\source\Gui\ActionController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ActionHolder.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ActionModel.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\BugReportController.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\BugReportView.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\BugReportLogger.cpp" />
     <ClCompile Include="..\..\..\source\Gui\CellComputerEditTab.cpp" />
     <ClCompile Include="..\..\..\source\Gui\CellConnectionItem.cpp" />
     <ClCompile Include="..\..\..\source\Gui\CellEditTab.cpp" />
@@ -235,6 +239,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\AbstractItem.h" />
+    <QtMoc Include="..\..\..\source\Gui\BugReportView.h" />
+    <QtMoc Include="..\..\..\source\Gui\BugReportController.h" />
+    <ClInclude Include="..\..\..\source\Gui\BugReportLogger.h" />
     <ClInclude Include="..\..\..\source\Gui\CellConnectionItem.h" />
     <ClInclude Include="..\..\..\source\Gui\CellItem.h" />
     <ClInclude Include="..\..\..\source\Gui\CoordinateSystem.h" />

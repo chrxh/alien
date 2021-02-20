@@ -72,8 +72,6 @@ namespace
         ~CudaInitializer()
         {
             cudaDeviceReset();
-            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-            loggingService->logMessage(Priority::Important, "reset CUDA device");
         }
     };
 }

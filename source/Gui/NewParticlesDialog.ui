@@ -40,6 +40,9 @@
      <property name="title">
       <string>energy values</string>
      </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
      <layout class="QGridLayout" name="gridLayout_2" columnminimumwidth="200,0">
       <item row="0" column="0">
        <widget class="QLabel" name="label">
