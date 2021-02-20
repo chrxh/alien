@@ -121,7 +121,7 @@ void MainController::init()
     SET_CHILD(_worker, worker);
 
     auto webFacade = ServiceLocator::getInstance().getService<WebBuilderFacade>();
-    auto webAccess = webFacade->buildWebController();
+    auto webAccess = webFacade->buildWebAccess();
     SET_CHILD(_webAccess, webAccess);
 
     auto webSimController = new WebSimulationController(webAccess, _view);

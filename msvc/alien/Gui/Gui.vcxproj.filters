@@ -49,6 +49,9 @@
     <Filter Include="Impl\Infobar">
       <UniqueIdentifier>{517e4671-661c-4337-98a9-56fd7582d989}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Impl\BugReporting">
+      <UniqueIdentifier>{786a9adc-2543-4d64-983d-bcd71f8b91b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Gui.ui">
@@ -116,6 +119,9 @@
     </QtUic>
     <QtUic Include="..\..\..\source\Gui\LoggingView.ui">
       <Filter>Impl\Infobar</Filter>
+    </QtUic>
+    <QtUic Include="..\..\..\source\Gui\BugReportDialog.ui">
+      <Filter>Impl\BugReporting</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
@@ -356,6 +362,15 @@
     <ClCompile Include="..\..\..\source\Gui\GeneralInfoController.cpp">
       <Filter>Impl\Infobar</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\BugReportLogger.cpp">
+      <Filter>Impl\BugReporting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\BugReportView.cpp">
+      <Filter>Impl\BugReporting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\BugReportController.cpp">
+      <Filter>Impl\BugReporting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -411,6 +426,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\FileLogger.h">
       <Filter>Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Gui\BugReportLogger.h">
+      <Filter>Impl\BugReporting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -611,6 +629,12 @@
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\GeneralInfoController.h">
       <Filter>Impl\Infobar</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\BugReportView.h">
+      <Filter>Impl\BugReporting</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\BugReportController.h">
+      <Filter>Impl\BugReporting</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

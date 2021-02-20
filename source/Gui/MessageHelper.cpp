@@ -7,7 +7,8 @@
 QWidget * MessageHelper::createProgressDialog(std::string message, QWidget * parent)
 {
     auto const progress = new QProgressDialog(QString::fromStdString(message), QString(), 0, 0, parent);
-    progress->setModal(false);
+    progress->setWindowFlags(progress->windowFlags() & ~Qt::WindowCloseButtonHint);
+    progress->setModal(true);
     progress->show();
 
     QCoreApplication::processEvents(QEventLoop::AllEvents);

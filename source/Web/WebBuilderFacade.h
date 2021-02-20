@@ -7,6 +7,6 @@ class WebBuilderFacade
 public:
     virtual ~WebBuilderFacade() = default;
 
-    virtual WebAccess* buildWebController() const = 0;
+    virtual WebAccess* buildWebAccess() const = 0;
 };
 

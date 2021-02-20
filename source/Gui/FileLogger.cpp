@@ -1,7 +1,7 @@
 #include "FileLogger.h"
 
-#include "Base/ServiceLocator.h"
 #include "Base/LoggingService.h"
+#include "Base/ServiceLocator.h"
 
 namespace
 {

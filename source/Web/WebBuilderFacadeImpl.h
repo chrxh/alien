@@ -7,6 +7,6 @@ class WebBuilderFacadeImpl : public WebBuilderFacade
 public:
     virtual ~WebBuilderFacadeImpl() = default;
 
-    WebAccess* buildWebController() const override;
+    WebAccess* buildWebAccess() const override;
 };
 

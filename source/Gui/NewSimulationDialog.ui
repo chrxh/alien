@@ -53,7 +53,10 @@
       </size>
      </property>
      <property name="title">
-      <string>simulation settings</string>
+      <string>further settings</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
@@ -83,6 +86,9 @@
      </property>
      <property name="title">
       <string>initial configuration</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="2">
@@ -166,7 +172,7 @@
   <customwidget>
    <class>ComputationSettingsWidget</class>
    <extends>QWidget</extends>
-   <header>computationsettingswidget.h</header>
+   <header>ComputationSettingsWidget.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -17,6 +17,7 @@ public:
     void requestDisconnect(string const& simulationId, string const& token) override;
     void sendStatistics(string const& simulationId, string const& token, map<string, string> monitorData) override;
     void sendLastImage(string const& simulationId, string const& token, QBuffer* data) override;
+    void sendBugReport(string const& protocol, string const& email, string const& userMessage) override;
 
 private:
     Q_SLOT void dataReceived(string handler, QByteArray data);
@@ -28,7 +29,8 @@ private:
         UnprocessedTasks,
         ProcessedTask,
         SendStatistics,
-        LastImage
+        LastImage,
+        SendBugReport
     };
 
     void get(string const& apiMethodName, RequestType requestType);
