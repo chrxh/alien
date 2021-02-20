@@ -266,14 +266,9 @@ void MainView::setupMenuAndToolbar()
 
 void MainView::setupFontsAndColors()
 {
-	setFont(GuiSettings::getGlobalFont());
-	ui->menuSimulation->setFont(GuiSettings::getGlobalFont());
-	ui->menuView->setFont(GuiSettings::getGlobalFont());
-	ui->menuEntity->setFont(GuiSettings::getGlobalFont());
-	ui->menuCollection->setFont(GuiSettings::getGlobalFont());
-	ui->menuSettings->setFont(GuiSettings::getGlobalFont());
-	ui->menuHelp->setFont(GuiSettings::getGlobalFont());
-    ui->menuTools->setFont(GuiSettings::getGlobalFont());
+    ui->generalInfoGroupBox->setFont(GuiSettings::getGlobalFont());
+    ui->monitorGroupBox->setFont(GuiSettings::getGlobalFont());
+    ui->loggingGroupBox->setFont(GuiSettings::getGlobalFont());
 
 	ui->toolBar->setStyleSheet(Const::ToolbarStyleSheet);
     ui->infobar->setStyleSheet(Const::InfobarStyleSheet);

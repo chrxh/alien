@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>symbol map</string>
+   <string>Symbol map</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -39,12 +39,12 @@
      </attribute>
      <column>
       <property name="text">
-       <string>key</string>
+       <string>Symbolname</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>value</string>
+       <string>Value</string>
       </property>
      </column>
     </widget>

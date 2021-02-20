@@ -10,7 +10,6 @@ NewHexagonDialog::NewHexagonDialog(SimulationParameters const& simulationParamet
 	: QDialog(parent), ui(new Ui::NewHexagonDialog)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
 
 	ui->layersEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::NewHexagonLayersKey, Const::NewHexagonLayersDefault)));

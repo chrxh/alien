@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>simulation parameters</string>
+   <string>Simulation parameters</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -58,12 +58,12 @@
      </attribute>
      <column>
       <property name="text">
-       <string>key</string>
+       <string>Property</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>value</string>
+       <string>Value</string>
       </property>
      </column>
      <item>

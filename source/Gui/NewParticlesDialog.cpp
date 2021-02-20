@@ -10,7 +10,6 @@ NewParticlesDialog::NewParticlesDialog(QWidget *parent)
     ui(new Ui::NewParticlesDialog)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
 
 	ui->totalEnergyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::NewParticlesTotalEnergyKey, Const::NewParticlesTotalEnergyDefault)));
