@@ -41,7 +41,7 @@ void BugReportController::execute()
             delete progress;
 
             QMessageBox messageBox;
-            messageBox.critical(0, "Critical error", "The bug report could not be sent.");
+            messageBox.critical(0, "Critical error", "The server does not respond. Your bug report could not be sent.");
             pause.quit();
         });
         _webAccess->connect(_webAccess, &WebAccess::sendBugReportReceived, [&]() {
@@ -49,7 +49,7 @@ void BugReportController::execute()
             delete progress;
 
             QMessageBox messageBox;
-            messageBox.information(0, "Success", "The server does not respond. The bug report was sent successfully.");
+            messageBox.information(0, "Success", "Your bug report was sent successfully.");
             pause.quit();
         });
 
