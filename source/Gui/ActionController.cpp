@@ -110,9 +110,9 @@ void ActionController::init(
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
 
     connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
-	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleMonitor);
+	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleInfobar);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
-	connect(actions->actionEditSymbols, &QAction::triggered, this, &ActionController::onEditSymbolTable);
+	connect(actions->actionEditSymbols, &QAction::triggered, this, &ActionController::onEditSymbolMap);
 
 	connect(actions->actionNewCell, &QAction::triggered, this, &ActionController::onNewCell);
 	connect(actions->actionNewParticle, &QAction::triggered, this, &ActionController::onNewParticle);
@@ -136,7 +136,7 @@ void ActionController::init(
 	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
 	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
 	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
-	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteCollection);
+	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteExtendedSelection);
 	connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
@@ -162,35 +162,38 @@ ActionHolder * ActionController::getActionHolder()
 
 void ActionController::onRunClicked(bool toggled)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
 	auto actions = _model->getActionHolder();
 	if (toggled) {
-        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "running simulation");
+        loggingService->logMessage(Priority::Important, "run simulation");
         actions->actionRunStepForward->setEnabled(false);
 	}
 	else {
-        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "stopping simulation");
+        loggingService->logMessage(Priority::Important, "stop simulation");
         actions->actionRunStepForward->setEnabled(true);
 	}
 	actions->actionRunStepBackward->setEnabled(false);
 
 	_mainController->onRunSimulation(toggled);
+
+    loggingService->logMessage(Priority::Unimportant, "run/stop simulation finished");
 }
 
 void ActionController::onStepForward()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "moving one time step forward");
+    loggingService->logMessage(Priority::Important, "calculate one time step forward");
 
     _mainController->onStepForward();
 	_model->getActionHolder()->actionRunStepBackward->setEnabled(true);
+
+    loggingService->logMessage(Priority::Unimportant, "calculate one time step forward finished");
 }
 
 void ActionController::onStepBackward()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "moving one time step backward");
+    loggingService->logMessage(Priority::Important, "calculate one time step backward");
 
     bool emptyStack = false;
 	_mainController->onStepBackward(emptyStack);
@@ -198,24 +201,30 @@ void ActionController::onStepBackward()
 		_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
 	}
 	_simulationViewWidget->refresh();
+
+    loggingService->logMessage(Priority::Unimportant, "calculate one time step backward finished");
 }
 
 void ActionController::onMakeSnapshot()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "making snapshot");
+    loggingService->logMessage(Priority::Important, "make snapshot");
 
     _mainController->onMakeSnapshot();
 	_model->getActionHolder()->actionRestore->setEnabled(true);
+
+    loggingService->logMessage(Priority::Unimportant, "make snapshot finished");
 }
 
 void ActionController::onRestoreSnapshot()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "loading snapshot");
+    loggingService->logMessage(Priority::Important, "load snapshot");
 
 	_mainController->onRestoreSnapshot();
 	_simulationViewWidget->refresh();
+
+	loggingService->logMessage(Priority::Unimportant, "load snapshot finished");
 }
 
 void ActionController::onAcceleration(bool toggled)
@@ -236,24 +245,39 @@ void ActionController::onAcceleration(bool toggled)
         parameters.freezingTimesteps = accelerationTimesteps;
 
         std::stringstream stream;
-		stream << "accelerating active clusters by " << accelerationTimesteps << " time steps";
+		stream << "activate accelerating active clusters by " << accelerationTimesteps << " time steps";
         loggingService->logMessage(Priority::Important, stream.str());
     } else {
-        loggingService->logMessage(Priority::Important, "accelerating active clusters deactivated");
+        loggingService->logMessage(Priority::Important, "deactivate accelerating active clusters");
 	}
     _mainModel->setExecutionParameters(parameters);
     _mainController->onUpdateExecutionParameters(parameters);
+
+	loggingService->logMessage(Priority::Unimportant, "toggle accelerating active clusters finished");	
 }
 
 void ActionController::onSimulationChanger(bool toggled)
 {
+	auto loggingService = ServiceLocator::getInstance().getService < LoggingService>();
+    if (toggled) {
+        loggingService->logMessage(Priority::Important, "activate parameter changer");
+    } else {
+        loggingService->logMessage(Priority::Important, "deactivate parameter changer");
+    }
     _mainController->onSimulationChanger(toggled);
+
+    loggingService->logMessage(Priority::Unimportant, "toggle parameter changer finished");
 }
 
 void ActionController::onZoomInClicked()
 {
-    auto zoomFactor = _simulationViewWidget->getZoomFactor();
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Unimportant, "zoom in");
+ 
+	auto zoomFactor = _simulationViewWidget->getZoomFactor();
 	_simulationViewWidget->setZoomFactor(zoomFactor * 2);
+
+	loggingService->logMessage(Priority::Unimportant, "zoom in finished");
 
     if(!_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
@@ -269,8 +293,13 @@ void ActionController::onZoomInClicked()
 
 void ActionController::onZoomOutClicked()
 {
-    auto zoomFactor = _simulationViewWidget->getZoomFactor();
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Unimportant, "zoom out");
+
+	auto zoomFactor = _simulationViewWidget->getZoomFactor();
     _simulationViewWidget->setZoomFactor(zoomFactor / 2);
+
+	loggingService->logMessage(Priority::Unimportant, "zoom out finished");
 
     if (_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
@@ -295,72 +324,102 @@ void ActionController::onToggleDisplayLink(bool toggled)
         loggingService->logMessage(Priority::Important, "deactivating display link");
     }
     _mainController->onDisplayLink(toggled);
+
+	loggingService->logMessage(Priority::Unimportant, "toggle display link finished");
 }
 
 void ActionController::onToggleFullscreen(bool toogled)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
 	Qt::WindowStates state = _mainView->windowState();
 	if (toogled) {
 		state |= Qt::WindowFullScreen;
-	}
+        loggingService->logMessage(Priority::Unimportant, "activate full screen");
+    }
 	else {
 		state &= ~Qt::WindowFullScreen;
-	}
+        loggingService->logMessage(Priority::Unimportant, "deactivate full screen");
+    }
 	_mainView->setWindowState(state);
 
 	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, toogled);
+
+    loggingService->logMessage(Priority::Unimportant, "toggle full screen finished");
 }
 
 void ActionController::onToggleGlowEffect(bool toggled)
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     if (toggled) {
-        loggingService->logMessage(Priority::Important, "activating glow effect");
+        loggingService->logMessage(Priority::Important, "activate glow effect");
     } else {
-        loggingService->logMessage(Priority::Important, "deactivating glow effect");
+        loggingService->logMessage(Priority::Important, "deactivate glow effect");
     }
+
     auto parameters = _mainModel->getExecutionParameters();
     parameters.imageGlow = toggled;
     _mainModel->setExecutionParameters(parameters);
     _mainController->onUpdateExecutionParameters(parameters);
     _mainView->refresh();
+
+    loggingService->logMessage(Priority::Unimportant, "toggle glow effect finished");
 }
 
 void ActionController::onToggleEditorMode(bool toggled)
 {
-    _model->setEditMode(toggled);
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+	_model->setEditMode(toggled);
     if (toggled) {
-        _infoController->setRendering(GeneralInfoController::Rendering::Item);
+        loggingService->logMessage(Priority::Unimportant, "activate editor mode");
+
+		_infoController->setRendering(GeneralInfoController::Rendering::Item);
         _simulationViewWidget->disconnectView();
         _simulationViewWidget->setActiveScene(ActiveView::ItemScene);
         _simulationViewWidget->connectView();
     }
 	else {
-        setPixelOrVectorView();
+        loggingService->logMessage(Priority::Unimportant, "deactivate editor mode");
+
+		setPixelOrVectorView();
 	}
     _simulationViewWidget->refresh();
     updateActionsEnableState();
 
 	Q_EMIT _toolbar->getContext()->show(toggled);
 	Q_EMIT _dataEditor->getContext()->show(toggled);
+
+    loggingService->logMessage(Priority::Unimportant, "toggle editor mode finished");
 }
 
-void ActionController::onToggleMonitor(bool toggled)
+void ActionController::onToggleInfobar(bool toggled)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (toggled) {
+        loggingService->logMessage(Priority::Unimportant, "activate infobar");
+    } else {
+        loggingService->logMessage(Priority::Unimportant, "deactivate infobar");
+    }
+
     _mainView->toggleInfobar(toggled);
+
+    loggingService->logMessage(Priority::Unimportant, "toggle infobar finished");
 }
 
 void ActionController::onNewSimulation()
 {
-	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolTable(), _serializer, _mainView);
+	NewSimulationDialog dialog(_mainModel->getSimulationParameters(), _mainModel->getSymbolMap(), _serializer, _mainView);
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "creating new simulation");
+        loggingService->logMessage(Priority::Important, "create simulation");
 
 		_mainController->onNewSimulation(*dialog.getConfig(), *dialog.getEnergy());
 
 		settingUpNewSimulation(_mainController->getSimulationConfig());
-	}
+
+		loggingService->logMessage(Priority::Unimportant, "create simulation finished");
+    }
 }
 
 void ActionController::onWebSimulation(bool toogled)
@@ -388,11 +447,13 @@ void ActionController::onSaveSimulation()
 
         std::stringstream stream;
         QFileInfo info(filename);
-        stream << "saving simulation '" << info.fileName().toStdString() << "'";
+        stream << "save simulation '" << info.fileName().toStdString() << "'";
         loggingService->logMessage(Priority::Important, stream.str());
 
 		_mainController->onSaveSimulation(filename.toStdString());
-	}
+
+		loggingService->logMessage(Priority::Unimportant, "save simulation finished");
+    }
 }
 
 void ActionController::onLoadSimulation()
@@ -403,14 +464,16 @@ void ActionController::onLoadSimulation()
 
         std::stringstream stream;
         QFileInfo info(filename);
-        stream << "loading simulation '" << info.fileName().toStdString() << "'";
+        stream << "load simulation '" << info.fileName().toStdString() << "'";
         loggingService->logMessage(Priority::Important, stream.str());
 
 		if (_mainController->onLoadSimulation(filename.toStdString(), MainController::LoadOption::SaveOldSim)) {
 			settingUpNewSimulation(_mainController->getSimulationConfig());
-		}
+
+			loggingService->logMessage(Priority::Unimportant, "load simulation finished");
+        }
 		else {
-            loggingService->logMessage(Priority::Important, "simulation could not be loaded");
+            loggingService->logMessage(Priority::Important, "load simulation failed");
 
 			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadSimulation);
 			msgBox.exec();
@@ -424,7 +487,7 @@ void ActionController::onConfigureGrid()
     if (dialog.exec()) {
 
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "changing general settings");
+        loggingService->logMessage(Priority::Important, "change general settings");
 
         auto config = _mainController->getSimulationConfig();
         config->universeSize = *dialog.getUniverseSize();
@@ -433,7 +496,9 @@ void ActionController::onConfigureGrid()
         auto const extrapolateContent = *dialog.isExtrapolateContent();
         _mainController->onRecreateUniverse(config, extrapolateContent);
         settingUpNewSimulation(config);
-	}
+
+		loggingService->logMessage(Priority::Unimportant, "change general settings finished");
+    }
 }
 
 void ActionController::onEditSimulationParameters()
@@ -442,28 +507,35 @@ void ActionController::onEditSimulationParameters()
     SimulationParametersDialog dialog(config->parameters, _serializer, _mainView);
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "changing simulation parameters");
+        loggingService->logMessage(Priority::Important, "change simulation parameters");
 
 		auto const parameters = dialog.getSimulationParameters();
 		_mainModel->setSimulationParameters(parameters);
 		_mainController->onUpdateSimulationParameters(parameters);
-	}
+
+		loggingService->logMessage(Priority::Unimportant, "change simulation parameters finished");
+    }
 }
 
-void ActionController::onEditSymbolTable()
+void ActionController::onEditSymbolMap()
 {
-	auto origSymbols = _mainModel->getSymbolTable();
+	auto origSymbols = _mainModel->getSymbolMap();
 	SymbolTableDialog dialog(origSymbols->clone(), _serializer, _mainView);
 	if (dialog.exec()) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, "change symbol map");
+
 		origSymbols->getSymbolsFrom(dialog.getSymbolTable());
 		Q_EMIT _dataEditor->getContext()->refresh();
-	}
+
+        loggingService->logMessage(Priority::Unimportant, "change symbol map finished");
+    }
 }
 
 void ActionController::onNewCell()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "adding cell");
+    loggingService->logMessage(Priority::Important, "add cell");
 
 	_repository->addAndSelectCell(_model->getPositionDeltaForNewEntity());
 	_repository->reconnectSelectedCells();
@@ -473,12 +545,14 @@ void ActionController::onNewCell()
 		Receiver::VisualEditor,
 		Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "add cell finished");
 }
 
 void ActionController::onNewParticle()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "adding particle");
+    loggingService->logMessage(Priority::Important, "add particle");
 
 	_repository->addAndSelectParticle(_model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
@@ -487,10 +561,15 @@ void ActionController::onNewParticle()
 		Receiver::VisualEditor,
 		Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "add particle finished");
 }
 
 void ActionController::onCopyEntity()
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "copy entity");
+
 	auto const& selectedCellIds = _repository->getSelectedCellIds();
 	auto const& selectedParticleIds = _repository->getSelectedParticleIds();
 	if (!selectedCellIds.empty()) {
@@ -506,6 +585,8 @@ void ActionController::onCopyEntity()
 		_model->setParticleCopied(particle);
 	}
 	updateActionsEnableState();
+
+    loggingService->logMessage(Priority::Unimportant, "copy entity finished");
 }
 
 void ActionController::onLoadCollection()
@@ -516,7 +597,7 @@ void ActionController::onLoadCollection()
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         std::stringstream stream;
         QFileInfo info(filename);
-        stream << "loading collection '" << info.fileName().toStdString() << "'";
+        stream << "load collection '" << info.fileName().toStdString() << "'";
         loggingService->logMessage(Priority::Important, stream.str());
 
 		DataDescription desc;
@@ -528,11 +609,15 @@ void ActionController::onLoadCollection()
 				Receiver::VisualEditor,
 				Receiver::ActionController
 			}, UpdateDescription::All);
-		}
+
+			loggingService->logMessage(Priority::Unimportant, "load collection finished");
+        }
 		else {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorLoadCollection);
 			msgBox.exec();
-		}
+
+			loggingService->logMessage(Priority::Important, "load collection failed");
+        }
 	}
 }
 
@@ -544,56 +629,71 @@ void ActionController::onSaveCollection()
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         std::stringstream stream;
         QFileInfo info(filename);
-        stream << "saving collection '" << info.fileName().toStdString() << "'";
+        stream << "save collection '" << info.fileName().toStdString() << "'";
         loggingService->logMessage(Priority::Important, stream.str());
 
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeDataDescription(_repository->getExtendedSelection()); })) {
 			QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorSaveCollection);
 			msgBox.exec();
-			return;
-		}
+
+			loggingService->logMessage(Priority::Important, "save collection failed");
+            return;
+        } else {
+            loggingService->logMessage(Priority::Unimportant, "save collection finished");
+        }
 	}
 }
 
 void ActionController::onCopyCollection()
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "copy collection");
+
 	DataDescription copiedData = _repository->getExtendedSelection();
 	_model->setCopiedCollection(copiedData);
 	updateActionsEnableState();
+
+    loggingService->logMessage(Priority::Unimportant, "copy collection finished");
 }
 
 void ActionController::onPasteCollection()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "pasting collection");
+    loggingService->logMessage(Priority::Important, "paste collection");
 
 	DataDescription copiedData = _model->getCopiedCollection();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "paste collection finished");
 }
 
 void ActionController::onDeleteSelection()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "deleting selection");
+    loggingService->logMessage(Priority::Important, "delete selection");
 
 	_repository->deleteSelection();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "delete selection finished");
 }
 
-void ActionController::onDeleteCollection()
+void ActionController::onDeleteExtendedSelection()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "deleting extended selection");
+    loggingService->logMessage(Priority::Important, "delete extended selection");
 
 	_repository->deleteExtendedSelection();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "delete extended selection finished");
 }
 
 namespace
@@ -640,7 +740,7 @@ void ActionController::onRandomMultiplier()
 	if (dialog.exec()) {
 
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "executing random multiplier");
+        loggingService->logMessage(Priority::Important, "execute random multiplier");
 
 		DataDescription data = _repository->getExtendedSelection();
 		IntVector2D universeSize = _mainController->getSimulationConfig()->universeSize;
@@ -674,7 +774,9 @@ void ActionController::onRandomMultiplier()
 			Receiver::VisualEditor,
 			Receiver::ActionController
 		}, UpdateDescription::All);
-	}
+
+	    loggingService->logMessage(Priority::Unimportant, "execute random multiplier finished");
+    }
 }
 
 void ActionController::onGridMultiplier()
@@ -684,7 +786,7 @@ void ActionController::onGridMultiplier()
 	GridMultiplierDialog dialog(center);
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "executing grid multiplier");
+        loggingService->logMessage(Priority::Important, "execute grid multiplier");
 
 		QVector2D initialDelta(dialog.getInitialPosX(), dialog.getInitialPosY());
 		initialDelta -= center;
@@ -726,15 +828,19 @@ void ActionController::onGridMultiplier()
 			Receiver::VisualEditor,
 			Receiver::ActionController
 		}, UpdateDescription::All);
-	}
+
+		loggingService->logMessage(Priority::Unimportant, "execute grid multiplier finished");
+    }
 }
 
 void ActionController::onMostFrequentCluster()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "finding most frequent active cluster");
+    loggingService->logMessage(Priority::Important, "find most frequent active cluster");
 
     _mainController->onAddMostFrequentClusterToSimulation();
+
+	loggingService->logMessage(Priority::Unimportant, "find most frequent active cluster finished");
 }
 
 void ActionController::onDeleteEntity()
@@ -745,28 +851,35 @@ void ActionController::onDeleteEntity()
 void ActionController::onPasteEntity()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "pasting entity");
+    loggingService->logMessage(Priority::Important, "paste entity");
 
 	DataDescription copiedData = _model->getCopiedEntity();
 	_repository->addAndSelectData(copiedData, _model->getPositionDeltaForNewEntity());
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor,Receiver::ActionController
 	}, UpdateDescription::All);
+
+	loggingService->logMessage(Priority::Unimportant, "paste entity finished");
 }
 
 void ActionController::onNewToken()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "creating token");
+    loggingService->logMessage(Priority::Important, "create token");
 
 	_repository->addToken();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
+
+	loggingService->logMessage(Priority::Unimportant, "create token finished");
 }
 
 void ActionController::onCopyToken()
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "copy token");
+
 	auto cellIds = _repository->getSelectedCellIds();
 	CHECK(cellIds.size() == 1);
 	auto tokenIndex = _repository->getSelectedTokenIndex();
@@ -776,45 +889,72 @@ void ActionController::onCopyToken()
 
 	_model->setCopiedToken(token);
 	updateActionsEnableState();
+
+    loggingService->logMessage(Priority::Unimportant, "copy token finished");
 }
 
 void ActionController::onPasteToken()
 { 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "pasting token");
+    loggingService->logMessage(Priority::Important, "paste token");
 
 	auto const& token = _model->getCopiedToken();
 	_repository->addToken(token);
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "paste token finished");
 }
 
 void ActionController::onDeleteToken()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "deleting token");
+    loggingService->logMessage(Priority::Important, "delete token");
 
 	_repository->deleteToken();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({
 		Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
 	}, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "delete token finished");
 }
 
 void ActionController::onToggleCellInfo(bool show)
 {
-	Q_EMIT _notifier->toggleCellInfo(show);
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (show) {
+        loggingService->logMessage(Priority::Unimportant, "activate cell info");
+    } else {
+        loggingService->logMessage(Priority::Unimportant, "deactivate cell info");
+    }
+
+    Q_EMIT _notifier->toggleCellInfo(show);
+
+	loggingService->logMessage(Priority::Unimportant, "toggle cell info finished");
 }
 
 void ActionController::onCenterSelection(bool centerSelection)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (centerSelection) {
+        loggingService->logMessage(Priority::Unimportant, "activate centering selection");
+    } else {
+        loggingService->logMessage(Priority::Unimportant, "deactivate centering selection");
+    }
+
 	_simulationViewWidget->toggleCenterSelection(centerSelection);
     _simulationViewWidget->refresh();
+
+    loggingService->logMessage(Priority::Unimportant, "toggle centering selection finished");
 }
 
 void ActionController::onCopyToClipboard()
 {
-    auto const cellIds = _repository->getSelectedCellIds();
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "copy token memory to clipboard");
+
+	auto const cellIds = _repository->getSelectedCellIds();
     CHECK(cellIds.size() == 1);
     auto const tokenIndex = _repository->getSelectedTokenIndex();
     CHECK(tokenIndex);
@@ -830,12 +970,14 @@ void ActionController::onCopyToClipboard()
     
     auto clipboard = QApplication::clipboard();
     clipboard->setText(QString::fromStdString(tokenMemoryInHex.toStdString()));
+
+    loggingService->logMessage(Priority::Unimportant, "copy token memory to clipboard finished");
 }
 
 void ActionController::onPasteFromClipboard()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "pasting token memory from clipboard");
+    loggingService->logMessage(Priority::Important, "paste token memory from clipboard");
 
     auto const cellIds = _repository->getSelectedCellIds();
     CHECK(cellIds.size() == 1);
@@ -854,11 +996,14 @@ void ActionController::onPasteFromClipboard()
     if (tokenMemorySize != tokenMemory.size()) {
         QMessageBox msgBox(QMessageBox::Critical, "Error", Const::ErrorPasteFromClipboard);
         msgBox.exec();
+        loggingService->logMessage(Priority::Important, "paste token memory from clipboard failed");
         return;
     }
     Q_EMIT _notifier->notifyDataRepositoryChanged({
         Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
     }, UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "paste token memory from clipboard finished");
 }
 
 void ActionController::onNewRectangle()
@@ -866,7 +1011,7 @@ void ActionController::onNewRectangle()
 	NewRectangleDialog dialog(_mainModel->getSimulationParameters());
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "creating rectangle");
+        loggingService->logMessage(Priority::Important, "create rectangle");
 
 		IntVector2D size = dialog.getBlockSize();
 		double distance = dialog.getDistance();
@@ -927,7 +1072,9 @@ void ActionController::onNewRectangle()
 			Receiver::VisualEditor,
 			Receiver::ActionController
 		}, UpdateDescription::All);
-	}
+
+	    loggingService->logMessage(Priority::Unimportant, "create rectangle finished");
+    }
 }
 
 namespace
@@ -939,7 +1086,7 @@ void ActionController::onNewHexagon()
 	NewHexagonDialog dialog(_mainModel->getSimulationParameters());
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "creating hexagon");
+        loggingService->logMessage(Priority::Important, "create hexagon");
 
 		int layers = dialog.getLayers();
 		double dist = dialog.getDistance();
@@ -957,7 +1104,9 @@ void ActionController::onNewHexagon()
 			Receiver::VisualEditor,
 			Receiver::ActionController
 		}, UpdateDescription::All);
-	}
+
+	    loggingService->logMessage(Priority::Unimportant, "create hexagon finished");
+    }
 }
 
 void ActionController::onNewParticles()
@@ -965,7 +1114,7 @@ void ActionController::onNewParticles()
 	NewParticlesDialog dialog;
 	if (dialog.exec()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, "creating particles");
+        loggingService->logMessage(Priority::Important, "create particles");
 
 		double totalEnergy = dialog.getTotalEnergy();
 		double maxEnergyPerParticle = dialog.getMaxEnergyPerParticle();
@@ -977,7 +1126,9 @@ void ActionController::onNewParticles()
 			Receiver::VisualEditor,
 			Receiver::ActionController
 		}, UpdateDescription::All);
-	}
+
+	    loggingService->logMessage(Priority::Unimportant, "create particles finished");
+    }
 }
 
 void ActionController::onShowAbout()
@@ -1006,6 +1157,8 @@ void ActionController::onShowDocumentation()
 
 void ActionController::onToggleRestrictTPS(bool toggled)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
 	if (toggled) {
         bool ok;
         auto restrictTPS = QInputDialog::getInt(
@@ -1018,15 +1171,20 @@ void ActionController::onToggleRestrictTPS(bool toggled)
             1,
             &ok);
         if (!ok) {
-            auto const actionHolder = _model->getActionHolder();
+			auto const actionHolder = _model->getActionHolder();
             actionHolder->actionRestrictTPS->setChecked(false);
             return;
         }
-        _mainController->onRestrictTPS(restrictTPS);
+        loggingService->logMessage(Priority::Important, "activate restrict time steps per seconds");
+
+		_mainController->onRestrictTPS(restrictTPS);
 	}
 	else {
+        loggingService->logMessage(Priority::Important, "deactivate restrict time steps per seconds");
         _mainController->onRestrictTPS(boost::none);
 	}
+
+    loggingService->logMessage(Priority::Unimportant, "toggle restrict time steps per seconds finished");
 }
 
 void ActionController::receivedNotifications(set<Receiver> const & targets)
@@ -1118,20 +1276,29 @@ void ActionController::updateActionsEnableState()
 
 void ActionController::setPixelOrVectorView()
 {
+	auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticVectorViewSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         if (ActiveView::VectorScene != _simulationViewWidget->getActiveView()) {
+            loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering");
+
             _infoController->setRendering(GeneralInfoController::Rendering::Vector);
             _simulationViewWidget->disconnectView();
             _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
             _simulationViewWidget->connectView();
+
+		    loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering finished");
         }
     }
     else {
         if (ActiveView::PixelScene != _simulationViewWidget->getActiveView()) {
-            _infoController->setRendering(GeneralInfoController::Rendering::Pixel);
+            loggingService->logMessage(Priority::Unimportant, "toggle to pixel rendering");
+
+			_infoController->setRendering(GeneralInfoController::Rendering::Pixel);
             _simulationViewWidget->disconnectView();
             _simulationViewWidget->setActiveScene(ActiveView::PixelScene);
             _simulationViewWidget->connectView();
+
+			loggingService->logMessage(Priority::Unimportant, "toggle to pixel rendering finished");
         }
     }
 }
