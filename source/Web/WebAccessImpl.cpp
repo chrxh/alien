@@ -21,7 +21,7 @@ namespace
     auto const ApiSendProcessedTask = "sendprocessedtask"s;
     auto const ApiSendStatistics = "sendstatistics"s;
     auto const ApiSendLastImage = "sendlastimage"s;
-    auto const ApiSendBugReport = "sendBugReport"s;
+    auto const ApiSendBugReport = "sendbugreport"s;
 }
 
 WebAccessImpl::WebAccessImpl()
