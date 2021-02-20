@@ -19,7 +19,7 @@ class LoggingService
 public:
     virtual ~LoggingService() = default;
 
-    virtual void logMessage(Priority priority, std::string const& message) const = 0;
+    virtual void logMessage(Priority priority, std::string const& message) = 0;
 
     virtual void registerCallBack(LoggingCallBack* callback) = 0;
 };
