@@ -20,7 +20,6 @@ ComputationSettingsWidget::ComputationSettingsWidget(QWidget* parent)
 {
     ui.setupUi(this);
 
-    setFont(GuiSettings::getGlobalFont());
     ui.gpuUniverseSizeXEdit->setText(StringHelper::toString(
         GuiSettings::getSettingsValue(Const::GpuUniverseSizeXKey, Const::GpuUniverseSizeXDefault)));
     ui.gpuUniverseSizeYEdit->setText(StringHelper::toString(

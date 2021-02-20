@@ -18,7 +18,6 @@ NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters,
 {
 	_symbolTable->setParent(parent);
 	ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
 	
 	ui->energyEdit->setText(StringHelper::toString(
 		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));

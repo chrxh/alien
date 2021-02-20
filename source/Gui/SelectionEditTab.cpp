@@ -5,7 +5,7 @@
 
 SelectionEditTab::SelectionEditTab(QWidget * parent /*= nullptr*/) : QTextEdit(parent)
 {
-	
+    setFont(GuiSettings::getGlobalFont());
 }
 
 void SelectionEditTab::init(DataEditModel * model, DataEditController * controller)

@@ -35,7 +35,6 @@ SimulationParametersDialog::SimulationParametersDialog(SimulationParameters cons
 	, _serializer(serializer)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
     ui->treeWidget->expandAll();
 	ui->treeWidget->setColumnWidth(0, 270);
     ui->treeWidget->setItemDelegateForColumn(0, new NoEditDelegate(this));

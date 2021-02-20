@@ -10,7 +10,6 @@ RandomMultiplierDialog::RandomMultiplierDialog(QWidget *parent) :
     ui(new Ui::RandomMultiplierDialog)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
 
 	ui->randomizeAngleCheckBox->setChecked(
 		GuiSettings::getSettingsValue(Const::RandomMulChangeAngleKey, Const::RandomMulChangeAngleDefault));

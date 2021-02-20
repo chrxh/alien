@@ -19,6 +19,7 @@ TokenEditTab::TokenEditTab(QWidget *parent) :
     _signalMapper3(new QSignalMapper(this))
 {
     ui->setupUi(this);
+    ui->tableWidget->setFont(GuiSettings::getGlobalFont());
 
     //set color
     QPalette p = ui->tokenMemoryLabel->palette();

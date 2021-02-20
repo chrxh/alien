@@ -9,7 +9,6 @@ GridMultiplierDialog::GridMultiplierDialog(QVector2D centerPos, QWidget *parent)
     ui(new Ui::GridMultiplierDialog)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
 
     ui->initialPosXEdit->setText(QString("%1").arg(centerPos.x()));
     ui->initialPosYEdit->setText(QString("%1").arg(centerPos.y()));
