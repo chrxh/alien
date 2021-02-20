@@ -10,7 +10,7 @@ GeneralInfoController::GeneralInfoController(QObject * parent)
 	: QObject(parent)
 	, _oneSecondTimer(new QTimer(this))
 {
-	connect(_oneSecondTimer, &QTimer::timeout, this, &GeneralInfoController::oneSecondTimerTimeout);
+    connect(_oneSecondTimer, &QTimer::timeout, this, &GeneralInfoController::oneSecondTimerTimeout);
 }
 
 void GeneralInfoController::init(QLabel * infoLabel, MainController* mainController)
@@ -20,6 +20,8 @@ void GeneralInfoController::init(QLabel * infoLabel, MainController* mainControl
     _oneSecondTimer->stop();
     _oneSecondTimer->start(1000);
     _rendering = Rendering::Vector;
+
+    _infoLabel->setFont(GuiSettings::getGlobalFont());
 }
 
 void GeneralInfoController::increaseTimestep()

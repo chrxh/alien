@@ -10,7 +10,6 @@ NewRectangleDialog::NewRectangleDialog(SimulationParameters const& simulationPar
 	: QDialog(parent), ui(new Ui::NewRectangleDialog)
 {
     ui->setupUi(this);
-    setFont(GuiSettings::getGlobalFont());
     ui->energyEdit->setText(QString("%1").arg(simulationParameters.cellFunctionConstructorOffspringCellEnergy));
 
 	ui->sizeXEdit->setText(StringHelper::toString(
