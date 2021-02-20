@@ -36,10 +36,10 @@ private:
 
 	Q_SLOT void onConfigureGrid();
 	Q_SLOT void onEditSimulationParameters();
-	Q_SLOT void onEditSymbolTable();
+	Q_SLOT void onEditSymbolMap();
 
 	Q_SLOT void onToggleEditorMode(bool toggled);
-    Q_SLOT void onToggleMonitor(bool toggled);
+    Q_SLOT void onToggleInfobar(bool toggled);
 	Q_SLOT void onZoomInClicked();
 	Q_SLOT void onZoomOutClicked();
     Q_SLOT void onToggleDisplayLink(bool toggled);
@@ -68,7 +68,7 @@ private:
 	Q_SLOT void onCopyCollection();
 	Q_SLOT void onPasteCollection();
 	Q_SLOT void onDeleteSelection();
-	Q_SLOT void onDeleteCollection();
+	Q_SLOT void onDeleteExtendedSelection();
 	Q_SLOT void onRandomMultiplier();
 	Q_SLOT void onGridMultiplier();
 
