@@ -28,6 +28,16 @@ BugReportController::~BugReportController()
 void BugReportController::execute()
 {
     if (_view->exec()) {
+        auto reply = QMessageBox::question(
+            _view,
+            "Sending bug report",
+            "By submitting a bug report, you agree that it will stored in a database, used only for debugging purposes, "
+            "and not transferred to third parties.",
+            QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::No) {
+            return;
+        }
+
         auto protocol = _view->getProtocol();
         auto email = _view->getEmailAddress();
         auto message = _view->getUserMessage();
