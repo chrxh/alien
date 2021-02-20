@@ -21,6 +21,8 @@
 #include "MainController.h"
 #include "Settings.h"
 #include "FileLogger.h"
+#include "BugReportController.h"
+#include "BugReportLogger.h"
 
 int main(int argc, char *argv[])
 {
@@ -34,6 +36,7 @@ int main(int argc, char *argv[])
     WebServices webServices;
 
     FileLogger fileLogger;
+    BugReportLogger bugReportLogger;
 
     MainController controller;
 	controller.init();
@@ -45,8 +48,9 @@ int main(int argc, char *argv[])
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, e.what());
 
-        QMessageBox messageBox;
-        messageBox.critical(0, "Critical error", QString::fromStdString(e.what()));
+        BugReportController bugReportController(e.what(), bugReportLogger.getFullProtocol());
+        bugReportController.execute();
+
         exit(EXIT_FAILURE);
     }
 }

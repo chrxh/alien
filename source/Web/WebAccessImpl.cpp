@@ -11,8 +11,8 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const ServerAddress = "https://alien-project.org/world-explorer/api/"s;
-//    auto const ServerAddress = "http://localhost/api/"s;
+//    auto const ServerAddress = "https://alien-project.org/world-explorer/api/"s;
+    auto const ServerAddress = "http://localhost/api/"s;
 
     auto const ApiGetSimulation = "getsimulationinfos"s;
     auto const ApiConnect = "connect"s;
@@ -21,6 +21,7 @@ namespace
     auto const ApiSendProcessedTask = "sendprocessedtask"s;
     auto const ApiSendStatistics = "sendstatistics"s;
     auto const ApiSendLastImage = "sendlastimage"s;
+    auto const ApiSendBugReport = "sendBugReport"s;
 }
 
 WebAccessImpl::WebAccessImpl()
@@ -81,8 +82,8 @@ void WebAccessImpl::sendStatistics(
     string const & token, 
     map<string, string> monitorData)
 {
-    monitorData.insert_or_assign("simulationId", simulationId);
-    monitorData.insert_or_assign("token", token);
+    monitorData.emplace("simulationId", simulationId);
+    monitorData.emplace("token", token);
     post(ApiSendStatistics, RequestType::SendStatistics, monitorData);
 }
 
@@ -94,6 +95,18 @@ void WebAccessImpl::sendLastImage(string const & simulationId, string const & to
         "",
         { { "simulationId", simulationId },{ "token", token } },
         data);
+}
+
+void WebAccessImpl::sendBugReport(
+    string const& protocol,
+    string const& email,
+    string const& userMessage)
+{
+    map<string, string> data;
+    data.emplace("protocol", protocol);
+    data.emplace("email", email);
+    data.emplace("userMessage", userMessage);
+    post(ApiSendBugReport, RequestType::SendBugReport, data);
 }
 
 void WebAccessImpl::dataReceived(string handler, QByteArray data)
@@ -133,6 +146,9 @@ void WebAccessImpl::dataReceived(string handler, QByteArray data)
         Q_EMIT sendLastImageReceived();
     }
     break;
+    case RequestType::SendBugReport: {
+        Q_EMIT sendBugReportReceived();
+    } break;
     }
 }
 

@@ -50,6 +50,9 @@
      <property name="title">
       <string>setup grid multiplier</string>
      </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
      <layout class="QGridLayout" name="gridLayout_2" columnminimumwidth="200,150,0,0">
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_8">
