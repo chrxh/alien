@@ -5,8 +5,10 @@
 #include <ctime>
 #include <sstream>
 
-void LoggingServiceImpl::logMessage(Priority priority, std::string const& message) const
+void LoggingServiceImpl::logMessage(Priority priority, std::string const& message)
 {
+    std::lock_guard<std::mutex> lock(_mutex);
+
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
 

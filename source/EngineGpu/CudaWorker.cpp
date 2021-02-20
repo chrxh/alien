@@ -7,6 +7,8 @@
 #include <QApplication>
 
 #include "Base/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
 #include "EngineInterface/SpaceProperties.h"
 #include "EngineInterface/PhysicalActions.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
@@ -104,6 +106,8 @@ void CudaWorker::run()
 
 void CudaWorker::processJobs()
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
     std::lock_guard<std::mutex> lock(_mutex);
     if (_jobs.empty()) {
         return;
@@ -138,45 +142,67 @@ void CudaWorker::processJobs()
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: update data");
+
             auto rect = _job->getRect();
             auto dataTO = _job->getDataTO();
             _cudaSimulation->getSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
 
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: update data finished 1/3");
+
             DataConverter converter(dataTO, _numberGenerator, _job->getSimulationParameters(), _cudaSimulation->getCudaConstants());
             converter.updateData(_job->getUpdateDescription());
 
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: update data finished 2/3");
+
             _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: update data finished 3/3");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_SetDataJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: set data");
+
             auto rect = _job->getRect();
             auto dataTO = _job->getDataTO();
             _cudaSimulation->setSimulationData({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, dataTO);
+
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: set data finished");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_RunSimulationJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: run simulation");
             _simulationRunning = true;
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_StopSimulationJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: stop simulation");
             _simulationRunning = false;
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_CalcSingleTimestepJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: calculate single time step");
             _cudaSimulation->calcCudaTimestep();
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: calculate single time step finished");
+
             Q_EMIT timestepCalculated();
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_TpsRestrictionJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: restrict time steps per second");
             _tpsRestriction = _job->getTpsRestriction();
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_SetSimulationParametersJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: set simulation parameters");
             _cudaSimulation->setSimulationParameters(_job->getSimulationParameters());
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: set simulation parameters finished");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_SetExecutionParametersJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: set execution parameters");
             _cudaSimulation->setExecutionParameters(_job->getSimulationExecutionParameters());
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: set execution parameters finished");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_GetMonitorDataJob>(job)) {
@@ -184,16 +210,22 @@ void CudaWorker::processJobs()
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_ClearDataJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: clear data");
             _cudaSimulation->clear();
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: clear data finished");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_SelectDataJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: select data");
             auto const pos = _job->getPosition();
             _cudaSimulation->selectData({ pos.x, pos.y });
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: select data finished");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_DeselectDataJob>(job)) {
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: deselect data");
             _cudaSimulation->deselectData();
+            loggingService->logMessage(Priority::Unimportant, "CudaWorker: deselect data finished");
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_PhysicalActionJob>(job)) {
