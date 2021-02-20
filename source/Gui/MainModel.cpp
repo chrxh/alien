@@ -23,7 +23,7 @@ void MainModel::setExecutionParameters(ExecutionParameters const & parameters)
     _executionParameters = parameters;
 }
 
-SymbolTable * MainModel::getSymbolTable() const
+SymbolTable * MainModel::getSymbolMap() const
 {
 	return _symbols;
 }
