@@ -7,6 +7,10 @@
 
 ### Changed
 - using standard font in dialogs and most widgets
+- requirements of the examples lowered
+
+### Fixed
+- runtime problems for cells with constructor function
 
 ## [2.2.2] - 2021-02-10
 ### Changed
