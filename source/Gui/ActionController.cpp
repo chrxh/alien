@@ -1175,12 +1175,12 @@ void ActionController::onToggleRestrictTPS(bool toggled)
             actionHolder->actionRestrictTPS->setChecked(false);
             return;
         }
-        loggingService->logMessage(Priority::Important, "activate restrict time steps per seconds");
+        loggingService->logMessage(Priority::Unimportant, "activate restrict time steps per seconds");
 
 		_mainController->onRestrictTPS(restrictTPS);
 	}
 	else {
-        loggingService->logMessage(Priority::Important, "deactivate restrict time steps per seconds");
+        loggingService->logMessage(Priority::Unimportant, "deactivate restrict time steps per seconds");
         _mainController->onRestrictTPS(boost::none);
 	}
 
