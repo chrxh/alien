@@ -59,7 +59,7 @@ public:
     __device__ __inline__ bool contains(Key const& key) const
     {
         int index = _hash(key) % _size;
-        for (int i = 0; i < _size; ++i, index = (++index) % _size) {
+        for (int i = 0; i < 10; ++i, index = (++index) % _size) {   //workaround: 10 is set to avoid too long runtime
             auto& entry = _entries[index];
             entry.getLock(2);
             if (0 == entry.getFree()) {
@@ -77,7 +77,7 @@ public:
 
     __device__ __inline__ Value at(Key const& key)
     {
-        for (int i = 0; i < _size; ++i) {
+        for (int i = 0; i < 10; ++i) {  //workaround: 10 is set to avoid too long runtime
             int index = _hash(key) % _size;
             auto& entry = _entries[index];
             entry.getLock(3);
