@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
 
     MainController controller;
 	controller.init();
+
     try {
 	    return a.exec();
     }
