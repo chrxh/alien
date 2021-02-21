@@ -1,5 +1,13 @@
 # Release notes
 
+## [2.3.0] - 2021-02-21
+### Added
+- infobar, which displays general information, monitor information and log protocol
+- show bug report dialog after crash that allows to send reports to a server
+
+### Changed
+- using standard font in dialogs and most widgets
+
 ## [2.2.2] - 2021-02-10
 ### Changed
 - upgrade to CUDA 11.2, Qt 6.0.1, boost 1.75.0 and VS 2019
