@@ -2,7 +2,7 @@
 
 ## [2.3.0] - 2021-02-21
 ### Added
-- infobar, which displays general information, monitor information and log protocol
+- infobar, which displays general information, monitor information and logging protocol
 - show bug report dialog after crash that allows to send reports to a server
 
 ### Changed
@@ -10,7 +10,7 @@
 - requirements of the examples lowered
 
 ### Fixed
-- runtime problems for cells with constructor function
+- fix runtime problems for cells with constructor function
 
 ## [2.2.2] - 2021-02-10
 ### Changed
