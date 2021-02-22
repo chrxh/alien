@@ -26,7 +26,7 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+    QApplication a(argc, argv);
 	QCoreApplication::setOrganizationName("alien");
 	QCoreApplication::setApplicationName("alien");
 
@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 	    return a.exec();
     }
     catch(std::exception const& e) {
+        std::cerr << Stack::GetTraceString() << std::endl;
 
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, e.what());

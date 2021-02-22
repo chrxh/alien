@@ -59,5 +59,5 @@ private:
 
 	DataDescription _copiedCollection;
 	DataDescription _copiedEntity;
-	optional<TokenDescription> _copiedToken;
+	boost::optional<TokenDescription> _copiedToken;
 };

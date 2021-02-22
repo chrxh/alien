@@ -698,8 +698,8 @@ void ActionController::onDeleteExtendedSelection()
 
 namespace
 {
-	void modifyDescription(DataDescription& data, QVector2D const& posDelta, optional<double> const& velocityXDelta
-		, optional<double> const& velocityYDelta, optional<double> const& angularVelocityDelta)
+	void modifyDescription(DataDescription& data, QVector2D const& posDelta, boost::optional<double> const& velocityXDelta
+		, boost::optional<double> const& velocityYDelta, boost::optional<double> const& angularVelocityDelta)
 	{
 		if (data.clusters) {
 			for (auto& cluster : data.clusters.get()) {
@@ -748,10 +748,10 @@ void ActionController::onRandomMultiplier()
 		for (int i = 0; i < dialog.getNumberOfCopies(); ++i) {
 			DataDescription dataCopied = data;
 			QVector2D posDelta(_numberGenerator->getRandomReal(0.0, universeSize.x), _numberGenerator->getRandomReal(0.0, universeSize.y));
-			optional<double> velocityX;
-			optional<double> velocityY;
-			optional<double> angle;
-			optional<double> angularVelocity;
+			boost::optional<double> velocityX;
+			boost::optional<double> velocityY;
+			boost::optional<double> angle;
+			boost::optional<double> angularVelocity;
 			if (dialog.isChangeVelX()) {
 				velocityX = _numberGenerator->getRandomReal(dialog.getVelXMin(), dialog.getVelXMax());
 			}
@@ -797,10 +797,10 @@ void ActionController::onGridMultiplier()
 					continue;
 				}
 				DataDescription dataCopied = data;
-				optional<double> velocityX;
-				optional<double> velocityY;
-				optional<double> angle;
-				optional<double> angularVelocity;
+				boost::optional<double> velocityX;
+				boost::optional<double> velocityY;
+				boost::optional<double> angle;
+				boost::optional<double> angularVelocity;
 				if (dialog.isChangeAngle()) {
 					angle = dialog.getInitialAngle() + i*dialog.getHorizontalAngleIncrement() + j*dialog.getVerticalAngleIncrement();
 				}

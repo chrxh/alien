@@ -18,7 +18,7 @@ public:
     void setRun(bool run) override;
 	void calculateSingleTimestep() override;
 	SimulationContext* getContext() const override;
-	void setRestrictTimestepsPerSecond(optional<int> tps) override;
+	void setRestrictTimestepsPerSecond(boost::optional<int> tps) override;
     void setEnableCalculateFrames(bool enabled) override;
 
 private:

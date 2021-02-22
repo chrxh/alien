@@ -25,15 +25,15 @@ public:
 	virtual ParticleDescription& getParticleDescRef(uint64_t particleId);
 	virtual ParticleDescription const& getParticleDescRef(uint64_t particleId) const;
 
-	virtual void setSelectedTokenIndex(optional<uint> const& value);
-	virtual optional<uint> getSelectedTokenIndex() const;
+	virtual void setSelectedTokenIndex(boost::optional<uint> const& value);
+	virtual boost::optional<uint> getSelectedTokenIndex() const;
 
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
 	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
 	struct DataAndAngle {
 		DataDescription data;
-		optional<double> angle;
+		boost::optional<double> angle;
 	};
 	virtual void addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles);
 	virtual void addRandomParticles(double totalEnergy, double maxEnergyPerParticle);
@@ -87,7 +87,7 @@ private:
 	DataDescription _data;
 	DataDescription _unchangedData;
 
-	optional<uint> _selectedTokenIndex;
+	boost::optional<uint> _selectedTokenIndex;
 	unordered_set<uint64_t> _selectedCellIds;
 	unordered_set<uint64_t> _selectedClusterIds;
 	unordered_set<uint64_t> _selectedParticleIds;

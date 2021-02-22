@@ -6,7 +6,7 @@ class ParticleGpuTests
 public:
     ParticleGpuTests(
         IntVector2D const& universeSize = { 900, 600 },
-        optional<EngineGpuData> const& modelData = boost::none)
+        boost::optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 

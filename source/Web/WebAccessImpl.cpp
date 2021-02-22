@@ -129,7 +129,7 @@ void WebAccessImpl::dataReceived(string handler, QByteArray data)
     }
     break;
     case RequestType::Connect: {
-        auto const token = !data.isEmpty() ? optional<string>(data.toStdString()) : optional<string>();
+        auto const token = !data.isEmpty() ? boost::optional<string>(data.toStdString()) : boost::optional<string>();
         Q_EMIT connectToSimulationReceived(token);
     }
     break;

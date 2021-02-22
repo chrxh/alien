@@ -19,8 +19,8 @@ public:
 	void setClusterAndCell(ClusterDescription const& cluster, uint64_t cellId);
 	void setParticle(ParticleDescription const& particle);
 	void setSelectionIds(unordered_set<uint64_t> const& selectedCellIds, unordered_set<uint64_t> const& selectedParticleIds);
-	void setSelectedTokenIndex(optional<uint> const& value);	//will be stored in DataManipulator
-	optional<uint> getSelectedTokenIndex() const;
+	void setSelectedTokenIndex(boost::optional<uint> const& value);	//will be stored in DataManipulator
+	boost::optional<uint> getSelectedTokenIndex() const;
 
 	DataChangeDescription getAndUpdateChanges();
 
