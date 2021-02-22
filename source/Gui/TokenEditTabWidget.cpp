@@ -34,7 +34,7 @@ void TokenEditTabWidget::updateDisplay()
 	int numToken = cell.tokens->size();
 	if (_tokenTabs.size() != numToken) {
 
-		optional<uint> origIndex = _model->getSelectedTokenIndex();
+		boost::optional<uint> origIndex = _model->getSelectedTokenIndex();
 		deleteAllTabs();
 
 		for (int tokenIndex = 0; tokenIndex < numToken; ++tokenIndex) {

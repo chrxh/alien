@@ -47,12 +47,12 @@ void DataEditModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellI
 	_selectedParticleIds = selectedParticleIds;
 }
 
-void DataEditModel::setSelectedTokenIndex(optional<uint> const & value)
+void DataEditModel::setSelectedTokenIndex(boost::optional<uint> const & value)
 {
 	_manipulator->setSelectedTokenIndex(value);
 }
 
-optional<uint> DataEditModel::getSelectedTokenIndex() const
+boost::optional<uint> DataEditModel::getSelectedTokenIndex() const
 {
 	return _manipulator->getSelectedTokenIndex();
 }

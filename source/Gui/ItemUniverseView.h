@@ -45,7 +45,7 @@ protected:
 
 private:
 	void requestData();
-	optional<QVector2D> getCenterPosOfSelection() const;
+	boost::optional<QVector2D> getCenterPosOfSelection() const;
 	void centerSelectionIfEnabled();
     void updateItems();
 

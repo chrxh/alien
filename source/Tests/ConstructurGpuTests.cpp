@@ -11,7 +11,7 @@ class ConstructorGpuTests : public IntegrationGpuTestFramework
 public:
     ConstructorGpuTests(
         IntVector2D const& universeSize = { 900, 600 }, 
-        optional<EngineGpuData> const& modelData = boost::none)
+        boost::optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
@@ -34,7 +34,7 @@ protected:
 
     struct TokenForConstructionParameters
     {
-        MEMBER_DECLARATION(TokenForConstructionParameters, optional<float>, energy, boost::none);
+        MEMBER_DECLARATION(TokenForConstructionParameters, boost::optional<float>, energy, boost::none);
         MEMBER_DECLARATION(
             TokenForConstructionParameters,
             Enums::ConstrIn::Type,
@@ -71,24 +71,24 @@ protected:
             origConstructionSite;  //ordered by assumed construction process where the front is the newest cell
 
         TokenDescription token;
-        optional<CellDescription> sourceCell;  //possibly be destroyed
+        boost::optional<CellDescription> sourceCell;  //possibly be destroyed
         CellDescription constructorCell;
         vector<CellDescription> constructionSite;
 
-        optional<CellDescription> getFirstCellOfOrigConstructionSite() const;
-        optional<CellDescription> getSecondCellOfOrigConstructionSite() const;
+        boost::optional<CellDescription> getFirstCellOfOrigConstructionSite() const;
+        boost::optional<CellDescription> getSecondCellOfOrigConstructionSite() const;
 
-        optional<CellDescription> getFirstCellOfConstructionSiteAfterCreation() const;
-        optional<CellDescription> getSecondCellOfConstructionSiteAfterCreation() const;
-        optional<CellDescription> getThirdCellOfConstructionSiteAfterCreation() const;
+        boost::optional<CellDescription> getFirstCellOfConstructionSiteAfterCreation() const;
+        boost::optional<CellDescription> getSecondCellOfConstructionSiteAfterCreation() const;
+        boost::optional<CellDescription> getThirdCellOfConstructionSiteAfterCreation() const;
         
-        optional<CellDescription> getCellOfConstructionSite(uint64_t id) const;
+        boost::optional<CellDescription> getCellOfConstructionSite(uint64_t id) const;
     };
     struct StartConstructionOnHorizontalClusterTestParameters
     {
         MEMBER_DECLARATION(
             StartConstructionOnHorizontalClusterTestParameters,
-            optional<float>,
+            boost::optional<float>,
             horizontalObstacleAt,
             boost::none);
         MEMBER_DECLARATION(
@@ -118,7 +118,7 @@ protected:
         MEMBER_DECLARATION(StartConstructionOnWedgeClusterTestParameters, float, clusterAngle, 0.0f);
         MEMBER_DECLARATION(
             StartConstructionOnWedgeClusterTestParameters,
-            optional<QVector2D>,
+            boost::optional<QVector2D>,
             referencePosition,
             boost::none);
     };
@@ -144,12 +144,12 @@ protected:
             TokenDescription());
         MEMBER_DECLARATION(
             SecondCellConstructionOnLineClusterTestParameters,
-            optional<TokenDescription>,
+            boost::optional<TokenDescription>,
             tokenOnConstructionSite,
             boost::none);
         MEMBER_DECLARATION(
             SecondCellConstructionOnLineClusterTestParameters,
-            optional<float>,
+            boost::optional<float>,
             horizontalObstacleAt,
             boost::none);
         MEMBER_DECLARATION(
@@ -180,7 +180,7 @@ protected:
             TokenDescription());
         MEMBER_DECLARATION(
             FurtherCellConstructionOnLineClusterTestParameters,
-            optional<float>,
+            boost::optional<float>,
             verticalObstacleAt,
             boost::none);
         MEMBER_DECLARATION(
@@ -193,8 +193,8 @@ protected:
         {
             float angle;
             int maxConnection;  //0 = automatic
-            optional<TokenDescription> token;
-            optional<int> tokenBranchNumber;
+            boost::optional<TokenDescription> token;
+            boost::optional<int> tokenBranchNumber;
         };
         FurtherCellConstructionOnLineClusterTestParameters& propertiesOfConstructionSite(vector<CellProperties> const& value)
         {
@@ -222,8 +222,8 @@ protected:
     struct Expectations
     {
         MEMBER_DECLARATION(Expectations, Enums::ConstrOut::Type, tokenOutput, Enums::ConstrOut::SUCCESS);
-        MEMBER_DECLARATION(Expectations, optional<QVector2D>, relPosOfFirstCellOfConstructionSite, boost::none);
-        MEMBER_DECLARATION(Expectations, optional<TokenDescription>, constructedToken, boost::none);
+        MEMBER_DECLARATION(Expectations, boost::optional<QVector2D>, relPosOfFirstCellOfConstructionSite, boost::none);
+        MEMBER_DECLARATION(Expectations, boost::optional<TokenDescription>, constructedToken, boost::none);
         MEMBER_DECLARATION(Expectations, bool, destruction, false);
     };
 
@@ -1164,7 +1164,7 @@ TokenDescription ConstructorGpuTests::createTokenForConstruction(TokenForConstru
     return token;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfConstructionSiteAfterCreation() const
+boost::optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfConstructionSiteAfterCreation() const
 {
     map<uint64_t, CellDescription> cellsBefore;
     for (auto const& cell : origConstructionSite) {
@@ -1185,7 +1185,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfConstru
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfOrigConstructionSite() const
+boost::optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfOrigConstructionSite() const
 {
     if (!origConstructionSite.empty()) {
         return origConstructionSite.front();
@@ -1193,7 +1193,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getFirstCellOfOrigCon
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfOrigConstructionSite() const
+boost::optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfOrigConstructionSite() const
 {
     if (origConstructionSite.size() > 1) {
         return origConstructionSite.at(1);
@@ -1201,7 +1201,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfOrigCo
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstructionSiteAfterCreation() const
+boost::optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstructionSiteAfterCreation() const
 {
     if (auto const firstCell = getFirstCellOfOrigConstructionSite()) {
         return getCellOfConstructionSite(firstCell->id);
@@ -1209,7 +1209,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getSecondCellOfConstr
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getThirdCellOfConstructionSiteAfterCreation() const
+boost::optional<CellDescription> ConstructorGpuTests::TestResult::getThirdCellOfConstructionSiteAfterCreation() const
 {
     if (auto const firstCell = getSecondCellOfOrigConstructionSite()) {
         return getCellOfConstructionSite(firstCell->id);
@@ -1217,7 +1217,7 @@ optional<CellDescription> ConstructorGpuTests::TestResult::getThirdCellOfConstru
     return boost::none;
 }
 
-optional<CellDescription> ConstructorGpuTests::TestResult::getCellOfConstructionSite(uint64_t id) const
+boost::optional<CellDescription> ConstructorGpuTests::TestResult::getCellOfConstructionSite(uint64_t id) const
 {
     for (auto const& constructionSiteCell : constructionSite) {
         if (id == constructionSiteCell.id) {
@@ -1601,7 +1601,7 @@ void ConstructorGpuTests::_ResultChecker::checkTokenMovement(TestResult const & 
 
 void ConstructorGpuTests::_ResultChecker::checkConstructionSiteDistances(TestResult const & testResult) const
 {
-    optional<CellDescription> prevOrigCell;
+    boost::optional<CellDescription> prevOrigCell;
     for (auto const& origCell : testResult.origConstructionSite) {
         if (prevOrigCell) {
             auto const prevCell = *testResult.getCellOfConstructionSite(prevOrigCell->id);

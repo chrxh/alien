@@ -21,8 +21,8 @@ public:
 	NewSimulationDialog(SimulationParameters const& parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
 	virtual ~NewSimulationDialog();
 
-	optional<SimulationConfig> getConfig() const;
-	optional<double> getEnergy() const;
+	boost::optional<SimulationConfig> getConfig() const;
+	boost::optional<double> getEnergy() const;
 
 private:
 	SymbolTable* getSymbolTable() const;

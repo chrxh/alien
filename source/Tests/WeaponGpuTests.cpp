@@ -9,7 +9,7 @@ class WeaponGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    WeaponGpuTests(IntVector2D const& universeSize = {50, 50}, optional<EngineGpuData> const& modelData = boost::none)
+    WeaponGpuTests(IntVector2D const& universeSize = {50, 50}, boost::optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 
@@ -20,9 +20,9 @@ protected:
 
     struct WeaponTestResult {
         Enums::WeaponOut::Type tokenOutput;
-        optional<float> energyDiffOfWeapon;
-        optional<float> energyDiffOfTarget1;
-        optional<float> energyDiffOfTarget2;
+        boost::optional<float> energyDiffOfWeapon;
+        boost::optional<float> energyDiffOfTarget1;
+        boost::optional<float> energyDiffOfTarget2;
     };
     struct WeaponTestParameters {
         MEMBER_DECLARATION(WeaponTestParameters, int, minMass, 0);
@@ -35,8 +35,8 @@ protected:
             QVector2D position;
             int mass;
         };
-        MEMBER_DECLARATION(WeaponTestParameters, optional<Target>, target1, boost::none);
-        MEMBER_DECLARATION(WeaponTestParameters, optional<Target>, target2, boost::none);
+        MEMBER_DECLARATION(WeaponTestParameters, boost::optional<Target>, target1, boost::none);
+        MEMBER_DECLARATION(WeaponTestParameters, boost::optional<Target>, target2, boost::none);
     };
     WeaponTestResult runWeaponTest(WeaponTestParameters const& parameters) const;
 
@@ -65,8 +65,8 @@ auto WeaponGpuTests::runWeaponTest(WeaponTestParameters const& parameters) const
     DataDescription origData;
     origData.addCluster(origCluster);
 
-    optional<ClusterDescription> target1;
-    optional<ClusterDescription> target2;
+    boost::optional<ClusterDescription> target1;
+    boost::optional<ClusterDescription> target2;
     if (parameters._target1) {
         target1 = createRectangularCluster(
             {parameters._target1->mass, 1}, addSmallDisplacement(parameters._target1->position), QVector2D{});

@@ -4,7 +4,7 @@
 
 namespace
 {
-    optional<uint> getUIntOrZero(QString const& string)
+    boost::optional<uint> getUIntOrZero(QString const& string)
     {
         bool ok(true);
         auto const value = string.toUInt(&ok);
@@ -42,7 +42,7 @@ ComputationSettingsWidget::ComputationSettingsWidget(QWidget* parent)
         GuiSettings::getSettingsValue(Const::GpuMetadataDynamicMemorySizeKey, Const::GpuDynamicMemorySizeDefault)));
 }
 
-optional<IntVector2D> ComputationSettingsWidget::getUniverseSize() const
+boost::optional<IntVector2D> ComputationSettingsWidget::getUniverseSize() const
 {
     IntVector2D result;
     bool ok;
@@ -65,7 +65,7 @@ void ComputationSettingsWidget::setUniverseSize(IntVector2D const & value) const
     ui.gpuUniverseSizeYEdit->setText(QString::number(value.y));
 }
 
-optional<CudaConstants> ComputationSettingsWidget::getCudaConstants() const
+boost::optional<CudaConstants> ComputationSettingsWidget::getCudaConstants() const
 {
     CudaConstants result;
     if (auto const value = getUIntOrZero(ui.gpuNumBlocksEdit->text())) {

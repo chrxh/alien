@@ -12,9 +12,9 @@ public:
 	ComputationSettingsDialog(SimulationConfig const& config, QWidget * parent = nullptr);
 	virtual ~ComputationSettingsDialog() = default;
 
-    optional<IntVector2D> getUniverseSize() const;
-    optional<CudaConstants> getCudaConstants() const;
-    optional<bool> isExtrapolateContent() const;
+    boost::optional<IntVector2D> getUniverseSize() const;
+    boost::optional<CudaConstants> getCudaConstants() const;
+    boost::optional<bool> isExtrapolateContent() const;
 
 private:
 	Q_SLOT void okClicked();
