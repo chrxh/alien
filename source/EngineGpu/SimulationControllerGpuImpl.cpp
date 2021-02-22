@@ -73,7 +73,7 @@ SimulationContext * SimulationControllerGpuImpl::getContext() const
 	return _context;
 }
 
-void SimulationControllerGpuImpl::setRestrictTimestepsPerSecond(optional<int> tps)
+void SimulationControllerGpuImpl::setRestrictTimestepsPerSecond(boost::optional<int> tps)
 {
 	_context->getCudaController()->restrictTimestepsPerSecond(tps);
 }

@@ -5,7 +5,7 @@
 
 IntegrationGpuTestFramework::IntegrationGpuTestFramework(
     IntVector2D const& universeSize,
-    optional<EngineGpuData> const& modelData)
+    boost::optional<EngineGpuData> const& modelData)
     : IntegrationTestFramework(universeSize)
 {
     EngineGpuData data;

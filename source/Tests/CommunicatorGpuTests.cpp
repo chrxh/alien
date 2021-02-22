@@ -47,9 +47,9 @@ protected:
     struct CommunicatorResult
     {
         MEMBER_DECLARATION(CommunicatorResult, int, numMessagesSent, 0);
-        MEMBER_DECLARATION(CommunicatorResult, optional<char>, message, boost::none);
-        MEMBER_DECLARATION(CommunicatorResult, optional<float>, angle, boost::none);
-        MEMBER_DECLARATION(CommunicatorResult, optional<float>, distance, boost::none);
+        MEMBER_DECLARATION(CommunicatorResult, boost::optional<char>, message, boost::none);
+        MEMBER_DECLARATION(CommunicatorResult, boost::optional<float>, angle, boost::none);
+        MEMBER_DECLARATION(CommunicatorResult, boost::optional<float>, distance, boost::none);
         MEMBER_DECLARATION(
             CommunicatorResult,
             Enums::CommunicatorOutReceivedNewMessage::Type,

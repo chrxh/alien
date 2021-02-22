@@ -76,12 +76,12 @@ ParticleDescription const & DataRepository::getParticleDescRef(uint64_t particle
 	return _data.particles->at(particleIndex);
 }
 
-void DataRepository::setSelectedTokenIndex(optional<uint> const& value)
+void DataRepository::setSelectedTokenIndex(boost::optional<uint> const& value)
 {
 	_selectedTokenIndex = value;
 }
 
-optional<uint> DataRepository::getSelectedTokenIndex() const
+boost::optional<uint> DataRepository::getSelectedTokenIndex() const
 {
 	return _selectedTokenIndex;
 }
@@ -255,7 +255,7 @@ void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerP
 		remainingEnergy -= particleEnergy;
 	}
 
-	addDataAtFixedPosition({ { data, optional<double>() } });
+	addDataAtFixedPosition({ { data, boost::optional<double>() } });
 }
 
 namespace

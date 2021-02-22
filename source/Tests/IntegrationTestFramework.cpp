@@ -73,8 +73,8 @@ TokenDescription IntegrationTestFramework::createSimpleToken() const
 	return TokenDescription().setEnergy(tokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0));
 }
 
-ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, optional<QVector2D> const & centerPos, 
-	optional<QVector2D> const & centerVel, Boundary boundary) const
+ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, boost::optional<QVector2D> const & centerPos, 
+	boost::optional<QVector2D> const & centerVel, Boundary boundary) const
 {
     QVector2D pos = centerPos
         ? *centerPos
@@ -128,8 +128,8 @@ ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2
 	return cluster;
 }
 
-ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, optional<QVector2D> const & centerPos,
-	optional<QVector2D> const & centerVel, optional<double> const & optAngle, optional<double> const & optAngularVel) const
+ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, boost::optional<QVector2D> const & centerPos,
+	boost::optional<QVector2D> const & centerVel, boost::optional<double> const & optAngle, boost::optional<double> const & optAngularVel) const
 {
     QVector2D pos = centerPos
         ? *centerPos
@@ -170,9 +170,9 @@ ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, opt
 
 ClusterDescription IntegrationTestFramework::createHorizontalCluster(
     int numCells,
-    optional<QVector2D> const& centerPos,
-    optional<QVector2D> const& centerVel,
-    optional<double> const& optAngularVel,
+    boost::optional<QVector2D> const& centerPos,
+    boost::optional<QVector2D> const& centerVel,
+    boost::optional<double> const& optAngularVel,
     Boundary boundary /*= Boundary::NonSticky*/) const
 {
     QVector2D pos = centerPos
@@ -210,7 +210,7 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(
 	return cluster;
 }
 
-ClusterDescription IntegrationTestFramework::createVerticalCluster(int numCells, optional<QVector2D> const & centerPos, optional<QVector2D> const & centerVel) const
+ClusterDescription IntegrationTestFramework::createVerticalCluster(int numCells, boost::optional<QVector2D> const & centerPos, boost::optional<QVector2D> const & centerVel) const
 {
     QVector2D pos = centerPos
         ? *centerPos
@@ -252,8 +252,8 @@ ClusterDescription IntegrationTestFramework::createSingleCellCluster(uint64_t cl
 }
 
 ParticleDescription IntegrationTestFramework::createParticle(
-    optional<QVector2D> const& optPos,
-    optional<QVector2D> const& optVel) const
+    boost::optional<QVector2D> const& optPos,
+    boost::optional<QVector2D> const& optVel) const
 {
     auto pos = optPos
         ? *optPos

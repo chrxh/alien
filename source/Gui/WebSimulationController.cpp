@@ -143,12 +143,12 @@ bool WebSimulationController::onDisconnectToSimulation(string const& simulationI
     return true;
 }
 
-optional<string> WebSimulationController::getCurrentSimulationId() const
+boost::optional<string> WebSimulationController::getCurrentSimulationId() const
 {
     return _currentSimulationId;
 }
 
-optional<string> WebSimulationController::getCurrentToken() const
+boost::optional<string> WebSimulationController::getCurrentToken() const
 {
     return _currentToken;
 }

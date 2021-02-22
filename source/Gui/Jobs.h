@@ -19,4 +19,4 @@ public:
 private:
     std::function<void(Serializer*)> _executionFunc;
 };
-using ExecuteLaterFunc = shared_ptr<_ExecuteLaterFunc>;
+using ExecuteLaterFunc = boost::shared_ptr<_ExecuteLaterFunc>;
