@@ -6,7 +6,7 @@ class GpuBenchmark
     : public IntegrationGpuTestFramework
 {
 public:
-    GpuBenchmark(IntVector2D const& universeSize = { 1008, 504 }, optional<EngineGpuData> const& modelData = boost::none)
+    GpuBenchmark(IntVector2D const& universeSize = { 1008, 504 }, boost::optional<EngineGpuData> const& modelData = boost::none)
         : IntegrationGpuTestFramework(universeSize, modelData)
     {}
 

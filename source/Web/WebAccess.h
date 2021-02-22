@@ -25,7 +25,7 @@ public:
     virtual void sendBugReport(string const& protocol, string const& email, string const& userMessage) = 0;
 
     Q_SIGNAL void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
-    Q_SIGNAL void connectToSimulationReceived(optional<string> token);
+    Q_SIGNAL void connectToSimulationReceived(boost::optional<string> token);
     Q_SIGNAL void unprocessedTasksReceived(vector<Task> tasks);
     Q_SIGNAL void sendProcessedTaskReceived(string taskId);
     Q_SIGNAL void sendLastImageReceived();

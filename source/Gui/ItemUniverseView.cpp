@@ -127,7 +127,7 @@ void ItemUniverseView::requestData()
 	_repository->requireDataUpdateFromSimulation(_viewport->getRect());
 }
 
-optional<QVector2D> ItemUniverseView::getCenterPosOfSelection() const
+boost::optional<QVector2D> ItemUniverseView::getCenterPosOfSelection() const
 {
 	QVector2D result;
 	int numEntities = 0;

@@ -22,8 +22,8 @@ public:
     bool onConnectToSimulation();
     bool onDisconnectToSimulation(string const& simulationId, string const& token);
 
-    optional<string> getCurrentSimulationId() const;
-    optional<string> getCurrentToken() const;
+    boost::optional<string> getCurrentSimulationId() const;
+    boost::optional<string> getCurrentToken() const;
 
 private:
     Q_SLOT void requestUnprocessedTasks() const;
@@ -32,8 +32,8 @@ private:
     void processJobs();
     Q_SLOT void sendStatistics();
 
-    optional<string> _currentSimulationId;
-    optional<string> _currentToken;
+    boost::optional<string> _currentSimulationId;
+    boost::optional<string> _currentToken;
 
     Worker _worker;
 

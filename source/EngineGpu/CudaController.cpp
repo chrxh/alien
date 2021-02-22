@@ -74,7 +74,7 @@ void CudaController::calculate(RunningMode mode)
 	}
 }
 
-void CudaController::restrictTimestepsPerSecond(optional<int> tps)
+void CudaController::restrictTimestepsPerSecond(boost::optional<int> tps)
 {
     auto const job = boost::make_shared<_TpsRestrictionJob>(ThreadControllerId, tps);
 	_worker->addJob(job);

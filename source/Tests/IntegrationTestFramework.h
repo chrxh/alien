@@ -18,29 +18,29 @@ protected:
     enum class Boundary {Sticky, NonSticky};
     ClusterDescription createRectangularCluster(
         IntVector2D const& size,
-        optional<QVector2D> const& centerPos = boost::none,
-        optional<QVector2D> const& centerVel = boost::none,
+        boost::optional<QVector2D> const& centerPos = boost::none,
+        boost::optional<QVector2D> const& centerVel = boost::none,
         Boundary boundary = Boundary::NonSticky) const;
     ClusterDescription createLineCluster(int numCells,
-		optional<QVector2D> const& centerPos = boost::none,
-		optional<QVector2D> const& centerVel = boost::none,
-		optional<double> const& angle = boost::none,
-		optional<double> const& angularVel = boost::none) const;
+		boost::optional<QVector2D> const& centerPos = boost::none,
+		boost::optional<QVector2D> const& centerVel = boost::none,
+		boost::optional<double> const& angle = boost::none,
+		boost::optional<double> const& angularVel = boost::none) const;
 	ClusterDescription createHorizontalCluster(int numCells,
-		optional<QVector2D> const& centerPos = boost::none,
-		optional<QVector2D> const& centerVel = boost::none,
-		optional<double> const& angularVel = boost::none,
+		boost::optional<QVector2D> const& centerPos = boost::none,
+		boost::optional<QVector2D> const& centerVel = boost::none,
+		boost::optional<double> const& angularVel = boost::none,
         Boundary boundary = Boundary::NonSticky) const;
 	ClusterDescription createVerticalCluster(int numCells,
-		optional<QVector2D> const& centerPos = boost::none,
-		optional<QVector2D> const& centerVel = boost::none) const;	
+		boost::optional<QVector2D> const& centerPos = boost::none,
+		boost::optional<QVector2D> const& centerVel = boost::none) const;	
 	ClusterDescription createSingleCellCluster(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	TokenDescription createSimpleToken() const;
 
     ParticleDescription createParticle(
-        optional<QVector2D> const& pos = boost::none,
-        optional<QVector2D> const& vel = boost::none) const;
+        boost::optional<QVector2D> const& pos = boost::none,
+        boost::optional<QVector2D> const& vel = boost::none) const;
 
     //prevent indeterminism when position is between two pixels
     QVector2D addSmallDisplacement(QVector2D const& value) const;
@@ -62,7 +62,7 @@ bool checkCompatibility(T a, T b)
 }
 
 template<typename T>
-bool checkCompatibility(optional<T> a, optional<T> b)
+bool checkCompatibility(boost::optional<T> a, boost::optional<T> b)
 {
 	if (!a || !b) {
 		return true;

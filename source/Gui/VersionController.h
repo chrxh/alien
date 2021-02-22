@@ -32,12 +32,12 @@ private:
 	SimulationAccess* _access = nullptr;
 
 	enum class TargetForReceivedData { Stack, Snapshot};
-	optional<TargetForReceivedData> _target;
+	boost::optional<TargetForReceivedData> _target;
     struct SnapshotData
     {
         DataDescription data;
         int timestep;
     };
 	list<SnapshotData> _stack;
-	optional<SnapshotData> _snapshot;
+	boost::optional<SnapshotData> _snapshot;
 };

@@ -417,7 +417,7 @@ void MainController::onUpdateExecutionParameters(ExecutionParameters const & par
     delete progress;
 }
 
-void MainController::onRestrictTPS(optional<int> const& tps)
+void MainController::onRestrictTPS(boost::optional<int> const& tps)
 {
     _simController->setRestrictTimestepsPerSecond(tps);
 }

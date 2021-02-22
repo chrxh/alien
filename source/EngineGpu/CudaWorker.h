@@ -52,5 +52,5 @@ private:
 
 	bool _simulationRunning = false;
 	bool _terminate = false;
-	optional<int> _tpsRestriction;
+	boost::optional<int> _tpsRestriction;
 };

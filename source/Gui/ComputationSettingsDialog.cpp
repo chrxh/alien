@@ -18,17 +18,17 @@ ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& con
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &ComputationSettingsDialog::okClicked);
 }
 
-optional<IntVector2D> ComputationSettingsDialog::getUniverseSize() const
+boost::optional<IntVector2D> ComputationSettingsDialog::getUniverseSize() const
 {
 	return ui.computationSettingsWidget->getUniverseSize();
 }
 
-optional<CudaConstants> ComputationSettingsDialog::getCudaConstants() const
+boost::optional<CudaConstants> ComputationSettingsDialog::getCudaConstants() const
 {
     return ui.computationSettingsWidget->getCudaConstants();
 }
 
-optional<bool> ComputationSettingsDialog::isExtrapolateContent() const
+boost::optional<bool> ComputationSettingsDialog::isExtrapolateContent() const
 {
     return ui.extrapolateContentCheckBox->isChecked();
 }

@@ -75,7 +75,7 @@ void TokenEditTab::init(DataEditModel * model, DataEditController * controller, 
 
 namespace
 {
-	optional<int> getMemoryLocationOfSymbol(QString const& str)
+	boost::optional<int> getMemoryLocationOfSymbol(QString const& str)
 	{
 		if (str.size() > 1) {
 			if ((str.at(0) == QChar('[')) && (str.at(1) != QChar('['))) {
@@ -121,7 +121,7 @@ void TokenEditTab::updateDisplay()
 		QString v = QString::fromStdString(keyAndValue.second);
 
 		//fast check if variable or not
-		if (optional<int> addr = getMemoryLocationOfSymbol(v)) {
+		if (boost::optional<int> addr = getMemoryLocationOfSymbol(v)) {
 			addressVarMap[*addr] << k;
 		}
 	}

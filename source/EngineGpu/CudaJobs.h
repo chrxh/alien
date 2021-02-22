@@ -259,18 +259,18 @@ class _TpsRestrictionJob
 	: public _CudaJob
 {
 public:
-	_TpsRestrictionJob(string const& originId, optional<int> tpsRestriction, bool notifyFinish = false)
+	_TpsRestrictionJob(string const& originId, boost::optional<int> tpsRestriction, bool notifyFinish = false)
 		: _CudaJob(originId, notifyFinish), _tpsRestriction(tpsRestriction) { }
 
 	virtual ~_TpsRestrictionJob() = default;
 
-	optional<int> getTpsRestriction() const
+	boost::optional<int> getTpsRestriction() const
 	{
 		return _tpsRestriction;
 	}
 
 private:
-	optional<int> _tpsRestriction;
+	boost::optional<int> _tpsRestriction;
 };
 
 class _SetSimulationParametersJob

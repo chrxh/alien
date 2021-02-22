@@ -35,7 +35,7 @@ public:
 	void onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent);
 	void onUpdateSimulationParameters(SimulationParameters const& parameters);
     void onUpdateExecutionParameters(ExecutionParameters const& parameters);
-    void onRestrictTPS(optional<int> const& tps);
+    void onRestrictTPS(boost::optional<int> const& tps);
     void onAddMostFrequentClusterToSimulation();
 
 	int getTimestep() const;

@@ -22,7 +22,7 @@ public:
     CudaWorker* getCudaWorker() const;
 
 	void calculate(RunningMode mode);
-	void restrictTimestepsPerSecond(optional<int> tps);
+	void restrictTimestepsPerSecond(boost::optional<int> tps);
 	void setSimulationParameters(SimulationParameters const& parameters);
     void setExecutionParameters(ExecutionParameters const& parameters);
 

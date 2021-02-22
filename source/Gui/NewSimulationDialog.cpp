@@ -33,7 +33,7 @@ NewSimulationDialog::~NewSimulationDialog()
     delete ui;
 }
 
-optional<SimulationConfig> NewSimulationDialog::getConfig() const
+boost::optional<SimulationConfig> NewSimulationDialog::getConfig() const
 {
 	auto config = boost::make_shared<_SimulationConfig>();
     if (auto const value = ui->computationSettings->getUniverseSize()) {
@@ -53,7 +53,7 @@ optional<SimulationConfig> NewSimulationDialog::getConfig() const
     return config;
 }
 
-optional<double> NewSimulationDialog::getEnergy () const
+boost::optional<double> NewSimulationDialog::getEnergy () const
 {
     bool ok(true);
 	double energy = ui->energyEdit->text().toDouble(&ok);
