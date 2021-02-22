@@ -63,7 +63,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     iconAccelerate.addFile(":/Icons/main/accelerate off.png", QSize(), QIcon::Normal, QIcon::On);
     actionAcceleration->setIcon(iconAccelerate);
     actionAcceleration->setIconVisibleInMenu(false);
-    actionRestrictTPS = new QAction("Restrict TPS", this);
+    actionRestrictTPS = new QAction("Restrict time steps per second", this);
     actionRestrictTPS->setCheckable(true);
     actionRestrictTPS->setChecked(false);
     actionRestrictTPS->setEnabled(true);

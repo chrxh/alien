@@ -1164,7 +1164,7 @@ void ActionController::onToggleRestrictTPS(bool toggled)
         auto restrictTPS = QInputDialog::getInt(
             _mainView,
             "Restrict TPS",
-            "Enter the time steps per seconds",
+            "Enter the maximum number time steps per seconds",
             50,
             1,
             1000,
