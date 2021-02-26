@@ -34,7 +34,7 @@
 		<p>
 			The easiest way to get to know the ALiEn simulator is to load and run an existing simulation file.
 			You find various demos in <i>examples/simulations/*</i> demonstrating capabilities of the engine ranging from physics
-			examples, building machines, replicators to small ecosystems. 
+			examples, self-deploying structures, replicators to small ecosystems. 
 			To this end, go to <i>Simulation -> Load</i> and select a file.
 			However, for starters, you can use the simple evolution example already loaded.
 		</p>
@@ -68,12 +68,13 @@
 				<b>display link</b>: By switching off <i>View -> Display link</i> you can disable the rendering and thus speed up the whole simulation.
 			  </li>
 			  <li>
-				<b>accelerate active clusters</b>: It is possible to allocate more computing power to active clusters (cell clusters with tokens)
+				<b>accelerate active clusters</b>: It is possible to allocate more computing power to active clusters (cell clusters that perform programmed actions)
 				by periodically freezing the remaining content for a certain number of time steps. This can be achieved by toggling <i>Simulation -> Accelerate active clusters</i>.
 			  </li>
+			</ul>
 		</p>
 		<p>
-			One of the most important manipulation functions are the simulation and computations parameters:
+			One of the most important manipulation functions are the simulation parameters and general settings:
 			<ul>
 				<li><b>simulation parameters</b>: The parameters can be set by opening the <i>Settings -> Simulation parameters</i> dialog. 
 					Let us give some selected examples to play around with:
@@ -98,7 +99,7 @@
 					An overview of all parameters can be found in <i>Help -> Documentation</i>.
 				</li>
 				<li>
-					<b>computation parameters</b>: The sizes of a simulation can be changed in <i>Settings -> Computation</i>. There are many more technical parameters that we can leave unchanged for now.
+					<b>general settings</b>: The world size of a simulation can be changed in <i>Settings -> General settings</i>. There are many more technical parameters that we can leave unchanged for now.
 					They are used for the CUDA api and specify the number of threads and sizes of arrays.
 					If <i>scale content</i> is enabled in the dialog, additional space created by a possible world
 					enlargement will be periodically augmented with the existing cells and particles. 
