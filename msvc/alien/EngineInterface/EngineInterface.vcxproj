@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\..\source\EngineInterface\SerializerImpl.cpp" />
     <ClCompile Include="..\..\..\source\EngineInterface\SimulationChangerImpl.cpp" />
     <ClCompile Include="..\..\..\source\EngineInterface\SimulationParametersCalculator.cpp" />
+    <ClCompile Include="..\..\..\source\EngineInterface\SimulationParametersParser.cpp" />
     <ClCompile Include="..\..\..\source\EngineInterface\SpaceProperties.cpp" />
     <ClCompile Include="..\..\..\source\EngineInterface\SymbolTable.cpp" />
   </ItemGroup>
@@ -58,6 +59,7 @@
     <ClInclude Include="..\..\..\source\EngineInterface\SerializationHelper.h" />
     <ClInclude Include="..\..\..\source\EngineInterface\SimulationParameters.h" />
     <ClInclude Include="..\..\..\source\EngineInterface\SimulationParametersCalculator.h" />
+    <ClInclude Include="..\..\..\source\EngineInterface\SimulationParametersParser.h" />
     <QtMoc Include="..\..\..\source\EngineInterface\SymbolTable.h" />
     <QtMoc Include="..\..\..\source\EngineInterface\SpaceProperties.h" />
     <QtMoc Include="..\..\..\source\EngineInterface\SimulationMonitor.h" />

@@ -196,10 +196,19 @@ void SimulationParametersDialog::defaultButtonClicked ()
 
 void SimulationParametersDialog::loadButtonClicked ()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
+    QString filename = QFileDialog::getOpenFileName(this, "Load Simulation Parameters", "", "Alien Simulation Parameters(*.json)");
     if( !filename.isEmpty() ) {
 		auto origSimulationParameters = _simulationParameters;
-		if (SerializationHelper::loadFromFile<SimulationParameters>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSimulationParameters(data); }, _simulationParameters)) {
+        bool success = true;
+        try {
+            success = SerializationHelper::loadFromFile<SimulationParameters>(
+                filename.toStdString(),
+                [&](string const& data) { return _serializer->deserializeSimulationParameters(data); },
+                _simulationParameters);
+        } catch (...) {
+            success = false;
+        }
+		if (success) {
 			updateWidgetsFromSimulationParameters();
 		}
 		else {
@@ -212,7 +221,7 @@ void SimulationParametersDialog::loadButtonClicked ()
 
 void SimulationParametersDialog::saveButtonClicked ()
 {
-    QString filename = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.par)");
+    QString filename = QFileDialog::getSaveFileName(this, "Save Simulation Parameters", "", "Alien Simulation Parameters(*.json)");
     if( !filename.isEmpty() ) {
 		updateSimulationParametersFromWidgets();
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSimulationParameters(_simulationParameters); })) {
