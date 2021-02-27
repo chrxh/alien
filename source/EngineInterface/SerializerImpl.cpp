@@ -20,6 +20,7 @@
 #include "SymbolTable.h"
 #include "EngineInterfaceBuilderFacade.h"
 #include "DescriptionHelper.h"
+#include "SimulationParametersParser.h"
 
 #include "SerializerImpl.h"
 
@@ -246,7 +247,7 @@ void SerializerImpl::serialize(SimulationController * simController, int typeId,
     auto const universeSize = context->getSpaceProperties()->getSize();
     if (newSettings) {
 		_configToSerialize = {
-			context->getSimulationParameters(),
+            context->getSimulationParameters(),
 			context->getSymbolTable(),
 			newSettings->universeSize,
 			typeId,
@@ -260,7 +261,7 @@ void SerializerImpl::serialize(SimulationController * simController, int typeId,
     }
 	else {
 		_configToSerialize = {
-			context->getSimulationParameters(),
+            context->getSimulationParameters(),
 			context->getSymbolTable(),
 			context->getSpaceProperties()->getSize(),
 			typeId,
@@ -312,7 +313,8 @@ SimulationController* SerializerImpl::deserializeSimulation(string const& conten
     specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
     specificData.insert_or_assign("dynamicMemorySize", 100000000);
 */
-	auto const simController = _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
+    auto const simController = _controllerBuilder(
+        typeId, universeSize, symbolTable, parameters, specificData, timestep);
 
     simController->setParent(this);
 
@@ -365,21 +367,18 @@ SymbolTable * SerializerImpl::deserializeSymbolTable(string const & data)
 
 string SerializerImpl::serializeSimulationParameters(SimulationParameters const& parameters) const
 {
-	ostringstream stream;
-	boost::archive::binary_oarchive archive(stream);
-
-	archive << parameters;
-	return stream.str();
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, SimulationParametersParser::encode(parameters));
+    return ss.str();
 }
 
-SimulationParameters SerializerImpl::deserializeSimulationParameters(string const & data)
+SimulationParameters SerializerImpl::deserializeSimulationParameters(string const& data)
 {
-	istringstream stream(data);
-	boost::archive::binary_iarchive ia(stream);
-
-	SimulationParameters parameters;
-	ia >> parameters;
-	return parameters;
+    std::stringstream ss;
+    ss << data;
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(ss, tree);
+    return SimulationParametersParser::decode(tree);
 }
 
 void SerializerImpl::dataReadyToRetrieve()
