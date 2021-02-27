@@ -129,10 +129,19 @@ void SymbolTableDialog::defaultButtonClicked ()
 
 void SymbolTableDialog::loadButtonClicked ()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Load Symbol Table", "", "Alien Symbol Table(*.sym)");
+    QString filename = QFileDialog::getOpenFileName(this, "Load Symbol Map", "", "Alien Symbol Map(*.json)");
 	if (!filename.isEmpty()) {
 		auto origSymbolTable = _symbolTable;
-		if (SerializationHelper::loadFromFile<SymbolTable*>(filename.toStdString(), [&](string const& data) { return _serializer->deserializeSymbolTable(data); }, _symbolTable)) {
+        auto success = true;
+        try {
+            success = SerializationHelper::loadFromFile<SymbolTable*>(
+                filename.toStdString(),
+                [&](string const& data) { return _serializer->deserializeSymbolTable(data); },
+                _symbolTable);
+        } catch (...) {
+            success = false;
+        }
+		if (success) {
 			delete origSymbolTable;
 			updateWidgetsFromSymbolTable();
 		}
@@ -145,7 +154,7 @@ void SymbolTableDialog::loadButtonClicked ()
 
 void SymbolTableDialog::saveButtonClicked ()
 {
-    QString filename = QFileDialog::getSaveFileName(this, "Save Symbol Table", "", "Alien Symbol Table (*.sym)");
+    QString filename = QFileDialog::getSaveFileName(this, "Save Symbol Map", "", "Alien Symbol Map (*.json)");
     if( !filename.isEmpty() ) {
 		updateSymbolTableFromWidgets();
 		if (!SerializationHelper::saveToFile(filename.toStdString(), [&]() { return _serializer->serializeSymbolTable(_symbolTable); })) {

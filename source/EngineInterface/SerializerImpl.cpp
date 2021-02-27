@@ -348,21 +348,29 @@ DataDescription SerializerImpl::deserializeDataDescription(string const & data)
 
 string SerializerImpl::serializeSymbolTable(SymbolTable const* symbolTable) const
 {
-	ostringstream stream;
-	boost::archive::binary_oarchive archive(stream);
+    boost::property_tree::ptree tree;
+    for (auto const& [key, value] : symbolTable->getEntries()) {
+        tree.add(key, value);
+    }
 
-	archive << *symbolTable;
-	return stream.str();
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, tree);
+    return ss.str();
 }
 
 SymbolTable * SerializerImpl::deserializeSymbolTable(string const & data)
 {
-	istringstream stream(data);
-	boost::archive::binary_iarchive ia(stream);
-
-	SymbolTable* symbolTable = new SymbolTable(this);
-	ia >> *symbolTable;
-	return symbolTable;
+    std::stringstream ss;
+    ss << data;
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(ss, tree);
+    std::map<std::string, std::string> entries;
+    for (auto const& [key, value] : tree) {
+        entries.emplace(key.data(), value.data());
+	}
+    auto result = new SymbolTable(this);
+    result->setEntries(entries);
+    return result;
 }
 
 string SerializerImpl::serializeSimulationParameters(SimulationParameters const& parameters) const
