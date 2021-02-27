@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include "Base/Definitions.h"
 
 #include "SimulationParameters.h"

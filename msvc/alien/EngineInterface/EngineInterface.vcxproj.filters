@@ -103,6 +103,9 @@
     <ClCompile Include="..\..\..\source\EngineInterface\EngineInterfaceBuilderFacadeImpl.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\EngineInterface\SimulationParametersParser.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\EngineInterface\CompilerHelper.h">
@@ -147,9 +150,6 @@
     <ClInclude Include="..\..\..\source\EngineInterface\SerializationHelper.h">
       <Filter>Interface</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\EngineInterface\SimulationParameters.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\EngineInterface\Colors.h">
       <Filter>Interface</Filter>
     </ClInclude>
@@ -173,6 +173,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\EngineInterface\EngineInterfaceBuilderFacadeImpl.h">
       <Filter>Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\EngineInterface\SimulationParametersParser.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\EngineInterface\SimulationParameters.h">
+      <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

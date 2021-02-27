@@ -29,7 +29,7 @@ public:
 	virtual SymbolTable* deserializeSymbolTable(string const& data) override;
 
 	virtual string serializeSimulationParameters(SimulationParameters const& parameters) const override;
-	virtual SimulationParameters deserializeSimulationParameters(string const& data) override;
+    virtual SimulationParameters deserializeSimulationParameters(string const& data) override;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();
