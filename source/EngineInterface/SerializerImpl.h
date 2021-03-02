@@ -19,8 +19,9 @@ public:
         SimulationAccessBuildFunc const& accessBuilder) override;   //only for (de)serialization of entire simulation necessary
 
     virtual void serialize(SimulationController* simController, int typeId, boost::optional<Settings> newSettings = boost::none) override;
-	virtual string const& retrieveSerializedSimulation() override;
-	virtual SimulationController* deserializeSimulation(string const& content) override;
+    virtual SerializedSimulation const& retrieveSerializedSimulation() override;
+    virtual SimulationController* deserializeSimulation(std::string const& data) override;
+    virtual SimulationController* deserializeSimulation(SerializedSimulation const& data) override;
 
 	virtual string serializeDataDescription(DataDescription const& desc) const override;
 	virtual DataDescription deserializeDataDescription(string const& data) override;
@@ -30,6 +31,9 @@ public:
 
 	virtual string serializeSimulationParameters(SimulationParameters const& parameters) const override;
     virtual SimulationParameters deserializeSimulationParameters(string const& data) override;
+
+    virtual string serializeGeneralSettings(IntVector2D const& worldSize, std::map<std::string, int> const& gpuSettings)
+        const;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();
@@ -57,7 +61,7 @@ private:
         IntVector2D count;
     };
     DuplicationSettings _duplicationSettings;
-	string _serializedSimulation;
+    SerializedSimulation _serializedSimulation;
 
 	list<QMetaObject::Connection> _connections;
 };

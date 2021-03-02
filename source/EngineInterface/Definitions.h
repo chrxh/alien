@@ -46,3 +46,11 @@ using PhysicalAction = shared_ptr<_PhysicalAction>;
 
 class _ApplyForceAction;
 using ApplyForceAction = shared_ptr<_ApplyForceAction>;
+
+struct SerializedSimulation
+{
+    std::string generalSettings;
+    std::string simulationParameters;
+    std::string symbolMap;
+    std::string content;
+};
