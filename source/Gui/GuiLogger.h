@@ -12,7 +12,7 @@ class GuiLogger
 
 public:
     GuiLogger(LoggingView* view);
-    virtual ~GuiLogger() = default;
+    virtual ~GuiLogger();
 
     void newLogMessage(Priority priority, std::string const& message) override;
 
