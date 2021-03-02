@@ -25,3 +25,12 @@ void LoggingServiceImpl::registerCallBack(LoggingCallBack* callback)
 {
     _callbacks.emplace_back(callback);
 }
+
+void LoggingServiceImpl::unregisterCallBack(LoggingCallBack* callback)
+{
+    auto end = std::remove_if(_callbacks.begin(), _callbacks.end(), [&](auto const& callback_) {
+        return callback_ == callback;
+    });
+
+    _callbacks.erase(end, _callbacks.end());
+}

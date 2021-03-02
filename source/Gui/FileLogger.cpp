@@ -17,6 +17,12 @@ FileLogger::FileLogger()
     _outfile.open(LogFilename, std::ios_base::app);
 }
 
+FileLogger::~FileLogger()
+{
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->unregisterCallBack(this);
+}
+
 void FileLogger::newLogMessage(Priority priority, std::string const& message)
 {
     _outfile << message << std::endl;

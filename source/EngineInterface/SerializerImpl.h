@@ -20,7 +20,6 @@ public:
 
     virtual void serialize(SimulationController* simController, int typeId, boost::optional<Settings> newSettings = boost::none) override;
     virtual SerializedSimulation const& retrieveSerializedSimulation() override;
-    virtual SimulationController* deserializeSimulation(std::string const& data) override;
     virtual SimulationController* deserializeSimulation(SerializedSimulation const& data) override;
 
 	virtual string serializeDataDescription(DataDescription const& desc) const override;
@@ -34,6 +33,8 @@ public:
 
     virtual string serializeGeneralSettings(IntVector2D const& worldSize, std::map<std::string, int> const& gpuSettings)
         const;
+    virtual std::pair<IntVector2D, std::map<std::string, int>> deserializeGeneralSettings(
+        std::string const& data) const;
 
 private:
 	Q_SLOT void dataReadyToRetrieve();

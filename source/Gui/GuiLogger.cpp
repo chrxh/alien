@@ -13,6 +13,12 @@ GuiLogger::GuiLogger(LoggingView* view)
     loggingService->registerCallBack(this);
 }
 
+GuiLogger::~GuiLogger()
+{
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->unregisterCallBack(this);
+}
+
 void GuiLogger::newLogMessage(Priority priority, std::string const& message)
 {
     if (Priority::Important == priority) {
