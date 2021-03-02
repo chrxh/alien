@@ -35,16 +35,11 @@ void IntegrationTestHelper::updateData(SimulationAccess* access, SimulationConte
         finished = true;
         pause.quit();
     });
-    auto connection2 =
-        context->connect(context, &SimulationContext::errorThrown, [&](QString what) {
-            throw std::exception(what.toStdString().c_str());
-        });
     access->updateData(data);
     while (!finished) {
         pause.exec();
     }
     QObject::disconnect(connection1);
-    QObject::disconnect(connection2);
 }
 
 void IntegrationTestHelper::runSimulation(int timesteps, SimulationController* controller)
@@ -57,15 +52,11 @@ void IntegrationTestHelper::runSimulation(int timesteps, SimulationController* c
             finished = true;
             pause.quit();
         });
-        auto connection2 = context->connect(context, &SimulationContext::errorThrown, [&](QString what) {
-            throw std::exception(what.toStdString().c_str());
-        });
         controller->calculateSingleTimestep();
         if (!finished) {
             pause.exec();
         }
         QObject::disconnect(connection1);
-        QObject::disconnect(connection2);
     }
 }
 
