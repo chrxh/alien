@@ -287,52 +287,6 @@ auto SerializerImpl::retrieveSerializedSimulation() -> SerializedSimulation cons
 	return _serializedSimulation;
 }
 
-SimulationController* SerializerImpl::deserializeSimulation(std::string const& data)
-{
-    istringstream stream(data);
-    boost::archive::binary_iarchive ia(stream);
-
-    DataDescription content;
-    SimulationParameters parameters;
-    SymbolTable* symbolTable = new SymbolTable(this);
-    IntVector2D universeSize;
-    uint timestep;
-    int typeId;
-    map<string, int> specificData;
-    ia >> content >> universeSize >> typeId >> specificData >> parameters >> *symbolTable >> timestep;
-
-    auto facade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
-
-    //use following code for old simulation formats
-    /*
-    specificData.insert_or_assign("maxClusters", 1200000);
-    specificData.insert_or_assign("numThreadsPerBlock", 16);
-    specificData.insert_or_assign("numBlocks", 64*8);
-    specificData.insert_or_assign("numClusterPointerArrays", 1);
-    specificData.insert_or_assign("maxClusters", 500000);
-    specificData.insert_or_assign("maxCells", 2000000);
-    specificData.insert_or_assign("maxParticles", 2000000);
-    specificData.insert_or_assign("maxTokens", 500000);
-    specificData.insert_or_assign("maxCellPointers", 2000000 * 10);
-    specificData.insert_or_assign("maxClusterPointers", 500000 * 10);
-    specificData.insert_or_assign("maxParticlePointers", 2000000 * 10);
-    specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
-    specificData.insert_or_assign("dynamicMemorySize", 100000000);
-*/
-    auto const simController =
-        _controllerBuilder(typeId, universeSize, symbolTable, parameters, specificData, timestep);
-
-    simController->setParent(this);
-
-    _descHelper->init(simController->getContext());
-    _descHelper->makeValid(content);
-
-    buildAccess(simController);
-    _access->clear();
-    _access->updateData(content);
-    return simController;
-}
-
 SimulationController* SerializerImpl::deserializeSimulation(SerializedSimulation const& data)
 {
     istringstream stream(data.content);
@@ -341,32 +295,15 @@ SimulationController* SerializerImpl::deserializeSimulation(SerializedSimulation
 	DataDescription content;
 	SimulationParameters parameters = deserializeSimulationParameters(data.simulationParameters);
     SymbolTable* symbolMap = deserializeSymbolTable(data.symbolMap);
-	IntVector2D universeSize;
+    auto [worldSize, specificData] = deserializeGeneralSettings(data.generalSettings);
 	uint timestep;
 	int typeId;
-	map<string, int> specificData;
-	ia >> content /*>> universeSize */>> typeId /*>> specificData >> parameters >> *symbolTable*/ >> timestep;
+	ia >> content >> typeId >> timestep;
 
 	auto facade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 
-    //use following code for old simulation formats
-/*
-    specificData.insert_or_assign("maxClusters", 1200000);
-    specificData.insert_or_assign("numThreadsPerBlock", 16);
-    specificData.insert_or_assign("numBlocks", 64*8);
-    specificData.insert_or_assign("numClusterPointerArrays", 1);
-    specificData.insert_or_assign("maxClusters", 500000);
-    specificData.insert_or_assign("maxCells", 2000000);
-    specificData.insert_or_assign("maxParticles", 2000000);
-    specificData.insert_or_assign("maxTokens", 500000);
-    specificData.insert_or_assign("maxCellPointers", 2000000 * 10);
-    specificData.insert_or_assign("maxClusterPointers", 500000 * 10);
-    specificData.insert_or_assign("maxParticlePointers", 2000000 * 10);
-    specificData.insert_or_assign("maxTokenPointers", 500000 * 10);
-    specificData.insert_or_assign("dynamicMemorySize", 100000000);
-*/
     auto const simController = _controllerBuilder(
-        typeId, universeSize, symbolMap, parameters, specificData, timestep);
+        typeId, worldSize, symbolMap, parameters, specificData, timestep);
 
     simController->setParent(this);
 
@@ -458,6 +395,26 @@ string SerializerImpl::serializeGeneralSettings(
     return ss.str();
 }
 
+std::pair<IntVector2D, std::map<std::string, int>> SerializerImpl::deserializeGeneralSettings(
+    std::string const& data) const
+{
+    std::stringstream ss;
+    ss << data;
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(ss, tree);
+
+	IntVector2D worldSize;
+    worldSize.x = tree.get<int>("worldSize.x");
+    worldSize.y = tree.get<int>("worldSize.y");
+
+	std::map<std::string, int> specificData;
+	auto subTree = tree.get_child("cudaSettings");
+    for (auto const& [key, value] : subTree) {
+        specificData.emplace(key.data(), value.get_value<int>());
+    }
+    return std::make_pair(worldSize, specificData);
+}
+
 void SerializerImpl::dataReadyToRetrieve()
 {
 	ostringstream stream;
@@ -467,8 +424,7 @@ void SerializerImpl::dataReadyToRetrieve()
     if (_duplicationSettings.enabled) {
         _descHelper->duplicate(content, _duplicationSettings.origUniverseSize, _configToSerialize.universeSize);
     }
-    archive << content /*<< _configToSerialize.universeSize*/ << _configToSerialize.typeId
-            /*<< _configToSerialize.typeSpecificData */ << _configToSerialize.timestep;
+    archive << content << _configToSerialize.typeId << _configToSerialize.timestep;
     _serializedSimulation.generalSettings =
         serializeGeneralSettings(_configToSerialize.universeSize, _configToSerialize.typeSpecificData);
     _serializedSimulation.simulationParameters = serializeSimulationParameters(_configToSerialize.parameters);

@@ -300,7 +300,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_view->setupEditors(_simController, _accessBuildFunc(_simController));
 }
 
-void MainController::recreateSimulation(string const & serializedSimulation)
+void MainController::recreateSimulation(SerializedSimulation const & serializedSimulation)
 {
 	delete _simController;
     _simController = nullptr;
@@ -358,16 +358,16 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 	delete _simController;
     _simController = nullptr;
 
-    if (!SerializationHelper::loadFromFile<SimulationController*>(
+    if (!SerializationHelper::loadFromFile(
             filename,
-            [&](string const& data) { return _serializer->deserializeSimulation(data); },
+            [&](SerializedSimulation const& data) { return _serializer->deserializeSimulation(data); },
             _simController)) {
 
         //load old simulation
         if (LoadOption::SaveOldSim == option) {
-            CHECK(SerializationHelper::loadFromFile<SimulationController*>(
+            CHECK(SerializationHelper::loadFromFile(
                 getPathToApp() + Const::AutoSaveForLoadingFilename,
-                [&](string const& data) { return _serializer->deserializeSimulation(data); },
+                [&](SerializedSimulation const& data) { return _serializer->deserializeSimulation(data); },
                 _simController));
         }
         delete progress;
@@ -387,7 +387,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
     _view->getMonitorController()->pauseTimer();
 
     auto const recreateFunction = [&](Serializer* serializer) {
-        recreateSimulation(serializer->retrieveSerializedSimulation().content);
+        recreateSimulation(serializer->retrieveSerializedSimulation());
     };
     _worker->add(boost::make_shared<_ExecuteLaterFunc>(recreateFunction));
 

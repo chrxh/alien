@@ -23,7 +23,6 @@ public:
 	virtual void serialize(SimulationController* simController, int typeId, boost::optional<Settings> newSettings = boost::none) = 0;
 	Q_SIGNAL void serializationFinished();
     virtual SerializedSimulation const& retrieveSerializedSimulation() = 0;
-    virtual SimulationController* deserializeSimulation(std::string const& data) = 0;
     virtual SimulationController* deserializeSimulation(SerializedSimulation const& data) = 0;
 
 	virtual string serializeDataDescription(DataDescription const& desc) const = 0;
