@@ -1563,10 +1563,10 @@ void ConstructorGpuTests::_ResultChecker::checkCellConnectionsAfterRotation(
 {
     for (auto const& origCell : testResult.origConstructionSite) {
         auto const cell = *testResult.getCellOfConstructionSite(origCell.id);
-        EXPECT_EQ(origCell.connectingCells, cell.connectingCells);
+        EXPECT_TRUE(origCell.connectingCells == cell.connectingCells);
     }
-    EXPECT_EQ(testResult.origSourceCell.connectingCells, testResult.sourceCell->connectingCells);
-    EXPECT_EQ(testResult.origConstructorCell.connectingCells, testResult.constructorCell.connectingCells);
+    EXPECT_TRUE(testResult.origSourceCell.connectingCells == testResult.sourceCell->connectingCells);
+    EXPECT_TRUE(testResult.origConstructorCell.connectingCells == testResult.constructorCell.connectingCells);
 }
 
 void ConstructorGpuTests::_ResultChecker::checkTokenMovement(TestResult const & testResult) const
