@@ -591,7 +591,7 @@ void ActionController::onCopyEntity()
 
 void ActionController::onLoadCollection()
 {
-	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Collection", "", "Alien Collection (*.aco)");
+	QString filename = QFileDialog::getOpenFileName(_mainView, "Load Collection", "", "Alien Collection (*.col)");
 	if (!filename.isEmpty()) {
 
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
@@ -623,7 +623,7 @@ void ActionController::onLoadCollection()
 
 void ActionController::onSaveCollection()
 {
-	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Collection", "", "Alien Collection (*.aco)");
+	QString filename = QFileDialog::getSaveFileName(_mainView, "Save Collection", "", "Alien Collection (*.col)");
 	if (!filename.isEmpty()) {
 
 		auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
