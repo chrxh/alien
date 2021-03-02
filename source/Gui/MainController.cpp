@@ -387,7 +387,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
     _view->getMonitorController()->pauseTimer();
 
     auto const recreateFunction = [&](Serializer* serializer) {
-        recreateSimulation(serializer->retrieveSerializedSimulation());
+        recreateSimulation(serializer->retrieveSerializedSimulation().content);
     };
     _worker->add(boost::make_shared<_ExecuteLaterFunc>(recreateFunction));
 
