@@ -44,7 +44,7 @@ public:
 
 private:
 	void initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters);
-	void recreateSimulation(string const& serializedSimulation);
+    void recreateSimulation(SerializedSimulation const& serializedSimulation);
 	void connectSimController() const;
 	void addRandomEnergy(double amount);
 

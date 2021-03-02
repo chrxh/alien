@@ -12,10 +12,15 @@ class SerializationHelper
 public:
 	template<typename EntityType>
 	static bool loadFromFile(string const& filename, std::function<EntityType(string const&)> deserializer, EntityType& entity);
-	static bool saveToFile(string const& filename, std::function<string()> serializer);
+    static bool loadFromFile(
+        string const& filename,
+        std::function<SimulationController*(SerializedSimulation const&)> deserializer,
+        SimulationController*& entity);
+    static bool saveToFile(string const& filename, std::function<string()> serializer);
 	static bool saveToFile(string const& filename, std::function<SerializedSimulation()> serializer);
 
 private:
+    static bool loadFromFileIntern(std::string const& filename, std::string& data);
     static bool saveToFileIntern(std::string const& filename, std::string const& data);
 };
 
@@ -23,25 +28,37 @@ template<typename EntityType>
 inline bool SerializationHelper::loadFromFile(string const & filename, std::function<EntityType(string const&)> deserializer, EntityType & entity)
 {
     string data;
-    try {
-        std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
-
-        size_t size;
-
-        stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        data.resize(size);
-        stream.read(&data[0], size);
-        stream.close();
-
-        if (stream.fail()) {
-            return false;
-        }
-    } catch (std::exception const& e) {
+    if (!loadFromFileIntern(filename, data)) {
         return false;
-	}
-
+    }
 	entity = deserializer(data);
 	return true;
+}
+
+inline bool SerializationHelper::loadFromFile(
+    string const& filename,
+    std::function<SimulationController*(SerializedSimulation const&)> deserializer,
+    SimulationController*& entity)
+{
+    SerializedSimulation data;
+    if (!loadFromFileIntern(filename, data.content)) {
+        return false;
+    }
+    auto settingsFilename = QString::fromStdString(filename).replace(QRegularExpression("\\.\\w+$"), ".settings.json");
+    if (!loadFromFileIntern(settingsFilename.toStdString(), data.generalSettings)) {
+        return false;
+    }
+    auto parametersFilename =
+        QString::fromStdString(filename).replace(QRegularExpression("\\.\\w+$"), ".parameters.json");
+    if (!loadFromFileIntern(parametersFilename.toStdString(), data.simulationParameters)) {
+        return false;
+    }
+    auto symbolsFilename = QString::fromStdString(filename).replace(QRegularExpression("\\.\\w+$"), ".symbols.json");
+    if (!loadFromFileIntern(symbolsFilename.toStdString(), data.symbolMap)) {
+        return false;
+    }
+    entity = deserializer(data);
+    return true;
 }
 
 inline bool SerializationHelper::saveToFile(string const& filename, std::function<string()> serializer)
@@ -67,6 +84,26 @@ inline bool SerializationHelper::saveToFile(string const& filename, std::functio
     }
     auto symbolsFilename = QString::fromStdString(filename).replace(QRegularExpression("\\.\\w+$"), ".symbols.json");
     if (!saveToFileIntern(symbolsFilename.toStdString(), data.symbolMap)) {
+        return false;
+    }
+    return true;
+}
+
+inline bool SerializationHelper::loadFromFileIntern(std::string const& filename, std::string& data)
+{
+    try {
+        std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
+
+        size_t size;
+        stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+        if (stream.fail()) {
+            return false;
+        }
+        data.resize(size);
+        stream.read(&data[0], size);
+        stream.close();
+
+    } catch (std::exception const& e) {
         return false;
     }
     return true;

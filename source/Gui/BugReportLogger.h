@@ -9,7 +9,7 @@ class BugReportLogger : public LoggingCallBack
 
 public:
     BugReportLogger();
-    virtual ~BugReportLogger() = default;
+    virtual ~BugReportLogger();
 
     void newLogMessage(Priority priority, std::string const& message) override;
 

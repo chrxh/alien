@@ -12,6 +12,7 @@ public:
     void logMessage(Priority priority, std::string const& message) override;
 
     void registerCallBack(LoggingCallBack* callback) override;
+    void unregisterCallBack(LoggingCallBack* callback) override;
 
 private:
     std::vector<LoggingCallBack*> _callbacks;
