@@ -48,6 +48,7 @@ public:
 	virtual void moveExtendedSelection(QVector2D const &delta);
 	virtual void reconnectSelectedCells();
 	virtual void rotateSelection(double angle);
+    virtual void colorizeSelection(int colorCode);
 
 	virtual void updateCluster(ClusterDescription const& cluster);
 	virtual void updateParticle(ParticleDescription const& particle);
