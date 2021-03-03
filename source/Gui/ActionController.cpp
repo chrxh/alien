@@ -131,7 +131,8 @@ void ActionController::init(
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
 	connect(actions->actionNewParticles, &QAction::triggered, this, &ActionController::onNewParticles);
-	connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
+    connect(actions->actionColorize, &QAction::triggered, this, &ActionController::onColorize);
+    connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
 	connect(actions->actionSaveCol, &QAction::triggered, this, &ActionController::onSaveCollection);
 	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
 	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
@@ -1131,6 +1132,23 @@ void ActionController::onNewParticles()
     }
 }
 
+void ActionController::onColorize()
+{
+    bool ok;
+    auto colorCode = QInputDialog::getInt(nullptr, "Colorize", "Enter a color code (a value between 0 and 6):", 0, 0, 6, 1, &ok);
+    if (ok) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, "colorize selection");
+
+        _repository->colorizeSelection(colorCode);
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController},
+            UpdateDescription::All);
+
+        loggingService->logMessage(Priority::Unimportant, "colorize selection finished");
+    }
+}
+
 void ActionController::onShowAbout()
 {
     QFile file("://Version.txt");
@@ -1264,7 +1282,8 @@ void ActionController::updateActionsEnableState()
 	actions->actionNewRectangle->setEnabled(true);
 	actions->actionNewHexagon->setEnabled(true);
 	actions->actionNewParticles->setEnabled(true);
-	actions->actionLoadCol->setEnabled(true);
+    actions->actionColorize->setEnabled(collectionSelected);
+    actions->actionLoadCol->setEnabled(true);
 	actions->actionSaveCol->setEnabled(editMode && collectionSelected);
 	actions->actionCopyCol->setEnabled(editMode && collectionSelected);
 	actions->actionPasteCol->setEnabled(collectionCopied);
