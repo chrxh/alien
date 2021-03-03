@@ -63,7 +63,8 @@ private:
 	Q_SLOT void onNewRectangle();
 	Q_SLOT void onNewHexagon();
 	Q_SLOT void onNewParticles();
-	Q_SLOT void onLoadCollection();
+    Q_SLOT void onColorize();
+    Q_SLOT void onLoadCollection();
 	Q_SLOT void onSaveCollection();
 	Q_SLOT void onCopyCollection();
 	Q_SLOT void onPasteCollection();

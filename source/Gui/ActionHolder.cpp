@@ -227,6 +227,10 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionNewParticles = new QAction("New particles", this);
 	actionNewParticles->setEnabled(true);
 
+	actionColorize = new QAction("Colorize", this);
+    actionColorize->setEnabled(true);
+    actionColorize->setEnabled(false);
+
 	actionLoadCol = new QAction("Load", this);
 	actionLoadCol->setEnabled(true);
 
