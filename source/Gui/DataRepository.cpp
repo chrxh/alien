@@ -571,6 +571,17 @@ void DataRepository::rotateSelection(double angle)
 	rotate(angle, _selectedClusterIds.size(), _selectedParticleIds.size(), clusterResolver, particleResolver);
 }
 
+void DataRepository::colorizeSelection(int colorCode)
+{
+    for (uint64_t cellId : _selectedCellIds) {
+        if (isCellPresent(cellId)) {
+            int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
+            CellDescription& cellDesc = getCellDescRef(cellId);
+            cellDesc.metadata->color = colorCode;
+        }
+    }
+}
+
 void DataRepository::updateCluster(ClusterDescription const & cluster)
 {
 	int clusterIndex = _navi.clusterIndicesByClusterIds.at(cluster.id);
