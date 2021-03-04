@@ -116,8 +116,21 @@ void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 	_navi.update(_data);
 }
 
-void DataRepository::addAndSelectData(DataDescription data, QVector2D const & posDelta)
+void DataRepository::addAndSelectData(DataDescription data, QVector2D const& posDelta, Reconnect reconnect)
 {
+    if (Reconnect::Yes == reconnect) {
+        std::unordered_set<uint64_t> cellIds;
+        if (auto const& clusters = data.clusters)
+            for (auto const& cluster : *clusters) {
+                if (auto const& cells = cluster.cells) {
+                    for (auto const& cell : *cells) {
+                        cellIds.insert(cell.id);
+					}
+				}
+			}
+        _descHelper->reconnect(data, data, cellIds);
+	}
+
 	QVector2D centerOfData = data.calcCenter();
 	QVector2D targetCenter = _rect.center().toQVector2D() + posDelta;
 	QVector2D delta = targetCenter - centerOfData;
