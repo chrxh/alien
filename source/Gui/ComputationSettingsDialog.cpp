@@ -1,8 +1,9 @@
-﻿#include <QMessageBox>
+﻿#include "ComputationSettingsDialog.h"
+
+#include <QMessageBox>
 
 #include "Settings.h"
 #include "StringHelper.h"
-#include "ComputationSettingsDialog.h"
 #include "SimulationConfig.h"
 
 ComputationSettingsDialog::ComputationSettingsDialog(SimulationConfig const& config, QWidget * parent /*= nullptr*/)

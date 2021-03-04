@@ -7,5 +7,8 @@ class DescriptionFactoryImpl : public DescriptionFactory
 public:
     virtual ~DescriptionFactoryImpl() = default;
 
-    virtual ClusterDescription createHexagon(CreateHexagonParameters const& parameters) override;
+    ClusterDescription createHexagon(CreateHexagonParameters const& parameters) const override;
+
+    ClusterDescription createUnconnectedCircle(CreateCircleParameters const& parameters)
+        const override;
 };

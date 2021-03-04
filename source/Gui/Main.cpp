@@ -52,6 +52,13 @@ int main(int argc, char *argv[])
         bugReportController.execute();
 
         exit(EXIT_FAILURE);
+    } catch (...) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        auto message = "Unknown exception thrown.";
+        loggingService->logMessage(Priority::Important, message);
+
+        BugReportController bugReportController(message, bugReportLogger.getFullProtocol());
+        bugReportController.execute();
     }
 }
 

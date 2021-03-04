@@ -1,8 +1,11 @@
-#include "Physics.h"
-
 #include "DescriptionFactoryImpl.h"
 
-ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters const& parameters)
+#include <math.h>
+
+#include "Physics.h"
+
+
+ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters const& parameters) const
 {
     auto addConnection = [](CellDescription& cell1, CellDescription& cell2) {
         cell1.addConnection(cell2.id);
@@ -100,4 +103,37 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
     }
 
     return hexagon;
+}
+
+ClusterDescription DescriptionFactoryImpl::createUnconnectedCircle(
+    CreateCircleParameters const& parameters) const
+{
+    auto circle =
+        ClusterDescription().setVel({0, 0}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata());
+
+    uint64_t id = 0;
+    for (double radius = parameters._innerRadius; radius - FLOATINGPOINT_HIGH_PRECISION <= parameters._outerRadius;
+         radius += parameters._cellDistance) {
+        auto angleInc = radius > 0 ? asin(parameters._cellDistance / (2.0 * radius)) * 2.0 * radToDeg : 361.0;
+        angleInc = 360.0 / floor(360.0 / angleInc);
+        std::unordered_set<uint64_t> cellIds;
+        for (auto angle = 0.0; angle < 360.0; angle += angleInc) {
+            auto relPos = Physics::unitVectorOfAngle(angle) * radius;
+
+            auto cell = CellDescription()
+                            .setId(++id)
+                            .setEnergy(parameters._cellEnergy)
+                            .setPos(parameters._centerPosition + relPos)
+                            .setMaxConnections(parameters._maxConnections)
+                            .setFlagTokenBlocked(false)
+                            .setTokenBranchNumber(0)
+                            .setMetadata(CellMetadata().setColor(parameters._colorCode))
+                            .setCellFeature(CellFeatureDescription());
+            circle.addCell(cell);
+        }
+    }
+
+    circle.setPos(circle.getClusterPosFromCells());
+
+    return circle;
 }

@@ -5,8 +5,9 @@
 
 #include "Definitions.h"
 
-constexpr double degToRad = 3.14159265358979/180.0;
-constexpr double radToDeg = 180.0/3.14159265358979;
+constexpr double pi = 3.14159265358979;
+constexpr double degToRad = pi / 180.0;
+constexpr double radToDeg = 180.0 / pi;
 
 class ENGINEINTERFACE_EXPORT Physics
 {
