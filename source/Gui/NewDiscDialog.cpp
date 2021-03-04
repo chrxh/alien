@@ -64,14 +64,15 @@ bool NewDiscDialog::validate() const
     result &= ok;
     auto innerRadius = ui.innerRadiusEdit->text().toInt(&ok);
     result &= ok;
-    ui.distEdit->text().toDouble(&ok);
+    auto distance = ui.distEdit->text().toDouble(&ok);
     result &= ok;
-    ui.energyEdit->text().toDouble(&ok);
+    auto energy = ui.energyEdit->text().toDouble(&ok);
     result &= ok;
-    ui.colorCodeEdit->text().toInt(&ok);
+    auto colorCode = ui.colorCodeEdit->text().toInt(&ok);
     result &= ok;
 
-    if (outerRadius < 0 || innerRadius < 0 || outerRadius < innerRadius) {
+    if (outerRadius < 0 || innerRadius < 0 || outerRadius < innerRadius || energy <= 0.0 || colorCode < 0
+        || distance < 0.0) {
         return false;
     }
 
