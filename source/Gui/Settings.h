@@ -167,6 +167,17 @@ namespace Const
     const std::string NewHexagonColorCodeKey = "newHaxagon/colorCode";
     const int NewHexagonColorCodeDefault = 0;
 
+	const std::string NewCircleOuterRadiusKey = "newCircle/outerRadius";
+    const int NewCircleOuterRadiusDefault = 20;
+    const std::string NewCircleInnerRadiusKey = "newCircle/innerRadius";
+    const int NewCircleInnerRadiusDefault = 15;
+    const std::string NewCircleDistanceKey = "newCircle/distance";
+    const double NewCircleDistanceDefault = 1.0;
+    const std::string NewCircleCellEnergyKey = "newCircle/cellEnergy";
+    const double NewCircleCellEnergyDefault = 100.0;
+    const std::string NewCircleColorCodeKey = "newCircle/colorCode";
+    const int NewCircleColorCodeDefault = 0;
+
 	const std::string NewParticlesTotalEnergyKey = "newParticles/totalEnergy";
 	const double NewParticlesTotalEnergyDefault = 1000000.0;
 	const std::string NewParticlesMaxEnergyPerParticleKey = "newParticles/maxEnergyPerParticle";

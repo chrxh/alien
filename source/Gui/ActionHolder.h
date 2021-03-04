@@ -55,7 +55,8 @@ public:
 	QAction* actionNewRectangle = nullptr;
 	QAction* actionNewHexagon = nullptr;
     QAction* actionNewParticles = nullptr;
-    QAction* actionColorize = nullptr;
+    QAction* actionNewDisc = nullptr;
+    QAction* actionColorizeSel = nullptr;
 	QAction* actionLoadCol = nullptr;
 	QAction* actionSaveCol = nullptr;
 	QAction* actionCopyCol = nullptr;

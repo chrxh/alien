@@ -30,8 +30,13 @@ public:
 
 	virtual void addAndSelectCell(QVector2D const& posDelta);
 	virtual void addAndSelectParticle(QVector2D const& posDelta);
-	virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta);
-	struct DataAndAngle {
+    enum class Reconnect
+    {
+        No,
+        Yes
+    };
+    virtual void addAndSelectData(DataDescription data, QVector2D const& posDelta, Reconnect reconnect = Reconnect::No);
+    struct DataAndAngle {
 		DataDescription data;
 		boost::optional<double> angle;
 	};

@@ -225,9 +225,10 @@ void MainView::setupMenuAndToolbar()
 
     ui->menuCollection->addAction(actions->actionNewRectangle);
     ui->menuCollection->addAction(actions->actionNewHexagon);
+    ui->menuCollection->addAction(actions->actionNewDisc);
     ui->menuCollection->addAction(actions->actionNewParticles);
     ui->menuCollection->addSeparator();
-    ui->menuCollection->addAction(actions->actionColorize);
+    ui->menuCollection->addAction(actions->actionColorizeSel);
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionLoadCol);
     ui->menuCollection->addAction(actions->actionSaveCol);

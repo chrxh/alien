@@ -1,5 +1,14 @@
 # Release notes
 
+## [2.4.0] - 2021-03-04
+### Added
+- creating disc structures
+- selections can be colored
+
+### Changed
+- simulation parameters and symbol maps are saved in JSON format
+- saved simulations are divided into 4 files: *.sim, *.settings.json, *.parameters.json and *.symbols.json
+
 ## [2.3.0] - 2021-02-21
 ### Added
 - infobar, which displays general information, monitor information and logging protocol

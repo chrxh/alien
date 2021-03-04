@@ -47,6 +47,7 @@
 #include "ActionHolder.h"
 #include "SimulationConfig.h"
 #include "WebSimulationController.h"
+#include "NewDiscDialog.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -130,8 +131,9 @@ void ActionController::init(
 
 	connect(actions->actionNewRectangle, &QAction::triggered, this, &ActionController::onNewRectangle);
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
-	connect(actions->actionNewParticles, &QAction::triggered, this, &ActionController::onNewParticles);
-    connect(actions->actionColorize, &QAction::triggered, this, &ActionController::onColorize);
+    connect(actions->actionNewDisc, &QAction::triggered, this, &ActionController::onNewDisc);
+    connect(actions->actionNewParticles, &QAction::triggered, this, &ActionController::onNewParticles);
+    connect(actions->actionColorizeSel, &QAction::triggered, this, &ActionController::onColorizeSelection);
     connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
 	connect(actions->actionSaveCol, &QAction::triggered, this, &ActionController::onSaveCollection);
 	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
@@ -1110,6 +1112,33 @@ void ActionController::onNewHexagon()
     }
 }
 
+void ActionController::onNewDisc()
+{
+    NewDiscDialog dialog;
+    if (dialog.exec()) {
+
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, "create circle");
+
+        auto factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+        auto circle =
+            factory->createUnconnectedCircle(DescriptionFactory::CreateCircleParameters()
+                                                 .outerRadius(dialog.getOuterRadius())
+                                                 .innerRadius(dialog.getInnerRadius())
+                                                 .cellEnergy(dialog.getCellEnergy())
+                                                 .colorCode(dialog.getColorCode())
+                                                 .cellDistance(dialog.getDistance())
+                                                 .maxConnections(_mainModel->getSimulationParameters().cellMaxBonds));
+        _repository->addAndSelectData(DataDescription().addCluster(circle), {0, 0}, DataRepository::Reconnect::Yes);
+
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController},
+            UpdateDescription::All);
+
+        loggingService->logMessage(Priority::Unimportant, "create circle finished");
+    }
+}
+
 void ActionController::onNewParticles()
 {
 	NewParticlesDialog dialog;
@@ -1132,10 +1161,10 @@ void ActionController::onNewParticles()
     }
 }
 
-void ActionController::onColorize()
+void ActionController::onColorizeSelection()
 {
     bool ok;
-    auto colorCode = QInputDialog::getInt(nullptr, "Colorize", "Enter a color code (a value between 0 and 6):", 0, 0, 6, 1, &ok);
+    auto colorCode = QInputDialog::getInt(nullptr, "Colorize selection", "Enter a color code (a value between 0 and 6):", 0, 0, 6, 1, &ok);
     if (ok) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, "colorize selection");
@@ -1282,7 +1311,7 @@ void ActionController::updateActionsEnableState()
 	actions->actionNewRectangle->setEnabled(true);
 	actions->actionNewHexagon->setEnabled(true);
 	actions->actionNewParticles->setEnabled(true);
-    actions->actionColorize->setEnabled(collectionSelected);
+    actions->actionColorizeSel->setEnabled(collectionSelected);
     actions->actionLoadCol->setEnabled(true);
 	actions->actionSaveCol->setEnabled(editMode && collectionSelected);
 	actions->actionCopyCol->setEnabled(editMode && collectionSelected);
