@@ -51,7 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;$(Qt_INCLUDEPATH_);..\..\..\source\Gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\external\boost_1_75_0\stage\lib;$(Qt_LIBPATH_);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -60,7 +60,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;$(Qt_INCLUDEPATH_);..\..\..\source\Gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\..\external\boost_1_75_0\stage\lib;$(Qt_LIBPATH_);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -117,6 +117,7 @@
     <QtUic Include="..\..\..\source\Gui\MainView.ui" />
     <QtUic Include="..\..\..\source\Gui\MetadataEditTab.ui" />
     <QtUic Include="..\..\..\source\Gui\MonitorView.ui" />
+    <QtUic Include="..\..\..\source\Gui\NewDiscDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\NewHexagonDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\NewParticlesDialog.ui" />
     <QtUic Include="..\..\..\source\Gui\NewRectangleDialog.ui" />
@@ -198,6 +199,7 @@
     <ClCompile Include="..\..\..\source\Gui\MetadataEditWidget.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MonitorController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MonitorView.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\NewDiscDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\NewHexagonDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\NewParticlesDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\NewRectangleDialog.cpp" />
@@ -253,6 +255,7 @@
     <QtMoc Include="..\..\..\source\Gui\LoggingView.h" />
     <ClInclude Include="..\..\..\source\Gui\MarkerItem.h" />
     <ClInclude Include="..\..\..\source\Gui\MessageHelper.h" />
+    <QtMoc Include="..\..\..\source\Gui\NewDiscDialog.h" />
     <ClInclude Include="..\..\..\source\Gui\ParticleItem.h" />
     <ClInclude Include="..\..\..\source\Gui\PixelImageSectionItem.h" />
     <ClInclude Include="..\..\..\source\Gui\QApplicationHelper.h" />

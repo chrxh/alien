@@ -1,9 +1,10 @@
 #include "EngineInterface/SimulationParameters.h"
-#include "Gui/Settings.h"
-#include "Gui/StringHelper.h"
 
-#include "ui_NewHexagonDialog.h"
 #include "NewHexagonDialog.h"
+#include "ui_NewHexagonDialog.h"
+
+#include "Settings.h"
+#include "StringHelper.h"
 
 
 NewHexagonDialog::NewHexagonDialog(SimulationParameters const& simulationParameters, QWidget *parent)

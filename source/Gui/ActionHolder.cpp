@@ -224,12 +224,15 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionNewHexagon = new QAction("New hexagon", this);
 	actionNewHexagon->setEnabled(true);
 
+	actionNewDisc = new QAction("New disc", this);
+    actionNewDisc->setEnabled(true);
+
 	actionNewParticles = new QAction("New particles", this);
 	actionNewParticles->setEnabled(true);
 
-	actionColorize = new QAction("Colorize", this);
-    actionColorize->setEnabled(true);
-    actionColorize->setEnabled(false);
+	actionColorizeSel = new QAction("Colorize selection", this);
+    actionColorizeSel->setEnabled(true);
+    actionColorizeSel->setEnabled(false);
 
 	actionLoadCol = new QAction("Load", this);
 	actionLoadCol->setEnabled(true);
