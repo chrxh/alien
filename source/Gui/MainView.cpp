@@ -228,14 +228,14 @@ void MainView::setupMenuAndToolbar()
     ui->menuCollection->addAction(actions->actionNewDisc);
     ui->menuCollection->addAction(actions->actionNewParticles);
     ui->menuCollection->addSeparator();
-    ui->menuCollection->addAction(actions->actionColorizeSel);
-    ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionLoadCol);
     ui->menuCollection->addAction(actions->actionSaveCol);
     ui->menuCollection->addAction(actions->actionCopyCol);
     ui->menuCollection->addAction(actions->actionPasteCol);
     ui->menuCollection->addAction(actions->actionDeleteSel);
     ui->menuCollection->addAction(actions->actionDeleteCol);
+    ui->menuCollection->addSeparator();
+    ui->menuCollection->addAction(actions->actionColorizeSel);
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionRandomMultiplier);
     ui->menuCollection->addAction(actions->actionGridMultiplier);

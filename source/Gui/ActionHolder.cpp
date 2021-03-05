@@ -218,16 +218,16 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionPasteFromClipboard = new QAction("Paste memory from clipboard", this);
     actionPasteFromClipboard->setEnabled(false);
 
-	actionNewRectangle = new QAction("New rectangle", this);
+	actionNewRectangle = new QAction("Add rectangle", this);
 	actionNewRectangle->setEnabled(true);
 
-	actionNewHexagon = new QAction("New hexagon", this);
+	actionNewHexagon = new QAction("Add hexagon", this);
 	actionNewHexagon->setEnabled(true);
 
-	actionNewDisc = new QAction("New disc", this);
+	actionNewDisc = new QAction("Add disc", this);
     actionNewDisc->setEnabled(true);
 
-	actionNewParticles = new QAction("New particles", this);
+	actionNewParticles = new QAction("Add particles", this);
 	actionNewParticles->setEnabled(true);
 
 	actionColorizeSel = new QAction("Colorize selection", this);

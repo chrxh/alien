@@ -2,7 +2,7 @@
 
 ## [2.4.0] - 2021-03-04
 ### Added
-- creating disc structures
+- disc-shaped structures can be created
 - selections can be colored
 
 ### Changed
