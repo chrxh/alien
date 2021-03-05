@@ -72,7 +72,7 @@ public:
         if (oldIndex + size - 1 >= _size) {
             atomicAdd(_numEntries, -size);
             printf("Not enough fixed memory!\n");
-            return nullptr;
+            ABORT();
         }
         return &(*_data)[oldIndex];
     }
@@ -83,7 +83,7 @@ public:
         if (oldIndex >= _size) {
             atomicAdd(_numEntries, -1);
             printf("Not enough fixed memory!\n");
-            return nullptr;
+            ABORT();
         }
         return &(*_data)[oldIndex];
     }
