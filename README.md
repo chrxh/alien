@@ -5,7 +5,7 @@
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
-Artificial Life Environment (ALiEn) is a simulation program based on a specialized 2D physics and rendering engine in CUDA. Each simulated body has a graph-like structure of connected building blocks that can either be programmed or equipped with devices to act physically (accelerators, sensors, weapons, constructors, etc.). These internal body processes are triggered by signals coming from circulating tokens. Therefore, it is more appropriate to think of the bodies as small machines or agents.
+Artificial Life Environment (ALiEn) is a simulation program based on a specialized 2D physics and rendering engine in CUDA. Each simulated body has a graph-like structure of connected building blocks that can either be programmed or equipped with functions to act in the world (accelerators, sensors, weapons, constructors, etc.). Such internal processes are triggered by signals coming from circulating tokens. Therefore, it is more appropriate to think of the bodies as small machines or agents.
 
 ## Main features
 - Realistic physical calculations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
