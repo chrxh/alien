@@ -387,6 +387,9 @@
     <ClCompile Include="..\..\..\source\Gui\NewDiscDialog.cpp">
       <Filter>Impl\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\ColorizeDialogController.cpp">
+      <Filter>Impl\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -445,6 +448,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\BugReportLogger.h">
       <Filter>Impl\BugReporting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Gui\ColorizeDialogController.h">
+      <Filter>Impl\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

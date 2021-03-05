@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Add rectangle structure</string>
+   <string>Add rectangle-shaped structure</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0" colspan="2">

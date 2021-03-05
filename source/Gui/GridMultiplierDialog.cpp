@@ -1,8 +1,8 @@
 #include "GridMultiplierDialog.h"
 #include "ui_GridMultiplierDialog.h"
 
-#include "Gui/Settings.h"
-#include "Gui/StringHelper.h"
+#include "Settings.h"
+#include "StringHelper.h"
 
 GridMultiplierDialog::GridMultiplierDialog(QVector2D centerPos, QWidget *parent) :
     QDialog(parent),
