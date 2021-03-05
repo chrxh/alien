@@ -43,6 +43,9 @@ public:
     template<typename T>
     __device__ __inline__ T* getArray(int numElements)
     {
+        if (0 == numElements) {
+            return nullptr;
+        }
         int newBytesToOccupy = numElements * sizeof(T);
         newBytesToOccupy = newBytesToOccupy + 16 - (newBytesToOccupy % 16);
         int oldIndex = atomicAdd(_bytesOccupied, newBytesToOccupy);
