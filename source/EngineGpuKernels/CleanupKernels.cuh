@@ -327,7 +327,6 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     if ((data.timestep % freezingTimesteps) == 0) {
         KERNEL_CALL_1_1(unfreeze, data);
         data.entities.clusterFreezedPointers.reset();
-
         if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
             data.entitiesForCleanup.particles.reset();
             KERNEL_CALL(cleanupParticles, data);
@@ -351,7 +350,7 @@ __global__ void cleanupAfterSimulation(SimulationData data)
             KERNEL_CALL(cleanupCells, data.entities.clusterPointers, data.entitiesForCleanup.cells);
             data.entities.cells.swapContent(data.entitiesForCleanup.cells);
         }
-
+        
         if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
             data.entitiesForCleanup.tokenPointers.reset();
             KERNEL_CALL(cleanupTokenPointers, data.entities.clusterPointers, data.entitiesForCleanup.tokenPointers);

@@ -153,7 +153,6 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
-
     KERNEL_CALL(particleProcessingStep1, data);
     KERNEL_CALL(particleProcessingStep2, data);
     KERNEL_CALL(particleProcessingStep3, data);

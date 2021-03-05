@@ -31,3 +31,5 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define CHECK_FOR_CUDA_ERROR(val) \
     checkAndThrowError( (val), #val, __FILENAME__, __LINE__ )
+
+#define ABORT() *((int*)nullptr) = 1;
