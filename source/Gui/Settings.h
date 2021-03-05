@@ -197,6 +197,9 @@ namespace Const
     const std::string ExtrapolateContentKey = "computation/extrapolateContent";
     const bool ExtrapolateContentDefault = false;
 
+	const std::string ColorizeColorCodeKey = "colorize/colorCode";
+    const int ColorizeColorCodeDefault = 0;
+
     //messages
     QString const InfoAbout = "Artificial Life Environment, version %1.\nDeveloped by Christian Heinemann.";
     QString const InfoConnectedTo = "You are connected to %1.";

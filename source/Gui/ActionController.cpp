@@ -48,6 +48,7 @@
 #include "SimulationConfig.h"
 #include "WebSimulationController.h"
 #include "NewDiscDialog.h"
+#include "ColorizeDialogController.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
@@ -1163,13 +1164,11 @@ void ActionController::onNewParticles()
 
 void ActionController::onColorizeSelection()
 {
-    bool ok;
-    auto colorCode = QInputDialog::getInt(nullptr, "Colorize selection", "Enter a color code (a value between 0 and 6):", 0, 0, 6, 1, &ok);
-    if (ok) {
+    if (auto colorCode = ColorizeDialogController::executeDialogAndReturnColorCode()) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, "colorize selection");
 
-        _repository->colorizeSelection(colorCode);
+        _repository->colorizeSelection(*colorCode);
         Q_EMIT _notifier->notifyDataRepositoryChanged(
             {Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController},
             UpdateDescription::All);
