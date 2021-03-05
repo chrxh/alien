@@ -49,7 +49,7 @@ public:
         if (oldIndex + newBytesToOccupy - 1 >= _size) {
             atomicAdd(_bytesOccupied, -newBytesToOccupy);
             printf("Not enough dynamic memory!\n");
-            return nullptr;
+            ABORT();
         }
         return reinterpret_cast<T*>(&(*_data)[oldIndex]);
     }
