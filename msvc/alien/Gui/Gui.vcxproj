@@ -163,6 +163,7 @@
     <ClCompile Include="..\..\..\source\Gui\CellItem.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ClusterEditTab.cpp" />
     <ClCompile Include="..\..\..\source\Gui\CodeEditWidget.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\ColorizeDialogController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ComputationSettingsDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ComputationSettingsWidget.cpp" />
     <ClCompile Include="..\..\..\source\Gui\CoordinateSystem.cpp" />
@@ -246,6 +247,7 @@
     <ClInclude Include="..\..\..\source\Gui\BugReportLogger.h" />
     <ClInclude Include="..\..\..\source\Gui\CellConnectionItem.h" />
     <ClInclude Include="..\..\..\source\Gui\CellItem.h" />
+    <ClInclude Include="..\..\..\source\Gui\ColorizeDialogController.h" />
     <ClInclude Include="..\..\..\source\Gui\CoordinateSystem.h" />
     <ClInclude Include="..\..\..\source\Gui\Definitions.h" />
     <QtMoc Include="..\..\..\source\Gui\GuiLogger.h" />
