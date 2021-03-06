@@ -102,6 +102,14 @@ namespace
 	}
 }
 
+namespace
+{
+    int calcHeight(int numRows)
+	{
+		return 26 + 13 * (numRows - 1);
+	}
+}
+
 void TokenEditTab::updateDisplay()
 {
 
@@ -152,13 +160,14 @@ void TokenEditTab::updateDisplay()
 
 			//create hex editor
 			HexEditWidget* hex = new HexEditWidget();
-			hex->setMinimumHeight(26 + 15 * (v.size() - 1));
-			hex->setGeometry(0, 0, 100, 26 + 15 * (v.size() - 1));
-			hex->setMaximumHeight(26 + 15 * (v.size() - 1));
+            auto height = calcHeight(v.size());
+            hex->setMinimumHeight(height);
+            hex->setGeometry(0, 0, 100, height);
+            hex->setMaximumHeight(height);
 			hex->setStyleSheet("border: 0px");
 			hex->updateDisplay(token.data->mid(tokenMemPointer, 1));
+            ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
 			ui->tableWidget->setCellWidget(row, 2, hex);
-			ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
 
 			//update signal mapper
 			_signalMapper->setMapping(hex, tokenMemPointer);
@@ -197,7 +206,7 @@ void TokenEditTab::updateDisplay()
 				ui->tableWidget->setItem(row, 0, new QTableWidgetItem(QString("%1 - %2").arg(k, 2, 16, QChar('0')).arg(kNew, 2, 16, QChar('0')).toUpper()));
 			else
 				ui->tableWidget->setItem(row, 0, new QTableWidgetItem(QString("%1").arg(k, 2, 16, QChar('0')).toUpper()));
-			ui->tableWidget->setItem(row, 1, new QTableWidgetItem("(pure data block)"));
+			ui->tableWidget->setItem(row, 1, new QTableWidgetItem("(unnamed data block)"));
 			ui->tableWidget->item(row, 0)->setFlags(Qt::NoItemFlags);
 			ui->tableWidget->item(row, 0)->setTextAlignment(Qt::AlignTop);
             ui->tableWidget->item(row, 0)->setForeground(Const::CellEditTextColor1);
@@ -206,7 +215,7 @@ void TokenEditTab::updateDisplay()
             ui->tableWidget->item(row, 1)->setForeground(Const::CellEditTextColor2);
 			ui->tableWidget->setVerticalHeaderItem(row, new QTableWidgetItem(""));
 
-			int size = (kNew - k) / 6;
+			int size = (kNew - k) / 4 + 1;
 			HexEditWidget* hex = createHexEditWidget(size, row, tokenMemPointer);
 			hex->updateDisplay(token.data->mid(tokenMemPointer, kNew - k));
 			_hexEditByStartAddress[tokenMemPointer] = hex;
@@ -221,9 +230,10 @@ void TokenEditTab::updateDisplay()
 HexEditWidget* TokenEditTab::createHexEditWidget(int size, int row, int tokenMemPointer)
 {
 	HexEditWidget* hex = new HexEditWidget();
-	hex->setMaximumHeight(26 + 13 * size);
-	hex->setMinimumHeight(26 + 13 * size);
-	hex->setGeometry(0, 0, 100, 26 + 13 * size);
+    auto height = calcHeight(size);
+    hex->setMaximumHeight(height);
+    hex->setMinimumHeight(height);
+    hex->setGeometry(0, 0, 100, height);
 	hex->setStyleSheet("border: 0px");
 	ui->tableWidget->setCellWidget(row, 2, hex);
 	ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);

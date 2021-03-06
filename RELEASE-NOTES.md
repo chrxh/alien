@@ -9,6 +9,9 @@
 - simulation parameters and symbol maps are saved in JSON format
 - saved simulations are divided into 4 files: *.sim, *.settings.json, *.parameters.json and *.symbols.json
 
+### Fixed
+- second scrollbar in token editor avoided
+
 ## [2.3.0] - 2021-02-21
 ### Added
 - infobar, which displays general information, monitor information and logging protocol
