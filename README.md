@@ -27,6 +27,7 @@ The development is driven by the desire to better understand the conditions for 
 * [Website](https://alien-project.org)
 * [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 * [Twitter](https://twitter.com/chrx_h)
+* [Reddit](https://www.reddit.com/r/AlienProject)
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
