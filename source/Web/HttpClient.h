@@ -21,6 +21,11 @@ public:
 private:
     Q_SLOT void finished(QNetworkReply* reply);
 
+    void retry(QNetworkReply* reply);
+
     QNetworkAccessManager _networkManager;
     std::unordered_map<QNetworkReply*, string> _handlerByReply;
+
+    using PostData = std::variant<QHttpMultiPart*, QByteArray>;
+    std::unordered_map<QNetworkReply*, PostData> _postDataByReply;
 };

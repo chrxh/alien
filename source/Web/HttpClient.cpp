@@ -31,6 +31,7 @@ void HttpClient::postText(QUrl const & url, string const& handler, QByteArray co
 
     auto reply = _networkManager.post(request, data);
     _handlerByReply.insert_or_assign(reply, handler);
+    _postDataByReply.insert_or_assign(reply, data);
 }
 
 void HttpClient::postBinary(QUrl const & url, string const& handler, QHttpMultiPart* data)
@@ -42,12 +43,31 @@ void HttpClient::postBinary(QUrl const & url, string const& handler, QHttpMultiP
     auto reply = _networkManager.post(request, data);
     data->setParent(reply);
     _handlerByReply.insert_or_assign(reply, handler);
+    _postDataByReply.insert_or_assign(reply, data);
 }
 
 void HttpClient::finished(QNetworkReply * reply)
 {
-    if (QNetworkReply::NetworkError::NoError != reply->error()) {
-        Q_EMIT error("Could not read data from server.");
+    auto cleanupOnExit = [&]() {
+        reply->deleteLater();
+        _handlerByReply.erase(reply);
+        _postDataByReply.erase(reply);
+    };
+
+    auto errorCode = reply->error();
+    if (QNetworkReply::NetworkError::NoError != errorCode) {
+
+        if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
+            retry(reply);
+            cleanupOnExit();
+            return;
+        }
+
+        auto raw = reply->rawHeaderList();
+        Q_EMIT error(QString("Could not read data from server. %1").arg(reply->error()).toStdString());
+
+        reply->deleteLater();
+        cleanupOnExit();
         return;
     }
     auto data = reply->readAll();
@@ -55,5 +75,21 @@ void HttpClient::finished(QNetworkReply * reply)
     auto handler = _handlerByReply.at(reply);
     Q_EMIT dataReceived(handler, data);
 
-    reply->deleteLater();
+    cleanupOnExit();
+}
+
+void HttpClient::retry(QNetworkReply* reply)
+{
+    auto operation = reply->operation();
+    if (QNetworkAccessManager::GetOperation == reply->operation()) {
+        get(reply->url(), _handlerByReply.at(reply));
+    }
+    if (QNetworkAccessManager::PostOperation == reply->operation()) {
+        auto postData = _postDataByReply.at(reply);
+        if (std::holds_alternative<QByteArray>(postData)) {
+            postText(reply->url(), _handlerByReply.at(reply), std::get<QByteArray>(postData));
+        } else {
+            postBinary(reply->url(), _handlerByReply.at(reply), std::get<QHttpMultiPart*>(postData));
+        }
+    }
 }
