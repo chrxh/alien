@@ -33,7 +33,7 @@ The development is driven by the desire to better understand the conditions for 
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
 ## Documentation
-Please visit [alien-project.org](https://alien-project.org/documentation.html) for a comprehensive documentation of the program and the underlying model.
+Please visit [alien-project.org](https://alien-project.org/documentation.html) for a documentation of the program and the underlying model. A new documentation with many tutorials is currently under construction.
 
 ## Screenshots
 #### Startup screen
