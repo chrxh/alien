@@ -2,6 +2,9 @@
 #include <QNetworkReply>
 #include <QHttpMultiPart>
 
+#include "Base/ServiceLocator.h"
+#include "Base/LoggingService.h"
+
 #include "HttpClient.h"
 
 HttpClient::HttpClient(QObject* parent /*= nullptr*/)
@@ -57,11 +60,16 @@ void HttpClient::finished(QNetworkReply * reply)
     auto errorCode = reply->error();
     if (QNetworkReply::NetworkError::NoError != errorCode) {
 
-        if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
-            retry(reply);
-            cleanupOnExit();
-            return;
-        }
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(
+            Priority::Important,
+            QString("A network error occurred. Error code: %1.").arg(reply->error()).toStdString());
+
+        //        if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
+        retry(reply);
+        cleanupOnExit();
+        return;
+        //        }
 
         auto raw = reply->rawHeaderList();
         Q_EMIT error(QString("Could not read data from server. %1").arg(reply->error()).toStdString());
