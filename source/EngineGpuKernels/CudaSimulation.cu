@@ -285,8 +285,8 @@ namespace
 {
     void calcImageBlurFactors(int* imageBlurFactors)
     {
-        imageBlurFactors[0] = 300;
-        imageBlurFactors[1] = 40;
+        imageBlurFactors[0] = 200;
+        imageBlurFactors[1] = 20;
         imageBlurFactors[2] = 7;
         imageBlurFactors[3] = 7;
         imageBlurFactors[4] = 7;
