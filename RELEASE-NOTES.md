@@ -1,5 +1,9 @@
 # Release notes
 
+## [2.4.1] - 2021-03-17
+### Fixed
+- fix performance bug when using glow effect
+
 ## [2.4.0] - 2021-03-05
 ### Added
 - disc-shaped structures can be created
