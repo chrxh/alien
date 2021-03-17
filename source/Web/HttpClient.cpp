@@ -65,11 +65,11 @@ void HttpClient::finished(QNetworkReply * reply)
             Priority::Important,
             QString("A network error occurred. Error code: %1.").arg(reply->error()).toStdString());
 
-        //        if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
-        retry(reply);
-        cleanupOnExit();
-        return;
-        //        }
+        if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
+            retry(reply);
+            cleanupOnExit();
+            return;
+        }
 
         auto raw = reply->rawHeaderList();
         Q_EMIT error(QString("Could not read data from server. %1").arg(reply->error()).toStdString());
