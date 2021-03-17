@@ -365,7 +365,7 @@ __global__ void blurImage(
         __syncthreads();
 
         int2 pos{index % imageSize.x, index / imageSize.x };
-        int2 relPos{ static_cast<int>(threadIdx.x) - 5, static_cast<int>(threadIdx.y) - 5 };
+        int2 relPos{ static_cast<int>(threadIdx.x) - 3, static_cast<int>(threadIdx.y) - 3 };
 
         auto scanPos = pos - relPos;
         if (scanPos.x >= 0 && scanPos.y >= 0 && scanPos.x < imageSize.x && scanPos.y < imageSize.y) {
@@ -446,7 +446,7 @@ __global__ void drawImage_vectorStyle(int2 rectUpperLeft, int2 rectLowerRight, i
 
     if (cudaExecutionParameters.imageGlow) {
         auto const numBlocks = cudaConstants.NUM_BLOCKS*cudaConstants.NUM_THREADS_PER_BLOCK / 8;
-        blurImage << < numBlocks, dim3{ 11, 11 } >> > (data.rawImageData, data.finalImageData, imageSize);
+        blurImage << < numBlocks, dim3{ 7, 7 } >> > (data.rawImageData, data.finalImageData, imageSize);
         cudaDeviceSynchronize();
     }
 }
