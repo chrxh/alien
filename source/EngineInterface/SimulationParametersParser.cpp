@@ -3,7 +3,6 @@
 boost::property_tree::ptree SimulationParametersParser::encode(SimulationParameters const& parameters)
 {
     boost::property_tree::ptree tree;
-    tree.add("cluster.maxRadius", parameters.clusterMaxRadius);
     tree.add("cell.minDistance", parameters.cellMinDistance);
     tree.add("cell.maxDistance", parameters.cellMaxDistance);
     tree.add("cell.maxForce", parameters.cellMaxForce);
@@ -52,8 +51,6 @@ boost::property_tree::ptree SimulationParametersParser::encode(SimulationParamet
 SimulationParameters SimulationParametersParser::decode(boost::property_tree::ptree const& tree)
 {
     SimulationParameters result;
-    result.clusterMaxRadius = tree.get<float>("cluster.maxRadius");
-
     result.cellMinDistance = tree.get<float>("cell.minDistance");
     result.cellMaxDistance = tree.get<float>("cell.maxDistance");
     result.cellMaxForce = tree.get<float>("cell.maxForce");
