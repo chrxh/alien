@@ -66,8 +66,6 @@ void SimulationParametersDialog::okClicked()
 
 void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 {
-	setItem("max radius", 0, _simulationParameters.clusterMaxRadius);
-
     setItem("min token usages", 0, _simulationParameters.cellMinTokenUsages);
     setItem("token usage decay probability", 0, _simulationParameters.cellTokenUsageDecayProb);
     setItem("min distance", 0, _simulationParameters.cellMinDistance);
@@ -107,8 +105,6 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
 
 void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
 {
-	_simulationParameters.clusterMaxRadius = getItemReal("max radius", 0);
-	
     _simulationParameters.cellMinTokenUsages = getItemReal("min token usages", 0);
     _simulationParameters.cellTokenUsageDecayProb = getItemReal("token usage decay probability", 0);
     _simulationParameters.cellMinDistance = getItemReal("min distance", 0);
