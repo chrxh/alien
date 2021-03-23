@@ -68,19 +68,6 @@
      </column>
      <item>
       <property name="text">
-       <string>cluster properties</string>
-      </property>
-      <item>
-       <property name="text">
-        <string>max radius</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-     </item>
-     <item>
-      <property name="text">
        <string>cell properties</string>
       </property>
       <item>

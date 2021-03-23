@@ -149,11 +149,8 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
 SimulationParameters EngineInterfaceSettings::getDefaultSimulationParameters()
 {
 	SimulationParameters parameters;
-	parameters.clusterMaxRadius = 40.0f;
-
 	parameters.cellMinDistance = 0.3f;
 	parameters.cellMaxDistance = 1.3f;
-	parameters.cellMass_Reciprocal = 1;
 	parameters.cellMaxForce = 0.8f;
 	parameters.cellMaxForceDecayProb = 0.2f;
     parameters.cellMinTokenUsages = 40000;
