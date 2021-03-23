@@ -56,41 +56,51 @@ QRectF CellItem::boundingRect () const
 
 void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    //set pen color depending on whether the cell is on focus or not
-    if( _focusState == NO_FOCUS ) {
-        painter->setPen(QPen(QBrush(QColor(0,0,0,0)), CoordinateSystem::modelToScene(0.03)));
-    }
-    else {
-        painter->setPen(QPen(QBrush(Const::ClusterPenFocusColor), CoordinateSystem::modelToScene(0.03)));
-    }
-
     //set brush color
-	QColor brushColor;
+	QColor color;
 	uint8_t colorCode = getColorCode() % 7;
     if (colorCode == 0)
-        brushColor = toQColor(Const::IndividualCellColor1);
+        color = toQColor(Const::IndividualCellColor1);
     if( colorCode == 1 )
-        brushColor = toQColor(Const::IndividualCellColor2);
+        color = toQColor(Const::IndividualCellColor2);
     if( colorCode == 2 )
-        brushColor = toQColor(Const::IndividualCellColor3);
+        color = toQColor(Const::IndividualCellColor3);
     if( colorCode == 3 )
-        brushColor = toQColor(Const::IndividualCellColor4);
+        color = toQColor(Const::IndividualCellColor4);
     if( colorCode == 4 )
-        brushColor = toQColor(Const::IndividualCellColor5);
+        color = toQColor(Const::IndividualCellColor5);
     if( colorCode == 5 )
-        brushColor = toQColor(Const::IndividualCellColor6);
+        color = toQColor(Const::IndividualCellColor6);
     if( colorCode == 6 )
-        brushColor = toQColor(Const::IndividualCellColor7);
-	if (!isConnectable()) {
-		brushColor.setHsl(brushColor.hslHue(), brushColor.hslSaturation(), qMax(0, brushColor.lightness() - 60), brushColor.alpha());
+        color = toQColor(Const::IndividualCellColor7);
+
+    int h, s, l;
+    color.getHsl(&h, &s, &l);
+    if (!isConnectable()) {
+        l = std::max(0, l - 60);
 	}
-    painter->setBrush(QBrush(brushColor));
+    if (CellItem::FOCUS_CELL == _focusState) {
+        l = 190;
+    }
+    if (CellItem::FOCUS_CLUSTER == _focusState) {
+        l = std::min(255, l + 40);
+    }
+    color.setHsl(h, s, l);
+    painter->setBrush(QBrush(color));
+
+    if (_focusState == NO_FOCUS) {
+        l = std::max(0, l - 60);
+        color.setHsl(h, s, l);
+        painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
+    } else {
+        painter->setPen(QPen(QBrush(Const::ClusterPenFocusColor), CoordinateSystem::modelToScene(0.05)));
+    }
 
     //draw cell
     if( (_focusState == NO_FOCUS) || (_focusState == FOCUS_CLUSTER) )
         painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.33), CoordinateSystem::modelToScene(0.33));
     else
-        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.5), CoordinateSystem::modelToScene(0.5));
+        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.43), CoordinateSystem::modelToScene(0.43));
 
     //draw token
 	int numToken = getNumToken();
