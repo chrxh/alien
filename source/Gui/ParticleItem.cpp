@@ -32,15 +32,26 @@ QRectF ParticleItem::boundingRect () const
 
 void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    QColor color = Const::EnergyColor;
+
+    int h, s, l;
+    color.getHsl(&h, &s, &l);
+    if (FocusState::FOCUS == _focusState) {
+        l = 190;
+    }
+    color.setHsl(h, s, l);
+    painter->setBrush(QBrush(color));
+
     if( _focusState == NO_FOCUS ) {
-        painter->setPen(QPen(QBrush(QColor(0,0,0,0)), CoordinateSystem::modelToScene(0.03)));
-        painter->setBrush(QBrush(Const::EnergyColor));
-        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.20), CoordinateSystem::modelToScene(0.20));
+        l = std::max(0, l - 60);
+        color.setHsl(h, s, l);
+        painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
+        painter->drawEllipse(
+            QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.20), CoordinateSystem::modelToScene(0.20));
     }
     else {
-        painter->setPen(QPen(QBrush(Const::EnergyPenFocusColor), CoordinateSystem::modelToScene(0.03)));
-        painter->setBrush(QBrush(Const::EnergyFocusColor));
-        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.4), CoordinateSystem::modelToScene(0.4));
+        painter->setPen(QPen(QBrush(Const::EnergyPenFocusColor), CoordinateSystem::modelToScene(0.05)));
+        painter->drawEllipse(QPointF(0.0, 0.0), CoordinateSystem::modelToScene(0.3), CoordinateSystem::modelToScene(0.3));
     }
 }
 
