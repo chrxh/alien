@@ -2,11 +2,8 @@
 
 struct SimulationParameters
 {
-	float clusterMaxRadius = 0.0;
-
 	float cellMinDistance = 0.0;
 	float cellMaxDistance = 0.0;
-	float cellMass_Reciprocal = 0.0; //related to 1/mass
 	float cellMaxForce = 0.0;
 	float cellMaxForceDecayProb = 0.0;
     int cellMinTokenUsages = 0;
