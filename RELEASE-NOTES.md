@@ -3,7 +3,8 @@
 ## [2.4.2] - 2021-03-24
 ### Changed
 - selected cells and particles have lighter colors and smaller sizes in the editor
-- unused simulation parameter "max cluster size" removed
+- border colors of cells and particles darkened
+- unused simulation parameter "cluster properties -> max size" removed
 
 ## [2.4.1] - 2021-03-17
 ### Fixed
