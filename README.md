@@ -64,7 +64,7 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 ## How to build the sources
 To build alien you need Microsoft Visual Studio 2019. You find the solution file in msvc/alien/alien.sln.
 The following third-party libaries are necessary and should be installed:
-- [Qt 6.0.1](https://www.qt.io/download)
+- [Qt 6.0.2](https://www.qt.io/download)
 - [CUDA 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive)
 - [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) (needs to be installed in external/boost_1_75_0)
 - [OpenSSL version 1.1.1j](https://slproweb.com/products/Win32OpenSSL.html) (not mandatory, only used for bug reporting feature)
