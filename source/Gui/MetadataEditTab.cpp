@@ -14,6 +14,7 @@ MetadataEditTab::MetadataEditTab(QWidget *parent)
 {
     ui->setupUi(this);
     ui->metadataDescriptionEdit->setFont(GuiSettings::getGlobalFont());
+    ui->cellDescriptionLabel->setFont(GuiSettings::getGlobalFont());
 
     QPalette p = ui->cellDescriptionLabel->palette();
     p.setColor(QPalette::WindowText, Const::CellEditCaptionColor1);
