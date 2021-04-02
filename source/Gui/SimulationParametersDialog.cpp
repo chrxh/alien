@@ -36,7 +36,7 @@ SimulationParametersDialog::SimulationParametersDialog(SimulationParameters cons
 {
     ui->setupUi(this);
     ui->treeWidget->expandAll();
-	ui->treeWidget->setColumnWidth(0, 270);
+	ui->treeWidget->setColumnWidth(0, 300);
     ui->treeWidget->setItemDelegateForColumn(0, new NoEditDelegate(this));
 
     updateWidgetsFromSimulationParameters ();
