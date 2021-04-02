@@ -72,7 +72,7 @@ void HttpClient::finished(QNetworkReply * reply)
         }
 
         auto raw = reply->rawHeaderList();
-        Q_EMIT error(QString("Could not read data from server. %1").arg(reply->error()).toStdString());
+        Q_EMIT error(QString("Could not read data from server.").toStdString());
 
         reply->deleteLater();
         cleanupOnExit();

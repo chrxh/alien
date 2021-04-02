@@ -23,6 +23,7 @@ boost::property_tree::ptree SimulationParametersParser::encode(SimulationParamet
     tree.add(
         "cell.function.constructor.offspringCellDistance", parameters.cellFunctionConstructorOffspringCellDistance);
     tree.add("cell.function.constructor.offspringTokenEnergy", parameters.cellFunctionConstructorOffspringTokenEnergy);
+    tree.add("cell.function.constructor.offspringTokenSuppressMemoryCopy", parameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy);
     tree.add(
         "cell.function.constructor.tokenDataMutationProbability",
         parameters.cellFunctionConstructorTokenDataMutationProb);
@@ -74,6 +75,8 @@ SimulationParameters SimulationParametersParser::decode(boost::property_tree::pt
         "cell.function.constructor.offspringCellDistance");
     result.cellFunctionConstructorOffspringTokenEnergy =
         tree.get<float>("cell.function.constructor.offspringTokenEnergy");
+    result.cellFunctionConstructorOffspringTokenSuppressMemoryCopy=
+        tree.get<bool>("cell.function.constructor.offspringTokenSuppressMemoryCopy", false);
     result.cellFunctionConstructorTokenDataMutationProb =
         tree.get<float>(
         "cell.function.constructor.tokenDataMutationProbability");
