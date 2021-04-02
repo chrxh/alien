@@ -24,6 +24,7 @@ struct SimulationParameters
 	float cellFunctionConstructorOffspringCellEnergy = 0.0;
 	float cellFunctionConstructorOffspringCellDistance = 0.0;
 	float cellFunctionConstructorOffspringTokenEnergy = 0.0;
+    bool cellFunctionConstructorOffspringTokenSuppressMemoryCopy = false;
     float cellFunctionConstructorTokenDataMutationProb = 0.0;
     float cellFunctionConstructorCellDataMutationProb = 0.0;
     float cellFunctionConstructorCellPropertyMutationProb = 0.0;
