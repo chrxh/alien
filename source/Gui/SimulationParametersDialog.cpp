@@ -86,6 +86,8 @@ void SimulationParametersDialog::updateWidgetsFromSimulationParameters ()
     setItem("offspring cell energy", 0, _simulationParameters.cellFunctionConstructorOffspringCellEnergy);
     setItem("offspring cell distance", 0, _simulationParameters.cellFunctionConstructorOffspringCellDistance);
 	setItem("offspring token energy", 0, _simulationParameters.cellFunctionConstructorOffspringTokenEnergy);
+    setItem(
+        "offspring token suppress memory copy", 0, _simulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy);
     setItem("token data mutation probability", 0, _simulationParameters.cellFunctionConstructorTokenDataMutationProb);
     setItem("cell data mutation probability", 0, _simulationParameters.cellFunctionConstructorCellDataMutationProb);
     setItem("cell property mutation probability", 0, _simulationParameters.cellFunctionConstructorCellPropertyMutationProb);
@@ -125,7 +127,9 @@ void SimulationParametersDialog::updateSimulationParametersFromWidgets ()
     _simulationParameters.cellFunctionConstructorOffspringCellEnergy = getItemReal("offspring cell energy", 0);
     _simulationParameters.cellFunctionConstructorOffspringCellDistance = getItemReal("offspring cell distance", 0);
     _simulationParameters.cellFunctionConstructorOffspringTokenEnergy = getItemReal("offspring token energy", 0);
-    _simulationParameters.cellFunctionConstructorTokenDataMutationProb = getItemReal("token data mutation probability", 0);
+    _simulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy = getItemBool("offspring token suppress memory copy", 0);
+    _simulationParameters.cellFunctionConstructorTokenDataMutationProb =
+        getItemReal("token data mutation probability", 0);
     _simulationParameters.cellFunctionConstructorCellDataMutationProb = getItemReal("cell data mutation probability", 0);
     _simulationParameters.cellFunctionConstructorCellPropertyMutationProb = getItemReal("cell property mutation probability", 0);
     _simulationParameters.cellFunctionConstructorCellStructureMutationProb = getItemReal("cell structure mutation probability", 0);
@@ -152,6 +156,14 @@ void SimulationParametersDialog::setItem(QString key, int matchPos, qreal value)
 	ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->setText(1, QString("%1").arg(value));
 }
 
+void SimulationParametersDialog::setItem(QString key, int matchPos, bool value)
+{
+    auto text = value ? "true" : "false";
+    ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive)
+        .at(matchPos)
+        ->setText(1, QString::fromStdString(text));
+}
+
 int SimulationParametersDialog::getItemInt(QString key, int matchPos)
 {
 	bool ok(true);
@@ -162,6 +174,16 @@ qreal SimulationParametersDialog::getItemReal(QString key, int matchPos)
 {
 	bool ok(true);
 	return ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(1).toDouble(&ok);
+}
+
+bool SimulationParametersDialog::getItemBool(QString key, int matchPos)
+{
+    auto text =
+        ui->treeWidget->findItems(key, Qt::MatchExactly | Qt::MatchRecursive).at(matchPos)->text(1).toLower();
+    if (text == "true") {
+        return true;
+    }
+    return false;
 }
 
 bool SimulationParametersDialog::saveSimulationParameters(string filename)

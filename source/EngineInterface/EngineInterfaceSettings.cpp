@@ -171,6 +171,7 @@ SimulationParameters EngineInterfaceSettings::getDefaultSimulationParameters()
     parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
 	parameters.cellFunctionConstructorOffspringCellDistance = 1.0f;
     parameters.cellFunctionConstructorOffspringTokenEnergy = 60.0f;
+    parameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy = false;
     parameters.cellFunctionConstructorTokenDataMutationProb = 0.002f;
     parameters.cellFunctionConstructorCellDataMutationProb = 0.002f;
     parameters.cellFunctionConstructorCellPropertyMutationProb = 0.005f;
