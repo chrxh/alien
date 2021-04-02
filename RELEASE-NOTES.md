@@ -1,5 +1,12 @@
 # Release notes
 
+## [2.4.3] - 2021-04-02
+### Added
+- new simulation parameter "offspring token suppress memory copy" (default=false)
+
+### Fixed
+- font in metadata tab from visual editor corrected
+
 ## [2.4.2] - 2021-03-24
 ### Changed
 - selected cells and particles have lighter colors and smaller sizes in the editor

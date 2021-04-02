@@ -43,6 +43,7 @@ public:
 	SimulationMonitor* getSimulationMonitor() const;
 
 private:
+    void logStart();
 	void initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters);
     void recreateSimulation(SerializedSimulation const& serializedSimulation);
 	void connectSimController() const;
