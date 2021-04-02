@@ -7,6 +7,7 @@
 #include <QProgressDialog>
 #include <QCoreApplication>
 #include <QMessageBox>
+#include <QFile>
 
 #include "Base/GlobalFactory.h"
 #include "Base/ServiceLocator.h"
@@ -69,6 +70,8 @@ void MainController::init()
 {
     _model = new MainModel(this);
     _view = new MainView();
+
+    logStart();
 
     _controllerBuildFunc = [](int typeId, IntVector2D const& universeSize, SymbolTable* symbols,
         SimulationParameters const& parameters, map<string, int> const& typeSpecificData, uint timestepAtBeginning) -> SimulationController*
@@ -256,6 +259,18 @@ void MainController::onSimulationChanger(bool toggled)
     else {
         _simChanger->deactivate();
     }
+}
+
+void MainController::logStart()
+{
+    QFile file("://Version.txt");
+    CHECK(file.open(QIODevice::ReadOnly));
+
+    QTextStream in(&file);
+    auto version = in.readLine();
+
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, QString("initializing artificial life environment version %1").arg(version).toStdString());
 }
 
 void MainController::initSimulation(SymbolTable* symbolTable, SimulationParameters const& parameters)

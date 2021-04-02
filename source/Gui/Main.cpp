@@ -38,11 +38,12 @@ int main(int argc, char *argv[])
     FileLogger fileLogger;
     BugReportLogger bugReportLogger;
 
-    MainController controller;
-	controller.init();
-
     try {
-	    return a.exec();
+
+        MainController controller;
+        controller.init();
+
+        return a.exec();
     }
     catch(std::exception const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
