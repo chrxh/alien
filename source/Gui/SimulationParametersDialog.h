@@ -33,8 +33,10 @@ private:
 private:
 	void setItem(QString key, int matchPos, int value);
 	void setItem(QString key, int matchPos, qreal value);
-	int getItemInt(QString key, int matchPos);
+    void setItem(QString key, int matchPos, bool value);
+    int getItemInt(QString key, int matchPos);
 	qreal getItemReal(QString key, int matchPos);
+    bool getItemBool(QString key, int matchPos);
 
 	bool saveSimulationParameters(string filename);
 

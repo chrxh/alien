@@ -2534,6 +2534,27 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_withDupli
         result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedToken(expectedToken));
 }
 
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_withDuplicatedToken_suppressed)
+{
+    _parameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy = true;
+    _context->setSimulationParameters(_parameters);
+
+    auto const cellBranchNumber = 1;
+    auto const token = createTokenForConstruction(TokenForConstructionParameters()
+                                                      .constructionInput(Enums::ConstrIn::SAFE)
+                                                      .constructionOption(Enums::ConstrInOption::CREATE_DUP_TOKEN)
+                                                      .cellBranchNumber(cellBranchNumber));
+    auto const result = runSecondConstructionOnLineClusterTest(
+        SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
+    QByteArray expectedTokenMemory(_parameters.tokenMemorySize, 0);
+    expectedTokenMemory[0] = cellBranchNumber;
+    auto const expectedToken = TokenDescription()
+                                   .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
+                                   .setData(expectedTokenMemory);
+    _resultChecker->check(
+        result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedToken(expectedToken));
+}
+
 TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWithoutSeparation)
 {
     auto const token = createTokenForConstruction(TokenForConstructionParameters()
@@ -2594,9 +2615,31 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWit
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
 
-
 TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWithTokenAndSeparationAndReduction)
 {
+    auto const cellBranchNumber = 1;
+    auto const cellDistance = _parameters.cellMinDistance * 1.1f;
+    auto const token =
+        createTokenForConstruction(TokenForConstructionParameters()
+                                       .constructionInput(Enums::ConstrIn::SAFE)
+                                       .constructionOption(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED)
+                                       .cellBranchNumber(cellBranchNumber)
+                                       .distance(cellDistance));
+    auto const result = runSecondConstructionOnLineClusterTest(
+        SecondCellConstructionOnLineClusterTestParameters().tokenOnSourceCell(token));
+
+    auto const expectedToken = TokenDescription()
+        .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
+        .setData(*token.data);
+    _resultChecker->check(
+        result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedToken(expectedToken));
+}
+
+TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWithTokenAndSeparationAndReduction_suppressed)
+{
+    _parameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy = true;
+    _context->setSimulationParameters(_parameters);
+
     auto const cellBranchNumber = 1;
     auto const cellDistance = _parameters.cellMinDistance * 1.1f;
     auto const token =
@@ -2611,8 +2654,8 @@ TEST_F(ConstructorGpuTests, testConstructSecondCellOnHorizontalCluster_finishWit
     QByteArray expectedTokenMemory(_parameters.tokenMemorySize, 0);
     expectedTokenMemory[0] = cellBranchNumber;
     auto const expectedToken = TokenDescription()
-        .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
-        .setData(*token.data);
+                                   .setEnergy(_parameters.cellFunctionConstructorOffspringTokenEnergy)
+                                   .setData(expectedTokenMemory);
     _resultChecker->check(
         result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS).constructedToken(expectedToken));
 }

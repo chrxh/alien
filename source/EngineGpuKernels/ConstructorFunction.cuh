@@ -1463,7 +1463,7 @@ __inline__ __device__ void ConstructorFunction::constructNewToken(
     __syncthreads();
 
     auto const threadBlock = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
-    if (duplicate) {
+    if (duplicate && !cudaSimulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy) {
         //do not copy branchnumber (at address 0)
         for (int i = max(1, threadBlock.startIndex); i <= threadBlock.endIndex; ++i) {
             result->memory[i] = _token->memory[i];
