@@ -174,8 +174,8 @@ SimulationParameters EngineInterfaceSettings::getDefaultSimulationParameters()
     parameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy = false;
     parameters.cellFunctionConstructorTokenDataMutationProb = 0.002f;
     parameters.cellFunctionConstructorCellDataMutationProb = 0.002f;
-    parameters.cellFunctionConstructorCellPropertyMutationProb = 0.005f;
-    parameters.cellFunctionConstructorCellStructureMutationProb = 0.005f;
+    parameters.cellFunctionConstructorCellPropertyMutationProb = 0.002f;
+    parameters.cellFunctionConstructorCellStructureMutationProb = 0.002f;
     parameters.cellFunctionSensorRange = 50.0f;
 	parameters.cellFunctionCommunicatorRange = 50.0f;
 
