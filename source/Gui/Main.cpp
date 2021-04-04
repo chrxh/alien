@@ -38,11 +38,10 @@ int main(int argc, char *argv[])
     FileLogger fileLogger;
     BugReportLogger bugReportLogger;
 
+    MainController controller;
+
     try {
-
-        MainController controller;
         controller.init();
-
         return a.exec();
     }
     catch(std::exception const& e) {

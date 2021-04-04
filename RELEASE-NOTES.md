@@ -1,5 +1,9 @@
 # Release notes
 
+## [2.4.4] - 2021-04-04
+### Fixed
+- fixed crash when minimum hardware requirements are not met
+
 ## [2.4.3] - 2021-04-02
 ### Added
 - new simulation parameter "offspring token suppress memory copy" (default=false)
