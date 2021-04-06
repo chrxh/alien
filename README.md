@@ -29,6 +29,9 @@ The development is driven by the desire to better understand the conditions for 
 * [Twitter](https://twitter.com/chrx_h)
 * [Reddit](https://www.reddit.com/r/AlienProject)
 
+## Minimal system requirements
+An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
+
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
