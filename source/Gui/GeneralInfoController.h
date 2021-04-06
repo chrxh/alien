@@ -17,6 +17,8 @@ public:
 	void increaseTimestep();
 	void setZoomFactor(double factor);
 
+	void setRestrictedTPS(boost::optional<int> tps);
+
     enum class Rendering
     { Pixel, Vector, Item};
     void setRendering(Rendering value);
@@ -32,5 +34,6 @@ private:
 	int _tpsCounting = 0;
 	int _tps = 0;
 	double _zoomFactor = 4.0;
+    boost::optional<int> _restrictedTPS;
     Rendering _rendering = Rendering::Vector;
 };
