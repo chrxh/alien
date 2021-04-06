@@ -73,4 +73,5 @@ private:
     GettingStartedWindow* _gettingStartedWindow = nullptr;
 
 	bool _initialied = false;
+    bool _closing = false;
 };

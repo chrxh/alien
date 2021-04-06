@@ -164,6 +164,7 @@ void MainView::resizeEvent(QResizeEvent *event)
 
 void MainView::closeEvent(QCloseEvent * event)
 {
+    _closing = true;
     _actions->close();
 	_controller->autoSave();
 	QMainWindow::closeEvent(event);
@@ -298,7 +299,7 @@ void MainView::setupFullScreen()
 
 void MainView::infobarChanged(bool show)
 {
-    if (!show) {
+    if (!show && !_closing) {
         _actions->getActionHolder()->actionMonitor->setChecked(false);
     }
 }
