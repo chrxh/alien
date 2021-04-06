@@ -36,6 +36,12 @@ void GeneralInfoController::setZoomFactor(double factor)
 	updateInfoLabel();
 }
 
+void GeneralInfoController::setRestrictedTPS(boost::optional<int> tps)
+{
+    _restrictedTPS = tps;
+    updateInfoLabel();
+}
+
 void GeneralInfoController::setRendering(Rendering value)
 {
     _rendering = value;
@@ -57,10 +63,7 @@ void GeneralInfoController::updateInfoLabel()
     QString timestepValueString;
     QString tpsValueString;
 
-    
     if (auto config = _mainController->getSimulationConfig()) {
-
-
         renderModeValueString = [&] {
             if (Rendering::Pixel == _rendering) {
                 return QString("pixel");
@@ -99,6 +102,9 @@ void GeneralInfoController::updateInfoLabel()
         + timestepValueString + "</b>" + colorEnd;
     QString tpsString = colorTextStart + "Time steps/s: " + colorEnd + colorDataStart + "<b>"
         + tpsValueString + "</b>" + colorEnd;
+    if (_restrictedTPS) {
+        tpsString += colorDataStart + "&nbsp;(restricted)" + colorEnd;
+    }
 
     auto separator = QString("<br/>");  
     auto infoString = renderingString + separator + worldSizeString + separator + zoomLevelString + separator

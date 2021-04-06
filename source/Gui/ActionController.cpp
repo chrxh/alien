@@ -1207,7 +1207,7 @@ void ActionController::onToggleRestrictTPS(bool toggled)
 
 	if (toggled) {
         bool ok;
-        auto restrictTPS = QInputDialog::getInt(
+        auto restrictedTPS = QInputDialog::getInt(
             _mainView,
             "Restrict TPS",
             "Enter the maximum number time steps per seconds",
@@ -1223,12 +1223,14 @@ void ActionController::onToggleRestrictTPS(bool toggled)
         }
         loggingService->logMessage(Priority::Unimportant, "activate restrict time steps per seconds");
 
-		_mainController->onRestrictTPS(restrictTPS);
+		_mainController->onRestrictTPS(restrictedTPS);
+        _infoController->setRestrictedTPS(restrictedTPS);
 	}
 	else {
         loggingService->logMessage(Priority::Unimportant, "deactivate restrict time steps per seconds");
         _mainController->onRestrictTPS(boost::none);
-	}
+        _infoController->setRestrictedTPS(boost::none);
+    }
 
     loggingService->logMessage(Priority::Unimportant, "toggle restrict time steps per seconds finished");
 }
