@@ -1275,7 +1275,11 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
     actions->actionWebSimulation->setChecked(false);
     onRunClicked(false);
     onToggleCellInfo(actions->actionShowCellInfo->isChecked());
-    onToggleRestrictTPS(actions->actionRestrictTPS->isChecked());
+
+	bool oldState = actions->actionRestrictTPS->blockSignals(true);
+    actions->actionRestrictTPS->setChecked(false);
+    onToggleRestrictTPS(false);
+    actions->actionRestrictTPS->blockSignals(oldState);
 }
 
 void ActionController::updateActionsEnableState()
