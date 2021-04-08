@@ -1,5 +1,10 @@
 # Release notes
 
+## [2.4.5] - 2021-04-08
+### Fixed
+- fixed exception on closing
+- negative energies prevented
+
 ## [2.4.4] - 2021-04-04
 ### Fixed
 - fixed crash when minimum hardware requirements are not met
