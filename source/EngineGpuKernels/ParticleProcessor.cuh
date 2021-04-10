@@ -19,6 +19,8 @@ public:
     __inline__ __device__ void processingTransformation_system();
 	__inline__ __device__ void processingDataCopy_system();
 
+    __inline__ __device__ void repair_system();
+
 private:
 
 	SimulationData* _data;
@@ -116,4 +118,12 @@ __inline__ __device__ void ParticleProcessor::processingDataCopy_system()
 			}
 		}
 	}
+}
+
+__inline__ __device__ void ParticleProcessor::repair_system()
+{
+    for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
+        auto& particle = _data->entities.particlePointers.at(particleIndex);
+        particle->repair();
+    }
 }
