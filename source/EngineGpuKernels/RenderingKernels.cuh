@@ -227,11 +227,13 @@ __global__ void drawClusters_vectorStyle(
 
         __shared__ MapInfo map;
         __shared__ bool isSelected;
-        __shared__ bool isDarken;
+        __shared__ bool isLowZoom;
+        __shared__ bool isHighZoom;
         if (0 == threadIdx.x) {
             map.init(universeSize);
             isSelected = cluster->isSelected();
-            isDarken = zoom < 6;
+            isLowZoom = zoom < 4.1;
+            isHighZoom = zoom > 8.1;
         }
         __syncthreads();
 
@@ -245,14 +247,20 @@ __global__ void drawClusters_vectorStyle(
                 auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, cellPos, zoom);
                 auto const color = calcColor(cell);
                 if (isContainedInRect({ 0, 0 }, imageSize, cellImagePos, 3)) {
-                    auto index = cellImagePos.x - 1 + cellImagePos.y * imageSize.x;
-                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
-                    index += 2;
-                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
-                    index -= 1 + imageSize.x;
-                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
-                    index += 2 * imageSize.x;
-                    drawDot(imageData, imageSize, index, color, isSelected, isDarken);
+                    auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
+
+                    if (isHighZoom) {
+                        drawCircle(imageData, imageSize, index, color, isSelected, false);
+                    } else {
+                        --index;
+                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        index += 2;
+                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        index -= 1 + imageSize.x;
+                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        index += 2 * imageSize.x;
+                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                    }
                 }
 
                 auto const posCorrection = cellPos - cell->absPos;
@@ -262,15 +270,15 @@ __global__ void drawClusters_vectorStyle(
                     auto const otherCellPos = otherCell->absPos + posCorrection;
                     auto const otherCellImagePos = mapUniversePosToImagePos(rectUpperLeft, otherCellPos, zoom);
                     float dist = Math::length(otherCellImagePos - cellImagePos);
-                    float2 const v = { static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 2,
-                                       static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 2};
+                    float2 const v = { static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8,
+                                       static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8};
                     float2 pos = toFloat2(cellImagePos);
 
-                    for (int d = 0; d <= dist; d += 2) {
+                    for (float d = 0; d <= dist; d += 1.8) {
                         auto const intPos = toInt2(pos);
                         if (isContainedInRect({ 0, 0 }, imageSize, intPos, 2)) {
                             auto const index = intPos.x + intPos.y * imageSize.x;
-                            drawDot(imageData, imageSize, index, color, isSelected, isDarken);
+                            drawDot(imageData, imageSize, index, color, isSelected, true);
                         }
                         pos = pos + v;
                     }
@@ -291,7 +299,7 @@ __global__ void drawClusters_vectorStyle(
                 auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
                 auto const color = calcColor(token);
 
-                drawCircle(imageData, imageSize, index, color, cell->cluster->isSelected(), isDarken);
+                drawCircle(imageData, imageSize, index, color, cell->cluster->isSelected(), isLowZoom);
             }
         }
         __syncthreads();
@@ -340,7 +348,7 @@ __global__ void drawParticles_vectorStyle(
         if (isContainedInRect({ 0, 0 }, imageSize, particleImagePos, 4)) {
             auto index = particleImagePos.x + particleImagePos.y * imageSize.x;
             auto const color = calcColor(particle);
-            drawCircle(imageData, imageSize, index, color, particle->isSelected(), zoom < 6);
+            drawCircle(imageData, imageSize, index, color, particle->isSelected(), zoom < 4.1);
         }
     }
 }
