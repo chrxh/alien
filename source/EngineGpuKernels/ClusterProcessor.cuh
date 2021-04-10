@@ -28,6 +28,8 @@ public:
     __inline__ __device__ void processingDecomposition_block();
     __inline__ __device__ void processingClusterCopy_block();
 
+    __inline__ __device__ void repair_block();
+
 private:
     __inline__ __device__ void processingDecomposition_optimizedForSmallCluster_block();
     __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_block();
@@ -955,6 +957,15 @@ __inline__ __device__ void ClusterProcessor::processingClusterCopy_block()
         copyClusterWithFusion_block();
     }
     _cluster->timestepSimulated();
+}
+
+__inline__ __device__ void ClusterProcessor::repair_block()
+{
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto cell = _cluster->cellPointers[cellIndex];
+        cell->repair();
+    }
+    __syncthreads();
 }
 
 __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedForSmallCluster_block()

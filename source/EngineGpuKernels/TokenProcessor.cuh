@@ -33,6 +33,8 @@ public:
 
     __inline__ __device__ void processingCommunicatorsAnsSensors_block();
 
+    __inline__ __device__ void repair_block();
+
 private:
     __inline__ __device__ void calcAnticipatedTokens(Cluster* cluster, int& result);
     __inline__ __device__ void copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell);
@@ -349,6 +351,15 @@ __inline__ __device__ void TokenProcessor::processingCommunicatorsAnsSensors_blo
         }
         __syncthreads();
     }
+}
+
+__inline__ __device__ void TokenProcessor::repair_block()
+{
+    for (auto tokenIndex = _tokenPartition.startIndex; tokenIndex <= _tokenPartition.endIndex; ++tokenIndex) {
+        auto token = _cluster->tokenPointers[tokenIndex];
+        token->repair();
+    }
+    __syncthreads();
 }
 
 __inline__ __device__ void TokenProcessor::createCellFunctionData_block()
