@@ -4,9 +4,12 @@
 #include <QMessageBox>
 #include <QStyledItemDelegate>
 
+#include "qjsonmodel.h"
+
 #include "Base/ServiceLocator.h"
 
 #include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/SimulationParametersParser.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SerializationHelper.h"
 #include "EngineInterface/EngineInterfaceBuilderFacade.h"
@@ -39,7 +42,13 @@ SimulationParametersDialog::SimulationParametersDialog(SimulationParameters cons
 	ui->treeWidget->setColumnWidth(0, 300);
     ui->treeWidget->setItemDelegateForColumn(0, new NoEditDelegate(this));
 
-    updateWidgetsFromSimulationParameters ();
+    QJsonModel* model = new QJsonModel;
+    ui->treeView->setModel(model);
+
+    auto json = _serializer->serializeSimulationParameters(_simulationParameters);
+    model->loadJson(QByteArray::fromStdString(json));
+
+    updateWidgetsFromSimulationParameters();
 
     //connections
     connect(ui->defaultButton, SIGNAL(clicked()), this, SLOT(defaultButtonClicked()));

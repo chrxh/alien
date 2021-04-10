@@ -52,15 +52,13 @@
     <Filter Include="Impl\BugReporting">
       <UniqueIdentifier>{786a9adc-2543-4d64-983d-bcd71f8b91b7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
     <Filter Include="Form Files">
       <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
       <Extensions>ui</Extensions>
       <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="External">
+      <UniqueIdentifier>{36c02291-9d5d-4843-bbee-8a1d16fddf5a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -390,6 +388,9 @@
     <ClCompile Include="..\..\..\source\Gui\ColorizeDialogController.cpp">
       <Filter>Impl\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\external\QJsonModel\qjsonmodel.cpp">
+      <Filter>External</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -660,6 +661,9 @@
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\NewDiscDialog.h">
       <Filter>Impl\Dialogs</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\external\QJsonModel\qjsonmodel.h">
+      <Filter>External</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
