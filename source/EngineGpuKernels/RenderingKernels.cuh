@@ -270,11 +270,11 @@ __global__ void drawClusters_vectorStyle(
                     auto const otherCellPos = otherCell->absPos + posCorrection;
                     auto const otherCellImagePos = mapUniversePosToImagePos(rectUpperLeft, otherCellPos, zoom);
                     float dist = Math::length(otherCellImagePos - cellImagePos);
-                    float2 const v = { static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8,
-                                       static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8};
+                    float2 const v = { static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
+                                       static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8f};
                     float2 pos = toFloat2(cellImagePos);
 
-                    for (float d = 0; d <= dist; d += 1.8) {
+                    for (float d = 0; d <= dist; d += 1.8f) {
                         auto const intPos = toInt2(pos);
                         if (isContainedInRect({ 0, 0 }, imageSize, intPos, 2)) {
                             auto const index = intPos.x + intPos.y * imageSize.x;
