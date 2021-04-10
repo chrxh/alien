@@ -43,6 +43,13 @@ struct Particle
         atomicAdd(&_energy, changeValue);
     }
 
+    __device__ __inline__ void repair()
+    {
+        if (isnan(_energy) || _energy < 0.0) {
+            _energy = 0.01;
+        }
+    }
+
     __device__ __inline__ bool isSelected()
     {
         return _selected;

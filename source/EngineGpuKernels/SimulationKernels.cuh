@@ -22,6 +22,7 @@ __global__ void clusterProcessingStep1(SimulationData data, int numClusters)
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
         clusterProcessor.init_block(data, clusterIndex);
+        clusterProcessor.repair_block();
         clusterProcessor.processingMovement_block();
         clusterProcessor.updateMap_block();
     }
@@ -74,6 +75,7 @@ __global__ void tokenProcessingStep1(SimulationData data, int numClusters)
     for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
         TokenProcessor tokenProcessor;
         tokenProcessor.init_block(data, clusterIndex);
+        tokenProcessor.repair_block();
         tokenProcessor.processingEnergyAveraging_block();
         tokenProcessor.processingSpreading_block();
         tokenProcessor.processingLightWeigthedFeatures_block();
@@ -116,6 +118,7 @@ __global__ void particleProcessingStep1(SimulationData data)
 {
 	ParticleProcessor particleProcessor;
     particleProcessor.init_system(data);
+    particleProcessor.repair_system();
     particleProcessor.processingMovement_system();
     particleProcessor.updateMap_system();
     particleProcessor.processingTransformation_system();
