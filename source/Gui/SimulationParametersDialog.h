@@ -10,6 +10,8 @@ namespace Ui {
 class SimulationParametersDialog;
 }
 
+class QJsonModel;
+
 class SimulationParametersDialog
 	: public QDialog
 {
@@ -23,24 +25,18 @@ public:
 
 private:
 	Q_SLOT void okClicked();
-    Q_SLOT void updateWidgetsFromSimulationParameters ();
-	Q_SLOT void updateSimulationParametersFromWidgets ();
-
 	Q_SLOT void defaultButtonClicked ();
 	Q_SLOT void loadButtonClicked ();
 	Q_SLOT void saveButtonClicked ();
 
 private:
-	void setItem(QString key, int matchPos, int value);
-	void setItem(QString key, int matchPos, qreal value);
-    void setItem(QString key, int matchPos, bool value);
-    int getItemInt(QString key, int matchPos);
-	qreal getItemReal(QString key, int matchPos);
-    bool getItemBool(QString key, int matchPos);
+    void updateModelFromSimulationParameters();
+    void updateSimulationParametersFromModel();
 
 	bool saveSimulationParameters(string filename);
 
 	Ui::SimulationParametersDialog *ui;
 	Serializer* _serializer = nullptr;
     SimulationParameters _simulationParameters;
+    QJsonModel* _model = nullptr;
 };

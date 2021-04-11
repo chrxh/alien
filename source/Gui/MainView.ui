@@ -66,7 +66,7 @@
    </palette>
   </property>
   <property name="windowTitle">
-   <string>artificial life environment</string>
+   <string>Artificial Life Environment</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
