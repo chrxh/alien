@@ -129,4 +129,7 @@ void SendLastImageJob::serverReceivedImage()
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "Web: last image sent");
     _isReady = true;
+
+    delete _buffer;
+    _buffer = nullptr;
 }
