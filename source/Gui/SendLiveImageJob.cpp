@@ -123,4 +123,6 @@ void SendLiveImageJob::serverReceivedImage(string taskId)
     loggingService->logMessage(Priority::Important, stream.str());
 
     _isReady = true;
+    delete _buffer;
+    _buffer = nullptr;
 }
