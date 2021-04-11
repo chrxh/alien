@@ -1,5 +1,9 @@
 # Release notes
 
+## [2.4.6] - 2021-04-11
+### Changed
+- created cell have maximum bonds corresponding to simulation parameters
+
 ## [2.4.5] - 2021-04-08
 ### Fixed
 - fixed exception on closing
