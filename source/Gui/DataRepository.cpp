@@ -91,7 +91,7 @@ void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	int memorySize = _parameters.cellFunctionComputerCellMemorySize;
 	auto desc = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
-		CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setMaxConnections(_parameters.cellCreationMaxConnection)
+		CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy).setMaxConnections(_parameters.cellMaxBonds)
 		.setPos(pos).setConnectingCells({}).setMetadata(CellMetadata())
 		.setFlagTokenBlocked(false).setTokenBranchNumber(0).setCellFeature(
 			CellFeatureDescription().setType(Enums::CellFunction::COMPUTER).setVolatileData(QByteArray(memorySize, 0))
