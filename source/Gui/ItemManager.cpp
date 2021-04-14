@@ -1,5 +1,7 @@
 #include <QGraphicsScene>
 
+#include <Base/DebugMacros.h>
+
 #include "EngineInterface/ChangeDescriptions.h"
 #include "Gui/Settings.h"
 #include "Gui/DataRepository.h"
@@ -26,15 +28,18 @@ void ItemManager::init(QGraphicsScene * scene, ViewportInterface* viewport, Simu
 
 void ItemManager::activate(IntVector2D size)
 {
-	_scene->clear();
+    TRY;
+    _scene->clear();
 	_scene->setSceneRect(0, 0, CoordinateSystem::modelToScene(size.x), CoordinateSystem::modelToScene(size.y));
 	_cellsByIds.clear();
 	_particlesByIds.clear();
 	_connectionsByIds.clear();
+    CATCH;
 }
 
 void ItemManager::updateCells(DataRepository* dataController)
 {
+    TRY;
 	auto const &data = dataController->getDataRef();
 
 	map<uint64_t, CellItem*> newCellsByIds;
@@ -70,11 +75,13 @@ void ItemManager::updateCells(DataRepository* dataController)
 		delete cellById.second;
 	}
 	_cellsByIds = newCellsByIds;
+    CATCH;
 }
 
 void ItemManager::updateParticles(DataRepository* manipulator)
 {
-	auto const &data = manipulator->getDataRef();
+    TRY;
+    auto const& data = manipulator->getDataRef();
 
 	map<uint64_t, ParticleItem*> newParticlesByIds;
 	if (data.particles) {
@@ -104,11 +111,13 @@ void ItemManager::updateParticles(DataRepository* manipulator)
 		delete particleById.second;
 	}
 	_particlesByIds = newParticlesByIds;
+    CATCH;
 }
 
 void ItemManager::updateConnections(DataRepository* repository)
 {
-	auto const &data = repository->getDataRef();
+    TRY;
+    auto const& data = repository->getDataRef();
 	if (!data.clusters) {
 		return;
 	}
@@ -154,18 +163,22 @@ void ItemManager::updateConnections(DataRepository* repository)
 		delete connectionById.second;
 	}
 	_connectionsByIds = newConnectionsByIds;
+    CATCH;
 }
 
 void ItemManager::update(DataRepository* repository)
 {
-	updateCells(repository);
+    TRY;
+    updateCells(repository);
 	updateConnections(repository);
 	updateParticles(repository);
+    CATCH;
 }
 
 void ItemManager::setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRight)
 {
-	if (_marker) {
+    TRY;
+    if (_marker) {
 		_marker->update(upperLeft, lowerRight);
 	}
 	else {
@@ -173,36 +186,47 @@ void ItemManager::setMarkerItem(QPointF const &upperLeft, QPointF const &lowerRi
 		_scene->addItem(_marker);
 	}
 	_scene->update();
+    CATCH;
 }
 
 void ItemManager::setMarkerLowerRight(QPointF const & lowerRight)
 {
-	if (_marker) {
+    TRY;
+    if (_marker) {
 		_marker->setLowerRight(lowerRight);
 		_scene->update();
 	}
+    CATCH;
 }
 
 void ItemManager::deleteMarker()
 {
-	if (_marker) {
+    TRY;
+    if (_marker) {
 		delete _marker;
 		_marker = nullptr;
 		_scene->update();
 	}
+    CATCH;
 }
 
 bool ItemManager::isMarkerActive() const
 {
-	return (bool)_marker;
+    TRY;
+    return (bool)_marker;
+    CATCH;
 }
 
 QList<QGraphicsItem*> ItemManager::getItemsWithinMarker() const
 {
-	return _marker->collidingItems();
+    TRY;
+    return _marker->collidingItems();
+    CATCH;
 }
 
 void ItemManager::toggleCellInfo(bool showInfo)
 {
-	_config->setShowCellInfo(showInfo);
+    TRY;
+    _config->setShowCellInfo(showInfo);
+    CATCH;
 }
