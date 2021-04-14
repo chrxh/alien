@@ -22,6 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Base\BaseServices.h" />
+    <ClInclude Include="..\..\..\source\Base\DebugMacros.h" />
     <ClInclude Include="..\..\..\source\Base\Definitions.h" />
     <ClInclude Include="..\..\..\source\Base\DllExport.h" />
     <ClInclude Include="..\..\..\source\Base\GlobalFactory.h" />

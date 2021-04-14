@@ -7,6 +7,8 @@
 
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
+#include "Base/DebugMacros.h"
+
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationContext.h"
@@ -34,6 +36,7 @@ ItemUniverseView::ItemUniverseView(QGraphicsView* graphicsView, QObject *parent)
 
 void ItemUniverseView::init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator)
 {
+    TRY;
     disconnectView();
 
     _controller = controller;
@@ -49,37 +52,47 @@ void ItemUniverseView::init(Notifier* notifier, SimulationController* controller
 	_itemManager->init(_scene, _viewport, _controller->getContext()->getSimulationParameters());
 
 	connect(_notifier, &Notifier::toggleCellInfo, this, &ItemUniverseView::cellInfoToggled);
+    CATCH;
 }
 
 void ItemUniverseView::connectView()
 {
+    TRY;
     disconnectView();
     _connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemUniverseView::requestData));
     _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemUniverseView::receivedNotifications));
     _connections.push_back(QObject::connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ItemUniverseView::scrolled));
     _connections.push_back(QObject::connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &ItemUniverseView::scrolled));
+    CATCH;
 }
 
 void ItemUniverseView::disconnectView()
 {
+    TRY;
     for (auto const& connection : _connections) {
         disconnect(connection);
     }
     _connections.clear();
+    CATCH;
 }
 
 void ItemUniverseView::refresh()
 {
+    TRY;
     requestData();
+    CATCH;
 }
 
 bool ItemUniverseView::isActivated() const
 {
+    TRY;
     return _graphicsView->scene() == _scene;
+    CATCH;
 }
 
 void ItemUniverseView::activate(double zoomFactor)
 {
+    TRY;
     _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     _graphicsView->setScene(_scene);
     _graphicsView->resetTransform();
@@ -87,49 +100,63 @@ void ItemUniverseView::activate(double zoomFactor)
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     _itemManager->activate(size);
     setZoomFactor(zoomFactor);
+    CATCH;
 }
 
 double ItemUniverseView::getZoomFactor() const
 {
+    TRY;
     return _zoomFactor;
+    CATCH;
 }
 
 void ItemUniverseView::setZoomFactor(double zoomFactor)
 {
+    TRY;
     _zoomFactor = zoomFactor;
     _graphicsView->resetTransform();
     _graphicsView->scale(CoordinateSystem::sceneToModel(_zoomFactor), CoordinateSystem::sceneToModel(_zoomFactor));
+    CATCH;
 }
 
 QVector2D ItemUniverseView::getCenterPositionOfScreen() const
 {
+    TRY;
     auto const width = static_cast<double>(_graphicsView->width());
     auto const height = static_cast<double>(_graphicsView->height());
     auto const sceneCoordinates = _graphicsView->mapToScene(width / 2.0, height / 2.0);
     auto const modelCoordinates = CoordinateSystem::sceneToModel(QVector2D(sceneCoordinates.x(), sceneCoordinates.y()));
     return modelCoordinates;
+    CATCH;
 }
 
 void ItemUniverseView::centerTo(QVector2D const & position)
 {
+    TRY;
     auto const scenePosition = CoordinateSystem::modelToScene(position);
     _graphicsView->centerOn(scenePosition.x(), scenePosition.y());
+    CATCH;
 }
 
 void ItemUniverseView::toggleCenterSelection(bool value)
 {
-	_centerSelection = value;
+    TRY;
+    _centerSelection = value;
 	centerSelectionIfEnabled();
+    CATCH;
 }
 
 void ItemUniverseView::requestData()
 {
-	_repository->requireDataUpdateFromSimulation(_viewport->getRect());
+    TRY;
+    _repository->requireDataUpdateFromSimulation(_viewport->getRect());
+    CATCH;
 }
 
 boost::optional<QVector2D> ItemUniverseView::getCenterPosOfSelection() const
 {
-	QVector2D result;
+    TRY;
+    QVector2D result;
 	int numEntities = 0;
 	for (auto selectedCellId : _repository->getSelectedCellIds()) {
 		auto const& cell = _repository->getCellDescRef(selectedCellId);
@@ -146,11 +173,13 @@ boost::optional<QVector2D> ItemUniverseView::getCenterPosOfSelection() const
 	}
 	result /= numEntities;
 	return result;
+    CATCH;
 }
 
 void ItemUniverseView::centerSelectionIfEnabled()
 {
-	if (_centerSelection && !_mouseButtonPressed) {
+    TRY;
+    if (_centerSelection && !_mouseButtonPressed) {
         if (auto const& centerPos = getCenterPosOfSelection()) {
             disconnectView();
             _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
@@ -160,42 +189,52 @@ void ItemUniverseView::centerSelectionIfEnabled()
             connectView();
         }
 	}
+    CATCH;
 }
 
 void ItemUniverseView::updateItems()
 {
+    TRY;
     _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
     _itemManager->update(_repository);
     _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     _scene->update();
+    CATCH;
 }
 
 void ItemUniverseView::receivedNotifications(set<Receiver> const& targets)
 {
-	if (targets.find(Receiver::VisualEditor) == targets.end()) {
+    TRY;
+    if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
 
 	centerSelectionIfEnabled();
     updateItems();
+    CATCH;
 }
 
 void ItemUniverseView::cellInfoToggled(bool showInfo)
 {
-	_itemManager->toggleCellInfo(showInfo);
+    TRY;
+    _itemManager->toggleCellInfo(showInfo);
 	if (!_connections.empty()) {
         updateItems();
 	}
+    CATCH;
 }
 
 void ItemUniverseView::scrolled()
 {
-	requestData();
+    TRY;
+    requestData();
+    CATCH;
 }
 
 ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(QList<QGraphicsItem*> const &items) const
 {
-	ItemUniverseView::Selection result;
+    TRY;
+    ItemUniverseView::Selection result;
 	for (auto item : items) {
 		if (auto cellItem = qgraphicsitem_cast<CellItem*>(item)) {
 			result.cellIds.push_back(cellItem->getId());
@@ -205,20 +244,25 @@ ItemUniverseView::Selection ItemUniverseView::getSelectionFromItems(QList<QGraph
 		}
 	}
 	return result;
+    CATCH;
 }
 
 void ItemUniverseView::delegateSelection(Selection const & selection)
 {
-	_repository->setSelection(selection.cellIds, selection.particleIds);
+    TRY;
+    _repository->setSelection(selection.cellIds, selection.particleIds);
     updateItems();
+    CATCH;
 }
 
 void ItemUniverseView::startMarking(QPointF const& scenePos)
 {
-	_repository->setSelection(list<uint64_t>(), list<uint64_t>());
+    TRY;
+    _repository->setSelection(list<uint64_t>(), list<uint64_t>());
 	auto pos = CoordinateSystem::sceneToModel(scenePos);
 	_itemManager->setMarkerItem(pos, pos);
     updateItems();
+    CATCH;
 }
 
 namespace
@@ -236,6 +280,7 @@ namespace
 
 bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
 {
+    TRY;
     if (object != _scene) {
         return false;
     }
@@ -253,11 +298,13 @@ bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
     }
 
     return false;
+    CATCH;
 }
 
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
-	_mouseButtonPressed = true;
+    TRY;
+    _mouseButtonPressed = true;
 	auto itemsClicked = _scene->items(e->scenePos());
 	QList<QGraphicsItem*> frontItem = !itemsClicked.empty() ? QList<QGraphicsItem*>({ itemsClicked.front() }) : QList<QGraphicsItem*>();
 	Selection selection = getSelectionFromItems(frontItem);
@@ -277,11 +324,13 @@ void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	else {
 		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::All);
 	}
+    CATCH;
 }
 
 void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-	bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
+    TRY;
+    bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
 	
 	if(_itemManager->isMarkerActive()) {
@@ -319,11 +368,13 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 	if (leftButton || rightButton) {
 		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
 	}
+    CATCH;
 }
 
 void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
-	_mouseButtonPressed = false;
+    TRY;
+    _mouseButtonPressed = false;
 	if (_itemManager->isMarkerActive()) {
 		_itemManager->deleteMarker();
 
@@ -333,5 +384,6 @@ void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 			Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::AllExceptToken);
 		}
 	}
+    CATCH;
 }
 

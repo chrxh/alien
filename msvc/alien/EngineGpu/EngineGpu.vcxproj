@@ -133,7 +133,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>ENGINEGPU_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENGINEGPU_LIB;%(PreprocessorDefinitions);BOOST_BIND_GLOBAL_PLACEHOLDERS</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -148,7 +148,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>ENGINEGPU_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENGINEGPU_LIB;%(PreprocessorDefinitions);BOOST_BIND_GLOBAL_PLACEHOLDERS</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
