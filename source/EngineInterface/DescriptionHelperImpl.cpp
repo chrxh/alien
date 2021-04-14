@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include <Base/DebugMacros.h>
 #include "Base/NumberGenerator.h"
 
 #include "DescriptionHelperImpl.h"
@@ -19,6 +20,7 @@ void DescriptionHelperImpl::init(SimulationContext* context)
 
 void DescriptionHelperImpl::reconnect(DataDescription &data, DataDescription& orgData, unordered_set<uint64_t> const& idsOfChangedCells)
 {
+    TRY;
 	if (!data.clusters) {
 		return;
 	}
@@ -34,11 +36,13 @@ void DescriptionHelperImpl::reconnect(DataDescription &data, DataDescription& or
 		clusterIds.insert(_navi.clusterIdsByCellIds.at(cellId));
 	}
 	reclustering(clusterIds);
+    CATCH;
 }
 
 void DescriptionHelperImpl::recluster(DataDescription & data, unordered_set<uint64_t> const & idsOfChangedClusters)
 {
-	if (!data.clusters) {
+    TRY;
+    if (!data.clusters) {
 		return;
 	}
 	_data = &data;
@@ -46,10 +50,12 @@ void DescriptionHelperImpl::recluster(DataDescription & data, unordered_set<uint
 
 	updateInternals();
 	reclustering(idsOfChangedClusters);
+    CATCH;
 }
 
 void DescriptionHelperImpl::makeValid(DataDescription & data)
 {
+    TRY;
     if (data.clusters) {
         for (auto& cluster : *data.clusters) {
             makeValid(cluster);
@@ -60,11 +66,13 @@ void DescriptionHelperImpl::makeValid(DataDescription & data)
             makeValid(particle);
         }
     }
+    CATCH;
 }
 
 void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 {
-	cluster.id = _numberGen->getId();
+    TRY;
+    cluster.id = _numberGen->getId();
 	if (cluster.cells) {
 		unordered_map<uint64_t, uint64_t> newByOldIds;
 		for (auto & cell : *cluster.cells) {
@@ -81,15 +89,19 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 			}
 		}
 	}
+    CATCH;
 }
 
 void DescriptionHelperImpl::makeValid(ParticleDescription & particle)
 {
+    TRY;
 	particle.id = _numberGen->getId();
+    CATCH;
 }
 
 void DescriptionHelperImpl::duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
+    TRY;
     DataDescription result;
 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
@@ -121,20 +133,24 @@ void DescriptionHelperImpl::duplicate(DataDescription& data, IntVector2D const& 
         }
     }
     data = result;
+    CATCH;
 }
 
 list<uint64_t> DescriptionHelperImpl::filterPresentCellIds(unordered_set<uint64_t> const & cellIds) const
 {
+    TRY;
 	list<uint64_t> result;
 	std::copy_if(cellIds.begin(), cellIds.end(), std::back_inserter(result), [&](auto const& cellId) {
 		return _navi.cellIds.find(cellId) != _navi.cellIds.end();
 	});
 	return result;
+    CATCH;
 }
 
 void DescriptionHelperImpl::updateInternals()
 {
-	_navi.update(*_data);
+    TRY;
+    _navi.update(*_data);
 	_origNavi.update(*_origData);
 
 	_cellMap.clear();
@@ -145,11 +161,13 @@ void DescriptionHelperImpl::updateInternals()
 			_cellMap[intPos.x][intPos.y].push_back(cell.id);
 		}
 	}
+    CATCH;
 }
 
 void DescriptionHelperImpl::updateConnectingCells(list<uint64_t> const &changedCellIds)
 {
-	for (uint64_t changedCellId : changedCellIds) {
+    TRY;
+    for (uint64_t changedCellId : changedCellIds) {
 		auto &cell = getCellDescRef(changedCellId);
 		removeConnections(cell);
 	}
@@ -158,11 +176,13 @@ void DescriptionHelperImpl::updateConnectingCells(list<uint64_t> const &changedC
 		auto &cell = getCellDescRef(changedCellId);
 		establishNewConnectionsWithNeighborCells(cell);
 	}
+    CATCH;
 }
 
 void DescriptionHelperImpl::reclustering(unordered_set<uint64_t> const& clusterIds)
 {
-	unordered_set<uint64_t> affectedClusterIndices;
+    TRY;
+    unordered_set<uint64_t> affectedClusterIndices;
 	for (uint64_t clusterId : clusterIds) {
 		affectedClusterIndices.insert(_navi.clusterIndicesByClusterIds.at(clusterId));
 	}
@@ -199,12 +219,14 @@ void DescriptionHelperImpl::reclustering(unordered_set<uint64_t> const& clusterI
 	}
 
 	_data->clusters = newClusters;
+    CATCH;
 }
 
 void DescriptionHelperImpl::lookUpCell(uint64_t cellId, ClusterDescription &newCluster, unordered_set<uint64_t> &lookedUpCellIds
 	, unordered_set<uint64_t> &remainingCellIds)
 {
-	if (lookedUpCellIds.find(cellId) != lookedUpCellIds.end()) {
+    TRY;
+    if (lookedUpCellIds.find(cellId) != lookedUpCellIds.end()) {
 		return;
 	}
 	
@@ -219,19 +241,23 @@ void DescriptionHelperImpl::lookUpCell(uint64_t cellId, ClusterDescription &newC
 			lookUpCell(connectingCellId, newCluster, lookedUpCellIds, remainingCellIds);
 		}
 	}
+    CATCH;
 }
 
 CellDescription & DescriptionHelperImpl::getCellDescRef(uint64_t cellId)
 {
-	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
+    TRY;
+    int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
 	ClusterDescription &cluster = _data->clusters->at(clusterIndex);
 	return cluster.cells->at(cellIndex);
+    CATCH;
 }
 
 void DescriptionHelperImpl::removeConnections(CellDescription &cellDesc)
 {
-	if (cellDesc.connectingCells) {
+    TRY;
+    if (cellDesc.connectingCells) {
 		auto &connectingCellIds = *cellDesc.connectingCells;
 		for (uint64_t connectingCellId : connectingCellIds) {
 			auto &connectingCell = getCellDescRef(connectingCellId);
@@ -240,11 +266,13 @@ void DescriptionHelperImpl::removeConnections(CellDescription &cellDesc)
 		}
 		cellDesc.connectingCells = list<uint64_t>();
 	}
+    CATCH;
 }
 
 void DescriptionHelperImpl::establishNewConnectionsWithNeighborCells(CellDescription & cellDesc)
 {
-	int r = static_cast<int>(std::ceil(_parameters.cellMaxDistance));
+    TRY;
+    int r = static_cast<int>(std::ceil(_parameters.cellMaxDistance));
 	IntVector2D pos = *cellDesc.pos;
 	for(int dx = -r; dx <= r; ++dx) {
 		for (int dy = -r; dy <= r; ++dy) {
@@ -255,11 +283,13 @@ void DescriptionHelperImpl::establishNewConnectionsWithNeighborCells(CellDescrip
 			}
 		}
 	}
+    CATCH;
 }
 
 void DescriptionHelperImpl::establishNewConnection(CellDescription &cell1, CellDescription &cell2) const
 {
-	if (cell1.id == cell2.id) {
+    TRY;
+    if (cell1.id == cell2.id) {
 		return;
 	}
 	if (getDistance(cell1, cell2) > _parameters.cellMaxDistance) {
@@ -281,19 +311,23 @@ void DescriptionHelperImpl::establishNewConnection(CellDescription &cell1, CellD
 		connections1.push_back(cell2.id);
 		connections2.push_back(cell1.id);
 	}
+    CATCH;
 }
 
 double DescriptionHelperImpl::getDistance(CellDescription &cell1, CellDescription &cell2) const
 {
-	auto &pos1 = *cell1.pos;
+    TRY;
+    auto& pos1 = *cell1.pos;
 	auto &pos2 = *cell2.pos;
 	auto displacement = pos2 - pos1;
 	return displacement.length();
+    CATCH;
 }
 
 list<uint64_t> DescriptionHelperImpl::getCellIdsAtPos(IntVector2D const &pos)
 {
-	auto xIter = _cellMap.find(pos.x);
+    TRY;
+    auto xIter = _cellMap.find(pos.x);
 	if (xIter != _cellMap.end()) {
 		unordered_map<int, list<uint64_t>> &mapRemainder = xIter->second;
 		auto yIter = mapRemainder.find(pos.y);
@@ -302,6 +336,7 @@ list<uint64_t> DescriptionHelperImpl::getCellIdsAtPos(IntVector2D const &pos)
 		}
 	}
 	return list<uint64_t>();
+    CATCH;
 }
 
 namespace
@@ -319,7 +354,8 @@ namespace
 
 void DescriptionHelperImpl::setClusterAttributes(ClusterDescription& cluster)
 {
-	cluster.pos = calcCenter(*cluster.cells);
+    TRY;
+    cluster.pos = calcCenter(*cluster.cells);
 	cluster.angle = calcAngleBasedOnOrigClusters(*cluster.cells);
 	auto velocities = calcVelocitiesBasedOnOrigClusters(*cluster.cells);
 	double v = velocities.linear.length();
@@ -328,17 +364,20 @@ void DescriptionHelperImpl::setClusterAttributes(ClusterDescription& cluster)
 	if (auto clusterMetadata = calcMetadataBasedOnOrigClusters(*cluster.cells)) {
 		cluster.metadata = *clusterMetadata;
 	}
+    CATCH;
 }
 
 double DescriptionHelperImpl::calcAngleBasedOnOrigClusters(vector<CellDescription> const & cells) const
 {
-	qreal result = 0.0;
+    TRY;
+    qreal result = 0.0;
 	for (auto const& cell : cells) {
 		int clusterIndex = _navi.clusterIndicesByCellIds.at(cell.id);
 		result += *_data->clusters->at(clusterIndex).angle;
 	}
 	result /= cells.size();
 	return result;
+    CATCH;
 }
 
 namespace
@@ -356,7 +395,8 @@ namespace
 
 Physics::Velocities DescriptionHelperImpl::calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const
 {
-	CHECK(!cells.empty());
+    TRY;
+    CHECK(!cells.empty());
 	
 	Physics::Velocities result{ QVector2D(), 0.0 };
 	if (cells.size() == 1) {
@@ -398,11 +438,13 @@ Physics::Velocities DescriptionHelperImpl::calcVelocitiesBasedOnOrigClusters(vec
 	result.angular = Physics::angularVelocity(angularMomentum, calcAngularMass(cells));
 
 	return result;
+    CATCH;
 }
 
 boost::optional<ClusterMetadata> DescriptionHelperImpl::calcMetadataBasedOnOrigClusters(vector<CellDescription> const & cells) const
 {
-	CHECK(!cells.empty());
+    TRY;
+    CHECK(!cells.empty());
 
 	map<int, int> clusterCount;
 	for (auto const& cell : cells) {
@@ -420,4 +462,5 @@ boost::optional<ClusterMetadata> DescriptionHelperImpl::calcMetadataBasedOnOrigC
 	}
 	auto clusterWithMaxCount = _data->clusters->at(clusterIndexWithMaxCount);
 	return clusterWithMaxCount.metadata;
+    CATCH;
 }
