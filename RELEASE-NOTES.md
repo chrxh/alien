@@ -1,5 +1,9 @@
 # Release notes
 
+## [2.4.7] - 2021-04-14
+### Changed
+- error messages improved (call stack and bad alloc message)
+
 ## [2.4.6] - 2021-04-11
 ### Changed
 - created cell have maximum bonds corresponding to simulation parameters

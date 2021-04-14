@@ -51,7 +51,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_HAS_TR1_NAMESPACE;$(Qt_DEFINES_);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_HAS_TR1_NAMESPACE;$(Qt_DEFINES_);%(PreprocessorDefinitions);BOOST_BIND_GLOBAL_PLACEHOLDERS</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -62,7 +62,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>GeneratedFiles\$(ConfigurationName);GeneratedFiles;$(SolutionDir)..\..\external\boost_1_75_0;$(ProjectDir)..\..\..\source;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_HAS_TR1_NAMESPACE;$(Qt_DEFINES_);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_HAS_TR1_NAMESPACE;$(Qt_DEFINES_);%(PreprocessorDefinitions);BOOST_BIND_GLOBAL_PLACEHOLDERS</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
