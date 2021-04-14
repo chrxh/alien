@@ -223,18 +223,22 @@ void SimulationAccessGpuImpl::_DataTOCache::releaseDataTO(DataAccessTO const & d
 
 DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getNewDataTO()
 {
-    DataAccessTO result;
-    result.numClusters = new int;
-    result.numCells = new int;
-    result.numParticles = new int;
-    result.numTokens = new int;
-    result.numStringBytes = new int;
-    result.clusters = new ClusterAccessTO[_cudaConstants.MAX_CLUSTERS];
-    result.cells = new CellAccessTO[_cudaConstants.MAX_CELLS];
-    result.particles = new ParticleAccessTO[_cudaConstants.MAX_PARTICLES];
-    result.tokens = new TokenAccessTO[_cudaConstants.MAX_TOKENS];
-    result.stringBytes = new char[_cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE];
-    return result;
+    try {
+        DataAccessTO result;
+        result.numClusters = new int;
+        result.numCells = new int;
+        result.numParticles = new int;
+        result.numTokens = new int;
+        result.numStringBytes = new int;
+        result.clusters = new ClusterAccessTO[_cudaConstants.MAX_CLUSTERS];
+        result.cells = new CellAccessTO[_cudaConstants.MAX_CELLS];
+        result.particles = new ParticleAccessTO[_cudaConstants.MAX_PARTICLES];
+        result.tokens = new TokenAccessTO[_cudaConstants.MAX_TOKENS];
+        result.stringBytes = new char[_cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE];
+        return result;
+    } catch (std::bad_alloc const& exception) {
+        throw std::exception("There is not sufficient CPU memory available.");
+    }
 }
 
 void SimulationAccessGpuImpl::_DataTOCache::deleteDataTO(DataAccessTO const & dataTO)
