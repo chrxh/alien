@@ -1,5 +1,6 @@
 #include <QMatrix4x4>
 
+#include "Base/DebugMacros.h"
 #include "Base/NumberGenerator.h"
 
 #include "EngineInterface/SimulationAccess.h"
@@ -47,33 +48,43 @@ DataDescription & DataRepository::getDataRef()
 
 CellDescription & DataRepository::getCellDescRef(uint64_t cellId)
 {
+    TRY;
 	ClusterDescription &clusterDesc = getClusterDescRef(cellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
 	return clusterDesc.cells->at(cellIndex);
+	CATCH;
 }
 
 ClusterDescription & DataRepository::getClusterDescRef(uint64_t cellId)
 {
+    TRY;
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
-	return _data.clusters->at(clusterIndex);
+    return _data.clusters->at(clusterIndex);
+    CATCH;
 }
 
 ClusterDescription const & DataRepository::getClusterDescRef(uint64_t cellId) const
 {
+    TRY;
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
 	return _data.clusters->at(clusterIndex);
+    CATCH;
 }
 
 ParticleDescription& DataRepository::getParticleDescRef(uint64_t particleId)
 {
+    TRY;
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);
+    CATCH;
 }
 
 ParticleDescription const & DataRepository::getParticleDescRef(uint64_t particleId) const
 {
+    TRY;
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particleId);
 	return _data.particles->at(particleIndex);
+    CATCH;
 }
 
 void DataRepository::setSelectedTokenIndex(boost::optional<uint> const& value)
@@ -88,6 +99,7 @@ boost::optional<uint> DataRepository::getSelectedTokenIndex() const
 
 void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 {
+    TRY;
 	QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	int memorySize = _parameters.cellFunctionComputerCellMemorySize;
 	auto desc = ClusterDescription().setPos(pos).setVel({}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata()).addCell(
@@ -102,11 +114,13 @@ void DataRepository::addAndSelectCell(QVector2D const & posDelta)
 	_selectedClusterIds = { desc.id };
 	_selectedParticleIds = { };
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 {
-	QVector2D pos = _rect.center().toQVector2D() + posDelta;
+    TRY;
+    QVector2D pos = _rect.center().toQVector2D() + posDelta;
 	auto desc = ParticleDescription().setPos(pos).setVel({}).setEnergy(_parameters.cellMinEnergy / 2.0);
 	_descHelper->makeValid(desc);
 	_data.addParticle(desc);
@@ -114,10 +128,12 @@ void DataRepository::addAndSelectParticle(QVector2D const & posDelta)
 	_selectedClusterIds = { };
 	_selectedParticleIds = { desc.id };
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::addAndSelectData(DataDescription data, QVector2D const& posDelta, Reconnect reconnect)
 {
+    TRY;
     if (Reconnect::Yes == reconnect) {
         std::unordered_set<uint64_t> cellIds;
         if (auto const& clusters = data.clusters)
@@ -160,6 +176,7 @@ void DataRepository::addAndSelectData(DataDescription data, QVector2D const& pos
 		}
 	}
 	_navi.update(_data);
+    CATCH;
 }
 
 namespace
@@ -221,6 +238,7 @@ namespace
 
 void DataRepository::addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles)
 {
+    TRY;
 	for (auto & dataAndAngle : dataAndAngles) {
 		auto & data = dataAndAngle.data;
 		auto & rotationAngel = dataAndAngle.angle;
@@ -252,10 +270,12 @@ void DataRepository::addDataAtFixedPosition(vector<DataAndAngle> dataAndAngles)
 		}
 	}
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerParticle)
 {
+    TRY;
 	DataDescription data;
 	double remainingEnergy = totalEnergy;
 	while (remainingEnergy > FLOATINGPOINT_MEDIUM_PRECISION) {
@@ -269,6 +289,7 @@ void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerP
 	}
 
 	addDataAtFixedPosition({ { data, boost::optional<double>() } });
+    CATCH;
 }
 
 namespace
@@ -298,6 +319,7 @@ namespace
 
 void DataRepository::deleteSelection()
 {
+    TRY;
 	if (_data.clusters) {
 		unordered_set<uint64_t> modifiedClusterIds;
 		vector<ClusterDescription> newClusters;
@@ -339,10 +361,12 @@ void DataRepository::deleteSelection()
 	_selectedClusterIds = {};
 	_selectedParticleIds = {};
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::deleteExtendedSelection()
 {
+    TRY;
 	if (_data.clusters) {
 		vector<ClusterDescription> newClusters;
 		for (auto const& cluster : *_data.clusters) {
@@ -365,6 +389,7 @@ void DataRepository::deleteExtendedSelection()
 	_selectedClusterIds = {};
 	_selectedParticleIds = {};
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::addToken()
@@ -374,6 +399,7 @@ void DataRepository::addToken()
 
 void DataRepository::addToken(TokenDescription const & token)
 {
+    TRY;
 	CHECK(_selectedCellIds.size() == 1);
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
 
@@ -382,15 +408,18 @@ void DataRepository::addToken(TokenDescription const & token)
 		uint pos = _selectedTokenIndex ? *_selectedTokenIndex : numToken;
 		cell.addToken(pos, token);
 	}
+    CATCH;
 }
 
 void DataRepository::deleteToken()
 {
+    TRY;
 	CHECK(_selectedCellIds.size() == 1);
 	CHECK(_selectedTokenIndex);
 
 	auto& cell = getCellDescRef(*_selectedCellIds.begin());
 	cell.delToken(*_selectedTokenIndex);
+    CATCH;
 }
 
 bool DataRepository::isCellPresent(uint64_t cellId)
@@ -405,23 +434,28 @@ bool DataRepository::isParticlePresent(uint64_t particleId)
 
 void DataRepository::dataFromSimulationAvailable()
 {
+    TRY;
 	updateInternals(_access->retrieveData());
 
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::VisualEditor, Receiver::ActionController }, UpdateDescription::All);
+    CATCH;
 }
 
 void DataRepository::sendDataChangesToSimulation(set<Receiver> const& targets)
 {
+	TRY;
 	if (targets.find(Receiver::Simulation) == targets.end()) {
 		return;
 	}
 	DataChangeDescription delta(_unchangedData, _data);
 	_access->updateData(delta);
 	_unchangedData = _data;
+    CATCH;
 }
 
 void DataRepository::setSelection(list<uint64_t> const &cellIds, list<uint64_t> const &particleIds)
 {
+    TRY;
 	_selectedCellIds.clear();
 	for (uint64_t particleId : cellIds) {
 		if (_navi.cellIds.find(particleId) != _navi.cellIds.end()) {
@@ -443,6 +477,7 @@ void DataRepository::setSelection(list<uint64_t> const &cellIds, list<uint64_t> 
 			_selectedClusterIds.insert(clusterIdByCellIdIter->second);
 		}
 	}
+    CATCH;
 }
 
 bool DataRepository::isInSelection(list<uint64_t> const & ids) const
@@ -501,6 +536,7 @@ unordered_set<uint64_t> DataRepository::getSelectedParticleIds() const
 
 DataDescription DataRepository::getExtendedSelection() const
 {
+    TRY;
 	DataDescription result;
 	for (uint64_t clusterId : _selectedClusterIds) {
 		int clusterIndex = _navi.clusterIndicesByClusterIds.at(clusterId);
@@ -510,10 +546,12 @@ DataDescription DataRepository::getExtendedSelection() const
 		result.addParticle(getParticleDescRef(particleId));
 	}
 	return result;
+    CATCH;
 }
 
 void DataRepository::moveSelection(QVector2D const &delta)
 {
+    TRY;
 	for (uint64_t cellId : _selectedCellIds) {
 		if (isCellPresent(cellId)) {
 			int clusterIndex = _navi.clusterIndicesByCellIds.at(cellId);
@@ -529,10 +567,12 @@ void DataRepository::moveSelection(QVector2D const &delta)
 			particleDesc.pos = *particleDesc.pos + delta;
 		}
 	}
+    CATCH;
 }
 
 void DataRepository::moveExtendedSelection(QVector2D const & delta)
 {
+    TRY;
 	for (uint64_t selectedClusterId : _selectedClusterIds) {
 		auto selectedClusterIndex = _navi.clusterIndicesByClusterIds.at(selectedClusterId);
 		ClusterDescription &clusterDesc = _data.clusters->at(selectedClusterIndex);
@@ -563,16 +603,20 @@ void DataRepository::moveExtendedSelection(QVector2D const & delta)
 			particleDesc.pos = *particleDesc.pos + delta;
 		}
 	}
+    CATCH;
 }
 
 void DataRepository::reconnectSelectedCells()
 {
+    TRY;
 	_descHelper->reconnect(getDataRef(), _unchangedData, getSelectedCellIds());
 	updateAfterCellReconnections();
+    CATCH;
 }
 
 void DataRepository::rotateSelection(double angle)
 {
+    TRY;
 	vector<uint64_t> selectedClusterIds(_selectedClusterIds.begin(), _selectedClusterIds.end());
 	vector<uint64_t> selectedParticleIds(_selectedParticleIds.begin(), _selectedParticleIds.end());
 	auto clusterResolver = [&selectedClusterIds, this](int index) -> ClusterDescription&  {
@@ -582,10 +626,12 @@ void DataRepository::rotateSelection(double angle)
 		return getParticleDescRef(selectedParticleIds.at(index));
 	};
 	rotate(angle, _selectedClusterIds.size(), _selectedParticleIds.size(), clusterResolver, particleResolver);
+    CATCH;
 }
 
 void DataRepository::colorizeSelection(int colorCode)
 {
+    TRY;
     for (uint64_t cellId : _selectedCellIds) {
         if (isCellPresent(cellId)) {
             int cellIndex = _navi.cellIndicesByCellIds.at(cellId);
@@ -593,30 +639,37 @@ void DataRepository::colorizeSelection(int colorCode)
             cellDesc.metadata->color = colorCode;
         }
     }
+    CATCH;
 }
 
 void DataRepository::updateCluster(ClusterDescription const & cluster)
 {
+    TRY;
 	int clusterIndex = _navi.clusterIndicesByClusterIds.at(cluster.id);
 	_data.clusters->at(clusterIndex) = cluster;
 
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::updateParticle(ParticleDescription const & particle)
 {
+    TRY;
 	int particleIndex = _navi.particleIndicesByParticleIds.at(particle.id);
 	_data.particles->at(particleIndex) = particle;
 
 	_navi.update(_data);
+    CATCH;
 }
 
 void DataRepository::requireDataUpdateFromSimulation(IntRect const& rect)
 {
+    TRY;
 	_rect = rect;
 	ResolveDescription resolveDesc;
 	resolveDesc.resolveCellLinks = true;
 	_access->requireData(rect, resolveDesc);
+    CATCH;
 }
 
 void DataRepository::requirePixelImageFromSimulation(IntRect const & rect, QImagePtr const& target)
@@ -638,6 +691,7 @@ std::mutex & DataRepository::getImageMutex()
 
 void DataRepository::updateAfterCellReconnections()
 {
+    TRY;
 	_navi.update(_data);
 
 	_selectedClusterIds.clear();
@@ -646,10 +700,12 @@ void DataRepository::updateAfterCellReconnections()
 			_selectedClusterIds.insert(_navi.clusterIdsByCellIds.at(selectedCellId));
 		}
 	}
+    CATCH;
 }
 
 void DataRepository::updateInternals(DataDescription const &data)
 {
+    TRY;
 	_data = data;
 	_unchangedData = _data;
 
@@ -675,5 +731,6 @@ void DataRepository::updateInternals(DataDescription const &data)
 			return _navi.particleIds.find(particleId) != _navi.particleIds.end();
 		});
 	_selectedParticleIds = newSelectedParticles;
+    CATCH;
 }
 
