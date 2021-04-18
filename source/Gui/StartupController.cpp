@@ -95,6 +95,6 @@ void StartupController::currentVersionReceived(string currentVersion)
 
         _fadeoutProgress = 0;
         _timer->setSingleShot(true);
-        _timer->start(std::chrono::milliseconds(2500));
+        _timer->start(std::chrono::milliseconds(1700));
     }
 }
