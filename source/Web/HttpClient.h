@@ -10,7 +10,7 @@ class HttpClient : public QObject
 public:
     HttpClient(QObject* parent = nullptr);
 
-    void get(QUrl const& url, string const& handler);
+    void get(QUrl const& url, string const& handler, bool omitErrorResponse = false);
     void postText(QUrl const& url, string const& handler, QByteArray const& data);
     void postBinary(QUrl const& url, string const& handler, QHttpMultiPart* data);
 
@@ -25,6 +25,7 @@ private:
 
     QNetworkAccessManager _networkManager;
     std::unordered_map<QNetworkReply*, string> _handlerByReply;
+    std::unordered_set<QNetworkReply*> _noErrorResponseWantedFor;
 
     using PostData = std::variant<QHttpMultiPart*, QByteArray>;
     std::unordered_map<QNetworkReply*, PostData> _postDataByReply;

@@ -5,14 +5,14 @@
 #include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
 
-class VersionController
+class SnapshotController
 	: public QObject
 {
 	Q_OBJECT
 
 public:
-	VersionController(QObject * parent = nullptr);
-	virtual ~VersionController() = default;
+	SnapshotController(QObject * parent = nullptr);
+	virtual ~SnapshotController() = default;
 
 	virtual void init(SimulationContext* context, SimulationAccess* access);
 
