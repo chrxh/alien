@@ -13,6 +13,8 @@ class QTableWidgetItem;
 class QSignalMapper;
 class QAction;
 class QBuffer;
+class QLabel;
+class QGraphicsSimpleTextItem;
 
 class CellItem;
 class ParticleItem;
@@ -53,7 +55,7 @@ class Notifier;
 class MainView;
 class MainModel;
 class MainController;
-class VersionController;
+class SnapshotController;
 class SimulationViewWidget;
 class ActionHolder;
 class ActionController;
@@ -63,6 +65,7 @@ class VectorImageSectionItem;
 class VectorViewport;
 class PixelViewport;
 class ItemViewport;
+class StartupController;
 
 struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;

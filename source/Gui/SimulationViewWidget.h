@@ -36,7 +36,6 @@ public:
     Q_SIGNAL void zoomFactorChanged(double factor);
 
 private:
-    void setStartupScene();
     UniverseView* getActiveUniverseView() const;
     UniverseView* getView(ActiveView activeView) const;
 

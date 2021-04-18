@@ -26,7 +26,8 @@ public:
         Serializer* serializer,
         DataRepository* repository,
         Notifier* notifier, 
-        WebSimulationController* webSimController);
+        WebSimulationController* webSimController,
+        StartupController* versionController);
 
     virtual void initGettingStartedWindow();
 
@@ -49,6 +50,7 @@ private:
 	void setupFontsAndColors();
 	void setupWidgets();
 	void setupFullScreen();
+    void setupStartupWidget();
 
 private:
     Q_SLOT void infobarChanged(bool show);
@@ -69,6 +71,7 @@ private:
 	GeneralInfoController* _infoController = nullptr;
 	MonitorController* _monitor = nullptr;
     LoggingController* _logging = nullptr;
+    StartupController* _startupController = nullptr;
 
     GettingStartedWindow* _gettingStartedWindow = nullptr;
 

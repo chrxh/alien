@@ -10,6 +10,7 @@ public:
 
     void init() override;
 
+    void requestCurrentVersion() override;
     void requestSimulationInfos() override;
     void requestConnectToSimulation(string const& simulationId, string const& password) override;
     void requestUnprocessedTasks(string const& simulationId, string const& token) override;
@@ -23,6 +24,7 @@ private:
     Q_SLOT void dataReceived(string handler, QByteArray data);
 
     enum class RequestType {
+        CurrentVersion,
         SimulationInfo,
         Connect,
         Disconnect,
@@ -33,7 +35,7 @@ private:
         SendBugReport
     };
 
-    void get(string const& apiMethodName, RequestType requestType);
+    void get(string const& apiMethodName, RequestType requestType, bool omitErrorResponse = false);
     void post(string const& apiMethodName, RequestType requestType, std::map<string, string> const& keyValues);
     void postImage(string const& apiMethodName, RequestType requestType, string const& id, 
         std::map<string, string> const& keyValues, QBuffer* data);
