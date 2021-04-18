@@ -28,6 +28,7 @@
 #include "SymbolTableDialog.h"
 #include "GettingStartedWindow.h"
 #include "LoggingController.h"
+#include "StartupController.h"
 
 #include "ui_MainView.h"
 
@@ -76,12 +77,14 @@ void MainView::init(
     Serializer* serializer, 
     DataRepository* repository, 
     Notifier* notifier, 
-    WebSimulationController* webSimController)
+    WebSimulationController* webSimController,
+    StartupController* startupController)
 {
 	_model = model;
 	_controller = mainController;
 	_repository = repository;
 	_notifier = notifier;
+    _startupController = startupController;
 
 	_infoController->init(ui->infoLabel, mainController);
 	_monitor->init(_controller);
@@ -104,7 +107,8 @@ void MainView::init(
 	setupFullScreen();
 	show();
 
-	_initialied = true;
+    setupStartupWidget();
+    _initialied = true;
 }
 
 void MainView::initGettingStartedWindow()
@@ -295,6 +299,16 @@ void MainView::setupFullScreen()
 	if (fullScreen) {
 		setWindowState(windowState() | Qt::WindowFullScreen);
 	}
+}
+
+void MainView::setupStartupWidget()
+{
+    auto startupWidget = _startupController->getWidget();
+    startupWidget->setParent(ui->simulationViewWidget);
+    auto posX = ui->simulationViewWidget->width() / 2 - startupWidget->width() / 2;
+    auto posY = ui->simulationViewWidget->height() / 2 - startupWidget->height() / 2;
+    startupWidget->move(posX, posY);
+    startupWidget->setVisible(true);
 }
 
 void MainView::infobarChanged(bool show)

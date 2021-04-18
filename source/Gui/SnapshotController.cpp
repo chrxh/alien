@@ -6,15 +6,15 @@
 #include "EngineInterface/SimulationContext.h"
 #include "EngineInterface/SpaceProperties.h"
 
-#include "VersionController.h"
+#include "SnapshotController.h"
 
 
-VersionController::VersionController(QObject * parent) : QObject(parent)
+SnapshotController::SnapshotController(QObject * parent) : QObject(parent)
 {
 	
 }
 
-void VersionController::init(SimulationContext* context, SimulationAccess* access)
+void SnapshotController::init(SimulationContext* context, SimulationAccess* access)
 {
     _context = context;
 	SET_CHILD(_access, access);
@@ -22,20 +22,20 @@ void VersionController::init(SimulationContext* context, SimulationAccess* acces
 	_stack.clear();
 	_snapshot.reset();
 
-	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &VersionController::dataReadyToRetrieve);
+	connect(_access, &SimulationAccess::dataReadyToRetrieve, this, &SnapshotController::dataReadyToRetrieve);
 }
 
-bool VersionController::isStackEmpty()
+bool SnapshotController::isStackEmpty()
 {
 	return _stack.empty();
 }
 
-void VersionController::clearStack()
+void SnapshotController::clearStack()
 {
 	_stack.clear();
 }
 
-void VersionController::loadSimulationContentFromStack()
+void SnapshotController::loadSimulationContentFromStack()
 {
 	if (_stack.empty()) {
 		return;
@@ -45,19 +45,19 @@ void VersionController::loadSimulationContentFromStack()
 	_stack.pop_back();
 }
 
-void VersionController::saveSimulationContentToStack()
+void SnapshotController::saveSimulationContentToStack()
 {
 	_target = TargetForReceivedData::Stack;
 	_access->requireData({ { 0, 0 }, _universeSize }, ResolveDescription());
 }
 
-void VersionController::makeSnapshot()
+void SnapshotController::makeSnapshot()
 {
 	_target = TargetForReceivedData::Snapshot;
 	_access->requireData({ { 0, 0 }, _universeSize }, ResolveDescription());
 }
 
-void VersionController::restoreSnapshot()
+void SnapshotController::restoreSnapshot()
 {
 	if (!_snapshot) {
 		return;
@@ -67,7 +67,7 @@ void VersionController::restoreSnapshot()
     _context->setTimestep(_snapshot->timestep);
 }
 
-void VersionController::dataReadyToRetrieve()
+void SnapshotController::dataReadyToRetrieve()
 {
 	if (!_target) {
 		return;

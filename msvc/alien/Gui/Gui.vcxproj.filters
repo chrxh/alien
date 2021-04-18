@@ -163,7 +163,7 @@
     <ClCompile Include="..\..\..\source\Gui\SimulationConfig.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\VersionController.cpp">
+    <ClCompile Include="..\..\..\source\Gui\SnapshotController.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ActionController.cpp">
@@ -391,6 +391,9 @@
     <ClCompile Include="..\..\..\external\QJsonModel\qjsonmodel.cpp">
       <Filter>External</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\StartupController.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -473,7 +476,7 @@
     <QtMoc Include="..\..\..\source\Gui\Queue.h">
       <Filter>Impl</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\VersionController.h">
+    <QtMoc Include="..\..\..\source\Gui\SnapshotController.h">
       <Filter>Impl</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ActionController.h">
@@ -664,6 +667,9 @@
     </QtMoc>
     <QtMoc Include="..\..\..\external\QJsonModel\qjsonmodel.h">
       <Filter>External</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\StartupController.h">
+      <Filter>Impl</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

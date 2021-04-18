@@ -15,6 +15,7 @@ public:
 
     virtual void init() = 0;
 
+    virtual void requestCurrentVersion() = 0;
     virtual void requestSimulationInfos() = 0;
     virtual void requestConnectToSimulation(string const& simulationId, string const& password) = 0;
     virtual void requestUnprocessedTasks(string const& simulationId, string const& token) = 0;
@@ -24,6 +25,7 @@ public:
     virtual void sendLastImage(string const& simulationId, string const& token, QBuffer* data) = 0;
     virtual void sendBugReport(string const& protocol, string const& email, string const& userMessage) = 0;
 
+    Q_SIGNAL void currentVersionReceived(string version);
     Q_SIGNAL void simulationInfosReceived(vector<SimulationInfo> simulationInfos);
     Q_SIGNAL void connectToSimulationReceived(boost::optional<string> token);
     Q_SIGNAL void unprocessedTasksReceived(vector<Task> tasks);

@@ -35,7 +35,7 @@
 #include "Web/WebBuilderFacade.h"
 
 #include "MessageHelper.h"
-#include "VersionController.h"
+#include "SnapshotController.h"
 #include "GeneralInfoController.h"
 #include "MainController.h"
 #include "MainView.h"
@@ -49,6 +49,7 @@
 #include "WebSimulationController.h"
 #include "Settings.h"
 #include "MonitorController.h"
+#include "StartupController.h"
 
 namespace Const
 {
@@ -113,10 +114,10 @@ void MainController::init()
     auto EngineInterfaceFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
     auto serializer = EngineInterfaceFacade->buildSerializer();
     auto descHelper = EngineInterfaceFacade->buildDescriptionHelper();
-    auto versionController = new VersionController();
+    auto snapshotController = new SnapshotController();
     SET_CHILD(_serializer, serializer);
     SET_CHILD(_descHelper, descHelper);
-    SET_CHILD(_versionController, versionController);
+    SET_CHILD(_snapshotController, snapshotController);
     _repository = new DataRepository(this);
     _notifier = new Notifier(this);
     _dataAnalyzer = new DataAnalyzer(this);
@@ -130,11 +131,11 @@ void MainController::init()
     auto webSimController = new WebSimulationController(webAccess, _view);
     SET_CHILD(_webSimController, webSimController);
 
-    _serializer->init(_controllerBuildFunc, _accessBuildFunc);
-    _view->init(_model, this, _serializer, _repository, _notifier, _webSimController);
-    _worker->init(_serializer);
+    auto startupController = new StartupController(_webAccess, _view);
 
-    QApplicationHelper::processEventsForMilliSec(1000);
+    _serializer->init(_controllerBuildFunc, _accessBuildFunc);
+    _view->init(_model, this, _serializer, _repository, _notifier, _webSimController, startupController);
+    _worker->init(_serializer);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     std::stringstream stream;
@@ -220,29 +221,29 @@ string MainController::getPathToApp() const
 void MainController::onRunSimulation(bool run)
 {
 	_simController->setRun(run);
-	_versionController->clearStack();
+	_snapshotController->clearStack();
 }
 
 void MainController::onStepForward()
 {
-	_versionController->saveSimulationContentToStack();
+	_snapshotController->saveSimulationContentToStack();
 	_simController->calculateSingleTimestep();
 }
 
 void MainController::onStepBackward(bool& emptyStack)
 {
-	_versionController->loadSimulationContentFromStack();
-	emptyStack = _versionController->isStackEmpty();
+	_snapshotController->loadSimulationContentFromStack();
+	emptyStack = _snapshotController->isStackEmpty();
 }
 
 void MainController::onMakeSnapshot()
 {
-	_versionController->makeSnapshot();
+	_snapshotController->makeSnapshot();
 }
 
 void MainController::onRestoreSnapshot()
 {
-	_versionController->restoreSnapshot();
+	_snapshotController->restoreSnapshot();
 }
 
 void MainController::onDisplayLink(bool toggled)
@@ -285,7 +286,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 	auto context = _simController->getContext();
 	_descHelper->init(context);
-	_versionController->init(_simController->getContext(), _accessBuildFunc(_simController));
+	_snapshotController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _accessBuildFunc(_simController), _descHelper, context);
     _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier);
 

@@ -15,6 +15,7 @@ namespace
 //    auto const ServerAddress = "http://localhost/api/"s;
 
     auto const ApiGetSimulation = "getsimulationinfos"s;
+    auto const ApiGetCurrentVersion = "getcurrentversion"s;
     auto const ApiConnect = "connect"s;
     auto const ApiDisconnect = "disconnect"s;
     auto const ApiGetUnprocessedTasks = "getunprocessedtasks"s;
@@ -41,6 +42,11 @@ void WebAccessImpl::init()
 
     _connections.emplace_back(connect(_http, &HttpClient::dataReceived, this, &WebAccessImpl::dataReceived));
     _connections.emplace_back(connect(_http, &HttpClient::error, this, &WebAccess::error));
+}
+
+void WebAccessImpl::requestCurrentVersion()
+{
+    get(ApiGetCurrentVersion, RequestType::SimulationInfo, true);
 }
 
 void WebAccessImpl::requestSimulationInfos()
@@ -119,13 +125,7 @@ void WebAccessImpl::dataReceived(string handler, QByteArray data)
 
     switch (requestType) {
     case RequestType::SimulationInfo : {
-        try {
-            auto simulationInfos = Parser::parseForSimulationInfos(data);
-            Q_EMIT simulationInfosReceived(simulationInfos);
-        }
-        catch (std::exception const& exception) {
-            Q_EMIT error(exception.what());
-        }
+        Q_EMIT currentVersionReceived(data.toStdString());
     }
     break;
     case RequestType::Connect: {
@@ -152,7 +152,7 @@ void WebAccessImpl::dataReceived(string handler, QByteArray data)
     }
 }
 
-void WebAccessImpl::get(string const & apiMethodName, RequestType requestType)
+void WebAccessImpl::get(string const& apiMethodName, RequestType requestType, bool omitErrorResponse)
 {
     if (_requesting.find(requestType) != _requesting.end()) {
         return;
@@ -160,7 +160,7 @@ void WebAccessImpl::get(string const & apiMethodName, RequestType requestType)
     _requesting.insert(requestType);
 
     auto const handler = std::to_string(static_cast<int>(requestType)) + ":";
-    _http->get(QUrl(QString::fromStdString(ServerAddress + apiMethodName)), handler);
+    _http->get(QUrl(QString::fromStdString(ServerAddress + apiMethodName)), handler, omitErrorResponse);
 }
 
 void WebAccessImpl::post(string const & apiMethodName, RequestType requestType, std::map<string, string> const& keyValues)
