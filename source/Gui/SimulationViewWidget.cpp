@@ -14,6 +14,8 @@
 #include "PixelUniverseView.h"
 #include "VectorUniverseView.h"
 #include "ItemUniverseView.h"
+#include "QApplicationHelper.h"
+#include "StartupController.h"
 
 #include "SimulationViewWidget.h"
 #include "ui_SimulationViewWidget.h"
@@ -32,7 +34,9 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
     ui->simulationView->horizontalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
 
-    setStartupScene();
+    auto startupScene = new QGraphicsScene(this);
+    startupScene->setBackgroundBrush(QBrush(Const::UniverseColor));
+    ui->simulationView->setScene(startupScene);
 }
 
 SimulationViewWidget::~SimulationViewWidget()
@@ -139,32 +143,6 @@ void SimulationViewWidget::toggleCenterSelection(bool value)
     CHECK(itemUniverseView);
 
     itemUniverseView->toggleCenterSelection(value);
-}
-
-void SimulationViewWidget::setStartupScene()
-{
-    auto startupScene = new QGraphicsScene(this);
-    startupScene->setBackgroundBrush(QBrush(Const::UniverseColor));
-
-    QPixmap startScreenPixmap("://logo.png");
-    startupScene->addPixmap(startScreenPixmap);
-
-    QFile file("://Version.txt");
-    if (!file.open(QIODevice::ReadOnly)) {
-        THROW_NOT_IMPLEMENTED();
-    }
-    QTextStream in(&file);
-    auto version = in.readLine();
-
-    QGraphicsSimpleTextItem* versionTextItem = new QGraphicsSimpleTextItem("Version " + version);
-    auto font = versionTextItem->font();
-    font.setPixelSize(15);
-    versionTextItem->setFont(font);
-    versionTextItem->setPos(440, 480);
-    versionTextItem->setBrush(Const::StartupTextColor);
-    startupScene->addItem(versionTextItem);
-
-    ui->simulationView->setScene(startupScene);
 }
 
 UniverseView * SimulationViewWidget::getActiveUniverseView() const

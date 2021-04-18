@@ -240,7 +240,8 @@
     <ClCompile Include="..\..\..\source\Gui\VectorImageSectionItem.cpp" />
     <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\VectorViewport.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\VersionController.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\SnapshotController.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\StartupController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ViewportInterface.cpp" />
     <ClCompile Include="..\..\..\source\Gui\WebSimulationController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\WebSimulationSelectionController.cpp" />
@@ -274,13 +275,14 @@
     <ClInclude Include="..\..\..\source\Gui\StringHelper.h" />
     <ClInclude Include="..\..\..\source\Gui\TabWidgetHelper.h" />
     <ClInclude Include="..\..\..\source\Gui\VectorImageSectionItem.h" />
+    <QtMoc Include="..\..\..\source\Gui\StartupController.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="..\..\..\source\Gui\WebSimulationTableModel.h" />
     <QtMoc Include="..\..\..\source\Gui\WebSimulationSelectionView.h" />
     <QtMoc Include="..\..\..\source\Gui\WebSimulationSelectionController.h" />
     <QtMoc Include="..\..\..\source\Gui\WebSimulationController.h" />
     <QtMoc Include="..\..\..\source\Gui\ViewportInterface.h" />
-    <QtMoc Include="..\..\..\source\Gui\VersionController.h" />
+    <QtMoc Include="..\..\..\source\Gui\SnapshotController.h" />
     <QtMoc Include="..\..\..\source\Gui\VectorViewport.h" />
     <QtMoc Include="..\..\..\source\Gui\VectorUniverseView.h" />
     <QtMoc Include="..\..\..\source\Gui\UniverseView.h" />

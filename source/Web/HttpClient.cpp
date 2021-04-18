@@ -11,11 +11,9 @@ HttpClient::HttpClient(QObject* parent /*= nullptr*/)
     : QObject(parent)
 {
     connect(&_networkManager, &QNetworkAccessManager::finished, this, &HttpClient::finished);
-
-    //TODO: QNetworkAccessManager::authenticationRequired
 }
 
-void HttpClient::get(QUrl const& url, string const& handler)
+void HttpClient::get(QUrl const& url, string const& handler, bool omitErrorResponse)
 {
     QNetworkRequest request(url);
     request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
@@ -23,6 +21,9 @@ void HttpClient::get(QUrl const& url, string const& handler)
 
     auto reply = _networkManager.get(request);
     _handlerByReply.insert_or_assign(reply, handler);
+    if (omitErrorResponse) {
+        _noErrorResponseWantedFor.insert(reply);
+    }
 }
 
 void HttpClient::postText(QUrl const & url, string const& handler, QByteArray const & data)
@@ -55,24 +56,27 @@ void HttpClient::finished(QNetworkReply * reply)
         reply->deleteLater();
         _handlerByReply.erase(reply);
         _postDataByReply.erase(reply);
+        _noErrorResponseWantedFor.erase(reply);
     };
 
     auto errorCode = reply->error();
     if (QNetworkReply::NetworkError::NoError != errorCode) {
+        if (_noErrorResponseWantedFor.find(reply) == _noErrorResponseWantedFor.end()) {
 
-        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(
-            Priority::Important,
-            QString("A network error occurred. Error code: %1.").arg(reply->error()).toStdString());
+            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+            loggingService->logMessage(
+                Priority::Important,
+                QString("A network error occurred. Error code: %1.").arg(reply->error()).toStdString());
 
-        if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
-            retry(reply);
-            cleanupOnExit();
-            return;
+            if (QNetworkReply::NetworkError::InternalServerError == errorCode) {
+                retry(reply);
+                cleanupOnExit();
+                return;
+            }
+
+            auto raw = reply->rawHeaderList();
+            Q_EMIT error(QString("Could not read data from server.").toStdString());
         }
-
-        auto raw = reply->rawHeaderList();
-        Q_EMIT error(QString("Could not read data from server.").toStdString());
 
         reply->deleteLater();
         cleanupOnExit();

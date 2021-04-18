@@ -68,7 +68,7 @@ private:
 
 	DataRepository* _repository = nullptr;
 	Notifier* _notifier = nullptr;
-	VersionController* _versionController = nullptr;
+	SnapshotController* _snapshotController = nullptr;
 	SimulationAccess* _simAccess = nullptr;
 	NumberGenerator* _numberGenerator = nullptr;
 	Serializer* _serializer = nullptr;
