@@ -106,7 +106,12 @@ void ActionController::init(
     connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
 
 	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
-	connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
+    connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
+    connect(_simulationViewWidget, &SimulationViewWidget::continuousZoomIn, this, &ActionController::onContinuousZoomIn);
+    connect(_simulationViewWidget, &SimulationViewWidget::continuousZoomOut, this, &ActionController::onContinuousZoomOut);
+    connect(_simulationViewWidget, &SimulationViewWidget::endContinuousZoom, this, &ActionController::onEndContinuousZoom);
+    connect(
+        &_continuousZoomTimer, &QTimer::timeout, this, &ActionController::onContinuousZoom);
     connect(actions->actionDisplayLink, &QAction::triggered, this, &ActionController::onToggleDisplayLink);
     connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
@@ -283,15 +288,18 @@ void ActionController::onZoomInClicked()
 
 	loggingService->logMessage(Priority::Unimportant, "zoom in finished");
 
+	auto actions = _model->getActionHolder();
     if(!_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-            _model->getActionHolder()->actionEditor->toggle();
+            actions->actionEditor->toggle();
         }
         else {
             setPixelOrVectorView();
         }
     }
-    _simulationViewWidget->refresh();
+    if (!actions->actionRunSimulation->isChecked()) {
+        _simulationViewWidget->refresh();
+    }
     updateActionsEnableState();
 }
 
@@ -305,6 +313,7 @@ void ActionController::onZoomOutClicked()
 
 	loggingService->logMessage(Priority::Unimportant, "zoom out finished");
 
+	auto actions = _model->getActionHolder();
     if (_model->isEditMode()) {
         if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         }
@@ -315,8 +324,82 @@ void ActionController::onZoomOutClicked()
     else {
         setPixelOrVectorView();
     }
-    _simulationViewWidget->refresh();
+    if (!actions->actionRunSimulation->isChecked()) {
+        _simulationViewWidget->refresh();
+    }
     updateActionsEnableState();
+}
+
+void ActionController::onContinuousZoomIn(QVector2D const& worldPos)
+{
+    _continuousZoomTimer.start(std::chrono::milliseconds(30));
+    _continuousZoomMode = ContinuousZoomMode::In;
+    _continuousZoomWorldPos = worldPos;
+}
+
+void ActionController::onContinuousZoomOut(QVector2D const& worldPos)
+{
+    _continuousZoomTimer.start(std::chrono::milliseconds(30));
+    _continuousZoomMode = ContinuousZoomMode::Out;
+    _continuousZoomWorldPos = worldPos;
+}
+
+void ActionController::onContinuousZoom()
+{
+    if (ContinuousZoomMode::In == _continuousZoomMode) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Unimportant, "zoom in");
+
+        auto zoomFactor = _simulationViewWidget->getZoomFactor();
+        _simulationViewWidget->setZoomFactor(zoomFactor * 1.05, *_continuousZoomWorldPos);
+
+        loggingService->logMessage(Priority::Unimportant, "zoom in finished");
+
+        auto actions = _model->getActionHolder();
+        if (!_model->isEditMode()) {
+            if (_simulationViewWidget->getZoomFactor()
+                > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
+                actions->actionEditor->toggle();
+            } else {
+                setPixelOrVectorView();
+            }
+        }
+        if (!actions->actionRunSimulation->isChecked()) {
+            _simulationViewWidget->refresh();
+        }
+        updateActionsEnableState();
+    }
+    if (ContinuousZoomMode::Out == _continuousZoomMode) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Unimportant, "zoom out");
+
+        auto zoomFactor = _simulationViewWidget->getZoomFactor();
+        _simulationViewWidget->setZoomFactor(zoomFactor / 1.05, *_continuousZoomWorldPos);
+
+        loggingService->logMessage(Priority::Unimportant, "zoom out finished");
+
+        auto actions = _model->getActionHolder();
+        if (_model->isEditMode()) {
+            if (_simulationViewWidget->getZoomFactor()
+                > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
+            } else {
+                _model->getActionHolder()->actionEditor->toggle();
+            }
+        } else {
+            setPixelOrVectorView();
+        }
+        if (!actions->actionRunSimulation->isChecked()) {
+            _simulationViewWidget->refresh();
+        }
+        updateActionsEnableState();
+    }
+}
+
+void ActionController::onEndContinuousZoom()
+{
+    _continuousZoomTimer.stop();
+    _continuousZoomMode = boost::none;
+    _continuousZoomWorldPos = boost::none;
 }
 
 void ActionController::onToggleDisplayLink(bool toggled)

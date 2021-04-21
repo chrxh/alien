@@ -30,9 +30,22 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
     _pixelUniverse = new PixelUniverseView(ui->simulationView, this);
     _vectorUniverse = new VectorUniverseView(ui->simulationView, this);
     _itemUniverse = new ItemUniverseView(ui->simulationView, this);
+    connect(_pixelUniverse, &PixelUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
+    connect(_pixelUniverse, &PixelUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
+    connect(_pixelUniverse, &PixelUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
+    connect(_vectorUniverse, &VectorUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
+    connect(
+        _vectorUniverse, &VectorUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
+    connect(_vectorUniverse, &VectorUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
+    connect(_itemUniverse, &ItemUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
+    connect(_itemUniverse, &ItemUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
+    connect(_itemUniverse, &ItemUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
 
     ui->simulationView->horizontalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
     ui->simulationView->verticalScrollBar()->setStyleSheet(Const::ScrollbarStyleSheet);
+
+    ui->simulationView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->simulationView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     auto startupScene = new QGraphicsScene(this);
     startupScene->setBackgroundBrush(QBrush(Const::UniverseColor));
@@ -120,6 +133,23 @@ void SimulationViewWidget::setZoomFactor(double factor)
     auto screenCenterPos = activeView->getCenterPositionOfScreen();
     activeView->setZoomFactor(factor);
     activeView->centerTo(screenCenterPos);
+
+    Q_EMIT zoomFactorChanged(factor);
+}
+
+void SimulationViewWidget::setZoomFactor(double factor, QVector2D const& worldPos)
+{
+    auto origZoomFactor = getZoomFactor();
+    auto activeView = getActiveUniverseView();
+    auto worldPosOfScreenCenter = activeView->getCenterPositionOfScreen();
+    activeView->setZoomFactor(factor);
+    QVector2D mu(
+        worldPosOfScreenCenter.x() * (factor / origZoomFactor - 1.0),
+        worldPosOfScreenCenter.y() * (factor / origZoomFactor - 1.0));
+    QVector2D correction(
+        mu.x() * (worldPosOfScreenCenter.x() - worldPos.x()) / worldPosOfScreenCenter.x(),
+        mu.y() * (worldPosOfScreenCenter.y() - worldPos.y()) / worldPosOfScreenCenter.y());
+    activeView->centerTo(worldPosOfScreenCenter - correction);
 
     Q_EMIT zoomFactorChanged(factor);
 }
