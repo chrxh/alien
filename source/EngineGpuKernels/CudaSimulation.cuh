@@ -1,11 +1,10 @@
 #pragma once
 
-#include "EngineInterface/MonitorData.h"
-#include "EngineInterface/ExecutionParameters.h"
-
-#include "Definitions.cuh"
 #include "CudaConstants.h"
+#include "Definitions.cuh"
 #include "DllExport.h"
+#include "EngineInterface/ExecutionParameters.h"
+#include "EngineInterface/MonitorData.h"
 
 class ENGINEGPUKERNELS_EXPORT CudaSimulation
 {
@@ -20,7 +19,12 @@ public:
     void calcCudaTimestep();
 
     void getPixelImage(int2 const& rectUpperLeft, int2 const& rectLowerRight, unsigned char* imageData);
-    void getVectorImage(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& imageSize, double zoom, unsigned char* imageData);
+    void getVectorImage(
+        float2 const& rectUpperLeft,
+        float2 const& rectLowerRight,
+        int2 const& imageSize,
+        double zoom,
+        unsigned char* imageData);
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 

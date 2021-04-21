@@ -1,26 +1,25 @@
 #pragma once
 
-#include "EngineInterface/SimulationAccess.h"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineGpuKernels/CudaConstants.h"
-
+#include "EngineInterface/ChangeDescriptions.h"
+#include "EngineInterface/SimulationAccess.h"
 #include "SimulationAccessGpu.h"
+#include "DefinitionsImpl.h"
 
-class SimulationAccessGpuImpl
-	: public SimulationAccessGpu
+class SimulationAccessGpuImpl : public SimulationAccessGpu
 {
 public:
-	SimulationAccessGpuImpl(QObject* parent = nullptr);
-	virtual ~SimulationAccessGpuImpl();
+    SimulationAccessGpuImpl(QObject* parent = nullptr);
+    virtual ~SimulationAccessGpuImpl();
 
-	void init(SimulationControllerGpu* controller) override;
+    void init(SimulationControllerGpu* controller) override;
 
-	void clear() override;
-	void updateData(DataChangeDescription const &dataToUpdate) override;
+    void clear() override;
+    void updateData(DataChangeDescription const& dataToUpdate) override;
     void requireData(ResolveDescription const& resolveDesc) override;
     void requireData(IntRect rect, ResolveDescription const& resolveDesc) override;
-	void requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
-    void requireVectorImage(IntRect rect, double zoom, QImagePtr const& target, std::mutex& mutex) override;
+    void requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) override;
+    void requireVectorImage(RealRect rect, double zoom, QImagePtr const& target, std::mutex& mutex) override;
     void selectEntities(IntVector2D const& pos) override;
     void deselectAll() override;
     void applyAction(PhysicalAction const& action) override;
@@ -28,42 +27,41 @@ public:
 
 private:
     void scheduleJob(CudaJob const& job);
-	Q_SLOT void jobsFinished();
+    Q_SLOT void jobsFinished();
 
-	void createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect);
+    void createDataFromGpuModel(DataAccessTO dataTO, IntRect const& rect);
 
-	void metricCorrection(DataChangeDescription& data) const;
+    void metricCorrection(DataChangeDescription& data) const;
 
-	string getObjectId() const;
+    string getObjectId() const;
 
-	class _DataTOCache
-	{
-	public:
-		_DataTOCache(CudaConstants const& cudaConstants);
-		~_DataTOCache();
+    class _DataTOCache
+    {
+    public:
+        _DataTOCache(CudaConstants const& cudaConstants);
+        ~_DataTOCache();
 
-		DataAccessTO getDataTO();
-		void releaseDataTO(DataAccessTO const& dataTO);
+        DataAccessTO getDataTO();
+        void releaseDataTO(DataAccessTO const& dataTO);
 
-	private:
+    private:
         DataAccessTO getNewDataTO();
         void deleteDataTO(DataAccessTO const& dataTO);
 
         CudaConstants _cudaConstants;
         vector<DataAccessTO> _freeDataTOs;
-		vector<DataAccessTO> _usedDataTOs;
-	};
+        vector<DataAccessTO> _usedDataTOs;
+    };
     using DataTOCache = boost::shared_ptr<_DataTOCache>;
 
 private:
-	list<QMetaObject::Connection> _connections;
+    list<QMetaObject::Connection> _connections;
 
-	SimulationContextGpuImpl* _context = nullptr;
-	NumberGenerator* _numberGen = nullptr;
+    SimulationContextGpuImpl* _context = nullptr;
+    NumberGenerator* _numberGen = nullptr;
     CudaConstants _cudaConstants;
 
-	DataDescription _dataCollected;
-	DataTOCache _dataTOCache;
-	IntRect _lastDataRect;
+    DataDescription _dataCollected;
+    DataTOCache _dataTOCache;
+    IntRect _lastDataRect;
 };
-

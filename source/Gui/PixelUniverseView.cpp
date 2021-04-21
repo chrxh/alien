@@ -138,15 +138,25 @@ bool PixelUniverseView::eventFilter(QObject* object, QEvent* event)
 
 void PixelUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
+    auto pos = QVector2D(event->scenePos().x(), event->scenePos().y());
+    if (event->buttons() == Qt::MouseButton::LeftButton) {
+        Q_EMIT startContinuousZoomIn(pos);
+    }
+    if (event->buttons() == Qt::MouseButton::RightButton) {
+        Q_EMIT startContinuousZoomOut(pos);
+    }
+/*
     if (!_controller->getRun()) {
         QVector2D pos(event->scenePos().x(), event->scenePos().y());
         _access->selectEntities(pos);
         requestImage();
     }
+*/
 }
 
 void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
+/*
     auto const pos = QVector2D(e->scenePos().x(), e->scenePos().y());
     auto const lastPos = QVector2D(e->lastScenePos().x(), e->lastScenePos().y());
 
@@ -167,14 +177,18 @@ void PixelUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
             requestImage();
         }
     }
+*/
 }
 
 void PixelUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
+    Q_EMIT endContinuousZoom();
+/*
     if (!_controller->getRun()) {
         _access->deselectAll();
         requestImage();
     }
+*/
 }
 
 void PixelUniverseView::receivedNotifications(set<Receiver> const & targets)

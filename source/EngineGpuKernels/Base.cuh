@@ -1,14 +1,15 @@
 #pragma once
 
 #include <vector>
+
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
-#include "Definitions.cuh"
 #include "Array.cuh"
 #include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
+#include "Definitions.cuh"
 #include "HashSet.cuh"
 
 struct PartitionData
@@ -16,23 +17,19 @@ struct PartitionData
     int startIndex;
     int endIndex;
 
-    __inline__ __device__ int numElements() const
-    {
-        return endIndex - startIndex + 1;
-    }
+    __inline__ __device__ int numElements() const { return endIndex - startIndex + 1; }
 };
 
 class CudaNumberGenerator
 {
 private:
-    unsigned int *_currentIndex;
-    int *_array;
+    unsigned int* _currentIndex;
+    int* _array;
     int _size;
 
-    uint64_t *_currentId;
+    uint64_t* _currentId;
 
 public:
-
     void init(int size)
     {
         _size = size;
@@ -49,7 +46,7 @@ public:
         for (int i = 0; i < size; ++i) {
             randomNumbers[i] = rand();
         }
-        checkCudaErrors(cudaMemcpy(_array, randomNumbers.data(), sizeof(int)*size, cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
     }
 
 
@@ -62,7 +59,7 @@ public:
     __device__ __inline__ float random(float maxVal)
     {
         int number = getRandomNumber();
-        return maxVal* static_cast<float>(number) / RAND_MAX;
+        return maxVal * static_cast<float>(number) / RAND_MAX;
     }
 
     __device__ __inline__ float random()
@@ -71,10 +68,7 @@ public:
         return static_cast<float>(number) / RAND_MAX;
     }
 
-    __device__ __inline__ uint64_t createNewId_kernel()
-    {
-        return atomicAdd(_currentId, 1);
-    }
+    __device__ __inline__ uint64_t createNewId_kernel() { return atomicAdd(_currentId, 1); }
 
     void free()
     {
@@ -102,21 +96,21 @@ __device__ __inline__ PartitionData calcPartition(int numEntities, int division,
     int remainder = numEntities % numDivisions;
 
     int length = division < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
-    result.startIndex = division < remainder ?
-        (entitiesByDivisions + 1) * division
+    result.startIndex = division < remainder
+        ? (entitiesByDivisions + 1) * division
         : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (division - remainder);
     result.endIndex = result.startIndex + length - 1;
     return result;
 }
 
-__host__ __device__ __inline__ int2 toInt2(float2 const &p)
+__host__ __device__ __inline__ int2 toInt2(float2 const& p)
 {
-    return{ static_cast<int>(p.x), static_cast<int>(p.y) };
+    return {static_cast<int>(p.x), static_cast<int>(p.y)};
 }
 
-__host__ __device__ __inline__ float2 toFloat2(int2 const &p)
+__host__ __device__ __inline__ float2 toFloat2(int2 const& p)
 {
-    return{ static_cast<float>(p.x), static_cast<float>(p.y) };
+    return {static_cast<float>(p.x), static_cast<float>(p.y)};
 }
 
 __host__ __device__ __inline__ int floorInt(float v)
@@ -128,28 +122,32 @@ __host__ __device__ __inline__ int floorInt(float v)
     return result;
 }
 
-__host__ __device__ __inline__ bool isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
+__host__ __device__ __inline__ bool
+isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
 {
-    return pos.x >= rectUpperLeft.x
-        && pos.x <= rectLowerRight.x
-        && pos.y >= rectUpperLeft.y
+    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x && pos.y >= rectUpperLeft.y
+        && pos.y <= rectLowerRight.y;
+}
+
+__host__ __device__ __inline__ bool
+isContainedInRect(float2 const& rectUpperLeft, float2 const& rectLowerRight, float2 const& pos)
+{
+    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x && pos.y >= rectUpperLeft.y
         && pos.y <= rectLowerRight.y;
 }
 
 __host__ __device__ __inline__ bool
 isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int const& boundary = 0)
 {
-    return pos.x >= rectUpperLeft.x + boundary
-        && pos.x <= rectLowerRight.x - boundary
-        && pos.y >= rectUpperLeft.y + boundary
-        && pos.y <= rectLowerRight.y - boundary;
+    return pos.x >= rectUpperLeft.x + boundary && pos.x <= rectLowerRight.x - boundary
+        && pos.y >= rectUpperLeft.y + boundary && pos.y <= rectLowerRight.y - boundary;
 }
 
-template<typename T>
-__device__ __inline__  T* atomicExch(T** address, T* value)
+template <typename T>
+__device__ __inline__ T* atomicExch(T** address, T* value)
 {
-    return reinterpret_cast<T*>(atomicExch(reinterpret_cast<unsigned long long int*>(address),
-        reinterpret_cast<unsigned long long int>(value)));
+    return reinterpret_cast<T*>(atomicExch(
+        reinterpret_cast<unsigned long long int*>(address), reinterpret_cast<unsigned long long int>(value)));
 }
 
 /*
@@ -174,48 +172,35 @@ public:
 
     __device__ __inline__ void getLock()
     {
-        while (1 == atomicExch_block(&lock, 1)) {}
+        while (1 == atomicExch_block(&lock, 1)) {
+        }
     }
 
-    __device__ __inline__ bool tryLock()
-    {
-        return 0 == atomicExch_block(&lock, 1);
-    }
+    __device__ __inline__ bool tryLock() { return 0 == atomicExch_block(&lock, 1); }
 
-    __device__ __inline__ void releaseLock()
-    {
-        atomicExch_block(&lock, 0);
-    }
+    __device__ __inline__ void releaseLock() { atomicExch_block(&lock, 0); }
 
 private:
-    int lock;   //0 = unlocked, 1 = locked
+    int lock;  //0 = unlocked, 1 = locked
 };
 
 class SystemLock
 {
 public:
-    __device__ __inline__ void init()
-    {
-        lock = 0;
-    }
+    __device__ __inline__ void init() { lock = 0; }
 
     __device__ __inline__ void getLock()
     {
-        while (1 == atomicExch(&lock, 1)) {}
+        while (1 == atomicExch(&lock, 1)) {
+        }
     }
 
-    __device__ __inline__ bool tryLock()
-    {
-        return 0 == atomicExch(&lock, 1);
-    }
+    __device__ __inline__ bool tryLock() { return 0 == atomicExch(&lock, 1); }
 
-    __device__ __inline__ void releaseLock()
-    {
-        atomicExch(&lock, 0);
-    }
+    __device__ __inline__ void releaseLock() { atomicExch(&lock, 0); }
 
 private:
-    int lock;   //0 = unlocked, 1 = locked
+    int lock;  //0 = unlocked, 1 = locked
 };
 
 class SystemDoubleLock
@@ -226,8 +211,7 @@ public:
         if (lock1 <= lock2) {
             _lock1 = lock1;
             _lock2 = lock2;
-        }
-        else {
+        } else {
             _lock1 = lock2;
             _lock2 = lock1;
         }
@@ -246,13 +230,11 @@ public:
 
     __device__ __inline__ void getLock()
     {
-        while (!tryLock()) {};
+        while (!tryLock()) {
+        };
     }
 
-    __device__ __inline__ bool isLocked()
-    {
-        return _lockState1 == 0 && _lockState2 == 0;
-    }
+    __device__ __inline__ bool isLocked() { return _lockState1 == 0 && _lockState2 == 0; }
 
     __device__ __inline__ void releaseLock()
     {
@@ -276,11 +258,10 @@ float random(float max)
     return ((float)rand() / RAND_MAX) * max;
 }
 
-template<typename T>
-__host__ __device__ __inline__ void swap(T &a, T &b)
+template <typename T>
+__host__ __device__ __inline__ void swap(T& a, T& b)
 {
     T temp = a;
     a = b;
     b = temp;
 }
-
