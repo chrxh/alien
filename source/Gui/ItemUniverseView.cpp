@@ -304,6 +304,14 @@ bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
     TRY;
+    auto pos = QVector2D(CoordinateSystem::sceneToModel(e->scenePos().x()), CoordinateSystem::sceneToModel(e->scenePos().y()));
+    if (e->buttons() == Qt::MouseButton::LeftButton) {
+        Q_EMIT startContinuousZoomIn(pos);
+    }
+    if (e->buttons() == Qt::MouseButton::RightButton) {
+        Q_EMIT startContinuousZoomOut(pos);
+    }
+/*
     _mouseButtonPressed = true;
 	auto itemsClicked = _scene->items(e->scenePos());
 	QList<QGraphicsItem*> frontItem = !itemsClicked.empty() ? QList<QGraphicsItem*>({ itemsClicked.front() }) : QList<QGraphicsItem*>();
@@ -324,12 +332,14 @@ void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 	else {
 		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::All);
 	}
+*/
     CATCH;
 }
 
 void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
     TRY;
+/*
     bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
 	
@@ -368,12 +378,15 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 	if (leftButton || rightButton) {
 		Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor, Receiver::ActionController }, UpdateDescription::AllExceptToken);
 	}
+*/
     CATCH;
 }
 
 void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
     TRY;
+    Q_EMIT endContinuousZoom();
+/*
     _mouseButtonPressed = false;
 	if (_itemManager->isMarkerActive()) {
 		_itemManager->deleteMarker();
@@ -384,6 +397,7 @@ void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 			Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::AllExceptToken);
 		}
 	}
+*/
     CATCH;
 }
 

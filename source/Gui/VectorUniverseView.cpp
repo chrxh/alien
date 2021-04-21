@@ -101,7 +101,7 @@ void VectorUniverseView::setZoomFactor(double zoomFactor)
 {
     _zoomFactor = zoomFactor;
     auto const size = _controller->getContext()->getSpaceProperties()->getSize();
-    _scene->setSceneRect(0, 0, size.x * zoomFactor, size.y * zoomFactor);
+    _scene->setSceneRect(0, 0, static_cast<double>(size.x) * zoomFactor, static_cast<double>(size.y) * zoomFactor);
     _viewport->setZoomFactor(zoomFactor);
     _imageSectionItem->setZoomFactor(zoomFactor);
 }
@@ -142,15 +142,26 @@ bool VectorUniverseView::eventFilter(QObject * object, QEvent * event)
 
 void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
+    auto pos = QVector2D(event->scenePos().x() / _zoomFactor, event->scenePos().y() / _zoomFactor);
+
+    if (event->buttons() == Qt::MouseButton::LeftButton) {
+        Q_EMIT startContinuousZoomIn(pos);
+    }
+    if (event->buttons() == Qt::MouseButton::RightButton) {
+        Q_EMIT startContinuousZoomOut(pos);
+    }
+    /*
     if (!_controller->getRun()) {
         QVector2D pos(event->scenePos().x() / _zoomFactor, event->scenePos().y() / _zoomFactor);
         _access->selectEntities(pos);
         requestImage();
     }
+*/
 }
 
 void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 {
+/*
     auto const pos = QVector2D(e->scenePos().x() / _zoomFactor, e->scenePos().y() / _zoomFactor);
     auto const lastPos = QVector2D(e->lastScenePos().x() / _zoomFactor, e->lastScenePos().y() / _zoomFactor);
 
@@ -171,14 +182,19 @@ void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
             requestImage();
         }
     }
+*/
 }
 
 void VectorUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
+    Q_EMIT endContinuousZoom();
+
+/*
     if (!_controller->getRun()) {
         _access->deselectAll();
         requestImage();
     }
+*/
 }
 
 void VectorUniverseView::receivedNotifications(set<Receiver> const & targets)
