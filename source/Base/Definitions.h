@@ -1,26 +1,27 @@
 #pragma once
 
-#include <QObject>
-#include <QtGlobal>
 #include <QColor>
-#include <QVector2D>
-#include <QVector2D>
-#include <QSize>
-#include <QMap>
-#include <QSet>
-#include <QList>
 #include <QDataStream>
-#include <qmath.h>
+#include <QList>
+#include <QMap>
+#include <QObject>
+#include <QSet>
+#include <QSize>
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 
-#include <string>
-#include <set>
-#include <map>
-#include <vector>
-#include <unordered_set>
-#include <unordered_map>
+#include <QVector2D>
+#include <qmath.h>
+
+#include <QtGlobal>
 
 #include "DllExport.h"
 #include "Tracker.h"
@@ -28,22 +29,20 @@
 class NumberGenerator;
 class TagGenerator;
 
-using std::uint64_t;
-using std::uint32_t;
-using std::uint32_t;
-using std::int64_t;
-using std::int32_t;
-using std::int32_t;
-using std::vector;
-using std::map;
-using std::set;
-using std::list;
-using std::unordered_set;
-using std::unordered_map;
-using std::pair;
-using std::string;
 using boost::optional;
 using boost::shared_ptr;
+using std::int32_t;
+using std::int64_t;
+using std::list;
+using std::map;
+using std::pair;
+using std::set;
+using std::string;
+using std::uint32_t;
+using std::uint64_t;
+using std::unordered_map;
+using std::unordered_set;
+using std::vector;
 
 class _Worker;
 using Worker = boost::shared_ptr<_Worker>;
@@ -65,64 +64,84 @@ inline QColor toQColor(unsigned int const& rgba)
 }
 
 struct IntRect;
-struct BASE_EXPORT IntVector2D {
-	int x = 0;
-	int y = 0;
+struct BASE_EXPORT IntVector2D
+{
+    int x = 0;
+    int y = 0;
 
-	IntVector2D() = default;
-	IntVector2D(std::initializer_list<int> l);
-	IntVector2D(QVector2D const& vec);
-	QVector2D toQVector2D();
-	IntVector2D& restrictToRect(IntRect const& rect);
-	bool operator==(IntVector2D const& vec);
+    IntVector2D() = default;
+    IntVector2D(std::initializer_list<int> l);
+    IntVector2D(QVector2D const& vec);
+    QVector2D toQVector2D();
+    IntVector2D& restrictToRect(IntRect const& rect);
+    bool operator==(IntVector2D const& vec);
     void operator-=(IntVector2D const& vec);
-
 };
 
-BASE_EXPORT std::ostream& operator << (std::ostream& os, const IntVector2D& vec);
+struct RealRect;
+struct BASE_EXPORT RealVector2D
+{
+    float x = 0;
+    float y = 0;
 
-struct BASE_EXPORT IntRect {
-	IntVector2D p1;
-	IntVector2D p2;
-
-	IntRect() = default;
-	IntRect(std::initializer_list<IntVector2D> l);
-	IntRect(QRectF const& rect);
-	inline bool isContained(IntVector2D const& p) const;
-	inline IntVector2D center() const;
+    RealVector2D() = default;
+    RealVector2D(std::initializer_list<float> l);
+    RealVector2D(QVector2D const& vec);
+    QVector2D toQVector2D();
+    RealVector2D& restrictToRect(RealRect const& rect);
+    bool operator==(RealVector2D const& vec);
+    void operator-=(RealVector2D const& vec);
 };
 
-bool IntRect::isContained(IntVector2D const &p) const
+BASE_EXPORT std::ostream& operator<<(std::ostream& os, const IntVector2D& vec);
+
+struct BASE_EXPORT IntRect
 {
-	return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y;
-}
+    IntVector2D p1;
+    IntVector2D p2;
 
-IntVector2D IntRect::center() const
+    IntRect() = default;
+    IntRect(std::initializer_list<IntVector2D> l);
+    IntRect(QRectF const& rect);
+    bool isContained(IntVector2D const& p) const { return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y; }
+
+    IntVector2D center() const { return IntVector2D({(p1.x + p2.x) / 2, (p1.y + p2.y) / 2}); }
+};
+
+struct BASE_EXPORT RealRect
 {
-	return IntVector2D({ (p1.x + p2.x) / 2, (p1.y + p2.y) / 2 });
-}
+    RealVector2D p1;
+    RealVector2D p2;
+
+    RealRect() = default;
+    RealRect(std::initializer_list<RealVector2D> l);
+    RealRect(QRectF const& rect);
+    bool isContained(RealVector2D const& p) const { return p1.x <= p.x && p1.y <= p.y && p.x <= p2.x && p.y <= p2.y; }
+
+    RealVector2D center() const { return RealVector2D({(p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f}); }
+};
 
 
-#define SET_CHILD(previousChild, newChild)\
-	if (previousChild != newChild) { \
-		if(previousChild) { \
-			previousChild->deleteLater(); \
-		} \
-		previousChild = newChild; \
-		previousChild->setParent(this); \
-	}
+#define SET_CHILD(previousChild, newChild) \
+    if (previousChild != newChild) { \
+        if (previousChild) { \
+            previousChild->deleteLater(); \
+        } \
+        previousChild = newChild; \
+        previousChild->setParent(this); \
+    }
 
 #define THROW_NOT_IMPLEMENTED() throw std::exception("not implemented")
 
-#define CHECK(expression)\
-	if(!(expression)) {\
-		throw std::exception("check failed");\
-	}
+#define CHECK(expression) \
+    if (!(expression)) { \
+        throw std::exception("check failed"); \
+    }
 
-#define MEMBER_DECLARATION(className, type, name, initialValue)\
-    type _ ## name = initialValue; \
-    className& name(type const& name)\
+#define MEMBER_DECLARATION(className, type, name, initialValue) \
+    type _##name = initialValue; \
+    className& name(type const& name) \
     { \
-        _ ## name = name; \
+        _##name = name; \
         return *this; \
     }
