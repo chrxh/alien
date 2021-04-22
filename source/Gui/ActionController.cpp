@@ -49,18 +49,20 @@
 #include "WebSimulationController.h"
 #include "NewDiscDialog.h"
 #include "ColorizeDialogController.h"
+#include "ZoomActionController.h"
 
 ActionController::ActionController(QObject * parent)
 	: QObject(parent)
 {
 	_model = new ActionModel(this);
+    _zoomController = new ZoomActionController(this);
 }
 
 void ActionController::init(
     MainController* mainController,
     MainModel* mainModel,
     MainView* mainView,
-    SimulationViewWidget* visualEditor,
+    SimulationViewWidget* simulationViewWidget,
     Serializer* serializer,
     GeneralInfoController* infoController,
     DataEditController* dataEditor,
@@ -73,11 +75,12 @@ void ActionController::init(
     auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
     auto numberGenerator = factory->buildRandomNumberGenerator();
 	numberGenerator->init();
+    _zoomController->init(_model->getActionHolder(), simulationViewWidget);
 
 	_mainController = mainController;
 	_mainModel = mainModel;
 	_mainView = mainView;
-	_simulationViewWidget = visualEditor;
+	_simulationViewWidget = simulationViewWidget;
 	_serializer = serializer;
 	_infoController = infoController;
 	_dataEditor = dataEditor;
@@ -105,13 +108,23 @@ void ActionController::init(
     connect(actions->actionSimulationChanger, &QAction::triggered, this, &ActionController::onSimulationChanger);
     connect(actions->actionExit, &QAction::triggered, _mainView, &MainView::close);
 
-	connect(actions->actionZoomIn, &QAction::triggered, this, &ActionController::onZoomInClicked);
-    connect(actions->actionZoomOut, &QAction::triggered, this, &ActionController::onZoomOutClicked);
-    connect(_simulationViewWidget, &SimulationViewWidget::continuousZoomIn, this, &ActionController::onContinuousZoomIn);
-    connect(_simulationViewWidget, &SimulationViewWidget::continuousZoomOut, this, &ActionController::onContinuousZoomOut);
-    connect(_simulationViewWidget, &SimulationViewWidget::endContinuousZoom, this, &ActionController::onEndContinuousZoom);
+	connect(actions->actionZoomIn, &QAction::triggered, _zoomController, &ZoomActionController::onZoomInClicked);
+    connect(actions->actionZoomOut, &QAction::triggered, _zoomController, &ZoomActionController::onZoomOutClicked);
     connect(
-        &_continuousZoomTimer, &QTimer::timeout, this, &ActionController::onContinuousZoom);
+        _simulationViewWidget,
+        &SimulationViewWidget::continuousZoomIn,
+        _zoomController,
+        &ZoomActionController::onContinuousZoomIn);
+    connect(
+        _simulationViewWidget,
+        &SimulationViewWidget::continuousZoomOut,
+        _zoomController,
+        &ZoomActionController::onContinuousZoomOut);
+    connect(
+        _simulationViewWidget,
+        &SimulationViewWidget::endContinuousZoom,
+        _zoomController,
+        &ZoomActionController::onEndContinuousZoom);
     connect(actions->actionDisplayLink, &QAction::triggered, this, &ActionController::onToggleDisplayLink);
     connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
@@ -276,130 +289,6 @@ void ActionController::onSimulationChanger(bool toggled)
     _mainController->onSimulationChanger(toggled);
 
     loggingService->logMessage(Priority::Unimportant, "toggle parameter changer finished");
-}
-
-void ActionController::onZoomInClicked()
-{
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Unimportant, "zoom in");
- 
-	auto zoomFactor = _simulationViewWidget->getZoomFactor();
-	_simulationViewWidget->setZoomFactor(zoomFactor * 2);
-
-	loggingService->logMessage(Priority::Unimportant, "zoom in finished");
-
-	auto actions = _model->getActionHolder();
-    if(!_model->isEditMode()) {
-        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-            actions->actionEditor->toggle();
-        }
-        else {
-            setPixelOrVectorView();
-        }
-    }
-    if (!actions->actionRunSimulation->isChecked()) {
-        _simulationViewWidget->refresh();
-    }
-    updateActionsEnableState();
-}
-
-void ActionController::onZoomOutClicked()
-{
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Unimportant, "zoom out");
-
-	auto zoomFactor = _simulationViewWidget->getZoomFactor();
-    _simulationViewWidget->setZoomFactor(zoomFactor / 2);
-
-	loggingService->logMessage(Priority::Unimportant, "zoom out finished");
-
-	auto actions = _model->getActionHolder();
-    if (_model->isEditMode()) {
-        if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-        }
-        else {
-            _model->getActionHolder()->actionEditor->toggle();
-        }
-    }
-    else {
-        setPixelOrVectorView();
-    }
-    if (!actions->actionRunSimulation->isChecked()) {
-        _simulationViewWidget->refresh();
-    }
-    updateActionsEnableState();
-}
-
-void ActionController::onContinuousZoomIn(QVector2D const& worldPos)
-{
-    _continuousZoomTimer.start(std::chrono::milliseconds(30));
-    _continuousZoomMode = ContinuousZoomMode::In;
-    _continuousZoomWorldPos = worldPos;
-}
-
-void ActionController::onContinuousZoomOut(QVector2D const& worldPos)
-{
-    _continuousZoomTimer.start(std::chrono::milliseconds(30));
-    _continuousZoomMode = ContinuousZoomMode::Out;
-    _continuousZoomWorldPos = worldPos;
-}
-
-void ActionController::onContinuousZoom()
-{
-    if (ContinuousZoomMode::In == _continuousZoomMode) {
-        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Unimportant, "zoom in");
-
-        auto zoomFactor = _simulationViewWidget->getZoomFactor();
-        _simulationViewWidget->setZoomFactor(zoomFactor * 1.05, *_continuousZoomWorldPos);
-
-        loggingService->logMessage(Priority::Unimportant, "zoom in finished");
-
-        auto actions = _model->getActionHolder();
-        if (!_model->isEditMode()) {
-            if (_simulationViewWidget->getZoomFactor()
-                > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-                actions->actionEditor->toggle();
-            } else {
-                setPixelOrVectorView();
-            }
-        }
-        if (!actions->actionRunSimulation->isChecked()) {
-            _simulationViewWidget->refresh();
-        }
-        updateActionsEnableState();
-    }
-    if (ContinuousZoomMode::Out == _continuousZoomMode) {
-        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Unimportant, "zoom out");
-
-        auto zoomFactor = _simulationViewWidget->getZoomFactor();
-        _simulationViewWidget->setZoomFactor(zoomFactor / 1.05, *_continuousZoomWorldPos);
-
-        loggingService->logMessage(Priority::Unimportant, "zoom out finished");
-
-        auto actions = _model->getActionHolder();
-        if (_model->isEditMode()) {
-            if (_simulationViewWidget->getZoomFactor()
-                > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-            } else {
-                _model->getActionHolder()->actionEditor->toggle();
-            }
-        } else {
-            setPixelOrVectorView();
-        }
-        if (!actions->actionRunSimulation->isChecked()) {
-            _simulationViewWidget->refresh();
-        }
-        updateActionsEnableState();
-    }
-}
-
-void ActionController::onEndContinuousZoom()
-{
-    _continuousZoomTimer.stop();
-    _continuousZoomMode = boost::none;
-    _continuousZoomWorldPos = boost::none;
 }
 
 void ActionController::onToggleDisplayLink(bool toggled)
