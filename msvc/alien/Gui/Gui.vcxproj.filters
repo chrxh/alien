@@ -394,6 +394,9 @@
     <ClCompile Include="..\..\..\source\Gui\StartupController.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\ZoomActionController.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -669,6 +672,9 @@
       <Filter>External</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\StartupController.h">
+      <Filter>Impl</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\ZoomActionController.h">
       <Filter>Impl</Filter>
     </QtMoc>
   </ItemGroup>

@@ -247,6 +247,12 @@
     <ClCompile Include="..\..\..\source\Gui\WebSimulationSelectionController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\WebSimulationSelectionView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\WebSimulationTableModel.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\ZoomActionController.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\..\external\QJsonModel\qjsonmodel.h" />
@@ -276,6 +282,7 @@
     <ClInclude Include="..\..\..\source\Gui\TabWidgetHelper.h" />
     <ClInclude Include="..\..\..\source\Gui\VectorImageSectionItem.h" />
     <QtMoc Include="..\..\..\source\Gui\StartupController.h" />
+    <QtMoc Include="..\..\..\source\Gui\ZoomActionController.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="..\..\..\source\Gui\WebSimulationTableModel.h" />
     <QtMoc Include="..\..\..\source\Gui\WebSimulationSelectionView.h" />

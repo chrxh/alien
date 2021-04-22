@@ -57,7 +57,11 @@ SimulationViewWidget::~SimulationViewWidget()
     delete ui;
 }
 
-void SimulationViewWidget::init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* repository)
+void SimulationViewWidget::init(
+    Notifier* notifier,
+    SimulationController* controller,
+    SimulationAccess* access,
+    DataRepository* repository)
 {
     auto const InitialZoomFactor = 4.0;
 
@@ -137,21 +141,21 @@ void SimulationViewWidget::setZoomFactor(double factor)
     Q_EMIT zoomFactorChanged(factor);
 }
 
-void SimulationViewWidget::setZoomFactor(double factor, QVector2D const& worldPos)
+void SimulationViewWidget::setZoomFactor(double zoomFactor, QVector2D const& worldPos)
 {
     auto origZoomFactor = getZoomFactor();
     auto activeView = getActiveUniverseView();
     auto worldPosOfScreenCenter = activeView->getCenterPositionOfScreen();
-    activeView->setZoomFactor(factor);
+    activeView->setZoomFactor(zoomFactor);
     QVector2D mu(
-        worldPosOfScreenCenter.x() * (factor / origZoomFactor - 1.0),
-        worldPosOfScreenCenter.y() * (factor / origZoomFactor - 1.0));
+        worldPosOfScreenCenter.x() * (zoomFactor / origZoomFactor - 1.0),
+        worldPosOfScreenCenter.y() * (zoomFactor / origZoomFactor - 1.0));
     QVector2D correction(
         mu.x() * (worldPosOfScreenCenter.x() - worldPos.x()) / worldPosOfScreenCenter.x(),
         mu.y() * (worldPosOfScreenCenter.y() - worldPos.y()) / worldPosOfScreenCenter.y());
     activeView->centerTo(worldPosOfScreenCenter - correction);
 
-    Q_EMIT zoomFactorChanged(factor);
+    Q_EMIT zoomFactorChanged(zoomFactor);
 }
 
 QVector2D SimulationViewWidget::getViewCenterWithIncrement ()
