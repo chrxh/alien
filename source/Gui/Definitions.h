@@ -101,3 +101,4 @@ class LoggingView;
 class LoggingController;
 class GuiLogger;
 class BugReportView;
+class ZoomActionController;
