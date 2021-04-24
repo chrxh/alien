@@ -23,7 +23,7 @@
 #include "VectorViewport.h"
 
 VectorUniverseView::VectorUniverseView(QGraphicsView* graphicsView, QObject* parent)
-    : UniverseView(parent), _graphicsView(graphicsView)
+    : UniverseView(graphicsView, parent)
 {
     _scene = new QGraphicsScene(parent);
     _scene->setBackgroundBrush(QBrush(Const::BackgroundColor));
@@ -49,8 +49,10 @@ void VectorUniverseView::init(
 
     delete _imageSectionItem;
 
-    auto const size = _controller->getContext()->getSpaceProperties()->getSize();
-    _imageSectionItem = new VectorImageSectionItem(_viewport, size, repository->getImageMutex());
+    auto width = _graphicsView->width();
+    auto height = _graphicsView->height();
+    _imageSectionItem = new VectorImageSectionItem(_viewport, {width, height}, repository->getImageMutex());
+    _scene->setSceneRect(0, 0, width - 1, height - 1);
 
     _scene->addItem(_imageSectionItem);
 }
@@ -100,23 +102,57 @@ double VectorUniverseView::getZoomFactor() const
 void VectorUniverseView::setZoomFactor(double zoomFactor)
 {
     _zoomFactor = zoomFactor;
+    _viewport->setZoomFactor(zoomFactor);
+    _imageSectionItem->setZoomFactor(zoomFactor);
+/*
     auto const size = _controller->getContext()->getSpaceProperties()->getSize();
     _scene->setSceneRect(0, 0, static_cast<double>(size.x) * zoomFactor, static_cast<double>(size.y) * zoomFactor);
     _viewport->setZoomFactor(zoomFactor);
     _imageSectionItem->setZoomFactor(zoomFactor);
+*/
+}
+
+void VectorUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixedPos)
+{
+    auto worldPosOfScreenCenter = getCenterPositionOfScreen();
+    auto origZoomFactor = _zoomFactor;
+
+    _zoomFactor = zoomFactor;
+/*
+    auto size = _controller->getContext()->getSpaceProperties()->getSize();
+        _scene->setSceneRect(
+            0, 0, static_cast<double>(size.x) * _zoomFactor, static_cast<double>(size.y) * _zoomFactor);
+*/
+    QVector2D mu(
+        worldPosOfScreenCenter.x() * (zoomFactor / origZoomFactor - 1.0),
+        worldPosOfScreenCenter.y() * (zoomFactor / origZoomFactor - 1.0));
+    QVector2D correction(
+        mu.x() * (worldPosOfScreenCenter.x() - fixedPos.x()) / worldPosOfScreenCenter.x(),
+        mu.y() * (worldPosOfScreenCenter.y() - fixedPos.y()) / worldPosOfScreenCenter.y());
+    centerTo(worldPosOfScreenCenter - correction);
+
+    _viewport->setZoomFactor(_zoomFactor);
+//    _imageSectionItem->setZoomFactor(_zoomFactor);
 }
 
 QVector2D VectorUniverseView::getCenterPositionOfScreen() const
 {
-    auto const width = static_cast<double>(_graphicsView->width());
-    auto const height = static_cast<double>(_graphicsView->height());
-    auto const result = _graphicsView->mapToScene(width / 2.0, height / 2.0);
-    return{ static_cast<float>(result.x() / _zoomFactor), static_cast<float>(result.y() / _zoomFactor)};
+    return _center;
+/*
+    auto width = static_cast<double>(_graphicsView->width());
+    auto height = static_cast<double>(_graphicsView->height());
+    auto scenePosition =
+        _graphicsView->mapToScene(width / 2.0, height / 2.0);
+    return{ static_cast<float>(scenePosition.x() / _zoomFactor), static_cast<float>(scenePosition.y() / _zoomFactor)};
+*/
 }
 
 void VectorUniverseView::centerTo(QVector2D const & position)
 {
-    _graphicsView->centerOn(position.x() * _zoomFactor, position.y() * _zoomFactor);
+    _center = position;
+/*
+    centerToIntern({static_cast<float>(position.x() * _zoomFactor), static_cast<float>(position.y() * _zoomFactor)});
+*/
 }
 
 bool VectorUniverseView::eventFilter(QObject * object, QEvent * event)
@@ -142,7 +178,7 @@ bool VectorUniverseView::eventFilter(QObject * object, QEvent * event)
 
 void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-    auto pos = QVector2D(event->scenePos().x() / _zoomFactor, event->scenePos().y() / _zoomFactor);
+    auto pos = mapViewToWorldPosition(QVector2D(event->scenePos().x(), event->scenePos().y()));
 
     if (event->buttons() == Qt::MouseButton::LeftButton) {
         Q_EMIT startContinuousZoomIn(pos);
@@ -209,7 +245,20 @@ void VectorUniverseView::receivedNotifications(set<Receiver> const & targets)
 void VectorUniverseView::requestImage()
 {
     if (!_connections.empty()) {
-        _repository->requireVectorImageFromSimulation(_viewport->getRect(), getZoomFactor(), _imageSectionItem->getImageOfVisibleRect());
+        auto topLeft = mapViewToWorldPosition(QVector2D(0, 0));
+        auto bottomRight = mapViewToWorldPosition(QVector2D(_graphicsView->width() - 1, _graphicsView->height() - 1));
+        RealRect rect{RealVector2D(topLeft), RealVector2D(bottomRight)};
+/*
+        RealVector2D upperLeft{
+            static_cast<float>(std::max(0.0, _center.x() - _graphicsView->width() / (2.0 * _zoomFactor))),
+            static_cast<float>(std::max(0.0, _center.y() - _graphicsView->height() / (2.0 * _zoomFactor)))};
+        RealRect rect{
+            {upperLeft.x, upperLeft.y},
+            {upperLeft.x + static_cast<float>(_graphicsView->width() / _zoomFactor),
+             upperLeft.y + static_cast<float>(_graphicsView->height() / _zoomFactor)}};
+*/
+        _repository->requireVectorImageFromSimulation(
+            rect, _zoomFactor, _imageSectionItem->getImageOfVisibleRect());
     }
 }
 
@@ -222,5 +271,15 @@ void VectorUniverseView::scrolled()
 {
     requestImage();
 }
+
+QVector2D VectorUniverseView::mapViewToWorldPosition(QVector2D const& viewPos) const
+{
+    QVector2D relCenter(
+        static_cast<float>(_graphicsView->width() / (2.0 * _zoomFactor)),
+        static_cast<float>(_graphicsView->height() / (2.0 * _zoomFactor)));
+    QVector2D relWorldPos(viewPos.x() / _zoomFactor, viewPos.y() / _zoomFactor);
+    return _center - relCenter + relWorldPos;
+}
+
 
 

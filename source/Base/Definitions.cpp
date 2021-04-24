@@ -70,8 +70,8 @@ RealVector2D::RealVector2D(std::initializer_list<float> l)
 }
 
 RealVector2D::RealVector2D(QVector2D const& vec)
-    : x(static_cast<int>(vec.x()))
-    , y(static_cast<int>(vec.y()))
+    : x(vec.x())
+    , y(vec.y())
 {}
 
 QVector2D RealVector2D::toQVector2D()

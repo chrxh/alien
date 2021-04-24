@@ -31,6 +31,7 @@ public:
 
     double getZoomFactor() const override;
     void setZoomFactor(double zoomFactor) override;
+    void setZoomFactor(double zoomFactor, QVector2D const& fixedPos) override;
 
     QVector2D getCenterPositionOfScreen() const override;
 
@@ -48,9 +49,10 @@ private:
     Q_SLOT void imageReady();
     Q_SLOT void scrolled();
 
+    QVector2D mapViewToWorldPosition(QVector2D const& viewPos) const;
+
     list<QMetaObject::Connection> _connections;
 
-    QGraphicsView* _graphicsView = nullptr;
     QGraphicsScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;
@@ -62,5 +64,6 @@ private:
 
     Notifier* _notifier = nullptr;
     double _zoomFactor = 0.0;
+    QVector2D _center;
 };
 

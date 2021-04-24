@@ -155,14 +155,24 @@ void CudaSimulation::DEBUG_printNumEntries()
     loggingService->logMessage(Priority::Important, stream.str());
 }
 
-void CudaSimulation::getPixelImage(int2 const& rectUpperLeft, int2 const& rectLowerRight, unsigned char* imageData)
+void CudaSimulation::getPixelImage(
+    int2 const& rectUpperLeft,
+    int2 const& rectLowerRight,
+    int2 const& imageSize,
+    unsigned char* imageData)
 {
-    int width = rectLowerRight.x - rectUpperLeft.x + 1;
-    int height = rectLowerRight.y - rectUpperLeft.y + 1;
+//    int width = rectLowerRight.x - rectUpperLeft.x + 1;
+//    int height = rectLowerRight.y - rectUpperLeft.y + 1;
+    if (imageSize.x * imageSize.y > _cudaSimulationData->numImageBytes) {
+        _cudaSimulationData->resizeImage(imageSize);
+    }
 
-    GPU_FUNCTION(cudaDrawImage_pixelStyle, rectUpperLeft, rectLowerRight, *_cudaSimulationData);
+    GPU_FUNCTION(cudaDrawImage_pixelStyle, rectUpperLeft, rectLowerRight, imageSize, * _cudaSimulationData);
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        imageData, _cudaSimulationData->finalImageData, sizeof(unsigned int) * width * height, cudaMemcpyDeviceToHost));
+        imageData,
+        _cudaSimulationData->finalImageData,
+        sizeof(unsigned int) * imageSize.x * imageSize.y,
+        cudaMemcpyDeviceToHost));
 }
 
 void CudaSimulation::getVectorImage(

@@ -2,11 +2,13 @@
 
 #include <QObject>
 
+#include "Definitions.h"
+
 class UniverseView : public QObject
 {
     Q_OBJECT
 public:
-    UniverseView(QObject* parent = nullptr);
+    UniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
     virtual ~UniverseView() = default;
 
     virtual void connectView() = 0;
@@ -18,6 +20,7 @@ public:
 
     virtual double getZoomFactor() const = 0;
     virtual void setZoomFactor(double zoomFactor) = 0;
+    virtual void setZoomFactor(double zoomFactor, QVector2D const& fixedPos) = 0;
 
     Q_SIGNAL void startContinuousZoomIn(QVector2D const& worldPos);
     Q_SIGNAL void startContinuousZoomOut(QVector2D const& worldPos);
@@ -25,4 +28,9 @@ public:
 
     virtual QVector2D getCenterPositionOfScreen() const = 0;
     virtual void centerTo(QVector2D const& position) = 0;
+
+protected:
+    virtual void centerToIntern(QVector2D const& scenePosition);
+
+    QGraphicsView* _graphicsView = nullptr;
 };

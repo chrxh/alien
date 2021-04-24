@@ -34,7 +34,6 @@ void ZoomActionController::onZoomInClicked()
     if (!_actions->actionEditor->isChecked()) {
         if (_simulationViewWidget->getZoomFactor()
             > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-//            _actions->actionEditor->toggle();
             setItemView();
         } else {
             setPixelOrVectorView();
@@ -107,7 +106,6 @@ void ZoomActionController::onContinuousZoom()
         if (!_actions->actionEditor->isChecked()) {
             if (_simulationViewWidget->getZoomFactor()
                 > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-//                _actions->actionEditor->toggle();
                 setItemView();
             } else {
                 setPixelOrVectorView();
@@ -127,7 +125,6 @@ void ZoomActionController::onContinuousZoom()
             if (_simulationViewWidget->getZoomFactor()
                 > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
             } else {
-//                _actions->actionEditor->toggle();
                 setPixelOrVectorView();
             }
         } else {
@@ -147,39 +144,13 @@ bool ZoomActionController::isSimulationRunning() const
 
 void ZoomActionController::setItemView()
 {
-    _actions->actionEditor->setChecked(true);
+//    _actions->actionEditor->setChecked(true);
 }
 
 
 void ZoomActionController::setPixelOrVectorView()
 {
-    _actions->actionEditor->setChecked(false); 
-/*
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    if (_simulationViewWidget->getZoomFactor()
-        > Const::ZoomLevelForAutomaticVectorViewSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-        if (ActiveView::VectorScene != _simulationViewWidget->getActiveView()) {
-            loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering");
-
-            _infoController->setRendering(GeneralInfoController::Rendering::Vector);
-            _simulationViewWidget->disconnectView();
-            _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
-            _simulationViewWidget->connectView();
-
-            loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering finished");
-        }
-    } else {
-        if (ActiveView::PixelScene != _simulationViewWidget->getActiveView()) {
-            loggingService->logMessage(Priority::Unimportant, "toggle to pixel rendering");
-
-            _infoController->setRendering(GeneralInfoController::Rendering::Pixel);
-            _simulationViewWidget->disconnectView();
-            _simulationViewWidget->setActiveScene(ActiveView::PixelScene);
-            _simulationViewWidget->connectView();
-
-            loggingService->logMessage(Priority::Unimportant, "toggle to pixel rendering finished");
-        }
-    }
-*/
+    _actions->actionEditor->setChecked(false);
+    Q_EMIT _actions->actionEditor->toggled(false);  //for switching from vector to pixel view
 }
 

@@ -19,7 +19,7 @@ public:
 private:
     QImagePtr _imageOfVisibleRect = nullptr;
     ViewportInterface* _viewport = nullptr;
-    IntVector2D _universeSize;
+    IntVector2D _displaySize;
     double _zoom = 0;
     std::mutex& _mutex;
 };
