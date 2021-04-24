@@ -125,6 +125,11 @@ void ActionController::init(
         &SimulationViewWidget::endContinuousZoom,
         _zoomController,
         &ZoomActionController::onEndContinuousZoom);
+    connect(
+        _zoomController,
+        &ZoomActionController::updateActionsState,
+        this,
+        &ActionController::updateActionsEnableState);
     connect(actions->actionDisplayLink, &QAction::triggered, this, &ActionController::onToggleDisplayLink);
     connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
@@ -1302,28 +1307,12 @@ void ActionController::updateActionsEnableState()
 void ActionController::setPixelOrVectorView()
 {
 	auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    if (_simulationViewWidget->getZoomFactor() > Const::ZoomLevelForAutomaticVectorViewSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
-        if (ActiveView::VectorScene != _simulationViewWidget->getActiveView()) {
-            loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering");
+    loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering");
 
-            _infoController->setRendering(GeneralInfoController::Rendering::Vector);
-            _simulationViewWidget->disconnectView();
-            _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
-            _simulationViewWidget->connectView();
+    _infoController->setRendering(GeneralInfoController::Rendering::Vector);
+    _simulationViewWidget->disconnectView();
+    _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
+    _simulationViewWidget->connectView();
 
-		    loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering finished");
-        }
-    }
-    else {
-        if (ActiveView::PixelScene != _simulationViewWidget->getActiveView()) {
-            loggingService->logMessage(Priority::Unimportant, "toggle to pixel rendering");
-
-			_infoController->setRendering(GeneralInfoController::Rendering::Pixel);
-            _simulationViewWidget->disconnectView();
-            _simulationViewWidget->setActiveScene(ActiveView::PixelScene);
-            _simulationViewWidget->connectView();
-
-			loggingService->logMessage(Priority::Unimportant, "toggle to pixel rendering finished");
-        }
-    }
+	loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering finished");
 }

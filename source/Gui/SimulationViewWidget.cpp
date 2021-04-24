@@ -27,12 +27,8 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    _pixelUniverse = new PixelUniverseView(ui->simulationView, this);
     _vectorUniverse = new VectorUniverseView(ui->simulationView, this);
     _itemUniverse = new ItemUniverseView(ui->simulationView, this);
-    connect(_pixelUniverse, &PixelUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
-    connect(_pixelUniverse, &PixelUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
-    connect(_pixelUniverse, &PixelUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
     connect(_vectorUniverse, &VectorUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
     connect(
         _vectorUniverse, &VectorUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
@@ -67,7 +63,6 @@ void SimulationViewWidget::init(
 
 	_controller = controller;
 
-    _pixelUniverse->init(notifier, controller, access, repository);
     _vectorUniverse->init(notifier, controller, access, repository);
     _itemUniverse->init(notifier, controller, repository);
 
@@ -99,9 +94,6 @@ void SimulationViewWidget::refresh()
 
 ActiveView SimulationViewWidget::getActiveView() const
 {
-    if (_pixelUniverse->isActivated()) {
-        return ActiveView::PixelScene;
-    }
     if (_vectorUniverse->isActivated()) {
         return ActiveView::VectorScene;
     }
@@ -114,16 +106,14 @@ ActiveView SimulationViewWidget::getActiveView() const
 
 void SimulationViewWidget::setActiveScene (ActiveView activeScene)
 {
-    auto scrollPosX = ui->simulationView->horizontalScrollBar()->value();
-    auto scrollPosY = ui->simulationView->verticalScrollBar()->value();
+    auto center = getActiveUniverseView()->getCenterPositionOfScreen();
 
     auto zoom = getZoomFactor();
 
     auto view = getView(activeScene);
     view->activate(zoom);
 
-    ui->simulationView->horizontalScrollBar()->setValue(scrollPosX); //workaround since UniverseView::centerTo has bad precision
-    ui->simulationView->verticalScrollBar()->setValue(scrollPosY);
+    getActiveUniverseView()->centerTo(center);
 }
 
 double SimulationViewWidget::getZoomFactor()
@@ -143,17 +133,7 @@ void SimulationViewWidget::setZoomFactor(double factor)
 
 void SimulationViewWidget::setZoomFactor(double zoomFactor, QVector2D const& worldPos)
 {
-    auto origZoomFactor = getZoomFactor();
-    auto activeView = getActiveUniverseView();
-    auto worldPosOfScreenCenter = activeView->getCenterPositionOfScreen();
-    activeView->setZoomFactor(zoomFactor);
-    QVector2D mu(
-        worldPosOfScreenCenter.x() * (zoomFactor / origZoomFactor - 1.0),
-        worldPosOfScreenCenter.y() * (zoomFactor / origZoomFactor - 1.0));
-    QVector2D correction(
-        mu.x() * (worldPosOfScreenCenter.x() - worldPos.x()) / worldPosOfScreenCenter.x(),
-        mu.y() * (worldPosOfScreenCenter.y() - worldPos.y()) / worldPosOfScreenCenter.y());
-    activeView->centerTo(worldPosOfScreenCenter - correction);
+    getActiveUniverseView()->setZoomFactor(zoomFactor, worldPos);
 
     Q_EMIT zoomFactorChanged(zoomFactor);
 }
@@ -181,9 +161,6 @@ void SimulationViewWidget::toggleCenterSelection(bool value)
 
 UniverseView * SimulationViewWidget::getActiveUniverseView() const
 {
-    if (_pixelUniverse->isActivated()) {
-        return _pixelUniverse;
-    }
     if (_vectorUniverse->isActivated()) {
         return _vectorUniverse;
     }
@@ -196,9 +173,6 @@ UniverseView * SimulationViewWidget::getActiveUniverseView() const
 
 UniverseView * SimulationViewWidget::getView(ActiveView activeView) const
 {
-    if (ActiveView::PixelScene == activeView) {
-        return _pixelUniverse;
-    }
     if (ActiveView::VectorScene == activeView) {
         return _vectorUniverse;
     }

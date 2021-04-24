@@ -18,7 +18,11 @@ public:
 
     void calcCudaTimestep();
 
-    void getPixelImage(int2 const& rectUpperLeft, int2 const& rectLowerRight, unsigned char* imageData);
+    void getPixelImage(
+        int2 const& rectUpperLeft,
+        int2 const& rectLowerRight,
+        int2 const& imageSize,
+        unsigned char* imageData);
     void getVectorImage(
         float2 const& rectUpperLeft,
         float2 const& rectLowerRight,

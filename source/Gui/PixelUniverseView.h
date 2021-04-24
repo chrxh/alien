@@ -32,6 +32,7 @@ public:
 
     double getZoomFactor() const override;
     void setZoomFactor(double zoomFactor) override;
+    void setZoomFactor(double zoomFactor, QVector2D const& fixedPos) {}
 
     QVector2D getCenterPositionOfScreen() const override;
 
@@ -51,7 +52,6 @@ private:
 
 	list<QMetaObject::Connection> _connections;
 
-    QGraphicsView* _graphicsView = nullptr;
     QGraphicsScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;

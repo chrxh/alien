@@ -81,8 +81,8 @@ struct BASE_EXPORT IntVector2D
 struct RealRect;
 struct BASE_EXPORT RealVector2D
 {
-    float x = 0;
-    float y = 0;
+    float x = 0.0f;
+    float y = 0.0f;
 
     RealVector2D() = default;
     RealVector2D(std::initializer_list<float> l);
