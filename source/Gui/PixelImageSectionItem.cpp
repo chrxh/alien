@@ -17,9 +17,12 @@ QImagePtr PixelImageSectionItem::getImageOfVisibleRect()
     //resize image?
     auto rect = _viewport->getRect();
     IntVector2D viewportSize{ static_cast<int>(rect.width()), static_cast<int>(rect.height()) };
-    viewportSize.x = std::min(_universeSize.x, viewportSize.x);
-    viewportSize.y = std::min(_universeSize.y, viewportSize.y);
+    viewportSize.x = 2000;
+        //std::min(_universeSize.x, viewportSize.x);
+    viewportSize.y = 1000;
+        //std::min(_universeSize.y, viewportSize.y);
     if (!_imageOfVisibleRect || (_imageOfVisibleRect->width() != viewportSize.x || _imageOfVisibleRect->height() != viewportSize.y)) {
+        std::lock_guard<std::mutex> lock(_mutex);
         _imageOfVisibleRect = boost::make_shared<QImage>(viewportSize.x, viewportSize.y, QImage::Format_ARGB32);
     }
 

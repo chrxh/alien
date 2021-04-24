@@ -95,7 +95,7 @@ private:
 
 private:
 	void settingUpNewSimulation(SimulationConfig const& config);
-	void updateActionsEnableState();
+	Q_SLOT void updateActionsEnableState();
     void setPixelOrVectorView();
 
 	ActionModel* _model = nullptr;

@@ -30,6 +30,7 @@ public:
 
     double getZoomFactor() const override;
     void setZoomFactor(double zoomFactor) override;
+    void setZoomFactor(double zoomFactor, QVector2D const& fixedPos) override;
 
     QVector2D getCenterPositionOfScreen() const override;
 
@@ -62,7 +63,6 @@ private:
 	void delegateSelection(Selection const& selection);
 	void startMarking(QPointF const& scenePos);
 
-    QGraphicsView* _graphicsView = nullptr;
     QGraphicsScene* _scene = nullptr;
 
 	list<QMetaObject::Connection> _connections;

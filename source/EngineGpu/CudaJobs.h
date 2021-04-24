@@ -81,11 +81,8 @@ public:
         : _CudaJob(originId, true)
         , _targetImage(targetImage)
         , _mutex(mutex)
+        , _rect(rect)
     {
-        auto imageSize = targetImage->size();
-
-        IntVector2D upperLeft = {std::max(0, rect.p1.x), std::max(0, rect.p1.y)};
-        _rect = {upperLeft, {upperLeft.x + imageSize.width() - 1, upperLeft.y + imageSize.height() - 1}};
     }
 
     virtual ~_GetPixelImageJob() = default;

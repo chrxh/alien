@@ -408,21 +408,21 @@ __global__ void blurImage(unsigned int* sourceImage, unsigned int* targetImage, 
 /* Main      															*/
 /************************************************************************/
 
-__global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight, int2 imageSize, SimulationData data)
 {
-    int width = rectLowerRight.x - rectUpperLeft.x + 1;
+/*    int width = rectLowerRight.x - rectUpperLeft.x + 1;
     int height = rectLowerRight.y - rectUpperLeft.y + 1;
     int numPixels = width * height;
     int2 imageSize{width, height};
-
+*/
     unsigned int* targetImage;
     if (cudaExecutionParameters.imageGlow) {
         targetImage = data.rawImageData;
     } else {
         targetImage = data.finalImageData;
     }
-    KERNEL_CALL(clearImageMap, targetImage, numPixels);
-    KERNEL_CALL(
+    KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
+/*    KERNEL_CALL(
         drawClusters_pixelStyle,
         data.size,
         rectUpperLeft,
@@ -454,6 +454,7 @@ __global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight
         blurImage<<<numBlocks, dim3{11, 11}>>>(data.rawImageData, data.finalImageData, imageSize);
         cudaDeviceSynchronize();
     }
+    */
 }
 
 __global__ void

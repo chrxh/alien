@@ -71,7 +71,6 @@ struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;
 
 enum class ActiveView {
-    PixelScene,
     VectorScene,
     ItemScene
 };
