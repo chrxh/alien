@@ -26,7 +26,7 @@
 #include "ItemViewport.h"
 
 ItemUniverseView::ItemUniverseView(QGraphicsView* graphicsView, QObject *parent)
-	: UniverseView(parent), _graphicsView(graphicsView)
+    : UniverseView(graphicsView, parent)
 {
     _scene = new QGraphicsScene(parent);
     _scene->setBackgroundBrush(QBrush(Const::UniverseColor));
@@ -119,6 +119,12 @@ void ItemUniverseView::setZoomFactor(double zoomFactor)
     CATCH;
 }
 
+void ItemUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixedPos)
+{
+
+}
+
+
 QVector2D ItemUniverseView::getCenterPositionOfScreen() const
 {
     TRY;
@@ -133,8 +139,7 @@ QVector2D ItemUniverseView::getCenterPositionOfScreen() const
 void ItemUniverseView::centerTo(QVector2D const & position)
 {
     TRY;
-    auto const scenePosition = CoordinateSystem::modelToScene(position);
-    _graphicsView->centerOn(scenePosition.x(), scenePosition.y());
+    centerToIntern(CoordinateSystem::modelToScene(position));
     CATCH;
 }
 

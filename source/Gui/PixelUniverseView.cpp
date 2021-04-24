@@ -23,7 +23,7 @@
 #include "PixelViewport.h"
 
 PixelUniverseView::PixelUniverseView(QGraphicsView* graphicsView, QObject* parent)
-    : UniverseView(parent), _graphicsView(graphicsView)
+    : UniverseView(graphicsView, parent)
 {
     _scene = new QGraphicsScene(parent);
     _scene->setBackgroundBrush(QBrush(Const::BackgroundColor));
@@ -112,7 +112,7 @@ QVector2D PixelUniverseView::getCenterPositionOfScreen() const
 
 void PixelUniverseView::centerTo(QVector2D const & position)
 {
-    _graphicsView->centerOn(position.x(), position.y());
+    centerToIntern(position);
 }
 
 bool PixelUniverseView::eventFilter(QObject* object, QEvent* event)

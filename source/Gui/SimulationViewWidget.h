@@ -47,7 +47,6 @@ private:
 
 	SimulationController* _controller = nullptr;
 
-    PixelUniverseView* _pixelUniverse = nullptr;
     VectorUniverseView* _vectorUniverse = nullptr;
     ItemUniverseView* _itemUniverse = nullptr;
 
