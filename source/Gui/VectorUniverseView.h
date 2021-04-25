@@ -9,6 +9,9 @@
 #include "UniverseView.h"
 #include "Definitions.h"
 
+class VectorViewGraphicsScene;
+class QResizeEvent;
+
 class VectorUniverseView : public UniverseView
 {
     Q_OBJECT
@@ -42,6 +45,7 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void resize(QResizeEvent* event);
 
 private:
     Q_SLOT void receivedNotifications(set<Receiver> const& targets);
@@ -53,14 +57,11 @@ private:
 
     list<QMetaObject::Connection> _connections;
 
-    QGraphicsScene* _scene = nullptr;
+    VectorViewGraphicsScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;
     SimulationController* _controller = nullptr;
-    VectorViewport* _viewport = nullptr;
-
-    VectorImageSectionItem* _imageSectionItem = nullptr;
 
     Notifier* _notifier = nullptr;
     double _zoomFactor = 0.0;
