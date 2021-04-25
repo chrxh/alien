@@ -72,12 +72,12 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.0.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;opengl;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.0.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;opengl;openglwidgets;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -238,7 +238,12 @@
     <ClCompile Include="..\..\..\source\Gui\ToolbarView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\UniverseView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\VectorImageSectionItem.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\VectorViewport.cpp" />
     <ClCompile Include="..\..\..\source\Gui\SnapshotController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\StartupController.cpp" />
