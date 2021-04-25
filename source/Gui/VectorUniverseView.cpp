@@ -1,34 +1,133 @@
-#include <QGraphicsView>
+#include "VectorUniverseView.h"
+
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
 #include <QScrollBar>
-#include <QtCore/qmath.h>
+#include <QResizeEvent>
+#include <QtGui>
+#include <QOpenGLFunctions>
 #include <QMatrix4x4>
+#include <QOpenGLWidget>
+#include <QOpenGLShaderProgram>
+
+#include <QtCore/qmath.h>
 
 #include "Base/ServiceLocator.h"
-#include "EngineInterface/PhysicalActions.h"
-#include "EngineInterface/EngineInterfaceBuilderFacade.h"
-#include "EngineInterface/SimulationAccess.h"
-#include "EngineInterface/SimulationController.h"
-#include "EngineInterface/SimulationContext.h"
-#include "EngineInterface/SpaceProperties.h"
-#include "Gui/ViewportInterface.h"
-#include "Gui/Settings.h"
-#include "Gui/Notifier.h"
-
 #include "CoordinateSystem.h"
 #include "DataRepository.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
+#include "EngineInterface/PhysicalActions.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SimulationContext.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SpaceProperties.h"
+#include "Gui/Notifier.h"
+#include "Gui/Settings.h"
+#include "Gui/ViewportInterface.h"
 #include "VectorImageSectionItem.h"
-#include "VectorUniverseView.h"
 #include "VectorViewport.h"
+
+class VectorViewGraphicsScene
+    : public QGraphicsScene
+    , protected QOpenGLFunctions
+{
+public:
+    const char* vertexShaderSource = "attribute highp vec4 posAttr;\n"
+                                            "attribute lowp vec4 colAttr;\n"
+                                            "varying lowp vec4 col;\n"
+                                            "uniform highp mat4 matrix;\n"
+                                            "void main() {\n"
+                                            "   col = colAttr;\n"
+                                            "   gl_Position = matrix * posAttr;\n"
+                                            "}\n";
+
+    const char* fragmentShaderSource = "varying lowp vec4 col;\n"
+                                              "void main() {\n"
+                                              "   gl_FragColor = col;\n"
+                                              "}\n";
+
+    VectorViewGraphicsScene(IntVector2D const& displaySize, std::mutex& mutex, QObject* parent = nullptr)
+        : QGraphicsScene(parent)
+        , _displaySize(displaySize)
+        , _mutex(mutex)
+    {
+        m_context = new QOpenGLContext;
+        m_context->create();
+        initializeOpenGLFunctions();
+        m_program = new QOpenGLShaderProgram(this);
+        m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
+        m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+        m_program->link();
+        m_posAttr = m_program->attributeLocation("posAttr");
+        Q_ASSERT(m_posAttr != -1);
+        m_colAttr = m_program->attributeLocation("colAttr");
+        Q_ASSERT(m_colAttr != -1);
+        m_matrixUniform = m_program->uniformLocation("matrix");
+        Q_ASSERT(m_matrixUniform != -1);
+
+        _image = boost::make_shared<QImage>(_displaySize.x, _displaySize.y, QImage::Format_ARGB32);
+    }
+
+    void resize(IntVector2D const& size) { _image = boost::make_shared<QImage>(size.x, size.y, QImage::Format_ARGB32); }
+
+    QImagePtr getImageOfVisibleRect()
+    {
+        return _image;
+    }
+
+    void drawBackground(QPainter* painter, const QRectF& rect) override
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_program->bind();
+
+        QMatrix4x4 matrix;
+//        matrix.perspective(00.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+        matrix.translate(0, 0, -1);
+//        matrix.rotate(100.0f, 0, 1, 0);
+
+        m_program->setUniformValue(m_matrixUniform, matrix);
+
+        static const GLfloat vertices[] = {-1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
+
+        static const GLfloat colors[] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+
+        glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+
+        glEnableVertexAttribArray(m_posAttr);
+        glEnableVertexAttribArray(m_colAttr);
+
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        glDisableVertexAttribArray(m_colAttr);
+        glDisableVertexAttribArray(m_posAttr);
+
+        m_program->release();
+
+        //        painter->drawImage(0, 0, *_image);
+    }
+
+private:
+    QImagePtr _image = nullptr;
+    IntVector2D _displaySize;
+    std::mutex& _mutex;
+
+    QOpenGLContext* m_context;
+    GLint m_posAttr = 0;
+    GLint m_colAttr = 0;
+    GLint m_matrixUniform = 0;
+
+    QOpenGLShaderProgram* m_program = nullptr;
+};
 
 VectorUniverseView::VectorUniverseView(QGraphicsView* graphicsView, QObject* parent)
     : UniverseView(graphicsView, parent)
 {
-    _scene = new QGraphicsScene(parent);
-    _scene->setBackgroundBrush(QBrush(Const::BackgroundColor));
-    _scene->update();
-    _scene->installEventFilter(this);
 }
 
 void VectorUniverseView::init(
@@ -37,34 +136,41 @@ void VectorUniverseView::init(
     SimulationAccess* access,
     DataRepository* repository)
 {
+    _graphicsView->setViewport(new QOpenGLWidget());
+    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
     disconnectView();
     _controller = controller;
     _repository = repository;
     _notifier = notifier;
 
-    delete _viewport;
-    _viewport = new VectorViewport(_graphicsView, this);
-
     SET_CHILD(_access, access);
-
-    delete _imageSectionItem;
 
     auto width = _graphicsView->width();
     auto height = _graphicsView->height();
-    _imageSectionItem = new VectorImageSectionItem(_viewport, {width, height}, repository->getImageMutex());
-    _scene->setSceneRect(0, 0, width - 1, height - 1);
 
-    _scene->addItem(_imageSectionItem);
+    delete _scene;
+    _scene = new VectorViewGraphicsScene(IntVector2D{width, height}, repository->getImageMutex(), this);
+    //    _scene->setBackgroundBrush(QBrush(Const::BackgroundColor));
+    _scene->update();
+    _scene->installEventFilter(this);
+    _graphicsView->installEventFilter(this);
+    _scene->setSceneRect(0, 0, width - 3, height - 3);
 }
 
 void VectorUniverseView::connectView()
 {
     disconnectView();
-    _connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &VectorUniverseView::requestImage));
-    _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &VectorUniverseView::receivedNotifications));
-    _connections.push_back(connect(_repository, &DataRepository::imageReady, this, &VectorUniverseView::imageReady, Qt::QueuedConnection));
-    _connections.push_back(connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &VectorUniverseView::scrolled));
-    _connections.push_back(connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &VectorUniverseView::scrolled));
+    _connections.push_back(
+        connect(_controller, &SimulationController::nextFrameCalculated, this, &VectorUniverseView::requestImage));
+    _connections.push_back(
+        connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &VectorUniverseView::receivedNotifications));
+    _connections.push_back(
+        connect(_repository, &DataRepository::imageReady, this, &VectorUniverseView::imageReady, Qt::QueuedConnection));
+    _connections.push_back(
+        connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &VectorUniverseView::scrolled));
+    _connections.push_back(
+        connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &VectorUniverseView::scrolled));
 }
 
 void VectorUniverseView::disconnectView()
@@ -102,14 +208,6 @@ double VectorUniverseView::getZoomFactor() const
 void VectorUniverseView::setZoomFactor(double zoomFactor)
 {
     _zoomFactor = zoomFactor;
-    _viewport->setZoomFactor(zoomFactor);
-    _imageSectionItem->setZoomFactor(zoomFactor);
-/*
-    auto const size = _controller->getContext()->getSpaceProperties()->getSize();
-    _scene->setSceneRect(0, 0, static_cast<double>(size.x) * zoomFactor, static_cast<double>(size.y) * zoomFactor);
-    _viewport->setZoomFactor(zoomFactor);
-    _imageSectionItem->setZoomFactor(zoomFactor);
-*/
 }
 
 void VectorUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixedPos)
@@ -118,11 +216,6 @@ void VectorUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixed
     auto origZoomFactor = _zoomFactor;
 
     _zoomFactor = zoomFactor;
-/*
-    auto size = _controller->getContext()->getSpaceProperties()->getSize();
-        _scene->setSceneRect(
-            0, 0, static_cast<double>(size.x) * _zoomFactor, static_cast<double>(size.y) * _zoomFactor);
-*/
     QVector2D mu(
         worldPosOfScreenCenter.x() * (zoomFactor / origZoomFactor - 1.0),
         worldPosOfScreenCenter.y() * (zoomFactor / origZoomFactor - 1.0));
@@ -130,53 +223,43 @@ void VectorUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixed
         mu.x() * (worldPosOfScreenCenter.x() - fixedPos.x()) / worldPosOfScreenCenter.x(),
         mu.y() * (worldPosOfScreenCenter.y() - fixedPos.y()) / worldPosOfScreenCenter.y());
     centerTo(worldPosOfScreenCenter - correction);
-
-    _viewport->setZoomFactor(_zoomFactor);
-//    _imageSectionItem->setZoomFactor(_zoomFactor);
 }
 
 QVector2D VectorUniverseView::getCenterPositionOfScreen() const
 {
     return _center;
-/*
-    auto width = static_cast<double>(_graphicsView->width());
-    auto height = static_cast<double>(_graphicsView->height());
-    auto scenePosition =
-        _graphicsView->mapToScene(width / 2.0, height / 2.0);
-    return{ static_cast<float>(scenePosition.x() / _zoomFactor), static_cast<float>(scenePosition.y() / _zoomFactor)};
-*/
 }
 
-void VectorUniverseView::centerTo(QVector2D const & position)
+void VectorUniverseView::centerTo(QVector2D const& position)
 {
     _center = position;
-/*
-    centerToIntern({static_cast<float>(position.x() * _zoomFactor), static_cast<float>(position.y() * _zoomFactor)});
-*/
 }
 
-bool VectorUniverseView::eventFilter(QObject * object, QEvent * event)
+bool VectorUniverseView::eventFilter(QObject* object, QEvent* event)
 {
-    if (object != _scene) {
-        return false;
+    if (object == _scene) {
+        if (event->type() == QEvent::GraphicsSceneMousePress) {
+            mousePressEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+        }
+
+        if (event->type() == QEvent::GraphicsSceneMouseMove) {
+            mouseMoveEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+        }
+
+        if (event->type() == QEvent::GraphicsSceneMouseRelease) {
+            mouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+        }
     }
 
-    if (event->type() == QEvent::GraphicsSceneMousePress) {
-        mousePressEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
+    if (object = _graphicsView) {
+        if (event->type() == QEvent::Resize) {
+            resize(static_cast<QResizeEvent*>(event));
+        }
     }
-
-    if (event->type() == QEvent::GraphicsSceneMouseMove) {
-        mouseMoveEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
-    }
-
-    if (event->type() == QEvent::GraphicsSceneMouseRelease) {
-        mouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
-    }
-
     return false;
 }
 
-void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
+void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     auto pos = mapViewToWorldPosition(QVector2D(event->scenePos().x(), event->scenePos().y()));
 
@@ -195,9 +278,9 @@ void VectorUniverseView::mousePressEvent(QGraphicsSceneMouseEvent * event)
 */
 }
 
-void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
+void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-/*
+    /*
     auto const pos = QVector2D(e->scenePos().x() / _zoomFactor, e->scenePos().y() / _zoomFactor);
     auto const lastPos = QVector2D(e->lastScenePos().x() / _zoomFactor, e->lastScenePos().y() / _zoomFactor);
 
@@ -221,7 +304,7 @@ void VectorUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent * e)
 */
 }
 
-void VectorUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
+void VectorUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     Q_EMIT endContinuousZoom();
 
@@ -233,7 +316,14 @@ void VectorUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 */
 }
 
-void VectorUniverseView::receivedNotifications(set<Receiver> const & targets)
+void VectorUniverseView::resize(QResizeEvent* event)
+{
+    auto size = event->size();
+    _scene->resize({size.width(), size.height()});
+    _scene->setSceneRect(QRect(QPoint(0, 0), QPoint(size.width() - 3, size.height() - 3)));
+}
+
+void VectorUniverseView::receivedNotifications(set<Receiver> const& targets)
 {
     if (targets.find(Receiver::VisualEditor) == targets.end()) {
         return;
@@ -248,17 +338,7 @@ void VectorUniverseView::requestImage()
         auto topLeft = mapViewToWorldPosition(QVector2D(0, 0));
         auto bottomRight = mapViewToWorldPosition(QVector2D(_graphicsView->width() - 1, _graphicsView->height() - 1));
         RealRect rect{RealVector2D(topLeft), RealVector2D(bottomRight)};
-/*
-        RealVector2D upperLeft{
-            static_cast<float>(std::max(0.0, _center.x() - _graphicsView->width() / (2.0 * _zoomFactor))),
-            static_cast<float>(std::max(0.0, _center.y() - _graphicsView->height() / (2.0 * _zoomFactor)))};
-        RealRect rect{
-            {upperLeft.x, upperLeft.y},
-            {upperLeft.x + static_cast<float>(_graphicsView->width() / _zoomFactor),
-             upperLeft.y + static_cast<float>(_graphicsView->height() / _zoomFactor)}};
-*/
-        _repository->requireVectorImageFromSimulation(
-            rect, _zoomFactor, _imageSectionItem->getImageOfVisibleRect());
+        _repository->requireVectorImageFromSimulation(rect, _zoomFactor, _scene->getImageOfVisibleRect());
     }
 }
 
@@ -280,6 +360,3 @@ QVector2D VectorUniverseView::mapViewToWorldPosition(QVector2D const& viewPos) c
     QVector2D relWorldPos(viewPos.x() / _zoomFactor, viewPos.y() / _zoomFactor);
     return _center - relCenter + relWorldPos;
 }
-
-
-

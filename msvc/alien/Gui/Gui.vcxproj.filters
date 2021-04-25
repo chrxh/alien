@@ -322,9 +322,6 @@
     <ClCompile Include="..\..\..\source\Gui\VectorImageSectionItem.cpp">
       <Filter>Impl\SimulationView\VectorView</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp">
-      <Filter>Impl\SimulationView\VectorView</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\VectorViewport.cpp">
       <Filter>Impl\SimulationView\VectorView</Filter>
     </ClCompile>
@@ -396,6 +393,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ZoomActionController.cpp">
       <Filter>Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp">
+      <Filter>Impl\SimulationView\VectorView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
