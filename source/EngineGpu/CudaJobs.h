@@ -3,6 +3,8 @@
 #include <QImage>
 
 #include "Base/Definitions.h"
+#include "EngineInterface/Definitions.h"
+
 #include "DefinitionsImpl.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
 #include "EngineInterface/ChangeDescriptions.h"
@@ -104,31 +106,35 @@ class _GetVectorImageJob : public _CudaJob
 public:
     _GetVectorImageJob(
         string const& originId,
-        RealRect const& rect,
+        RealRect const& worldRect,
         double zoom,
-        QImagePtr const& targetImage,
+        ImageResource const& targetImage,
+        IntVector2D const& imageSize,
         std::mutex& mutex)
         : _CudaJob(originId, true)
         , _zoom(zoom)
         , _targetImage(targetImage)
+        , _imageSize(imageSize)
         , _mutex(mutex)
-        , _rect(rect)
+        , _worldRect(worldRect)
     {}
 
     virtual ~_GetVectorImageJob() = default;
 
-    RealRect const& getRect() const { return _rect; }
+    RealRect const& getWorldRect() const { return _worldRect; }
 
     double const& getZoom() const { return _zoom; }
 
-    QImagePtr getTargetImage() const { return _targetImage; }
+    ImageResource getTargetImage() const { return _targetImage; }
+    IntVector2D getImageSize() const { return _imageSize; }
 
     std::mutex& getMutex() { return _mutex; }
 
 private:
-    RealRect _rect;
+    RealRect _worldRect;
     double _zoom;
-    QImagePtr _targetImage;
+    ImageResource _targetImage;
+    IntVector2D _imageSize; 
     std::mutex& _mutex;
 };
 

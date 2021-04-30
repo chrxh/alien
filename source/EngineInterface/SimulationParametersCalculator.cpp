@@ -48,13 +48,13 @@ bool SimulationParametersCalculator::isSourceReached() const
 
 SimulationParameters SimulationParametersCalculator::getNext()
 {
-    _step = std::min(MaxSteps, _step + 1);
+    _step = min(MaxSteps, _step + 1);
     return calcCurrentParameters();
 }
 
 SimulationParameters SimulationParametersCalculator::getPrevious()
 {
-    _step = std::max(0, _step - 1);
+    _step = max(0, _step - 1);
     return calcCurrentParameters();
 }
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "EngineInterface/Descriptions.h"
-#include "Gui/Definitions.h"
+#include "EngineInterface/SimulationAccess.h"
+
+#include "Definitions.h"
 
 class DataRepository : public QObject
 {
@@ -67,7 +69,11 @@ public:
 
     virtual void requireDataUpdateFromSimulation(IntRect const& rect);
     virtual void requirePixelImageFromSimulation(IntRect const& rect, QImagePtr const& target);
-    virtual void requireVectorImageFromSimulation(RealRect const& rect, double zoom, QImagePtr const& target);
+    virtual void requireVectorImageFromSimulation(
+        RealRect const& rect,
+        double zoom,
+        ImageResource const& image,
+        IntVector2D const& imageSize);
     virtual std::mutex& getImageMutex();
 
     Q_SIGNAL void imageReady();
