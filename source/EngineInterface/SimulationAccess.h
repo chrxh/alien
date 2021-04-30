@@ -1,5 +1,4 @@
 #pragma once
-
 #include <mutex>
 
 #include "Definitions.h"
@@ -19,11 +18,16 @@ public:
     virtual void requireData(IntRect rect, ResolveDescription const& resolveDesc) = 0;
     virtual void requireData(ResolveDescription const& resolveDesc) = 0;
     virtual void requirePixelImage(IntRect rect, QImagePtr const& target, std::mutex& mutex) = 0;
-    virtual void requireVectorImage(RealRect rect, double zoom, QImagePtr const& target, std::mutex& mutex) = 0;
+    virtual void requireVectorImage(
+        RealRect worldRect,
+        double zoom,
+        ImageResource const& target,
+        IntVector2D const& imageSize,
+        std::mutex& mutex) = 0;
     virtual void selectEntities(IntVector2D const& pos) = 0;
     virtual void deselectAll() = 0;
     virtual void applyAction(PhysicalAction const& action) = 0;
-
+    virtual ImageResource registerImageResource(GLuint imageId) = 0;
 
     Q_SIGNAL void dataReadyToRetrieve();
     Q_SIGNAL void dataUpdated();

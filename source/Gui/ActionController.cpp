@@ -1311,7 +1311,7 @@ void ActionController::setPixelOrVectorView()
 
     _infoController->setRendering(GeneralInfoController::Rendering::Vector);
     _simulationViewWidget->disconnectView();
-    _simulationViewWidget->setActiveScene(ActiveView::VectorScene);
+    _simulationViewWidget->setActiveScene(ActiveView::OpenGLScene);
     _simulationViewWidget->connectView();
 
 	loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering finished");

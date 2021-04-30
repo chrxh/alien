@@ -26,7 +26,7 @@ StartupController::StartupController(WebAccess* access, QWidget* parent)
     _timer = new QTimer(this);
     connect(_timer, &QTimer::timeout, this, &StartupController::fadeout);
     _timer->setSingleShot(true);
-    _timer->start(std::chrono::milliseconds(1500));
+    _timer->start(std::chrono::milliseconds(150));
 }
 
 QWidget* StartupController::getWidget() const
@@ -95,6 +95,6 @@ void StartupController::currentVersionReceived(string currentVersion)
 
         _fadeoutProgress = 0;
         _timer->setSingleShot(true);
-        _timer->start(std::chrono::milliseconds(1700));
+        _timer->start(std::chrono::milliseconds(170));
     }
 }

@@ -77,19 +77,19 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
     int h, s, l;
     color.getHsl(&h, &s, &l);
     if (!isConnectable()) {
-        l = std::max(0, l - 60);
+        l = max(0, l - 60);
 	}
     if (CellItem::FOCUS_CELL == _focusState) {
         l = 190;
     }
     if (CellItem::FOCUS_CLUSTER == _focusState) {
-        l = std::min(255, l + 40);
+        l = min(255, l + 40);
     }
     color.setHsl(h, s, l);
     painter->setBrush(QBrush(color));
 
     if (_focusState == NO_FOCUS) {
-        l = std::max(0, l - 60);
+        l = max(0, l - 60);
         color.setHsl(h, s, l);
         painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
     } else {

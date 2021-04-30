@@ -73,14 +73,14 @@ void ZoomActionController::onZoomOutClicked()
 
 void ZoomActionController::onContinuousZoomIn(QVector2D const& worldPos)
 {
-    _continuousZoomTimer.start(std::chrono::milliseconds(30));
+    _continuousZoomTimer.start(std::chrono::milliseconds(20));
     _continuousZoomMode = ContinuousZoomMode::In;
     _continuousZoomWorldPos = worldPos;
 }
 
 void ZoomActionController::onContinuousZoomOut(QVector2D const& worldPos)
 {
-    _continuousZoomTimer.start(std::chrono::milliseconds(30));
+    _continuousZoomTimer.start(std::chrono::milliseconds(20));
     _continuousZoomMode = ContinuousZoomMode::Out;
     _continuousZoomWorldPos = worldPos;
 }

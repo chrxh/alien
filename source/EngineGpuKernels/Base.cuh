@@ -12,6 +12,8 @@
 #include "Definitions.cuh"
 #include "HashSet.cuh"
 
+texture<uchar4, 2, cudaReadModeElementType> outTexture;
+
 struct PartitionData
 {
     int startIndex;

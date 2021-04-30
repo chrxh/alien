@@ -23,8 +23,8 @@ class ItemConfig;
 class MonitorView;
 class MetadataManager;
 class UniverseView;
-class PixelUniverseView;
-class VectorUniverseView;
+class OpenGLUniverseView;
+class OpenGLUniverseScene;
 class ItemUniverseView;
 class ItemManager;
 class DataRepository;
@@ -71,7 +71,7 @@ struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;
 
 enum class ActiveView {
-    VectorScene,
+    OpenGLScene,
     ItemScene
 };
 enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };

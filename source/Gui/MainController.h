@@ -9,7 +9,7 @@
 #include "Definitions.h"
 
 class MainController
-	: public QObject
+    : public QObject
 {
 	Q_OBJECT
 public:
