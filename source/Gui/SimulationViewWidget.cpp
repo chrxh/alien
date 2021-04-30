@@ -11,8 +11,7 @@
 #include "EngineInterface/SimulationContext.h"
 #include "EngineInterface/SpaceProperties.h"
 
-#include "PixelUniverseView.h"
-#include "VectorUniverseView.h"
+#include "OpenGLUniverseView.h"
 #include "ItemUniverseView.h"
 #include "QApplicationHelper.h"
 #include "StartupController.h"
@@ -27,12 +26,12 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    _vectorUniverse = new VectorUniverseView(ui->simulationView, this);
+    _openGLUniverse = new OpenGLUniverseView(ui->simulationView, this);
     _itemUniverse = new ItemUniverseView(ui->simulationView, this);
-    connect(_vectorUniverse, &VectorUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
+    connect(_openGLUniverse, &OpenGLUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
     connect(
-        _vectorUniverse, &VectorUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
-    connect(_vectorUniverse, &VectorUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
+        _openGLUniverse, &OpenGLUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
+    connect(_openGLUniverse, &OpenGLUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
     connect(_itemUniverse, &ItemUniverseView::startContinuousZoomIn, this, &SimulationViewWidget::continuousZoomIn);
     connect(_itemUniverse, &ItemUniverseView::startContinuousZoomOut, this, &SimulationViewWidget::continuousZoomOut);
     connect(_itemUniverse, &ItemUniverseView::endContinuousZoom, this, &SimulationViewWidget::endContinuousZoom);
@@ -63,16 +62,16 @@ void SimulationViewWidget::init(
 
 	_controller = controller;
 
-    _vectorUniverse->init(notifier, controller, access, repository);
+    _openGLUniverse->init(notifier, controller, access, repository);
     _itemUniverse->init(notifier, controller, repository);
 
-    _vectorUniverse->activate(InitialZoomFactor);
+    _openGLUniverse->activate(InitialZoomFactor);
 
     auto const size = _controller->getContext()->getSpaceProperties()->getSize();
-    _vectorUniverse->centerTo({ static_cast<float>(size.x) / 2, static_cast<float>(size.y) / 2 });
+    _openGLUniverse->centerTo({ static_cast<float>(size.x) / 2, static_cast<float>(size.y) / 2 });
 
-    _vectorUniverse->connectView();
-    _vectorUniverse->refresh();
+    _openGLUniverse->connectView();
+    _openGLUniverse->refresh();
 
     Q_EMIT zoomFactorChanged(InitialZoomFactor);
 }
@@ -94,8 +93,8 @@ void SimulationViewWidget::refresh()
 
 ActiveView SimulationViewWidget::getActiveView() const
 {
-    if (_vectorUniverse->isActivated()) {
-        return ActiveView::VectorScene;
+    if (_openGLUniverse->isActivated()) {
+        return ActiveView::OpenGLScene;
     }
     if (_itemUniverse->isActivated()) {
         return ActiveView::ItemScene;
@@ -161,8 +160,8 @@ void SimulationViewWidget::toggleCenterSelection(bool value)
 
 UniverseView * SimulationViewWidget::getActiveUniverseView() const
 {
-    if (_vectorUniverse->isActivated()) {
-        return _vectorUniverse;
+    if (_openGLUniverse->isActivated()) {
+        return _openGLUniverse;
     }
     if (_itemUniverse->isActivated()) {
         return _itemUniverse;
@@ -173,8 +172,8 @@ UniverseView * SimulationViewWidget::getActiveUniverseView() const
 
 UniverseView * SimulationViewWidget::getView(ActiveView activeView) const
 {
-    if (ActiveView::VectorScene == activeView) {
-        return _vectorUniverse;
+    if (ActiveView::OpenGLScene == activeView) {
+        return _openGLUniverse;
     }
     if (ActiveView::ItemScene== activeView) {
         return _itemUniverse;

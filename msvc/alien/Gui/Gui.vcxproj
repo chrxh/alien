@@ -72,7 +72,7 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.0.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;opengl;widgets</QtModules>
+    <QtModules>core;gui;opengl;openglwidgets;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
@@ -93,7 +93,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -107,7 +107,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -213,11 +213,9 @@
     <ClCompile Include="..\..\..\source\Gui\NewRectangleDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\NewSimulationDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\Notifier.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseScene.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ParticleEditTab.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ParticleItem.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\PixelImageSectionItem.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\PixelUniverseView.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\PixelViewport.cpp" />
     <ClCompile Include="..\..\..\source\Gui\Queue.cpp" />
     <ClCompile Include="..\..\..\source\Gui\RandomMultiplierDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\SelectionEditTab.cpp" />
@@ -237,14 +235,12 @@
     <ClCompile Include="..\..\..\source\Gui\ToolbarController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ToolbarView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\UniverseView.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\VectorImageSectionItem.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp">
+    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseView.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\VectorViewport.cpp" />
     <ClCompile Include="..\..\..\source\Gui\SnapshotController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\StartupController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ViewportInterface.cpp" />
@@ -278,14 +274,13 @@
     <ClInclude Include="..\..\..\source\Gui\MarkerItem.h" />
     <ClInclude Include="..\..\..\source\Gui\MessageHelper.h" />
     <QtMoc Include="..\..\..\source\Gui\NewDiscDialog.h" />
+    <ClInclude Include="..\..\..\source\Gui\OpenGLUniverseScene.h" />
     <ClInclude Include="..\..\..\source\Gui\ParticleItem.h" />
-    <ClInclude Include="..\..\..\source\Gui\PixelImageSectionItem.h" />
     <ClInclude Include="..\..\..\source\Gui\QApplicationHelper.h" />
     <ClInclude Include="..\..\..\source\Gui\Settings.h" />
     <ClInclude Include="..\..\..\source\Gui\SimulationConfig.h" />
     <ClInclude Include="..\..\..\source\Gui\StringHelper.h" />
     <ClInclude Include="..\..\..\source\Gui\TabWidgetHelper.h" />
-    <ClInclude Include="..\..\..\source\Gui\VectorImageSectionItem.h" />
     <QtMoc Include="..\..\..\source\Gui\StartupController.h" />
     <QtMoc Include="..\..\..\source\Gui\ZoomActionController.h" />
     <ClInclude Include="resource.h" />
@@ -295,8 +290,7 @@
     <QtMoc Include="..\..\..\source\Gui\WebSimulationController.h" />
     <QtMoc Include="..\..\..\source\Gui\ViewportInterface.h" />
     <QtMoc Include="..\..\..\source\Gui\SnapshotController.h" />
-    <QtMoc Include="..\..\..\source\Gui\VectorViewport.h" />
-    <QtMoc Include="..\..\..\source\Gui\VectorUniverseView.h" />
+    <QtMoc Include="..\..\..\source\Gui\OpenGLUniverseView.h" />
     <QtMoc Include="..\..\..\source\Gui\UniverseView.h" />
     <QtMoc Include="..\..\..\source\Gui\ToolbarView.h" />
     <QtMoc Include="..\..\..\source\Gui\ToolbarController.h" />
@@ -314,8 +308,6 @@
     <QtMoc Include="..\..\..\source\Gui\SelectionEditTab.h" />
     <QtMoc Include="..\..\..\source\Gui\RandomMultiplierDialog.h" />
     <QtMoc Include="..\..\..\source\Gui\Queue.h" />
-    <QtMoc Include="..\..\..\source\Gui\PixelViewport.h" />
-    <QtMoc Include="..\..\..\source\Gui\PixelUniverseView.h" />
     <QtMoc Include="..\..\..\source\Gui\ParticleEditTab.h" />
     <QtMoc Include="..\..\..\source\Gui\Notifier.h" />
     <QtMoc Include="..\..\..\source\Gui\NewSimulationDialog.h" />

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <windows.h>
+#include <GL/gl.h>
+
 #include "CudaConstants.h"
 #include "Definitions.cuh"
 #include "DllExport.h"
@@ -16,6 +19,8 @@ public:
         CudaConstants const& cudaConstants);
     ~CudaSimulation();
 
+    void* registerImageResource(GLuint image);
+
     void calcCudaTimestep();
 
     void getPixelImage(
@@ -26,9 +31,9 @@ public:
     void getVectorImage(
         float2 const& rectUpperLeft,
         float2 const& rectLowerRight,
+        void* const& resource,
         int2 const& imageSize,
-        double zoom,
-        unsigned char* imageData);
+        double zoom);
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 

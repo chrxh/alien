@@ -457,8 +457,12 @@ __global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight
     */
 }
 
-__global__ void
-drawImage_vectorStyle(float2 rectUpperLeft, float2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
+__global__ void drawImage_vectorStyle(
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    int2 imageSize,
+    float zoom,
+    SimulationData data)
 {
     unsigned int* targetImage;
     if (cudaExecutionParameters.imageGlow) {
@@ -503,4 +507,23 @@ drawImage_vectorStyle(float2 rectUpperLeft, float2 rectLowerRight, int2 imageSiz
         blurImage<<<numBlocks, dim3{7, 7}>>>(data.rawImageData, data.finalImageData, imageSize);
         cudaDeviceSynchronize();
     }
+}
+
+__global__ void clearTexture(int size)
+{
+    auto const block = calcPartition(size, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (int index = block.startIndex; index <= block.endIndex; ++index) {
+//        texture[index] = 0xff00001b;
+        uchar4 ucres = tex2D(outTexture, 1, 1);
+    }
+}
+
+__global__ void drawTexture_vectorStyle(
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    int2 imageSize,
+    float zoom,
+    SimulationData data)
+{
+    KERNEL_CALL(clearTexture, imageSize.x * imageSize.y);
 }
