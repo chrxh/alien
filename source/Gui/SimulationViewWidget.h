@@ -47,7 +47,7 @@ private:
 
 	SimulationController* _controller = nullptr;
 
-    VectorUniverseView* _vectorUniverse = nullptr;
+    OpenGLUniverseView* _openGLUniverse = nullptr;
     ItemUniverseView* _itemUniverse = nullptr;
 
     qreal _posIncrement = 0.0;

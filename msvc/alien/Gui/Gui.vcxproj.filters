@@ -34,12 +34,6 @@
     <Filter Include="Impl\SimulationView\ItemView">
       <UniqueIdentifier>{20054b77-4c6b-481b-8bce-2ea84410bfae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Impl\SimulationView\PixelView">
-      <UniqueIdentifier>{0814ffb7-baaa-4609-a5d8-080b0c6a2405}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Impl\SimulationView\VectorView">
-      <UniqueIdentifier>{c2f57fe4-4bd4-42a4-8028-cf62945795b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Impl\Toolbar">
       <UniqueIdentifier>{d358c13f-ebae-46bb-8f7d-5c43e54953e6}</UniqueIdentifier>
     </Filter>
@@ -59,6 +53,9 @@
     </Filter>
     <Filter Include="External">
       <UniqueIdentifier>{36c02291-9d5d-4843-bbee-8a1d16fddf5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Impl\SimulationView\OpenGL">
+      <UniqueIdentifier>{c2f57fe4-4bd4-42a4-8028-cf62945795b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -310,21 +307,6 @@
     <ClCompile Include="..\..\..\source\Gui\MarkerItem.cpp">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\PixelImageSectionItem.cpp">
-      <Filter>Impl\SimulationView\PixelView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\PixelUniverseView.cpp">
-      <Filter>Impl\SimulationView\PixelView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\PixelViewport.cpp">
-      <Filter>Impl\SimulationView\PixelView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\VectorImageSectionItem.cpp">
-      <Filter>Impl\SimulationView\VectorView</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\VectorViewport.cpp">
-      <Filter>Impl\SimulationView\VectorView</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ToolbarContext.cpp">
       <Filter>Impl\Toolbar</Filter>
     </ClCompile>
@@ -394,8 +376,11 @@
     <ClCompile Include="..\..\..\source\Gui\ZoomActionController.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\VectorUniverseView.cpp">
-      <Filter>Impl\SimulationView\VectorView</Filter>
+    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseView.cpp">
+      <Filter>Impl\SimulationView\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseScene.cpp">
+      <Filter>Impl\SimulationView\OpenGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -441,12 +426,6 @@
     <ClInclude Include="..\..\..\source\Gui\MarkerItem.h">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\Gui\PixelImageSectionItem.h">
-      <Filter>Impl\SimulationView\PixelView</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\Gui\VectorImageSectionItem.h">
-      <Filter>Impl\SimulationView\VectorView</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -458,6 +437,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\ColorizeDialogController.h">
       <Filter>Impl\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Gui\OpenGLUniverseScene.h">
+      <Filter>Impl\SimulationView\OpenGL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -605,17 +587,8 @@
     <QtMoc Include="..\..\..\source\Gui\ItemViewport.h">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\PixelUniverseView.h">
-      <Filter>Impl\SimulationView\PixelView</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\PixelViewport.h">
-      <Filter>Impl\SimulationView\PixelView</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\VectorViewport.h">
-      <Filter>Impl\SimulationView\VectorView</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\VectorUniverseView.h">
-      <Filter>Impl\SimulationView\VectorView</Filter>
+    <QtMoc Include="..\..\..\source\Gui\OpenGLUniverseView.h">
+      <Filter>Impl\SimulationView\OpenGL</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ToolbarContext.h">
       <Filter>Impl\Toolbar</Filter>

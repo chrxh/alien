@@ -301,7 +301,7 @@ void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerP
     double remainingEnergy = totalEnergy;
     while (remainingEnergy > FLOATINGPOINT_MEDIUM_PRECISION) {
         double particleEnergy = _numberGenerator->getRandomReal(maxEnergyPerParticle / 100.0, maxEnergyPerParticle);
-        particleEnergy = std::min(particleEnergy, remainingEnergy);
+        particleEnergy = min(particleEnergy, remainingEnergy);
         data.addParticle(
             ParticleDescription()
                 .setPos(QVector2D(
@@ -716,10 +716,14 @@ void DataRepository::requirePixelImageFromSimulation(IntRect const& rect, QImage
     CATCH;
 }
 
-void DataRepository::requireVectorImageFromSimulation(RealRect const& rect, double zoom, QImagePtr const& target)
+void DataRepository::requireVectorImageFromSimulation(
+    RealRect const& rect,
+    double zoom,
+    ImageResource const& image,
+    IntVector2D const& imageSize)
 {
     _rect = rect;
-    _access->requireVectorImage(rect, zoom, target, _mutex);
+    _access->requireVectorImage(rect, zoom, image, imageSize, _mutex);
 }
 
 std::mutex& DataRepository::getImageMutex()

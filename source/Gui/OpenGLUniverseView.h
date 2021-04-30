@@ -9,15 +9,15 @@
 #include "UniverseView.h"
 #include "Definitions.h"
 
-class VectorViewGraphicsScene;
+class OpenGLUniverseScene;
 class QResizeEvent;
 
-class VectorUniverseView : public UniverseView
+class OpenGLUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
-    VectorUniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
-    virtual ~VectorUniverseView() = default;
+    OpenGLUniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
+    virtual ~OpenGLUniverseView() = default;
 
     virtual void init(
         Notifier* notifier,
@@ -57,7 +57,7 @@ private:
 
     list<QMetaObject::Connection> _connections;
 
-    VectorViewGraphicsScene* _scene = nullptr;
+    OpenGLUniverseScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <windows.h>
+#include <GL/gl.h>
+
 #include <boost/property_tree/json_parser.hpp>
 
 #include "Base/Definitions.h"
@@ -53,4 +56,10 @@ struct SerializedSimulation
     std::string simulationParameters;
     std::string symbolMap;
     std::string content;
+};
+
+struct ImageResource
+{
+    GLuint imageId;
+    void* data;
 };

@@ -5,6 +5,8 @@
 #include <QThread>
 #include <QString>
 #include <QApplication>
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOffscreenSurface>
 
 #include "Base/NumberGenerator.h"
 #include "Base/ServiceLocator.h"
@@ -35,6 +37,9 @@ void CudaWorker::init(
     auto size = space->getSize();
 	delete _cudaSimulation;
     _cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
+
+    _surface = new QOffscreenSurface();
+    _surface->create();
 }
 
 void CudaWorker::terminateWorker()
@@ -70,9 +75,18 @@ vector<CudaJob> CudaWorker::getFinishedJobs(string const & originId)
 
 void CudaWorker::run()
 {
+    QSurfaceFormat format;
+    format.setMajorVersion(3);
+    format.setMinorVersion(3);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+
+    _context = new QOpenGLContext();
+    _context->setFormat(format);
+    _context->create();
+
     try {
         do {
-		    QElapsedTimer timer;
+            QElapsedTimer timer;
 		    timer.start();
 
             processJobs();
@@ -127,13 +141,23 @@ void CudaWorker::processJobs()
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_GetVectorImageJob>(job)) {
-            auto rect = _job->getRect();
+            auto worldRect = _job->getWorldRect();
             auto zoom = _job->getZoom();
-            auto image = _job->getTargetImage();
+            auto resource = _job->getTargetImage();
+            auto imageSize = _job->getImageSize();
             auto& mutex = _job->getMutex();
 
             std::lock_guard<std::mutex> lock(mutex);
-            _cudaSimulation->getVectorImage({ rect.p1.x, rect.p1.y }, { rect.p2.x, rect.p2.y }, { image->width(), image->height() }, zoom, image->bits());
+            {
+                _context->makeCurrent(_surface);
+
+                _cudaSimulation->getVectorImage(
+                    {worldRect.p1.x, worldRect.p1.y},
+                    {worldRect.p2.x, worldRect.p2.y},
+                    resource.data,
+                    {imageSize.x, imageSize.y},
+                    zoom);
+            }
         }
 
         if (auto _job = boost::dynamic_pointer_cast<_GetDataJob>(job)) {
@@ -291,4 +315,10 @@ void CudaWorker::setTimestep(int timestep)
     }
     std::lock_guard<std::mutex> lock(_mutex);
     return _cudaSimulation->setTimestep(timestep);
+}
+
+void* CudaWorker::registerImageResource(GLuint image)
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+    return _cudaSimulation->registerImageResource(image);
 }

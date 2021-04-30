@@ -79,9 +79,14 @@ void SimulationAccessGpuImpl::requirePixelImage(IntRect rect, QImagePtr const& t
     scheduleJob(boost::make_shared<_GetPixelImageJob>(getObjectId(), rect, target, mutex));
 }
 
-void SimulationAccessGpuImpl::requireVectorImage(RealRect rect, double zoom, QImagePtr const& target, std::mutex& mutex)
+void SimulationAccessGpuImpl::requireVectorImage(
+    RealRect worldRect,
+    double zoom,
+    ImageResource const& target,
+    IntVector2D const& imageSize, 
+    std::mutex& mutex)
 {
-    scheduleJob(boost::make_shared<_GetVectorImageJob>(getObjectId(), rect, zoom, target, mutex));
+    scheduleJob(boost::make_shared<_GetVectorImageJob>(getObjectId(), worldRect, zoom, target, imageSize, mutex));
 }
 
 void SimulationAccessGpuImpl::selectEntities(IntVector2D const& pos)
@@ -102,6 +107,12 @@ void SimulationAccessGpuImpl::applyAction(PhysicalAction const& action)
 DataDescription const& SimulationAccessGpuImpl::retrieveData()
 {
     return _dataCollected;
+}
+
+ImageResource SimulationAccessGpuImpl::registerImageResource(GLuint imageId)
+{
+    auto worker = _context->getCudaController()->getCudaWorker();
+    return ImageResource{imageId, worker->registerImageResource(imageId)};
 }
 
 void SimulationAccessGpuImpl::scheduleJob(CudaJob const& job)
