@@ -30,7 +30,5 @@ public:
     virtual void centerTo(QVector2D const& position) = 0;
 
 protected:
-    virtual void centerToIntern(QVector2D const& scenePosition);
-
     QGraphicsView* _graphicsView = nullptr;
 };

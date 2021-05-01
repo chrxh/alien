@@ -39,7 +39,10 @@ void ToolbarView::init(IntVector2D const & upperLeftPosition, ActionHolder* acti
 void ToolbarView::connectActionToButton(QAction *& action, QToolButton *& button)
 {
 	button->setEnabled(action->isEnabled());
-	button->setIcon(action->icon());
+    if (button->isCheckable()) {
+        button->setChecked(action->isChecked());
+    }
+    button->setIcon(action->icon());
 	button->setToolTip(action->toolTip());
 	_connections.push_back(connect(action, &QAction::changed, [&]() {
 		button->setEnabled(action->isEnabled());
