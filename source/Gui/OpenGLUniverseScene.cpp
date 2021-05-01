@@ -35,8 +35,6 @@ OpenGLUniverseScene::OpenGLUniverseScene(
     , _access(access)
     , _mutex(mutex)
 {
-    setSceneRect(0, 0, viewSize.x - 3, viewSize.y - 3);
-
     auto context = new QOpenGLContext(parent);
     context->create();
     initializeOpenGLFunctions();
@@ -71,21 +69,14 @@ OpenGLUniverseScene::OpenGLUniverseScene(
     m_program->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(float), 2, 5 * sizeof(float));
     m_program->setUniformValue("texture1", 0);
 
-        //texture
-    m_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
-    m_texture->setMinificationFilter(QOpenGLTexture::Nearest);
-    m_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
-    m_texture->setWrapMode(QOpenGLTexture::Repeat);
-    m_texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+    //texture
 
     //release (unbind) all
     m_object.release();
     m_vertex.release();
     m_program->release();
 
-    updateTexture();
-
-    _imageResource = _access->registerImageResource(m_texture->textureId());
+    resize(viewSize);
 }
 
 ImageResource OpenGLUniverseScene::getImageResource() const
@@ -93,26 +84,41 @@ ImageResource OpenGLUniverseScene::getImageResource() const
     return _imageResource;
 }
 
-void OpenGLUniverseScene::updateTexture()
+void OpenGLUniverseScene::resize(IntVector2D const& size)
 {
-    m_texture->bind();
-
-    m_texture->setSize(sceneRect().width(), sceneRect().height());
-    m_texture->allocateStorage(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8);
-
-    m_texture->release();
+    setSceneRect(0, 0, size.x/* - 3*/, size.y/* - 3*/);
+    updateTexture(size);
 }
 
 void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     std::lock_guard<std::mutex> lock(_mutex);
+    
     m_program->bind();
     m_texture->bind();
-
     m_object.bind();
+
     glDrawArrays(GL_QUADS, 0, 4);
-    //        glDrawElements(GL_QUADS, 1, GL_UNSIGNED_INT, 0);
+
     m_object.release();
     m_texture->release();
     m_program->release();
+}
+
+void OpenGLUniverseScene::updateTexture(IntVector2D const& size)
+{
+    delete m_texture;
+    m_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
+    m_texture->setMinificationFilter(QOpenGLTexture::Nearest);
+    m_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
+    m_texture->setWrapMode(QOpenGLTexture::Repeat);
+    m_texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+
+    m_texture->bind();
+    m_texture->setSize(size.x, size.y);
+    m_texture->allocateStorage(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8);
+
+    m_texture->release();
+
+    _imageResource = _access->registerImageResource(m_texture->textureId());
 }

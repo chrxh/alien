@@ -198,21 +198,6 @@ void CudaSimulation::getVectorImage(
     cudaArray* mappedArray;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResource, 0, 0));
 
-/*
-    CHECK_FOR_CUDA_ERROR(cudaBindTextureToArray(outTexture, mappedArray));
-
-    struct cudaChannelFormatDesc desc;
-    CHECK_FOR_CUDA_ERROR(cudaGetChannelDesc(&desc, mappedArray));
-
-    GPU_FUNCTION(
-        drawTexture_vectorStyle,
-        rectUpperLeft,
-        rectLowerRight,
-        imageSize,
-        static_cast<float>(zoom),
-        *_cudaSimulationData);
-*/
-
     if (imageSize.x * imageSize.y > _cudaSimulationData->numImageBytes) {
         _cudaSimulationData->resizeImage(imageSize);
     }
@@ -233,14 +218,6 @@ void CudaSimulation::getVectorImage(
         cudaMemcpyDeviceToDevice);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResource));
-
-/*
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        imageData,
-        _cudaSimulationData->finalImageData,
-        sizeof(unsigned int) * imageSize.x * imageSize.y,
-        cudaMemcpyDeviceToHost));
-*/
 }
 
 void CudaSimulation::getSimulationData(
