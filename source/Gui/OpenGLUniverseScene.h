@@ -23,11 +23,12 @@ public:
 
     ImageResource getImageResource() const;
 
-    void updateTexture();
+    void resize(IntVector2D const& size);
 
     void drawBackground(QPainter* painter, const QRectF& rect) override;
 
 private:
+    void updateTexture(IntVector2D const& size);
 
     SimulationAccess* _access;
     std::mutex& _mutex;
@@ -41,4 +42,5 @@ private:
     QOpenGLVertexArrayObject m_object;
     QOpenGLShaderProgram* m_program = nullptr;
     QOpenGLTexture* m_texture = nullptr;
+    bool _first = true;
 };
