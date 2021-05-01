@@ -16,9 +16,8 @@ class CudaWorker : public QObject
 {
     Q_OBJECT
 public:
-    CudaWorker(QObject* parent = nullptr)
-        : QObject(parent)
-    {}
+    CudaWorker(QObject* parent = nullptr);
+
     virtual ~CudaWorker();
 
     void init(
