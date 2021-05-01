@@ -318,8 +318,9 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 
 void MainController::recreateSimulation(SerializedSimulation const & serializedSimulation)
 {
-	delete _simController;
+    auto ptr = _simController;
     _simController = nullptr;
+    delete ptr;
 
 	_simController = _serializer->deserializeSimulation(serializedSimulation);
 
@@ -336,8 +337,10 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 {
     _view->getMonitorController()->pauseTimer();
 
-    delete _simController;
+    auto ptr = _simController;
     _simController = nullptr;
+    delete ptr;
+
     auto facade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
     auto simulationControllerConfig =
         EngineGpuBuilderFacade::Config{ config->universeSize, config->symbolTable, config->parameters};
@@ -371,8 +374,9 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     if (LoadOption::SaveOldSim == option) {
         autoSaveIntern(getPathToApp() + Const::AutoSaveForLoadingFilename);
     }
-	delete _simController;
+    auto ptr = _simController;
     _simController = nullptr;
+    delete ptr;
 
     if (!SerializationHelper::loadFromFile(
             filename,
