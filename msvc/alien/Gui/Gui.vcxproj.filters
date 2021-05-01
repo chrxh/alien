@@ -667,4 +667,12 @@
   <ItemGroup>
     <None Include="cpp.hint" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\source\Gui\Resources\FragmentShader.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\..\source\Gui\Resources\VertexShader.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
