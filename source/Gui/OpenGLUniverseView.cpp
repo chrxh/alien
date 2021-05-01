@@ -218,8 +218,7 @@ void OpenGLUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void OpenGLUniverseView::resize(QResizeEvent* event)
 {
     auto size = event->size();
-    _scene->setSceneRect(QRect(QPoint(0, 0), QPoint(size.width() - 3, size.height() - 3)));
-    _scene->updateTexture();
+    _scene->resize({size.width(), size.height()});
 }
 
 void OpenGLUniverseView::receivedNotifications(set<Receiver> const& targets)
