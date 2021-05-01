@@ -320,5 +320,11 @@ void CudaWorker::setTimestep(int timestep)
 void* CudaWorker::registerImageResource(GLuint image)
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    return _cudaSimulation->registerImageResource(image);
+
+    QOpenGLFunctions_3_3_Core openGL;
+    openGL.initializeOpenGLFunctions();
+    openGL.glBindTexture(GL_TEXTURE_2D, image);
+    auto result = _cudaSimulation->registerImageResource(image);
+    openGL.glBindTexture(GL_TEXTURE_2D, 0);
+    return result;
 }

@@ -28,5 +28,7 @@
         <file>Icons/main/accelerate on.png</file>
         <file>GettingStartedWindow.html</file>
         <file>Version.txt</file>
+        <file>FragmentShader.txt</file>
+        <file>VertexShader.txt</file>
     </qresource>
 </RCC>

@@ -14,7 +14,7 @@ __global__ void clearImageMap(unsigned int* imageData, int size)
 {
     auto const block = calcPartition(size, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
-        imageData[index] = 0xff00001b;
+        imageData[index] = 0xff1b0000;
     }
 }
 
@@ -74,13 +74,13 @@ __device__ __inline__ unsigned int calcColor(Cell* cell)
     auto r = ((result >> 16) & 0xff) * factor / 150;
     auto g = ((result >> 8) & 0xff) * factor / 150;
     auto b = (result & 0xff) * factor / 150;
-    return 0xff000000 | (r << 16) | (g << 8) | b;
+    return 0xff000000 | (b << 16) | (g << 8) | r;
 }
 
 __device__ __inline__ unsigned int calcColor(Particle* particle)
 {
     auto e = min(150, (static_cast<int>(particle->getEnergy()) + 10) * 5);
-    return (e << 16) | 0xff000030;
+    return e | 0xff300000;
 }
 
 __device__ __inline__ unsigned int calcColor(Token* token)
@@ -509,21 +509,3 @@ __global__ void drawImage_vectorStyle(
     }
 }
 
-__global__ void clearTexture(int size)
-{
-    auto const block = calcPartition(size, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int index = block.startIndex; index <= block.endIndex; ++index) {
-//        texture[index] = 0xff00001b;
-        uchar4 ucres = tex2D(outTexture, 1, 1);
-    }
-}
-
-__global__ void drawTexture_vectorStyle(
-    float2 rectUpperLeft,
-    float2 rectLowerRight,
-    int2 imageSize,
-    float zoom,
-    SimulationData data)
-{
-    KERNEL_CALL(clearTexture, imageSize.x * imageSize.y);
-}
