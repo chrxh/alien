@@ -20,8 +20,16 @@
 #include "EngineGpuData.h"
 #include "DataConverter.h"
 
+CudaWorker::CudaWorker(QObject* parent /*= nullptr*/)
+    : QObject(parent)
+{
+    _surface = new QOffscreenSurface();
+    _surface->create();
+}
+
 CudaWorker::~CudaWorker()
 {
+    delete _surface;
 	delete _cudaSimulation;
 }
 
@@ -37,9 +45,6 @@ void CudaWorker::init(
     auto size = space->getSize();
 	delete _cudaSimulation;
     _cudaSimulation = new CudaSimulation({ size.x, size.y }, timestep, parameters, cudaConstants);
-
-    _surface = new QOffscreenSurface();
-    _surface->create();
 }
 
 void CudaWorker::terminateWorker()
