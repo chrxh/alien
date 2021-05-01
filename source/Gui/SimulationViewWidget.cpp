@@ -67,7 +67,7 @@ void SimulationViewWidget::init(
 
     _openGLUniverse->activate(InitialZoomFactor);
 
-    auto const size = _controller->getContext()->getSpaceProperties()->getSize();
+    auto size = _controller->getContext()->getSpaceProperties()->getSize();
     _openGLUniverse->centerTo({ static_cast<float>(size.x) / 2, static_cast<float>(size.y) / 2 });
 
     _openGLUniverse->connectView();
@@ -108,7 +108,6 @@ void SimulationViewWidget::setActiveScene (ActiveView activeScene)
     auto center = getActiveUniverseView()->getCenterPositionOfScreen();
 
     auto zoom = getZoomFactor();
-
     auto view = getView(activeScene);
     view->activate(zoom);
 

@@ -20,7 +20,7 @@ public:
 	SimulationParameters const& getSimulationParameters() const;
 
 private:
-	bool _showCellInfo = false;
+	bool _showCellInfo = true;
 	SimulationParameters _parameters;
 };
 
