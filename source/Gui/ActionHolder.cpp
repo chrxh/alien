@@ -150,7 +150,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionShowCellInfo->setIconVisibleInMenu(false);
 	actionShowCellInfo->setEnabled(false);
 	actionShowCellInfo->setCheckable(true);
-	actionShowCellInfo->setChecked(false);
+	actionShowCellInfo->setChecked(true);
 	actionShowCellInfo->setToolTip("cell info");
 
 	actionCenterSelection = new QAction("Center selection", this);
