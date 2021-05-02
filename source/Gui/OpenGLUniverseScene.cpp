@@ -63,6 +63,7 @@ OpenGLUniverseScene::OpenGLUniverseScene(QOpenGLContext* context, QObject* paren
     m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 5 * sizeof(float));
     m_program->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(float), 2, 5 * sizeof(float));
     m_program->setUniformValue("texture1", 0);
+    m_program->setUniformValue("texture2", 1);
 
     //release (unbind) all
     m_vertexArrayObject.release();
@@ -103,10 +104,19 @@ void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
     m_texture->bind();
     m_frameBufferObject->bind();
     m_program->setUniformValue("phase", 0);
+
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_texture->textureId());
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_frameBufferObject->texture());
+
     glDrawArrays(GL_QUADS, 0, 4);
     m_texture->release();
 
     m_frameBufferObject->bindDefault();
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_frameBufferObject->texture());
     m_program->setUniformValue("phase", 1);
     glDrawArrays(GL_QUADS, 0, 4);

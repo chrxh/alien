@@ -2,6 +2,7 @@
 out vec4 FragColor;
 in vec2 texCoord;
 uniform sampler2D texture1;
+uniform sampler2D texture2;
 uniform int phase;
 
 uniform float weight_rg[10] = float[](0.7, 0.16, 0.03, 0.03, 0.03, 0.03, 0.01, 0.01, 0.01, 0.01);
@@ -23,6 +24,7 @@ void main()
             result.b += texture(texture1, mirroredCoord + vec2(0.0, texelSize.y * i)).b * weight_b[i];
             result.b += texture(texture1, mirroredCoord - vec2(0.0, texelSize.y * i)).b * weight_b[i];
         }
+        result = result * 0.82 + texture(texture2, texCoord).rgb * 0.18;
         FragColor = vec4(result, 1.0);
     } else {
         vec3 result = vec3(texture(texture1, texCoord).rg * weight_rg[0], texture(texture1, texCoord).b * weight_b[0]);
