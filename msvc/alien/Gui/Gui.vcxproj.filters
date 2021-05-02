@@ -666,13 +666,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\source\Gui\Resources\FragmentShader.txt">
+    <None Include="..\..\..\source\Gui\Resources\Shader\FragmentShader.glsl">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="..\..\..\source\Gui\Resources\VertexShader.txt">
+    </None>
+    <None Include="..\..\..\source\Gui\Resources\Shader\VertexShader.glsl">
       <Filter>Resource Files</Filter>
-    </Text>
+    </None>
   </ItemGroup>
 </Project>

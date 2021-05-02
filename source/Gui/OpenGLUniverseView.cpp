@@ -29,6 +29,14 @@
 OpenGLUniverseView::OpenGLUniverseView(QGraphicsView* graphicsView, QObject* parent)
     : UniverseView(graphicsView, parent)
 {
+    _viewport = new QOpenGLWidget();
+
+    _graphicsView->setViewport(_viewport);
+    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+/*
+    viewport->makeCurrent();
+    _scene = new OpenGLUniverseScene(viewport->context(), this);
+*/
 }
 
 void OpenGLUniverseView::init(
@@ -37,8 +45,10 @@ void OpenGLUniverseView::init(
     SimulationAccess* access,
     DataRepository* repository)
 {
+    /*
     _graphicsView->setViewport(new QOpenGLWidget());
     _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+*/
 
     disconnectView();
     _controller = controller;
@@ -50,8 +60,16 @@ void OpenGLUniverseView::init(
     auto width = _graphicsView->width();
     auto height = _graphicsView->height();
 
+    if (!_scene) {
+        _viewport->makeCurrent();
+        _scene = new OpenGLUniverseScene(_viewport->context(), this);
+    }
+    _scene->init(access, repository->getImageMutex());
+    _scene->resize({width, height});
+        /*
     delete _scene;
     _scene = new OpenGLUniverseScene(access, IntVector2D{width, height}, repository->getImageMutex(), this);
+*/
     _scene->update();
     _scene->installEventFilter(this);
     _graphicsView->installEventFilter(this);

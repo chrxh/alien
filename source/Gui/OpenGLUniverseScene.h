@@ -16,10 +16,15 @@ class OpenGLUniverseScene
 {
 public:
     OpenGLUniverseScene(
+/*
         SimulationAccess* access,
         IntVector2D const& viewSize,
-        std::mutex& mutex,
+*/
+        QOpenGLContext* context,
         QObject* parent = nullptr);
+
+    void init(SimulationAccess* access, std::mutex& mutex);
+
 
     ImageResource getImageResource() const;
 
@@ -31,7 +36,7 @@ private:
     void updateTexture(IntVector2D const& size);
 
     SimulationAccess* _access;
-    std::mutex& _mutex;
+    boost::optional<std::mutex&> _mutex;
     ImageResource _imageResource;
 
     GLint m_posAttr = 0;
@@ -39,8 +44,9 @@ private:
     GLint m_matrixUniform = 0;
 
     QOpenGLBuffer m_vertex;
-    QOpenGLVertexArrayObject m_object;
+    QOpenGLVertexArrayObject m_vertexArrayObject;
     QOpenGLShaderProgram* m_program = nullptr;
     QOpenGLTexture* m_texture = nullptr;
+    QOpenGLFramebufferObject* m_frameBufferObject = nullptr;
     bool _first = true;
 };

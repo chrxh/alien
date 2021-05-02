@@ -66,5 +66,7 @@ private:
     Notifier* _notifier = nullptr;
     double _zoomFactor = 0.0;
     QVector2D _center;
+
+    QOpenGLWidget* _viewport;
 };
 
