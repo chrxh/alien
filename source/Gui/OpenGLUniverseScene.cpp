@@ -86,7 +86,7 @@ void OpenGLUniverseScene::resize(IntVector2D const& size)
 
     delete m_frameBufferObject;
     m_frameBufferObject =
-        new QOpenGLFramebufferObject(QSize(size.x, size.y), QOpenGLFramebufferObject::CombinedDepthStencil);
+        new QOpenGLFramebufferObject(QSize(size.x - 2, size.y - 2), QOpenGLFramebufferObject::CombinedDepthStencil);
 }
 
 void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
@@ -98,13 +98,13 @@ void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
 
     m_texture->bind();
     m_frameBufferObject->bind();
-    m_program->setUniformValue("mirror", true);
+    m_program->setUniformValue("phase", 0);
     glDrawArrays(GL_QUADS, 0, 4);
     m_texture->release();
 
     m_frameBufferObject->bindDefault();
     glBindTexture(GL_TEXTURE_2D, m_frameBufferObject->texture());
-    m_program->setUniformValue("mirror", false);
+    m_program->setUniformValue("phase", 1);
     glDrawArrays(GL_QUADS, 0, 4);
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -117,8 +117,8 @@ void OpenGLUniverseScene::updateTexture(IntVector2D const& size)
     delete m_texture;
 
     m_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
-    m_texture->setMinificationFilter(QOpenGLTexture::Nearest);
-    m_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
+    m_texture->setMinificationFilter(QOpenGLTexture::Linear);
+    m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
     m_texture->setWrapMode(QOpenGLTexture::Repeat);
     m_texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
 
