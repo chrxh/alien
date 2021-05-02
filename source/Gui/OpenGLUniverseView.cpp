@@ -45,11 +45,6 @@ void OpenGLUniverseView::init(
     SimulationAccess* access,
     DataRepository* repository)
 {
-    /*
-    _graphicsView->setViewport(new QOpenGLWidget());
-    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-*/
-
     disconnectView();
     _controller = controller;
     _repository = repository;
@@ -66,10 +61,6 @@ void OpenGLUniverseView::init(
     }
     _scene->init(access, repository->getImageMutex());
     _scene->resize({width, height});
-        /*
-    delete _scene;
-    _scene = new OpenGLUniverseScene(access, IntVector2D{width, height}, repository->getImageMutex(), this);
-*/
     _scene->update();
     _scene->installEventFilter(this);
     _graphicsView->installEventFilter(this);

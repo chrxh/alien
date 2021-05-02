@@ -29,6 +29,8 @@ namespace
 
 OpenGLUniverseScene::OpenGLUniverseScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
     : QGraphicsScene(parent)
+    , _surface(context->surface())
+    , _context(context)
 {
     initializeOpenGLFunctions();
 
@@ -84,15 +86,17 @@ void OpenGLUniverseScene::resize(IntVector2D const& size)
     setSceneRect(0, 0, size.x, size.y);
     updateTexture(size);
 
+    _context->makeCurrent(_surface);
+
     delete m_frameBufferObject;
     m_frameBufferObject =
         new QOpenGLFramebufferObject(QSize(size.x - 2, size.y - 2), QOpenGLFramebufferObject::CombinedDepthStencil);
+
 }
 
 void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     std::lock_guard<std::mutex> lock(*_mutex);
-    
     m_program->bind();
     m_vertexArrayObject.bind();
 
