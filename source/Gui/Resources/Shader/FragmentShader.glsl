@@ -4,7 +4,8 @@ in vec2 texCoord;
 uniform sampler2D texture1;
 uniform int phase;
 
-uniform float weight[10] = float[](0.9, 0.12, 0.03, 0.03, 0.03, 0.03, 0.01, 0.01, 0.01, 0.01);
+uniform float weight_rg[10] = float[](0.7, 0.16, 0.03, 0.03, 0.03, 0.03, 0.01, 0.01, 0.01, 0.01);
+uniform float weight_b[10] = float[](0.5, 0.12, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02);
 
 void main()
 {
@@ -12,17 +13,27 @@ void main()
     if (phase == 0) {
         vec2 mirroredCoord = vec2(texCoord.x, 1.0 - texCoord.y);  //mirror
 
-        vec3 result = texture(texture1, mirroredCoord).rgb * weight[0];
+        vec3 result = vec3(texture(texture1, mirroredCoord).rg * weight_rg[0], texture(texture1, mirroredCoord).b * weight_b[0]);
         for (int i = 1; i < 10; ++i) {
-            result += texture(texture1, mirroredCoord + vec2(texelSize.x * i, 0.0)).rgb * weight[i];
-            result += texture(texture1, mirroredCoord - vec2(texelSize.x * i, 0.0)).rgb * weight[i];
+            result.rg += texture(texture1, mirroredCoord + vec2(texelSize.x * i, 0.0)).rg * weight_rg[i];
+            result.rg += texture(texture1, mirroredCoord - vec2(texelSize.x * i, 0.0)).rg * weight_rg[i];
+
+            result.b += texture(texture1, mirroredCoord + vec2(texelSize.x * i, 0.0)).b * weight_b[i];
+            result.b += texture(texture1, mirroredCoord - vec2(texelSize.x * i, 0.0)).b * weight_b[i];
+            result.b += texture(texture1, mirroredCoord + vec2(0.0, texelSize.y * i)).b * weight_b[i];
+            result.b += texture(texture1, mirroredCoord - vec2(0.0, texelSize.y * i)).b * weight_b[i];
         }
         FragColor = vec4(result, 1.0);
     } else {
-        vec3 result = texture(texture1, texCoord).rgb * weight[0];
+        vec3 result = vec3(texture(texture1, texCoord).rg * weight_rg[0], texture(texture1, texCoord).b * weight_b[0]);
         for (int i = 1; i < 10; ++i) {
-            result += texture(texture1, texCoord + vec2(0.0, texelSize.y * i)).rgb * weight[i];
-            result += texture(texture1, texCoord - vec2(0.0, texelSize.y * i)).rgb * weight[i];
+            result.rg += texture(texture1, texCoord + vec2(0.0, texelSize.y * i)).rg * weight_rg[i];
+            result.rg += texture(texture1, texCoord - vec2(0.0, texelSize.y * i)).rg * weight_rg[i];
+
+            result.b += texture(texture1, texCoord + vec2(0.0, texelSize.y * i)).b * weight_b[i];
+            result.b += texture(texture1, texCoord - vec2(0.0, texelSize.y * i)).b * weight_b[i];
+            result.b += texture(texture1, texCoord + vec2(texelSize.x * i, 0.0)).b * weight_b[i];
+            result.b += texture(texture1, texCoord - vec2(texelSize.x * i, 0.0)).b * weight_b[i];
         }
         FragColor = vec4(result, 1.0);
     }
