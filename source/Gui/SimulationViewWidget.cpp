@@ -4,6 +4,7 @@
 #include <QGraphicsBlurEffect>
 #include <QFile>
 #include <QTextStream>
+#include <QOpenGLWidget>
 
 #include "Gui/Settings.h"
 #include "EngineInterface/SimulationAccess.h"
@@ -25,6 +26,11 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
 	, ui(new Ui::SimulationViewWidget)
 {
     ui->setupUi(this);
+
+/*
+    ui->simulationView->setViewport(new QOpenGLWidget());
+    ui->simulationView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+*/
 
     _openGLUniverse = new OpenGLUniverseView(ui->simulationView, this);
     _itemUniverse = new ItemUniverseView(ui->simulationView, this);
