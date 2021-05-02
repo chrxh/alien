@@ -39,14 +39,12 @@ private:
     boost::optional<std::mutex&> _mutex;
     ImageResource _imageResource;
 
-    GLint m_posAttr = 0;
-    GLint m_colAttr = 0;
-    GLint m_matrixUniform = 0;
+    QSurface* _surface = nullptr;
+    QOpenGLContext* _context = nullptr;
 
     QOpenGLBuffer m_vertex;
     QOpenGLVertexArrayObject m_vertexArrayObject;
     QOpenGLShaderProgram* m_program = nullptr;
     QOpenGLTexture* m_texture = nullptr;
     QOpenGLFramebufferObject* m_frameBufferObject = nullptr;
-    bool _first = true;
 };
