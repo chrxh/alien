@@ -358,51 +358,6 @@ __global__ void drawParticles_vectorStyle(
     }
 }
 
-__global__ void blurImage(unsigned int* sourceImage, unsigned int* targetImage, int2 imageSize)
-{
-    auto constexpr Radius = 5;
-
-    auto const pixelBlock = calcPartition(imageSize.x * imageSize.y, blockIdx.x, gridDim.x);
-    for (int index = pixelBlock.startIndex; index <= pixelBlock.endIndex; ++index) {
-
-        __shared__ int red, green, blue;
-        if (0 == threadIdx.x && 0 == threadIdx.y) {
-            red = 0;
-            green = 0;
-            blue = 0;
-        }
-        __syncthreads();
-
-        int2 pos{index % imageSize.x, index / imageSize.x};
-        int2 relPos{static_cast<int>(threadIdx.x) - 3, static_cast<int>(threadIdx.y) - 3};
-
-        auto scanPos = pos - relPos;
-        if (scanPos.x >= 0 && scanPos.y >= 0 && scanPos.x < imageSize.x && scanPos.y < imageSize.y) {
-            auto r = Math::length(toFloat2(relPos));
-            if (r <= Radius + FP_PRECISION) {
-                auto const pixel = sourceImage[scanPos.x + scanPos.y * imageSize.x];
-                auto const scanRed = (pixel >> 16) & 0xff;
-                auto const scanGreen = (pixel >> 8) & 0xff;
-                auto const scanBlue = pixel & 0xff;
-                auto const factor = cudaImageBlurFactors[floorInt(r)];
-                atomicAdd_block(&red, scanRed * factor);
-                atomicAdd_block(&green, scanGreen * factor);
-                atomicAdd_block(&blue, scanBlue * factor);
-            }
-        }
-        __syncthreads();
-
-        if (0 == threadIdx.x && 0 == threadIdx.y) {
-            auto sum = cudaImageBlurFactors[6];
-            red = min(255, red / sum);
-            green = min(255, green / sum);
-            blue = min(255, blue / sum);
-            targetImage[pos.x + pos.y * imageSize.x] = 0xff000000 | (red << 16) | (green << 8) | blue;
-        }
-        __syncthreads();
-    }
-}
-
 
 /************************************************************************/
 /* Main      															*/
@@ -464,12 +419,7 @@ __global__ void drawImage_vectorStyle(
     float zoom,
     SimulationData data)
 {
-    unsigned int* targetImage;
-    if (cudaExecutionParameters.imageGlow) {
-        targetImage = data.rawImageData;
-    } else {
-        targetImage = data.finalImageData;
-    }
+    unsigned int* targetImage = data.finalImageData;
 
     KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
     KERNEL_CALL(
@@ -501,11 +451,5 @@ __global__ void drawImage_vectorStyle(
         targetImage,
         imageSize,
         zoom);
-
-    if (cudaExecutionParameters.imageGlow) {
-        auto const numBlocks = cudaConstants.NUM_BLOCKS * cudaConstants.NUM_THREADS_PER_BLOCK / 8;
-        blurImage<<<numBlocks, dim3{7, 7}>>>(data.rawImageData, data.finalImageData, imageSize);
-        cudaDeviceSynchronize();
-    }
 }
 
