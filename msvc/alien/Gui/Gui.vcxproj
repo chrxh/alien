@@ -350,11 +350,9 @@
     <ResourceCompile Include="icon.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\source\Gui\Resources\Shader\FragmentShader.glsl" />
+    <None Include="..\..\..\source\Gui\Resources\Shader\VertexShader.glsl" />
     <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\source\Gui\Resources\FragmentShader.txt" />
-    <Text Include="..\..\..\source\Gui\Resources\VertexShader.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
