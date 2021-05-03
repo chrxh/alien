@@ -72,7 +72,7 @@ struct BASE_EXPORT IntVector2D
     IntVector2D() = default;
     IntVector2D(std::initializer_list<int> l);
     IntVector2D(QVector2D const& vec);
-    QVector2D toQVector2D();
+    QVector2D toQVector2D() const;
     IntVector2D& restrictToRect(IntRect const& rect);
     bool operator==(IntVector2D const& vec);
     void operator-=(IntVector2D const& vec);

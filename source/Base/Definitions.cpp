@@ -16,7 +16,7 @@ IntVector2D::IntVector2D(QVector2D const& vec)
     , y(static_cast<int>(vec.y()))
 {}
 
-QVector2D IntVector2D::toQVector2D()
+QVector2D IntVector2D::toQVector2D() const
 {
     return QVector2D(x, y);
 }

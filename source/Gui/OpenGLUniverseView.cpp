@@ -118,19 +118,11 @@ void OpenGLUniverseView::setZoomFactor(double zoomFactor)
     _zoomFactor = zoomFactor;
 }
 
-void OpenGLUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixedPos)
+void OpenGLUniverseView::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
 {
-    auto worldPosOfScreenCenter = getCenterPositionOfScreen();
-    auto origZoomFactor = _zoomFactor;
-
-    _zoomFactor = zoomFactor;
-    QVector2D mu(
-        worldPosOfScreenCenter.x() * (zoomFactor / origZoomFactor - 1.0),
-        worldPosOfScreenCenter.y() * (zoomFactor / origZoomFactor - 1.0));
-    QVector2D correction(
-        mu.x() * (worldPosOfScreenCenter.x() - fixedPos.x()) / worldPosOfScreenCenter.x(),
-        mu.y() * (worldPosOfScreenCenter.y() - fixedPos.y()) / worldPosOfScreenCenter.y());
-    centerTo(worldPosOfScreenCenter - correction);
+    auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
+    setZoomFactor(zoomFactor);
+    centerTo(worldPos, viewPos);
 }
 
 QVector2D OpenGLUniverseView::getCenterPositionOfScreen() const
@@ -142,6 +134,16 @@ void OpenGLUniverseView::centerTo(QVector2D const& position)
 {
     _center = position;
 }
+
+void OpenGLUniverseView::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
+{
+    QVector2D deltaViewPos{
+        static_cast<float>(viewPos.x) - static_cast<float>(_graphicsView->width()) / 2.0f,
+        static_cast<float>(viewPos.y) - static_cast<float>(_graphicsView->height()) / 2.0f};
+    auto deltaWorldPos = mapDeltaViewToDeltaWorldPosition(deltaViewPos);
+    centerTo(worldPosition - deltaWorldPos);
+}
+
 
 bool OpenGLUniverseView::eventFilter(QObject* object, QEvent* event)
 {
@@ -169,14 +171,19 @@ bool OpenGLUniverseView::eventFilter(QObject* object, QEvent* event)
 
 void OpenGLUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    auto pos = mapViewToWorldPosition(QVector2D(event->scenePos().x(), event->scenePos().y()));
+    auto viewPos = IntVector2D{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
+    auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
 
     if (event->buttons() == Qt::MouseButton::LeftButton) {
-        Q_EMIT startContinuousZoomIn(pos);
+        Q_EMIT startContinuousZoomIn(viewPos);
     }
     if (event->buttons() == Qt::MouseButton::RightButton) {
-        Q_EMIT startContinuousZoomOut(pos);
+        Q_EMIT startContinuousZoomOut(viewPos);
     }
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        _worldPosForMovement = worldPos;
+    }
+
     /*
     if (!_controller->getRun()) {
         QVector2D pos(event->scenePos().x() / _zoomFactor, event->scenePos().y() / _zoomFactor);
@@ -186,8 +193,14 @@ void OpenGLUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 */
 }
 
-void OpenGLUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+void OpenGLUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
+    IntVector2D viewPos{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        centerTo(*_worldPosForMovement, viewPos);
+        refresh();
+    }
+
     /*
     auto const pos = QVector2D(e->scenePos().x() / _zoomFactor, e->scenePos().y() / _zoomFactor);
     auto const lastPos = QVector2D(e->lastScenePos().x() / _zoomFactor, e->lastScenePos().y() / _zoomFactor);
@@ -214,6 +227,8 @@ void OpenGLUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 
 void OpenGLUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
+    _worldPosForMovement = boost::none;
+
     Q_EMIT endContinuousZoom();
 
 /*
@@ -271,4 +286,9 @@ QVector2D OpenGLUniverseView::mapViewToWorldPosition(QVector2D const& viewPos) c
         static_cast<float>(_graphicsView->height() / (2.0 * _zoomFactor)));
     QVector2D relWorldPos(viewPos.x() / _zoomFactor, viewPos.y() / _zoomFactor);
     return _center - relCenter + relWorldPos;
+}
+
+QVector2D OpenGLUniverseView::mapDeltaViewToDeltaWorldPosition(QVector2D const& viewPos) const
+{
+    return viewPos / _zoomFactor;
 }

@@ -119,9 +119,14 @@ void ItemUniverseView::setZoomFactor(double zoomFactor)
     CATCH;
 }
 
-void ItemUniverseView::setZoomFactor(double zoomFactor, QVector2D const& fixedPos)
+void ItemUniverseView::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
 {
+    TRY;
+    auto scenePos = _graphicsView->mapToScene(viewPos.x, viewPos.y);
+    auto worldPos = CoordinateSystem::sceneToModel(scenePos);
     setZoomFactor(zoomFactor);
+    centerTo(QVector2D(worldPos.x(), worldPos.y()), viewPos);
+    CATCH;
 }
 
 
@@ -149,6 +154,25 @@ void ItemUniverseView::toggleCenterSelection(bool value)
     TRY;
     _centerSelection = value;
 	centerSelectionIfEnabled();
+    CATCH;
+}
+
+void ItemUniverseView::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
+{
+    TRY;
+    auto scenePos = _graphicsView->mapToScene(viewPos.x, viewPos.y);
+    auto centerScenePos = _graphicsView->mapToScene(
+        static_cast<float>(_graphicsView->width()) / 2.0f, static_cast<float>(_graphicsView->height()) / 2.0f);
+
+    QVector2D deltaWorldPos(CoordinateSystem::sceneToModel(scenePos.x() - centerScenePos.x()),
+        CoordinateSystem::sceneToModel(scenePos.y() - centerScenePos.y()));
+/*
+    QVector2D deltaViewPos{
+        static_cast<float>(viewPos.x) - static_cast<float>(_graphicsView->width()) / 2.0f,
+        static_cast<float>(viewPos.y) - static_cast<float>(_graphicsView->height()) / 2.0f};
+    auto deltaWorldPos = CoordinateSystem::sceneToModel(deltaViewPos);
+*/
+    centerTo(worldPosition - deltaWorldPos);
     CATCH;
 }
 
@@ -310,12 +334,13 @@ bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
 void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
 {
     TRY;
-    auto pos = QVector2D(CoordinateSystem::sceneToModel(e->scenePos().x()), CoordinateSystem::sceneToModel(e->scenePos().y()));
+    auto viewPos = _graphicsView->mapFromScene(e->scenePos().x(), e->scenePos().y());
+    auto viewPosInt = IntVector2D{static_cast<int>(viewPos.x()), static_cast<int>(viewPos.y())};
     if (e->buttons() == Qt::MouseButton::LeftButton) {
-        Q_EMIT startContinuousZoomIn(pos);
+        Q_EMIT startContinuousZoomIn(viewPosInt);
     }
     if (e->buttons() == Qt::MouseButton::RightButton) {
-        Q_EMIT startContinuousZoomOut(pos);
+        Q_EMIT startContinuousZoomOut(viewPosInt);
     }
 /*
     _mouseButtonPressed = true;
