@@ -30,7 +30,7 @@ public:
 
     double getZoomFactor() const override;
     void setZoomFactor(double zoomFactor) override;
-    void setZoomFactor(double zoomFactor, QVector2D const& fixedPos) override;
+    void setZoomFactor(double zoomFactor, IntVector2D const& viewPos) override;
 
     QVector2D getCenterPositionOfScreen() const override;
 
@@ -45,7 +45,8 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
 
 private:
-	void requestData();
+    void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
+    void requestData();
 	boost::optional<QVector2D> getCenterPosOfSelection() const;
 	void centerSelectionIfEnabled();
     void updateItems();
