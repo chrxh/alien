@@ -135,9 +135,9 @@ void SimulationViewWidget::setZoomFactor(double factor)
     Q_EMIT zoomFactorChanged(factor);
 }
 
-void SimulationViewWidget::setZoomFactor(double zoomFactor, QVector2D const& worldPos)
+void SimulationViewWidget::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
 {
-    getActiveUniverseView()->setZoomFactor(zoomFactor, worldPos);
+    getActiveUniverseView()->setZoomFactor(zoomFactor, viewPos);
 
     Q_EMIT zoomFactorChanged(zoomFactor);
 }

@@ -28,14 +28,14 @@ public:
 
     double getZoomFactor();
     void setZoomFactor(double factor);
-    void setZoomFactor(double factor, QVector2D const& worldPos);
+    void setZoomFactor(double factor, IntVector2D const& viewPos);
 
 	QVector2D getViewCenterWithIncrement ();
 
 	void toggleCenterSelection(bool value);
 
-    Q_SIGNAL void continuousZoomIn(QVector2D const& worldPos);
-    Q_SIGNAL void continuousZoomOut(QVector2D const& worldPos);
+    Q_SIGNAL void continuousZoomIn(IntVector2D const& viewPos);
+    Q_SIGNAL void continuousZoomOut(IntVector2D const& viewPos);
     Q_SIGNAL void endContinuousZoom();
     Q_SIGNAL void zoomFactorChanged(double factor);
 

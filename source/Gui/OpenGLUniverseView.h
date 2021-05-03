@@ -34,7 +34,7 @@ public:
 
     double getZoomFactor() const override;
     void setZoomFactor(double zoomFactor) override;
-    void setZoomFactor(double zoomFactor, QVector2D const& fixedPos) override;
+    void setZoomFactor(double zoomFactor, IntVector2D const& viewPos) override;
 
     QVector2D getCenterPositionOfScreen() const override;
 
@@ -43,17 +43,20 @@ public:
 protected:
     bool eventFilter(QObject* object, QEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     void resize(QResizeEvent* event);
 
 private:
+    void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
+
     Q_SLOT void receivedNotifications(set<Receiver> const& targets);
     Q_SLOT void requestImage();
     Q_SLOT void imageReady();
     Q_SLOT void scrolled();
 
     QVector2D mapViewToWorldPosition(QVector2D const& viewPos) const;
+    QVector2D mapDeltaViewToDeltaWorldPosition(QVector2D const& viewPos) const;
 
     list<QMetaObject::Connection> _connections;
 
@@ -62,11 +65,14 @@ private:
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;
     SimulationController* _controller = nullptr;
+    QOpenGLWidget* _viewport = nullptr;
 
     Notifier* _notifier = nullptr;
+
     double _zoomFactor = 0.0;
     QVector2D _center;
 
-    QOpenGLWidget* _viewport;
+    //navigation
+    boost::optional<QVector2D> _worldPosForMovement;
 };
 
