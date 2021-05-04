@@ -54,6 +54,7 @@ private:
     Q_SLOT void requestImage();
     Q_SLOT void imageReady();
     Q_SLOT void scrolled();
+    Q_SLOT void updateViewTimeout();
 
     QVector2D mapViewToWorldPosition(QVector2D const& viewPos) const;
     QVector2D mapDeltaViewToDeltaWorldPosition(QVector2D const& viewPos) const;
@@ -68,6 +69,8 @@ private:
     QOpenGLWidget* _viewport = nullptr;
 
     Notifier* _notifier = nullptr;
+    QTimer _updateViewTimer;
+    int _scheduledViewUpdates = 0;
 
     double _zoomFactor = 0.0;
     QVector2D _center;

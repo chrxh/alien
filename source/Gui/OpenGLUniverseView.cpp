@@ -37,6 +37,8 @@ OpenGLUniverseView::OpenGLUniverseView(QGraphicsView* graphicsView, QObject* par
     viewport->makeCurrent();
     _scene = new OpenGLUniverseScene(viewport->context(), this);
 */
+
+    connect(&_updateViewTimer, &QTimer::timeout, this, &OpenGLUniverseView::updateViewTimeout);
 }
 
 void OpenGLUniverseView::init(
@@ -196,6 +198,12 @@ void OpenGLUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void OpenGLUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     IntVector2D viewPos{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
+    if (event->buttons() == Qt::MouseButton::LeftButton) {
+        Q_EMIT startContinuousZoomIn(viewPos);
+    }
+    if (event->buttons() == Qt::MouseButton::RightButton) {
+        Q_EMIT startContinuousZoomOut(viewPos);
+    }
     if (event->buttons() == Qt::MouseButton::MiddleButton) {
         centerTo(*_worldPosForMovement, viewPos);
         refresh();
@@ -272,11 +280,24 @@ void OpenGLUniverseView::requestImage()
 void OpenGLUniverseView::imageReady()
 {
     _scene->update();
+    _updateViewTimer.start(Const::OpenGLViewUpdateInterval);
+    _scheduledViewUpdates = Const::ViewUpdates;
 }
 
 void OpenGLUniverseView::scrolled()
 {
     requestImage();
+}
+
+void OpenGLUniverseView::updateViewTimeout()
+{
+    if (_scheduledViewUpdates > 0) {
+        _scene->update();
+        --_scheduledViewUpdates;
+    }
+    if (_scheduledViewUpdates == 0) {
+        _updateViewTimer.stop();
+    }
 }
 
 QVector2D OpenGLUniverseView::mapViewToWorldPosition(QVector2D const& viewPos) const
