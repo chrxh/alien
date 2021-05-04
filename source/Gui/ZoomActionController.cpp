@@ -59,7 +59,6 @@ void ZoomActionController::onZoomOutClicked()
         if (_simulationViewWidget->getZoomFactor()
             > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         } else {
-//            _actions->actionEditor->toggle();
             setPixelOrVectorView();
         }
     } else {
@@ -73,14 +72,18 @@ void ZoomActionController::onZoomOutClicked()
 
 void ZoomActionController::onContinuousZoomIn(IntVector2D const& viewPos)
 {
-    _continuousZoomTimer.start(std::chrono::milliseconds(20));
+    if (!_continuousZoomTimer.isActive()) {
+        _continuousZoomTimer.start(Const::ContinuousZoomInterval);
+    }
     _continuousZoomMode = ContinuousZoomMode::In;
     _continuousZoomWorldPos = viewPos;
 }
 
 void ZoomActionController::onContinuousZoomOut(IntVector2D const& viewPos)
 {
-    _continuousZoomTimer.start(std::chrono::milliseconds(20));
+    if (!_continuousZoomTimer.isActive()) {
+        _continuousZoomTimer.start(Const::ContinuousZoomInterval);
+    }
     _continuousZoomMode = ContinuousZoomMode::Out;
     _continuousZoomWorldPos = viewPos;
 }

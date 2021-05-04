@@ -12,6 +12,10 @@ namespace Const
     auto const ZoomLevelForAutomaticVectorViewSwitch = 4.0;
     auto const MinZoomLevelForEditor = 4.0;
 
+	auto const ContinuousZoomInterval = std::chrono::milliseconds(20);
+    auto const OpenGLViewUpdateInterval = std::chrono::milliseconds(20);
+    auto const ViewUpdates = 4;
+
     //startup
     const QColor StartupTextColor(0x89, 0x94, 0xc4);
     const QColor StartupNewVersionTextColor(0xff, 0x94, 0xc4);
