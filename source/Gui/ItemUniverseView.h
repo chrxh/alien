@@ -40,9 +40,9 @@ public:
 
 protected:
     bool eventFilter(QObject* object, QEvent* event) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent* e);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* e);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e);
+    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
 private:
     void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
@@ -76,6 +76,8 @@ private:
 	Notifier* _notifier = nullptr;
 
     double _zoomFactor = 0.0;
-    bool _mouseButtonPressed = true;
+    boost::optional<QVector2D> _worldPosForMovement;
+
+	bool _mouseButtonPressed = true;
 	bool _centerSelection = false;
 };
