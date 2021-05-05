@@ -17,7 +17,7 @@ public:
     SimulationViewWidget(QWidget* parent = nullptr);
     virtual ~SimulationViewWidget();
 
-    void updateScrollbars(IntVector2D const& worldSize, double zoom);
+    void updateScrollbars(IntVector2D const& worldSize, QVector2D const& center, double zoom);
 
     QGraphicsView* getGraphicsView() const;
 
