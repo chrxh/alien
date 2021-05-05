@@ -49,6 +49,7 @@ protected:
 
 private:
     void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
+    void updateScrollbars();
 
     Q_SLOT void receivedNotifications(set<Receiver> const& targets);
     Q_SLOT void requestImage();
