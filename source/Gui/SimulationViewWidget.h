@@ -21,8 +21,16 @@ public:
 
     QGraphicsView* getGraphicsView() const;
 
+    Q_SIGNAL void scrolledX(float centerX);
+    Q_SIGNAL void scrolledY(float centerY);
+
 private:
+    Q_SLOT void horizontalScrolled();
+    Q_SLOT void verticalScrolled();
+
     Ui::SimulationViewWidget *ui;
+
+    boost::optional<double> _zoom;
 };
 
 

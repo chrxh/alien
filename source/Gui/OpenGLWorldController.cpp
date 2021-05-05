@@ -80,12 +80,10 @@ void OpenGLWorldController::connectView()
         connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &OpenGLWorldController::receivedNotifications));
     _connections.push_back(connect(
         _repository, &DataRepository::imageReady, this, &OpenGLWorldController::imageReady, Qt::QueuedConnection));
-
-    auto graphicsView = _simulationViewWidget->getGraphicsView();
-    _connections.push_back(connect(
-        graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
-    _connections.push_back(
-        connect(graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
+    _connections.push_back(QObject::connect(
+        _simulationViewWidget, &SimulationViewWidget::scrolledX, this, &OpenGLWorldController::scrolledX));
+    _connections.push_back(QObject::connect(
+        _simulationViewWidget, &SimulationViewWidget::scrolledY, this, &OpenGLWorldController::scrolledY));
 }
 
 void OpenGLWorldController::disconnectView()
@@ -300,8 +298,19 @@ void OpenGLWorldController::imageReady()
     _scheduledViewUpdates = Const::ViewUpdates;
 }
 
-void OpenGLWorldController::scrolled()
+void OpenGLWorldController::scrolledX(float centerX)
 {
+    auto center = getCenterPositionOfScreen();
+    center.setX(centerX);
+    centerTo(center);
+    requestImage();
+}
+
+void OpenGLWorldController::scrolledY(float centerY)
+{
+    auto center = getCenterPositionOfScreen();
+    center.setY(centerY);
+    centerTo(center);
     requestImage();
 }
 

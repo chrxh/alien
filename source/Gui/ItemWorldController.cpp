@@ -61,13 +61,15 @@ void ItemWorldController::connectView()
 {
     TRY;
     disconnectView();
-    _connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemWorldController::requestData));
-    _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemWorldController::receivedNotifications));
-    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    _connections.push_back(
+        connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemWorldController::requestData));
+    _connections.push_back(
+        connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemWorldController::receivedNotifications));
+
     _connections.push_back(QObject::connect(
-        graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ItemWorldController::scrolled));
+        _simulationViewWidget, &SimulationViewWidget::scrolledX, this, &ItemWorldController::scrolledX));
     _connections.push_back(QObject::connect(
-        graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &ItemWorldController::scrolled));
+        _simulationViewWidget, &SimulationViewWidget::scrolledY, this, &ItemWorldController::scrolledY));
     CATCH;
 }
 
@@ -280,9 +282,21 @@ void ItemWorldController::cellInfoToggled(bool showInfo)
     CATCH;
 }
 
-void ItemWorldController::scrolled()
+void ItemWorldController::scrolledX(float centerX)
 {
     TRY;
+    auto center = getCenterPositionOfScreen();
+    center.setX(centerX);
+    centerTo(center);
+    requestData();
+    CATCH;
+}
+void ItemWorldController::scrolledY(float centerY)
+{
+    TRY;
+    auto center = getCenterPositionOfScreen();
+    center.setY(centerY);
+    centerTo(center);
     requestData();
     CATCH;
 }
