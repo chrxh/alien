@@ -177,7 +177,9 @@ void CudaSimulation::getPixelImage(
         _cudaSimulationData->resizeImage(imageSize);
     }
 
+/*
     GPU_FUNCTION(cudaDrawImage_pixelStyle, rectUpperLeft, rectLowerRight, imageSize, * _cudaSimulationData);
+*/
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
         imageData,
         _cudaSimulationData->finalImageData,
@@ -202,7 +204,7 @@ void CudaSimulation::getVectorImage(
         _cudaSimulationData->resizeImage(imageSize);
     }
     GPU_FUNCTION(
-        drawImage_vectorStyle,
+        drawImage,
         rectUpperLeft,
         rectLowerRight,
         imageSize,
