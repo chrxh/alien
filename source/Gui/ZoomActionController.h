@@ -11,7 +11,7 @@ class ZoomActionController : public QObject
 public:
     ZoomActionController(QObject* parent = nullptr);
 
-    void init(ActionHolder* actions, SimulationViewWidget* simulationViewWidget);
+    void init(ActionHolder* actions, SimulationViewController* simulationViewController);
 
     Q_SLOT void onZoomInClicked();
     Q_SLOT void onZoomOutClicked();
@@ -30,7 +30,7 @@ private:
     void setPixelOrVectorView();
 
     ActionHolder* _actions = nullptr;
-    SimulationViewWidget* _simulationViewWidget = nullptr;
+    SimulationViewController* _simulationViewController = nullptr;
 
     enum class ContinuousZoomMode
     {

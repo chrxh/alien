@@ -25,9 +25,10 @@
 #include "Notifier.h"
 #include "Settings.h"
 #include "OpenGLUniverseScene.h"
+#include "SimulationViewWidget.h"
 
-OpenGLUniverseView::OpenGLUniverseView(QGraphicsView* graphicsView, QObject* parent)
-    : UniverseView(graphicsView, parent)
+OpenGLUniverseView::OpenGLUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent)
+    : UniverseView(simulationViewWidget->getGraphicsView(), parent)
 {
     _viewport = new QOpenGLWidget();
 

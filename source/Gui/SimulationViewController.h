@@ -1,0 +1,55 @@
+#pragma once
+
+#include <QWidget>
+
+#include <QVector2D>
+
+#include "Definitions.h"
+#include "EngineInterface/Definitions.h"
+
+
+class SimulationViewController : public QObject
+{
+    Q_OBJECT
+public:
+    SimulationViewController(QWidget* parent = nullptr);
+    virtual ~SimulationViewController() = default;
+
+    QWidget* getWidget() const;
+
+    void
+    init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* manipulator);
+
+    void connectView();
+    void disconnectView();
+    void refresh();
+
+    ActiveView getActiveView() const;
+    void setActiveScene(ActiveView activeScene);
+
+    double getZoomFactor();
+    void setZoomFactor(double factor);
+    void setZoomFactor(double factor, IntVector2D const& viewPos);
+
+    QVector2D getViewCenterWithIncrement();
+
+    void toggleCenterSelection(bool value);
+
+    Q_SIGNAL void continuousZoomIn(IntVector2D const& viewPos);
+    Q_SIGNAL void continuousZoomOut(IntVector2D const& viewPos);
+    Q_SIGNAL void endContinuousZoom();
+    Q_SIGNAL void zoomFactorChanged(double factor);
+
+private:
+    UniverseView* getActiveUniverseView() const;
+    UniverseView* getView(ActiveView activeView) const;
+
+    SimulationController* _controller = nullptr;
+
+    SimulationViewWidget* _simulationViewWidget = nullptr;
+
+    OpenGLUniverseView* _openGLUniverse = nullptr;
+    ItemUniverseView* _itemUniverse = nullptr;
+
+    qreal _posIncrement = 0.0;
+};
