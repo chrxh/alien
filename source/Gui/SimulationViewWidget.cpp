@@ -43,6 +43,16 @@ SimulationViewWidget::~SimulationViewWidget()
     delete ui;
 }
 
+void SimulationViewWidget::updateScrollbars(IntVector2D const& worldSize, double zoom)
+{
+    RealVector2D sceneSize = {toFloat(worldSize.x * zoom), toFloat(worldSize.y * zoom)};
+    IntVector2D viewSize = {ui->simulationView->width(), ui->simulationView->height()};
+    ui->horizontalScrollBar->setRange(0, sceneSize.x - viewSize.x);
+    ui->horizontalScrollBar->setPageStep(viewSize.x);
+    ui->verticalScrollBar->setRange(0, sceneSize.y - viewSize.y);
+    ui->verticalScrollBar->setPageStep(viewSize.y);
+}
+
 QGraphicsView* SimulationViewWidget::getGraphicsView() const
 {
     return ui->simulationView;

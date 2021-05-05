@@ -8,7 +8,7 @@ class AbstractWorldController : public QObject
 {
     Q_OBJECT
 public:
-    AbstractWorldController(QGraphicsView* graphicsView, QObject* parent = nullptr);
+    AbstractWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
     virtual ~AbstractWorldController() = default;
 
     virtual void connectView() = 0;
@@ -31,5 +31,5 @@ public:
     virtual void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos) = 0;
 
 protected:
-    QGraphicsView* _graphicsView = nullptr;
+    SimulationViewWidget* _simulationViewWidget = nullptr;
 };
