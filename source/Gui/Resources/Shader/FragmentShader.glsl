@@ -39,4 +39,14 @@ void main()
         }
         FragColor = vec4(result, 1.0);
     }
+ /*
+    if (phase == 0) {
+        vec2 mirroredCoord = vec2(texCoord.x, 1.0 - texCoord.y);  //mirror
+        vec3 result = vec3(texture(texture1, mirroredCoord).rgb);
+        FragColor = vec4(result, 1.0);
+    } else {
+        vec3 result = vec3(texture(texture1, texCoord).rgb);
+        FragColor = vec4(result, 1.0);
+    }
+*/
 }

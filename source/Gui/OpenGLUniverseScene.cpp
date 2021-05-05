@@ -133,7 +133,7 @@ void OpenGLUniverseScene::updateTexture(IntVector2D const& size)
     m_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
     m_texture->setMinificationFilter(QOpenGLTexture::Linear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
-    m_texture->setWrapMode(QOpenGLTexture::Repeat);
+    m_texture->setWrapMode(QOpenGLTexture::ClampToBorder);
     m_texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
 
     m_texture->bind();
