@@ -18,74 +18,85 @@ __global__ void clearImageMap(unsigned int* imageData, int size)
     }
 }
 
-__device__ __inline__ int
-mapUniversePosToImageIndex(int2 const& imageSize, int2 const& rectUpperLeft, int2 const& intPos)
+__device__ __inline__ int2 mapUniversePosToVectorImagePos(float2 const& rectUpperLeft, float2 const& pos, float zoom)
 {
-    return (intPos.x - rectUpperLeft.x) + (intPos.y - rectUpperLeft.y) * imageSize.x;
+    return {toInt((pos.x - rectUpperLeft.x) * zoom), toInt((pos.y - rectUpperLeft.y) * zoom)};
 }
 
-__device__ __inline__ int2 mapUniversePosToImagePos(int2 const& rectUpperLeft, float2 const& pos, float zoom)
+__device__ __inline__ float2 mapUniversePosToPixelImagePos(float2 const& rectUpperLeft, float2 const& pos, float zoom)
 {
-    return {static_cast<int>((pos.x - rectUpperLeft.x) * zoom), static_cast<int>((pos.y - rectUpperLeft.y) * zoom)};
+    float2 offset{
+        toFloat(toInt(rectUpperLeft.x) + 1) - rectUpperLeft.x,
+        toFloat(toInt(rectUpperLeft.y) + 1) - rectUpperLeft.y};
+    return {
+        (toFloat(toInt(pos.x - toInt(rectUpperLeft.x))) + offset.x) * zoom,
+        (toFloat(toInt(pos.y - toInt(rectUpperLeft.y))) + offset.y) * zoom};
 }
 
-__device__ __inline__ int2 mapUniversePosToImagePos(float2 const& rectUpperLeft, float2 const& pos, float zoom)
-{
-    return {static_cast<int>((pos.x - rectUpperLeft.x) * zoom), static_cast<int>((pos.y - rectUpperLeft.y) * zoom)};
-}
-
-__device__ __inline__ unsigned int calcColor(Cell* cell)
+__device__ __inline__ unsigned int calcColor(Cell* cell, bool selected)
 {
     unsigned char colorCode = cell->metadata.color;
 
-    unsigned int result;
+    unsigned int cellColor;
     switch (colorCode % 7) {
     case 0: {
-        result = Const::IndividualCellColor1;
+        cellColor = Const::IndividualCellColor1;
         break;
     }
     case 1: {
-        result = Const::IndividualCellColor2;
+        cellColor = Const::IndividualCellColor2;
         break;
     }
     case 2: {
-        result = Const::IndividualCellColor3;
+        cellColor = Const::IndividualCellColor3;
         break;
     }
     case 3: {
-        result = Const::IndividualCellColor4;
+        cellColor = Const::IndividualCellColor4;
         break;
     }
     case 4: {
-        result = Const::IndividualCellColor5;
+        cellColor = Const::IndividualCellColor5;
         break;
     }
     case 5: {
-        result = Const::IndividualCellColor6;
+        cellColor = Const::IndividualCellColor6;
         break;
     }
     case 6: {
-        result = Const::IndividualCellColor7;
+        cellColor = Const::IndividualCellColor7;
         break;
     }
     }
 
     auto factor = static_cast<int>(min(150.0f, cell->getEnergy() / 2 + 20.0f));
-    auto r = ((result >> 16) & 0xff) * factor / 150;
-    auto g = ((result >> 8) & 0xff) * factor / 150;
-    auto b = (result & 0xff) * factor / 150;
-    return 0xff000000 | (b << 16) | (g << 8) | r;
+    auto r = ((cellColor >> 16) & 0xff) * factor / 150;
+    auto g = ((cellColor >> 8) & 0xff) * factor / 150;
+    auto b = (cellColor & 0xff) * factor / 150;
+
+    auto result = (b << 16) | (g << 8) | r;
+
+    if (!selected) {
+        result = (result >> 1) & 0x7e7e7e;
+    }
+
+    return 0xff000000 | result;
 }
 
-__device__ __inline__ unsigned int calcColor(Particle* particle)
+__device__ __inline__ unsigned int calcColor(Particle* particle, bool selected)
 {
-    auto e = min(150, (static_cast<int>(particle->getEnergy()) + 10) * 5);
-    return e | 0xff300000;
+    auto result = min(150, (static_cast<int>(particle->getEnergy()) + 10) * 5);
+
+    if (!selected) {
+        result = (result >> 1) & 0x7e7e7e;
+    }
+
+    return result | 0xff130013;
 }
 
-__device__ __inline__ unsigned int calcColor(Token* token)
+__device__ __inline__ unsigned int calcColor(Token* token, bool selected)
 {
-    return 0xffffffff;
+    return selected ? 0xffffffff : 0xff7f7f7f;
 }
 
 __device__ __inline__ void addingColor(unsigned int& color, unsigned int const& colorToAdd)
@@ -108,12 +119,8 @@ __device__ __inline__ void drawDot(
     int2 const& imageSize,
     int const& index,
     unsigned int color,
-    bool selected,
     bool darken = false)
 {
-    if (!selected) {
-        color = (color >> 1) & 0x7e7e7e;
-    }
     if (darken) {
         color = (color >> 1) & 0x7e7e7e;
     }
@@ -127,89 +134,37 @@ __device__ __inline__ void drawDot(
 }
 
 __device__ __inline__ void
-drawCircle(unsigned int* imageData, int2 const& imageSize, int index, unsigned int color, bool selected, bool darken)
+drawCircle(unsigned int* imageData, int2 const& imageSize, int index, unsigned int color, bool darken)
 {
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
 
     index -= 1 + 2 * imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     ++index;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     ++index;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
 
     index += 1 + imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     index += imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     index += imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
 
     index += imageSize.x - 1;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     --index;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     --index;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
 
     index -= 1 + imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     index -= imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
+    drawDot(imageData, imageSize, index, color, darken);
     index -= imageSize.x;
-    drawDot(imageData, imageSize, index, color, selected, darken);
-}
-
-__global__ void drawClusters_pixelStyle(
-    int2 universeSize,
-    int2 rectUpperLeft,
-    int2 rectLowerRight,
-    Array<Cluster*> clusters,
-    unsigned int* imageData,
-    int2 imageSize)
-{
-    auto const clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
-
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-
-        auto const& cluster = clusters.at(clusterIndex);
-        if (nullptr == cluster) {
-            continue;
-        }
-
-        __shared__ MapInfo map;
-        if (0 == threadIdx.x) {
-            map.init(universeSize);
-        }
-        __syncthreads();
-
-        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-        for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = cluster->cellPointers[cellIndex];
-            auto intPos = toInt2(cell->absPos);
-            map.mapPosCorrection(intPos);
-            if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
-                auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
-                auto const color = calcColor(cell);
-                drawDot(imageData, imageSize, index, color, cell->cluster->isSelected());
-            }
-        }
-        __syncthreads();
-
-        auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
-        for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-            auto const& token = cluster->tokenPointers[tokenIndex];
-            auto const& cell = token->cell;
-            auto intPos = toInt2(cell->absPos);
-            map.mapPosCorrection(intPos);
-            if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
-                auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
-                auto const color = calcColor(token);
-                drawDot(imageData, imageSize, index, color, cell->cluster->isSelected());
-            }
-        }
-        __syncthreads();
-    }
+    drawDot(imageData, imageSize, index, color, darken);
 }
 
 __global__ void drawClusters_vectorStyle(
@@ -249,22 +204,22 @@ __global__ void drawClusters_vectorStyle(
             auto cellPos = cell->absPos;
             map.mapPosCorrection(cellPos);
             if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
-                auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, cellPos, zoom);
-                auto const color = calcColor(cell);
+                auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
+                auto const color = calcColor(cell, isSelected);
                 if (isContainedInRect({0, 0}, imageSize, cellImagePos, 3)) {
                     auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
 
                     if (isHighZoom) {
-                        drawCircle(imageData, imageSize, index, color, isSelected, false);
+                        drawCircle(imageData, imageSize, index, color, false);
                     } else {
                         --index;
-                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        drawDot(imageData, imageSize, index, color, isLowZoom);
                         index += 2;
-                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        drawDot(imageData, imageSize, index, color, isLowZoom);
                         index -= 1 + imageSize.x;
-                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        drawDot(imageData, imageSize, index, color, isLowZoom);
                         index += 2 * imageSize.x;
-                        drawDot(imageData, imageSize, index, color, isSelected, isLowZoom);
+                        drawDot(imageData, imageSize, index, color, isLowZoom);
                     }
                 }
 
@@ -273,7 +228,7 @@ __global__ void drawClusters_vectorStyle(
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i];
                     auto const otherCellPos = otherCell->absPos + posCorrection;
-                    auto const otherCellImagePos = mapUniversePosToImagePos(rectUpperLeft, otherCellPos, zoom);
+                    auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
                     float dist = Math::length(otherCellImagePos - cellImagePos);
                     float2 const v = {
                         static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
@@ -284,7 +239,7 @@ __global__ void drawClusters_vectorStyle(
                         auto const intPos = toInt2(pos);
                         if (isContainedInRect({0, 0}, imageSize, intPos, 2)) {
                             auto const index = intPos.x + intPos.y * imageSize.x;
-                            drawDot(imageData, imageSize, index, color, isSelected, true);
+                            drawDot(imageData, imageSize, index, color, true);
                         }
                         pos = pos + v;
                     }
@@ -300,37 +255,15 @@ __global__ void drawClusters_vectorStyle(
 
             auto cellPos = cell->absPos;
             map.mapPosCorrection(cellPos);
-            auto const cellImagePos = mapUniversePosToImagePos(rectUpperLeft, cellPos, zoom);
+            auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
             if (isContainedInRect({0, 0}, imageSize, cellImagePos, 4)) {
                 auto index = cellImagePos.x + cellImagePos.y * imageSize.x;
-                auto const color = calcColor(token);
+                auto const color = calcColor(token, cell->cluster->isSelected());
 
-                drawCircle(imageData, imageSize, index, color, cell->cluster->isSelected(), isLowZoom);
+                drawCircle(imageData, imageSize, index, color, isLowZoom);
             }
         }
         __syncthreads();
-    }
-}
-
-__global__ void drawParticles_pixelStyle(
-    int2 universeSize,
-    int2 rectUpperLeft,
-    int2 rectLowerRight,
-    Array<Particle*> particles,
-    unsigned int* imageData,
-    int2 imageSize)
-{
-    auto const particleBlock =
-        calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
-        auto const& particle = particles.at(index);
-        auto intPos = toInt2(particle->absPos);
-        if (isContainedInRect(rectUpperLeft, rectLowerRight, intPos, 1)) {
-            auto const index = mapUniversePosToImageIndex(imageSize, rectUpperLeft, intPos);
-            auto const color = calcColor(particle);
-            drawDot(imageData, imageSize, index, color, particle->isSelected());
-        }
     }
 }
 
@@ -349,70 +282,192 @@ __global__ void drawParticles_vectorStyle(
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
 
-        auto const particleImagePos = mapUniversePosToImagePos(rectUpperLeft, particle->absPos, zoom);
+        auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particle->absPos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos, 4)) {
             auto index = particleImagePos.x + particleImagePos.y * imageSize.x;
-            auto const color = calcColor(particle);
-            drawCircle(imageData, imageSize, index, color, particle->isSelected(), zoom < 4.1);
+            auto const color = calcColor(particle, particle->isSelected());
+            drawCircle(imageData, imageSize, index, color, zoom < 4.1);
         }
     }
 }
+
+
+__device__ __inline__ void drawPixel(
+    unsigned int* imageData,
+    int2 const& imageSize,
+    float2 const& pos,
+    unsigned int color,
+    float zoom)
+{
+    int zoomIntPart = toInt(zoom);
+    float zoomFracPart = zoom - toFloat(zoomIntPart);
+
+    auto r = toFloat(color & 0xff);
+    auto g = toFloat((color >> 8) & 0xff);
+    auto b = toFloat((color >> 16) & 0xff);
+ 
+/*
+    r = toInt(toFloat(r) * zoomFracPart);
+    g = toInt(toFloat(g * zoomFracPart));
+    b = toInt(toFloat(b) * zoomFracPart);
+*/
+
+    auto intPosX = toInt(pos.x);
+    auto intPosY = toInt(pos.y);
+    auto posFracX = pos.x - intPosX;
+    auto posFracY = pos.y - intPosY;
+    
+    auto factor1 = (1.0f - posFracX) * (1.0f - posFracY);
+    auto color1 = 0xff000000 | toInt(r * factor1) | (toInt(g * factor1) << 8) | (toInt(b * factor1) << 16);
+    auto colorFrac1 = 0xff000000 | toInt(r * factor1 * zoomFracPart) | (toInt(g * factor1 * zoomFracPart) << 8)
+        | (toInt(b * factor1 * zoomFracPart) << 16);
+    
+    auto factor2 = posFracX * (1.0f - posFracY);
+    auto color2 = 0xff000000 | toInt(r * factor2) | (toInt(g * factor2) << 8) | (toInt(b * factor2) << 16);
+    auto colorFrac2 = 0xff000000 | toInt(r * factor2 * zoomFracPart) | (toInt(g * factor2 * zoomFracPart) << 8)
+        | (toInt(b * factor2 * zoomFracPart) << 16);
+    
+    auto factor3 = (1.0f - posFracX) * posFracY;
+    auto color3 = 0xff000000 | toInt(r * factor3) | (toInt(g * factor3) << 8) | (toInt(b * factor3) << 16);
+    auto colorFrac3 = 0xff000000 | toInt(r * factor3 * zoomFracPart) | (toInt(g * factor3 * zoomFracPart) << 8)
+        | (toInt(b * factor3 * zoomFracPart) << 16);
+
+    auto factor4 = posFracX * posFracY;
+    auto color4 = 0xff000000 | toInt(r * factor4) | (toInt(g * factor4) << 8) | (toInt(b * factor4) << 16);
+    auto colorFrac4 = 0xff000000 | toInt(r * factor4 * zoomFracPart) | (toInt(g * factor4 * zoomFracPart) << 8)
+        | (toInt(b * factor4 * zoomFracPart) << 16);
+
+    for (int x = 0; x <= zoomIntPart + 1; ++x) {
+        for (int y = 0; y <= zoomIntPart + 1; ++y) {
+            auto resultPosX = intPosX + x;
+            auto resultPosY = intPosY + y;
+            if (resultPosX >= 1 && resultPosX < imageSize.x - 1 && resultPosY >= 1 && resultPosY < imageSize.y - 1) {
+                auto resultIndex = resultPosX + resultPosY * imageSize.x;
+                if (x == zoomIntPart + 1 || y == zoomIntPart + 1) {
+                    addingColor(imageData[resultIndex], colorFrac1);
+                    addingColor(imageData[resultIndex + 1], colorFrac2);
+                    addingColor(imageData[resultIndex + imageSize.x], colorFrac3);
+                    addingColor(imageData[resultIndex + imageSize.x + 1], colorFrac4);
+                } else {
+                    addingColor(imageData[resultIndex], color1);
+                    addingColor(imageData[resultIndex + 1], color2);
+                    addingColor(imageData[resultIndex + imageSize.x], color3);
+                    addingColor(imageData[resultIndex + imageSize.x + 1], color4);
+                }
+            }
+        }
+    }
+/*
+    int r = color & 0xff;
+    int g = (color >> 8) & 0xff;
+    int b = (color >> 16) & 0xff;
+    r = toInt(toFloat(r) * zoomFracPart);
+    g = toInt(toFloat(g * zoomFracPart));
+    b = toInt(toFloat(b) * zoomFracPart);
+
+    auto colorFracPart = 0xff000000 | r | (g << 8) | (b << 16);
+
+    for (int x = 0; x <= zoomIntPart + 1; ++x) {
+        for (int y = 0; y <= zoomIntPart + 1; ++y) {
+            auto resultPosX = intPosX + x;
+            auto resultPosY = intPosY + y;
+            if (resultPosX >= 0 && resultPosX < imageSize.x && resultPosY >= 0 && resultPosY < imageSize.y) {
+                auto resultIndex = resultPosX + resultPosY * imageSize.x;
+                if (x == zoomIntPart + 1 || y == zoomIntPart + 1) {
+                    addingColor(imageData[resultIndex], colorFracPart);
+                } else {
+                    addingColor(imageData[resultIndex], color);
+                }
+            }
+        }
+    }
+*/
+}
+
+__global__ void drawClusters_pixelStyle(
+    int2 universeSize,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    Array<Cluster*> clusters,
+    unsigned int* imageData,
+    int2 imageSize,
+    float zoom)
+{
+    auto const clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+
+    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+
+        auto const& cluster = clusters.at(clusterIndex);
+        if (nullptr == cluster) {
+            continue;
+        }
+
+        __shared__ MapInfo map;
+        if (0 == threadIdx.x) {
+            map.init(universeSize);
+        }
+        __syncthreads();
+
+        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
+        for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
+            auto const& cell = cluster->cellPointers[cellIndex];
+            auto pos = cell->absPos;
+            map.mapPosCorrection(pos);
+            auto imagePos = mapUniversePosToPixelImagePos(rectUpperLeft, pos, zoom);
+            if (isContainedInRect({0, 0}, imageSize, imagePos)) {
+                auto color = calcColor(cell, cell->cluster->isSelected());
+                drawPixel(imageData, imageSize, imagePos, color, zoom);
+            }
+        }
+        __syncthreads();
+
+        auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+            auto const& token = cluster->tokenPointers[tokenIndex];
+            auto const& cell = token->cell;
+            auto pos = cell->absPos;
+            map.mapPosCorrection(pos);
+            auto imagePos = mapUniversePosToPixelImagePos(rectUpperLeft, pos, zoom);
+            if (isContainedInRect({0, 0}, imageSize, imagePos)) {
+                auto color = calcColor(token, cell->cluster->isSelected());
+                drawPixel(imageData, imageSize, imagePos, color, zoom);
+            }
+        }
+        __syncthreads();
+    }
+}
+
+
+__global__ void drawParticles_pixelStyle(
+    int2 universeSize,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    Array<Particle*> particles,
+    unsigned int* imageData,
+    int2 imageSize,
+    float zoom)
+{
+    auto particleBlock =
+        calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = particles.at(index);
+
+        auto particleImagePos = mapUniversePosToPixelImagePos(rectUpperLeft, particle->absPos, zoom);
+        if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
+            auto color = calcColor(particle, particle->isSelected());
+            drawPixel(imageData, imageSize, particleImagePos, color, zoom);
+        }
+    }
+}
+
 
 
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
 
-__global__ void cudaDrawImage_pixelStyle(int2 rectUpperLeft, int2 rectLowerRight, int2 imageSize, SimulationData data)
-{
-/*    int width = rectLowerRight.x - rectUpperLeft.x + 1;
-    int height = rectLowerRight.y - rectUpperLeft.y + 1;
-    int numPixels = width * height;
-    int2 imageSize{width, height};
-*/
-    unsigned int* targetImage;
-    if (cudaExecutionParameters.imageGlow) {
-        targetImage = data.rawImageData;
-    } else {
-        targetImage = data.finalImageData;
-    }
-    KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
-/*    KERNEL_CALL(
-        drawClusters_pixelStyle,
-        data.size,
-        rectUpperLeft,
-        rectLowerRight,
-        data.entities.clusterPointers,
-        targetImage,
-        imageSize);
-    if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
-        KERNEL_CALL(
-            drawClusters_pixelStyle,
-            data.size,
-            rectUpperLeft,
-            rectLowerRight,
-            data.entities.clusterFreezedPointers,
-            targetImage,
-            imageSize);
-    }
-    KERNEL_CALL(
-        drawParticles_pixelStyle,
-        data.size,
-        rectUpperLeft,
-        rectLowerRight,
-        data.entities.particlePointers,
-        targetImage,
-        imageSize);
-
-    if (cudaExecutionParameters.imageGlow) {
-        auto const numBlocks = cudaConstants.NUM_BLOCKS * cudaConstants.NUM_THREADS_PER_BLOCK / 8;
-        blurImage<<<numBlocks, dim3{11, 11}>>>(data.rawImageData, data.finalImageData, imageSize);
-        cudaDeviceSynchronize();
-    }
-    */
-}
-
-__global__ void drawImage_vectorStyle(
+__global__ void drawImage(
     float2 rectUpperLeft,
     float2 rectLowerRight,
     int2 imageSize,
@@ -422,34 +477,66 @@ __global__ void drawImage_vectorStyle(
     unsigned int* targetImage = data.finalImageData;
 
     KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
-    KERNEL_CALL(
-        drawClusters_vectorStyle,
-        data.size,
-        rectUpperLeft,
-        rectLowerRight,
-        data.entities.clusterPointers,
-        targetImage,
-        imageSize,
-        zoom);
-    if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
+    if (zoom > 3.5) {
         KERNEL_CALL(
             drawClusters_vectorStyle,
             data.size,
             rectUpperLeft,
             rectLowerRight,
-            data.entities.clusterFreezedPointers,
+            data.entities.clusterPointers,
+            targetImage,
+            imageSize,
+            zoom);
+        if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
+            KERNEL_CALL(
+                drawClusters_vectorStyle,
+                data.size,
+                rectUpperLeft,
+                rectLowerRight,
+                data.entities.clusterFreezedPointers,
+                targetImage,
+                imageSize,
+                zoom);
+        }
+        KERNEL_CALL(
+            drawParticles_vectorStyle,
+            data.size,
+            rectUpperLeft,
+            rectLowerRight,
+            data.entities.particlePointers,
+            targetImage,
+            imageSize,
+            zoom);
+    } else {
+        KERNEL_CALL(
+            drawClusters_pixelStyle,
+            data.size,
+            rectUpperLeft,
+            rectLowerRight,
+            data.entities.clusterPointers,
+            targetImage,
+            imageSize,
+            zoom);
+        if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
+            KERNEL_CALL(
+                drawClusters_pixelStyle,
+                data.size,
+                rectUpperLeft,
+                rectLowerRight,
+                data.entities.clusterFreezedPointers,
+                targetImage,
+                imageSize,
+                zoom);
+        }
+        KERNEL_CALL(
+            drawParticles_pixelStyle,
+            data.size,
+            rectUpperLeft,
+            rectLowerRight,
+            data.entities.particlePointers,
             targetImage,
             imageSize,
             zoom);
     }
-    KERNEL_CALL(
-        drawParticles_vectorStyle,
-        data.size,
-        rectUpperLeft,
-        rectLowerRight,
-        data.entities.particlePointers,
-        targetImage,
-        imageSize,
-        zoom);
 }
 

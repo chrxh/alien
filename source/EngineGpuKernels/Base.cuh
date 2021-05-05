@@ -12,7 +12,15 @@
 #include "Definitions.cuh"
 #include "HashSet.cuh"
 
-texture<uchar4, 2, cudaReadModeElementType> outTexture;
+__device__ inline float toFloat(int value)
+{
+    return static_cast<float>(value);
+}
+
+__device__ inline int toInt(float value)
+{
+    return static_cast<int>(value);
+}
 
 struct PartitionData
 {
@@ -127,8 +135,8 @@ __host__ __device__ __inline__ int floorInt(float v)
 __host__ __device__ __inline__ bool
 isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
 {
-    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x && pos.y >= rectUpperLeft.y
-        && pos.y <= rectLowerRight.y;
+    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x
+        && pos.y >= rectUpperLeft.y && pos.y <= rectLowerRight.y;
 }
 
 __host__ __device__ __inline__ bool
@@ -139,7 +147,7 @@ isContainedInRect(float2 const& rectUpperLeft, float2 const& rectLowerRight, flo
 }
 
 __host__ __device__ __inline__ bool
-isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int const& boundary = 0)
+isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int boundary = 0)
 {
     return pos.x >= rectUpperLeft.x + boundary && pos.x <= rectLowerRight.x - boundary
         && pos.y >= rectUpperLeft.y + boundary && pos.y <= rectLowerRight.y - boundary;
