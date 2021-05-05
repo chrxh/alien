@@ -124,7 +124,7 @@ double OpenGLWorldController::getZoomFactor() const
 void OpenGLWorldController::setZoomFactor(double zoomFactor)
 {
     _zoomFactor = zoomFactor;
-    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
+    updateScrollbars();
 }
 
 void OpenGLWorldController::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
@@ -142,6 +142,7 @@ QVector2D OpenGLWorldController::getCenterPositionOfScreen() const
 void OpenGLWorldController::centerTo(QVector2D const& position)
 {
     _center = position;
+    updateScrollbars();
 }
 
 void OpenGLWorldController::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
@@ -154,6 +155,11 @@ void OpenGLWorldController::centerTo(QVector2D const& worldPosition, IntVector2D
     centerTo(worldPosition - deltaWorldPos);
 }
 
+void OpenGLWorldController::updateScrollbars()
+{
+    _simulationViewWidget->updateScrollbars(
+        _controller->getContext()->getSpaceProperties()->getSize(), getCenterPositionOfScreen(), getZoomFactor());
+}
 
 bool OpenGLWorldController::eventFilter(QObject* object, QEvent* event)
 {
@@ -259,7 +265,7 @@ void OpenGLWorldController::resize(QResizeEvent* event)
 {
     auto size = event->size();
     _scene->resize({size.width(), size.height()});
-    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
+    updateScrollbars();
 }
 
 void OpenGLWorldController::receivedNotifications(set<Receiver> const& targets)

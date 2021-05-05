@@ -47,6 +47,7 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
 private:
+    void updateScrollbars();
     void resize(QResizeEvent* event);
     void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
     void requestData();
