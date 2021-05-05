@@ -382,6 +382,9 @@
     <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseScene.cpp">
       <Filter>Impl\SimulationView\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\SimulationViewController.cpp">
+      <Filter>Impl\SimulationView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -649,6 +652,9 @@
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ZoomActionController.h">
       <Filter>Impl</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\SimulationViewController.h">
+      <Filter>Impl\SimulationView</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

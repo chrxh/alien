@@ -23,7 +23,7 @@
 
 #include "ToolbarController.h"
 #include "ToolbarContext.h"
-#include "SimulationViewWidget.h"
+#include "SimulationViewController.h"
 #include "DataEditController.h"
 #include "DataEditContext.h"
 #include "NewSimulationDialog.h"
@@ -62,7 +62,7 @@ void ActionController::init(
     MainController* mainController,
     MainModel* mainModel,
     MainView* mainView,
-    SimulationViewWidget* simulationViewWidget,
+    SimulationViewController* simulationViewController,
     Serializer* serializer,
     GeneralInfoController* infoController,
     DataEditController* dataEditor,
@@ -75,12 +75,12 @@ void ActionController::init(
     auto factory = ServiceLocator::getInstance().getService<GlobalFactory>();
     auto numberGenerator = factory->buildRandomNumberGenerator();
 	numberGenerator->init();
-    _zoomController->init(_model->getActionHolder(), simulationViewWidget);
+    _zoomController->init(_model->getActionHolder(), simulationViewController);
 
 	_mainController = mainController;
 	_mainModel = mainModel;
 	_mainView = mainView;
-	_simulationViewWidget = simulationViewWidget;
+    _simulationViewController = simulationViewController;
 	_serializer = serializer;
 	_infoController = infoController;
 	_dataEditor = dataEditor;
@@ -111,18 +111,18 @@ void ActionController::init(
 	connect(actions->actionZoomIn, &QAction::triggered, _zoomController, &ZoomActionController::onZoomInClicked);
     connect(actions->actionZoomOut, &QAction::triggered, _zoomController, &ZoomActionController::onZoomOutClicked);
     connect(
-        _simulationViewWidget,
-        &SimulationViewWidget::continuousZoomIn,
+        _simulationViewController,
+        &SimulationViewController::continuousZoomIn,
         _zoomController,
         &ZoomActionController::onContinuousZoomIn);
     connect(
-        _simulationViewWidget,
-        &SimulationViewWidget::continuousZoomOut,
+        _simulationViewController,
+        &SimulationViewController::continuousZoomOut,
         _zoomController,
         &ZoomActionController::onContinuousZoomOut);
     connect(
-        _simulationViewWidget,
-        &SimulationViewWidget::endContinuousZoom,
+        _simulationViewController,
+        &SimulationViewController::endContinuousZoom,
         _zoomController,
         &ZoomActionController::onEndContinuousZoom);
     connect(
@@ -227,7 +227,7 @@ void ActionController::onStepBackward()
 	if (emptyStack) {
 		_model->getActionHolder()->actionRunStepBackward->setEnabled(false);
 	}
-	_simulationViewWidget->refresh();
+	_simulationViewController->refresh();
 
     loggingService->logMessage(Priority::Unimportant, "calculate one time step backward finished");
 }
@@ -249,7 +249,7 @@ void ActionController::onRestoreSnapshot()
     loggingService->logMessage(Priority::Important, "load snapshot");
 
 	_mainController->onRestoreSnapshot();
-	_simulationViewWidget->refresh();
+	_simulationViewController->refresh();
 
 	loggingService->logMessage(Priority::Unimportant, "load snapshot finished");
 }
@@ -352,16 +352,16 @@ void ActionController::onToggleEditorMode(bool toggled)
         loggingService->logMessage(Priority::Unimportant, "activate editor mode");
 
 		_infoController->setRendering(GeneralInfoController::Rendering::Item);
-        _simulationViewWidget->disconnectView();
-        _simulationViewWidget->setActiveScene(ActiveView::ItemScene);
-        _simulationViewWidget->connectView();
+        _simulationViewController->disconnectView();
+        _simulationViewController->setActiveScene(ActiveView::ItemScene);
+        _simulationViewController->connectView();
     }
 	else {
         loggingService->logMessage(Priority::Unimportant, "deactivate editor mode");
 
 		setPixelOrVectorView();
 	}
-    _simulationViewWidget->refresh();
+    _simulationViewController->refresh();
     updateActionsEnableState();
 
 	Q_EMIT _toolbar->getContext()->show(toggled);
@@ -920,8 +920,8 @@ void ActionController::onCenterSelection(bool centerSelection)
         loggingService->logMessage(Priority::Unimportant, "deactivate centering selection");
     }
 
-	_simulationViewWidget->toggleCenterSelection(centerSelection);
-    _simulationViewWidget->refresh();
+	_simulationViewController->toggleCenterSelection(centerSelection);
+    _simulationViewController->refresh();
 
     loggingService->logMessage(Priority::Unimportant, "toggle centering selection finished");
 }
@@ -1269,7 +1269,7 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
-    actions->actionEditor->setEnabled(_simulationViewWidget->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
+    actions->actionEditor->setEnabled(_simulationViewController->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
     actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
     actions->actionCenterSelection->setEnabled(editMode);
@@ -1306,9 +1306,9 @@ void ActionController::setPixelOrVectorView()
     loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering");
 
     _infoController->setRendering(GeneralInfoController::Rendering::Vector);
-    _simulationViewWidget->disconnectView();
-    _simulationViewWidget->setActiveScene(ActiveView::OpenGLScene);
-    _simulationViewWidget->connectView();
+    _simulationViewController->disconnectView();
+    _simulationViewController->setActiveScene(ActiveView::OpenGLScene);
+    _simulationViewController->connectView();
 
 	loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering finished");
 }
