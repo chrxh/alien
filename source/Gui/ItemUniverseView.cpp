@@ -24,9 +24,10 @@
 #include "ItemManager.h"
 #include "CoordinateSystem.h"
 #include "ItemViewport.h"
+#include "SimulationViewWidget.h"
 
-ItemUniverseView::ItemUniverseView(QGraphicsView* graphicsView, QObject *parent)
-    : UniverseView(graphicsView, parent)
+ItemUniverseView::ItemUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent)
+    : UniverseView(simulationViewWidget->getGraphicsView(), parent)
 {
     _scene = new QGraphicsScene(parent);
     _scene->setBackgroundBrush(QBrush(Const::UniverseColor));

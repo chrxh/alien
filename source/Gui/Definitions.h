@@ -66,6 +66,7 @@ class VectorViewport;
 class PixelViewport;
 class ItemViewport;
 class StartupController;
+class SimulationViewController;
 
 struct MonitorData;
 using MonitorDataSP = boost::shared_ptr<MonitorData>;
