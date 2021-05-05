@@ -65,6 +65,7 @@ void SimulationViewController::init(
 
     _openGLUniverse->connectView();
     _openGLUniverse->refresh();
+    _simulationViewWidget->updateScrollbars(size, InitialZoomFactor);
 
     Q_EMIT zoomFactorChanged(InitialZoomFactor);
 }

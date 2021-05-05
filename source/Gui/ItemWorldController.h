@@ -12,6 +12,8 @@
 #include "DataRepository.h"
 #include "AbstractWorldController.h"
 
+class QResizeEvent;
+
 class ItemWorldController : public AbstractWorldController
 {
     Q_OBJECT
@@ -45,6 +47,7 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
 private:
+    void resize(QResizeEvent* event);
     void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
     void requestData();
 	boost::optional<QVector2D> getCenterPosOfSelection() const;

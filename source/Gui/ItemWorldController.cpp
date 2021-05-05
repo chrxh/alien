@@ -4,6 +4,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QMatrix4x4>
 #include <QScrollbar>
+#include <QResizeEvent>
 
 #include "Base/ServiceLocator.h"
 #include "Base/Definitions.h"
@@ -27,7 +28,7 @@
 #include "SimulationViewWidget.h"
 
 ItemWorldController::ItemWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent)
-    : AbstractWorldController(simulationViewWidget->getGraphicsView(), parent)
+    : AbstractWorldController(simulationViewWidget, parent)
 {
     _scene = new QGraphicsScene(parent);
     _scene->setBackgroundBrush(QBrush(Const::UniverseColor));
@@ -45,7 +46,7 @@ void ItemWorldController::init(Notifier* notifier, SimulationController* control
 	_notifier = notifier;
 
     delete _viewport;
-    _viewport = new ItemViewport(_graphicsView, this);
+    _viewport = new ItemViewport(_simulationViewWidget->getGraphicsView(), this);
 
 	auto itemManager = new ItemManager();
 	SET_CHILD(_itemManager, itemManager);
@@ -62,8 +63,11 @@ void ItemWorldController::connectView()
     disconnectView();
     _connections.push_back(connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemWorldController::requestData));
     _connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &ItemWorldController::receivedNotifications));
-    _connections.push_back(QObject::connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ItemWorldController::scrolled));
-    _connections.push_back(QObject::connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &ItemWorldController::scrolled));
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    _connections.push_back(QObject::connect(
+        graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &ItemWorldController::scrolled));
+    _connections.push_back(QObject::connect(
+        graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &ItemWorldController::scrolled));
     CATCH;
 }
 
@@ -87,16 +91,17 @@ void ItemWorldController::refresh()
 bool ItemWorldController::isActivated() const
 {
     TRY;
-    return _graphicsView->scene() == _scene;
+    return _simulationViewWidget->getGraphicsView()->scene() == _scene;
     CATCH;
 }
 
 void ItemWorldController::activate(double zoomFactor)
 {
     TRY;
-    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    _graphicsView->setScene(_scene);
-    _graphicsView->resetTransform();
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    graphicsView->setScene(_scene);
+    graphicsView->resetTransform();
 
     IntVector2D size = _controller->getContext()->getSpaceProperties()->getSize();
     _itemManager->activate(size);
@@ -115,15 +120,18 @@ void ItemWorldController::setZoomFactor(double zoomFactor)
 {
     TRY;
     _zoomFactor = zoomFactor;
-    _graphicsView->resetTransform();
-    _graphicsView->scale(CoordinateSystem::sceneToModel(_zoomFactor), CoordinateSystem::sceneToModel(_zoomFactor));
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    graphicsView->resetTransform();
+    graphicsView->scale(CoordinateSystem::sceneToModel(_zoomFactor), CoordinateSystem::sceneToModel(_zoomFactor));
+    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
+
     CATCH;
 }
 
 void ItemWorldController::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
 {
     TRY;
-    auto scenePos = _graphicsView->mapToScene(viewPos.x, viewPos.y);
+    auto scenePos = _simulationViewWidget->getGraphicsView()->mapToScene(viewPos.x, viewPos.y);
     auto worldPos = CoordinateSystem::sceneToModel(scenePos);
     setZoomFactor(zoomFactor);
     centerTo(QVector2D(worldPos.x(), worldPos.y()), viewPos);
@@ -134,9 +142,10 @@ void ItemWorldController::setZoomFactor(double zoomFactor, IntVector2D const& vi
 QVector2D ItemWorldController::getCenterPositionOfScreen() const
 {
     TRY;
-    auto const width = static_cast<double>(_graphicsView->width());
-    auto const height = static_cast<double>(_graphicsView->height());
-    auto const sceneCoordinates = _graphicsView->mapToScene(width / 2.0, height / 2.0);
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    auto const width = static_cast<double>(graphicsView->width());
+    auto const height = static_cast<double>(graphicsView->height());
+    auto const sceneCoordinates = graphicsView->mapToScene(width / 2.0, height / 2.0);
     auto const modelCoordinates = CoordinateSystem::sceneToModel(QVector2D(sceneCoordinates.x(), sceneCoordinates.y()));
     return modelCoordinates;
     CATCH;
@@ -146,7 +155,7 @@ void ItemWorldController::centerTo(QVector2D const & position)
 {
     TRY;
     auto scenePos = CoordinateSystem::modelToScene(position);
-    _graphicsView->centerOn(scenePos.x(), scenePos.y());
+    _simulationViewWidget->getGraphicsView()->centerOn(scenePos.x(), scenePos.y());
     CATCH;
 }
 
@@ -161,9 +170,10 @@ void ItemWorldController::toggleCenterSelection(bool value)
 void ItemWorldController::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
 {
     TRY;
-    auto scenePos = _graphicsView->mapToScene(viewPos.x, viewPos.y);
-    auto centerScenePos = _graphicsView->mapToScene(
-        static_cast<float>(_graphicsView->width()) / 2.0f, static_cast<float>(_graphicsView->height()) / 2.0f);
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    auto scenePos = graphicsView->mapToScene(viewPos.x, viewPos.y);
+    auto centerScenePos = graphicsView->mapToScene(
+        static_cast<float>(graphicsView->width()) / 2.0f, static_cast<float>(graphicsView->height()) / 2.0f);
 
     QVector2D deltaWorldPos(CoordinateSystem::sceneToModel(scenePos.x() - centerScenePos.x()),
         CoordinateSystem::sceneToModel(scenePos.y() - centerScenePos.y()));
@@ -174,6 +184,13 @@ void ItemWorldController::centerTo(QVector2D const& worldPosition, IntVector2D c
     auto deltaWorldPos = CoordinateSystem::sceneToModel(deltaViewPos);
 */
     centerTo(worldPosition - deltaWorldPos);
+    CATCH;
+}
+
+void ItemWorldController::resize(QResizeEvent* event)
+{
+    TRY;
+    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
     CATCH;
 }
 
@@ -213,10 +230,11 @@ void ItemWorldController::centerSelectionIfEnabled()
     if (_centerSelection && !_mouseButtonPressed) {
         if (auto const& centerPos = getCenterPosOfSelection()) {
             disconnectView();
-            _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+            auto graphicsView = _simulationViewWidget->getGraphicsView();
+            graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
             auto const scenePos = CoordinateSystem::modelToScene(*centerPos);
-            _graphicsView->centerOn(scenePos.x(), scenePos.y());
-            _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+            graphicsView->centerOn(scenePos.x(), scenePos.y());
+            graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
             connectView();
         }
 	}
@@ -226,9 +244,10 @@ void ItemWorldController::centerSelectionIfEnabled()
 void ItemWorldController::updateItems()
 {
     TRY;
-    _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
     _itemManager->update(_repository);
-    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     _scene->update();
     CATCH;
 }
@@ -328,6 +347,12 @@ bool ItemWorldController::eventFilter(QObject * object, QEvent * event)
         mouseReleaseEvent(static_cast<QGraphicsSceneMouseEvent*>(event));
     }
 
+    if (object = _simulationViewWidget->getGraphicsView()) {
+        if (event->type() == QEvent::Resize) {
+            resize(static_cast<QResizeEvent*>(event));
+        }
+    }
+
     return false;
     CATCH;
 }
@@ -335,7 +360,7 @@ bool ItemWorldController::eventFilter(QObject * object, QEvent * event)
 void ItemWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     TRY;
-    auto viewPos = _graphicsView->mapFromScene(event->scenePos().x(), event->scenePos().y());
+    auto viewPos = _simulationViewWidget->getGraphicsView()->mapFromScene(event->scenePos().x(), event->scenePos().y());
     auto viewPosInt = IntVector2D{static_cast<int>(viewPos.x()), static_cast<int>(viewPos.y())};
     auto worldPos = CoordinateSystem::sceneToModel(QVector2D(event->scenePos().x(), event->scenePos().y()));
 
@@ -377,7 +402,7 @@ void ItemWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void ItemWorldController::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     TRY;
-    auto viewPos = _graphicsView->mapFromScene(event->scenePos().x(), event->scenePos().y());
+    auto viewPos = _simulationViewWidget->getGraphicsView()->mapFromScene(event->scenePos().x(), event->scenePos().y());
     auto viewPosInt = IntVector2D{toInt(viewPos.x()), toInt(viewPos.y())};
     if (event->buttons() == Qt::MouseButton::LeftButton) {
         Q_EMIT startContinuousZoomIn(viewPosInt);

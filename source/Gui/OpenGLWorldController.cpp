@@ -28,13 +28,14 @@
 #include "SimulationViewWidget.h"
 
 OpenGLWorldController::OpenGLWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent)
-    : AbstractWorldController(simulationViewWidget->getGraphicsView(), parent)
+    : AbstractWorldController(simulationViewWidget, parent)
 {
     _viewport = new QOpenGLWidget();
 
-    _graphicsView->setViewport(_viewport);
-    _graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-/*
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    graphicsView->setViewport(_viewport);
+    graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    /*
     viewport->makeCurrent();
     _scene = new OpenGLUniverseScene(viewport->context(), this);
 */
@@ -55,8 +56,9 @@ void OpenGLWorldController::init(
 
     SET_CHILD(_access, access);
 
-    auto width = _graphicsView->width();
-    auto height = _graphicsView->height();
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    auto width = graphicsView->width();
+    auto height = graphicsView->height();
 
     if (!_scene) {
         _viewport->makeCurrent();
@@ -66,7 +68,7 @@ void OpenGLWorldController::init(
     _scene->resize({width, height});
     _scene->update();
     _scene->installEventFilter(this);
-    _graphicsView->installEventFilter(this);
+    graphicsView->installEventFilter(this);
 }
 
 void OpenGLWorldController::connectView()
@@ -76,12 +78,14 @@ void OpenGLWorldController::connectView()
         connect(_controller, &SimulationController::nextFrameCalculated, this, &OpenGLWorldController::requestImage));
     _connections.push_back(
         connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &OpenGLWorldController::receivedNotifications));
+    _connections.push_back(connect(
+        _repository, &DataRepository::imageReady, this, &OpenGLWorldController::imageReady, Qt::QueuedConnection));
+
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    _connections.push_back(connect(
+        graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
     _connections.push_back(
-        connect(_repository, &DataRepository::imageReady, this, &OpenGLWorldController::imageReady, Qt::QueuedConnection));
-    _connections.push_back(
-        connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
-    _connections.push_back(
-        connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
+        connect(graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
 }
 
 void OpenGLWorldController::disconnectView()
@@ -99,14 +103,15 @@ void OpenGLWorldController::refresh()
 
 bool OpenGLWorldController::isActivated() const
 {
-    return _graphicsView->scene() == _scene;
+    return _simulationViewWidget->getGraphicsView()->scene() == _scene;
 }
 
 void OpenGLWorldController::activate(double zoomFactor)
 {
-    _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
-    _graphicsView->setScene(_scene);
-    _graphicsView->resetTransform();
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+    graphicsView->setScene(_scene);
+    graphicsView->resetTransform();
 
     setZoomFactor(zoomFactor);
 }
@@ -119,6 +124,7 @@ double OpenGLWorldController::getZoomFactor() const
 void OpenGLWorldController::setZoomFactor(double zoomFactor)
 {
     _zoomFactor = zoomFactor;
+    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
 }
 
 void OpenGLWorldController::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
@@ -140,9 +146,10 @@ void OpenGLWorldController::centerTo(QVector2D const& position)
 
 void OpenGLWorldController::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
 {
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
     QVector2D deltaViewPos{
-        static_cast<float>(viewPos.x) - static_cast<float>(_graphicsView->width()) / 2.0f,
-        static_cast<float>(viewPos.y) - static_cast<float>(_graphicsView->height()) / 2.0f};
+        static_cast<float>(viewPos.x) - static_cast<float>(graphicsView->width()) / 2.0f,
+        static_cast<float>(viewPos.y) - static_cast<float>(graphicsView->height()) / 2.0f};
     auto deltaWorldPos = mapDeltaViewToDeltaWorldPosition(deltaViewPos);
     centerTo(worldPosition - deltaWorldPos);
 }
@@ -164,7 +171,7 @@ bool OpenGLWorldController::eventFilter(QObject* object, QEvent* event)
         }
     }
 
-    if (object = _graphicsView) {
+    if (object = _simulationViewWidget->getGraphicsView()) {
         if (event->type() == QEvent::Resize) {
             resize(static_cast<QResizeEvent*>(event));
         }
@@ -252,6 +259,7 @@ void OpenGLWorldController::resize(QResizeEvent* event)
 {
     auto size = event->size();
     _scene->resize({size.width(), size.height()});
+    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
 }
 
 void OpenGLWorldController::receivedNotifications(set<Receiver> const& targets)
@@ -266,8 +274,9 @@ void OpenGLWorldController::receivedNotifications(set<Receiver> const& targets)
 void OpenGLWorldController::requestImage()
 {
     if (!_connections.empty()) {
+        auto graphicsView = _simulationViewWidget->getGraphicsView();
         auto topLeft = mapViewToWorldPosition(QVector2D(0, 0));
-        auto bottomRight = mapViewToWorldPosition(QVector2D(_graphicsView->width() - 1, _graphicsView->height() - 1));
+        auto bottomRight = mapViewToWorldPosition(QVector2D(graphicsView->width() - 1, graphicsView->height() - 1));
         RealRect worldRect{RealVector2D(topLeft), RealVector2D(bottomRight)};
         auto sceneRect = _scene->sceneRect();
         _repository->requireVectorImageFromSimulation(
@@ -303,9 +312,9 @@ void OpenGLWorldController::updateViewTimeout()
 
 QVector2D OpenGLWorldController::mapViewToWorldPosition(QVector2D const& viewPos) const
 {
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
     QVector2D relCenter(
-        static_cast<float>(_graphicsView->width() / (2.0 * _zoomFactor)),
-        static_cast<float>(_graphicsView->height() / (2.0 * _zoomFactor)));
+        toFloat(graphicsView->width() / (2.0 * _zoomFactor)), toFloat(graphicsView->height() / (2.0 * _zoomFactor)));
     QVector2D relWorldPos(viewPos.x() / _zoomFactor, viewPos.y() / _zoomFactor);
     return _center - relCenter + relWorldPos;
 }
