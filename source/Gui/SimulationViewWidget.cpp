@@ -27,7 +27,10 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-/*
+    ui->verticalScrollBar->setStyleSheet(Const::ScrollbarStyleSheet);
+    ui->horizontalScrollBar->setStyleSheet(Const::ScrollbarStyleSheet);
+
+    /*
     ui->simulationView->setViewport(new QOpenGLWidget());
     ui->simulationView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 */
