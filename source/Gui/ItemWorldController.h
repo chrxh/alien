@@ -57,7 +57,8 @@ private:
 
 	Q_SLOT void receivedNotifications(set<Receiver> const& targets);
 	Q_SLOT void cellInfoToggled(bool showInfo);
-	Q_SLOT void scrolled();
+    Q_SLOT void scrolledX(float centerX);
+    Q_SLOT void scrolledY(float centerY);
 
 	struct Selection
 	{
