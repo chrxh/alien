@@ -51,10 +51,10 @@
     <Filter Include="External">
       <UniqueIdentifier>{36c02291-9d5d-4843-bbee-8a1d16fddf5a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Impl\SimulationView\OpenGL">
+    <Filter Include="Impl\SimulationView\OpenGLWorld">
       <UniqueIdentifier>{c2f57fe4-4bd4-42a4-8028-cf62945795b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Impl\SimulationView\ItemView">
+    <Filter Include="Impl\SimulationView\ItemWorld">
       <UniqueIdentifier>{20054b77-4c6b-481b-8bce-2ea84410bfae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -278,34 +278,34 @@
       <Filter>Impl\SimulationView</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\AbstractItem.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\CellConnectionItem.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\CellItem.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\CoordinateSystem.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ItemConfig.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ItemManager.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ItemWorldController.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ItemViewport.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ParticleItem.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\MarkerItem.cpp">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ToolbarContext.cpp">
       <Filter>Impl\Toolbar</Filter>
@@ -377,10 +377,10 @@
       <Filter>Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\OpenGLWorldController.cpp">
-      <Filter>Impl\SimulationView\OpenGL</Filter>
+      <Filter>Impl\SimulationView\OpenGLWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\OpenGLScene.cpp">
-      <Filter>Impl\SimulationView\OpenGL</Filter>
+      <Filter>Impl\SimulationView\OpenGLWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\SimulationViewController.cpp">
       <Filter>Impl\SimulationView</Filter>
@@ -412,22 +412,22 @@
       <Filter>Impl\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\AbstractItem.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\CellConnectionItem.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\CellItem.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\CoordinateSystem.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\ParticleItem.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\MarkerItem.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
@@ -442,7 +442,7 @@
       <Filter>Impl\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\OpenGLScene.h">
-      <Filter>Impl\SimulationView\OpenGL</Filter>
+      <Filter>Impl\SimulationView\OpenGLWorld</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -579,19 +579,19 @@
       <Filter>Impl\SimulationView</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ItemConfig.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ItemManager.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ItemWorldController.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ItemViewport.h">
-      <Filter>Impl\SimulationView\ItemView</Filter>
+      <Filter>Impl\SimulationView\ItemWorld</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\OpenGLWorldController.h">
-      <Filter>Impl\SimulationView\OpenGL</Filter>
+      <Filter>Impl\SimulationView\OpenGLWorld</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ToolbarContext.h">
       <Filter>Impl\Toolbar</Filter>
