@@ -54,7 +54,8 @@ private:
     Q_SLOT void receivedNotifications(set<Receiver> const& targets);
     Q_SLOT void requestImage();
     Q_SLOT void imageReady();
-    Q_SLOT void scrolled();
+    Q_SLOT void scrolledX(float centerX);
+    Q_SLOT void scrolledY(float centerY);
     Q_SLOT void updateViewTimeout();
 
     QVector2D mapViewToWorldPosition(QVector2D const& viewPos) const;
