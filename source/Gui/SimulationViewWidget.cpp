@@ -12,8 +12,8 @@
 #include "EngineInterface/SimulationContext.h"
 #include "EngineInterface/SpaceProperties.h"
 
-#include "OpenGLUniverseView.h"
-#include "ItemUniverseView.h"
+#include "OpenGLWorldController.h"
+#include "ItemWorldController.h"
 #include "QApplicationHelper.h"
 #include "StartupController.h"
 

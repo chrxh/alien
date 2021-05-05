@@ -1,4 +1,4 @@
-#include "OpenGLUniverseScene.h"
+#include "OpenGLScene.h"
 
 #include <QOpenGLShader>
 #include <QFile>
@@ -27,7 +27,7 @@ namespace
     }
 }
 
-OpenGLUniverseScene::OpenGLUniverseScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
+OpenGLScene::OpenGLScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
     : QGraphicsScene(parent)
     , _surface(context->surface())
     , _context(context)
@@ -71,18 +71,18 @@ OpenGLUniverseScene::OpenGLUniverseScene(QOpenGLContext* context, QObject* paren
     m_program->release();
 }
 
-void OpenGLUniverseScene::init(SimulationAccess* access, std::mutex& mutex)
+void OpenGLScene::init(SimulationAccess* access, std::mutex& mutex)
 {
     _access = access;
     _mutex = mutex;
 }
 
-ImageResource OpenGLUniverseScene::getImageResource() const
+ImageResource OpenGLScene::getImageResource() const
 {
     return _imageResource;
 }
 
-void OpenGLUniverseScene::resize(IntVector2D const& size)
+void OpenGLScene::resize(IntVector2D const& size)
 {
     setSceneRect(0, 0, size.x, size.y);
     updateTexture(size);
@@ -95,7 +95,7 @@ void OpenGLUniverseScene::resize(IntVector2D const& size)
 
 }
 
-void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
+void OpenGLScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     std::lock_guard<std::mutex> lock(*_mutex);
     m_program->bind();
@@ -126,7 +126,7 @@ void OpenGLUniverseScene::drawBackground(QPainter* painter, const QRectF& rect)
     m_program->release();
 }
 
-void OpenGLUniverseScene::updateTexture(IntVector2D const& size)
+void OpenGLScene::updateTexture(IntVector2D const& size)
 {
     delete m_texture;
 

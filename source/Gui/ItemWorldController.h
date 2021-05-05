@@ -10,14 +10,14 @@
 #include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
 #include "DataRepository.h"
-#include "UniverseView.h"
+#include "AbstractWorldController.h"
 
-class ItemUniverseView : public UniverseView
+class ItemWorldController : public AbstractWorldController
 {
     Q_OBJECT
 public:
-    ItemUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
-	virtual ~ItemUniverseView() = default;
+    ItemWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
+	virtual ~ItemWorldController() = default;
 
     void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator);
 

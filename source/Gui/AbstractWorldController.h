@@ -4,12 +4,12 @@
 
 #include "Definitions.h"
 
-class UniverseView : public QObject
+class AbstractWorldController : public QObject
 {
     Q_OBJECT
 public:
-    UniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
-    virtual ~UniverseView() = default;
+    AbstractWorldController(QGraphicsView* graphicsView, QObject* parent = nullptr);
+    virtual ~AbstractWorldController() = default;
 
     virtual void connectView() = 0;
     virtual void disconnectView() = 0;
