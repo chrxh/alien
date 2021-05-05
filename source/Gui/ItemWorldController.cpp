@@ -123,8 +123,7 @@ void ItemWorldController::setZoomFactor(double zoomFactor)
     auto graphicsView = _simulationViewWidget->getGraphicsView();
     graphicsView->resetTransform();
     graphicsView->scale(CoordinateSystem::sceneToModel(_zoomFactor), CoordinateSystem::sceneToModel(_zoomFactor));
-    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
-
+    updateScrollbars();
     CATCH;
 }
 
@@ -156,6 +155,7 @@ void ItemWorldController::centerTo(QVector2D const & position)
     TRY;
     auto scenePos = CoordinateSystem::modelToScene(position);
     _simulationViewWidget->getGraphicsView()->centerOn(scenePos.x(), scenePos.y());
+    updateScrollbars();
     CATCH;
 }
 
@@ -187,10 +187,16 @@ void ItemWorldController::centerTo(QVector2D const& worldPosition, IntVector2D c
     CATCH;
 }
 
+void ItemWorldController::updateScrollbars()
+{
+    _simulationViewWidget->updateScrollbars(
+        _controller->getContext()->getSpaceProperties()->getSize(), getCenterPositionOfScreen(), getZoomFactor());
+}
+
 void ItemWorldController::resize(QResizeEvent* event)
 {
     TRY;
-    _simulationViewWidget->updateScrollbars(_controller->getContext()->getSpaceProperties()->getSize(), _zoomFactor);
+    updateScrollbars();
     CATCH;
 }
 

@@ -61,11 +61,12 @@ void SimulationViewController::init(
     _openGLUniverse->activate(InitialZoomFactor);
 
     auto size = _controller->getContext()->getSpaceProperties()->getSize();
-    _openGLUniverse->centerTo({static_cast<float>(size.x) / 2, static_cast<float>(size.y) / 2});
+    auto center = QVector2D{static_cast<float>(size.x) / 2, static_cast<float>(size.y) / 2};
+    _openGLUniverse->centerTo(center);
 
     _openGLUniverse->connectView();
     _openGLUniverse->refresh();
-    _simulationViewWidget->updateScrollbars(size, InitialZoomFactor);
+    _simulationViewWidget->updateScrollbars(size, center, InitialZoomFactor);
 
     Q_EMIT zoomFactorChanged(InitialZoomFactor);
 }
