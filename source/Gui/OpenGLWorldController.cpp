@@ -1,4 +1,4 @@
-#include "OpenGLUniverseView.h"
+#include "OpenGLWorldController.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
@@ -24,11 +24,11 @@
 
 #include "Notifier.h"
 #include "Settings.h"
-#include "OpenGLUniverseScene.h"
+#include "OpenGLScene.h"
 #include "SimulationViewWidget.h"
 
-OpenGLUniverseView::OpenGLUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent)
-    : UniverseView(simulationViewWidget->getGraphicsView(), parent)
+OpenGLWorldController::OpenGLWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent)
+    : AbstractWorldController(simulationViewWidget->getGraphicsView(), parent)
 {
     _viewport = new QOpenGLWidget();
 
@@ -39,10 +39,10 @@ OpenGLUniverseView::OpenGLUniverseView(SimulationViewWidget* simulationViewWidge
     _scene = new OpenGLUniverseScene(viewport->context(), this);
 */
 
-    connect(&_updateViewTimer, &QTimer::timeout, this, &OpenGLUniverseView::updateViewTimeout);
+    connect(&_updateViewTimer, &QTimer::timeout, this, &OpenGLWorldController::updateViewTimeout);
 }
 
-void OpenGLUniverseView::init(
+void OpenGLWorldController::init(
     Notifier* notifier,
     SimulationController* controller,
     SimulationAccess* access,
@@ -60,7 +60,7 @@ void OpenGLUniverseView::init(
 
     if (!_scene) {
         _viewport->makeCurrent();
-        _scene = new OpenGLUniverseScene(_viewport->context(), this);
+        _scene = new OpenGLScene(_viewport->context(), this);
     }
     _scene->init(access, repository->getImageMutex());
     _scene->resize({width, height});
@@ -69,22 +69,22 @@ void OpenGLUniverseView::init(
     _graphicsView->installEventFilter(this);
 }
 
-void OpenGLUniverseView::connectView()
+void OpenGLWorldController::connectView()
 {
     disconnectView();
     _connections.push_back(
-        connect(_controller, &SimulationController::nextFrameCalculated, this, &OpenGLUniverseView::requestImage));
+        connect(_controller, &SimulationController::nextFrameCalculated, this, &OpenGLWorldController::requestImage));
     _connections.push_back(
-        connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &OpenGLUniverseView::receivedNotifications));
+        connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &OpenGLWorldController::receivedNotifications));
     _connections.push_back(
-        connect(_repository, &DataRepository::imageReady, this, &OpenGLUniverseView::imageReady, Qt::QueuedConnection));
+        connect(_repository, &DataRepository::imageReady, this, &OpenGLWorldController::imageReady, Qt::QueuedConnection));
     _connections.push_back(
-        connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLUniverseView::scrolled));
+        connect(_graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
     _connections.push_back(
-        connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLUniverseView::scrolled));
+        connect(_graphicsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &OpenGLWorldController::scrolled));
 }
 
-void OpenGLUniverseView::disconnectView()
+void OpenGLWorldController::disconnectView()
 {
     for (auto const& connection : _connections) {
         disconnect(connection);
@@ -92,17 +92,17 @@ void OpenGLUniverseView::disconnectView()
     _connections.clear();
 }
 
-void OpenGLUniverseView::refresh()
+void OpenGLWorldController::refresh()
 {
     requestImage();
 }
 
-bool OpenGLUniverseView::isActivated() const
+bool OpenGLWorldController::isActivated() const
 {
     return _graphicsView->scene() == _scene;
 }
 
-void OpenGLUniverseView::activate(double zoomFactor)
+void OpenGLWorldController::activate(double zoomFactor)
 {
     _graphicsView->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
     _graphicsView->setScene(_scene);
@@ -111,34 +111,34 @@ void OpenGLUniverseView::activate(double zoomFactor)
     setZoomFactor(zoomFactor);
 }
 
-double OpenGLUniverseView::getZoomFactor() const
+double OpenGLWorldController::getZoomFactor() const
 {
     return _zoomFactor;
 }
 
-void OpenGLUniverseView::setZoomFactor(double zoomFactor)
+void OpenGLWorldController::setZoomFactor(double zoomFactor)
 {
     _zoomFactor = zoomFactor;
 }
 
-void OpenGLUniverseView::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
+void OpenGLWorldController::setZoomFactor(double zoomFactor, IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
     setZoomFactor(zoomFactor);
     centerTo(worldPos, viewPos);
 }
 
-QVector2D OpenGLUniverseView::getCenterPositionOfScreen() const
+QVector2D OpenGLWorldController::getCenterPositionOfScreen() const
 {
     return _center;
 }
 
-void OpenGLUniverseView::centerTo(QVector2D const& position)
+void OpenGLWorldController::centerTo(QVector2D const& position)
 {
     _center = position;
 }
 
-void OpenGLUniverseView::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
+void OpenGLWorldController::centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos)
 {
     QVector2D deltaViewPos{
         static_cast<float>(viewPos.x) - static_cast<float>(_graphicsView->width()) / 2.0f,
@@ -148,7 +148,7 @@ void OpenGLUniverseView::centerTo(QVector2D const& worldPosition, IntVector2D co
 }
 
 
-bool OpenGLUniverseView::eventFilter(QObject* object, QEvent* event)
+bool OpenGLWorldController::eventFilter(QObject* object, QEvent* event)
 {
     if (object == _scene) {
         if (event->type() == QEvent::GraphicsSceneMousePress) {
@@ -172,7 +172,7 @@ bool OpenGLUniverseView::eventFilter(QObject* object, QEvent* event)
     return false;
 }
 
-void OpenGLUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void OpenGLWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     auto viewPos = IntVector2D{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
     auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
@@ -196,7 +196,7 @@ void OpenGLUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 */
 }
 
-void OpenGLUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void OpenGLWorldController::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     IntVector2D viewPos{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
     if (event->buttons() == Qt::MouseButton::LeftButton) {
@@ -234,7 +234,7 @@ void OpenGLUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 */
 }
 
-void OpenGLUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void OpenGLWorldController::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     _worldPosForMovement = boost::none;
 
@@ -248,13 +248,13 @@ void OpenGLUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 */
 }
 
-void OpenGLUniverseView::resize(QResizeEvent* event)
+void OpenGLWorldController::resize(QResizeEvent* event)
 {
     auto size = event->size();
     _scene->resize({size.width(), size.height()});
 }
 
-void OpenGLUniverseView::receivedNotifications(set<Receiver> const& targets)
+void OpenGLWorldController::receivedNotifications(set<Receiver> const& targets)
 {
     if (targets.find(Receiver::VisualEditor) == targets.end()) {
         return;
@@ -263,7 +263,7 @@ void OpenGLUniverseView::receivedNotifications(set<Receiver> const& targets)
     requestImage();
 }
 
-void OpenGLUniverseView::requestImage()
+void OpenGLWorldController::requestImage()
 {
     if (!_connections.empty()) {
         auto topLeft = mapViewToWorldPosition(QVector2D(0, 0));
@@ -278,19 +278,19 @@ void OpenGLUniverseView::requestImage()
     }
 }
 
-void OpenGLUniverseView::imageReady()
+void OpenGLWorldController::imageReady()
 {
     _scene->update();
     _updateViewTimer.start(Const::OpenGLViewUpdateInterval);
     _scheduledViewUpdates = Const::ViewUpdates;
 }
 
-void OpenGLUniverseView::scrolled()
+void OpenGLWorldController::scrolled()
 {
     requestImage();
 }
 
-void OpenGLUniverseView::updateViewTimeout()
+void OpenGLWorldController::updateViewTimeout()
 {
     if (_scheduledViewUpdates > 0) {
         _scene->update();
@@ -301,7 +301,7 @@ void OpenGLUniverseView::updateViewTimeout()
     }
 }
 
-QVector2D OpenGLUniverseView::mapViewToWorldPosition(QVector2D const& viewPos) const
+QVector2D OpenGLWorldController::mapViewToWorldPosition(QVector2D const& viewPos) const
 {
     QVector2D relCenter(
         static_cast<float>(_graphicsView->width() / (2.0 * _zoomFactor)),
@@ -310,7 +310,7 @@ QVector2D OpenGLUniverseView::mapViewToWorldPosition(QVector2D const& viewPos) c
     return _center - relCenter + relWorldPos;
 }
 
-QVector2D OpenGLUniverseView::mapDeltaViewToDeltaWorldPosition(QVector2D const& viewPos) const
+QVector2D OpenGLWorldController::mapDeltaViewToDeltaWorldPosition(QVector2D const& viewPos) const
 {
     return viewPos / _zoomFactor;
 }
