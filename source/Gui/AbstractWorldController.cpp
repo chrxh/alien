@@ -3,9 +3,11 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 
-AbstractWorldController::AbstractWorldController(QGraphicsView* graphicsView, QObject* parent /*= nullptr*/)
+AbstractWorldController::AbstractWorldController(
+    SimulationViewWidget* simulationViewWidget,
+    QObject* parent /*= nullptr*/)
     : QObject(parent)
-    , _graphicsView(graphicsView)
+    , _simulationViewWidget(simulationViewWidget)
 {
 
 }
