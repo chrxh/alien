@@ -16,7 +16,7 @@ class ItemUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
-    ItemUniverseView (QGraphicsView* graphicsView, QObject *parent = nullptr);
+    ItemUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
 	virtual ~ItemUniverseView() = default;
 
     void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator);

@@ -18,7 +18,7 @@ public:
         MainController* mainController,
         MainModel* mainModel,
         MainView* mainView,
-        SimulationViewWidget* visualEditor,
+        SimulationViewController* simulationViewController,
         Serializer* serializer,
         GeneralInfoController* infoController,
         DataEditController* dataEditor,
@@ -106,7 +106,7 @@ private:
 	Notifier* _notifier = nullptr;
 	Serializer* _serializer = nullptr;
 
-	SimulationViewWidget* _simulationViewWidget = nullptr;
+	SimulationViewController* _simulationViewController = nullptr;
 	DataEditController* _dataEditor = nullptr;
 	GeneralInfoController* _infoController = nullptr;
 	ToolbarController* _toolbar = nullptr;

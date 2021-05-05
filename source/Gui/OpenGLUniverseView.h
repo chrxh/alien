@@ -16,7 +16,7 @@ class OpenGLUniverseView : public UniverseView
 {
     Q_OBJECT
 public:
-    OpenGLUniverseView(QGraphicsView* graphicsView, QObject* parent = nullptr);
+    OpenGLUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
     virtual ~OpenGLUniverseView() = default;
 
     virtual void init(

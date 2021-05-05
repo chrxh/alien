@@ -10,11 +10,11 @@
 #include "EngineInterface/SpaceProperties.h"
 #include "EngineInterface/SimulationContext.h"
 
-#include "Gui/ToolbarController.h"
-#include "Gui/ToolbarContext.h"
-#include "Gui/ActionController.h"
-#include "Gui/ActionHolder.h"
-#include "Gui/MonitorController.h"
+#include "ToolbarController.h"
+#include "ToolbarContext.h"
+#include "ActionController.h"
+#include "ActionHolder.h"
+#include "MonitorController.h"
 
 #include "GeneralInfoController.h"
 #include "DataEditController.h"
@@ -29,6 +29,7 @@
 #include "GettingStartedWindow.h"
 #include "LoggingController.h"
 #include "StartupController.h"
+#include "SimulationViewController.h"
 
 #include "ui_MainView.h"
 
@@ -37,14 +38,28 @@ MainView::MainView(QWidget * parent)
 	, ui(new Ui::MainView)
 {
 	ui->setupUi(this);
-	_simulationViewWidget = ui->simulationViewWidget;
-	_toolbar = new ToolbarController(_simulationViewWidget);
-	_dataEditor = new DataEditController(_simulationViewWidget);
+    _simulationViewController = new SimulationViewController(this);
+    auto simulationViewWidget = _simulationViewController->getWidget();
+
+    _toolbar = new ToolbarController(simulationViewWidget);
+    _dataEditor = new DataEditController(simulationViewWidget);
 	_infoController = new GeneralInfoController(this);
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
     _logging = new LoggingController(this);
     _gettingStartedWindow = new GettingStartedWindow(this);
+
+    simulationViewWidget->setParent(ui->centralWidget);
+    simulationViewWidget->setObjectName(QString::fromUtf8("simulationViewWidget"));
+    QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    sizePolicy1.setHorizontalStretch(0);
+    sizePolicy1.setVerticalStretch(0);
+    sizePolicy1.setHeightForWidth(simulationViewWidget->sizePolicy().hasHeightForWidth());
+    simulationViewWidget->setSizePolicy(sizePolicy1);
+    simulationViewWidget->setMinimumSize(QSize(0, 0));
+    simulationViewWidget->setMaximumSize(QSize(16777215, 16777215));
+    simulationViewWidget->setLayoutDirection(Qt::LeftToRight);
+    ui->gridLayout->addWidget(simulationViewWidget, 0, 0, 1, 1);
 
     {
         auto gridLayout = new QGridLayout(ui->monitorGroupBox);
@@ -63,7 +78,7 @@ MainView::MainView(QWidget * parent)
 
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
     connect(ui->infobar, &QDockWidget::visibilityChanged, this, &MainView::infobarChanged);
-    connect(_simulationViewWidget, &SimulationViewWidget::zoomFactorChanged, _infoController, &GeneralInfoController::setZoomFactor);
+    connect(_simulationViewController, &SimulationViewController::zoomFactorChanged, _infoController, &GeneralInfoController::setZoomFactor);
 }
 
 MainView::~MainView()
@@ -91,7 +106,7 @@ void MainView::init(
 	_actions->init(_controller, 
         _model, 
         this, 
-        _simulationViewWidget, 
+        _simulationViewController, 
         serializer, 
         _infoController, 
         _dataEditor, 
@@ -120,14 +135,14 @@ void MainView::initGettingStartedWindow()
 
 void MainView::refresh()
 {
-	_simulationViewWidget->refresh();
+	_simulationViewController->refresh();
 }
 
 void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)
 {
 	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
-	_simulationViewWidget->init(_notifier, controller, access, _repository);
+	_simulationViewController->init(_notifier, controller, access, _repository);
 
 	_actions->getActionHolder()->actionEditor->setChecked(false);
 }
@@ -304,9 +319,10 @@ void MainView::setupFullScreen()
 void MainView::setupStartupWidget()
 {
     auto startupWidget = _startupController->getWidget();
-    startupWidget->setParent(ui->simulationViewWidget);
-    auto posX = ui->simulationViewWidget->width() / 2 - startupWidget->width() / 2;
-    auto posY = ui->simulationViewWidget->height() / 2 - startupWidget->height() / 2;
+    auto simulationViewWidget = _simulationViewController->getWidget();
+    startupWidget->setParent(simulationViewWidget);
+    auto posX = simulationViewWidget->width() / 2 - startupWidget->width() / 2;
+    auto posY = simulationViewWidget->height() / 2 - startupWidget->height() / 2;
     startupWidget->move(posX, posY);
     startupWidget->setVisible(true);
 }
