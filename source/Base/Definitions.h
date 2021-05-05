@@ -58,6 +58,11 @@ inline float toFloat(int value)
     return static_cast<float>(value);
 }
 
+inline int toInt(float value)
+{
+    return static_cast<int>(value);
+}
+
 inline QColor toQColor(unsigned int const& rgba)
 {
     return QColor((rgba >> 16) & 0xff, (rgba >> 8) & 0xff, rgba & 0xff, rgba >> 24);
