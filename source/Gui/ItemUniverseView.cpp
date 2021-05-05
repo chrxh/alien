@@ -331,18 +331,24 @@ bool ItemUniverseView::eventFilter(QObject * object, QEvent * event)
     CATCH;
 }
 
-void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
+void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     TRY;
-    auto viewPos = _graphicsView->mapFromScene(e->scenePos().x(), e->scenePos().y());
+    auto viewPos = _graphicsView->mapFromScene(event->scenePos().x(), event->scenePos().y());
     auto viewPosInt = IntVector2D{static_cast<int>(viewPos.x()), static_cast<int>(viewPos.y())};
-    if (e->buttons() == Qt::MouseButton::LeftButton) {
+    auto worldPos = CoordinateSystem::sceneToModel(QVector2D(event->scenePos().x(), event->scenePos().y()));
+
+    if (event->buttons() == Qt::MouseButton::LeftButton) {
         Q_EMIT startContinuousZoomIn(viewPosInt);
     }
-    if (e->buttons() == Qt::MouseButton::RightButton) {
+    if (event->buttons() == Qt::MouseButton::RightButton) {
         Q_EMIT startContinuousZoomOut(viewPosInt);
     }
-/*
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        _worldPosForMovement = worldPos;
+    }
+
+    /*
     _mouseButtonPressed = true;
 	auto itemsClicked = _scene->items(e->scenePos());
 	QList<QGraphicsItem*> frontItem = !itemsClicked.empty() ? QList<QGraphicsItem*>({ itemsClicked.front() }) : QList<QGraphicsItem*>();
@@ -367,10 +373,23 @@ void ItemUniverseView::mousePressEvent(QGraphicsSceneMouseEvent* e)
     CATCH;
 }
 
-void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     TRY;
-/*
+    auto viewPos = _graphicsView->mapFromScene(event->scenePos().x(), event->scenePos().y());
+    auto viewPosInt = IntVector2D{toInt(viewPos.x()), toInt(viewPos.y())};
+    if (event->buttons() == Qt::MouseButton::LeftButton) {
+        Q_EMIT startContinuousZoomIn(viewPosInt);
+    }
+    if (event->buttons() == Qt::MouseButton::RightButton) {
+        Q_EMIT startContinuousZoomOut(viewPosInt);
+    }
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        centerTo(*_worldPosForMovement, viewPosInt);
+        refresh();
+    }
+
+    /*
     bool leftButton = ((e->buttons() & Qt::LeftButton) == Qt::LeftButton);
 	bool rightButton = ((e->buttons() & Qt::RightButton) == Qt::RightButton);
 	
@@ -416,6 +435,8 @@ void ItemUniverseView::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 void ItemUniverseView::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
     TRY;
+    _worldPosForMovement = boost::none;
+
     Q_EMIT endContinuousZoom();
 /*
     _mouseButtonPressed = false;
