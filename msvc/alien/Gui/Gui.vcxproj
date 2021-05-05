@@ -193,7 +193,7 @@
     <ClCompile Include="..\..\..\source\Gui\GeneralInfoController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemConfig.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemManager.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\ItemUniverseView.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\ItemWorldController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemViewport.cpp" />
     <ClCompile Include="..\..\..\source\Gui\LoggingController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\LoggingView.cpp" />
@@ -213,7 +213,7 @@
     <ClCompile Include="..\..\..\source\Gui\NewRectangleDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\NewSimulationDialog.cpp" />
     <ClCompile Include="..\..\..\source\Gui\Notifier.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseScene.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\OpenGLScene.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ParticleEditTab.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ParticleItem.cpp" />
     <ClCompile Include="..\..\..\source\Gui\Queue.cpp" />
@@ -235,8 +235,8 @@
     <ClCompile Include="..\..\..\source\Gui\ToolbarContext.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ToolbarController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ToolbarView.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\UniverseView.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseView.cpp">
+    <ClCompile Include="..\..\..\source\Gui\AbstractWorldController.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\OpenGLWorldController.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
@@ -275,7 +275,7 @@
     <ClInclude Include="..\..\..\source\Gui\MarkerItem.h" />
     <ClInclude Include="..\..\..\source\Gui\MessageHelper.h" />
     <QtMoc Include="..\..\..\source\Gui\NewDiscDialog.h" />
-    <ClInclude Include="..\..\..\source\Gui\OpenGLUniverseScene.h" />
+    <ClInclude Include="..\..\..\source\Gui\OpenGLScene.h" />
     <ClInclude Include="..\..\..\source\Gui\ParticleItem.h" />
     <ClInclude Include="..\..\..\source\Gui\QApplicationHelper.h" />
     <ClInclude Include="..\..\..\source\Gui\Settings.h" />
@@ -292,8 +292,8 @@
     <QtMoc Include="..\..\..\source\Gui\WebSimulationController.h" />
     <QtMoc Include="..\..\..\source\Gui\ViewportInterface.h" />
     <QtMoc Include="..\..\..\source\Gui\SnapshotController.h" />
-    <QtMoc Include="..\..\..\source\Gui\OpenGLUniverseView.h" />
-    <QtMoc Include="..\..\..\source\Gui\UniverseView.h" />
+    <QtMoc Include="..\..\..\source\Gui\OpenGLWorldController.h" />
+    <QtMoc Include="..\..\..\source\Gui\AbstractWorldController.h" />
     <QtMoc Include="..\..\..\source\Gui\ToolbarView.h" />
     <QtMoc Include="..\..\..\source\Gui\ToolbarController.h" />
     <QtMoc Include="..\..\..\source\Gui\ToolbarContext.h" />
@@ -324,7 +324,7 @@
     <QtMoc Include="..\..\..\source\Gui\MainModel.h" />
     <QtMoc Include="..\..\..\source\Gui\MainController.h" />
     <QtMoc Include="..\..\..\source\Gui\ItemViewport.h" />
-    <QtMoc Include="..\..\..\source\Gui\ItemUniverseView.h" />
+    <QtMoc Include="..\..\..\source\Gui\ItemWorldController.h" />
     <QtMoc Include="..\..\..\source\Gui\ItemManager.h" />
     <QtMoc Include="..\..\..\source\Gui\ItemConfig.h" />
     <QtMoc Include="..\..\..\source\Gui\GeneralInfoController.h" />

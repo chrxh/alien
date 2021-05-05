@@ -41,15 +41,15 @@ public:
     Q_SIGNAL void zoomFactorChanged(double factor);
 
 private:
-    UniverseView* getActiveUniverseView() const;
-    UniverseView* getView(ActiveView activeView) const;
+    AbstractWorldController* getActiveUniverseView() const;
+    AbstractWorldController* getView(ActiveView activeView) const;
 
     SimulationController* _controller = nullptr;
 
     SimulationViewWidget* _simulationViewWidget = nullptr;
 
-    OpenGLUniverseView* _openGLUniverse = nullptr;
-    ItemUniverseView* _itemUniverse = nullptr;
+    OpenGLWorldController* _openGLUniverse = nullptr;
+    ItemWorldController* _itemUniverse = nullptr;
 
     qreal _posIncrement = 0.0;
 };
