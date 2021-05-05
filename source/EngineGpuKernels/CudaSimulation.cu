@@ -182,7 +182,7 @@ void CudaSimulation::getPixelImage(
 */
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
         imageData,
-        _cudaSimulationData->finalImageData,
+        _cudaSimulationData->imageData,
         sizeof(unsigned int) * imageSize.x * imageSize.y,
         cudaMemcpyDeviceToHost));
 }
@@ -215,7 +215,7 @@ void CudaSimulation::getVectorImage(
         mappedArray,
         0,
         0,
-        _cudaSimulationData->finalImageData,
+        _cudaSimulationData->imageData,
         sizeof(unsigned int) * imageSize.x * imageSize.y,
         cudaMemcpyDeviceToDevice);
 
