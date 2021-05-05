@@ -31,9 +31,6 @@
     <Filter Include="Impl\SimulationView">
       <UniqueIdentifier>{c3413457-7ffe-4597-9ba9-f5bdb7c2819b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Impl\SimulationView\ItemView">
-      <UniqueIdentifier>{20054b77-4c6b-481b-8bce-2ea84410bfae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Impl\Toolbar">
       <UniqueIdentifier>{d358c13f-ebae-46bb-8f7d-5c43e54953e6}</UniqueIdentifier>
     </Filter>
@@ -56,6 +53,9 @@
     </Filter>
     <Filter Include="Impl\SimulationView\OpenGL">
       <UniqueIdentifier>{c2f57fe4-4bd4-42a4-8028-cf62945795b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Impl\SimulationView\ItemView">
+      <UniqueIdentifier>{20054b77-4c6b-481b-8bce-2ea84410bfae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -271,7 +271,7 @@
     <ClCompile Include="..\..\..\source\Gui\SimulationViewWidget.cpp">
       <Filter>Impl\SimulationView</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\UniverseView.cpp">
+    <ClCompile Include="..\..\..\source\Gui\AbstractWorldController.cpp">
       <Filter>Impl\SimulationView</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ViewportInterface.cpp">
@@ -295,7 +295,7 @@
     <ClCompile Include="..\..\..\source\Gui\ItemManager.cpp">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\ItemUniverseView.cpp">
+    <ClCompile Include="..\..\..\source\Gui\ItemWorldController.cpp">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\ItemViewport.cpp">
@@ -376,10 +376,10 @@
     <ClCompile Include="..\..\..\source\Gui\ZoomActionController.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseView.cpp">
+    <ClCompile Include="..\..\..\source\Gui\OpenGLWorldController.cpp">
       <Filter>Impl\SimulationView\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\OpenGLUniverseScene.cpp">
+    <ClCompile Include="..\..\..\source\Gui\OpenGLScene.cpp">
       <Filter>Impl\SimulationView\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\SimulationViewController.cpp">
@@ -441,7 +441,7 @@
     <ClInclude Include="..\..\..\source\Gui\ColorizeDialogController.h">
       <Filter>Impl\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\Gui\OpenGLUniverseScene.h">
+    <ClInclude Include="..\..\..\source\Gui\OpenGLScene.h">
       <Filter>Impl\SimulationView\OpenGL</Filter>
     </ClInclude>
   </ItemGroup>
@@ -572,7 +572,7 @@
     <QtMoc Include="..\..\..\source\Gui\SimulationViewWidget.h">
       <Filter>Impl\SimulationView</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\UniverseView.h">
+    <QtMoc Include="..\..\..\source\Gui\AbstractWorldController.h">
       <Filter>Impl\SimulationView</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ViewportInterface.h">
@@ -584,13 +584,13 @@
     <QtMoc Include="..\..\..\source\Gui\ItemManager.h">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\ItemUniverseView.h">
+    <QtMoc Include="..\..\..\source\Gui\ItemWorldController.h">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ItemViewport.h">
       <Filter>Impl\SimulationView\ItemView</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\..\source\Gui\OpenGLUniverseView.h">
+    <QtMoc Include="..\..\..\source\Gui\OpenGLWorldController.h">
       <Filter>Impl\SimulationView\OpenGL</Filter>
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\ToolbarContext.h">

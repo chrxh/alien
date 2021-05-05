@@ -6,18 +6,18 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
-#include "UniverseView.h"
+#include "AbstractWorldController.h"
 #include "Definitions.h"
 
-class OpenGLUniverseScene;
+class OpenGLScene;
 class QResizeEvent;
 
-class OpenGLUniverseView : public UniverseView
+class OpenGLWorldController : public AbstractWorldController
 {
     Q_OBJECT
 public:
-    OpenGLUniverseView(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
-    virtual ~OpenGLUniverseView() = default;
+    OpenGLWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
+    virtual ~OpenGLWorldController() = default;
 
     virtual void init(
         Notifier* notifier,
@@ -61,7 +61,7 @@ private:
 
     list<QMetaObject::Connection> _connections;
 
-    OpenGLUniverseScene* _scene = nullptr;
+    OpenGLScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;

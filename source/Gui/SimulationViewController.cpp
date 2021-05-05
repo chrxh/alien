@@ -13,8 +13,8 @@
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/SpaceProperties.h"
 #include "Gui/Settings.h"
-#include "ItemUniverseView.h"
-#include "OpenGLUniverseView.h"
+#include "ItemWorldController.h"
+#include "OpenGLWorldController.h"
 #include "QApplicationHelper.h"
 #include "StartupController.h"
 #include "SimulationViewWidget.h"
@@ -25,15 +25,15 @@ SimulationViewController::SimulationViewController(QWidget* parent)
 {
     _simulationViewWidget = new SimulationViewWidget(parent);
 
-    _openGLUniverse = new OpenGLUniverseView(_simulationViewWidget, this);
-    _itemUniverse = new ItemUniverseView(_simulationViewWidget, this);
-    connect(_openGLUniverse, &OpenGLUniverseView::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
+    _openGLUniverse = new OpenGLWorldController(_simulationViewWidget, this);
+    _itemUniverse = new ItemWorldController(_simulationViewWidget, this);
+    connect(_openGLUniverse, &OpenGLWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
     connect(
-        _openGLUniverse, &OpenGLUniverseView::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
-    connect(_openGLUniverse, &OpenGLUniverseView::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
-    connect(_itemUniverse, &ItemUniverseView::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
-    connect(_itemUniverse, &ItemUniverseView::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
-    connect(_itemUniverse, &ItemUniverseView::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
+        _openGLUniverse, &OpenGLWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
+    connect(_openGLUniverse, &OpenGLWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
+    connect(_itemUniverse, &ItemWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
+    connect(_itemUniverse, &ItemWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
+    connect(_itemUniverse, &ItemWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
 
     auto startupScene = new QGraphicsScene(this);
     startupScene->setBackgroundBrush(QBrush(Const::UniverseColor));
@@ -144,13 +144,13 @@ QVector2D SimulationViewController::getViewCenterWithIncrement()
 void SimulationViewController::toggleCenterSelection(bool value)
 {
     auto activeUniverseView = getActiveUniverseView();
-    auto itemUniverseView = dynamic_cast<ItemUniverseView*>(activeUniverseView);
+    auto itemUniverseView = dynamic_cast<ItemWorldController*>(activeUniverseView);
     CHECK(itemUniverseView);
 
     itemUniverseView->toggleCenterSelection(value);
 }
 
-UniverseView* SimulationViewController::getActiveUniverseView() const
+AbstractWorldController* SimulationViewController::getActiveUniverseView() const
 {
     if (_openGLUniverse->isActivated()) {
         return _openGLUniverse;
@@ -162,7 +162,7 @@ UniverseView* SimulationViewController::getActiveUniverseView() const
     THROW_NOT_IMPLEMENTED();
 }
 
-UniverseView* SimulationViewController::getView(ActiveView activeView) const
+AbstractWorldController* SimulationViewController::getView(ActiveView activeView) const
 {
     if (ActiveView::OpenGLScene == activeView) {
         return _openGLUniverse;

@@ -10,12 +10,12 @@
 
 class QOpenGLShaderProgram;
 
-class OpenGLUniverseScene
+class OpenGLScene
     : public QGraphicsScene
     , protected QOpenGLExtraFunctions
 {
 public:
-    OpenGLUniverseScene(
+    OpenGLScene(
 /*
         SimulationAccess* access,
         IntVector2D const& viewSize,
