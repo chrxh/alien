@@ -338,10 +338,6 @@ void ActionController::onToggleGlowEffect(bool toggled)
         loggingService->logMessage(Priority::Important, "deactivate glow effect");
     }
 
-    auto parameters = _mainModel->getExecutionParameters();
-    parameters.imageGlow = toggled;
-    _mainModel->setExecutionParameters(parameters);
-    _mainController->onUpdateExecutionParameters(parameters);
     _mainView->refresh();
 
     loggingService->logMessage(Priority::Unimportant, "toggle glow effect finished");

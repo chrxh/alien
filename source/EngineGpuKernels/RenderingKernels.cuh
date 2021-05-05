@@ -306,12 +306,6 @@ __device__ __inline__ void drawPixel(
     auto g = toFloat((color >> 8) & 0xff);
     auto b = toFloat((color >> 16) & 0xff);
  
-/*
-    r = toInt(toFloat(r) * zoomFracPart);
-    g = toInt(toFloat(g * zoomFracPart));
-    b = toInt(toFloat(b) * zoomFracPart);
-*/
-
     auto intPosX = toInt(pos.x);
     auto intPosY = toInt(pos.y);
     auto posFracX = pos.x - intPosX;
@@ -357,31 +351,6 @@ __device__ __inline__ void drawPixel(
             }
         }
     }
-/*
-    int r = color & 0xff;
-    int g = (color >> 8) & 0xff;
-    int b = (color >> 16) & 0xff;
-    r = toInt(toFloat(r) * zoomFracPart);
-    g = toInt(toFloat(g * zoomFracPart));
-    b = toInt(toFloat(b) * zoomFracPart);
-
-    auto colorFracPart = 0xff000000 | r | (g << 8) | (b << 16);
-
-    for (int x = 0; x <= zoomIntPart + 1; ++x) {
-        for (int y = 0; y <= zoomIntPart + 1; ++y) {
-            auto resultPosX = intPosX + x;
-            auto resultPosY = intPosY + y;
-            if (resultPosX >= 0 && resultPosX < imageSize.x && resultPosY >= 0 && resultPosY < imageSize.y) {
-                auto resultIndex = resultPosX + resultPosY * imageSize.x;
-                if (x == zoomIntPart + 1 || y == zoomIntPart + 1) {
-                    addingColor(imageData[resultIndex], colorFracPart);
-                } else {
-                    addingColor(imageData[resultIndex], color);
-                }
-            }
-        }
-    }
-*/
 }
 
 __global__ void drawClusters_pixelStyle(
@@ -474,7 +443,7 @@ __global__ void drawImage(
     float zoom,
     SimulationData data)
 {
-    unsigned int* targetImage = data.finalImageData;
+    unsigned int* targetImage = data.imageData;
 
     KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
     if (zoom > 3.5) {
