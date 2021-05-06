@@ -96,6 +96,11 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionEditor->setIcon(iconEditor);
 	actionEditor->setIconVisibleInMenu(false);
 
+	actionActionMode = new QAction("Action mode", this);
+    actionActionMode->setCheckable(true);
+    actionActionMode->setChecked(false);
+    actionActionMode->setEnabled(true);
+
 	actionMonitor = new QAction("Info bar", this);
 	actionMonitor->setEnabled(true);
 	QIcon iconMonitor;
