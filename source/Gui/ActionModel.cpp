@@ -1,6 +1,7 @@
-#include "Gui/Definitions.h"
-
 #include "ActionModel.h"
+
+#include <QAction>
+
 #include "ActionHolder.h"
 
 ActionModel::ActionModel(QObject* parent)
@@ -129,4 +130,11 @@ TokenDescription const & ActionModel::getCopiedToken() const
 void ActionModel::setCopiedToken(TokenDescription const & value)
 {
 	_copiedToken = value;
+}
+
+SimulationViewSettings ActionModel::getSimulationViewSettings() const
+{
+    SimulationViewSettings result;
+    result.glowEffect = _actions->actionGlowEffect->isChecked();
+    return result;
 }

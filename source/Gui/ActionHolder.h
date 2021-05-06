@@ -37,6 +37,7 @@ public:
     QAction* actionDisplayLink = nullptr;
     QAction* actionFullscreen = nullptr;
     QAction* actionGlowEffect = nullptr;
+    QAction* actionMotionEffect = nullptr;
     QAction* actionShowCellInfo = nullptr;
 	QAction* actionCenterSelection = nullptr;
 

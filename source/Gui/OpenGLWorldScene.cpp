@@ -1,4 +1,4 @@
-#include "OpenGLScene.h"
+#include "OpenGLWorldScene.h"
 
 #include <QOpenGLShader>
 #include <QFile>
@@ -27,7 +27,7 @@ namespace
     }
 }
 
-OpenGLScene::OpenGLScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
+OpenGLWorldScene::OpenGLWorldScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
     : QGraphicsScene(parent)
     , _surface(context->surface())
     , _context(context)
@@ -64,6 +64,8 @@ OpenGLScene::OpenGLScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
     m_program->setAttributeBuffer(1, GL_FLOAT, 3 * sizeof(float), 2, 5 * sizeof(float));
     m_program->setUniformValue("texture1", 0);
     m_program->setUniformValue("texture2", 1);
+    m_program->setUniformValue("glowEffect", _settings.glowEffect);
+    m_program->setUniformValue("motionEffect", _settings.motionEffect);
 
     //release (unbind) all
     m_vertexArrayObject.release();
@@ -71,18 +73,28 @@ OpenGLScene::OpenGLScene(QOpenGLContext* context, QObject* parent /*= nullptr*/)
     m_program->release();
 }
 
-void OpenGLScene::init(SimulationAccess* access, std::mutex& mutex)
+void OpenGLWorldScene::init(SimulationAccess* access, std::mutex& mutex)
 {
     _access = access;
     _mutex = mutex;
 }
 
-ImageResource OpenGLScene::getImageResource() const
+void OpenGLWorldScene::setSettings(SimulationViewSettings const& settings)
+{
+    _settings = settings;
+    _context->makeCurrent(_surface);
+    m_program->bind();
+    m_program->setUniformValue("glowEffect", settings.glowEffect);
+    m_program->setUniformValue("motionEffect", settings.motionEffect);
+    m_program->release();
+}
+
+ImageResource OpenGLWorldScene::getImageResource() const
 {
     return _imageResource;
 }
 
-void OpenGLScene::resize(IntVector2D const& size)
+void OpenGLWorldScene::resize(IntVector2D const& size)
 {
     setSceneRect(0, 0, size.x, size.y);
     updateTexture(size);
@@ -95,7 +107,7 @@ void OpenGLScene::resize(IntVector2D const& size)
 
 }
 
-void OpenGLScene::drawBackground(QPainter* painter, const QRectF& rect)
+void OpenGLWorldScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     std::lock_guard<std::mutex> lock(*_mutex);
     m_program->bind();
@@ -126,7 +138,7 @@ void OpenGLScene::drawBackground(QPainter* painter, const QRectF& rect)
     m_program->release();
 }
 
-void OpenGLScene::updateTexture(IntVector2D const& size)
+void OpenGLWorldScene::updateTexture(IntVector2D const& size)
 {
     delete m_texture;
 

@@ -142,6 +142,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionGlowEffect->setShortcut(Qt::ALT + Qt::Key_G);
     actionGlowEffect->setChecked(true);
 
+    actionMotionEffect = new QAction("Motion effect", this);
+    actionMotionEffect->setEnabled(true);
+    actionMotionEffect->setCheckable(true);
+    actionMotionEffect->setShortcut(Qt::ALT + Qt::Key_M);
+    actionMotionEffect->setChecked(true);
+
 	actionShowCellInfo = new QAction("Cell info", this);
 	QIcon iconCellInfo;
 	iconCellInfo.addFile("://Icons/editor/info_off.png", QSize(), QIcon::Normal, QIcon::Off);

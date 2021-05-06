@@ -312,8 +312,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
         onUpdateSimulationParameters(newParameters);
     }));
 
-    SimulationAccess* accessForWidgets;
-	_view->setupEditors(_simController, _accessBuildFunc(_simController));
+	_view->initSimulation(_simController, _accessBuildFunc(_simController));
 }
 
 void MainController::recreateSimulation(SerializedSimulation const & serializedSimulation)

@@ -18,6 +18,7 @@
 #include "EngineInterface/Physics.h"
 #include "EngineInterface/SerializationHelper.h"
 #include "EngineInterface/DescriptionFactory.h"
+#include "EngineInterface/ZoomLevels.h"
 
 #include "Web/WebAccess.h"
 
@@ -133,6 +134,7 @@ void ActionController::init(
     connect(actions->actionDisplayLink, &QAction::triggered, this, &ActionController::onToggleDisplayLink);
     connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
+    connect(actions->actionMotionEffect, &QAction::toggled, this, &ActionController::onToggleMotionEffect);
 
     connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleInfobar);
@@ -338,9 +340,29 @@ void ActionController::onToggleGlowEffect(bool toggled)
         loggingService->logMessage(Priority::Important, "deactivate glow effect");
     }
 
+	auto viewSettings = _model->getSimulationViewSettings();
+    viewSettings.glowEffect = toggled;
+    _simulationViewController->setSettings(viewSettings);
     _mainView->refresh();
 
     loggingService->logMessage(Priority::Unimportant, "toggle glow effect finished");
+}
+
+void ActionController::onToggleMotionEffect(bool toggled)
+{
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (toggled) {
+        loggingService->logMessage(Priority::Important, "activate motion effect");
+    } else {
+        loggingService->logMessage(Priority::Important, "deactivate motion effect");
+    }
+
+    auto viewSettings = _model->getSimulationViewSettings();
+    viewSettings.motionEffect = toggled;
+    _simulationViewController->setSettings(viewSettings);
+    _mainView->refresh();
+
+    loggingService->logMessage(Priority::Unimportant, "toggle motion effect finished");
 }
 
 void ActionController::onToggleEditorMode(bool toggled)
@@ -1237,7 +1259,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 
 void ActionController::settingUpNewSimulation(SimulationConfig const& config)
 {
-    _infoController->setRendering(GeneralInfoController::Rendering::Vector);
+    _infoController->setRendering(GeneralInfoController::Rendering::OpenGL);
 
     auto actions = _model->getActionHolder();
     actions->actionRunSimulation->setChecked(false);
@@ -1269,7 +1291,8 @@ void ActionController::updateActionsEnableState()
 	bool collectionCopied = _model->isCollectionCopied();
 
 	auto actions = _model->getActionHolder();
-    actions->actionEditor->setEnabled(_simulationViewController->getZoomFactor() > Const::MinZoomLevelForEditor - FLOATINGPOINT_MEDIUM_PRECISION);
+    actions->actionEditor->setEnabled(
+        _simulationViewController->getZoomFactor() + FLOATINGPOINT_MEDIUM_PRECISION > Const::MinZoomLevelForEditor);
     actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
     actions->actionCenterSelection->setEnabled(editMode);
@@ -1305,7 +1328,7 @@ void ActionController::setPixelOrVectorView()
 	auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Unimportant, "toggle to vector rendering");
 
-    _infoController->setRendering(GeneralInfoController::Rendering::Vector);
+    _infoController->setRendering(GeneralInfoController::Rendering::OpenGL);
     _simulationViewController->disconnectView();
     _simulationViewController->setActiveScene(ActiveView::OpenGLScene);
     _simulationViewController->connectView();

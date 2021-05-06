@@ -3,7 +3,9 @@
 #include <QObject>
 
 #include "EngineInterface/Descriptions.h"
-#include "Gui/Definitions.h"
+
+#include "SimulationViewSettings.h"
+#include "Definitions.h"
 
 class ActionModel
 	: public QObject
@@ -13,38 +15,40 @@ public:
 	ActionModel(QObject* parent = nullptr);
 	virtual ~ActionModel() = default;
 
-	virtual ActionHolder* getActionHolder() const;
+	ActionHolder* getActionHolder() const;
 
-	virtual QVector2D getPositionDeltaForNewEntity();
+	QVector2D getPositionDeltaForNewEntity();
 
     bool isEditMode() const;
     void setEditMode(bool value);
 
-	virtual bool isEntitySelected() const;
-	virtual void setEntitySelected(bool value);
+	bool isEntitySelected() const;
+	void setEntitySelected(bool value);
 
-	virtual bool isEntityCopied() const;
-	virtual DataDescription const& getCopiedEntity() const;
-	virtual void setCellCopied(CellDescription cell, QVector2D const& vel);
-	virtual void setParticleCopied(ParticleDescription const& value);
+	bool isEntityCopied() const;
+	DataDescription const& getCopiedEntity() const;
+	void setCellCopied(CellDescription cell, QVector2D const& vel);
+	void setParticleCopied(ParticleDescription const& value);
 
-	virtual bool isCellWithTokenSelected() const;
-	virtual void setCellWithTokenSelected(bool value);
+	bool isCellWithTokenSelected() const;
+	void setCellWithTokenSelected(bool value);
 
-	virtual bool isCellWithFreeTokenSelected() const;
-	virtual void setCellWithFreeTokenSelected(bool value);
+	bool isCellWithFreeTokenSelected() const;
+	void setCellWithFreeTokenSelected(bool value);
 
-	virtual bool isTokenCopied() const;
+	bool isTokenCopied() const;
 
-	virtual bool isCollectionSelected() const;
-	virtual void setCollectionSelected(bool value);
+	bool isCollectionSelected() const;
+	void setCollectionSelected(bool value);
 
-	virtual bool isCollectionCopied() const;
-	virtual DataDescription const& getCopiedCollection() const;
-	virtual void setCopiedCollection(DataDescription const& value);
+	bool isCollectionCopied() const;
+	DataDescription const& getCopiedCollection() const;
+	void setCopiedCollection(DataDescription const& value);
 
-	virtual TokenDescription const& getCopiedToken() const;
-	virtual void setCopiedToken(TokenDescription const& value);
+	TokenDescription const& getCopiedToken() const;
+	void setCopiedToken(TokenDescription const& value);
+
+	SimulationViewSettings getSimulationViewSettings() const;
 
 private:
 	ActionHolder* _actions = nullptr;

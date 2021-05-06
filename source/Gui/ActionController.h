@@ -52,8 +52,9 @@ private:
 	Q_SLOT void onToggleEditorMode(bool toggled);
     Q_SLOT void onToggleInfobar(bool toggled);
     Q_SLOT void onToggleDisplayLink(bool toggled);
-    Q_SLOT void onToggleFullscreen(bool toogled);
-    Q_SLOT void onToggleGlowEffect(bool toogled);
+    Q_SLOT void onToggleFullscreen(bool toggled);
+    Q_SLOT void onToggleGlowEffect(bool toggled);
+    Q_SLOT void onToggleMotionEffect(bool toggled);
 
 	Q_SLOT void onNewCell();
 	Q_SLOT void onNewParticle();
