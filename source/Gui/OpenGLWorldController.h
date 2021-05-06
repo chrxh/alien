@@ -66,6 +66,7 @@ private:
     list<QMetaObject::Connection> _connections;
 
     OpenGLWorldScene* _scene = nullptr;
+    SimulationViewSettings _settings;
 
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;

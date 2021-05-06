@@ -216,7 +216,9 @@ void MainView::setupMenuAndToolbar()
     ui->menuSettings->addAction(actions->actionEditSimParameters);
     ui->menuSettings->addAction(actions->actionEditSymbols);
 
-    ui->menuView->addAction(actions->actionEditor);
+    ui->menuEdit->addAction(actions->actionEditor);
+    ui->menuEdit->addAction(actions->actionActionMode);
+
     ui->menuView->addAction(actions->actionMonitor);
     ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionZoomIn);
@@ -276,6 +278,7 @@ void MainView::setupMenuAndToolbar()
 	ui->toolBar->addSeparator();
     ui->toolBar->addAction(actions->actionZoomIn);
 	ui->toolBar->addAction(actions->actionZoomOut);
+    ui->toolBar->addAction(actions->actionActionMode);
     ui->toolBar->addAction(actions->actionEditor);
     ui->toolBar->addAction(actions->actionMonitor);
     ui->toolBar->addSeparator();
