@@ -32,7 +32,7 @@ void main()
             result = vec3(texture(texture1, mirroredCoord).rgb);
         }
         if (motionEffect) {
-            result = result * 0.62 + texture(texture2, texCoord).rgb * 0.38;
+            result = result * 0.55 + texture(texture2, texCoord).rgb * 0.45;
         }
         FragColor = vec4(result, 1.0);
     } else {
