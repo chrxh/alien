@@ -24,7 +24,7 @@ class MonitorView;
 class MetadataManager;
 class AbstractWorldController;
 class OpenGLWorldController;
-class OpenGLScene;
+class OpenGLWorldScene;
 class ItemWorldController;
 class ItemManager;
 class DataRepository;

@@ -30,10 +30,10 @@ public:
         StartupController* versionController);
 
     virtual void initGettingStartedWindow();
+	virtual void initSimulation(SimulationController* controller, SimulationAccess* access);
 
     virtual void refresh();
 
-	virtual void setupEditors(SimulationController* controller, SimulationAccess* access);
 	virtual GeneralInfoController* getInfoController() const;
     virtual MonitorController* getMonitorController() const;
 

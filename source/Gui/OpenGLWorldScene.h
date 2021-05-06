@@ -7,23 +7,22 @@
 #include <QOpenGLTexture>
 
 #include "Definitions.h"
+#include "SimulationViewSettings.h"
 
 class QOpenGLShaderProgram;
 
-class OpenGLScene
+class OpenGLWorldScene
     : public QGraphicsScene
     , protected QOpenGLExtraFunctions
 {
 public:
-    OpenGLScene(
-/*
-        SimulationAccess* access,
-        IntVector2D const& viewSize,
-*/
+    OpenGLWorldScene(
         QOpenGLContext* context,
         QObject* parent = nullptr);
 
     void init(SimulationAccess* access, std::mutex& mutex);
+
+    void setSettings(SimulationViewSettings const& settings);
 
 
     ImageResource getImageResource() const;
@@ -36,6 +35,7 @@ private:
     void updateTexture(IntVector2D const& size);
 
     SimulationAccess* _access;
+    SimulationViewSettings _settings;
     boost::optional<std::mutex&> _mutex;
     ImageResource _imageResource;
 

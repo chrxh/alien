@@ -3,6 +3,7 @@
 #include <QObject>
 
 #include "Definitions.h"
+#include "SimulationViewSettings.h"
 
 class AbstractWorldController : public QObject
 {
@@ -10,6 +11,8 @@ class AbstractWorldController : public QObject
 public:
     AbstractWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent = nullptr);
     virtual ~AbstractWorldController() = default;
+
+    virtual void setSettings(SimulationViewSettings const& settings) = 0;
 
     virtual void connectView() = 0;
     virtual void disconnectView() = 0;

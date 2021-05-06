@@ -20,7 +20,7 @@ public:
 	void setRestrictedTPS(boost::optional<int> tps);
 
     enum class Rendering
-    { Pixel, Vector, Item};
+    { OpenGL, Item};
     void setRendering(Rendering value);
 
 private:
@@ -35,5 +35,5 @@ private:
 	int _tps = 0;
 	double _zoomFactor = 4.0;
     boost::optional<int> _restrictedTPS;
-    Rendering _rendering = Rendering::Vector;
+    Rendering _rendering = Rendering::OpenGL;
 };
