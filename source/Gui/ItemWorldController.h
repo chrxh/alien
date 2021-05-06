@@ -72,6 +72,7 @@ private:
 	void startMarking(QPointF const& scenePos);
 
     QGraphicsScene* _scene = nullptr;
+    SimulationViewSettings _settings;
 
 	list<QMetaObject::Connection> _connections;
 
