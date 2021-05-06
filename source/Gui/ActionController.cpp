@@ -137,6 +137,8 @@ void ActionController::init(
     connect(actions->actionMotionEffect, &QAction::toggled, this, &ActionController::onToggleMotionEffect);
 
     connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
+    connect(actions->actionActionMode, &QAction::toggled, this, &ActionController::onToggleActionMode);
+
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleInfobar);
 	connect(actions->actionEditSimParameters, &QAction::triggered, this, &ActionController::onEditSimulationParameters);
 	connect(actions->actionEditSymbols, &QAction::triggered, this, &ActionController::onEditSymbolMap);
@@ -390,6 +392,23 @@ void ActionController::onToggleEditorMode(bool toggled)
 	Q_EMIT _dataEditor->getContext()->show(toggled);
 
     loggingService->logMessage(Priority::Unimportant, "toggle editor mode finished");
+}
+
+void ActionController::onToggleActionMode(bool toggled)
+{
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    if (toggled) {
+        loggingService->logMessage(Priority::Important, "activate action mode");
+    } else {
+        loggingService->logMessage(Priority::Important, "deactivate action mode");
+    }
+
+    auto viewSettings = _model->getSimulationViewSettings();
+    viewSettings.mode = toggled ? SimulationViewSettings::Mode::ActionMode : SimulationViewSettings::Mode::NavigationMode;
+    _simulationViewController->setSettings(viewSettings);
+    _mainView->refresh();
+
+    loggingService->logMessage(Priority::Unimportant, "toggle action mode finished");
 }
 
 void ActionController::onToggleInfobar(bool toggled)

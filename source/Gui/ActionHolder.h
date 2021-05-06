@@ -27,10 +27,11 @@ public:
 
 	QAction* actionComputationSettings = nullptr;
 	QAction* actionEditSimParameters = nullptr;
-
 	QAction* actionEditSymbols = nullptr;
 
 	QAction* actionEditor = nullptr;
+    QAction* actionActionMode = nullptr;
+
     QAction* actionMonitor = nullptr;
 	QAction* actionZoomIn = nullptr;
 	QAction* actionZoomOut = nullptr;
