@@ -5,6 +5,8 @@
 #include "Base/ServiceLocator.h"
 #include "Base/LoggingService.h"
 
+#include "EngineInterface/ZoomLevels.h"
+
 #include "ActionHolder.h"
 #include "SimulationViewController.h"
 #include "Settings.h"

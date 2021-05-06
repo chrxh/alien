@@ -379,7 +379,7 @@
     <ClCompile Include="..\..\..\source\Gui\OpenGLWorldController.cpp">
       <Filter>Impl\SimulationView\OpenGLWorld</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\OpenGLScene.cpp">
+    <ClCompile Include="..\..\..\source\Gui\OpenGLWorldScene.cpp">
       <Filter>Impl\SimulationView\OpenGLWorld</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\SimulationViewController.cpp">
@@ -441,8 +441,11 @@
     <ClInclude Include="..\..\..\source\Gui\ColorizeDialogController.h">
       <Filter>Impl\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\Gui\OpenGLScene.h">
+    <ClInclude Include="..\..\..\source\Gui\OpenGLWorldScene.h">
       <Filter>Impl\SimulationView\OpenGLWorld</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Gui\SimulationViewSettings.h">
+      <Filter>Impl\SimulationView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

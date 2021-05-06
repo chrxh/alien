@@ -60,6 +60,7 @@
     <ClInclude Include="..\..\..\source\EngineInterface\SimulationParameters.h" />
     <ClInclude Include="..\..\..\source\EngineInterface\SimulationParametersCalculator.h" />
     <ClInclude Include="..\..\..\source\EngineInterface\SimulationParametersParser.h" />
+    <ClInclude Include="..\..\..\source\EngineInterface\ZoomLevels.h" />
     <QtMoc Include="..\..\..\source\EngineInterface\SymbolTable.h" />
     <QtMoc Include="..\..\..\source\EngineInterface\SpaceProperties.h" />
     <QtMoc Include="..\..\..\source\EngineInterface\SimulationMonitor.h" />

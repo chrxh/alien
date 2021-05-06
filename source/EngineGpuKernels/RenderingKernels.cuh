@@ -1,9 +1,11 @@
 #pragma once
 
+#include "EngineInterface/Colors.h"
+#include "EngineInterface/ZoomLevels.h"
+
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "CleanupKernels.cuh"
-#include "EngineInterface/Colors.h"
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
@@ -25,12 +27,10 @@ __device__ __inline__ int2 mapUniversePosToVectorImagePos(float2 const& rectUppe
 
 __device__ __inline__ float2 mapUniversePosToPixelImagePos(float2 const& rectUpperLeft, float2 const& pos, float zoom)
 {
-    float2 offset{
-        toFloat(toInt(rectUpperLeft.x) + 1) - rectUpperLeft.x,
-        toFloat(toInt(rectUpperLeft.y) + 1) - rectUpperLeft.y};
+    float2 offset{rectUpperLeft.x - toFloat(toInt(rectUpperLeft.x)), rectUpperLeft.y - toFloat(toInt(rectUpperLeft.y))};
     return {
-        (toFloat(toInt(pos.x - toInt(rectUpperLeft.x))) + offset.x) * zoom,
-        (toFloat(toInt(pos.y - toInt(rectUpperLeft.y))) + offset.y) * zoom};
+        (toFloat(toInt(pos.x - toInt(rectUpperLeft.x))) - offset.x) * zoom,
+        (toFloat(toInt(pos.y - toInt(rectUpperLeft.y))) - offset.y) * zoom};
 }
 
 __device__ __inline__ unsigned int calcColor(Cell* cell, bool selected)
@@ -306,10 +306,10 @@ __device__ __inline__ void drawPixel(
     auto g = toFloat((color >> 8) & 0xff);
     auto b = toFloat((color >> 16) & 0xff);
  
-    auto intPosX = toInt(pos.x);
-    auto intPosY = toInt(pos.y);
-    auto posFracX = pos.x - intPosX;
-    auto posFracY = pos.y - intPosY;
+    auto intPosX = toInt(pos.x - zoom / 2.0f);
+    auto intPosY = toInt(pos.y - zoom / 2.0f);
+    auto posFracX = pos.x - zoom / 2.0f - intPosX;
+    auto posFracY = pos.y - zoom / 2.0f - intPosY;
     
     auto factor1 = (1.0f - posFracX) * (1.0f - posFracY);
     auto color1 = 0xff000000 | toInt(r * factor1) | (toInt(g * factor1) << 8) | (toInt(b * factor1) << 16);
@@ -335,7 +335,7 @@ __device__ __inline__ void drawPixel(
         for (int y = 0; y <= zoomIntPart + 1; ++y) {
             auto resultPosX = intPosX + x;
             auto resultPosY = intPosY + y;
-            if (resultPosX >= 1 && resultPosX < imageSize.x - 1 && resultPosY >= 1 && resultPosY < imageSize.y - 1) {
+            if (resultPosX >= 5 && resultPosX < imageSize.x - 1 && resultPosY >= 5 && resultPosY < imageSize.y - 1) {
                 auto resultIndex = resultPosX + resultPosY * imageSize.x;
                 if (x == zoomIntPart + 1 || y == zoomIntPart + 1) {
                     addingColor(imageData[resultIndex], colorFrac1);
@@ -446,7 +446,7 @@ __global__ void drawImage(
     unsigned int* targetImage = data.imageData;
 
     KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
-    if (zoom > 3.5) {
+    if (zoom > Const::ZoomLevelForAutomaticVectorViewSwitch) {
         KERNEL_CALL(
             drawClusters_vectorStyle,
             data.size,

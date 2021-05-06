@@ -23,6 +23,8 @@ public:
 
     void init(Notifier* notifier, SimulationController* controller, DataRepository* manipulator);
 
+    void setSettings(SimulationViewSettings const& settings);
+
     void connectView() override;
     void disconnectView() override;
     void refresh() override;

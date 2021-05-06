@@ -25,15 +25,15 @@ SimulationViewController::SimulationViewController(QWidget* parent)
 {
     _simulationViewWidget = new SimulationViewWidget(parent);
 
-    _openGLUniverse = new OpenGLWorldController(_simulationViewWidget, this);
-    _itemUniverse = new ItemWorldController(_simulationViewWidget, this);
-    connect(_openGLUniverse, &OpenGLWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
+    _openGLWorld = new OpenGLWorldController(_simulationViewWidget, this);
+    _itemWorld = new ItemWorldController(_simulationViewWidget, this);
+    connect(_openGLWorld, &OpenGLWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
     connect(
-        _openGLUniverse, &OpenGLWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
-    connect(_openGLUniverse, &OpenGLWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
-    connect(_itemUniverse, &ItemWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
-    connect(_itemUniverse, &ItemWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
-    connect(_itemUniverse, &ItemWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
+        _openGLWorld, &OpenGLWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
+    connect(_openGLWorld, &OpenGLWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
+    connect(_itemWorld, &ItemWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
+    connect(_itemWorld, &ItemWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
+    connect(_itemWorld, &ItemWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
 
     auto startupScene = new QGraphicsScene(this);
     startupScene->setBackgroundBrush(QBrush(Const::UniverseColor));
@@ -55,20 +55,26 @@ void SimulationViewController::init(
 
     _controller = controller;
 
-    _openGLUniverse->init(notifier, controller, access, repository);
-    _itemUniverse->init(notifier, controller, repository);
+    _openGLWorld->init(notifier, controller, access, repository);
+    _itemWorld->init(notifier, controller, repository);
 
-    _openGLUniverse->activate(InitialZoomFactor);
+    _openGLWorld->activate(InitialZoomFactor);
 
     auto size = _controller->getContext()->getSpaceProperties()->getSize();
     auto center = QVector2D{static_cast<float>(size.x) / 2, static_cast<float>(size.y) / 2};
-    _openGLUniverse->centerTo(center);
+    _openGLWorld->centerTo(center);
 
-    _openGLUniverse->connectView();
-    _openGLUniverse->refresh();
+    _openGLWorld->connectView();
+    _openGLWorld->refresh();
     _simulationViewWidget->updateScrollbars(size, center, InitialZoomFactor);
 
     Q_EMIT zoomFactorChanged(InitialZoomFactor);
+}
+
+void SimulationViewController::setSettings(SimulationViewSettings const& settings)
+{
+    _itemWorld->setSettings(settings);
+    _openGLWorld->setSettings(settings);
 }
 
 void SimulationViewController::connectView()
@@ -88,10 +94,10 @@ void SimulationViewController::refresh()
 
 ActiveView SimulationViewController::getActiveView() const
 {
-    if (_openGLUniverse->isActivated()) {
+    if (_openGLWorld->isActivated()) {
         return ActiveView::OpenGLScene;
     }
-    if (_itemUniverse->isActivated()) {
+    if (_itemWorld->isActivated()) {
         return ActiveView::ItemScene;
     }
 
@@ -154,11 +160,11 @@ void SimulationViewController::toggleCenterSelection(bool value)
 
 AbstractWorldController* SimulationViewController::getActiveUniverseView() const
 {
-    if (_openGLUniverse->isActivated()) {
-        return _openGLUniverse;
+    if (_openGLWorld->isActivated()) {
+        return _openGLWorld;
     }
-    if (_itemUniverse->isActivated()) {
-        return _itemUniverse;
+    if (_itemWorld->isActivated()) {
+        return _itemWorld;
     }
 
     THROW_NOT_IMPLEMENTED();
@@ -167,10 +173,10 @@ AbstractWorldController* SimulationViewController::getActiveUniverseView() const
 AbstractWorldController* SimulationViewController::getView(ActiveView activeView) const
 {
     if (ActiveView::OpenGLScene == activeView) {
-        return _openGLUniverse;
+        return _openGLWorld;
     }
     if (ActiveView::ItemScene == activeView) {
-        return _itemUniverse;
+        return _itemWorld;
     }
 
     THROW_NOT_IMPLEMENTED();

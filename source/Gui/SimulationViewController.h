@@ -4,9 +4,10 @@
 
 #include <QVector2D>
 
-#include "Definitions.h"
 #include "EngineInterface/Definitions.h"
 
+#include "SimulationViewSettings.h"
+#include "Definitions.h"
 
 class SimulationViewController : public QObject
 {
@@ -19,6 +20,8 @@ public:
 
     void
     init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* manipulator);
+
+    void setSettings(SimulationViewSettings const& settings);
 
     void connectView();
     void disconnectView();
@@ -48,8 +51,8 @@ private:
 
     SimulationViewWidget* _simulationViewWidget = nullptr;
 
-    OpenGLWorldController* _openGLUniverse = nullptr;
-    ItemWorldController* _itemUniverse = nullptr;
+    OpenGLWorldController* _openGLWorld = nullptr;
+    ItemWorldController* _itemWorld = nullptr;
 
     qreal _posIncrement = 0.0;
 };

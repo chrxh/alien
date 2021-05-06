@@ -8,10 +8,6 @@
 
 namespace Const
 {
-    auto const ZoomLevelForAutomaticEditorSwitch = 16.0;
-    auto const ZoomLevelForAutomaticVectorViewSwitch = 4.0;
-    auto const MinZoomLevelForEditor = 4.0;
-
 	auto const ContinuousZoomInterval = std::chrono::milliseconds(20);
     auto const OpenGLViewUpdateInterval = std::chrono::milliseconds(20);
     auto const ViewUpdates = 4;

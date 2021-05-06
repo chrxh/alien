@@ -180,5 +180,8 @@
     <ClInclude Include="..\..\..\source\EngineInterface\SimulationParameters.h">
       <Filter>Interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\EngineInterface\ZoomLevels.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

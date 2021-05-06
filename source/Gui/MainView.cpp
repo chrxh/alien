@@ -103,7 +103,8 @@ void MainView::init(
 
 	_infoController->init(ui->infoLabel, mainController);
 	_monitor->init(_controller);
-	_actions->init(_controller, 
+    _actions->init(
+        _controller, 
         _model, 
         this, 
         _simulationViewController, 
@@ -138,7 +139,7 @@ void MainView::refresh()
 	_simulationViewController->refresh();
 }
 
-void MainView::setupEditors(SimulationController * controller, SimulationAccess* access)
+void MainView::initSimulation(SimulationController * controller, SimulationAccess* access)
 {
 	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
@@ -223,7 +224,10 @@ void MainView::setupMenuAndToolbar()
     ui->menuView->addAction(actions->actionDisplayLink);
     ui->menuView->addAction(actions->actionFullscreen);
     ui->menuView->addSeparator();
-    ui->menuView->addAction(actions->actionGlowEffect);
+    auto visualEffects = new QMenu("Visual effects", this);
+    visualEffects->addAction(actions->actionGlowEffect);
+    visualEffects->addAction(actions->actionMotionEffect);
+    ui->menuView->addMenu(visualEffects);
     ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionShowCellInfo);
     ui->menuView->addAction(actions->actionCenterSelection);
