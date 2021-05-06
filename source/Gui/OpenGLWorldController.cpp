@@ -24,7 +24,7 @@
 
 #include "Notifier.h"
 #include "Settings.h"
-#include "OpenGLScene.h"
+#include "OpenGLWorldScene.h"
 #include "SimulationViewWidget.h"
 
 OpenGLWorldController::OpenGLWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent)
@@ -62,13 +62,18 @@ void OpenGLWorldController::init(
 
     if (!_scene) {
         _viewport->makeCurrent();
-        _scene = new OpenGLScene(_viewport->context(), this);
+        _scene = new OpenGLWorldScene(_viewport->context(), this);
     }
     _scene->init(access, repository->getImageMutex());
     _scene->resize({width, height});
     _scene->update();
     _scene->installEventFilter(this);
     graphicsView->installEventFilter(this);
+}
+
+void OpenGLWorldController::setSettings(SimulationViewSettings const& settings)
+{
+    _scene->setSettings(settings);
 }
 
 void OpenGLWorldController::connectView()

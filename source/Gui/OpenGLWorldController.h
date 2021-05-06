@@ -9,7 +9,7 @@
 #include "AbstractWorldController.h"
 #include "Definitions.h"
 
-class OpenGLScene;
+class OpenGLWorldScene;
 class QResizeEvent;
 
 class OpenGLWorldController : public AbstractWorldController
@@ -24,6 +24,8 @@ public:
         SimulationController* controller,
         SimulationAccess* access,
         DataRepository* repository);
+
+    void setSettings(SimulationViewSettings const& settings);
 
     void connectView() override;
     void disconnectView() override;
@@ -63,7 +65,7 @@ private:
 
     list<QMetaObject::Connection> _connections;
 
-    OpenGLScene* _scene = nullptr;
+    OpenGLWorldScene* _scene = nullptr;
 
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;

@@ -1,5 +1,7 @@
 ﻿#include <QTimer>
 
+#include <EngineInterface/ZoomLevels.h>
+
 #include "MainController.h"
 #include "SimulationConfig.h"
 #include "GeneralInfoController.h"
@@ -19,7 +21,7 @@ void GeneralInfoController::init(QLabel * infoLabel, MainController* mainControl
 	_mainController = mainController;
     _oneSecondTimer->stop();
     _oneSecondTimer->start(1000);
-    _rendering = Rendering::Vector;
+    _rendering = Rendering::OpenGL;
 
     _infoLabel->setFont(GuiSettings::getGlobalFont());
 }
@@ -65,9 +67,9 @@ void GeneralInfoController::updateInfoLabel()
 
     if (auto config = _mainController->getSimulationConfig()) {
         renderModeValueString = [&] {
-            if (Rendering::Pixel == _rendering) {
+            if (Rendering::OpenGL == _rendering && _zoomFactor < Const::ZoomLevelForAutomaticVectorViewSwitch) {
                 return QString("pixel");
-            } else if (Rendering::Vector == _rendering) {
+            } else if (Rendering::OpenGL == _rendering && _zoomFactor >= Const::ZoomLevelForAutomaticVectorViewSwitch) {
                 return QString("vector");
             }
             return QString("item");
@@ -75,15 +77,15 @@ void GeneralInfoController::updateInfoLabel()
         worldSizeValueString = QString("%1 x %2").arg(
             StringHelper::generateFormattedIntString(config->universeSize.x, true),
             StringHelper::generateFormattedIntString(config->universeSize.y, true));
-        zoomLevelValueString = QString("%1x").arg(_zoomFactor);
+        zoomLevelValueString = QString("%1").arg(toInt(_zoomFactor)) + QString(".%1x").arg(toInt(_zoomFactor * 10) % 10);
         timestepValueString = StringHelper::generateFormattedIntString(_mainController->getTimestep(), true);
         tpsValueString = StringHelper::generateFormattedIntString(_tps, true);
     }
 
     auto renderModeColorString = [&] {
-        if (Rendering::Pixel == _rendering) {
+        if (Rendering::OpenGL == _rendering && _zoomFactor < Const::ZoomLevelForAutomaticVectorViewSwitch) {
             return QString("<font color = #FFB080>");
-        } else if (Rendering::Vector == _rendering) {
+        } else if (Rendering::OpenGL == _rendering && _zoomFactor >= Const::ZoomLevelForAutomaticVectorViewSwitch) {
             return QString("<font color = #B0FF80>");
         }
         return QString("<font color = #80B0FF>");

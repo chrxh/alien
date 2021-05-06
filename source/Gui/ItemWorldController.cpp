@@ -57,6 +57,11 @@ void ItemWorldController::init(Notifier* notifier, SimulationController* control
     CATCH;
 }
 
+void ItemWorldController::setSettings(SimulationViewSettings const& settings)
+{
+
+}
+
 void ItemWorldController::connectView()
 {
     TRY;
