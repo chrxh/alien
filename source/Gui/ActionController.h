@@ -50,6 +50,8 @@ private:
 	Q_SLOT void onEditSymbolMap();
 
 	Q_SLOT void onToggleEditorMode(bool toggled);
+    Q_SLOT void onToggleActionMode(bool toggled);
+
     Q_SLOT void onToggleInfobar(bool toggled);
     Q_SLOT void onToggleDisplayLink(bool toggled);
     Q_SLOT void onToggleFullscreen(bool toggled);
