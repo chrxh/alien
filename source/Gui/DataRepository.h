@@ -57,6 +57,7 @@ public:
 
     virtual void updateCluster(ClusterDescription const& cluster);
     virtual void updateParticle(ParticleDescription const& particle);
+    virtual void updateData(DataDescription const& data);
 
     virtual bool isInSelection(list<uint64_t> const& ids) const;
     virtual bool isInSelection(uint64_t id) const;  //id can mean cell or particle id

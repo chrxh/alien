@@ -76,13 +76,14 @@ private:
 	Q_SLOT void onNewHexagon();
     Q_SLOT void onNewDisc();
 	Q_SLOT void onNewParticles();
-    Q_SLOT void onColorizeSelection();
     Q_SLOT void onLoadCollection();
 	Q_SLOT void onSaveCollection();
 	Q_SLOT void onCopyCollection();
 	Q_SLOT void onPasteCollection();
 	Q_SLOT void onDeleteSelection();
 	Q_SLOT void onDeleteExtendedSelection();
+    Q_SLOT void onColorizeSelection();
+    Q_SLOT void onGenerateBranchNumbers();
 	Q_SLOT void onRandomMultiplier();
 	Q_SLOT void onGridMultiplier();
 

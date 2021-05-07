@@ -82,6 +82,7 @@ void StartupController::fadeout()
     if (100 == _fadeoutProgress) {
         delete _graphicsView;
         delete _timer;
+        _newVersionTextItem = nullptr;
     }
     ++_fadeoutProgress;
 }
@@ -89,7 +90,7 @@ void StartupController::fadeout()
 void StartupController::currentVersionReceived(string currentVersion)
 {
     auto currentVersionQString = QString::fromStdString(currentVersion);
-    if (_thisVersion != currentVersionQString) {
+    if (_thisVersion != currentVersionQString && _newVersionTextItem) {
 
         _newVersionTextItem->setText(QString("(newer version %1 available)").arg(currentVersionQString));
 
