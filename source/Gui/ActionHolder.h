@@ -58,14 +58,15 @@ public:
 	QAction* actionNewHexagon = nullptr;
     QAction* actionNewParticles = nullptr;
     QAction* actionNewDisc = nullptr;
-    QAction* actionColorizeSel = nullptr;
 	QAction* actionLoadCol = nullptr;
 	QAction* actionSaveCol = nullptr;
 	QAction* actionCopyCol = nullptr;
 	QAction* actionPasteCol = nullptr;
 	QAction* actionDeleteCol = nullptr;
 	QAction* actionDeleteSel = nullptr;
-	QAction* actionRandomMultiplier = nullptr;
+    QAction* actionColorizeSel = nullptr;
+    QAction* actionGenerateBranchNumbers = nullptr;
+    QAction* actionRandomMultiplier = nullptr;
 	QAction* actionGridMultiplier = nullptr;
 
     QAction* actionMostFrequentCluster = nullptr;

@@ -100,6 +100,11 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionActionMode->setCheckable(true);
     actionActionMode->setChecked(false);
     actionActionMode->setEnabled(true);
+    QIcon iconActionMode;
+    iconActionMode.addFile(":/Icons/main/navigation mode.png", QSize(), QIcon::Normal, QIcon::On);
+    iconActionMode.addFile(":/Icons/main/action mode.png", QSize(), QIcon::Normal, QIcon::Off);
+    actionActionMode->setIcon(iconActionMode);
+    actionActionMode->setIconVisibleInMenu(false);
 
 	actionMonitor = new QAction("Info bar", this);
 	actionMonitor->setEnabled(true);
@@ -241,10 +246,6 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionNewParticles = new QAction("Add particles", this);
 	actionNewParticles->setEnabled(true);
 
-	actionColorizeSel = new QAction("Colorize selection", this);
-    actionColorizeSel->setEnabled(true);
-    actionColorizeSel->setEnabled(false);
-
 	actionLoadCol = new QAction("Load", this);
 	actionLoadCol->setEnabled(true);
 
@@ -275,6 +276,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionDeleteCol->setIconVisibleInMenu(false);
 	actionDeleteCol->setEnabled(false);
 	actionDeleteCol->setToolTip("delete extended selection");
+
+    actionColorizeSel = new QAction("Colorize", this);
+    actionColorizeSel->setEnabled(false);
+
+    actionGenerateBranchNumbers = new QAction("Generate branch numbers", this);
+    actionGenerateBranchNumbers->setEnabled(false);
 
 	actionRandomMultiplier = new QAction("Random multiplier", this);
 	actionRandomMultiplier->setEnabled(false);
