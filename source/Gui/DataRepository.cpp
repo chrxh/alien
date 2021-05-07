@@ -507,6 +507,22 @@ void DataRepository::setSelection(list<uint64_t> const& cellIds, list<uint64_t> 
     CATCH;
 }
 
+void DataRepository::updateData(DataDescription const& data)
+{
+    TRY;
+    if (data.clusters) {
+        for (auto const& cluster : *data.clusters) {
+            updateCluster(cluster);
+        }
+    }
+    if (data.particles) {
+        for (auto const& particle : *data.particles) {
+            updateParticle(particle);
+        }
+    }
+    CATCH;
+}
+
 bool DataRepository::isInSelection(list<uint64_t> const& ids) const
 {
     for (uint64_t id : ids) {

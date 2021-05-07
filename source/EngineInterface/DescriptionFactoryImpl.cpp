@@ -16,20 +16,10 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
     std::vector<std::vector<CellDescription>> cellMatrix(2 * layers - 1, std::vector<CellDescription>(2 * layers - 1));
     list<CellDescription> cells;
 
-    int maxCon = 6;
     uint64_t id = 0;
     double incY = std::sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < layers; ++j) {
         for (int i = -(layers - 1); i < layers - j; ++i) {
-
-            //check if cell is on boundary
-            if (((i == -(layers - 1)) || (i == layers - j - 1)) && ((j == 0) || (j == layers - 1))) {
-                maxCon = 3;
-            } else if ((i == -(layers - 1)) || (i == layers - j - 1) || (j == layers - 1)) {
-                maxCon = 4;
-            } else {
-                maxCon = 6;
-            }
 
             //create cell: upper layer
             cellMatrix[layers - 1 + i][layers - 1 - j] =
@@ -40,7 +30,7 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
                         parameters._centerPosition
                         + QVector2D{static_cast<float>(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), 
                                     static_cast<float>(-j * incY)})
-                    .setMaxConnections(maxCon)
+                    .setMaxConnections(parameters._maxConnections)
                     .setFlagTokenBlocked(false)
                     .setTokenBranchNumber(0)
                     .setMetadata(CellMetadata().setColor(parameters._colorCode))
@@ -66,7 +56,7 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
                         .setPos(
                             parameters._centerPosition
                             + QVector2D{static_cast<float>(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), static_cast<float>(+j * incY)})
-                        .setMaxConnections(maxCon)
+                        .setMaxConnections(parameters._maxConnections)
                         .setFlagTokenBlocked(false)
                         .setTokenBranchNumber(0)
                         .setMetadata(CellMetadata().setColor(parameters._colorCode))
@@ -105,8 +95,8 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters
     return hexagon;
 }
 
-ClusterDescription DescriptionFactoryImpl::createUnconnectedCircle(
-    CreateCircleParameters const& parameters) const
+ClusterDescription DescriptionFactoryImpl::createUnconnectedDisc(
+    CreateDiscParameters const& parameters) const
 {
     auto circle =
         ClusterDescription().setVel({0, 0}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata());
@@ -136,4 +126,12 @@ ClusterDescription DescriptionFactoryImpl::createUnconnectedCircle(
     circle.setPos(circle.getClusterPosFromCells());
 
     return circle;
+}
+
+void DescriptionFactoryImpl::generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> cellIds) const
+{
+    DescriptionNavigator navigator;
+    navigator.update(data);
+
+
 }
