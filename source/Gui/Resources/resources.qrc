@@ -30,5 +30,7 @@
         <file>Version.txt</file>
         <file>Shader/FragmentShader.glsl</file>
         <file>Shader/VertexShader.glsl</file>
+        <file>Icons/main/action mode.png</file>
+        <file>Icons/main/navigation mode.png</file>
     </qresource>
 </RCC>

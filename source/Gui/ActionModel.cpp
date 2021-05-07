@@ -72,6 +72,16 @@ void ActionModel::setParticleCopied(ParticleDescription const & value)
 	_copiedEntity.addParticle(value);
 }
 
+bool ActionModel::areCellsSelected() const
+{
+    return _cellsSelected;
+}
+
+void ActionModel::setCellsSelected(bool value)
+{
+    _cellsSelected = value;
+}
+
 bool ActionModel::isCellWithTokenSelected() const
 {
 	return _cellWithTokenSelected;

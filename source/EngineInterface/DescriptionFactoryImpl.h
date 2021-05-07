@@ -9,6 +9,7 @@ public:
 
     ClusterDescription createHexagon(CreateHexagonParameters const& parameters) const override;
 
-    ClusterDescription createUnconnectedCircle(CreateCircleParameters const& parameters)
-        const override;
+    ClusterDescription createUnconnectedDisc(CreateDiscParameters const& parameters) const override;
+
+    void generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> cellIds) const override;
 };

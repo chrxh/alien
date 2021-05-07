@@ -30,13 +30,16 @@ public:
 	void setCellCopied(CellDescription cell, QVector2D const& vel);
 	void setParticleCopied(ParticleDescription const& value);
 
+	bool areCellsSelected() const;
+    void setCellsSelected(bool value);
+
 	bool isCellWithTokenSelected() const;
 	void setCellWithTokenSelected(bool value);
 
 	bool isCellWithFreeTokenSelected() const;
-	void setCellWithFreeTokenSelected(bool value);
+    void setCellWithFreeTokenSelected(bool value);
 
-	bool isTokenCopied() const;
+    bool isTokenCopied() const;
 
 	bool isCollectionSelected() const;
 	void setCollectionSelected(bool value);
@@ -57,6 +60,7 @@ private:
 	bool _isEditMode = false;
 	double _delta = 0.0;
 	bool _entitySelected = false;
+    bool _cellsSelected = false;
 	bool _cellWithTokenSelected = false;
 	bool _cellWithFreeTokenSelected = false;
 	bool _collectionSelected = false;

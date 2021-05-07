@@ -262,6 +262,7 @@ void MainView::setupMenuAndToolbar()
     ui->menuCollection->addAction(actions->actionDeleteCol);
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionColorizeSel);
+    ui->menuCollection->addAction(actions->actionGenerateBranchNumbers);
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionRandomMultiplier);
     ui->menuCollection->addAction(actions->actionGridMultiplier);

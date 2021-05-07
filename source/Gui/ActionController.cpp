@@ -161,14 +161,16 @@ void ActionController::init(
 	connect(actions->actionNewHexagon, &QAction::triggered, this, &ActionController::onNewHexagon);
     connect(actions->actionNewDisc, &QAction::triggered, this, &ActionController::onNewDisc);
     connect(actions->actionNewParticles, &QAction::triggered, this, &ActionController::onNewParticles);
-    connect(actions->actionColorizeSel, &QAction::triggered, this, &ActionController::onColorizeSelection);
     connect(actions->actionLoadCol, &QAction::triggered, this, &ActionController::onLoadCollection);
 	connect(actions->actionSaveCol, &QAction::triggered, this, &ActionController::onSaveCollection);
 	connect(actions->actionCopyCol, &QAction::triggered, this, &ActionController::onCopyCollection);
 	connect(actions->actionPasteCol, &QAction::triggered, this, &ActionController::onPasteCollection);
 	connect(actions->actionDeleteSel, &QAction::triggered, this, &ActionController::onDeleteSelection);
 	connect(actions->actionDeleteCol, &QAction::triggered, this, &ActionController::onDeleteExtendedSelection);
-	connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
+    connect(actions->actionColorizeSel, &QAction::triggered, this, &ActionController::onColorizeSelection);
+    connect(
+        actions->actionGenerateBranchNumbers, &QAction::triggered, this, &ActionController::onGenerateBranchNumbers);
+    connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
     connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
@@ -1042,16 +1044,9 @@ void ActionController::onNewRectangle()
 		for (int x = 0; x < size.x; ++x) {
 			vector<CellDescription> cellRow;
 			for (int y = 0; y < size.y; ++y) {
-				int maxConn = 4;
-				if (x == 0 || x == size.x - 1) {
-					--maxConn;
-				}
-				if (y == 0 || y == size.y - 1) {
-					--maxConn;
-				}
 				cellRow.push_back(CellDescription().setId(++id).setEnergy(energy)
 					.setPos({ static_cast<float>(x), static_cast<float>(y) })
-					.setMaxConnections(maxConn).setFlagTokenBlocked(false)
+					.setMaxConnections(4).setFlagTokenBlocked(false)
 					.setTokenBranchNumber(0).setMetadata(CellMetadata().setColor(colorCode))
 					.setCellFeature(CellFeatureDescription()));
 			}
@@ -1137,7 +1132,7 @@ void ActionController::onNewDisc()
 
         auto factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
         auto circle =
-            factory->createUnconnectedCircle(DescriptionFactory::CreateCircleParameters()
+            factory->createUnconnectedDisc(DescriptionFactory::CreateDiscParameters()
                                                  .outerRadius(dialog.getOuterRadius())
                                                  .innerRadius(dialog.getInnerRadius())
                                                  .cellEnergy(dialog.getCellEnergy())
@@ -1189,6 +1184,22 @@ void ActionController::onColorizeSelection()
 
         loggingService->logMessage(Priority::Unimportant, "colorize selection finished");
     }
+}
+
+void ActionController::onGenerateBranchNumbers()
+{
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "generate branch numbers");
+
+	auto extendedSelection = _repository->getExtendedSelection();
+    auto selectedCellIds = _repository->getSelectedCellIds();
+
+    auto factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+    factory->generateBranchNumbers(extendedSelection, selectedCellIds);
+
+	_repository->updateData(extendedSelection);
+
+    loggingService->logMessage(Priority::Unimportant, "generate branch numbers finished");
 }
 
 void ActionController::onShowAbout()
@@ -1272,6 +1283,7 @@ void ActionController::receivedNotifications(set<Receiver> const & targets)
 	_model->setCellWithTokenSelected(tokenOfSelectedCell > 0);
 	_model->setCellWithFreeTokenSelected(freeTokenOfSelectedCell > 0);
 	_model->setCollectionSelected(selectedCells > 0 || selectedParticles > 0);
+    _model->setCellsSelected(selectedCells > 0);
 
 	updateActionsEnableState();
 }
@@ -1308,6 +1320,7 @@ void ActionController::updateActionsEnableState()
 	bool tokenCopied = _model->isTokenCopied();
 	bool collectionSelected = _model->isCollectionSelected();
 	bool collectionCopied = _model->isCollectionCopied();
+    bool cellsSelected = _model->areCellsSelected();
 
 	auto actions = _model->getActionHolder();
     actions->actionEditor->setEnabled(
@@ -1331,14 +1344,15 @@ void ActionController::updateActionsEnableState()
 	actions->actionNewRectangle->setEnabled(true);
 	actions->actionNewHexagon->setEnabled(true);
 	actions->actionNewParticles->setEnabled(true);
-    actions->actionColorizeSel->setEnabled(collectionSelected);
     actions->actionLoadCol->setEnabled(true);
 	actions->actionSaveCol->setEnabled(editMode && collectionSelected);
 	actions->actionCopyCol->setEnabled(editMode && collectionSelected);
 	actions->actionPasteCol->setEnabled(collectionCopied);
 	actions->actionDeleteSel->setEnabled(editMode && collectionSelected);
 	actions->actionDeleteCol->setEnabled(editMode && collectionSelected);
-	actions->actionRandomMultiplier->setEnabled(collectionSelected);
+    actions->actionColorizeSel->setEnabled(collectionSelected);
+    actions->actionGenerateBranchNumbers->setEnabled(cellsSelected);
+    actions->actionRandomMultiplier->setEnabled(collectionSelected);
 	actions->actionGridMultiplier->setEnabled(collectionSelected);
 }
 
