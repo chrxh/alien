@@ -76,8 +76,10 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     int h, s, l;
     color.getHsl(&h, &s, &l);
+
+    //fill color (brush)
     if (!isConnectable()) {
-        l = max(0, l - 60);
+        l = max(0, l - 30);
 	}
     if (CellItem::FOCUS_CELL == _focusState) {
         l = 190;
@@ -88,13 +90,19 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
     color.setHsl(h, s, l);
     painter->setBrush(QBrush(color));
 
+    //boundary color (pen)
     if (_focusState == NO_FOCUS) {
         l = max(0, l - 60);
         color.setHsl(h, s, l);
-        painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
-    } else {
-        painter->setPen(QPen(QBrush(Const::ClusterPenFocusColor), CoordinateSystem::modelToScene(0.05)));
     }
+    if (_focusState == FOCUS_CLUSTER) {
+        l = min(255, l + 15);
+        color.setHsl(h, s, l);
+    }
+    if (_focusState == FOCUS_CELL) {
+        color.setHsl(h, s, 255);
+    }
+    painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
 
     //draw cell
     if( (_focusState == NO_FOCUS) || (_focusState == FOCUS_CLUSTER) )
