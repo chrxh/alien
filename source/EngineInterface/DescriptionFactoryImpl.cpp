@@ -128,10 +128,50 @@ ClusterDescription DescriptionFactoryImpl::createUnconnectedDisc(
     return circle;
 }
 
-void DescriptionFactoryImpl::generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> cellIds) const
+void DescriptionFactoryImpl::generateBranchNumbers(
+    SimulationParameters const& parameters,
+    DataDescription& data,
+    std::unordered_set<uint64_t> const& cellIds) const
 {
     DescriptionNavigator navigator;
     navigator.update(data);
 
+    std::set<uint64_t> visitedCellIds;
+    std::set<uint64_t> currentCellIds(cellIds.begin(), cellIds.end());
+    int branchNumber = 0;
 
+    int origNumVisitedCells = 0;
+    do {
+        std::set<uint64_t> adjacentCellIds;
+        for (auto const& cellId : currentCellIds) {
+            auto clusterIndex = navigator.clusterIndicesByCellIds.at(cellId);
+            auto cellIndex = navigator.cellIndicesByCellIds.at(cellId);
+            auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
+            cell.setTokenBranchNumber(branchNumber);
+
+            for (auto const& connectingCellId : *cell.connectingCells) {
+                if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()) {
+                    adjacentCellIds.insert(connectingCellId);
+                    break;
+                }
+            }
+//            adjacentCellIds.insert(cell.connectingCells->begin(), cell.connectingCells->end());
+        }
+
+        origNumVisitedCells = visitedCellIds.size();
+        visitedCellIds.insert(currentCellIds.begin(), currentCellIds.end());
+
+/*
+        std::set<uint64_t> differenceCellIds;
+        std::set_difference(
+            adjacentCellIds.begin(),
+            adjacentCellIds.end(),
+            visitedCellIds.begin(),
+            visitedCellIds.end(),
+            std::inserter(differenceCellIds, differenceCellIds.begin()));
+*/
+
+        currentCellIds = adjacentCellIds;
+        branchNumber = (branchNumber + 1) % parameters.cellMaxTokenBranchNumber;
+    } while (origNumVisitedCells != visitedCellIds.size());
 }
