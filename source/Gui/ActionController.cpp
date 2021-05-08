@@ -1195,9 +1195,13 @@ void ActionController::onGenerateBranchNumbers()
     auto selectedCellIds = _repository->getSelectedCellIds();
 
     auto factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-    factory->generateBranchNumbers(extendedSelection, selectedCellIds);
+    factory->generateBranchNumbers(_mainModel->getSimulationParameters(), extendedSelection, selectedCellIds);
 
 	_repository->updateData(extendedSelection);
+
+    Q_EMIT _notifier->notifyDataRepositoryChanged(
+        {Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController},
+        UpdateDescription::All);
 
     loggingService->logMessage(Priority::Unimportant, "generate branch numbers finished");
 }
