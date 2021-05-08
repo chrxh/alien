@@ -85,7 +85,7 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
         l = 190;
     }
     if (CellItem::FOCUS_CLUSTER == _focusState) {
-        l = min(255, l + 40);
+        l = min(255, l + 20);
     }
     color.setHsl(h, s, l);
     painter->setBrush(QBrush(color));
