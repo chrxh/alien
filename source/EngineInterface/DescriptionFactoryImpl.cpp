@@ -139,7 +139,6 @@ void DescriptionFactoryImpl::generateBranchNumbers(
     std::set<uint64_t> visitedCellIds;
     std::set<uint64_t> currentCellIds(cellIds.begin(), cellIds.end());
     int branchNumber = 0;
-
     int origNumVisitedCells = 0;
     do {
         std::set<uint64_t> adjacentCellIds;
@@ -150,26 +149,16 @@ void DescriptionFactoryImpl::generateBranchNumbers(
             cell.setTokenBranchNumber(branchNumber);
 
             for (auto const& connectingCellId : *cell.connectingCells) {
-                if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()) {
+                if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()
+                    && currentCellIds.find(connectingCellId) == currentCellIds.end()) {
                     adjacentCellIds.insert(connectingCellId);
                     break;
                 }
             }
-//            adjacentCellIds.insert(cell.connectingCells->begin(), cell.connectingCells->end());
         }
 
         origNumVisitedCells = visitedCellIds.size();
         visitedCellIds.insert(currentCellIds.begin(), currentCellIds.end());
-
-/*
-        std::set<uint64_t> differenceCellIds;
-        std::set_difference(
-            adjacentCellIds.begin(),
-            adjacentCellIds.end(),
-            visitedCellIds.begin(),
-            visitedCellIds.end(),
-            std::inserter(differenceCellIds, differenceCellIds.begin()));
-*/
 
         currentCellIds = adjacentCellIds;
         branchNumber = (branchNumber + 1) % parameters.cellMaxTokenBranchNumber;

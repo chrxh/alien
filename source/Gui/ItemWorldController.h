@@ -49,6 +49,9 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
 private:
+    void addSelection(QPointF const& scenePos);
+    void startNewSelection(QPointF const& scenePos);
+
     void updateScrollbars();
     void resize(QResizeEvent* event);
     void centerTo(QVector2D const& worldPosition, IntVector2D const& viewPos);
