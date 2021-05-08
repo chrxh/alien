@@ -32,5 +32,8 @@ public:
     virtual ClusterDescription createUnconnectedDisc(CreateDiscParameters const& parameters)
         const = 0;
 
-    virtual void generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> cellIds) const = 0;
+    virtual void generateBranchNumbers(
+        SimulationParameters const& parameters,
+        DataDescription& data,
+        std::unordered_set<uint64_t> const& cellIds) const = 0;
 };

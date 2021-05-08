@@ -11,5 +11,8 @@ public:
 
     ClusterDescription createUnconnectedDisc(CreateDiscParameters const& parameters) const override;
 
-    void generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> cellIds) const override;
+    void generateBranchNumbers(
+        SimulationParameters const& parameters,
+        DataDescription& data,
+        std::unordered_set<uint64_t> const& cellIds) const override;
 };
