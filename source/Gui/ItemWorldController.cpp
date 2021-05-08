@@ -189,6 +189,70 @@ void ItemWorldController::centerTo(QVector2D const& worldPosition, IntVector2D c
     CATCH;
 }
 
+void ItemWorldController::addSelection(QPointF const& scenePos)
+{
+    TRY;
+    auto itemsClicked = _scene->items(scenePos);
+    QList<QGraphicsItem*> frontItem =
+        !itemsClicked.empty() ? QList<QGraphicsItem*>({itemsClicked.front()}) : QList<QGraphicsItem*>();
+    auto newSelectedCellIds = getSelectionFromItems(frontItem).cellIds;
+    auto selectedCellIds = _repository->getSelectedCellIds();
+    selectedCellIds.insert(newSelectedCellIds.begin(), newSelectedCellIds.end());
+
+    auto selectedParticleIds = _repository->getSelectedParticleIds();
+
+    std::list<uint64_t> selectedCellIdList(selectedCellIds.begin(), selectedCellIds.end());
+    std::list<uint64_t> selectedParticleIdList(selectedParticleIds.begin(), selectedParticleIds.end());
+    _repository->setSelection(selectedCellIdList, selectedParticleIdList);
+
+    updateItems();
+
+    Q_EMIT _notifier->notifyDataRepositoryChanged(
+        {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::AllExceptToken);
+    CATCH;
+}
+
+namespace
+{
+    bool clickedOnSpace(QList<QGraphicsItem*> const& items)
+    {
+        for (auto item : items) {
+            if (qgraphicsitem_cast<CellItem*>(item) || qgraphicsitem_cast<ParticleItem*>(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+void ItemWorldController::startNewSelection(QPointF const& scenePos)
+{
+    TRY;
+    auto itemsClicked = _scene->items(scenePos);
+    QList<QGraphicsItem*> frontItem =
+        !itemsClicked.empty() ? QList<QGraphicsItem*>({itemsClicked.front()}) : QList<QGraphicsItem*>();
+    Selection selection = getSelectionFromItems(frontItem);
+
+    bool alreadySelected =
+        _repository->isInSelection(selection.cellIds) && _repository->isInSelection(selection.particleIds);
+    if (!alreadySelected) {
+        delegateSelection(selection);
+    }
+
+    if (clickedOnSpace(itemsClicked)) {
+        startMarking(scenePos);
+    }
+
+    if (alreadySelected) {
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::AllExceptToken);
+    } else {
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::All);
+    }
+    CATCH;
+}
+
 void ItemWorldController::updateScrollbars()
 {
     _simulationViewWidget->updateScrollbars(
@@ -335,19 +399,6 @@ void ItemWorldController::startMarking(QPointF const& scenePos)
     CATCH;
 }
 
-namespace
-{
-	bool clickedOnSpace(QList<QGraphicsItem*> const &items)
-	{
-		for (auto item : items) {
-			if (qgraphicsitem_cast<CellItem*>(item) || qgraphicsitem_cast<ParticleItem*>(item)) {
-				return false;
-			}
-		}
-		return true;
-	}
-}
-
 bool ItemWorldController::eventFilter(QObject * object, QEvent * event)
 {
     TRY;
@@ -397,28 +448,11 @@ void ItemWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
         }
     }
     if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        _mouseButtonPressed = true;
-        auto itemsClicked = _scene->items(event->scenePos());
-        QList<QGraphicsItem*> frontItem =
-            !itemsClicked.empty() ? QList<QGraphicsItem*>({itemsClicked.front()}) : QList<QGraphicsItem*>();
-        Selection selection = getSelectionFromItems(frontItem);
-
-        bool alreadySelected =
-            _repository->isInSelection(selection.cellIds) && _repository->isInSelection(selection.particleIds);
-        if (!alreadySelected) {
-            delegateSelection(selection);
-        }
-
-        if (clickedOnSpace(itemsClicked)) {
-            startMarking(event->scenePos());
-        }
-
-        if (alreadySelected) {
-            Q_EMIT _notifier->notifyDataRepositoryChanged(
-                {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::AllExceptToken);
+        if (Qt::KeyboardModifier::ControlModifier == event->modifiers()) {
+            addSelection(event->scenePos());
         } else {
-            Q_EMIT _notifier->notifyDataRepositoryChanged(
-                {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::All);
+            _mouseButtonPressed = true;
+            startNewSelection(event->scenePos());
         }
     }
     CATCH;
