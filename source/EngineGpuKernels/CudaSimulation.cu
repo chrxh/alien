@@ -45,27 +45,64 @@ namespace
 
         CudaInitializer()
         {
+            int deviceNumber = getDeviceNumberOfHighestComputeCapability();
+
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-            auto result = cudaSetDevice(0);
+            auto result = cudaSetDevice(deviceNumber);
             if (result != cudaSuccess) {
                 throw std::exception("CUDA could not be initialized.");
             }
 
-            cudaDeviceProp prop;
-            CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, 0));
-            if (prop.major < 6) {
-                std::stringstream stream;
-                stream << "The found device " << prop.name << " has compute capability of " << prop.major << "."
-                       << prop.minor << ". A compute capability of 6.0 is needed.";
-                throw std::exception(stream.str().c_str());
-            }
-
             std::stringstream stream;
-            stream << prop.name << " with compute capability " << prop.major << "." << prop.minor << " found and set";
+            stream << "Device " << deviceNumber << " is set";
             loggingService->logMessage(Priority::Important, stream.str());
         }
 
         ~CudaInitializer() { cudaDeviceReset(); }
+
+    private:
+        int getDeviceNumberOfHighestComputeCapability()
+        {
+            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+
+            int numberOfDevices;
+            CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
+            if (numberOfDevices < 1) {
+                throw std::exception("No CUDA device found.");
+            }
+            {
+                std::stringstream stream;
+                if (1 == numberOfDevices) {
+                    stream << "1 CUDA device found";
+                } else {
+                    stream << numberOfDevices << " CUDA devices found";
+                }
+                loggingService->logMessage(Priority::Important, stream.str());
+            }
+
+            int result = 0;
+            int highestComputeCapability = 0;
+            for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
+                cudaDeviceProp prop;
+                CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
+
+                std::stringstream stream;
+                stream << "device " << deviceNumber << ": " << prop.name << " has compute capability " << prop.major
+                       << "." << prop.minor;
+                loggingService->logMessage(Priority::Important, stream.str());
+
+                int computeCapability = prop.major * 100 + prop.minor;
+                if (computeCapability > highestComputeCapability) {
+                    result = deviceNumber;
+                    highestComputeCapability = computeCapability;
+                }
+            }
+            if (highestComputeCapability < 600) {
+                throw std::exception("No CUDA device with compute capability of 6.0 or higher found.");
+            }
+
+            return result;
+        }
     };
 }
 
