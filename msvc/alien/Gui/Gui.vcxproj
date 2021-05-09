@@ -195,6 +195,7 @@
     <ClCompile Include="..\..\..\source\Gui\ItemManager.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemWorldController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\ItemViewport.cpp" />
+    <ClCompile Include="..\..\..\source\Gui\ProgressBar.cpp" />
     <ClCompile Include="..\..\..\source\Gui\LoggingController.cpp" />
     <ClCompile Include="..\..\..\source\Gui\LoggingView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\Main.cpp" />
@@ -202,7 +203,6 @@
     <ClCompile Include="..\..\..\source\Gui\MainModel.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MainView.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MarkerItem.cpp" />
-    <ClCompile Include="..\..\..\source\Gui\MessageHelper.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MetadataEditTab.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MetadataEditWidget.cpp" />
     <ClCompile Include="..\..\..\source\Gui\MonitorController.cpp" />
@@ -272,8 +272,8 @@
     <ClInclude Include="..\..\..\source\Gui\Jobs.h" />
     <QtMoc Include="..\..\..\source\Gui\LoggingController.h" />
     <QtMoc Include="..\..\..\source\Gui\LoggingView.h" />
+    <QtMoc Include="..\..\..\source\Gui\ProgressBar.h" />
     <ClInclude Include="..\..\..\source\Gui\MarkerItem.h" />
-    <ClInclude Include="..\..\..\source\Gui\MessageHelper.h" />
     <QtMoc Include="..\..\..\source\Gui\NewDiscDialog.h" />
     <ClInclude Include="..\..\..\source\Gui\OpenGLWorldScene.h" />
     <ClInclude Include="..\..\..\source\Gui\ParticleItem.h" />
