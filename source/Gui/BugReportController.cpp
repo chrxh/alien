@@ -8,7 +8,7 @@
 #include "Web/WebAccess.h"
 #include "Web/WebBuilderFacade.h"
 
-#include "MessageHelper.h"
+#include "ProgressBar.h"
 #include "BugReportView.h"
 
 BugReportController::BugReportController(std::string const& errorMessage, std::string const& protocol)
@@ -32,7 +32,7 @@ void BugReportController::execute()
         auto email = _view->getEmailAddress();
         auto message = _view->getUserMessage();
 
-        auto progress = MessageHelper::createProgressDialog("Sending report...", _view);
+        auto progress = new ProgressBar("Sending report ...", _view);
 
         QEventLoop pause;
         bool finished = false;
