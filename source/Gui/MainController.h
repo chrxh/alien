@@ -84,4 +84,5 @@ private:
 	SimulationMonitorBuildFunc _monitorBuildFunc;
 
     QTimer* _autosaveTimer = nullptr;
+    ProgressBar* _progressBar = nullptr;
 };
