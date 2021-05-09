@@ -16,6 +16,11 @@ namespace Const
     const QColor StartupTextColor(0x89, 0x94, 0xc4);
     const QColor StartupNewVersionTextColor(0xff, 0x94, 0xc4);
 
+	//progress bar
+    const QColor ProgressBarBackgroundColor(0, 64, 0);
+    const QColor ProgressBarForegroundColor(0, 128, 0);
+    const QColor ProgressBarTextColor(0xB0, 0xff, 0xB0);
+
     //visual viewport
 	const QColor BackgroundColor(0x00, 0x00, 0x00);
 	const QColor UniverseColor(0x00, 0x00, 0x1b);

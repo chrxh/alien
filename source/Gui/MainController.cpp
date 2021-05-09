@@ -34,7 +34,6 @@
 #include "Web/WebAccess.h"
 #include "Web/WebBuilderFacade.h"
 
-#include "MessageHelper.h"
 #include "SnapshotController.h"
 #include "GeneralInfoController.h"
 #include "MainController.h"
@@ -50,6 +49,7 @@
 #include "Settings.h"
 #include "MonitorController.h"
 #include "StartupController.h"
+#include "ProgressBar.h"
 
 namespace Const
 {
@@ -169,7 +169,7 @@ void MainController::init()
 
 void MainController::autoSave()
 {
-    auto progress = MessageHelper::createProgressDialog("Autosaving...", _view);
+    auto progress = new ProgressBar("Autosaving ...", _view);
     autoSaveIntern(getPathToApp() + Const::AutoSaveFilename);
     delete progress;
 }
@@ -356,11 +356,10 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 
 void MainController::onSaveSimulation(string const& filename)
 {
-    auto progress = MessageHelper::createProgressDialog("Saving...", _view);
+    auto progress = new ProgressBar("Saving ...", _view);
 
     saveSimulationIntern(filename);
 
-    QApplicationHelper::processEventsForMilliSec(1000);
     delete progress;
 }
 
@@ -368,7 +367,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 {
     _view->getMonitorController()->pauseTimer();
 
-    auto progress = MessageHelper::createProgressDialog("Loading...", _view);
+    auto progress = new ProgressBar("Loading ...", _view);
 
     if (LoadOption::SaveOldSim == option) {
         autoSaveIntern(getPathToApp() + Const::AutoSaveForLoadingFilename);
@@ -418,21 +417,19 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
 
 void MainController::onUpdateSimulationParameters(SimulationParameters const& parameters)
 {
-    auto progress = MessageHelper::createProgressDialog("Updating simulation parameters...", _view);
-
+    auto progress = new ProgressBar("Updating simulation parameters ...", _view);
+    
 	_simController->getContext()->setSimulationParameters(parameters);
 
-    QApplicationHelper::processEventsForMilliSec(500);
     delete progress;
 }
 
 void MainController::onUpdateExecutionParameters(ExecutionParameters const & parameters)
 {
-    auto progress = MessageHelper::createProgressDialog("Updating execution parameters...", _view);
+    auto progress = new ProgressBar("Updating execution parameters ...", _view);
 
     _simController->getContext()->setExecutionParameters(parameters);
 
-    QApplicationHelper::processEventsForMilliSec(500);
     delete progress;
 }
 

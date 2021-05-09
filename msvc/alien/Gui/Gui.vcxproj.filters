@@ -238,9 +238,6 @@
     <ClCompile Include="..\..\..\source\Gui\GridMultiplierDialog.cpp">
       <Filter>Impl\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Gui\MessageHelper.cpp">
-      <Filter>Impl\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\source\Gui\NewHexagonDialog.cpp">
       <Filter>Impl\Dialogs</Filter>
     </ClCompile>
@@ -385,6 +382,9 @@
     <ClCompile Include="..\..\..\source\Gui\SimulationViewController.cpp">
       <Filter>Impl\SimulationView</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Gui\ProgressBar.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Gui\Definitions.h">
@@ -407,9 +407,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\TabWidgetHelper.h">
       <Filter>Impl\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\Gui\MessageHelper.h">
-      <Filter>Impl\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\Gui\AbstractItem.h">
       <Filter>Impl\SimulationView\ItemWorld</Filter>
@@ -658,6 +655,9 @@
     </QtMoc>
     <QtMoc Include="..\..\..\source\Gui\SimulationViewController.h">
       <Filter>Impl\SimulationView</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\..\source\Gui\ProgressBar.h">
+      <Filter>Impl</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
