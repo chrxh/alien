@@ -169,9 +169,9 @@ void MainController::init()
 
 void MainController::autoSave()
 {
-    auto progress = new ProgressBar("Autosaving ...", _view);
+    _progressBar = new ProgressBar("Autosaving ...", _view);
     autoSaveIntern(getPathToApp() + Const::AutoSaveFilename);
-    delete progress;
+    delete _progressBar;
 }
 
 void MainController::serializeSimulationAndWaitUntilFinished()
@@ -356,18 +356,18 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 
 void MainController::onSaveSimulation(string const& filename)
 {
-    auto progress = new ProgressBar("Saving ...", _view);
+    _progressBar = new ProgressBar("Saving ...", _view);
 
     saveSimulationIntern(filename);
 
-    delete progress;
+    delete _progressBar;
 }
 
 bool MainController::onLoadSimulation(string const & filename, LoadOption option)
 {
     _view->getMonitorController()->pauseTimer();
 
-    auto progress = new ProgressBar("Loading ...", _view);
+    _progressBar = new ProgressBar("Loading ...", _view);
 
     if (LoadOption::SaveOldSim == option) {
         autoSaveIntern(getPathToApp() + Const::AutoSaveForLoadingFilename);
@@ -388,7 +388,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
                 [&](SerializedSimulation const& data) { return _serializer->deserializeSimulation(data); },
                 _simController));
         }
-        delete progress;
+        delete _progressBar;
         return false;
     }
 
@@ -396,16 +396,20 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
     _view->getMonitorController()->continueTimer();
 	_view->refresh();
 
-    delete progress;
+    delete _progressBar;
     return true;
 }
 
 void MainController::onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent)
 {
+    _progressBar = new ProgressBar("Reassembling world...", _view);
+
     _view->getMonitorController()->pauseTimer();
 
     auto const recreateFunction = [&](Serializer* serializer) {
         recreateSimulation(serializer->retrieveSerializedSimulation());
+        delete _progressBar;
+        _progressBar = nullptr;
     };
     _worker->add(boost::make_shared<_ExecuteLaterFunc>(recreateFunction));
 
@@ -417,20 +421,20 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
 
 void MainController::onUpdateSimulationParameters(SimulationParameters const& parameters)
 {
-    auto progress = new ProgressBar("Updating simulation parameters ...", _view);
+    _progressBar = new ProgressBar("Updating simulation parameters ...", _view);
     
 	_simController->getContext()->setSimulationParameters(parameters);
 
-    delete progress;
+    delete _progressBar;
 }
 
 void MainController::onUpdateExecutionParameters(ExecutionParameters const & parameters)
 {
-    auto progress = new ProgressBar("Updating execution parameters ...", _view);
+    _progressBar = new ProgressBar("Updating execution parameters ...", _view);
 
     _simController->getContext()->setExecutionParameters(parameters);
 
-    delete progress;
+    delete _progressBar;
 }
 
 void MainController::onRestrictTPS(boost::optional<int> const& tps)
