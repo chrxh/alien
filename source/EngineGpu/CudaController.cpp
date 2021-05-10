@@ -5,6 +5,7 @@
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
+#include "Base/Exceptions.h"
 
 #include "CudaWorker.h"
 #include "CudaJobs.h"
@@ -99,5 +100,5 @@ void CudaController::timestepCalculatedWithGpu()
 
 void CudaController::errorThrown(QString message)
 {
-    throw std::exception(message.toStdString().c_str());
+    throw BugReportException(message.toStdString());
 }

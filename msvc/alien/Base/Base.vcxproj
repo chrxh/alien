@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\..\source\Base\DebugMacros.h" />
     <ClInclude Include="..\..\..\source\Base\Definitions.h" />
     <ClInclude Include="..\..\..\source\Base\DllExport.h" />
+    <ClInclude Include="..\..\..\source\Base\Exceptions.h" />
     <ClInclude Include="..\..\..\source\Base\GlobalFactory.h" />
     <ClInclude Include="..\..\..\source\Base\GlobalFactoryImpl.h" />
     <ClInclude Include="..\..\..\source\Base\LoggingService.h" />

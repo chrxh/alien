@@ -3,6 +3,8 @@
 #include <QImage>
 #include <sstream>
 
+#include "Base/Exceptions.h"
+
 #include "CudaController.h"
 #include "CudaJobs.h"
 #include "CudaWorker.h"
@@ -248,7 +250,7 @@ DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getNewDataTO()
         result.stringBytes = new char[_cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE];
         return result;
     } catch (std::bad_alloc const& exception) {
-        throw std::exception("There is not sufficient CPU memory available.");
+        throw BugReportException("There is not sufficient CPU memory available.");
     }
 }
 
