@@ -8,6 +8,7 @@
 #include "Base/GlobalFactory.h"
 #include "Base/NumberGenerator.h"
 #include "Base/BaseServices.h"
+#include "Base/Exceptions.h"
 #include "EngineInterface/SimulationAccess.h"
 #include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
@@ -43,8 +44,26 @@ int main(int argc, char* argv[])
     try {
         controller.init();
         return a.exec();
-    }
-    catch(std::exception const& e) {
+    } catch (SystemRequirementNotMetException const& e) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, e.what());
+
+        std::stringstream ss;
+        ss << "Your system does not meet the minimum system requirements." << std::endl
+           << "Error message: " << e.what();
+
+        QMessageBox::critical(nullptr, "System requirements", QString::fromStdString(ss.str()));
+
+        exit(EXIT_FAILURE);
+    } catch (BugReportException const& e) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, e.what());
+
+        BugReportController bugReportController(e.what(), bugReportLogger.getFullProtocol());
+        bugReportController.execute();
+
+        exit(EXIT_FAILURE);
+    } catch(std::exception const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, e.what());
 
@@ -59,6 +78,7 @@ int main(int argc, char* argv[])
 
         BugReportController bugReportController(message, bugReportLogger.getFullProtocol());
         bugReportController.execute();
+        exit(EXIT_FAILURE);
     }
 }
 

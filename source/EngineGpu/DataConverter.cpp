@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "Base/NumberGenerator.h"
+#include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/Physics.h"
@@ -166,7 +167,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 
     auto clusterIndex = (*_dataTO.numClusters)++;
     if (clusterIndex >= _cudaConstants.MAX_CLUSTERS) {
-        throw std::exception("Array size for clusters is too small.");
+        throw BugReportException("Array size for clusters is chosen too small.");
     }
 
 	ClusterAccessTO& clusterTO = _dataTO.clusters[clusterIndex];
@@ -209,7 +210,7 @@ void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
     auto particleIndex = (*_dataTO.numParticles)++;
     if (particleIndex >= _cudaConstants.MAX_PARTICLES) {
-        throw std::exception("Array size for particles is too small.");
+        throw BugReportException("Array size for particles is chosen too small.");
     }
 
 	ParticleAccessTO& particleTO = _dataTO.particles[particleIndex];
@@ -391,7 +392,7 @@ void DataConverter::processModifications()
 					for (int sourceTokenIndex = 0; sourceTokenIndex < tokens->size(); ++sourceTokenIndex) {
 						int targetTokenIndex = (*_dataTO.numTokens)++;
                         if (targetTokenIndex >= _cudaConstants.MAX_TOKENS) {
-                            throw std::exception("Array size for tokens is too small.");
+                            throw BugReportException("Array size for tokens is chosen too small.");
                         }
 
 						auto& targetToken = _dataTO.tokens[targetTokenIndex];
@@ -408,7 +409,7 @@ void DataConverter::processModifications()
 				for (int sourceTokenIndex = 0; sourceTokenIndex < tokens.size(); ++sourceTokenIndex) {
 					int targetTokenIndex = (*_dataTO.numTokens)++;
                     if (targetTokenIndex >= _cudaConstants.MAX_TOKENS) {
-                        throw std::exception("Array size for tokens is too small.");
+                        throw BugReportException("Array size for tokens is chosen too small.");
                     }
 
 					auto& targetToken = _dataTO.tokens[targetTokenIndex];
@@ -445,7 +446,7 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
 {
 	int cellIndex = (*_dataTO.numCells)++;
     if (cellIndex >= _cudaConstants.MAX_CELLS) {
-        throw std::exception("Array size for cells is too small.");
+        throw BugReportException("Array size for cells is chosen too small.");
     }
 	CellAccessTO& cellTO = _dataTO.cells[cellIndex];
 	cellTO.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
