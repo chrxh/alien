@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QString>
 
+#include "Base/Exceptions.h"
 #include "Parser.h"
 
 vector<SimulationInfo> Parser::parseForSimulationInfos(QByteArray const & raw)

@@ -6,6 +6,7 @@
 #include <helper_cuda.h>
 #include <sstream>
 
+#include "Base/Exceptions.h"
 
 #define KERNEL_CALL(func, ...)  \
         func<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >>>(##__VA_ARGS__); \
@@ -23,7 +24,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("
                << _cudaGetErrorEnum(result) << ") \"" << func << "\"";
         DEVICE_RESET
-        throw std::exception(stream.str().c_str());
+        throw BugReportException(stream.str().c_str());
     }
 }
 

@@ -25,6 +25,7 @@
 
 #include "DllExport.h"
 #include "Tracker.h"
+#include "Exceptions.h"
 
 class NumberGenerator;
 class TagGenerator;
@@ -145,7 +146,7 @@ struct BASE_EXPORT RealRect
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throw std::exception("check failed"); \
+        throw BugReportException("check failed"); \
     }
 
 #define MEMBER_DECLARATION(className, type, name, initialValue) \

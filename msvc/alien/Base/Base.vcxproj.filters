@@ -76,6 +76,9 @@
     <ClInclude Include="..\..\..\source\Base\DebugMacros.h">
       <Filter>Interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\source\Base\Exceptions.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\..\source\Base\Job.h">

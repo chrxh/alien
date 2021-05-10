@@ -10,6 +10,9 @@
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
+#include "Base/Exceptions.h"
+#include "EngineInterface/SimulationParameters.h"
+
 #include "AccessKernels.cuh"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
@@ -21,7 +24,6 @@
 #include "CudaMemoryManager.cuh"
 #include "CudaMonitorData.cuh"
 #include "CudaSimulation.cuh"
-#include "EngineInterface/SimulationParameters.h"
 #include "Entities.cuh"
 #include "Map.cuh"
 #include "MonitorKernels.cuh"
@@ -50,11 +52,11 @@ namespace
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
             auto result = cudaSetDevice(deviceNumber);
             if (result != cudaSuccess) {
-                throw std::exception("CUDA could not be initialized.");
+                throw SystemRequirementNotMetException("CUDA device could not be initialized.");
             }
 
             std::stringstream stream;
-            stream << "Device " << deviceNumber << " is set";
+            stream << "device " << deviceNumber << " is set";
             loggingService->logMessage(Priority::Important, stream.str());
         }
 
@@ -68,7 +70,7 @@ namespace
             int numberOfDevices;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
             if (numberOfDevices < 1) {
-                throw std::exception("No CUDA device found.");
+                throw SystemRequirementNotMetException("No CUDA device found.");
             }
             {
                 std::stringstream stream;
@@ -98,7 +100,8 @@ namespace
                 }
             }
             if (highestComputeCapability < 600) {
-                throw std::exception("No CUDA device with compute capability of 6.0 or higher found.");
+                throw SystemRequirementNotMetException(
+                    "No CUDA device with compute capability of 6.0 or higher found.");
             }
 
             return result;
