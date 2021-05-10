@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QOpenGLFramebufferObject>
 
+#include "Base/Exceptions.h"
 #include "EngineInterface/SimulationAccess.h"
 
 namespace
@@ -20,7 +21,7 @@ namespace
     {
         QFile file("://" + filename);
         if (!file.open(QIODevice::ReadOnly)) {
-            throw std::runtime_error(filename.toStdString() + " not found");
+            throw BugReportException(filename.toStdString() + " not found");
         }
         QTextStream in(&file);
         return in.readAll();
@@ -37,11 +38,11 @@ OpenGLWorldScene::OpenGLWorldScene(QOpenGLContext* context, QObject* parent /*= 
     //create shaders
     auto vertex_shader = new QOpenGLShader(QOpenGLShader::Vertex, this);
     if (!vertex_shader->compileSourceCode(readFile("Shader/VertexShader.glsl"))) {
-        throw std::runtime_error("vertex shader compilation failed");
+        throw BugReportException("vertex shader compilation failed");
     }
     auto fragment_shader = new QOpenGLShader(QOpenGLShader::Fragment, this);
     if (!fragment_shader->compileSourceCode(readFile("Shader/FragmentShader.glsl"))) {
-        throw std::runtime_error("fragment shader compilation failed");
+        throw BugReportException("fragment shader compilation failed");
     }
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShader(vertex_shader);
