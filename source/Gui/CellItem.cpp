@@ -74,34 +74,11 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
     if( colorCode == 6 )
         color = toQColor(Const::IndividualCellColor7);
 
-    int h, s, l;
-    color.getHsl(&h, &s, &l);
-
-    //fill color (brush)
-    if (!isConnectable()) {
-        l = max(0, l - 30);
-	}
-    if (CellItem::FOCUS_CELL == _focusState) {
-        l = 190;
-    }
-    if (CellItem::FOCUS_CLUSTER == _focusState) {
-        l = min(255, l + 20);
-    }
-    color.setHsl(h, s, l);
+    adaptColorForFocus(color);
     painter->setBrush(QBrush(color));
 
     //boundary color (pen)
-    if (_focusState == NO_FOCUS) {
-        l = max(0, l - 60);
-        color.setHsl(h, s, l);
-    }
-    if (_focusState == FOCUS_CLUSTER) {
-        l = min(255, l + 15);
-        color.setHsl(h, s, l);
-    }
-    if (_focusState == FOCUS_CELL) {
-        color.setHsl(h, s, 255);
-    }
+    adaptColorForBoundary(color);
     painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
 
     //draw cell
@@ -113,11 +90,12 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
     //draw token
 	int numToken = getNumToken();
     if( numToken > 0 ) {
-        if( _focusState == NO_FOCUS )
-            painter->setBrush(QBrush(Const::TokenColor));
-        else
-            painter->setBrush(QBrush(Const::TokenFocusColor));
-        painter->setPen(QPen(QBrush(Const::ClusterPenFocusColor), CoordinateSystem::modelToScene(0.03)));
+
+        auto tokenColor = Const::TokenColor;
+        adaptColorForFocus(color);
+        painter->setBrush(QBrush(tokenColor));
+        adaptColorForBoundary(tokenColor);
+        painter->setPen(QPen(QBrush(tokenColor), CoordinateSystem::modelToScene(0.03)));
         qreal shift1 = -0.5*0.20*(qreal)(numToken-1);
         if( numToken > 3)
             shift1 = -0.5*0.20*2.0;
@@ -174,6 +152,41 @@ void CellItem::setFocusState (FocusState focusState)
 void CellItem::setDisplayString(QString value)
 {
 	_displayString = value;
+}
+
+void CellItem::adaptColorForFocus(QColor& color) const
+{
+    int h, s, l;
+    color.getHsl(&h, &s, &l);
+
+    //fill color (brush)
+    if (!isConnectable()) {
+        l = max(0, l - 30);
+    }
+    if (CellItem::FOCUS_CELL == _focusState) {
+        l = 190;
+    }
+    if (CellItem::FOCUS_CLUSTER == _focusState) {
+        l = min(255, l + 20);
+    }
+    color.setHsl(h, s, l);
+}
+
+void CellItem::adaptColorForBoundary(QColor& color) const
+{
+    int h, s, l;
+    color.getHsl(&h, &s, &l);
+    if (_focusState == NO_FOCUS) {
+        l = max(0, l - 60);
+        color.setHsl(h, s, l);
+    }
+    if (_focusState == FOCUS_CLUSTER) {
+        l = min(255, l + 15);
+        color.setHsl(h, s, l);
+    }
+    if (_focusState == FOCUS_CELL) {
+        color.setHsl(h, s, 255);
+    }
 }
 
 int CellItem::getBranchNumber() const

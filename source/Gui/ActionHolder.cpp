@@ -146,13 +146,13 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	bool isFullscreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
 	actionFullscreen->setChecked(isFullscreen);
     
-    actionGlowEffect = new QAction("Glow effect", this);
+    actionGlowEffect = new QAction("Glow", this);
     actionGlowEffect->setEnabled(true);
     actionGlowEffect->setCheckable(true);
     actionGlowEffect->setShortcut(Qt::ALT + Qt::Key_G);
     actionGlowEffect->setChecked(true);
 
-    actionMotionEffect = new QAction("Motion effect", this);
+    actionMotionEffect = new QAction("Motion blur", this);
     actionMotionEffect->setEnabled(true);
     actionMotionEffect->setCheckable(true);
     actionMotionEffect->setShortcut(Qt::ALT + Qt::Key_M);
@@ -282,6 +282,9 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 
     actionGenerateBranchNumbers = new QAction("Generate branch numbers", this);
     actionGenerateBranchNumbers->setEnabled(false);
+
+	actionRandomizeCellFunctions = new QAction("Randomize cell functions", this);
+    actionRandomizeCellFunctions->setEnabled(false);
 
 	actionRandomMultiplier = new QAction("Random multiplier", this);
 	actionRandomMultiplier->setEnabled(false);

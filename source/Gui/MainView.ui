@@ -182,14 +182,8 @@
      <string>Tools</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-   </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuSettings"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuEntity"/>
    <addaction name="menuCollection"/>
