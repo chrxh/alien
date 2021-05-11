@@ -217,7 +217,7 @@ void DescriptionFactoryImpl::randomizeCellFunctions(
     }
 }
 
-void DescriptionFactoryImpl::preserveCellConnections(
+void DescriptionFactoryImpl::removeFreeCellConnections(
     SimulationParameters const& parameters,
     DataDescription& data,
     std::unordered_set<uint64_t> const& cellIds) const
