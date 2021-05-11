@@ -263,6 +263,7 @@ void MainView::setupMenuAndToolbar()
     ui->menuCollection->addAction(actions->actionColorizeSel);
     ui->menuCollection->addAction(actions->actionGenerateBranchNumbers);
     ui->menuCollection->addAction(actions->actionRandomizeCellFunctions);
+    ui->menuCollection->addAction(actions->actionRemoveFreeCellConnections);
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionRandomMultiplier);
     ui->menuCollection->addAction(actions->actionGridMultiplier);

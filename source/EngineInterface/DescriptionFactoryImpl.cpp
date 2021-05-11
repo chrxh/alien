@@ -216,3 +216,18 @@ void DescriptionFactoryImpl::randomizeCellFunctions(
         cell.cellFeature = cellFunction;
     }
 }
+
+void DescriptionFactoryImpl::preserveCellConnections(
+    SimulationParameters const& parameters,
+    DataDescription& data,
+    std::unordered_set<uint64_t> const& cellIds) const
+{
+    DescriptionNavigator navigator;
+    navigator.update(data);
+    for (auto const& cellId : cellIds) {
+        auto clusterIndex = navigator.clusterIndicesByCellIds.at(cellId);
+        auto cellIndex = navigator.cellIndicesByCellIds.at(cellId);
+        auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
+        cell.maxConnections = cell.connectingCells ? cell.connectingCells->size() : 0;
+    }
+}
