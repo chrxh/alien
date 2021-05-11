@@ -576,6 +576,9 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
         QVector2D newAbsPos = cellChanges.pos.getValue();
         convert(newAbsPos, cellTO.pos);
     }
+    if (cellChanges.maxConnections) {
+        cellTO.maxConnections = cellChanges.maxConnections.getValue();
+    }
     if (cellChanges.energy) {
         cellTO.energy = cellChanges.energy.getValue();
     }

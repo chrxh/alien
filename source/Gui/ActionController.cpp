@@ -1239,7 +1239,7 @@ void ActionController::onRemoveFreeCellConnections()
     auto selectedCellIds = _repository->getSelectedCellIds();
 
     auto factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-    factory->preserveCellConnections(_mainModel->getSimulationParameters(), extendedSelection, selectedCellIds);
+    factory->removeFreeCellConnections(_mainModel->getSimulationParameters(), extendedSelection, selectedCellIds);
 
     _repository->updateData(extendedSelection);
 
