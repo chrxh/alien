@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include <QRandomGenerator>
+
 #include "Physics.h"
 
 
@@ -181,34 +183,36 @@ void DescriptionFactoryImpl::generateBranchNumbers(
             }
         }
     } while (origNumVisitedCells != visitedCellIds.size());
+}
 
-    /*
-    std::set<uint64_t> visitedCellIds;
-    std::set<uint64_t> currentCellIds(cellIds.begin(), cellIds.end());
-    int branchNumber = 0;
-    int origNumVisitedCells = 0;
-    do {
-        std::set<uint64_t> adjacentCellIds;
-        for (auto const& cellId : currentCellIds) {
-            auto clusterIndex = navigator.clusterIndicesByCellIds.at(cellId);
-            auto cellIndex = navigator.cellIndicesByCellIds.at(cellId);
-            auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
-            cell.setTokenBranchNumber(branchNumber);
+void DescriptionFactoryImpl::randomizeCellFunctions(
+    SimulationParameters const& parameters,
+    DataDescription& data,
+    std::unordered_set<uint64_t> const& cellIds) const
+{
 
-            for (auto const& connectingCellId : *cell.connectingCells) {
-                if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()
-                    && currentCellIds.find(connectingCellId) == currentCellIds.end()) {
-                    adjacentCellIds.insert(connectingCellId);
-                    break;
-                }
-            }
+    DescriptionNavigator navigator;
+    navigator.update(data);
+    for (auto const& cellId : cellIds) {
+        auto clusterIndex = navigator.clusterIndicesByCellIds.at(cellId);
+        auto cellIndex = navigator.cellIndicesByCellIds.at(cellId);
+        auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
+
+        CellFeatureDescription cellFunction;
+        cellFunction.setType(static_cast<Enums::CellFunction::Type>(
+            QRandomGenerator::global()->generate() % Enums::CellFunction::_COUNTER));
+
+        QByteArray volatileData;
+        for (int i = 0; i < parameters.cellFunctionComputerMaxInstructions * 3; ++i) {
+            volatileData.append(QRandomGenerator::global()->generate() % 256);
         }
+        cellFunction.setVolatileData(volatileData);
 
-        origNumVisitedCells = visitedCellIds.size();
-        visitedCellIds.insert(currentCellIds.begin(), currentCellIds.end());
-
-        currentCellIds = adjacentCellIds;
-        branchNumber = (branchNumber + 1) % parameters.cellMaxTokenBranchNumber;
-    } while (origNumVisitedCells != visitedCellIds.size());
-*/
+        QByteArray staticData;
+        for (int i = 0; i < parameters.cellFunctionComputerCellMemorySize; ++i) {
+            staticData.append(QRandomGenerator::global()->generate() % 256);
+        }
+        cellFunction.setConstData(staticData);
+        cell.cellFeature = cellFunction;
+    }
 }

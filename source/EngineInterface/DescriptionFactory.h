@@ -36,4 +36,9 @@ public:
         SimulationParameters const& parameters,
         DataDescription& data,
         std::unordered_set<uint64_t> const& cellIds) const = 0;
+
+    virtual void randomizeCellFunctions(
+        SimulationParameters const& parameters,
+        DataDescription& data,
+        std::unordered_set<uint64_t> const& cellIds) const = 0;
 };
