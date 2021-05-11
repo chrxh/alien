@@ -67,6 +67,7 @@ public:
     QAction* actionColorizeSel = nullptr;
     QAction* actionGenerateBranchNumbers = nullptr;
     QAction* actionRandomizeCellFunctions = nullptr;
+    QAction* actionRemoveFreeCellConnections = nullptr;
     QAction* actionRandomMultiplier = nullptr;
 	QAction* actionGridMultiplier = nullptr;
 

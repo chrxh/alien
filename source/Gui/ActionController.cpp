@@ -172,6 +172,8 @@ void ActionController::init(
         actions->actionGenerateBranchNumbers, &QAction::triggered, this, &ActionController::onGenerateBranchNumbers);
     connect(
         actions->actionRandomizeCellFunctions, &QAction::triggered, this, &ActionController::onRandomizeCellFunctions);
+    connect(
+        actions->actionRemoveFreeCellConnections, &QAction::triggered, this, &ActionController::onRemoveFreeCellConnections);
     connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
@@ -1228,6 +1230,26 @@ void ActionController::onRandomizeCellFunctions()
     loggingService->logMessage(Priority::Unimportant, "randomize cell functions finished");
 }
 
+void ActionController::onRemoveFreeCellConnections()
+{
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "remove free cell connections");
+
+    auto extendedSelection = _repository->getExtendedSelection();
+    auto selectedCellIds = _repository->getSelectedCellIds();
+
+    auto factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+    factory->preserveCellConnections(_mainModel->getSimulationParameters(), extendedSelection, selectedCellIds);
+
+    _repository->updateData(extendedSelection);
+
+    Q_EMIT _notifier->notifyDataRepositoryChanged(
+        {Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController},
+        UpdateDescription::All);
+
+    loggingService->logMessage(Priority::Unimportant, "remove free cell connections finished");
+}
+
 void ActionController::onShowAbout()
 {
     QFile file("://Version.txt");
@@ -1379,6 +1401,7 @@ void ActionController::updateActionsEnableState()
     actions->actionColorizeSel->setEnabled(collectionSelected);
     actions->actionGenerateBranchNumbers->setEnabled(cellsSelected);
     actions->actionRandomizeCellFunctions->setEnabled(cellsSelected);
+    actions->actionRemoveFreeCellConnections->setEnabled(cellsSelected);
     actions->actionRandomMultiplier->setEnabled(collectionSelected);
 	actions->actionGridMultiplier->setEnabled(collectionSelected);
 }
