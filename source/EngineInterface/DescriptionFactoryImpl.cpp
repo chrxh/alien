@@ -107,7 +107,7 @@ ClusterDescription DescriptionFactoryImpl::createUnconnectedDisc(
         auto angleInc = radius > 0 ? asin(parameters._cellDistance / (2.0 * radius)) * 2.0 * radToDeg : 361.0;
         angleInc = 360.0 / floor(360.0 / angleInc);
         std::unordered_set<uint64_t> cellIds;
-        for (auto angle = 0.0; angle < 360.0; angle += angleInc) {
+        for (auto angle = 0.0; angle < 360.0 - angleInc/2; angle += angleInc) {
             auto relPos = Physics::unitVectorOfAngle(angle) * radius;
 
             auto cell = CellDescription()
@@ -136,6 +136,53 @@ void DescriptionFactoryImpl::generateBranchNumbers(
     DescriptionNavigator navigator;
     navigator.update(data);
 
+    std::set<uint64_t> visitedCellIds(cellIds.begin(), cellIds.end());
+    std::vector<std::vector<uint64_t>> cellIdPaths;
+    for (auto const& cellId : cellIds) {
+        cellIdPaths.emplace_back(std::vector<uint64_t>{cellId});
+    }
+
+    int origNumVisitedCells = 0;
+    do {
+
+        //set branch numbers an last cell on path
+        for (auto const& cellIdPath : cellIdPaths) {
+            if (cellIdPath.empty()) {
+                continue;
+            }
+            auto const& lastCellId = cellIdPath.back();
+
+            auto clusterIndex = navigator.clusterIndicesByCellIds.at(lastCellId);
+            auto cellIndex = navigator.cellIndicesByCellIds.at(lastCellId);
+            auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
+            cell.setTokenBranchNumber((cellIdPath.size() - 1) % parameters.cellMaxTokenBranchNumber);
+        }
+
+        //modify paths
+        origNumVisitedCells = visitedCellIds.size();
+        for (auto& cellIdPath : cellIdPaths) {
+            auto found = false;
+            while (!found && !cellIdPath.empty()) {
+                auto const& lastCellId = cellIdPath.back();
+                auto clusterIndex = navigator.clusterIndicesByCellIds.at(lastCellId);
+                auto cellIndex = navigator.cellIndicesByCellIds.at(lastCellId);
+                auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
+                for (auto const& connectingCellId : *cell.connectingCells) {
+                    if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()) {
+                        cellIdPath.emplace_back(connectingCellId);
+                        visitedCellIds.insert(connectingCellId);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    cellIdPath.pop_back();
+                }
+            }
+        }
+    } while (origNumVisitedCells != visitedCellIds.size());
+
+    /*
     std::set<uint64_t> visitedCellIds;
     std::set<uint64_t> currentCellIds(cellIds.begin(), cellIds.end());
     int branchNumber = 0;
@@ -163,4 +210,5 @@ void DescriptionFactoryImpl::generateBranchNumbers(
         currentCellIds = adjacentCellIds;
         branchNumber = (branchNumber + 1) % parameters.cellMaxTokenBranchNumber;
     } while (origNumVisitedCells != visitedCellIds.size());
+*/
 }

@@ -32,6 +32,18 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
     ui->simulationView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->simulationView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    ui->horizontalScrollBar->setValue(0);
+    ui->horizontalScrollBar->setRange(0, 0);
+    ui->horizontalScrollBar->setPageStep(0);
+    ui->verticalScrollBar->setValue(0);
+    ui->verticalScrollBar->setRange(0, 0);
+    ui->verticalScrollBar->setPageStep(0);
+    ui->simulationView->setRenderHint(QPainter::Antialiasing, false);
+    ui->simulationView->setRenderHint(QPainter::TextAntialiasing, false);
+    ui->simulationView->setRenderHint(QPainter::SmoothPixmapTransform, false);
+    ui->simulationView->setRenderHint(QPainter::LosslessImageRendering, false);
+    ui->simulationView->setOptimizationFlags(
+        QGraphicsView::DontSavePainterState | QGraphicsView::DontAdjustForAntialiasing | QGraphicsView::IndirectPainting);
     connect(ui->horizontalScrollBar, &QScrollBar::valueChanged, this, &SimulationViewWidget::horizontalScrolled);
     connect(ui->verticalScrollBar, &QScrollBar::valueChanged, this, &SimulationViewWidget::verticalScrolled);
 

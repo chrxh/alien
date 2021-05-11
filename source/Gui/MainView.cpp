@@ -216,9 +216,8 @@ void MainView::setupMenuAndToolbar()
     ui->menuSettings->addAction(actions->actionEditSimParameters);
     ui->menuSettings->addAction(actions->actionEditSymbols);
 
-    ui->menuEdit->addAction(actions->actionEditor);
-    ui->menuEdit->addAction(actions->actionActionMode);
-
+    ui->menuView->addAction(actions->actionEditor);
+    ui->menuView->addAction(actions->actionActionMode);
     ui->menuView->addAction(actions->actionMonitor);
     ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionZoomIn);
@@ -263,6 +262,7 @@ void MainView::setupMenuAndToolbar()
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionColorizeSel);
     ui->menuCollection->addAction(actions->actionGenerateBranchNumbers);
+    ui->menuCollection->addAction(actions->actionRandomizeCellFunctions);
     ui->menuCollection->addSeparator();
     ui->menuCollection->addAction(actions->actionRandomMultiplier);
     ui->menuCollection->addAction(actions->actionGridMultiplier);

@@ -33,6 +33,8 @@ public:
 	virtual void setDisplayString (QString value);
 
 private:
+    void adaptColorForFocus(QColor& color) const;
+    void adaptColorForBoundary(QColor& color) const;
 	int getBranchNumber() const;
 	int getNumToken() const;
 	bool isConnectable() const;

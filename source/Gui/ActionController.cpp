@@ -170,6 +170,8 @@ void ActionController::init(
     connect(actions->actionColorizeSel, &QAction::triggered, this, &ActionController::onColorizeSelection);
     connect(
         actions->actionGenerateBranchNumbers, &QAction::triggered, this, &ActionController::onGenerateBranchNumbers);
+    connect(
+        actions->actionRandomizeCellFunctions, &QAction::triggered, this, &ActionController::onRanomizeCellFunctions);
     connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
@@ -1206,6 +1208,45 @@ void ActionController::onGenerateBranchNumbers()
     loggingService->logMessage(Priority::Unimportant, "generate branch numbers finished");
 }
 
+#include <QRandomGenerator>
+
+void ActionController::onRanomizeCellFunctions()
+{
+    auto extendedSelection = _repository->getExtendedSelection();
+    auto selectedCellIds = _repository->getSelectedCellIds();
+
+    DescriptionNavigator navigator;
+    navigator.update(extendedSelection);
+    for (auto const& cellId : selectedCellIds) {
+        auto clusterIndex = navigator.clusterIndicesByCellIds.at(cellId);
+        auto cellIndex = navigator.cellIndicesByCellIds.at(cellId);
+        auto& cell = extendedSelection.clusters->at(clusterIndex).cells->at(cellIndex);
+
+		CellFeatureDescription cellFunction;
+        cellFunction.setType(static_cast<Enums::CellFunction::Type>(
+            QRandomGenerator::global()->generate() % Enums::CellFunction::_COUNTER));
+
+		QByteArray volatileData;
+        for (int i = 0; i < _mainModel->getSimulationParameters().cellFunctionComputerCellMemorySize * 3; ++i) {
+            volatileData.append(QRandomGenerator::global()->generate() % 256);
+        }
+        cellFunction.setVolatileData(volatileData);
+
+		QByteArray staticData;
+        for (int i = 0; i < _mainModel->getSimulationParameters().cellFunctionComputerCellMemorySize; ++i) {
+            staticData.append(QRandomGenerator::global()->generate() % 256);
+        }
+        cellFunction.setConstData(staticData);
+		cell.cellFeature = cellFunction;
+    }
+
+	_repository->updateData(extendedSelection);
+
+    Q_EMIT _notifier->notifyDataRepositoryChanged(
+        {Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController},
+        UpdateDescription::All);
+}
+
 void ActionController::onShowAbout()
 {
     QFile file("://Version.txt");
@@ -1356,6 +1397,7 @@ void ActionController::updateActionsEnableState()
 	actions->actionDeleteCol->setEnabled(editMode && collectionSelected);
     actions->actionColorizeSel->setEnabled(collectionSelected);
     actions->actionGenerateBranchNumbers->setEnabled(cellsSelected);
+    actions->actionRandomizeCellFunctions->setEnabled(cellsSelected);
     actions->actionRandomMultiplier->setEnabled(collectionSelected);
 	actions->actionGridMultiplier->setEnabled(collectionSelected);
 }
