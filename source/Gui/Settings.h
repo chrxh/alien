@@ -10,11 +10,11 @@ namespace Const
 {
 	auto const ContinuousZoomInterval = std::chrono::milliseconds(20);
     auto const OpenGLViewUpdateInterval = std::chrono::milliseconds(20);
-    auto const ViewUpdates = 4;
+    auto const ViewUpdates = 6;
 
     //startup
     const QColor StartupTextColor(0x89, 0x94, 0xc4);
-    const QColor StartupNewVersionTextColor(0xff, 0x94, 0xc4);
+    const QColor StartupNewVersionTextColor(0xB0, 0xb0, 0xff);
 
 	//progress bar
     const QColor ProgressBarBackgroundColor(0, 64, 0);
@@ -28,9 +28,8 @@ namespace Const
 	const QColor ClusterPenFocusColor(0xFF, 0xFF, 0xFF, 0xFF);
 	const QColor LineActiveColor(0xFF, 0xFF, 0xFF, 0xB0);
 	const QColor LineInactiveColor(0xB0, 0xB0, 0xB0, 0xB0);
-	const QColor TokenColor(0xB0, 0xB0, 0xFF, 0xFF);
-	const QColor TokenFocusColor(0xE0, 0xE0, 0xFF, 0xFF);
-	const QColor EnergyColor(0xB0, 0x10, 0x0, 0xFF);
+	const QColor TokenColor(0xE0, 0xE0, 0xFF, 0xFF);
+    const QColor EnergyColor(0xB0, 0x10, 0x0, 0xFF);
 	const QColor EnergyPenFocusColor(0xFF, 0xFF, 0xFF, 0xFF);
 	const QColor MarkerColor(0x0, 0xC0, 0xFF, 0x30);
 

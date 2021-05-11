@@ -84,7 +84,8 @@ private:
 	Q_SLOT void onDeleteExtendedSelection();
     Q_SLOT void onColorizeSelection();
     Q_SLOT void onGenerateBranchNumbers();
-	Q_SLOT void onRandomMultiplier();
+    Q_SLOT void onRanomizeCellFunctions();
+    Q_SLOT void onRandomMultiplier();
 	Q_SLOT void onGridMultiplier();
 
     Q_SLOT void onMostFrequentCluster();
