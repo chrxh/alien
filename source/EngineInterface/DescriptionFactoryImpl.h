@@ -21,7 +21,7 @@ public:
         DataDescription& data,
         std::unordered_set<uint64_t> const& cellIds) const override;
 
-    void preserveCellConnections(
+    void removeFreeCellConnections(
         SimulationParameters const& parameters,
         DataDescription& data,
         std::unordered_set<uint64_t> const& cellIds) const override;

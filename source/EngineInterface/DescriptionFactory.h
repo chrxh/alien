@@ -42,7 +42,7 @@ public:
         DataDescription& data,
         std::unordered_set<uint64_t> const& cellIds) const = 0;
 
-    virtual void preserveCellConnections(
+    virtual void removeFreeCellConnections(
         SimulationParameters const& parameters,
         DataDescription& data,
         std::unordered_set<uint64_t> const& cellIds) const = 0;
