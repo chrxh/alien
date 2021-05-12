@@ -136,7 +136,7 @@ void ActionController::init(
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
     connect(actions->actionMotionEffect, &QAction::toggled, this, &ActionController::onToggleMotionEffect);
 
-    connect(actions->actionEditor, &QAction::toggled, this, &ActionController::onToggleEditorMode);
+    connect(actions->actionItemView, &QAction::toggled, this, &ActionController::onToggleEditorMode);
     connect(actions->actionActionMode, &QAction::toggled, this, &ActionController::onToggleActionMode);
 
 	connect(actions->actionMonitor, &QAction::toggled, this, &ActionController::onToggleInfobar);
@@ -1371,7 +1371,7 @@ void ActionController::updateActionsEnableState()
     bool cellsSelected = _model->areCellsSelected();
 
 	auto actions = _model->getActionHolder();
-    actions->actionEditor->setEnabled(
+    actions->actionItemView->setEnabled(
         _simulationViewController->getZoomFactor() + FLOATINGPOINT_MEDIUM_PRECISION > Const::MinZoomLevelForEditor);
     actions->actionGlowEffect->setEnabled(!editMode);
 	actions->actionShowCellInfo->setEnabled(editMode);
