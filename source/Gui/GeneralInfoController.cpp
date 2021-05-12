@@ -68,11 +68,11 @@ void GeneralInfoController::updateInfoLabel()
     if (auto config = _mainController->getSimulationConfig()) {
         renderModeValueString = [&] {
             if (Rendering::OpenGL == _rendering && _zoomFactor < Const::ZoomLevelForAutomaticVectorViewSwitch) {
-                return QString("pixel");
+                return QString("pixel style");
             } else if (Rendering::OpenGL == _rendering && _zoomFactor >= Const::ZoomLevelForAutomaticVectorViewSwitch) {
-                return QString("vector");
+                return QString("vector style");
             }
-            return QString("item");
+            return QString("item-based");
         }();
         worldSizeValueString = QString("%1 x %2").arg(
             StringHelper::generateFormattedIntString(config->universeSize.x, true),
@@ -94,15 +94,15 @@ void GeneralInfoController::updateInfoLabel()
     auto colorDataStart = QString("<font color = %1>").arg(Const::CellEditDataColor1.name());
     auto colorEnd = QString("</font>");
 
-    QString renderingString = colorTextStart + "Render style: " + colorEnd + renderModeColorString + "<b>"
+    QString renderingString = colorTextStart + "Rendering: &nbsp;&nbsp;&nbsp;" + colorEnd + renderModeColorString + "<b>"
         + renderModeValueString + "</b>" + colorEnd;
     QString worldSizeString = colorTextStart + "World size: &nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
         + worldSizeValueString + "</b>" + colorEnd;
     QString zoomLevelString = colorTextStart + "Zoom level: &nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
         + zoomLevelValueString + "</b>" + colorEnd;
-    QString timestepString = colorTextStart + "Time step: &nbsp;&nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
+    QString timestepString = colorTextStart +  "Time step: &nbsp;&nbsp;&nbsp;" + colorEnd + colorDataStart + "<b>"
         + timestepValueString + "</b>" + colorEnd;
-    QString tpsString = colorTextStart + "Time steps/s: " + colorEnd + colorDataStart + "<b>"
+    QString tpsString = colorTextStart +       "Time steps/s: " + colorEnd + colorDataStart + "<b>"
         + tpsValueString + "</b>" + colorEnd;
     if (_restrictedTPS) {
         tpsString += colorDataStart + "&nbsp;(restricted)" + colorEnd;
