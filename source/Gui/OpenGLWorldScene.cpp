@@ -106,6 +106,7 @@ void OpenGLWorldScene::resize(IntVector2D const& size)
     m_frameBufferObject =
         new QOpenGLFramebufferObject(QSize(size.x - 2, size.y - 2), QOpenGLFramebufferObject::CombinedDepthStencil);
 
+    glViewport(0, 0, size.x, size.y);
 }
 
 void OpenGLWorldScene::drawBackground(QPainter* painter, const QRectF& rect)
