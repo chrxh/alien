@@ -1,4 +1,5 @@
 ﻿#include <QAction>
+#include <QActionGroup>
 
 #include "Gui/Settings.h"
 
@@ -86,25 +87,53 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionEditSymbols = new QAction("Symbol map", this);
 	actionEditSymbols->setEnabled(true);
 
-	actionEditor = new QAction("Editor", this);
-	actionEditor->setCheckable(true);
-	actionEditor->setChecked(false);
-	actionEditor->setEnabled(true);
-    QIcon iconEditor;
-	iconEditor.addFile(":/Icons/main/pixel view.png", QSize(), QIcon::Normal, QIcon::On);
-	iconEditor.addFile(":/Icons/main/item view.png", QSize(), QIcon::Normal, QIcon::Off);
-	actionEditor->setIcon(iconEditor);
-	actionEditor->setIconVisibleInMenu(false);
+	actionOpenGLView = new QAction("Pixel/Vector view", this);
+    actionOpenGLView->setCheckable(true);
+    actionOpenGLView->setChecked(true);
+    actionOpenGLView->setEnabled(true);
+    QIcon iconOpenGLView;
+    iconOpenGLView.addFile(":/Icons/main/pixel view on.png", QSize(), QIcon::Normal, QIcon::On);
+    iconOpenGLView.addFile(":/Icons/main/pixel view off.png", QSize(), QIcon::Normal, QIcon::Off);
+    actionOpenGLView->setIcon(iconOpenGLView);
+    actionOpenGLView->setIconVisibleInMenu(false);
 
-	actionActionMode = new QAction("Action mode", this);
+	actionItemView = new QAction("Item-based view", this);
+    actionItemView->setCheckable(true);
+    actionItemView->setChecked(false);
+    actionItemView->setEnabled(true);
+    QIcon iconItemView;
+    iconItemView.addFile(":/Icons/main/item view on.png", QSize(), QIcon::Normal, QIcon::On);
+    iconItemView.addFile(":/Icons/main/item view off.png", QSize(), QIcon::Normal, QIcon::Off);
+    actionItemView->setIcon(iconItemView);
+    actionItemView->setIconVisibleInMenu(false);
+
+    actionGroupOpenGLItemView = new QActionGroup(this);
+    actionGroupOpenGLItemView->addAction(actionOpenGLView);
+    actionGroupOpenGLItemView->addAction(actionItemView);
+
+    actionNavigationMode = new QAction("Navigation mode", this);
+    actionNavigationMode->setCheckable(true);
+    actionNavigationMode->setChecked(true);
+    actionNavigationMode->setEnabled(true);
+    QIcon iconNavigator;
+    iconNavigator.addFile(":/Icons/main/navigation on.png", QSize(), QIcon::Normal, QIcon::On);
+    iconNavigator.addFile(":/Icons/main/navigation off.png", QSize(), QIcon::Normal, QIcon::Off);
+    actionNavigationMode->setIcon(iconNavigator);
+    actionNavigationMode->setIconVisibleInMenu(false);
+
+    actionActionMode = new QAction("Action mode", this);
     actionActionMode->setCheckable(true);
     actionActionMode->setChecked(false);
     actionActionMode->setEnabled(true);
     QIcon iconActionMode;
-    iconActionMode.addFile(":/Icons/main/navigation mode.png", QSize(), QIcon::Normal, QIcon::On);
-    iconActionMode.addFile(":/Icons/main/action mode.png", QSize(), QIcon::Normal, QIcon::Off);
+    iconActionMode.addFile(":/Icons/main/action on.png", QSize(), QIcon::Normal, QIcon::On);
+    iconActionMode.addFile(":/Icons/main/action off.png", QSize(), QIcon::Normal, QIcon::Off);
     actionActionMode->setIcon(iconActionMode);
     actionActionMode->setIconVisibleInMenu(false);
+
+	actionGroupNavigationAction = new QActionGroup(this);
+    actionGroupNavigationAction->addAction(actionActionMode);
+    actionGroupNavigationAction->addAction(actionNavigationMode);
 
 	actionMonitor = new QAction("Info bar", this);
 	actionMonitor->setEnabled(true);

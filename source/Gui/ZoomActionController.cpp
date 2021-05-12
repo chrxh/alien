@@ -33,7 +33,7 @@ void ZoomActionController::onZoomInClicked()
 
     loggingService->logMessage(Priority::Unimportant, "zoom in finished");
 
-    if (!_actions->actionEditor->isChecked()) {
+    if (!_actions->actionItemView->isChecked()) {
         if (_simulationViewController->getZoomFactor()
             > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
             setItemView();
@@ -57,7 +57,7 @@ void ZoomActionController::onZoomOutClicked()
 
     loggingService->logMessage(Priority::Unimportant, "zoom out finished");
 
-    if (_actions->actionEditor->isChecked()) {
+    if (_actions->actionItemView->isChecked()) {
         if (_simulationViewController->getZoomFactor()
             > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
         } else {
@@ -108,7 +108,7 @@ void ZoomActionController::onContinuousZoom()
 
         loggingService->logMessage(Priority::Unimportant, "continuous zoom in finished");
 
-        if (!_actions->actionEditor->isChecked()) {
+        if (!_actions->actionItemView->isChecked()) {
             if (_simulationViewController->getZoomFactor()
                 > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
                 setItemView();
@@ -126,7 +126,7 @@ void ZoomActionController::onContinuousZoom()
 
         loggingService->logMessage(Priority::Unimportant, "continuous zoom out finished");
 
-        if (_actions->actionEditor->isChecked()) {
+        if (_actions->actionItemView->isChecked()) {
             if (_simulationViewController->getZoomFactor()
                 > Const::ZoomLevelForAutomaticEditorSwitch - FLOATINGPOINT_MEDIUM_PRECISION) {
             } else {
@@ -149,13 +149,13 @@ bool ZoomActionController::isSimulationRunning() const
 
 void ZoomActionController::setItemView()
 {
-    _actions->actionEditor->setChecked(true);
+    _actions->actionItemView->setChecked(true);
 }
 
 
 void ZoomActionController::setPixelOrVectorView()
 {
-    _actions->actionEditor->setChecked(false);
-    Q_EMIT _actions->actionEditor->toggled(false);  //for switching from vector to pixel view
+    _actions->actionOpenGLView->setChecked(true);
+//    Q_EMIT _actions->actionItemView->toggled(false);  //for switching from vector to pixel view
 }
 
