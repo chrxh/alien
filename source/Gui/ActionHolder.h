@@ -29,7 +29,12 @@ public:
 	QAction* actionEditSimParameters = nullptr;
 	QAction* actionEditSymbols = nullptr;
 
-	QAction* actionEditor = nullptr;
+	QActionGroup* actionGroupOpenGLItemView = nullptr;
+    QAction* actionOpenGLView = nullptr;
+	QAction* actionItemView = nullptr;
+
+	QActionGroup* actionGroupNavigationAction = nullptr;
+    QAction* actionNavigationMode = nullptr;
     QAction* actionActionMode = nullptr;
 
     QAction* actionMonitor = nullptr;

@@ -145,7 +145,7 @@ void MainView::initSimulation(SimulationController * controller, SimulationAcces
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
 	_simulationViewController->init(_notifier, controller, access, _repository);
 
-	_actions->getActionHolder()->actionEditor->setChecked(false);
+	_actions->getActionHolder()->actionItemView->setChecked(false);
 }
 
 GeneralInfoController * MainView::getInfoController() const
@@ -216,8 +216,12 @@ void MainView::setupMenuAndToolbar()
     ui->menuSettings->addAction(actions->actionEditSimParameters);
     ui->menuSettings->addAction(actions->actionEditSymbols);
 
-    ui->menuView->addAction(actions->actionEditor);
+    ui->menuView->addAction(actions->actionOpenGLView);
+    ui->menuView->addAction(actions->actionItemView);
+    ui->menuView->addSeparator();
+    ui->menuView->addAction(actions->actionNavigationMode);
     ui->menuView->addAction(actions->actionActionMode);
+    ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionMonitor);
     ui->menuView->addSeparator();
     ui->menuView->addAction(actions->actionZoomIn);
@@ -276,24 +280,35 @@ void MainView::setupMenuAndToolbar()
     ui->menuHelp->addAction(actions->actionGettingStarted);
     ui->menuHelp->addAction(actions->actionDocumentation);
 
+    auto createSeparator = [&] {
+        auto separator = new QWidget(this);
+        separator->setStyleSheet(Const::ToolbarSeparatorStyleSheet);
+        separator->setMinimumWidth(5);
+        return separator;
+    };
     ui->toolBar->setIconSize(QSize(48, 48));
-	ui->toolBar->addSeparator();
+    ui->toolBar->addWidget(createSeparator());
     ui->toolBar->addAction(actions->actionZoomIn);
 	ui->toolBar->addAction(actions->actionZoomOut);
+    ui->toolBar->addWidget(createSeparator());
+    ui->toolBar->addAction(actions->actionOpenGLView);
+    ui->toolBar->addAction(actions->actionItemView);
+    ui->toolBar->addWidget(createSeparator());
+    ui->toolBar->addAction(actions->actionNavigationMode);
     ui->toolBar->addAction(actions->actionActionMode);
-    ui->toolBar->addAction(actions->actionEditor);
+    ui->toolBar->addWidget(createSeparator());
     ui->toolBar->addAction(actions->actionMonitor);
-    ui->toolBar->addSeparator();
+    ui->toolBar->addWidget(createSeparator());
     ui->toolBar->addAction(actions->actionRunSimulation);
     ui->toolBar->addAction(actions->actionAcceleration);
 	ui->toolBar->addAction(actions->actionRunStepBackward);
 	ui->toolBar->addAction(actions->actionRunStepForward);
-    ui->toolBar->addSeparator();
-	ui->toolBar->addAction(actions->actionSnapshot);
+    ui->toolBar->addWidget(createSeparator());
+    ui->toolBar->addAction(actions->actionSnapshot);
 	ui->toolBar->addAction(actions->actionRestore);
-    ui->toolBar->addSeparator();
+    ui->toolBar->addWidget(createSeparator());
     ui->toolBar->addAction(actions->actionDisplayLink);
-    ui->toolBar->addSeparator();
+    ui->toolBar->addWidget(createSeparator());
 }
 
 void MainView::setupFontsAndColors()

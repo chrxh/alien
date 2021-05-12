@@ -12,6 +12,7 @@ class QTabWidget;
 class QTableWidgetItem;
 class QSignalMapper;
 class QAction;
+class QActionGroup;
 class QBuffer;
 class QLabel;
 class QGraphicsSimpleTextItem;
