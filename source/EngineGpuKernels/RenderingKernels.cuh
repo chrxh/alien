@@ -12,11 +12,18 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-__global__ void clearImageMap(unsigned int* imageData, int size)
+__global__ void clearImageMap(unsigned int* imageData, int2 size, int2 outsideRectUpperLeft, int2 outsideRectLowerRight)
 {
-    auto const block = calcPartition(size, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const block = calcPartition(size.x*size.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
-        imageData[index] = 0xff1b0000;
+        auto x = index % size.x;
+        auto y = index / size.x;
+        if (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x
+            || y >= outsideRectLowerRight.y) {
+            imageData[index] = Const::NothingnessColor;
+        } else {
+            imageData[index] = Const::SpaceColor;
+        }
     }
 }
 
@@ -445,7 +452,11 @@ __global__ void drawImage(
 {
     unsigned int* targetImage = data.imageData;
 
-    KERNEL_CALL(clearImageMap, targetImage, imageSize.x * imageSize.y);
+    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
+    int2 outsideRectLowerRight{
+        imageSize.x - max(toInt((rectLowerRight.x - data.size.x) * zoom), 0),
+        imageSize.y - max(toInt((rectLowerRight.y - data.size.y) * zoom), 0)};
+    KERNEL_CALL(clearImageMap, targetImage, imageSize, outsideRectUpperLeft, outsideRectLowerRight);
     if (zoom > Const::ZoomLevelForAutomaticVectorViewSwitch) {
         KERNEL_CALL(
             drawClusters_vectorStyle,
