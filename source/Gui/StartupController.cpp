@@ -53,19 +53,19 @@ void StartupController::initWidget()
     auto font = versionTextItem->font();
     font.setPixelSize(15);
     versionTextItem->setFont(font);
-    versionTextItem->setPos(460, 480);
+    versionTextItem->setPos(300, 330);
     versionTextItem->setBrush(Const::StartupTextColor);
     _scene->addItem(versionTextItem);
 
     _newVersionTextItem = new QGraphicsSimpleTextItem(" ");
     _newVersionTextItem->setFont(font);
-    _newVersionTextItem->setPos(400, 500);
+    _newVersionTextItem->setPos(240, 355);
     _newVersionTextItem->setBrush(Const::StartupNewVersionTextColor);
     _scene->addItem(_newVersionTextItem);
 
     _graphicsView = new QGraphicsView();
     _graphicsView->setScene(_scene);
-    _graphicsView->setGeometry(0, 0, 1000, 570);
+    _graphicsView->setGeometry(0, 0, 800, 400);
 }
 
 void StartupController::fadeout()
