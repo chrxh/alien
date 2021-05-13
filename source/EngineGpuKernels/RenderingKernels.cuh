@@ -14,7 +14,7 @@
 
 __global__ void clearImageMap(unsigned int* imageData, int2 size, int2 outsideRectUpperLeft, int2 outsideRectLowerRight)
 {
-    auto const block = calcPartition(size.x*size.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const block = calcPartition(size.x * size.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
         auto x = index % size.x;
         auto y = index / size.x;
