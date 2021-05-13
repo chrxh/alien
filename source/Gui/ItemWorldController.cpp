@@ -189,16 +189,17 @@ void ItemWorldController::centerTo(QVector2D const& worldPosition, IntVector2D c
     CATCH;
 }
 
-void ItemWorldController::addSelection(QPointF const& scenePos)
+void ItemWorldController::modifySelection(QPointF const& scenePos)
 {
     TRY;
     auto itemsClicked = _scene->items(scenePos);
-    QList<QGraphicsItem*> frontItem =
-        !itemsClicked.empty() ? QList<QGraphicsItem*>({itemsClicked.front()}) : QList<QGraphicsItem*>();
-    auto newSelectedCellIds = getSelectionFromItems(frontItem).cellIds;
+    auto newSelectedCellIds = getSelectionFromItems(itemsClicked).cellIds;
     auto selectedCellIds = _repository->getSelectedCellIds();
-    selectedCellIds.insert(newSelectedCellIds.begin(), newSelectedCellIds.end());
-
+    for (auto const& newSelectedCellId : newSelectedCellIds) {
+        if (selectedCellIds.erase(newSelectedCellId) == 0) {
+            selectedCellIds.insert(newSelectedCellId);
+        }
+    }
     auto selectedParticleIds = _repository->getSelectedParticleIds();
 
     std::list<uint64_t> selectedCellIdList(selectedCellIds.begin(), selectedCellIds.end());
@@ -449,7 +450,7 @@ void ItemWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
     }
     if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
         if (Qt::KeyboardModifier::ControlModifier == event->modifiers()) {
-            addSelection(event->scenePos());
+            modifySelection(event->scenePos());
         } else {
             _mouseButtonPressed = true;
             startNewSelection(event->scenePos());
