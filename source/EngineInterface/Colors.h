@@ -12,6 +12,6 @@ namespace Const
     unsigned int const CellFunctionInfoColor = 0xff404090;
     unsigned int const BranchNumberInfoColor = 0xff000000;
 
-    unsigned int const SpaceColor = 0xff000000;
-
+    unsigned int const SpaceColor = 0xff1b0000;
+    unsigned int const NothingnessColor = 0xff000000;
 }
