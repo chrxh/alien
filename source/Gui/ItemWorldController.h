@@ -49,7 +49,7 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
 private:
-    void addSelection(QPointF const& scenePos);
+    void modifySelection(QPointF const& scenePos);
     void startNewSelection(QPointF const& scenePos);
 
     void updateScrollbars();
