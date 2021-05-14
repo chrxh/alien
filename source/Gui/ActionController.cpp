@@ -1382,7 +1382,7 @@ void ActionController::updateActionsEnableState()
 	actions->actionCopyEntity->setEnabled(editMode && entitySelected);
 	actions->actionPasteEntity->setEnabled(editMode && entityCopied);
 	actions->actionDeleteEntity->setEnabled(editMode && entitySelected);
-	actions->actionNewToken->setEnabled(editMode && entitySelected);
+    actions->actionNewToken->setEnabled(editMode && cellWithFreeTokenSelected);
 	actions->actionCopyToken->setEnabled(editMode && cellWithTokenSelected);
 	actions->actionPasteToken->setEnabled(editMode && entitySelected && tokenCopied);
 	actions->actionDeleteToken->setEnabled(editMode && cellWithTokenSelected);
