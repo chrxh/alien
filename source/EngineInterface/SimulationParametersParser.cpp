@@ -10,55 +10,55 @@ namespace
 boost::property_tree::ptree SimulationParametersParser::encode(SimulationParameters const& parameters)
 {
     boost::property_tree::ptree tree;
-    tree.add("cell.minDistance", toString(parameters.cellMinDistance));
-    tree.add("cell.maxDistance", toString(parameters.cellMaxDistance));
-    tree.add("cell.maxForce", toString(parameters.cellMaxForce));
-    tree.add("cell.maxForceDecayProbability", toString(parameters.cellMaxForceDecayProb));
-    tree.add("cell.minTokenUsages", toString(parameters.cellMinTokenUsages));
-    tree.add("cell.tokenUsageDecayProbability", toString(parameters.cellTokenUsageDecayProb));
-    tree.add("cell.maxBonds", toString(parameters.cellMaxBonds));
-    tree.add("cell.maxToken", toString(parameters.cellMaxToken));
-    tree.add("cell.maxTokenBranchNumber", toString(parameters.cellMaxTokenBranchNumber));
-    tree.add("cell.minEnergy", toString(parameters.cellMinEnergy));
-    tree.add("cell.transformationProb", toString(parameters.cellTransformationProb));
-    tree.add("cell.fusionVelocity", toString(parameters.cellFusionVelocity));
-    tree.add("cell.function.computer.maxInstructions", toString(parameters.cellFunctionComputerMaxInstructions));
-    tree.add("cell.function.computer.memorySize", toString(parameters.cellFunctionComputerCellMemorySize));
+    tree.add("cell.min distance", toString(parameters.cellMinDistance));
+    tree.add("cell.max distance", toString(parameters.cellMaxDistance));
+    tree.add("cell.max force", toString(parameters.cellMaxForce));
+    tree.add("cell.max force decay probability", toString(parameters.cellMaxForceDecayProb));
+    tree.add("cell.min token usages", toString(parameters.cellMinTokenUsages));
+    tree.add("cell.token usage decay probability", toString(parameters.cellTokenUsageDecayProb));
+    tree.add("cell.max bonds", toString(parameters.cellMaxBonds));
+    tree.add("cell.max token", toString(parameters.cellMaxToken));
+    tree.add("cell.max token branch number", toString(parameters.cellMaxTokenBranchNumber));
+    tree.add("cell.min energy", toString(parameters.cellMinEnergy));
+    tree.add("cell.transformation probability", toString(parameters.cellTransformationProb));
+    tree.add("cell.fusion velocity", toString(parameters.cellFusionVelocity));
+    tree.add("cell.function.computer.max instructions", toString(parameters.cellFunctionComputerMaxInstructions));
+    tree.add("cell.function.computer.memory size", toString(parameters.cellFunctionComputerCellMemorySize));
     tree.add("cell.function.weapon.strength", toString(parameters.cellFunctionWeaponStrength));
-    tree.add("cell.function.weapon.energyCost", toString(parameters.cellFunctionWeaponEnergyCost));
+    tree.add("cell.function.weapon.energy cost", toString(parameters.cellFunctionWeaponEnergyCost));
     tree.add(
-        "cell.function.constructor.offspringCellEnergy",
+        "cell.function.constructor.offspring.cellEnergy",
         toString(parameters.cellFunctionConstructorOffspringCellEnergy));
     tree.add(
-        "cell.function.constructor.offspringCellDistance",
+        "cell.function.constructor.offspring.cell distance",
         toString(parameters.cellFunctionConstructorOffspringCellDistance));
     tree.add(
-        "cell.function.constructor.offspringTokenEnergy",
+        "cell.function.constructor.offspring.token energy",
         toString(parameters.cellFunctionConstructorOffspringTokenEnergy));
     tree.add(
-        "cell.function.constructor.offspringTokenSuppressMemoryCopy",
+        "cell.function.constructor.offspring.token suppress memory copy",
         toString(parameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy));
     tree.add(
-        "cell.function.constructor.tokenDataMutationProbability",
+        "cell.function.constructor.mutation probability.token data",
         toString(parameters.cellFunctionConstructorTokenDataMutationProb));
     tree.add(
-        "cell.function.constructor.cellDataMutationProbability",
+        "cell.function.constructor.mutation probability.cell data",
         toString(parameters.cellFunctionConstructorCellDataMutationProb));
     tree.add(
-        "cell.function.constructor.cellPropertyMutationProbability",
+        "cell.function.constructor.mutation probability.cell property",
         toString(parameters.cellFunctionConstructorCellPropertyMutationProb));
     tree.add(
-        "cell.function.constructor.cellStructureMutationProbability",
+        "cell.function.constructor.mutation probability.cell structure",
         toString(parameters.cellFunctionConstructorCellStructureMutationProb));
     tree.add("cell.function.sensor.range", toString(parameters.cellFunctionSensorRange));
     tree.add("cell.function.communicator.range", toString(parameters.cellFunctionCommunicatorRange));
-    tree.add("token.memorySize", toString(parameters.tokenMemorySize));
-    tree.add("token.minEnergy", toString(parameters.tokenMinEnergy));
+    tree.add("token.memory size", toString(parameters.tokenMemorySize));
+    tree.add("token.min energy", toString(parameters.tokenMinEnergy));
     tree.add("radiation.exponent", toString(parameters.radiationExponent));
     tree.add("radiation.factor", toString(parameters.radiationFactor));
     tree.add("radiation.probability", toString(parameters.radiationProb));
-    tree.add("radiation.velocityMultiplier", toString(parameters.radiationVelocityMultiplier));
-    tree.add("radiation.velocityPerturbation", toString(parameters.radiationVelocityPerturbation));
+    tree.add("radiation.velocity multiplier", toString(parameters.radiationVelocityMultiplier));
+    tree.add("radiation.velocity perturbation", toString(parameters.radiationVelocityPerturbation));
 
     return tree;
 }
