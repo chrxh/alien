@@ -83,7 +83,7 @@ SimulationParameters SimulationParametersParser::decode(boost::property_tree::pt
     result.cellFunctionWeaponStrength = tree.get<float>("cell.function.weapon.strength");
     result.cellFunctionWeaponEnergyCost = tree.get<float>("cell.function.weapon.energy cost");
     result.cellFunctionConstructorOffspringCellEnergy =
-        tree.get<float>("cell.function.constructor.offspring.cellEnergy");
+        tree.get<float>("cell.function.constructor.offspring.cell energy");
     result.cellFunctionConstructorOffspringCellDistance =
         tree.get<float>(
         "cell.function.constructor.offspring.cell distance");
