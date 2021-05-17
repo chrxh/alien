@@ -72,7 +72,7 @@ void StartupController::fadeout()
 {
     if (0 == _fadeoutProgress) {
         _timer->setSingleShot(false);
-        _timer->start(std::chrono::milliseconds(15));
+        _timer->start(std::chrono::milliseconds(30));
     }
     if (0 < _fadeoutProgress && _fadeoutProgress < 100) {
         auto transparencyEffect = new QGraphicsOpacityEffect(this);
