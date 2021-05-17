@@ -104,9 +104,9 @@ void CellItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *option,
             qreal shift2 = 0.20*(qreal)(i%3);
             qreal shiftY2 = 0.35*(qreal)(i/3);
             if( numToken <= 3 )
-                painter->drawEllipse(CoordinateSystem::modelToScene(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2)), CoordinateSystem::modelToScene(0.1), CoordinateSystem::modelToScene(0.1));
+                painter->drawEllipse(CoordinateSystem::modelToScene(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2)), CoordinateSystem::modelToScene(0.25), CoordinateSystem::modelToScene(0.15));
             else
-                painter->drawEllipse(CoordinateSystem::modelToScene(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2)), CoordinateSystem::modelToScene(0.1), CoordinateSystem::modelToScene(0.1));
+                painter->drawEllipse(CoordinateSystem::modelToScene(QPointF(shift1+shift2, shift1+shift2+shiftY1+shiftY2)), CoordinateSystem::modelToScene(0.25), CoordinateSystem::modelToScene(0.15));
         }
     }
 
