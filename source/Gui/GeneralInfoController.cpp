@@ -67,7 +67,7 @@ void GeneralInfoController::updateInfoLabel()
 
     if (auto config = _mainController->getSimulationConfig()) {
         renderModeValueString = [&] {
-            if (Rendering::OpenGL == _rendering && _zoomFactor < Const::ZoomLevelForAutomaticVectorViewSwitch) {
+            if (Rendering::OpenGL == _rendering && _zoomFactor < 2.0) {
                 return QString("pixel");
             } else if (Rendering::OpenGL == _rendering && _zoomFactor >= Const::ZoomLevelForAutomaticVectorViewSwitch) {
                 return QString("vector");
