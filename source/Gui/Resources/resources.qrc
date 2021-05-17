@@ -24,7 +24,6 @@
         <file>logo.png</file>
         <file>Icons/main/accelerate off.png</file>
         <file>Icons/main/accelerate on.png</file>
-        <file>GettingStartedWindow.html</file>
         <file>Version.txt</file>
         <file>Shader/FragmentShader.glsl</file>
         <file>Shader/VertexShader.glsl</file>
@@ -36,5 +35,6 @@
         <file>Icons/main/item view on.png</file>
         <file>Icons/main/pixel view off.png</file>
         <file>Icons/main/pixel view on.png</file>
+        <file>GettingStartedWindow.html</file>
     </qresource>
 </RCC>
