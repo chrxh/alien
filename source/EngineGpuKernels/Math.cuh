@@ -60,6 +60,11 @@ __inline__ __device__ float2 operator*(float2 const& p, float m)
     return{ p.x * m, p.y * m };
 }
 
+__inline__ __device__ float3 operator*(float3 const& p, float m)
+{
+    return {p.x * m, p.y * m, p.z * m};
+}
+
 __inline__ __device__ float2 operator/(float2 const& p, float m)
 {
     return{ p.x / m, p.y / m };
