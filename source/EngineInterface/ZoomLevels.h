@@ -2,7 +2,7 @@
 
 namespace Const
 {
-    int const ZoomLevelForAutomaticEditorSwitch = 16;
-    int const ZoomLevelForAutomaticVectorViewSwitch = 2;
+    int const ZoomLevelForAutomaticEditorSwitch = 32;
+    int const ZoomLevelForAutomaticVectorViewSwitch = 1;
     int const MinZoomLevelForEditor = 4;
 }
