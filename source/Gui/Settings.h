@@ -48,10 +48,10 @@ namespace Const
 
 	const QString ButtonStyleSheet = "background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px";
 	const QString TableStyleSheet = "background-color: #000000; color: #EEEEEE; gridline-color: #303030; selection-color: #EEEEEE; selection-background-color: #202020; font-family: Courier New; font-weight: bold; font-size: 12px;";
-	const QString ScrollbarStyleSheet = "background-color: #303030; color: #B0B0B0; gridline-color: #303030;";
-    const QString ToolbarStyleSheet = "background-color: #151550;";
-    const QString ToolbarSeparatorStyleSheet = "background-color: #000000;";
-    const QString InfobarStyleSheet = "background-color: #151550; color: #FFF;";
+	const QString ScrollbarStyleSheet = "background-color: #001550; color: #FFF";
+    const QString ToolbarStyleSheet = "background-color: #001550;";
+    const QString ToolbarSeparatorStyleSheet = "background-color: #002580;";
+    const QString InfobarStyleSheet = "background-color: #001550; color: #FFF;";
     const QColor ButtonTextColor(0xC2, 0xC2, 0xC2);
 	const QColor ButtonTextHighlightColor(0x90, 0x90, 0xFF);
 	const QString StandardFont = "Courier New";
