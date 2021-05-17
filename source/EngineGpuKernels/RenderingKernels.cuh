@@ -143,14 +143,16 @@ drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float
 }
 
 __device__ __inline__ void
-drawCircle(unsigned int* imageData, int2 const& imageSize, float2 pos, float3 color, float radius)
+drawCircle(unsigned int* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
 {
     if (radius > 1.0 - FP_PRECISION) {
         auto radiusSquared = radius * radius;
         for (float x = -radius; x <= radius; x += 1.0f) {
             for (float y = -radius; y <= radius; y += 1.0f) {
-                if (x * x + y * y <= radiusSquared) {
-                    drawDot(imageData, imageSize, pos + float2{x, y}, color);
+                auto rSquared = x * x + y * y;
+                if (rSquared <= radiusSquared) {
+                    auto factor = inverted ? (rSquared / radiusSquared) * 2 : (1.0f - rSquared / radiusSquared) * 2;
+                    drawDot(imageData, imageSize, pos + float2{x, y}, color * min(factor, 1.0f));
                 }
             }
         }
@@ -200,7 +202,7 @@ __global__ void drawClusters(
             if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
                 auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
                 auto color = calcColor(cell, isSelected);
-                drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3);
+                drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
 
                 auto posCorrection = cellPos - cell->absPos;
                 if (zoom > 1 - FP_PRECISION) {
@@ -263,7 +265,7 @@ __global__ void drawParticles(
         auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particle->absPos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
             auto const color = calcColor(particle, particle->isSelected());
-            drawCircle(imageData, imageSize, particleImagePos, color, zoom / 4);
+            drawCircle(imageData, imageSize, particleImagePos, color, zoom / 3);
         }
     }
 }

@@ -87,15 +87,50 @@ void StartupController::fadeout()
     ++_fadeoutProgress;
 }
 
+namespace
+{
+    bool parseVersion(std::string const& version, int& major, int& minor, int& patch)
+    {
+        auto versionQString = QString::fromStdString(version);
+        auto versionFragments = versionQString.split(QLatin1Char('.'));
+        if (versionFragments.size() != 3) {
+            return false;
+        }
+        auto majorStr = versionFragments[0];
+        auto minorStr = versionFragments[1];
+        auto patchStr = versionFragments[2];
+
+        bool success;
+        major = majorStr.toInt(&success);
+        if (!success) {
+            return false;
+        }
+        minor = minorStr.toInt(&success);
+        if (!success) {
+            return false;
+        }
+        patch = patchStr.toInt(&success);
+        if (!success) {
+            return false;
+        }
+        return true;
+    }
+}
+
 void StartupController::currentVersionReceived(string currentVersion)
 {
     auto currentVersionQString = QString::fromStdString(currentVersion);
     if (_thisVersion != currentVersionQString && _newVersionTextItem) {
 
-        _newVersionTextItem->setText(QString("(newer version %1 available)").arg(currentVersionQString));
+        int major;
+        int minor;
+        int patch;
+        if (parseVersion(currentVersion, major, minor, patch)) {
+            _newVersionTextItem->setText(QString("- newer version %1 available -").arg(currentVersionQString));
 
-        _fadeoutProgress = 0;
-        _timer->setSingleShot(true);
-        _timer->start(std::chrono::milliseconds(1000));
+            _fadeoutProgress = 0;
+            _timer->setSingleShot(true);
+            _timer->start(std::chrono::milliseconds(1000));
+        }
     }
 }
