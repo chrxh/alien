@@ -60,7 +60,7 @@ namespace Const
 	const std::string MainViewFullScreenKey = "mainView/fullScreen";
 	const bool MainViewFullScreenDefault = true;
 
-    const std::string GettingStartedWindowKey = "mainView/gettingStartedWindow";
+    const std::string GettingStartedWindowKey = "mainView/2.5/gettingStartedWindow";
     const bool GettingStartedWindowKeyDefault = true;
 
     const std::string ModelComputationTypeKey = "newSim/modelComputationType";
@@ -172,9 +172,9 @@ namespace Const
     const int NewHexagonColorCodeDefault = 0;
 
 	const std::string NewCircleOuterRadiusKey = "newCircle/outerRadius";
-    const int NewCircleOuterRadiusDefault = 20;
+    const int NewCircleOuterRadiusDefault = 15;
     const std::string NewCircleInnerRadiusKey = "newCircle/innerRadius";
-    const int NewCircleInnerRadiusDefault = 15;
+    const int NewCircleInnerRadiusDefault = 10;
     const std::string NewCircleDistanceKey = "newCircle/distance";
     const double NewCircleDistanceDefault = 1.0;
     const std::string NewCircleCellEnergyKey = "newCircle/cellEnergy";
