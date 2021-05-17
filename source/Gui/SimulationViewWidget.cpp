@@ -38,6 +38,7 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
     ui->verticalScrollBar->setValue(0);
     ui->verticalScrollBar->setRange(0, 0);
     ui->verticalScrollBar->setPageStep(0);
+    ui->simulationView->setFrameStyle(0);
     ui->simulationView->setRenderHint(QPainter::Antialiasing, false);
     ui->simulationView->setRenderHint(QPainter::TextAntialiasing, false);
     ui->simulationView->setRenderHint(QPainter::SmoothPixmapTransform, false);

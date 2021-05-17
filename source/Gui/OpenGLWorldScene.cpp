@@ -67,6 +67,7 @@ OpenGLWorldScene::OpenGLWorldScene(QOpenGLContext* context, QObject* parent /*= 
     m_program->setUniformValue("texture2", 1);
     m_program->setUniformValue("glowEffect", _settings.glowEffect);
     m_program->setUniformValue("motionEffect", _settings.motionEffect);
+    m_program->setUniformValue("motionBlurFactor", 0.60f);
 
     //release (unbind) all
     m_vertexArrayObject.release();
@@ -87,6 +88,18 @@ void OpenGLWorldScene::setSettings(SimulationViewSettings const& settings)
     m_program->bind();
     m_program->setUniformValue("glowEffect", settings.glowEffect);
     m_program->setUniformValue("motionEffect", settings.motionEffect);
+    m_program->release();
+}
+
+void OpenGLWorldScene::setMotionBlurFactor(MotionBlurFactor factor)
+{
+    _context->makeCurrent(_surface);
+    m_program->bind();
+    if (MotionBlurFactor::Default == factor) {
+        m_program->setUniformValue("motionBlurFactor", 0.60f);
+    } else {
+        m_program->setUniformValue("motionBlurFactor", 0.45f);
+    }
     m_program->release();
 }
 

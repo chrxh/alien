@@ -6,6 +6,7 @@ uniform sampler2D texture2;
 uniform int phase;
 uniform bool glowEffect;
 uniform bool motionEffect;
+uniform float motionBlurFactor;
 
 uniform float weight_rg[10] = float[](0.7, 0.16, 0.03, 0.03, 0.03, 0.03, 0.01, 0.01, 0.01, 0.01);
 uniform float weight_b[10] = float[](0.5, 0.12, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02);
@@ -32,7 +33,7 @@ void main()
             result = vec3(texture(texture1, mirroredCoord).rgb);
         }
         if (motionEffect) {
-            result = result * 0.55 + texture(texture2, texCoord).rgb * 0.45;
+            result = result * motionBlurFactor /*0.55*/ + texture(texture2, texCoord).rgb * (1 - motionBlurFactor)/*0.45*/;
         }
         FragColor = vec4(result, 1.0);
     } else {

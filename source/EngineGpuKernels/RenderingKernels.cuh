@@ -76,8 +76,8 @@ __device__ __inline__ unsigned int calcColor(Cell* cell, bool selected)
     }
     }
 
-    auto factor = static_cast<int>(min(150.0f, cell->getEnergy() / 2 + 20.0f));
-    auto r = ((cellColor >> 16) & 0xff) * factor / 150;
+    auto factor = toInt(min(100.0f, sqrt(cell->getEnergy()) * 5 + 20.0f));
+    auto r = ((cellColor >> 16) & 0xff) * factor / 150 ;
     auto g = ((cellColor >> 8) & 0xff) * factor / 150;
     auto b = (cellColor & 0xff) * factor / 150;
 
@@ -318,22 +318,22 @@ __device__ __inline__ void drawPixel(
     auto posFracX = pos.x - zoom / 2.0f - intPosX;
     auto posFracY = pos.y - zoom / 2.0f - intPosY;
     
-    auto factor1 = (1.0f - posFracX) * (1.0f - posFracY);
+    auto factor1 = ((1.0f - posFracX) * (1.0f - posFracY))*min(zoom, 1.0f);
     auto color1 = 0xff000000 | toInt(r * factor1) | (toInt(g * factor1) << 8) | (toInt(b * factor1) << 16);
     auto colorFrac1 = 0xff000000 | toInt(r * factor1 * zoomFracPart) | (toInt(g * factor1 * zoomFracPart) << 8)
         | (toInt(b * factor1 * zoomFracPart) << 16);
     
-    auto factor2 = posFracX * (1.0f - posFracY);
+    auto factor2 = posFracX * (1.0f - posFracY) * min(zoom, 1.0f);
     auto color2 = 0xff000000 | toInt(r * factor2) | (toInt(g * factor2) << 8) | (toInt(b * factor2) << 16);
     auto colorFrac2 = 0xff000000 | toInt(r * factor2 * zoomFracPart) | (toInt(g * factor2 * zoomFracPart) << 8)
         | (toInt(b * factor2 * zoomFracPart) << 16);
     
-    auto factor3 = (1.0f - posFracX) * posFracY;
+    auto factor3 = (1.0f - posFracX) * posFracY * min(zoom, 1.0f);
     auto color3 = 0xff000000 | toInt(r * factor3) | (toInt(g * factor3) << 8) | (toInt(b * factor3) << 16);
     auto colorFrac3 = 0xff000000 | toInt(r * factor3 * zoomFracPart) | (toInt(g * factor3 * zoomFracPart) << 8)
         | (toInt(b * factor3 * zoomFracPart) << 16);
 
-    auto factor4 = posFracX * posFracY;
+    auto factor4 = posFracX * posFracY * min(zoom, 1.0f);
     auto color4 = 0xff000000 | toInt(r * factor4) | (toInt(g * factor4) << 8) | (toInt(b * factor4) << 16);
     auto colorFrac4 = 0xff000000 | toInt(r * factor4 * zoomFracPart) | (toInt(g * factor4 * zoomFracPart) << 8)
         | (toInt(b * factor4 * zoomFracPart) << 16);
