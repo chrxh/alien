@@ -117,6 +117,8 @@ void OpenGLWorldController::activate(double zoomFactor)
     graphicsView->setScene(_scene);
     graphicsView->resetTransform();
 
+    _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::Default);
+
     setZoomFactor(zoomFactor);
 }
 
@@ -196,9 +198,11 @@ void OpenGLWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
         if (event->buttons() == Qt::MouseButton::LeftButton) {
+            _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::High);
             Q_EMIT startContinuousZoomIn(viewPos);
         }
         if (event->buttons() == Qt::MouseButton::RightButton) {
+            _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::High);
             Q_EMIT startContinuousZoomOut(viewPos);
         }
         if (event->buttons() == Qt::MouseButton::MiddleButton) {
@@ -260,6 +264,7 @@ void OpenGLWorldController::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
         _worldPosForMovement = boost::none;
+        _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::Default);
         Q_EMIT endContinuousZoom();
     }
 

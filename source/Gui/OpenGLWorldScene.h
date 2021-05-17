@@ -24,6 +24,11 @@ public:
 
     void setSettings(SimulationViewSettings const& settings);
 
+    enum class MotionBlurFactor
+    {
+        Default, High
+    };
+    void setMotionBlurFactor(MotionBlurFactor factor);
 
     ImageResource getImageResource() const;
 
