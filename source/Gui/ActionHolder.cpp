@@ -315,7 +315,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionRandomizeCellFunctions = new QAction("Randomize cell functions", this);
     actionRandomizeCellFunctions->setEnabled(false);
 
-	actionRemoveFreeCellConnections = new QAction("Remove free cell connections", this);
+	actionRemoveFreeCellConnections = new QAction("Remove unused cell connections", this);
     actionRemoveFreeCellConnections->setEnabled(false);
 
 	actionRandomMultiplier = new QAction("Random multiplier", this);
