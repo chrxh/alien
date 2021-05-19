@@ -299,6 +299,8 @@ void MainView::setupMenuAndToolbar()
     ui->toolBar->addWidget(createSeparator());
     ui->toolBar->addAction(actions->actionMonitor);
     ui->toolBar->addWidget(createSeparator());
+    ui->toolBar->addAction(actions->actionDisplayLink);
+    ui->toolBar->addWidget(createSeparator());
     ui->toolBar->addAction(actions->actionRunSimulation);
     ui->toolBar->addAction(actions->actionAcceleration);
 	ui->toolBar->addAction(actions->actionRunStepBackward);
@@ -307,8 +309,8 @@ void MainView::setupMenuAndToolbar()
     ui->toolBar->addAction(actions->actionSnapshot);
 	ui->toolBar->addAction(actions->actionRestore);
     ui->toolBar->addWidget(createSeparator());
-    ui->toolBar->addAction(actions->actionDisplayLink);
-    ui->toolBar->addWidget(createSeparator());
+
+    ui->infobar->setVisible(false);
 }
 
 void MainView::setupFontsAndColors()

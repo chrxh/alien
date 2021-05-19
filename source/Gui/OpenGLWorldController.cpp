@@ -196,65 +196,68 @@ void OpenGLWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
     auto viewPos = IntVector2D{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
     auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
 
-    if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
-        if (event->buttons() == Qt::MouseButton::LeftButton) {
-            _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::High);
-            Q_EMIT startContinuousZoomIn(viewPos);
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        _worldPosForMovement = worldPos;
+    } else {
+        if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+            if (event->buttons() == Qt::MouseButton::LeftButton) {
+                _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::High);
+                Q_EMIT startContinuousZoomIn(viewPos);
+            }
+            if (event->buttons() == Qt::MouseButton::RightButton) {
+                _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::High);
+                Q_EMIT startContinuousZoomOut(viewPos);
+            }
         }
-        if (event->buttons() == Qt::MouseButton::RightButton) {
-            _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::High);
-            Q_EMIT startContinuousZoomOut(viewPos);
-        }
-        if (event->buttons() == Qt::MouseButton::MiddleButton) {
-            _worldPosForMovement = worldPos;
-        }
-    }
-    if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        if (!_controller->getRun()) {
-            _access->selectEntities(worldPos);
-            requestImage();
+        if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
+            if (!_controller->getRun()) {
+                _access->selectEntities(worldPos);
+                requestImage();
+            }
         }
     }
 }
 
 void OpenGLWorldController::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
-        IntVector2D viewPos{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
-        if (event->buttons() == Qt::MouseButton::LeftButton) {
-            Q_EMIT startContinuousZoomIn(viewPos);
-        }
-        if (event->buttons() == Qt::MouseButton::RightButton) {
-            Q_EMIT startContinuousZoomOut(viewPos);
-        }
-        if (event->buttons() == Qt::MouseButton::MiddleButton) {
-            centerTo(*_worldPosForMovement, viewPos);
-            refresh();
-        }
-    }
-
-    if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        auto viewPos = IntVector2D{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
-        auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
-
-        auto lastViewPos =
-            IntVector2D{static_cast<int>(event->lastScenePos().x()), static_cast<int>(event->lastScenePos().y())};
-        auto lastWorldPos = mapViewToWorldPosition(lastViewPos.toQVector2D());
-
-        if (_controller->getRun()) {
+    IntVector2D viewPos{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        centerTo(*_worldPosForMovement, viewPos);
+        refresh();
+    } else {
+        if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
             if (event->buttons() == Qt::MouseButton::LeftButton) {
-                auto const force = (worldPos - lastWorldPos) / 10;
-                _access->applyAction(boost::make_shared<_ApplyForceAction>(lastWorldPos, worldPos, force));
+                Q_EMIT startContinuousZoomIn(viewPos);
             }
             if (event->buttons() == Qt::MouseButton::RightButton) {
-                auto const force = (worldPos - lastWorldPos) / 10;
-                _access->applyAction(boost::make_shared<_ApplyRotationAction>(lastWorldPos, worldPos, force));
+                Q_EMIT startContinuousZoomOut(viewPos);
             }
-        } else {
-            if (event->buttons() == Qt::MouseButton::LeftButton) {
-                auto const displacement = worldPos - lastWorldPos;
-                _access->applyAction(boost::make_shared<_MoveSelectionAction>(displacement));
-                requestImage();
+        }
+
+        if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
+            auto viewPos =
+                IntVector2D{static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y())};
+            auto worldPos = mapViewToWorldPosition(viewPos.toQVector2D());
+
+            auto lastViewPos =
+                IntVector2D{static_cast<int>(event->lastScenePos().x()), static_cast<int>(event->lastScenePos().y())};
+            auto lastWorldPos = mapViewToWorldPosition(lastViewPos.toQVector2D());
+
+            if (_controller->getRun()) {
+                if (event->buttons() == Qt::MouseButton::LeftButton) {
+                    auto const force = (worldPos - lastWorldPos) / 10;
+                    _access->applyAction(boost::make_shared<_ApplyForceAction>(lastWorldPos, worldPos, force));
+                }
+                if (event->buttons() == Qt::MouseButton::RightButton) {
+                    auto const force = (worldPos - lastWorldPos) / 10;
+                    _access->applyAction(boost::make_shared<_ApplyRotationAction>(lastWorldPos, worldPos, force));
+                }
+            } else {
+                if (event->buttons() == Qt::MouseButton::LeftButton) {
+                    auto const displacement = worldPos - lastWorldPos;
+                    _access->applyAction(boost::make_shared<_MoveSelectionAction>(displacement));
+                    requestImage();
+                }
             }
         }
     }
@@ -262,16 +265,19 @@ void OpenGLWorldController::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void OpenGLWorldController::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
         _worldPosForMovement = boost::none;
-        _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::Default);
-        Q_EMIT endContinuousZoom();
-    }
+    } else {
+        if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+            _scene->setMotionBlurFactor(OpenGLWorldScene::MotionBlurFactor::Default);
+            Q_EMIT endContinuousZoom();
+        }
 
-    if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        if (!_controller->getRun()) {
-            _access->deselectAll();
-            requestImage();
+        if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
+            if (!_controller->getRun()) {
+                _access->deselectAll();
+                requestImage();
+            }
         }
     }
 }
