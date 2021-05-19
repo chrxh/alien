@@ -1,5 +1,40 @@
 # Release notes
 
+## [2.5.0] - 2021-05-19
+### Added
+- navigation mode enables continuous zooming
+- new editing function: modifier key (CTRL) allows the precise selection of cells
+- new editing function: randomize cell function
+- new editing function: automatic generation of token branch numbers on cell cluster
+- new editing function: remove unused cell connections
+- selection of the graphics card with the highest compute capability, if more than one is found
+- checking for newer versions
+- display in the infobar when time steps per second are restricted
+
+### Changed
+- better rendering performance due to OpenGL-CUDA interoperability
+- better image quality for low zoom factors
+- motion blur filter
+- more intense glow filter
+- cells are represented in the vector view by a circle with a color gradient
+- two toolbar buttons (instead of one) for switching between editor and pixel/vector view
+- using flat design for main window
+- more beautiful loading bar
+- activated icons in the toolbar glow
+- simulation parameters renamed
+- meaningful error message in case the system requirements are not met
+- colors in editor more balanced
+- infobar is disabled by default
+- getting started info revised
+- logo reduced in size
+- startup example revised
+- collision example revised
+
+### Removed
+
+### Fixed
+- prevent exception on closing
+
 ## [2.4.7] - 2021-04-14
 ### Changed
 - error messages improved (call stack and bad alloc message)
