@@ -30,9 +30,11 @@
 ItemWorldController::ItemWorldController(SimulationViewWidget* simulationViewWidget, QObject* parent)
     : AbstractWorldController(simulationViewWidget, parent)
 {
+    TRY;
     _scene = new QGraphicsScene(parent);
     _scene->setBackgroundBrush(QBrush(Const::UniverseColor));
     _scene->installEventFilter(this);
+    CATCH;
 }
 
 
@@ -256,8 +258,10 @@ void ItemWorldController::startNewSelection(QPointF const& scenePos)
 
 void ItemWorldController::updateScrollbars()
 {
+    TRY;
     _simulationViewWidget->updateScrollbars(
         _controller->getContext()->getSpaceProperties()->getSize(), getCenterPositionOfScreen(), getZoomFactor());
+    CATCH;
 }
 
 void ItemWorldController::resize(QResizeEvent* event)
@@ -432,28 +436,32 @@ bool ItemWorldController::eventFilter(QObject * object, QEvent * event)
 void ItemWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     TRY;
-    if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
-        auto viewPos =
-            _simulationViewWidget->getGraphicsView()->mapFromScene(event->scenePos().x(), event->scenePos().y());
-        auto viewPosInt = IntVector2D{static_cast<int>(viewPos.x()), static_cast<int>(viewPos.y())};
-        auto worldPos = CoordinateSystem::sceneToModel(QVector2D(event->scenePos().x(), event->scenePos().y()));
 
-        if (event->buttons() == Qt::MouseButton::LeftButton) {
-            Q_EMIT startContinuousZoomIn(viewPosInt);
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        auto worldPos = CoordinateSystem::sceneToModel(QVector2D(event->scenePos().x(), event->scenePos().y()));
+        _worldPosForMovement = worldPos;
+    } else {
+
+        if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+            auto viewPos =
+                _simulationViewWidget->getGraphicsView()->mapFromScene(event->scenePos().x(), event->scenePos().y());
+            auto viewPosInt = IntVector2D{static_cast<int>(viewPos.x()), static_cast<int>(viewPos.y())};
+            auto worldPos = CoordinateSystem::sceneToModel(QVector2D(event->scenePos().x(), event->scenePos().y()));
+
+            if (event->buttons() == Qt::MouseButton::LeftButton) {
+                Q_EMIT startContinuousZoomIn(viewPosInt);
+            }
+            if (event->buttons() == Qt::MouseButton::RightButton) {
+                Q_EMIT startContinuousZoomOut(viewPosInt);
+            }
         }
-        if (event->buttons() == Qt::MouseButton::RightButton) {
-            Q_EMIT startContinuousZoomOut(viewPosInt);
-        }
-        if (event->buttons() == Qt::MouseButton::MiddleButton) {
-            _worldPosForMovement = worldPos;
-        }
-    }
-    if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        if (Qt::KeyboardModifier::ControlModifier == event->modifiers()) {
-            modifySelection(event->scenePos());
-        } else {
-            _mouseButtonPressed = true;
-            startNewSelection(event->scenePos());
+        if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
+            if (Qt::KeyboardModifier::ControlModifier == event->modifiers()) {
+                modifySelection(event->scenePos());
+            } else {
+                _mouseButtonPressed = true;
+                startNewSelection(event->scenePos());
+            }
         }
     }
     CATCH;
@@ -462,60 +470,61 @@ void ItemWorldController::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void ItemWorldController::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     TRY;
-    if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
-        auto viewPos =
-            _simulationViewWidget->getGraphicsView()->mapFromScene(event->scenePos().x(), event->scenePos().y());
-        auto viewPosInt = IntVector2D{toInt(viewPos.x()), toInt(viewPos.y())};
-        if (event->buttons() == Qt::MouseButton::LeftButton) {
-            Q_EMIT startContinuousZoomIn(viewPosInt);
-        }
-        if (event->buttons() == Qt::MouseButton::RightButton) {
-            Q_EMIT startContinuousZoomOut(viewPosInt);
-        }
-        if (event->buttons() == Qt::MouseButton::MiddleButton) {
-            centerTo(*_worldPosForMovement, viewPosInt);
-            refresh();
-        }
-    }
-    if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        bool leftButton = ((event->buttons() & Qt::LeftButton) == Qt::LeftButton);
-        bool rightButton = ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+    auto viewPos = _simulationViewWidget->getGraphicsView()->mapFromScene(event->scenePos().x(), event->scenePos().y());
+    auto viewPosInt = IntVector2D{toInt(viewPos.x()), toInt(viewPos.y())};
 
-        if (_itemManager->isMarkerActive()) {
-            auto pos = CoordinateSystem::sceneToModel(event->scenePos());
-            _itemManager->setMarkerLowerRight(pos);
-            auto itemsWithinMarker = _itemManager->getItemsWithinMarker();
-            list<uint64_t> cellIds;
-            list<uint64_t> particleIds;
-            auto selection = getSelectionFromItems(itemsWithinMarker);
-            if (!selection.particleIds.empty()) {
-                int dummy = 0;
+    if (event->buttons() == Qt::MouseButton::MiddleButton) {
+        centerTo(*_worldPosForMovement, viewPosInt);
+        refresh();
+    } else {
+        if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+            if (event->buttons() == Qt::MouseButton::LeftButton) {
+                Q_EMIT startContinuousZoomIn(viewPosInt);
             }
-            _repository->setSelection(selection.cellIds, selection.particleIds);
-            updateItems();
-        }
-        if (!_itemManager->isMarkerActive()) {
-            auto lastPos = event->lastScenePos();
-            auto pos = event->scenePos();
-            QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
-            delta = CoordinateSystem::sceneToModel(delta);
-            if (leftButton && !rightButton) {
-                _repository->moveSelection(delta);
-                _repository->reconnectSelectedCells();
-                updateItems();
-            }
-            if (rightButton && !leftButton) {
-                _repository->moveExtendedSelection(delta);
-                updateItems();
-            }
-            if (leftButton && rightButton) {
-                _repository->rotateSelection(delta.y() * 10);
-                updateItems();
+            if (event->buttons() == Qt::MouseButton::RightButton) {
+                Q_EMIT startContinuousZoomOut(viewPosInt);
             }
         }
-        if (leftButton || rightButton) {
-            Q_EMIT _notifier->notifyDataRepositoryChanged(
-                {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::AllExceptToken);
+        if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
+            bool leftButton = ((event->buttons() & Qt::LeftButton) == Qt::LeftButton);
+            bool rightButton = ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+
+            if (_itemManager->isMarkerActive()) {
+                auto pos = CoordinateSystem::sceneToModel(event->scenePos());
+                _itemManager->setMarkerLowerRight(pos);
+                auto itemsWithinMarker = _itemManager->getItemsWithinMarker();
+                list<uint64_t> cellIds;
+                list<uint64_t> particleIds;
+                auto selection = getSelectionFromItems(itemsWithinMarker);
+                if (!selection.particleIds.empty()) {
+                    int dummy = 0;
+                }
+                _repository->setSelection(selection.cellIds, selection.particleIds);
+                updateItems();
+            }
+            if (!_itemManager->isMarkerActive()) {
+                auto lastPos = event->lastScenePos();
+                auto pos = event->scenePos();
+                QVector2D delta(pos.x() - lastPos.x(), pos.y() - lastPos.y());
+                delta = CoordinateSystem::sceneToModel(delta);
+                if (leftButton && !rightButton) {
+                    _repository->moveSelection(delta);
+                    _repository->reconnectSelectedCells();
+                    updateItems();
+                }
+                if (rightButton && !leftButton) {
+                    _repository->moveExtendedSelection(delta);
+                    updateItems();
+                }
+                if (leftButton && rightButton) {
+                    _repository->rotateSelection(delta.y() * 10);
+                    updateItems();
+                }
+            }
+            if (leftButton || rightButton) {
+                Q_EMIT _notifier->notifyDataRepositoryChanged(
+                    {Receiver::DataEditor, Receiver::ActionController}, UpdateDescription::AllExceptToken);
+            }
         }
     }
     CATCH;
@@ -524,19 +533,22 @@ void ItemWorldController::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void ItemWorldController::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
     TRY;
-    if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+    if (e->buttons() == Qt::MouseButton::MiddleButton) {
         _worldPosForMovement = boost::none;
-        Q_EMIT endContinuousZoom();
-    }
-    if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
-        _mouseButtonPressed = false;
-        if (_itemManager->isMarkerActive()) {
-            _itemManager->deleteMarker();
+    } else {
+        if (SimulationViewSettings::Mode::NavigationMode == _settings.mode) {
+            Q_EMIT endContinuousZoom();
+        }
+        if (SimulationViewSettings::Mode::ActionMode == _settings.mode) {
+            _mouseButtonPressed = false;
+            if (_itemManager->isMarkerActive()) {
+                _itemManager->deleteMarker();
 
-        } else {
-            if (_repository->areEntitiesSelected()) {
-                Q_EMIT _notifier->notifyDataRepositoryChanged(
-                    {Receiver::Simulation}, UpdateDescription::AllExceptToken);
+            } else {
+                if (_repository->areEntitiesSelected()) {
+                    Q_EMIT _notifier->notifyDataRepositoryChanged(
+                        {Receiver::Simulation}, UpdateDescription::AllExceptToken);
+                }
             }
         }
     }

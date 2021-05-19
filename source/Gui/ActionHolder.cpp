@@ -138,12 +138,12 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionMonitor = new QAction("Info bar", this);
 	actionMonitor->setEnabled(true);
 	QIcon iconMonitor;
-	iconMonitor.addFile(":/Icons/main/monitor.png", QSize(), QIcon::Normal, QIcon::On);
-	iconMonitor.addFile(":/Icons/main/monitor.png", QSize(), QIcon::Normal, QIcon::Off);
+	iconMonitor.addFile(":/Icons/main/monitor on.png", QSize(), QIcon::Normal, QIcon::On);
+	iconMonitor.addFile(":/Icons/main/monitor off.png", QSize(), QIcon::Normal, QIcon::Off);
 	actionMonitor->setIcon(iconMonitor);
 	actionMonitor->setIconVisibleInMenu(false);
 	actionMonitor->setCheckable(true);
-	actionMonitor->setChecked(true);
+	actionMonitor->setChecked(false);
 	actionZoomIn = new QAction("Zoom in", this);
 	actionZoomIn->setEnabled(true);
 	QIcon iconZoomIn;
