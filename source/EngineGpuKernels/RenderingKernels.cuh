@@ -123,7 +123,7 @@ __device__ __inline__ void
 drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
 {
     int2 intPos{toInt(pos.x), toInt(pos.y)};
-    if (intPos.x >= 0 && intPos.x < imageSize.x - 1 && intPos.y >= 0 && intPos.y < imageSize.y - 1) {
+    if (intPos.x >= 1 && intPos.x < imageSize.x - 1 && intPos.y >= 1 && intPos.y < imageSize.y - 1) {
 
         float2 posFrac{pos.x - intPos.x, pos.y - intPos.y};
         unsigned int index = intPos.x + intPos.y * imageSize.x;
