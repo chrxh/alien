@@ -76,7 +76,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
 
     float factor = min(100.0f, sqrt(cell->getEnergy()) * 5 + 20.0f) / 100.0f;
     if (!selected) {
-        factor *= 0.5f;
+        factor *= 0.75f;
     }
 
     return {
@@ -89,7 +89,7 @@ __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 {
     auto intensity = max(min((toInt(particle->getEnergy()) + 10) * 5, 150), 20) / 256.0f;
     if (!selected) {
-        intensity *= 0.5f;
+        intensity *= 0.75f;
     }
 
     return {intensity, 0, 0.08f};
@@ -98,7 +98,7 @@ __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 
 __device__ __inline__ float3 calcColor(Token* token, bool selected)
 {
-    return selected ? float3{1.0f, 1.0f, 1.0f} : float3{0.5f, 0.5f, 0.5f};
+    return selected ? float3{1.0f, 1.0f, 1.0f} : float3{0.75f, 0.75f, 0.75f};
 }
 
 __device__ __inline__ void addingColor(unsigned int& pixel, float3 const& colorToAdd)
@@ -206,7 +206,7 @@ __global__ void drawClusters(
 
                 auto posCorrection = cellPos - cell->absPos;
                 if (zoom > 1 - FP_PRECISION) {
-                    color = color * min((zoom - 1.0f), 1.0f);
+                    color = color * min((zoom - 1.0f)/3, 1.0f);
                     for (int i = 0; i < cell->numConnections; ++i) {
                         auto const otherCell = cell->connections[i];
                         auto const otherCellPos = otherCell->absPos + posCorrection;
