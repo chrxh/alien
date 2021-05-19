@@ -12,15 +12,12 @@
         <file>Icons/editor/info_on.png</file>
         <file>Icons/main/zoom in.png</file>
         <file>Icons/main/zoom out.png</file>
-        <file>Icons/main/monitor.png</file>
-        <file>Icons/main/visual off.png</file>
         <file>Icons/main/restore.png</file>
         <file>Icons/main/run.png</file>
         <file>Icons/main/snapshot.png</file>
         <file>Icons/main/step backward.png</file>
         <file>Icons/main/step forward.png</file>
         <file>Icons/main/pause.png</file>
-        <file>Icons/main/visual on.png</file>
         <file>logo.png</file>
         <file>Icons/main/accelerate off.png</file>
         <file>Icons/main/accelerate on.png</file>
@@ -28,13 +25,17 @@
         <file>Shader/FragmentShader.glsl</file>
         <file>Shader/VertexShader.glsl</file>
         <file>Icons/main/action off.png</file>
-        <file>Icons/main/action on.png</file>
         <file>Icons/main/navigation off.png</file>
-        <file>Icons/main/navigation on.png</file>
         <file>Icons/main/item view off.png</file>
-        <file>Icons/main/item view on.png</file>
         <file>Icons/main/pixel view off.png</file>
-        <file>Icons/main/pixel view on.png</file>
         <file>GettingStartedWindow.html</file>
+        <file>Icons/main/action on.png</file>
+        <file>Icons/main/navigation on.png</file>
+        <file>Icons/main/item view on.png</file>
+        <file>Icons/main/pixel view on.png</file>
+        <file>Icons/main/monitor off.png</file>
+        <file>Icons/main/monitor on.png</file>
+        <file>Icons/main/visual on.png</file>
+        <file>Icons/main/visual off.png</file>
     </qresource>
 </RCC>
