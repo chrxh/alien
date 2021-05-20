@@ -569,7 +569,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
             entries[i].cluster.angularMass = 0.0f;
             entries[i].cluster.numCellPointers = 0;
             entries[i].cluster.numTokenPointers = 0;
-            entries[i].cluster.decompositionRequired = 0;
+            entries[i].cluster.decompositionRequired = 1;
             entries[i].cluster.clusterToFuse = nullptr;
             entries[i].cluster.locked = 0;
             entries[i].cluster.metadata.nameLen = 0;
@@ -614,7 +614,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.x, cell->absPos.x);
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.y, cell->absPos.y);
             entries[MAX_DECOMPOSITIONS - 1].cluster.addVelocity_safe(cell->vel);
-            entries[MAX_DECOMPOSITIONS - 1].cluster.decompositionRequired = 1;
         }
     }
     __syncthreads();
@@ -623,6 +622,9 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
         factory.init(_data);
+        if (1 == numDecompositions) {
+            entries[0].cluster.decompositionRequired = 0;
+        }
     }
     __syncthreads();
 
@@ -703,7 +705,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             newCluster->numTokenPointers = 0;
             newCluster->numCellPointers = _cluster->numCellPointers + otherCluster->numCellPointers;
             newCluster->cellPointers = _data->entities.cellPointers.getNewSubarray(newCluster->numCellPointers);
-            newCluster->decompositionRequired = _cluster->decompositionRequired | otherCluster->decompositionRequired;
+            newCluster->decompositionRequired = 1;
             newCluster->locked = 0;
             newCluster->clusterToFuse = nullptr;
 
