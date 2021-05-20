@@ -1,5 +1,9 @@
 # Release notes
 
+## [2.5.1] - 2021-05-20
+### Fixed
+- important memory leak fixed
+
 ## [2.5.0] - 2021-05-19
 ### Added
 - navigation mode enables continuous zooming
@@ -29,8 +33,6 @@
 - logo reduced in size
 - startup example revised
 - collision example revised
-
-### Removed
 
 ### Fixed
 - prevent exception on closing
