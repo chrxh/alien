@@ -130,6 +130,8 @@ void SimulationAccessGpuImpl::jobsFinished()
     for (auto const& job : finishedJobs) {
 
         if (auto const& getUpdateJob = boost::dynamic_pointer_cast<_UpdateDataJob>(job)) {
+            auto dataTO = getUpdateJob->getDataTO();
+            _dataTOCache->releaseDataTO(dataTO);
             Q_EMIT dataUpdated();
         }
 
