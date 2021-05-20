@@ -23,7 +23,7 @@
 - cells are represented in the vector view by a circle with a color gradient
 - two toolbar buttons (instead of one) for switching between editor and pixel/vector view
 - using flat design for main window
-- more beautiful loading bar
+- more beautiful progress bar
 - activated icons in the toolbar glow
 - simulation parameters renamed
 - meaningful error message in case the system requirements are not met
