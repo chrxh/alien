@@ -3,6 +3,7 @@
 ## [2.5.1] - 2021-05-20
 ### Fixed
 - important memory leak fixed
+- destruction of cell clusters corrected: looks now much nicer!
 
 ## [2.5.0] - 2021-05-19
 ### Added
