@@ -38,6 +38,10 @@ SimulationViewWidget::SimulationViewWidget(QWidget *parent)
     ui->verticalScrollBar->setValue(0);
     ui->verticalScrollBar->setRange(0, 0);
     ui->verticalScrollBar->setPageStep(0);
+
+    ui->horizontalScrollBar->setVisible(false);
+    ui->verticalScrollBar->setVisible(false);
+
     ui->simulationView->setFrameStyle(0);
     ui->simulationView->setRenderHint(QPainter::Antialiasing, false);
     ui->simulationView->setRenderHint(QPainter::TextAntialiasing, false);
@@ -61,6 +65,9 @@ SimulationViewWidget::~SimulationViewWidget()
 
 void SimulationViewWidget::updateScrollbars(IntVector2D const& worldSize, QVector2D const& center, double zoom)
 {
+    ui->horizontalScrollBar->setVisible(true);
+    ui->verticalScrollBar->setVisible(true);
+
     _zoom = zoom;
 
     RealVector2D sceneSize = {toFloat(worldSize.x * zoom), toFloat(worldSize.y * zoom)};
