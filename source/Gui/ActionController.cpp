@@ -1352,10 +1352,13 @@ void ActionController::settingUpNewSimulation(SimulationConfig const& config)
     onRunClicked(false);
     onToggleCellInfo(true);
 
-	bool oldState = actions->actionRestrictTPS->blockSignals(true);
-    actions->actionRestrictTPS->setChecked(false);
-    onToggleRestrictTPS(false);
-    actions->actionRestrictTPS->blockSignals(oldState);
+    {
+        bool oldState = actions->actionRestrictTPS->blockSignals(true);
+        actions->actionRestrictTPS->setChecked(false);
+        onToggleRestrictTPS(false);
+        actions->actionRestrictTPS->blockSignals(oldState);
+    }
+    actions->actionOpenGLView->setChecked(true);
 }
 
 void ActionController::updateActionsEnableState()
