@@ -33,11 +33,13 @@
 
 #include "ui_MainView.h"
 
-MainView::MainView(QWidget * parent)
-	: QMainWindow(parent)
-	, ui(new Ui::MainView)
+
+MainView::MainView(QWidget* parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainView)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
+
     _simulationViewController = new SimulationViewController(this);
     auto simulationViewWidget = _simulationViewController->getWidget();
 
@@ -47,6 +49,7 @@ MainView::MainView(QWidget * parent)
 	_actions = new ActionController(this);
 	_monitor = new MonitorController(this);
     _logging = new LoggingController(this);
+
     _gettingStartedWindow = new GettingStartedWindow(this);
 
     simulationViewWidget->setParent(ui->centralWidget);
@@ -59,6 +62,7 @@ MainView::MainView(QWidget * parent)
     simulationViewWidget->setMinimumSize(QSize(0, 0));
     simulationViewWidget->setMaximumSize(QSize(16777215, 16777215));
     simulationViewWidget->setLayoutDirection(Qt::LeftToRight);
+
     ui->gridLayout->addWidget(simulationViewWidget, 0, 0, 1, 1);
 
     {
@@ -172,6 +176,11 @@ void MainView::toggleInfobar(bool show)
 void MainView::showDocumentation()
 {
     QDesktopServices::openUrl(QUrl("https://alien-project.org/documentation.html"));
+}
+
+QWidget* MainView::getSimulationViewWidget() const
+{
+    return _simulationViewController->getWidget();
 }
 
 void MainView::resizeEvent(QResizeEvent *event)
@@ -344,6 +353,7 @@ void MainView::setupFullScreen()
 
 void MainView::setupStartupWidget()
 {
+    _startupController->init();
     auto startupWidget = _startupController->getWidget();
     auto simulationViewWidget = _simulationViewController->getWidget();
     startupWidget->setParent(simulationViewWidget);

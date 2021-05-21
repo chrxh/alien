@@ -41,6 +41,8 @@ public:
     virtual void toggleInfobar(bool show);
     virtual void showDocumentation();
 
+	virtual QWidget* getSimulationViewWidget() const;
+
 protected:
 	virtual void resizeEvent(QResizeEvent *event);
 	virtual void closeEvent(QCloseEvent* event);
