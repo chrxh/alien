@@ -168,13 +168,6 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionDisplayLink->setIcon(iconDisplayLink);
     actionDisplayLink->setIconVisibleInMenu(false);
 
-	actionFullscreen = new QAction("Fullscreen", this);
-	actionFullscreen->setEnabled(true);
-	actionFullscreen->setCheckable(true);
-	actionFullscreen->setShortcut(Qt::Key_F7);
-	bool isFullscreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
-	actionFullscreen->setChecked(isFullscreen);
-    
     actionGlowEffect = new QAction("Glow", this);
     actionGlowEffect->setEnabled(true);
     actionGlowEffect->setCheckable(true);

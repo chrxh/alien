@@ -4,7 +4,7 @@
 ### Fixed
 - important memory leak fixed
 - destruction of cell clusters corrected: looks now much nicer!
-- no fullscreen as default because of a Qt bug
+- allow only full screen because of a Qt bug
 
 ## [2.5.0] - 2021-05-19
 ### Added
