@@ -169,7 +169,7 @@ void MainController::init()
 
 void MainController::autoSave()
 {
-    _progressBar = new ProgressBar("Autosaving ...", _view);
+    _progressBar = new ProgressBar("Autosaving ...", _view->getSimulationViewWidget());
     autoSaveIntern(getPathToApp() + Const::AutoSaveFilename);
     delete _progressBar;
 }
@@ -356,7 +356,7 @@ void MainController::onNewSimulation(SimulationConfig const& config, double ener
 
 void MainController::onSaveSimulation(string const& filename)
 {
-    _progressBar = new ProgressBar("Saving ...", _view);
+    _progressBar = new ProgressBar("Saving ...", _view->getSimulationViewWidget());
 
     saveSimulationIntern(filename);
 
@@ -367,7 +367,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 {
     _view->getMonitorController()->pauseTimer();
 
-    _progressBar = new ProgressBar("Loading ...", _view);
+    _progressBar = new ProgressBar("Loading ...", _view->getSimulationViewWidget());
 
     if (LoadOption::SaveOldSim == option) {
         autoSaveIntern(getPathToApp() + Const::AutoSaveForLoadingFilename);
@@ -402,7 +402,7 @@ bool MainController::onLoadSimulation(string const & filename, LoadOption option
 
 void MainController::onRecreateUniverse(SimulationConfig const& config, bool extrapolateContent)
 {
-    _progressBar = new ProgressBar("Reassembling world...", _view);
+    _progressBar = new ProgressBar("Reassembling world...", _view->getSimulationViewWidget());
 
     _view->getMonitorController()->pauseTimer();
 
@@ -421,7 +421,7 @@ void MainController::onRecreateUniverse(SimulationConfig const& config, bool ext
 
 void MainController::onUpdateSimulationParameters(SimulationParameters const& parameters)
 {
-    _progressBar = new ProgressBar("Updating simulation parameters ...", _view);
+    _progressBar = new ProgressBar("Updating simulation parameters ...", _view->getSimulationViewWidget());
     
 	_simController->getContext()->setSimulationParameters(parameters);
 
@@ -430,7 +430,7 @@ void MainController::onUpdateSimulationParameters(SimulationParameters const& pa
 
 void MainController::onUpdateExecutionParameters(ExecutionParameters const & parameters)
 {
-    _progressBar = new ProgressBar("Updating execution parameters ...", _view);
+    _progressBar = new ProgressBar("Updating execution parameters ...", _view->getSimulationViewWidget());
 
     _simController->getContext()->setExecutionParameters(parameters);
 

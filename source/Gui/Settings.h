@@ -13,7 +13,7 @@ namespace Const
     auto const ViewUpdates = 6;
 
     //startup
-    const QColor StartupTextColor(0x89, 0x94, 0xc4);
+    const QColor StartupTextColor(0x99, 0xa0, 0xdd);
     const QColor StartupNewVersionTextColor(0xB0, 0xb0, 0xff);
 
 	//progress bar
@@ -57,8 +57,8 @@ namespace Const
 	const QString StandardFont = "Courier New";
 
 	//setting keys and default values
-	const std::string MainViewFullScreenKey = "mainView/fullScreen";
-	const bool MainViewFullScreenDefault = true;
+	const std::string MainViewFullScreenKey = "mainView/2.5/fullScreen";
+	const bool MainViewFullScreenDefault = false;
 
     const std::string GettingStartedWindowKey = "mainView/2.5/gettingStartedWindow";
     const bool GettingStartedWindowKeyDefault = true;

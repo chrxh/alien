@@ -19,7 +19,7 @@ ProgressBar::ProgressBar(std::string const& text, QWidget* parent)
     _graphicsView = new QGraphicsView(parent);
     auto rect = parent->geometry();
     auto posX = rect.width() / 2 - ProgressBarWidth / 2;
-    auto posY = rect.height() - 220;
+    auto posY = rect.height() - 100;
     _graphicsView->setFrameStyle(0);
     _graphicsView->setGeometry(posX, posY, ProgressBarWidth, 40);
     _graphicsView->show();

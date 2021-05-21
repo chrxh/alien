@@ -19,6 +19,10 @@ StartupController::StartupController(WebAccess* access, QWidget* parent)
 {
     connect(access, &WebAccess::currentVersionReceived, this, &StartupController::currentVersionReceived);
  
+}
+
+void StartupController::init()
+{
     initWidget();
 
     _access->requestCurrentVersion();
@@ -63,7 +67,7 @@ void StartupController::initWidget()
     _newVersionTextItem->setBrush(Const::StartupNewVersionTextColor);
     _scene->addItem(_newVersionTextItem);
 
-    _graphicsView = new QGraphicsView();
+    _graphicsView = new QGraphicsView(_parent);
     _graphicsView->setScene(_scene);
     _graphicsView->setGeometry(0, 0, 800, 400);
 }

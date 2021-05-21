@@ -25,7 +25,7 @@ SimulationViewController::SimulationViewController(QWidget* parent)
 {
     _simulationViewWidget = new SimulationViewWidget(parent);
 
-    _openGLWorld = new OpenGLWorldController(_simulationViewWidget, this);
+    _openGLWorld = new OpenGLWorldController(_simulationViewWidget, parent);
     _itemWorld = new ItemWorldController(_simulationViewWidget, this);
     connect(_openGLWorld, &OpenGLWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
     connect(
@@ -89,7 +89,9 @@ void SimulationViewController::disconnectView()
 
 void SimulationViewController::refresh()
 {
-    getActiveUniverseView()->refresh();
+    if (auto const& universeView = getActiveUniverseView()) {
+        universeView->refresh();
+    }
 }
 
 ActiveView SimulationViewController::getActiveView() const
@@ -167,7 +169,7 @@ AbstractWorldController* SimulationViewController::getActiveUniverseView() const
         return _itemWorld;
     }
 
-    THROW_NOT_IMPLEMENTED();
+    return nullptr;
 }
 
 AbstractWorldController* SimulationViewController::getView(ActiveView activeView) const

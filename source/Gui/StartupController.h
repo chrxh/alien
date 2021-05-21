@@ -14,6 +14,8 @@ public:
     StartupController(WebAccess* access, QWidget* parent);
     virtual ~StartupController() = default;
 
+    void init();
+
     QWidget* getWidget() const;
 
 private:
