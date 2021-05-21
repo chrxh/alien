@@ -1,9 +1,10 @@
 # Release notes
 
-## [2.5.1] - 2021-05-20
+## [2.5.1] - 2021-05-21
 ### Fixed
 - important memory leak fixed
 - destruction of cell clusters corrected: looks now much nicer!
+- no fullscreen as default because of a Qt bug
 
 ## [2.5.0] - 2021-05-19
 ### Added
