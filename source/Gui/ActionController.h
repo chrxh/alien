@@ -54,7 +54,6 @@ private:
 
     Q_SLOT void onToggleInfobar(bool toggled);
     Q_SLOT void onToggleDisplayLink(bool toggled);
-    Q_SLOT void onToggleFullscreen(bool toggled);
     Q_SLOT void onToggleGlowEffect(bool toggled);
     Q_SLOT void onToggleMotionEffect(bool toggled);
 

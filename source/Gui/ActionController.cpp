@@ -1,4 +1,5 @@
 ﻿#include <sstream>
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QAction>
@@ -132,7 +133,6 @@ void ActionController::init(
         this,
         &ActionController::updateActionsEnableState);
     connect(actions->actionDisplayLink, &QAction::triggered, this, &ActionController::onToggleDisplayLink);
-    connect(actions->actionFullscreen, &QAction::toggled, this, &ActionController::onToggleFullscreen);
     connect(actions->actionGlowEffect, &QAction::toggled, this, &ActionController::onToggleGlowEffect);
     connect(actions->actionMotionEffect, &QAction::toggled, this, &ActionController::onToggleMotionEffect);
 
@@ -317,26 +317,6 @@ void ActionController::onToggleDisplayLink(bool toggled)
     _mainController->onDisplayLink(toggled);
 
 	loggingService->logMessage(Priority::Unimportant, "toggle display link finished");
-}
-
-void ActionController::onToggleFullscreen(bool toogled)
-{
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-
-	Qt::WindowStates state = _mainView->windowState();
-	if (toogled) {
-		state |= Qt::WindowFullScreen;
-        loggingService->logMessage(Priority::Unimportant, "activate full screen");
-    }
-	else {
-		state &= ~Qt::WindowFullScreen;
-        loggingService->logMessage(Priority::Unimportant, "deactivate full screen");
-    }
-	_mainView->setWindowState(state);
-
-	GuiSettings::setSettingsValue(Const::MainViewFullScreenKey, toogled);
-
-    loggingService->logMessage(Priority::Unimportant, "toggle full screen finished");
 }
 
 void ActionController::onToggleGlowEffect(bool toggled)
