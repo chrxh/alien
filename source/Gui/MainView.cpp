@@ -236,7 +236,6 @@ void MainView::setupMenuAndToolbar()
     ui->menuView->addAction(actions->actionZoomIn);
     ui->menuView->addAction(actions->actionZoomOut);
     ui->menuView->addAction(actions->actionDisplayLink);
-    ui->menuView->addAction(actions->actionFullscreen);
     ui->menuView->addSeparator();
     auto visualEffects = new QMenu("Visual effects", this);
     visualEffects->addAction(actions->actionGlowEffect);
@@ -345,10 +344,8 @@ void MainView::setupWidgets()
 
 void MainView::setupFullScreen()
 {
-	bool fullScreen = GuiSettings::getSettingsValue(Const::MainViewFullScreenKey, Const::MainViewFullScreenDefault);
-	if (fullScreen) {
-		setWindowState(windowState() | Qt::WindowFullScreen);
-	}
+    setWindowState(windowState() | Qt::WindowFullScreen);
+    setFixedSize(size() + QSize(0, 1));     //workaround because of a Qt bug
 }
 
 void MainView::setupStartupWidget()
