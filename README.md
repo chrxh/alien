@@ -8,10 +8,16 @@
 Artificial Life Environment (ALiEn) is a simulation program based on a specialized 2D physics and rendering engine in CUDA. Each simulated body has a graph-like structure of connected building blocks that can either be programmed or equipped with functions to act in the world (accelerators, sensors, weapons, constructors, etc.). Such internal processes are triggered by signals coming from circulating tokens. The bodies can be thought of as small machines or agents operating in a common environment.
 
 ## Main features
+### Physics engine
 - Realistic physical computations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
+- Simulation and rendering on GPU
+- Post-processing filters such as glow and motion blur
+
+### Artificial Life extensions
 - Programmable matter approach for simulating digital organisms and evolution
 - Built-in code and graph editor for designing own machines 
-- Simulation and rendering on GPU
+
+<img src="img/engine2.gif" width=100%>
 
 The simulation code is written entirely in CUDA and highly optimized for large-scale real-time simulations of millions of bodies and particles.
 The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
@@ -20,8 +26,6 @@ The development is driven by the desire to better understand the conditions for 
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
 - Perhaps the most honest answer: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
 - A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
-
-<img src="img/engine2.gif" width=100%>
 
 **Further information and artworks**
 * [Website](https://alien-project.org)
