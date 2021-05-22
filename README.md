@@ -13,11 +13,13 @@ Artificial Life Environment (ALiEn) is a simulation program based on a specializ
 - Simulation and rendering on GPU
 - Post-processing filters such as glow and motion blur
 
+<img src="img/physics engine.gif" width=100%>
+
 ### Artificial Life extensions
 - Programmable matter approach for simulating digital organisms and evolution
 - Built-in code and graph editor for designing own machines 
 
-<img src="img/engine2.gif" width=100%>
+<img src="img/alife engine.gif" width=100%>
 
 The simulation code is written entirely in CUDA and highly optimized for large-scale real-time simulations of millions of bodies and particles.
 The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
