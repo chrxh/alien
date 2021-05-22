@@ -44,7 +44,7 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 <img src="img/screenshot1.png" width=100%>
 </h1>
 
-#### Evolving replicating machines in action
+#### Evolving self-replicating machines in action
 <h1 align="center">
 <img src="img/screenshot3.png" width=100%>
 </h1>
