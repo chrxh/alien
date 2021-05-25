@@ -10,7 +10,7 @@ Artificial Life Environment (ALiEn) is a simulation program based on a specializ
 ## Main features
 ### Physics and graphics engine
 - Realistic physical computations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
-- Real-time interaction with running simulations
+- Real-time user interactions with running simulations
 - Simulation and rendering on GPU via CUDA and OpenGL
 - Post-processing filters such as glow and motion blur
 
