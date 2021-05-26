@@ -67,6 +67,7 @@ void ItemWorldController::setSettings(SimulationViewSettings const& settings)
 void ItemWorldController::connectView()
 {
     TRY;
+    _dataRequested = false;
     disconnectView();
     _connections.push_back(
         connect(_controller, &SimulationController::nextFrameCalculated, this, &ItemWorldController::requestData));
@@ -274,7 +275,10 @@ void ItemWorldController::resize(QResizeEvent* event)
 void ItemWorldController::requestData()
 {
     TRY;
-    _repository->requireDataUpdateFromSimulation(_viewport->getRect());
+    if (!_dataRequested) {
+        _dataRequested = true;
+        _repository->requireDataUpdateFromSimulation(_viewport->getRect());
+    }
     CATCH;
 }
 
@@ -335,6 +339,7 @@ void ItemWorldController::receivedNotifications(set<Receiver> const& targets)
     if (targets.find(Receiver::VisualEditor) == targets.end()) {
 		return;
 	}
+    _dataRequested = false;
 
 	centerSelectionIfEnabled();
     updateItems();
