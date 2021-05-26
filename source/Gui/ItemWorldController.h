@@ -91,4 +91,5 @@ private:
 
 	bool _mouseButtonPressed = true;
 	bool _centerSelection = false;
+    bool _dataRequested = false;
 };
