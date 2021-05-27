@@ -18,17 +18,23 @@ MetadataEditWidget::MetadataEditWidget (QWidget *parent) :
 
 void MetadataEditWidget::updateModel ()
 {
-	auto& cluster = *_model->getClusterToEditRef().metadata;
-	auto& cell = *_model->getCellToEditRef().metadata;
+    auto cluster = _model->getClusterToEditRef();
+    auto cell = _model->getCellToEditRef();
+    if (!cluster || !cell) {
+        return;
+    }
+
+	auto& clusterMetadata = *cluster->metadata;
+    auto& cellMetadata = *cell->metadata;
 	int row = QTextEdit::textCursor().blockNumber();
 
     //collect new data
     QString currentText = QTextEdit::textCursor().block().text();
     currentText.remove(0, 14);
     if(row == 0)
-        cluster.name = currentText;
+        clusterMetadata.name = currentText;
     if(row == 1)
-        cell.name = currentText;
+        cellMetadata.name = currentText;
 
     //inform other instances
 	_controller->notificationFromMetadataTab();
@@ -42,8 +48,14 @@ void MetadataEditWidget::init(DataEditModel * model, DataEditController * contro
 
 void MetadataEditWidget::updateDisplay ()
 {
-	auto const& cluster = *_model->getClusterToEditRef().metadata;
-	auto const& cell = *_model->getCellToEditRef().metadata;
+    auto cluster = _model->getClusterToEditRef();
+    auto cell = _model->getCellToEditRef();
+    if (!cluster || !cell) {
+        return;
+    }
+
+    auto& clusterMetadata = *cluster->metadata;
+    auto& cellMetadata = *cell->metadata;
 
 	//define auxiliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
@@ -78,31 +90,31 @@ void MetadataEditWidget::updateDisplay ()
     QString sep7 = colorEnd + colorBlack + "&#9001;" + colorEnd + color7;
     QString colorBlock8 = "&#9608;&#9608;";//"&#10108;";
     QString sep8 = colorEnd;
-    if( cell.color == 0 ) {
+    if( cellMetadata.color == 0 ) {
         sep1 = colorWhite + "&#9002;" + colorEnd+color1;
         sep2 = colorEnd+ colorWhite + "&#9001;" + colorEnd + color2;
     }
-    if(cell.color == 1 ) {
+    if(cellMetadata.color == 1 ) {
         sep2 = colorEnd + colorWhite + "&#9002;" + colorEnd + color2;
         sep3 = colorEnd + colorWhite + "&#9001;" + colorEnd + color3;
     }
-    if(cell.color == 2 ) {
+    if(cellMetadata.color == 2 ) {
         sep3 = colorEnd + colorWhite + "&#9002;" + colorEnd + color3;
         sep4 = colorEnd + colorWhite + "&#9001;" + colorEnd + color4;
     }
-    if(cell.color == 3 ) {
+    if(cellMetadata.color == 3 ) {
         sep4 = colorEnd + colorWhite + "&#9002;" + colorEnd + color4;
         sep5 = colorEnd + colorWhite + "&#9001;" + colorEnd + color5;
     }
-    if(cell.color == 4 ) {
+    if(cellMetadata.color == 4 ) {
         sep5 = colorEnd + colorWhite + "&#9002;" + colorEnd + color5;
         sep6 = colorEnd + colorWhite + "&#9001;" + colorEnd + color6;
     }
-    if(cell.color == 5 ) {
+    if(cellMetadata.color == 5 ) {
         sep6 = colorEnd + colorWhite + "&#9002;" + colorEnd + color6;
         sep7 = colorEnd + colorWhite + "&#9001;" + colorEnd + color7;
     }
-    if(cell.color >= 6 ) {
+    if(cellMetadata.color >= 6 ) {
         sep7 = colorEnd + colorWhite + "&#9002;" + colorEnd + color7;
         sep8 = colorEnd + colorWhite + "&#9001;" + colorEnd;
     }
@@ -115,9 +127,9 @@ void MetadataEditWidget::updateDisplay ()
     //create string of display
     QString text;
     text = parStart+colorTextStart+ "cluster name:"+colorEnd;
-    text += colorDataStart+" " + cluster.name+colorEnd+parEnd;
+    text += colorDataStart+" " + clusterMetadata.name+colorEnd+parEnd;
     text += parStart+colorTextStart+ "cell name:&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+" " + cell.name+colorEnd+parEnd;
+    text += colorDataStart+" " + cellMetadata.name+colorEnd+parEnd;
     text += parStart+colorTextStart+ "cell color: &nbsp;&nbsp;"+colorEnd;
     text += sep1+colorBlock2+sep2+colorBlock3+sep3+colorBlock4+sep4+colorBlock5+sep5+colorBlock6+sep6+colorBlock7+sep7+colorBlock8+sep8+parEnd;
 
@@ -188,22 +200,29 @@ void MetadataEditWidget::mousePressEvent (QMouseEvent* e)
 
     //cell color clicked?
     if( row == 2 ) {
-		auto& cluster = *_model->getClusterToEditRef().metadata;
-		auto& cell = *_model->getCellToEditRef().metadata;
-		if ((col == 15) || (col == 16) || (col == 17))
-            cell.color = 0;
+        auto cluster = _model->getClusterToEditRef();
+        auto cell = _model->getCellToEditRef();
+        if (!cluster || !cell) {
+            return;
+        }
+
+        auto& clusterMetadata = *cluster->metadata;
+        auto& cellMetadata = *cell->metadata;
+
+        if ((col == 15) || (col == 16) || (col == 17))
+            cellMetadata.color = 0;
         if( (col == 18) || (col == 19) || (col == 20) )
-            cell.color = 1;
+            cellMetadata.color = 1;
         if( (col == 21) || (col == 22) || (col == 23) )
-            cell.color = 2;
+            cellMetadata.color = 2;
         if( (col == 24) || (col == 25) || (col == 26) )
-            cell.color = 3;
+            cellMetadata.color = 3;
         if( (col == 27) || (col == 28) || (col == 29) )
-            cell.color = 4;
+            cellMetadata.color = 4;
         if( (col == 30) || (col == 31) || (col == 32) )
-            cell.color = 5;
+            cellMetadata.color = 5;
         if( (col == 33) || (col == 34) || (col == 35) )
-            cell.color = 6;
+            cellMetadata.color = 6;
         updateDisplay();
         QTextEdit::clearFocus();
 		_controller->notificationFromMetadataTab();
