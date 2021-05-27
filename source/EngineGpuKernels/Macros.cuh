@@ -23,10 +23,13 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         DEVICE_RESET
         if (cudaError::cudaErrorInsufficientDriver == result) {
             throw SpecificCudaException(
-                "Your graphics driver is not compatible with CUDA 11.2. Please update your driver and start again.");
+                "Your graphics driver is not compatible with CUDA 11.2. Please update your driver and restart.");
         } else if (cudaError::cudaErrorOperatingSystem == result) {
+            throw SpecificCudaException("An operating system call within the CUDA api failed. Please check if your "
+                                        "monitor is plugged to the correct graphics card.");
+        } else if (cudaError::cudaErrorInitializationError == result) {
             throw SpecificCudaException(
-                "An operating system call within the CUDA api failed. Please check if your monitor is plugged to the correct graphics card.");
+                "CUDA could not be initialized. Please check the minimum hardware requirements. If fulfilled please update your driver and restart.");
         } else {
             std::stringstream stream;
             stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("

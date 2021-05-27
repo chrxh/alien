@@ -57,7 +57,10 @@
          <string>1000000</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -74,7 +77,10 @@
          <string>50</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
