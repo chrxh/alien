@@ -55,6 +55,13 @@ int main(int argc, char* argv[])
         QMessageBox::critical(nullptr, "System requirements", QString::fromStdString(ss.str()));
 
         exit(EXIT_FAILURE);
+    } catch (SpecificCudaException const& e) {
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, e.what());
+
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(e.what()));
+
+        exit(EXIT_FAILURE);
     } catch (BugReportException const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, e.what());

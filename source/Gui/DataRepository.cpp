@@ -223,8 +223,9 @@ namespace
             result += *particle.pos;
             ++numEntities;
         }
-        CHECK(numEntities > 0);
-        result /= numEntities;
+        if (numEntities > 0) {
+            result /= numEntities;
+        }
         return result;
     }
 
