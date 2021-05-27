@@ -23,22 +23,25 @@ void ClusterEditTab::init(DataEditModel* model, DataEditController* controller)
 
 void ClusterEditTab::requestUpdate ()
 {
-	auto &cluster= _model->getClusterToEditRef();
+	auto cluster= _model->getClusterToEditRef();
+    if (!cluster) {
+        return;
+    }
 	int row = QTextEdit::textCursor().blockNumber();
     QString currentText = QTextEdit::textCursor().block().text();
 
     if( row == 1 )
-        cluster.pos->setX(generateNumberFromFormattedString(currentText));
+        cluster->pos->setX(generateNumberFromFormattedString(currentText));
     if( row == 2 )
-		cluster.pos->setY(generateNumberFromFormattedString(currentText));
+		cluster->pos->setY(generateNumberFromFormattedString(currentText));
     if( row == 3 )
-		cluster.vel->setX(generateNumberFromFormattedString(currentText));
+		cluster->vel->setX(generateNumberFromFormattedString(currentText));
     if( row == 4 )
-		cluster.vel->setY(generateNumberFromFormattedString(currentText));
+		cluster->vel->setY(generateNumberFromFormattedString(currentText));
     if( row == 5 )
-		*cluster.angle = generateNumberFromFormattedString(currentText);
+		*cluster->angle = generateNumberFromFormattedString(currentText);
     if( row == 6 )
-		*cluster.angularVel = generateNumberFromFormattedString(currentText);
+		*cluster->angularVel = generateNumberFromFormattedString(currentText);
 
 	_controller->notificationFromClusterTab();
 }
@@ -246,7 +249,10 @@ void ClusterEditTab::wheelEvent (QWheelEvent* e)
 
 void ClusterEditTab::updateDisplay ()
 {
-	auto &cluster = _model->getClusterToEditRef();
+	auto cluster = _model->getClusterToEditRef();
+    if (!cluster) {
+        return;
+    }
 	int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
 
@@ -266,19 +272,19 @@ void ClusterEditTab::updateDisplay ()
 
     //create string of display
     text = parStart+colorTextStart+ "number of cells: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += colorDataStart+QString("%1").arg(cluster.cells->size())+colorEnd+parEnd;
+    text += colorDataStart+QString("%1").arg(cluster->cells->size())+colorEnd+parEnd;
     text += parStart+colorTextStart+ "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += StringHelper::generateFormattedRealString(cluster.pos->x())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster->pos->x()) + parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += StringHelper::generateFormattedRealString(cluster.pos->y())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster->pos->y()) + parEnd;
     text += parStart+colorTextStart+ "velocity x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += StringHelper::generateFormattedRealString(cluster.vel->x())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster->vel->x()) + parEnd;
     text += parStart+colorTextStart+ "velocity y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += StringHelper::generateFormattedRealString(cluster.vel->y())+parEnd;
+    text += StringHelper::generateFormattedRealString(cluster->vel->y()) + parEnd;
     text += parStart+colorTextStart+ "angle: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += StringHelper::generateFormattedRealString(*cluster.angle)+parEnd;
+    text += StringHelper::generateFormattedRealString(*cluster->angle) + parEnd;
     text += parStart+colorTextStart+ "angular vel: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += StringHelper::generateFormattedRealString(*cluster.angularVel)+parEnd;
+    text += StringHelper::generateFormattedRealString(*cluster->angularVel) + parEnd;
 
     QTextEdit::setText(text);
 

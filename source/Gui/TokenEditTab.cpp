@@ -165,7 +165,7 @@ void TokenEditTab::updateDisplay()
             hex->setGeometry(0, 0, 100, height);
             hex->setMaximumHeight(height);
 			hex->setStyleSheet("border: 0px");
-			hex->updateDisplay(token.data->mid(tokenMemPointer, 1));
+			hex->updateDisplay(token->data->mid(tokenMemPointer, 1));
             ui->tableWidget->verticalHeader()->setSectionResizeMode(row, QHeaderView::ResizeToContents);
 			ui->tableWidget->setCellWidget(row, 2, hex);
 
@@ -217,7 +217,7 @@ void TokenEditTab::updateDisplay()
 
 			int size = (kNew - k) / 4 + 1;
 			HexEditWidget* hex = createHexEditWidget(size, row, tokenMemPointer);
-			hex->updateDisplay(token.data->mid(tokenMemPointer, kNew - k));
+			hex->updateDisplay(token->data->mid(tokenMemPointer, kNew - k));
 			_hexEditByStartAddress[tokenMemPointer] = hex;
 
 			//update pointer
@@ -250,12 +250,15 @@ HexEditWidget* TokenEditTab::createHexEditWidget(int size, int row, int tokenMem
 
 void TokenEditTab::tokenMemoryChanged (int tokenMemPointer)
 {
-	auto& token = _model->getTokenToEditRef(_tokenIndex);
+	auto token = _model->getTokenToEditRef(_tokenIndex);
+    if (!token) {
+        return;
+    }
 	HexEditWidget* hex = _hexEditByStartAddress[tokenMemPointer];
     if( hex ) {
         QByteArray newData = hex->getData();
         for(int i = 0; i < newData.size(); ++i) {
-			token.data.get()[tokenMemPointer + i] = newData[i];
+			token->data.get()[tokenMemPointer + i] = newData[i];
         }
     }
 	_controller->notificationFromTokenTab();

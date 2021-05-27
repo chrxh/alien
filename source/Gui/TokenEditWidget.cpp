@@ -25,7 +25,10 @@ void TokenEditWidget::init(DataEditModel * model, DataEditController * controlle
 
 void TokenEditWidget::updateDisplay ()
 {
-	auto const& token = _model->getTokenToEditRef(_tokenIndex);
+	auto token = _model->getTokenToEditRef(_tokenIndex);
+    if (!token) {
+        return;
+    }
 
     //define auxilliary strings
     QString parStart = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
@@ -42,15 +45,19 @@ void TokenEditWidget::updateDisplay ()
 
     //create string of display
     text = parStart+colorTextStart+ "internal energy: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*token.energy)+parEnd;
+    text += generateFormattedRealString(*token->energy)+parEnd;
     QTextEdit::setText(text);
 }
 
 void TokenEditWidget::requestUpdate ()
 {
-	auto& token = _model->getTokenToEditRef(_tokenIndex);
+	auto token = _model->getTokenToEditRef(_tokenIndex);
+    if (!token) {
+        return;
+    }
+
 	QString currentText = QTextEdit::textCursor().block().text();
-    token.energy = generateNumberFromFormattedString(currentText);
+    token->energy = generateNumberFromFormattedString(currentText);
 
 	_controller->notificationFromTokenTab();
 }
@@ -194,9 +201,10 @@ void TokenEditWidget::keyPressEvent (QKeyEvent* e)
 
         //inform other instances
         QString energyStr = QTextEdit::textCursor().block().text();
-		auto& token = _model->getTokenToEditRef(_tokenIndex);
-		token.energy = generateNumberFromFormattedString(energyStr);
-		_controller->notificationFromTokenTab();
+        if (auto token = _model->getTokenToEditRef(_tokenIndex)) {
+            token->energy = generateNumberFromFormattedString(energyStr);
+            _controller->notificationFromTokenTab();
+        }
 
     }
 }

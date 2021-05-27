@@ -210,6 +210,11 @@ void ParticleEditTab::init(DataEditModel * model, DataEditController * controlle
 
 void ParticleEditTab::updateDisplay ()
 {
+    auto particle = _model->getParticleToEditRef();
+    if (!particle) {
+        return;
+    }
+
     int col = QTextEdit::textCursor().columnNumber();
     int row = QTextEdit::textCursor().blockNumber();
 
@@ -226,17 +231,16 @@ void ParticleEditTab::updateDisplay ()
     QTextEdit::setPalette(p);
 
     //create string of display
-	auto &particle = _model->getParticleToEditRef();
 	text = parStart + colorTextStart + "position x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + colorEnd;
-    text += generateFormattedRealString(particle.pos->x())+parEnd;
+    text += generateFormattedRealString(particle->pos->x())+parEnd;
     text += parStart+colorTextStart+ "position y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(particle.pos->y())+parEnd;
+    text += generateFormattedRealString(particle->pos->y())+parEnd;
     text += parStart+colorTextStart+ "velocity x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(particle.vel->x())+parEnd;
+    text += generateFormattedRealString(particle->vel->x())+parEnd;
     text += parStart+colorTextStart+ "velocity y: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(particle.vel->y())+parEnd;
+    text += generateFormattedRealString(particle->vel->y())+parEnd;
     text += parStart+colorTextStart+ "energy value: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+colorEnd;
-    text += generateFormattedRealString(*particle.energy)+parEnd;
+    text += generateFormattedRealString(*particle->energy)+parEnd;
     QTextEdit::setText(text);
 
     //restore cursor
@@ -248,20 +252,24 @@ void ParticleEditTab::updateDisplay ()
 
 void ParticleEditTab::updateModelAndNotifyController()
 {
-	int row = QTextEdit::textCursor().blockNumber();
+    auto particle = _model->getParticleToEditRef();
+    if (!particle) {
+        return;
+    }
+
+    int row = QTextEdit::textCursor().blockNumber();
 	QString currentText = QTextEdit::textCursor().block().text();
 
-	auto &particle = _model->getParticleToEditRef();
 	if (row == 0)
-		particle.pos->setX(generateNumberFromFormattedString(currentText));
+		particle->pos->setX(generateNumberFromFormattedString(currentText));
 	if (row == 1)
-		particle.pos->setY(generateNumberFromFormattedString(currentText));
+		particle->pos->setY(generateNumberFromFormattedString(currentText));
 	if (row == 2)
-		particle.vel->setX(generateNumberFromFormattedString(currentText));
+		particle->vel->setX(generateNumberFromFormattedString(currentText));
 	if (row == 3)
-		particle.vel->setY(generateNumberFromFormattedString(currentText));
+		particle->vel->setY(generateNumberFromFormattedString(currentText));
 	if (row == 4)
-		particle.energy = generateNumberFromFormattedString(currentText);
+		particle->energy = generateNumberFromFormattedString(currentText);
 	_controller->notificationFromParticleTab();
 }
 

@@ -41,7 +41,12 @@ void MetadataEditTab::init(DataEditModel * model, DataEditController * controlle
 
 void MetadataEditTab::updateDisplay ()
 {
-	auto const& metadata = *_model->getCellToEditRef().metadata;
+    auto cell = _model->getCellToEditRef();
+    if (!cell) {
+        return;
+    }
+    auto& metadata = *cell->metadata;
+
 	ui->metadataEditWidget->updateDisplay();
 	unsetConnections();
     ui->metadataDescriptionEdit->setText(metadata.description);
@@ -52,8 +57,13 @@ void MetadataEditTab::updateDisplay ()
 
 void MetadataEditTab::changesFromMetadataDescriptionEditor()
 {
-	auto& cell = *_model->getCellToEditRef().metadata;
-	cell.description = ui->metadataDescriptionEdit->toPlainText();
+    auto cell = _model->getCellToEditRef();
+    if (!cell) {
+        return;
+    }
+    auto& metadata = *cell->metadata;
+
+	metadata.description = ui->metadataDescriptionEdit->toPlainText();
 	_controller->notificationFromMetadataTab();
 }
 
