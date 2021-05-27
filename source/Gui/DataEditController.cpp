@@ -1,6 +1,7 @@
 #include <QMatrix4x4>
 
 #include "Base/ServiceLocator.h"
+#include "Base/DebugMacros.h"
 
 #include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/SymbolTable.h"
@@ -24,6 +25,7 @@ DataEditController::DataEditController(QWidget *parent /*= nullptr*/)
 
 void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* notifier, DataRepository * manipulator, SimulationContext* context)
 {
+    TRY;
 	_notifier = notifier;
 	_symbolTable = context->getSymbolTable();
 	_model = new DataEditModel(this);
@@ -41,6 +43,7 @@ void DataEditController::init(IntVector2D const & upperLeftPosition, Notifier* n
 	_connections.push_back(connect(_notifier, &Notifier::notifyDataRepositoryChanged, this, &DataEditController::receivedExternalNotifications));
 
 	onShow(false);
+    CATCH;
 }
 
 DataEditContext * DataEditController::getContext() const
@@ -63,7 +66,8 @@ namespace
 
 void DataEditController::notificationFromCellTab()
 {
-	auto& cluster = _model->getClusterToEditRef();
+    TRY;
+    auto& cluster = _model->getClusterToEditRef();
 	cluster.pos = calcCenterPosOfCells(cluster);
 
 	_repository->updateCluster(cluster);
@@ -75,10 +79,13 @@ void DataEditController::notificationFromCellTab()
 	switchToCellEditor(_repository->getCellDescRef(selectedCellId));
 
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+    CATCH;
 }
 
 void DataEditController::notificationFromClusterTab()
 {
+    TRY;
+
 	DataChangeDescription changes = _model->getAndUpdateChanges();
 	if (changes.clusters.empty()) {
 		return;
@@ -109,58 +116,79 @@ void DataEditController::notificationFromClusterTab()
 
 	_view->updateDisplay();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+
+    CATCH;
 }
 
 void DataEditController::notificationFromParticleTab()
 {
-	auto& particle = _model->getParticleToEditRef();
+    TRY;
+    auto& particle = _model->getParticleToEditRef();
 	_repository->updateParticle(particle);
 
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+
+    CATCH;
 }
 
 void DataEditController::notificationFromMetadataTab()
 {
-	auto& cluster = _model->getClusterToEditRef();
+    TRY;
+    auto& cluster = _model->getClusterToEditRef();
 	_repository->updateCluster(cluster);
 
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+
+    CATCH;
 }
 
 void DataEditController::notificationFromCellComputerTab()
 {
-	auto& cluster = _model->getClusterToEditRef();
+    TRY;
+    auto& cluster = _model->getClusterToEditRef();
 	_repository->updateCluster(cluster);
 
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+
+    CATCH;
 }
 
 void DataEditController::notificationFromSymbolTab()
 {
-	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::DataEditor }, UpdateDescription::AllExceptSymbols);
+    TRY;
+    Q_EMIT _notifier->notifyDataRepositoryChanged({Receiver::DataEditor}, UpdateDescription::AllExceptSymbols);
+    CATCH;
 }
 
 void DataEditController::notificationFromTokenTab()
 {
-	auto& cluster = _model->getClusterToEditRef();
+    TRY;
+    auto& cluster = _model->getClusterToEditRef();
 	_repository->updateCluster(cluster);
 
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::All);
+
+    CATCH;
 }
 
 void DataEditController::onShow(bool visible)
 {
-	_view->show(visible);
+    TRY;
+    _view->show(visible);
+    CATCH;
 }
 
 void DataEditController::onRefresh()
 {
-	_view->updateDisplay();
+    TRY;
+    _view->updateDisplay();
+    CATCH;
 }
 
 void DataEditController::receivedExternalNotifications(set<Receiver> const& targets, UpdateDescription update)
 {
-	if (targets.find(Receiver::DataEditor) == targets.end()) {
+    TRY;
+    if (targets.find(Receiver::DataEditor) == targets.end()) {
 		return;
 	}
 
@@ -185,11 +213,13 @@ void DataEditController::receivedExternalNotifications(set<Receiver> const& targ
 	if (selectedCellIds.empty() && selectedParticleIds.empty()) {
 		_view->switchToNoEditor();
 	}
+    CATCH;
 }
 
 void DataEditController::switchToCellEditor(CellDescription const& cell, UpdateDescription update)
 {
-	auto const computerActive = (Enums::CellFunction::COMPUTER == cell.cellFeature->getType());
+    TRY;
+    auto const computerActive = (Enums::CellFunction::COMPUTER == cell.cellFeature->getType());
 	bool tokenActive = cell.tokens && !cell.tokens->empty();
 	if (computerActive && tokenActive) {
 		_view->switchToCellEditorWithComputerWithToken(update);
@@ -203,4 +233,5 @@ void DataEditController::switchToCellEditor(CellDescription const& cell, UpdateD
 	else if (!computerActive && !tokenActive) {
 		_view->switchToCellEditorWithoutComputerWithoutToken();
 	}
+    CATCH;
 }
