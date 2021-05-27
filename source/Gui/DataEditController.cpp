@@ -67,18 +67,26 @@ namespace
 void DataEditController::notificationFromCellTab()
 {
     TRY;
-    auto& cluster = _model->getClusterToEditRef();
-	cluster.pos = calcCenterPosOfCells(cluster);
+    if (auto cluster = _model->getClusterToEditRef()) {
 
-	_repository->updateCluster(cluster);
-	_repository->reconnectSelectedCells();
+		auto cell = _model->getCellToEditRef();
+        if (!cell) {
+            return;
+		}
 
-	uint64_t selectedCellId = _model->getCellToEditRef().id;
-	_model->setClusterAndCell(_repository->getClusterDescRef(selectedCellId), selectedCellId);
+        cluster->pos = calcCenterPosOfCells(*cluster);
 
-	switchToCellEditor(_repository->getCellDescRef(selectedCellId));
+        _repository->updateCluster(*cluster);
+        _repository->reconnectSelectedCells();
 
-	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+        uint64_t selectedCellId = cell->id;
+        _model->setClusterAndCell(_repository->getClusterDescRef(selectedCellId), selectedCellId);
+
+        switchToCellEditor(_repository->getCellDescRef(selectedCellId));
+
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::Simulation, Receiver::VisualEditor}, UpdateDescription::All);
+    }
     CATCH;
 }
 
@@ -93,11 +101,14 @@ void DataEditController::notificationFromClusterTab()
 	CHECK(changes.clusters.size() == 1);
 
 	auto const& clusterChanges = changes.clusters.front().getValue();
-	auto& cluster = _model->getClusterToEditRef();
+	auto cluster = _model->getClusterToEditRef();
+    if (!cluster) {
+        return;
+    }
 
 	if (clusterChanges.pos) {
 		auto delta = clusterChanges.pos.getValue() - clusterChanges.pos.getOldValue();
-		for (auto& cell : *cluster.cells) {
+		for (auto& cell : *cluster->cells) {
 			*cell.pos += delta;
 		}
 	}
@@ -106,13 +117,13 @@ void DataEditController::notificationFromClusterTab()
 		auto delta = clusterChanges.angle.getValue() - clusterChanges.angle.getOldValue();
 		QMatrix4x4 transform;
 		transform.rotate(delta, 0.0, 0.0, 1.0);
-		for (auto& cell : *cluster.cells) {
-			auto newRelPos = transform.map(QVector3D(*cell.pos - *cluster.pos)).toVector2D();
-			cell.pos = newRelPos + *cluster.pos;
+		for (auto& cell : *cluster->cells) {
+			auto newRelPos = transform.map(QVector3D(*cell.pos - *cluster->pos)).toVector2D();
+			cell.pos = newRelPos + *cluster->pos;
 		}
 	}
 
-	_repository->updateCluster(cluster);
+	_repository->updateCluster(*cluster);
 
 	_view->updateDisplay();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
@@ -123,10 +134,12 @@ void DataEditController::notificationFromClusterTab()
 void DataEditController::notificationFromParticleTab()
 {
     TRY;
-    auto& particle = _model->getParticleToEditRef();
-	_repository->updateParticle(particle);
+    if (auto particle = _model->getParticleToEditRef()) {
+        _repository->updateParticle(*particle);
 
-	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::Simulation, Receiver::VisualEditor}, UpdateDescription::All);
+    }
 
     CATCH;
 }
@@ -134,22 +147,24 @@ void DataEditController::notificationFromParticleTab()
 void DataEditController::notificationFromMetadataTab()
 {
     TRY;
-    auto& cluster = _model->getClusterToEditRef();
-	_repository->updateCluster(cluster);
+    if (auto cluster = _model->getClusterToEditRef()) {
+        _repository->updateCluster(*cluster);
 
-	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
-
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::Simulation, Receiver::VisualEditor}, UpdateDescription::All);
+    }
     CATCH;
 }
 
 void DataEditController::notificationFromCellComputerTab()
 {
     TRY;
-    auto& cluster = _model->getClusterToEditRef();
-	_repository->updateCluster(cluster);
+    if (auto cluster = _model->getClusterToEditRef()) {
+        _repository->updateCluster(*cluster);
 
-	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);
-
+        Q_EMIT _notifier->notifyDataRepositoryChanged(
+            {Receiver::Simulation, Receiver::VisualEditor}, UpdateDescription::All);
+    }
     CATCH;
 }
 
@@ -163,10 +178,11 @@ void DataEditController::notificationFromSymbolTab()
 void DataEditController::notificationFromTokenTab()
 {
     TRY;
-    auto& cluster = _model->getClusterToEditRef();
-	_repository->updateCluster(cluster);
+    if (auto cluster = _model->getClusterToEditRef()) {
+        _repository->updateCluster(*cluster);
 
-	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation }, UpdateDescription::All);
+        Q_EMIT _notifier->notifyDataRepositoryChanged({Receiver::Simulation}, UpdateDescription::All);
+    }
 
     CATCH;
 }

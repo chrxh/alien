@@ -52,19 +52,9 @@ void DataEditModel::setSelectionIds(unordered_set<uint64_t> const& selectedCellI
 	_unchangedData = _data;
 	_navi.update(_data);
 
-	_selectedCellIds.clear();
-	for (auto const& selectedCellId : selectedCellIds) {
-        if (_navi.cellIds.find(selectedCellId) != _navi.cellIds.end()) {
-            _selectedCellIds.insert(selectedCellId);
-        }
-    }
+    _selectedCellIds = selectedCellIds;
+    _selectedParticleIds = selectedParticleIds;
 
-	_selectedParticleIds.clear();
-    for (auto const& selectedParticleId : selectedParticleIds) {
-        if (_navi.particleIds.find(selectedParticleId) != _navi.particleIds.end()) {
-            _selectedParticleIds.insert(selectedParticleId);
-        }
-    }
     CATCH;
 }
 
@@ -91,38 +81,66 @@ DataChangeDescription DataEditModel::getAndUpdateChanges()
     CATCH;
 }
 
-TokenDescription & DataEditModel::getTokenToEditRef(int tokenIndex)
+boost::optional<TokenDescription&> DataEditModel::getTokenToEditRef(int tokenIndex)
 {
     TRY;
-    auto& cell = getCellToEditRef();
-	return cell.tokens->at(tokenIndex);
+    if (auto cell = getCellToEditRef()) {
+        return cell->tokens->at(tokenIndex);
+    }
+    return boost::none;
     CATCH;
 }
 
-CellDescription & DataEditModel::getCellToEditRef()
+boost::optional<CellDescription&> DataEditModel::getCellToEditRef()
 {
     TRY;
+    if (_selectedCellIds.empty()) {
+        return boost::none;
+    }
     uint64_t selectedCellId = *_selectedCellIds.begin();
+
+    if (_navi.clusterIndicesByCellIds.find(selectedCellId) == _navi.clusterIndicesByCellIds.end()) {
+        return boost::none;
+    }
+    if (_navi.cellIndicesByCellIds.find(selectedCellId) == _navi.cellIndicesByCellIds.end()) {
+        return boost::none;
+    }
+
 	int clusterIndex = _navi.clusterIndicesByCellIds.at(selectedCellId);
 	int cellIndex = _navi.cellIndicesByCellIds.at(selectedCellId);
 	return _data.clusters->at(clusterIndex).cells->at(cellIndex);
     CATCH;
 }
 
-ParticleDescription & DataEditModel::getParticleToEditRef()
+boost::optional<ParticleDescription&> DataEditModel::getParticleToEditRef()
 {
     TRY;
+    if (_selectedParticleIds.empty()) {
+        return boost::none;
+    }
+
     uint64_t selectedParticleId = *_selectedParticleIds.begin();
-	int particleIndex = _navi.particleIndicesByParticleIds.at(selectedParticleId);
+    if (_navi.particleIndicesByParticleIds.find(selectedParticleId) == _navi.particleIndicesByParticleIds.end()) {
+        return boost::none;
+    }
+
+    int particleIndex = _navi.particleIndicesByParticleIds.at(selectedParticleId);
 	return _data.particles->at(particleIndex);
     CATCH;
 }
 
-ClusterDescription & DataEditModel::getClusterToEditRef()
+boost::optional<ClusterDescription&> DataEditModel::getClusterToEditRef()
 {
     TRY;
+    if (_selectedCellIds.empty()) {
+        return boost::none;
+    }
     uint64_t selectedCellId = *_selectedCellIds.begin();
-	int clusterIndex = _navi.clusterIndicesByCellIds.at(selectedCellId);
+    if (_navi.clusterIndicesByCellIds.find(selectedCellId) == _navi.clusterIndicesByCellIds.end()) {
+        return boost::none;
+    }
+
+    int clusterIndex = _navi.clusterIndicesByCellIds.at(selectedCellId);
 	return _data.clusters->at(clusterIndex);
     CATCH;
 }

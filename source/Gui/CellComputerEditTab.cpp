@@ -48,9 +48,10 @@ void CellComputerEditTab::init(DataEditModel * model, DataEditController * contr
 void CellComputerEditTab::updateDisplay()
 {
 	ui->codeEditWidget->updateDisplay();
-	auto const &cell = _model->getCellToEditRef();
-	auto const &data = cell.cellFeature->volatileData;
-	ui->memoryEditWidget->updateDisplay(data);
+    if (auto cell = _model->getCellToEditRef()) {
+        auto const& data = cell->cellFeature->volatileData;
+        ui->memoryEditWidget->updateDisplay(data);
+    }
 }
 
 void CellComputerEditTab::setCompilationState (bool error, int line)
@@ -77,9 +78,12 @@ void CellComputerEditTab::compileButtonClicked ()
 	auto const& code = ui->codeEditWidget->getCode();
 	CompilationResult result = _compiler->compileSourceCode(code);
 	if (result.compilationOk) {
-		auto& cell = _model->getCellToEditRef();
-		cell.cellFeature->constData = result.compilation;
-		cell.metadata->computerSourcecode = QString::fromStdString(code);
+		auto cell = _model->getCellToEditRef();
+        if (!cell) {
+            return;
+        }
+		cell->cellFeature->constData = result.compilation;
+		cell->metadata->computerSourcecode = QString::fromStdString(code);
 	}
 	setCompilationState(!result.compilationOk, result.lineOfFirstError);
 	_controller->notificationFromCellComputerTab();
@@ -95,9 +99,10 @@ void CellComputerEditTab::timerTimeout ()
 
 void CellComputerEditTab::updateFromMemoryEditWidget()
 {
-	auto &cell = _model->getCellToEditRef();
-	cell.cellFeature->volatileData = ui->memoryEditWidget->getData();
-	_controller->notificationFromCellComputerTab();
+    if (auto cell = _model->getCellToEditRef()) {
+        cell->cellFeature->volatileData = ui->memoryEditWidget->getData();
+        _controller->notificationFromCellComputerTab();
+    }
 }
 
 
