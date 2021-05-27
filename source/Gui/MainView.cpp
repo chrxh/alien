@@ -334,7 +334,6 @@ void MainView::setupFontsAndColors()
         p.setColor(QPalette::Window, QColor(7, 7, 21));
 		setPalette(p);
 	}
-
 }
 
 void MainView::setupWidgets()
