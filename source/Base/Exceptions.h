@@ -11,6 +11,14 @@ public:
     {}
 };
 
+class SpecificCudaException : public std::exception
+{
+public:
+    SpecificCudaException(std::string const& what)
+        : std::exception(what.c_str())
+    {}
+};
+
 class SystemRequirementNotMetException : public std::exception
 {
 public:
