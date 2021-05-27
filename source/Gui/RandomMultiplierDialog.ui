@@ -57,7 +57,10 @@
          <string>20</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -77,7 +80,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -90,7 +96,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -110,7 +119,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -123,7 +135,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -143,7 +158,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -156,7 +174,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -176,7 +197,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -189,7 +213,10 @@
          <string>0.0</string>
         </property>
         <property name="frame">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
