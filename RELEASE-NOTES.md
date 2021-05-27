@@ -1,5 +1,13 @@
 # Release notes
 
+## [2.5.2] - 2021-05-27
+### Added
+- planet gaia example files
+
+### Fixed
+- reduction of memory reservations in editor to prevent out-of-memory exceptions
+- prevent invalid-map-key exceptions in cases where the selection is no longer available in the editor
+
 ## [2.5.1] - 2021-05-21
 ### Fixed
 - important memory leak fixed
