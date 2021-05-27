@@ -66,7 +66,7 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 <img src="img/screenshot7.png" width=100%>
 </h1>
 
-#### Visual editor for programming the machines
+#### Visual editor and programming environment
 <h1 align="center">
 <img src="img/screenshot8.png" width=100%>
 </h1>
