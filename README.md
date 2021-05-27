@@ -18,7 +18,7 @@ Artificial Life Environment (ALiEn) is a simulation program based on a specializ
 
 ### Artificial Life extensions
 - Programmable matter approach for simulating digital organisms and evolution
-- Built-in code and graph editor for designing own machines 
+- Built-in programming environment and graph editor for designing own machines 
 
 <img src="img/alife engine.gif" width=100%>
 
