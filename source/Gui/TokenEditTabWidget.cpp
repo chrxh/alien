@@ -26,12 +26,12 @@ void TokenEditTabWidget::init(DataEditModel * model, DataEditController * contro
 void TokenEditTabWidget::updateDisplay()
 {
 	auto const& cell = _model->getCellToEditRef();
-	if (!cell.tokens) {
+	if (!cell || !cell->tokens) {
 		deleteAllTabs();
 		return;
 	}
 
-	int numToken = cell.tokens->size();
+	int numToken = cell->tokens->size();
 	if (_tokenTabs.size() != numToken) {
 
 		boost::optional<uint> origIndex = _model->getSelectedTokenIndex();

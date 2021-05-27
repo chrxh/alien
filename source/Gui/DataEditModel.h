@@ -24,10 +24,10 @@ public:
 
 	DataChangeDescription getAndUpdateChanges();
 
-	TokenDescription& getTokenToEditRef(int tokenIndex);
-	CellDescription& getCellToEditRef();
-	ParticleDescription& getParticleToEditRef();
-	ClusterDescription& getClusterToEditRef();
+	boost::optional<TokenDescription&> getTokenToEditRef(int tokenIndex);
+    boost::optional<CellDescription&> getCellToEditRef();
+    boost::optional<ParticleDescription&> getParticleToEditRef();
+    boost::optional<ClusterDescription&> getClusterToEditRef();
 
 	int getNumCells() const;
 	int getNumParticles() const;
