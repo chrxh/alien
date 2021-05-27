@@ -8,6 +8,7 @@
 - reduction of memory reservations in editor to prevent out-of-memory exceptions
 - prevent invalid-map-key exceptions in cases where the selection is no longer available in the editor
 - display more precise information in case of exceptions
+- layout in dialogs improved
 
 ## [2.5.1] - 2021-05-21
 ### Fixed
