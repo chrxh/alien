@@ -1,7 +1,9 @@
 ﻿#include <QTabWidget>
 #include <QGridLayout>
 
-#include "Gui/Settings.h"
+#include "Base/DebugMacros.h"
+
+#include "Settings.h"
 #include "ClusterEditTab.h"
 #include "CellEditTab.h"
 #include "MetadataEditTab.h"
@@ -19,6 +21,8 @@
 DataEditView::DataEditView(QWidget * parent)
 	: QObject(parent)
 {
+    TRY;
+
 	//main tabs
 	_mainTabWidget = new QTabWidget(parent);
 	TabWidgetHelper::setupTabWidget(_mainTabWidget, QSize(385, 260));
@@ -63,10 +67,14 @@ DataEditView::DataEditView(QWidget * parent)
 	TabWidgetHelper::setupTabWidget(_tokenTabWidget, QSize(385, 260));
 
 	updateDisplay();
+
+	CATCH;
 }
 
 void DataEditView::init(IntVector2D const & upperLeftPosition, DataEditModel* model, DataEditController* controller, CellComputerCompiler* compiler)
 {
+    TRY;
+
 	_model = model;
 	_upperLeftPosition = upperLeftPosition;
 	_mainTabWidget->setGeometry(upperLeftPosition.x, upperLeftPosition.y, _mainTabWidget->width(), _mainTabWidget->height());
@@ -82,10 +90,14 @@ void DataEditView::init(IntVector2D const & upperLeftPosition, DataEditModel* mo
 	_selectionTab->init(_model, controller);
 	_symbolTab->init(_model, controller);
 	_tokenTabWidget->init(_model, controller);
+
+	CATCH;
 }
 
 void DataEditView::updateDisplay(UpdateDescription update) const
 {
+    TRY;
+
 	if (!_visible || _editorSelector == EditorSelector::No) {
 		_mainTabWidget->setVisible(false);
 		_computerTabWidget->setVisible(false);
@@ -169,16 +181,22 @@ void DataEditView::updateDisplay(UpdateDescription update) const
 
 		_particleTab->updateDisplay();
 	}
+
+	CATCH;
 }
 
 void DataEditView::saveTabPositionForCellEditor()
 {
+    TRY;
+    
 	if (_editorSelector == EditorSelector::CellWithComputerWithToken
 		|| _editorSelector == EditorSelector::CellWithComputerWithoutToken
 		|| _editorSelector == EditorSelector::CellWithoutComputerWithToken
 		|| _editorSelector == EditorSelector::CellWithoutComputerWithoutToken) {
 		_savedTabPosition = _mainTabWidget->currentIndex();
 	}
+
+	CATCH;
 }
 
 int DataEditView::getTabPositionForCellEditor()
@@ -188,13 +206,19 @@ int DataEditView::getTabPositionForCellEditor()
 
 void DataEditView::switchToNoEditor()
 {
+    TRY;
+
 	saveTabPositionForCellEditor();
 	_editorSelector = EditorSelector::No;
 	updateDisplay();
+
+	CATCH;
 }
 
 void DataEditView::switchToCellEditorWithComputerWithToken(UpdateDescription update)
 {
+    TRY;
+
 	saveTabPositionForCellEditor();
 
 	if (_editorSelector != EditorSelector::CellWithComputerWithToken) {
@@ -212,10 +236,14 @@ void DataEditView::switchToCellEditorWithComputerWithToken(UpdateDescription upd
 		_editorSelector = EditorSelector::CellWithComputerWithToken;
 	}
 	updateDisplay(update);
+
+	CATCH;
 }
 
 void DataEditView::switchToCellEditorWithoutComputerWithToken(UpdateDescription update)
 {
+    TRY;
+
 	saveTabPositionForCellEditor();
 
 	if (_editorSelector != EditorSelector::CellWithoutComputerWithToken) {
@@ -227,10 +255,14 @@ void DataEditView::switchToCellEditorWithoutComputerWithToken(UpdateDescription 
 		_editorSelector = EditorSelector::CellWithoutComputerWithToken;
 	}
 	updateDisplay(update);
+
+	CATCH;
 }
 
 void DataEditView::switchToCellEditorWithComputerWithoutToken()
 {
+    TRY;
+
 	saveTabPositionForCellEditor();
 
 	if (_editorSelector != EditorSelector::CellWithComputerWithoutToken) {
@@ -246,10 +278,14 @@ void DataEditView::switchToCellEditorWithComputerWithoutToken()
 		_editorSelector = EditorSelector::CellWithComputerWithoutToken;
 	}
 	updateDisplay();
+
+	CATCH;
 }
 
 void DataEditView::switchToCellEditorWithoutComputerWithoutToken()
 {
+    TRY;
+    
 	saveTabPositionForCellEditor();
 	if (_editorSelector != EditorSelector::CellWithoutComputerWithoutToken) {
 		_mainTabWidget->clear();
@@ -260,10 +296,14 @@ void DataEditView::switchToCellEditorWithoutComputerWithoutToken()
 		_editorSelector = EditorSelector::CellWithoutComputerWithoutToken;
 	}
 	updateDisplay();
+
+	CATCH;
 }
 
 void DataEditView::switchToParticleEditor()
 {
+    TRY;
+
 	saveTabPositionForCellEditor();
 	if (_editorSelector != EditorSelector::Particle) {
 		_mainTabWidget->clear();
@@ -271,10 +311,14 @@ void DataEditView::switchToParticleEditor()
 		_editorSelector = EditorSelector::Particle;
 	}
 	updateDisplay();
+
+	CATCH;
 }
 
 void DataEditView::switchToSelectionEditor()
 {
+    TRY;
+
 	saveTabPositionForCellEditor();
 	if (_editorSelector != EditorSelector::Selection) {
 		_mainTabWidget->clear();
@@ -282,10 +326,16 @@ void DataEditView::switchToSelectionEditor()
 		_editorSelector = EditorSelector::Selection;
 	}
 	updateDisplay();
+
+	CATCH;
 }
 
 void DataEditView::show(bool visible)
 {
+    TRY;
+
 	_visible = visible;
 	updateDisplay();
+
+	CATCH;
 }
