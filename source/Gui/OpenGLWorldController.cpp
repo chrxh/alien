@@ -56,19 +56,14 @@ void OpenGLWorldController::init(
 
     SET_CHILD(_access, access);
 
-    auto graphicsView = _simulationViewWidget->getGraphicsView();
-    auto width = graphicsView->width();
-    auto height = graphicsView->height();
-
     if (!_scene) {
         _viewport->makeCurrent();
         _scene = new OpenGLWorldScene(_viewport->context(), this);
     }
     _scene->init(access, repository->getImageMutex());
-    _scene->resize({width, height});
     _scene->update();
     _scene->installEventFilter(this);
-    graphicsView->installEventFilter(this);
+    _simulationViewWidget->getGraphicsView()->installEventFilter(this);
 }
 
 void OpenGLWorldController::setSettings(SimulationViewSettings const& settings)
@@ -90,6 +85,9 @@ void OpenGLWorldController::connectView()
         _simulationViewWidget, &SimulationViewWidget::scrolledX, this, &OpenGLWorldController::scrolledX));
     _connections.push_back(QObject::connect(
         _simulationViewWidget, &SimulationViewWidget::scrolledY, this, &OpenGLWorldController::scrolledY));
+
+    auto graphicsView = _simulationViewWidget->getGraphicsView();
+    _scene->resize({graphicsView->width(), graphicsView->height()});
 }
 
 void OpenGLWorldController::disconnectView()
