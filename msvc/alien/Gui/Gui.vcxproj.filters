@@ -674,7 +674,6 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
     <None Include="..\..\..\source\Gui\Resources\Shader\FragmentShader.glsl">
       <Filter>Resource Files</Filter>
     </None>

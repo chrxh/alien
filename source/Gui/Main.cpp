@@ -3,6 +3,7 @@
 #include <QtCore/qmath.h>
 #include <QVector2D>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "Base/ServiceLocator.h"
 #include "Base/GlobalFactory.h"
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
     MainController controller;
 
     try {
-        controller.init();
+        QTimer::singleShot(1, [&] { controller.init(); });
         return a.exec();
     } catch (SystemRequirementNotMetException const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
