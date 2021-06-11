@@ -82,4 +82,3 @@ The following third-party libaries are necessary and should be installed:
 ## License
 alien is licensed under the [GPLv3](LICENSE).
 
-<p align="left"> <img src="https://komarev.com/ghpvc/?username=chrxh&label=Page%20views&color=0e75b6&style=flat" alt="chrxh" /> </p>
