@@ -150,11 +150,9 @@ namespace boost {
         template<class Archive>
 		inline void serialize(Archive & ar, SimulationParameters& data, const unsigned int /*version*/)
 		{
-			ar & data.clusterMaxRadius;
 			ar & data.cellFunctionConstructorCellDataMutationProb;
 			ar & data.cellMinDistance;
 			ar & data.cellMaxDistance;
-			ar & data.cellMass_Reciprocal;
 			ar & data.cellMaxForce;
 			ar & data.cellMaxForceDecayProb;
 			ar & data.cellMaxBonds;
