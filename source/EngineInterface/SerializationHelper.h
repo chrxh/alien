@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <QFile>
 #include <QRegularExpression>
 
 #include "Definitions.h"
@@ -92,16 +93,14 @@ inline bool SerializationHelper::saveToFile(string const& filename, std::functio
 inline bool SerializationHelper::loadFromFileIntern(std::string const& filename, std::string& data)
 {
     try {
-        std::ifstream stream(filename, std::ios_base::in | std::ios_base::binary);
-
-        size_t size;
-        stream.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-        if (stream.fail()) {
+        QFile file(QString::fromStdString(filename));
+        if (!file.open(QIODevice::ReadOnly)) {
             return false;
         }
-        data.resize(size);
-        stream.read(&data[0], size);
-        stream.close();
+        QByteArray blob = file.readAll();
+        size_t size;
+        data =  blob.toStdString();
+        return true;
 
     } catch (std::exception const& e) {
         return false;
@@ -112,15 +111,11 @@ inline bool SerializationHelper::loadFromFileIntern(std::string const& filename,
 inline bool SerializationHelper::saveToFileIntern(std::string const& filename, std::string const& data)
 {
     try {
-        std::ofstream stream(filename, std::ios_base::out | std::ios_base::binary);
-        size_t dataSize = data.size();
-        stream.write(reinterpret_cast<char*>(&dataSize), sizeof(size_t));
-        stream.write(&data[0], data.size());
-        stream.close();
-        if (stream.fail()) {
+        QFile file(QString::fromStdString(filename));
+        if (!file.open(QIODevice::WriteOnly)) {
             return false;
         }
-
+        file.write(data.c_str(), data.length());
     } catch (...) {
         return false;
     }
