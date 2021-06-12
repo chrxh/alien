@@ -458,8 +458,8 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
     cellTO.tokenUsages = cellDesc.tokenUsages.get_value_or(0);
     auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
     cellTO.cellFunctionType = cellFunction.getType();
-    cellTO.numStaticBytes = min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
-    cellTO.numMutableBytes = min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
+    cellTO.numStaticBytes = std::min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
+    cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
     convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
     convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
     if (cellDesc.connectingCells) {
@@ -588,8 +588,8 @@ void DataConverter::applyChangeDescription(CellChangeDescription const& cellChan
     if (cellChanges.cellFeatures) {
         auto cellFunction = *cellChanges.cellFeatures;
         cellTO.cellFunctionType = cellFunction.getType();
-        cellTO.numStaticBytes = min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
-        cellTO.numMutableBytes = min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
+        cellTO.numStaticBytes = std::min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
+        cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
         convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
         convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
     }
