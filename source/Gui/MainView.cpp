@@ -40,6 +40,9 @@ MainView::MainView(QWidget* parent)
 {
     ui->setupUi(this);
 
+    setupFontsAndColors();
+    setupFullScreen();
+
     _simulationViewController = new SimulationViewController(this);
     auto simulationViewWidget = _simulationViewController->getWidget();
 
@@ -83,6 +86,8 @@ MainView::MainView(QWidget* parent)
     connect(_gettingStartedWindow, &GettingStartedWindow::closed, this, &MainView::gettingStartedWindowClosed);
     connect(ui->infobar, &QDockWidget::visibilityChanged, this, &MainView::infobarChanged);
     connect(_simulationViewController, &SimulationViewController::zoomFactorChanged, _infoController, &GeneralInfoController::setZoomFactor);
+
+    show();
 }
 
 MainView::~MainView()
@@ -99,6 +104,8 @@ void MainView::init(
     WebSimulationController* webSimController,
     StartupController* startupController)
 {
+    _simulationViewController->init();
+
 	_model = model;
 	_controller = mainController;
 	_repository = repository;
@@ -122,11 +129,6 @@ void MainView::init(
         webSimController);
 
 	setupMenuAndToolbar();
-	setupFontsAndColors();
-	setupWidgets();
-	setupFullScreen();
-	show();
-
     setupStartupWidget();
     _initialied = true;
 }
@@ -147,7 +149,7 @@ void MainView::initSimulation(SimulationController * controller, SimulationAcces
 {
 	_toolbar->init({ 10, 10 }, _notifier, _repository, controller->getContext(), _actions->getActionHolder());
 	_dataEditor->init({ 10, 60 }, _notifier, _repository, controller->getContext());
-	_simulationViewController->init(_notifier, controller, access, _repository);
+	_simulationViewController->reinit(_notifier, controller, access, _repository);
 
 	_actions->getActionHolder()->actionItemView->setChecked(false);
 }
@@ -334,11 +336,6 @@ void MainView::setupFontsAndColors()
         p.setColor(QPalette::Window, QColor(7, 7, 21));
 		setPalette(p);
 	}
-}
-
-void MainView::setupWidgets()
-{
-	auto actions = _actions->getActionHolder();
 }
 
 void MainView::setupFullScreen()

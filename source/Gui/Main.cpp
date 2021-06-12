@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     MainController controller;
 
     try {
-        QTimer::singleShot(1, [&] { controller.init(); });
+        controller.init();
         return a.exec();
     } catch (SystemRequirementNotMetException const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();

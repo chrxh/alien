@@ -16,10 +16,12 @@ public:
     SimulationViewController(QWidget* parent = nullptr);
     virtual ~SimulationViewController() = default;
 
+    void init();
+
     QWidget* getWidget() const;
 
     void
-    init(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* manipulator);
+    reinit(Notifier* notifier, SimulationController* controller, SimulationAccess* access, DataRepository* manipulator);
 
     void setSettings(SimulationViewSettings const& settings);
 
@@ -46,6 +48,8 @@ public:
 private:
     AbstractWorldController* getActiveUniverseView() const;
     AbstractWorldController* getView(ActiveView activeView) const;
+
+    QWidget* _parent = nullptr;
 
     SimulationController* _controller = nullptr;
 

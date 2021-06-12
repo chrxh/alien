@@ -1,5 +1,14 @@
 # Release notes
 
+## [2.5.3] - 2021-06-12
+### Changed
+- more specific error message in case of cudaErrorUnsupportedPtxVersion
+- removed useless size info at the beginning in saved files (sim/parameters/...)
+
+### Fixed
+- wrong view port size bug fixed
+- integration tests repaired
+
 ## [2.5.2] - 2021-05-27
 ### Added
 - planet gaia example files

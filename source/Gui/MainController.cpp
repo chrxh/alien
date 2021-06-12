@@ -60,17 +60,18 @@ namespace Const
 MainController::MainController(QObject * parent)
 	: QObject(parent)
 {
+    _view = new MainView();
 }
 
 MainController::~MainController()
 {
     delete _view;
+    delete _model;
 }
 
 void MainController::init()
 {
     _model = new MainModel(this);
-    _view = new MainView();
 
     logStart();
 

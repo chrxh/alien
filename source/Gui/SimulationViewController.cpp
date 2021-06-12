@@ -22,17 +22,27 @@
 
 SimulationViewController::SimulationViewController(QWidget* parent)
     : QObject(parent)
+    , _parent(parent)
 {
     _simulationViewWidget = new SimulationViewWidget(parent);
+}
 
-    _openGLWorld = new OpenGLWorldController(_simulationViewWidget, parent);
+void SimulationViewController::init()
+{
+    _openGLWorld = new OpenGLWorldController(_simulationViewWidget, _parent);
     _itemWorld = new ItemWorldController(_simulationViewWidget, this);
-    connect(_openGLWorld, &OpenGLWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
     connect(
-        _openGLWorld, &OpenGLWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
-    connect(_openGLWorld, &OpenGLWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
+        _openGLWorld, &OpenGLWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
+    connect(
+        _openGLWorld,
+        &OpenGLWorldController::startContinuousZoomOut,
+        this,
+        &SimulationViewController::continuousZoomOut);
+    connect(
+        _openGLWorld, &OpenGLWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
     connect(_itemWorld, &ItemWorldController::startContinuousZoomIn, this, &SimulationViewController::continuousZoomIn);
-    connect(_itemWorld, &ItemWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
+    connect(
+        _itemWorld, &ItemWorldController::startContinuousZoomOut, this, &SimulationViewController::continuousZoomOut);
     connect(_itemWorld, &ItemWorldController::endContinuousZoom, this, &SimulationViewController::endContinuousZoom);
 
     auto startupScene = new QGraphicsScene(this);
@@ -45,7 +55,7 @@ QWidget* SimulationViewController::getWidget() const
     return _simulationViewWidget;
 }
 
-void SimulationViewController::init(
+void SimulationViewController::reinit(
     Notifier* notifier,
     SimulationController* controller,
     SimulationAccess* access,
