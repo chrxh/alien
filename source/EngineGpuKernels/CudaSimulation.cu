@@ -36,7 +36,7 @@
 
 
 #define GPU_FUNCTION(func, ...) \
-    func<<<1, 1>>>(##__VA_ARGS__); \
+    func<<<1, 1>>>(__VA_ARGS__); \
     cudaDeviceSynchronize(); \
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
