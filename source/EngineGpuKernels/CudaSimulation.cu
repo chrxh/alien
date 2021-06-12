@@ -2,7 +2,9 @@
 #include <iostream>
 #include <list>
 
+#if defined(_WIN32)
 #include <windows.h>
+#endif
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
