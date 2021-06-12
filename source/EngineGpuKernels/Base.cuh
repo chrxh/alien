@@ -11,6 +11,7 @@
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"
+#include "Swap.cuh"
 
 __device__ inline float toFloat(int value)
 {
@@ -266,12 +267,4 @@ private:
 float random(float max)
 {
     return ((float)rand() / RAND_MAX) * max;
-}
-
-template <typename T>
-__host__ __device__ __inline__ void swap(T& a, T& b)
-{
-    T temp = a;
-    a = b;
-    b = temp;
 }
