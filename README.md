@@ -82,3 +82,7 @@ The following third-party libaries are necessary and should be installed:
 ## License
 alien is licensed under the [GPLv3](LICENSE).
 
+## Contributors
+<a href="https://github.com/chrxh/alien/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=chrxh/alien" />
+</a>
