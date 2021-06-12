@@ -10,8 +10,8 @@ namespace
     EngineGpuData getEngineGpuDataForReplicatorGpuTests()
     {
         CudaConstants cudaConstants;
-        cudaConstants.NUM_THREADS_PER_BLOCK = 16;
-        cudaConstants.NUM_BLOCKS = 512;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 32;
+        cudaConstants.NUM_BLOCKS = 128;
         cudaConstants.MAX_CLUSTERS = 100000;
         cudaConstants.MAX_CELLS = 2000000;
         cudaConstants.MAX_PARTICLES = 2000000;
@@ -46,14 +46,14 @@ TEST_F(ReplicatorGpuTests, testManyReplicators)
 
     SimulationParameters parameters;
     {
-        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.json" };
+        auto filename = string{ ":/replicator.parameters.json" };
         SerializationHelper::loadFromFile<SimulationParameters>(
             filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
     }
     _context->setSimulationParameters(parameters);
 
     DataDescription loadData;
-    auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.col" };
+    auto filename = string{ ":/replicator.col" };
     SerializationHelper::loadFromFile<DataDescription>(
         filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
 
@@ -80,14 +80,14 @@ TEST_F(ReplicatorGpuTests, testManyConcentratedReplicators)
 
     SimulationParameters parameters;
     {
-        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.json" };
+        auto filename = string{ ":/replicator.parameters.json" };
         SerializationHelper::loadFromFile<SimulationParameters>(
             filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
     }
     _context->setSimulationParameters(parameters);
 
     DataDescription loadData;
-    auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\replicator.col" };
+    auto filename = string{ ":/replicator.col" };
     SerializationHelper::loadFromFile<DataDescription>(
         filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
 
@@ -145,7 +145,7 @@ TEST_F(ReplicatorGpuTestsWithManyThreads, testManyReplicators)
 
     SimulationParameters parameters;
     {
-        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\dna-replicator.json" };
+        auto filename = string{ ":/replicator.parameters.json" };
         SerializationHelper::loadFromFile<SimulationParameters>(
             filename, [&](string const& data) { return serializer->deserializeSimulationParameters(data); }, parameters);
     }
@@ -153,7 +153,7 @@ TEST_F(ReplicatorGpuTestsWithManyThreads, testManyReplicators)
 
     DataDescription loadData;
     {
-        auto filename = string{ "..\\..\\..\\..\\source\\Tests\\TestData\\dna-replicator.col" };
+        auto filename = string{ ":/dna-replicator.col" };
         SerializationHelper::loadFromFile<DataDescription>(
             filename, [&](string const& data) { return serializer->deserializeDataDescription(data); }, loadData);
     }
