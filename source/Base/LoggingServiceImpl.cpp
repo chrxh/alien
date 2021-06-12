@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include <algorithm>
 
 void LoggingServiceImpl::logMessage(Priority priority, std::string const& message)
 {
