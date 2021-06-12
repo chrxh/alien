@@ -302,7 +302,7 @@ void DataRepository::addRandomParticles(double totalEnergy, double maxEnergyPerP
     double remainingEnergy = totalEnergy;
     while (remainingEnergy > FLOATINGPOINT_MEDIUM_PRECISION) {
         double particleEnergy = _numberGenerator->getRandomReal(maxEnergyPerParticle / 100.0, maxEnergyPerParticle);
-        particleEnergy = min(particleEnergy, remainingEnergy);
+        particleEnergy = std::min(particleEnergy, remainingEnergy);
         data.addParticle(
             ParticleDescription()
                 .setPos(QVector2D(

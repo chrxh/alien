@@ -43,7 +43,7 @@ void ParticleItem::paint (QPainter *painter, const QStyleOptionGraphicsItem *opt
     painter->setBrush(QBrush(color));
 
     if( _focusState == NO_FOCUS ) {
-        l = max(0, l - 60);
+        l = std::max(0, l - 60);
         color.setHsl(h, s, l);
         painter->setPen(QPen(QBrush(color), CoordinateSystem::modelToScene(0.05)));
         painter->drawEllipse(

@@ -161,13 +161,13 @@ void CellItem::adaptColorForFocus(QColor& color) const
 
     //fill color (brush)
     if (!isConnectable()) {
-        l = max(0, l - 30);
+        l = std::max(0, l - 30);
     }
     if (CellItem::FOCUS_CELL == _focusState) {
         l = 190;
     }
     if (CellItem::FOCUS_CLUSTER == _focusState) {
-        l = min(255, l + 20);
+        l = std::min(255, l + 20);
     }
     color.setHsl(h, s, l);
 }
@@ -177,11 +177,11 @@ void CellItem::adaptColorForBoundary(QColor& color) const
     int h, s, l;
     color.getHsl(&h, &s, &l);
     if (_focusState == NO_FOCUS) {
-        l = max(0, l - 60);
+        l = std::max(0, l - 60);
         color.setHsl(h, s, l);
     }
     if (_focusState == FOCUS_CLUSTER) {
-        l = min(255, l + 15);
+        l = std::min(255, l + 15);
         color.setHsl(h, s, l);
     }
     if (_focusState == FOCUS_CELL) {
