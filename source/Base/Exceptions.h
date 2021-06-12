@@ -3,34 +3,34 @@
 #include <exception>
 #include <string>
 
-class BugReportException : public std::exception
+class BugReportException : public std::runtime_error
 {
 public:
     BugReportException(std::string const& what)
-        : std::exception(what.c_str())
+        : std::runtime_error(what.c_str())
     {}
 };
 
-class SpecificCudaException : public std::exception
+class SpecificCudaException : public std::runtime_error
 {
 public:
     SpecificCudaException(std::string const& what)
-        : std::exception(what.c_str())
+        : std::runtime_error(what.c_str())
     {}
 };
 
-class SystemRequirementNotMetException : public std::exception
+class SystemRequirementNotMetException : public std::runtime_error
 {
 public:
     SystemRequirementNotMetException(std::string const& what)
-        : std::exception(what.c_str())
+        : std::runtime_error(what.c_str())
     {}
 };
 
-class ParseErrorException : public std::exception
+class ParseErrorException : public std::runtime_error
 {
 public:
     ParseErrorException(std::string const& message)
-        : std::exception(message.c_str())
+        : std::runtime_error(message.c_str())
     {}
 };
