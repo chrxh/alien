@@ -50,7 +50,6 @@ protected:
 private:
 	void setupMenuAndToolbar();
 	void setupFontsAndColors();
-	void setupWidgets();
 	void setupFullScreen();
     void setupStartupWidget();
 

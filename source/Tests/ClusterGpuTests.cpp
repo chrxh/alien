@@ -562,7 +562,7 @@ TEST_F(ClusterGpuTests, DISABLED_testSidewiseCollisionOfTraversalLineClusters_wa
 * Situation: cluster with cross structure where middle cell connecting 4 parts has low energy
 * Expected result: cluster decomposes into 4 parts
 */
-TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy)
+TEST_F(ClusterGpuTests, DISABLED_testDecomposeClusterAfterLowEnergy)
 {
 	DataDescription origData;
 	{
