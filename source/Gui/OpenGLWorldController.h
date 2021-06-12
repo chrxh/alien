@@ -11,6 +11,7 @@
 
 class OpenGLWorldScene;
 class QResizeEvent;
+class QOpenGLWidget;
 
 class OpenGLWorldController : public AbstractWorldController
 {
