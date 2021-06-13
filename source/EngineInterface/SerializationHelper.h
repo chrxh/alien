@@ -98,7 +98,6 @@ inline bool SerializationHelper::loadFromFileIntern(std::string const& filename,
             return false;
         }
         QByteArray blob = file.readAll();
-        size_t size;
         data =  blob.toStdString();
         return true;
 
