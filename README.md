@@ -39,6 +39,8 @@ The development is driven by the desire to better understand the conditions for 
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
+For some graphics cards of the GeForce 10 series there are reported issues that are currently being investigated.
+
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
