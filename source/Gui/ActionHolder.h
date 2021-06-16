@@ -76,6 +76,7 @@ public:
 	QAction* actionGridMultiplier = nullptr;
 
     QAction* actionMostFrequentCluster = nullptr;
+    QAction* actionWriteMonitorLog = nullptr;
 
 	QAction* actionAbout = nullptr;
     QAction* actionGettingStarted = nullptr;
