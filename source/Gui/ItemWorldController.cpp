@@ -3,7 +3,7 @@
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QMatrix4x4>
-#include <QScrollbar>
+#include <QScrollBar>
 #include <QResizeEvent>
 
 #include "Base/ServiceLocator.h"

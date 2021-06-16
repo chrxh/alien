@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <typeinfo>
 
 #include "DllExport.h"

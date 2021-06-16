@@ -7,7 +7,7 @@
 #include "SimulationConfig.h"
 
 #include "NewSimulationDialog.h"
-#include "ui_newsimulationdialog.h"
+#include "ui_NewSimulationDialog.h"
 
 NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters, SymbolTable const* symbols, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)

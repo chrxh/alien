@@ -5,6 +5,7 @@
 #include <helper_cuda.h>
 
 #include "CudaMemoryManager.cuh"
+#include "Swap.cuh"
 
 template <class T>
 class Array

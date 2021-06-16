@@ -10,6 +10,7 @@
 #include "SimulationViewSettings.h"
 
 class QOpenGLShaderProgram;
+class QOpenGLFramebufferObject;
 
 class OpenGLWorldScene
     : public QGraphicsScene

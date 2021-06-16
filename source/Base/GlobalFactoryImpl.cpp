@@ -1,16 +1,7 @@
-#include "ServiceLocator.h"
-
 #include "GlobalFactoryImpl.h"
 #include "NumberGeneratorImpl.h"
 
-namespace {
-	GlobalFactoryImpl instance;
-}
-
-GlobalFactoryImpl::GlobalFactoryImpl()
-{
-	ServiceLocator::getInstance().registerService<GlobalFactory>(this);
-}
+GlobalFactoryImpl::GlobalFactoryImpl() = default;
 
 NumberGenerator * GlobalFactoryImpl::buildRandomNumberGenerator() const
 {
