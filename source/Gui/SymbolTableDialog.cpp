@@ -11,7 +11,7 @@
 #include "Gui/Settings.h"
 
 #include "SymbolTableDialog.h"
-#include "ui_symboltabledialog.h"
+#include "ui_SymbolTableDialog.h"
 
 SymbolTableDialog::SymbolTableDialog(SymbolTable const* symbolTable, Serializer* serializer, QWidget *parent)
 	: QDialog(parent)

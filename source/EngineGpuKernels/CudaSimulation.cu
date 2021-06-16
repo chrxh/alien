@@ -2,7 +2,9 @@
 #include <iostream>
 #include <list>
 
+#if defined(_WIN32)
 #include <windows.h>
+#endif
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
@@ -34,7 +36,7 @@
 
 
 #define GPU_FUNCTION(func, ...) \
-    func<<<1, 1>>>(##__VA_ARGS__); \
+    func<<<1, 1>>>(__VA_ARGS__); \
     cudaDeviceSynchronize(); \
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 

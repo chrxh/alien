@@ -49,7 +49,7 @@ void CellEditTab::updateModelAndNotifyController ()
 
 void CellEditTab::keyPressEvent (QKeyEvent* e)
 {
-	auto &cell = _model->getCellToEditRef();
+	auto cell = _model->getCellToEditRef();
 
 	//auxiliary data
     QString colorDataStart = "<span style=\"color:"+Const::CellEditDataColor1.name()+"\">";
