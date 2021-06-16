@@ -284,6 +284,7 @@ void MainView::setupMenuAndToolbar()
 
     ui->menuTools->addAction(actions->actionMostFrequentCluster);
     ui->menuTools->addAction(actions->actionSimulationChanger);
+    ui->menuTools->addAction(actions->actionWriteMonitorLog);
 
     ui->menuHelp->addAction(actions->actionAbout);
     ui->menuEntity->addSeparator();

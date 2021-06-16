@@ -45,6 +45,23 @@ void MonitorController::continueTimer()
     _updateTimer->start(millisec);
 }
 
+void MonitorController::startWritingToFile(std::string const& filename)
+{
+    stopWritingToFile();
+
+    FileInfo info;
+    info.file.open(filename, std::ios_base::app);
+    _fileInfo = std::move(info);
+}
+
+void MonitorController::stopWritingToFile()
+{
+    if (_fileInfo) {
+        _fileInfo->file.close(); 
+    }
+    _fileInfo = boost::none;
+}
+
 void MonitorController::timerTimeout()
 {
 	for (auto const& connection : _monitorConnections) {
@@ -69,4 +86,20 @@ void MonitorController::dataReadyToRetrieve()
 	MonitorData const& data = simMonitor->retrieveData();
     *_model = data;
 	_view->update();
+
+    if (_fileInfo) {
+        writeDataToFile();
+    }
+}
+
+void MonitorController::writeDataToFile()
+{
+    if (_model->timeStep != _fileInfo->lastTimestep) {
+        _fileInfo->file << _model->timeStep << ", " << _model->numClusters << ", " << _model->numClustersWithTokens
+                        << ", " << _model->numCells << ", " << _model->numParticles << ", " << _model->numTokens << ", "
+                        << _model->totalInternalEnergy << ", "
+                        << _model->totalLinearKineticEnergy + _model->totalRotationalKineticEnergy << std::endl;
+
+        _fileInfo->lastTimestep = _model->timeStep;
+    }
 }
