@@ -142,7 +142,7 @@ struct BASE_EXPORT RealRect
         previousChild->setParent(this); \
     }
 
-#define THROW_NOT_IMPLEMENTED() throw std::exception("not implemented")
+#define THROW_NOT_IMPLEMENTED() throw std::runtime_error("not implemented")
 
 #define CHECK(expression) \
     if (!(expression)) { \

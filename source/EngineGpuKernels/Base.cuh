@@ -11,6 +11,7 @@
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"
+#include "Swap.cuh"
 
 __device__ inline float toFloat(int value)
 {
@@ -37,7 +38,7 @@ private:
     int* _array;
     int _size;
 
-    uint64_t* _currentId;
+    unsigned long long int* _currentId;
 
 public:
     void init(int size)
@@ -46,11 +47,11 @@ public:
 
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentIndex);
         CudaMemoryManager::getInstance().acquireMemory<int>(size, _array);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _currentId);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _currentId);
 
         checkCudaErrors(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
-        uint64_t hostCurrentId = 1;
-        checkCudaErrors(cudaMemcpy(_currentId, &hostCurrentId, sizeof(uint64_t), cudaMemcpyHostToDevice));
+        unsigned long long int hostCurrentId = 1;
+        checkCudaErrors(cudaMemcpy(_currentId, &hostCurrentId, sizeof(_currentId), cudaMemcpyHostToDevice));
 
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
@@ -78,7 +79,7 @@ public:
         return static_cast<float>(number) / RAND_MAX;
     }
 
-    __device__ __inline__ uint64_t createNewId_kernel() { return atomicAdd(_currentId, 1); }
+    __device__ __inline__ unsigned long long int createNewId_kernel() { return atomicAdd(_currentId, 1); }
 
     void free()
     {
@@ -266,12 +267,4 @@ private:
 float random(float max)
 {
     return ((float)rand() / RAND_MAX) * max;
-}
-
-template <typename T>
-__host__ __device__ __inline__ void swap(T& a, T& b)
-{
-    T temp = a;
-    a = b;
-    b = temp;
 }

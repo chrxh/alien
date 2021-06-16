@@ -35,7 +35,7 @@ QVariant WebSimulationTableModel::data(const QModelIndex &index, int role) const
         case 3:
             return QString("%1 x %2").arg(simulationInfo.worldSize.x).arg(simulationInfo.worldSize.y);
         case 4:
-            return simulationInfo.timestep;
+            return static_cast<long long int>(simulationInfo.timestep);
         default:
         return QVariant();
         }

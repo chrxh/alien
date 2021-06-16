@@ -17,7 +17,7 @@
 #include "Settings.h"
 #include "SimulationParametersDialog.h"
 #include "SimulationConfig.h"
-#include "ui_simulationparametersdialog.h"
+#include "ui_SimulationParametersDialog.h"
 
 namespace {
     class NoEditDelegate : public QStyledItemDelegate {

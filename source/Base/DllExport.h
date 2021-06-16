@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef ALIEN_STATIC
+#if defined(_WIN32) && !defined(ALIEN_STATIC)
 #ifdef BASE_LIB
 #define BASE_EXPORT __declspec(dllexport)
 #else
