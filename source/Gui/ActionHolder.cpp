@@ -320,7 +320,7 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
     actionMostFrequentCluster = new QAction("Most frequent active cluster", this);
     actionMostFrequentCluster->setEnabled(true);
 
-	actionWriteMonitorLog = new QAction("Write monitor log to file", this);
+	actionWriteMonitorLog = new QAction("Stream monitor data to file", this);
     actionWriteMonitorLog->setEnabled(true);
     actionWriteMonitorLog->setCheckable(true);
     actionWriteMonitorLog->setChecked(false);
