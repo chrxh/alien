@@ -851,7 +851,7 @@ void ActionController::onMostFrequentCluster()
 void ActionController::onToggleWriteMonitorLog(bool toggled)
 {
     if (toggled) {
-        QString filename = QFileDialog::getSaveFileName(_mainView, "Write monitor log to file", "", "monitor data (*.csv)");
+        QString filename = QFileDialog::getSaveFileName(_mainView, "Stream monitor data to file", "", "monitor data (*.csv)");
         if (filename.isEmpty()) {
             _model->getActionHolder()->actionWriteMonitorLog->setChecked(false);
         }
