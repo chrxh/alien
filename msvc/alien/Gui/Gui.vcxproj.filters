@@ -680,5 +680,6 @@
     <None Include="..\..\..\source\Gui\Resources\Shader\VertexShader.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>
