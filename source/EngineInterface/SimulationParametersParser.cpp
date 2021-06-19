@@ -1,5 +1,7 @@
 #include "SimulationParametersParser.h"
 
+#include "EngineInterface/EngineInterfaceSettings.h"
+
 namespace
 {
     std::string toString(int value) { return QString("%1").arg(value).toStdString(); }
@@ -26,6 +28,10 @@ boost::property_tree::ptree SimulationParametersParser::encode(SimulationParamet
     tree.add("cell.function.computer.memory size", toString(parameters.cellFunctionComputerCellMemorySize));
     tree.add("cell.function.weapon.strength", toString(parameters.cellFunctionWeaponStrength));
     tree.add("cell.function.weapon.energy cost", toString(parameters.cellFunctionWeaponEnergyCost));
+    tree.add("cell.function.weapon.geometry deviation exponent", toString(parameters.cellFunctionWeaponGeometryDeviationExponent));
+    tree.add(
+        "cell.function.weapon.inhomogeneous color factor",
+        toString(parameters.cellFunctionWeaponInhomogeneousColorFactor));
     tree.add(
         "cell.function.constructor.offspring.cell energy",
         toString(parameters.cellFunctionConstructorOffspringCellEnergy));
@@ -65,6 +71,8 @@ boost::property_tree::ptree SimulationParametersParser::encode(SimulationParamet
 
 SimulationParameters SimulationParametersParser::decode(boost::property_tree::ptree const& tree)
 {
+    auto defaultParameters = EngineInterfaceSettings::getDefaultSimulationParameters();
+
     SimulationParameters result;
     result.cellMinDistance = tree.get<float>("cell.min distance");
     result.cellMaxDistance = tree.get<float>("cell.max distance");
@@ -82,6 +90,12 @@ SimulationParameters SimulationParametersParser::decode(boost::property_tree::pt
     result.cellFunctionComputerCellMemorySize = tree.get<int>("cell.function.computer.memory size");
     result.cellFunctionWeaponStrength = tree.get<float>("cell.function.weapon.strength");
     result.cellFunctionWeaponEnergyCost = tree.get<float>("cell.function.weapon.energy cost");
+    result.cellFunctionWeaponGeometryDeviationExponent = tree.get<float>(
+        "cell.function.weapon.geometry deviation exponent",
+        defaultParameters.cellFunctionWeaponGeometryDeviationExponent);
+    result.cellFunctionWeaponInhomogeneousColorFactor = tree.get<float>(
+        "cell.function.weapon.inhomogeneous color factor",
+        defaultParameters.cellFunctionWeaponInhomogeneousColorFactor);
     result.cellFunctionConstructorOffspringCellEnergy =
         tree.get<float>("cell.function.constructor.offspring.cell energy");
     result.cellFunctionConstructorOffspringCellDistance =

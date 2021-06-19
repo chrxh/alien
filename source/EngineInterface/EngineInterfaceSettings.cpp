@@ -166,6 +166,8 @@ SimulationParameters EngineInterfaceSettings::getDefaultSimulationParameters()
 
 	parameters.cellFunctionWeaponStrength = 0.1f;
     parameters.cellFunctionWeaponEnergyCost = 0.5f;
+    parameters.cellFunctionWeaponGeometryDeviationExponent = 2.0f;
+    parameters.cellFunctionWeaponInhomogeneousColorFactor = 0.3f;
     parameters.cellFunctionComputerMaxInstructions = 15;
 	parameters.cellFunctionComputerCellMemorySize = 8;
     parameters.cellFunctionConstructorOffspringCellEnergy = 100.0f;
