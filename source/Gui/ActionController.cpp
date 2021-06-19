@@ -178,6 +178,7 @@ void ActionController::init(
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
     connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
+    connect(actions->actionWriteMonitorLog, &QAction::toggled, this, &ActionController::onToggleWriteMonitorLog);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
     connect(actions->actionGettingStarted, &QAction::triggered, this, &ActionController::onToggleGettingStarted);
@@ -845,6 +846,19 @@ void ActionController::onMostFrequentCluster()
     _mainController->onAddMostFrequentClusterToSimulation();
 
 	loggingService->logMessage(Priority::Unimportant, "find most frequent active cluster finished");
+}
+
+void ActionController::onToggleWriteMonitorLog(bool toggled)
+{
+    if (toggled) {
+        QString filename = QFileDialog::getSaveFileName(_mainView, "Write monitor log to file", "", "monitor data (*.csv)");
+        if (filename.isEmpty()) {
+            _model->getActionHolder()->actionWriteMonitorLog->setChecked(false);
+        }
+        _monitor->startWritingToFile(filename.toStdString());
+    } else {
+        _monitor->stopWritingToFile();
+    }
 }
 
 void ActionController::onDeleteEntity()
