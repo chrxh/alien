@@ -2827,7 +2827,7 @@ TEST_F(ConstructorGpuTests, testLargeCluster_limitSize)
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
 
-    int minSize = min(_universeSize.x, _universeSize.y);
+    int minSize = std::min(_universeSize.x, _universeSize.y);
     CHECK(0 == minSize % 4);
     int maxRadius = minSize / 2 - 1;
 
@@ -2847,7 +2847,7 @@ TEST_F(ConstructorGpuTests, testLargeCluster_errorMaxRadius)
     auto const token =
         createTokenForConstruction(TokenForConstructionParameters().constructionInput(Enums::ConstrIn::SAFE));
 
-    int minSize = min(_universeSize.x, _universeSize.y);
+    int minSize = std::min(_universeSize.x, _universeSize.y);
     CHECK(0 == minSize % 4);
     int maxRadius = minSize / 2;
 

@@ -21,7 +21,9 @@ struct SimulationParameters
 	int cellFunctionComputerCellMemorySize = 0;
 	float cellFunctionWeaponStrength = 0.0;
     float cellFunctionWeaponEnergyCost = 0.0;
-	float cellFunctionConstructorOffspringCellEnergy = 0.0;
+    float cellFunctionWeaponGeometryDeviationExponent = 0.0;
+    float cellFunctionWeaponInhomogeneousColorFactor = 0.0;
+    float cellFunctionConstructorOffspringCellEnergy = 0.0;
 	float cellFunctionConstructorOffspringCellDistance = 0.0;
 	float cellFunctionConstructorOffspringTokenEnergy = 0.0;
     bool cellFunctionConstructorOffspringTokenSuppressMemoryCopy = false;
