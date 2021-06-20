@@ -50,14 +50,16 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                 auto energyToTransfer =
                     otherCell->getEnergy_safe() * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
 
-                auto d = otherCell->absPos - cell->absPos;
-                auto angle1 = calcOpenAngle(cell, d);
-                auto angle2 = calcOpenAngle(otherCell, d * (-1));
-                auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;   //1 = no deviation, 0 = max deviation
-                
-                energyToTransfer = energyToTransfer
-                    * powf(max(0.0f, min(1.0f, deviation)),
-                           cudaSimulationParameters.cellFunctionWeaponGeometryDeviationExponent);
+                if (abs(cudaSimulationParameters.cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
+                    auto d = otherCell->absPos - cell->absPos;
+                    auto angle1 = calcOpenAngle(cell, d);
+                    auto angle2 = calcOpenAngle(otherCell, d * (-1));
+                    auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;   //1 = no deviation, 0 = max deviation
+               
+                    energyToTransfer = energyToTransfer
+                        * powf(max(0.0f, min(1.0f, deviation)),
+                               cudaSimulationParameters.cellFunctionWeaponGeometryDeviationExponent);
+                }
 
                 auto homogene = isHomogene(cell);
                 auto otherHomogene = isHomogene(otherCell);

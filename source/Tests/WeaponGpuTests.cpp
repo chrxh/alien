@@ -47,6 +47,8 @@ protected:
 void WeaponGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
+    _parameters.cellFunctionWeaponGeometryDeviationExponent = 0;
+    _parameters.cellFunctionWeaponInhomogeneousColorFactor = 1.0f;
     _context->setSimulationParameters(_parameters);
 }
 
