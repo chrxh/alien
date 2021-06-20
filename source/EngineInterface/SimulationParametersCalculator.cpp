@@ -25,6 +25,8 @@ SimulationParametersCalculator SimulationParametersCalculator::createWithRandomT
     target.cellFusionVelocity = numberGenerator->getRandomReal(0.2, 0.8);
     target.cellFunctionWeaponStrength = numberGenerator->getRandomReal(0.2, 2.7);
     target.cellFunctionWeaponEnergyCost = numberGenerator->getRandomReal(0, 4);
+    target.cellFunctionWeaponGeometryDeviationExponent = numberGenerator->getRandomReal(0, 3.0);
+    target.cellFunctionWeaponInhomogeneousColorFactor = numberGenerator->getRandomReal(0.1, 1.0);
     target.cellFunctionConstructorOffspringCellEnergy = numberGenerator->getRandomReal(70, 130);
     target.cellFunctionConstructorOffspringTokenEnergy = numberGenerator->getRandomReal(30, 100);
     target.cellFunctionConstructorTokenDataMutationProb = numberGenerator->getRandomReal(0, 0.02);
@@ -84,6 +86,10 @@ SimulationParameters SimulationParametersCalculator::calcCurrentParameters() con
         calcCurrentParameter(_source.cellFunctionWeaponStrength, _target.cellFunctionWeaponStrength);
     result.cellFunctionWeaponEnergyCost =
         calcCurrentParameter(_source.cellFunctionWeaponEnergyCost, _target.cellFunctionWeaponEnergyCost);
+    result.cellFunctionWeaponGeometryDeviationExponent = calcCurrentParameter(
+        _source.cellFunctionWeaponGeometryDeviationExponent, _target.cellFunctionWeaponGeometryDeviationExponent);
+    result.cellFunctionWeaponInhomogeneousColorFactor = calcCurrentParameter(
+        _source.cellFunctionWeaponInhomogeneousColorFactor, _target.cellFunctionWeaponInhomogeneousColorFactor);
     result.cellFunctionConstructorOffspringCellEnergy = calcCurrentParameter(
         _source.cellFunctionConstructorOffspringCellEnergy, _target.cellFunctionConstructorOffspringCellEnergy);
     result.cellFunctionConstructorOffspringTokenEnergy = calcCurrentParameter(

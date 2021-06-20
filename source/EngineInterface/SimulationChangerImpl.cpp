@@ -74,6 +74,13 @@ void SimulationChangerImpl::deactivate()
     }
 
     _state = State::Deactivated;
+
+    //restore initial parameters
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "parameter changer: restore initial parameters");
+
+    _parameters = _initialParameters;
+    Q_EMIT simulationParametersChanged();
 }
 
 SimulationParameters const & SimulationChangerImpl::retrieveSimulationParameters()
