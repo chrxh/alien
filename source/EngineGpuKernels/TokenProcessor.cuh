@@ -106,28 +106,32 @@ __inline__ __device__ void TokenProcessor::processingEnergyAveraging_block()
         float averageEnergy = 0;
         int numCellsForEnergyAveraging = 0;
 
-        clusterLock.getLock();
-        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-            auto const& cell = candidateCellsForEnergyAveraging[index];
-            cell->getLock();
-        }
-        clusterLock.releaseLock();
+        bool clusterLockResult = false;
+        do {
+            if (clusterLockResult = clusterLock.tryLock()) {
+                for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+                    auto const& cell = candidateCellsForEnergyAveraging[index];
+                    cell->getLock();
+                }
+                clusterLock.releaseLock();
 
-        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-            auto const& cell = candidateCellsForEnergyAveraging[index];
-            averageEnergy += cell->getEnergy_safe();
-            cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
-        }
-        averageEnergy /= numCellsForEnergyAveraging;
-        for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
-            auto const& cell = cellsForEnergyAveraging[index];
-            cell->setEnergy_safe(averageEnergy);
-        }
+                for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+                    auto const& cell = candidateCellsForEnergyAveraging[index];
+                    averageEnergy += cell->getEnergy_safe();
+                    cellsForEnergyAveraging[numCellsForEnergyAveraging++] = cell;
+                }
+                averageEnergy /= numCellsForEnergyAveraging;
+                for (int index = 0; index < numCellsForEnergyAveraging; ++index) {
+                    auto const& cell = cellsForEnergyAveraging[index];
+                    cell->setEnergy_safe(averageEnergy);
+                }
 
-        for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
-            auto const& cell = candidateCellsForEnergyAveraging[index];
-            cell->releaseLock();
-        }
+                for (int index = 0; index < numCandidateCellsForEnergyAveraging; ++index) {
+                    auto const& cell = candidateCellsForEnergyAveraging[index];
+                    cell->releaseLock();
+                }
+            }
+        } while (!clusterLockResult);
     }
     __syncthreads();
 }
