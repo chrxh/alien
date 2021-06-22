@@ -50,7 +50,11 @@ void MonitorController::startWritingToFile(std::string const& filename)
     stopWritingToFile();
 
     FileInfo info;
-    info.file.open(filename, std::ios_base::app);
+    info.file.open(filename, std::ios_base::out);
+    info.file << "time step, number of clusters, number of active clusters, number of cells, number of particles, "
+                 "number of tokens, total internal energy, total kinetic energy"
+              << std::endl;
+
     _fileInfo = std::move(info);
 }
 

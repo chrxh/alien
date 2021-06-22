@@ -1,7 +1,11 @@
 #include <boost/range/adaptors.hpp>
+#include <boost/range/adaptor/indexed.hpp>
+
 #include <QMessageBox>
 
 #include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SerializationHelper.h"
+#include "EngineInterface/Serializer.h"
 #include "EngineInterface/Descriptions.h"
 
 #include "Notifier.h"
@@ -12,11 +16,16 @@ DataAnalyzer::DataAnalyzer(QObject* parent /*= nullptr*/)
     : QObject(parent)
 {}
 
-void DataAnalyzer::init(SimulationAccess* access, DataRepository* repository, Notifier* notifier)
+void DataAnalyzer::init(
+    SimulationAccess* access,
+    DataRepository* repository,
+    Notifier* notifier,
+    Serializer* serializer)
 {
     SET_CHILD(_access, access);
     _repository = repository;
     _notifier = notifier;
+    _serializer = serializer;
 
     for (auto const& connection : _connections) {
         disconnect(connection);
@@ -27,8 +36,9 @@ void DataAnalyzer::init(SimulationAccess* access, DataRepository* repository, No
         _access, &SimulationAccess::dataReadyToRetrieve, this, &DataAnalyzer::dataFromAccessAvailable, Qt::QueuedConnection));
 }
 
-void DataAnalyzer::addMostFrequenceClusterRepresentantToSimulation() const
+void DataAnalyzer::saveRepetitiveActiveClustersToFiles(std::string const& folder)
 {
+    _folder = folder;
     _access->requireData(ResolveDescription());
 }
 
@@ -36,39 +46,44 @@ void DataAnalyzer::dataFromAccessAvailable()
 {
     DataDescription data = _access->retrieveData();
 
-    auto const partitionDataByDescription = calcPartitionData(data);
+    auto const partitionClassDataByDescription = calcPartitionData(data);
 
-    PartitionData mostFrequentClusterData;
-    for (auto const& descAndPartitionData : partitionDataByDescription ) {
-        auto const& desc = descAndPartitionData.first;
-        auto const& partitionData = descAndPartitionData.second;
-        if (partitionData.numberOfElements > mostFrequentClusterData.numberOfElements && desc.hasToken) {
-            mostFrequentClusterData = partitionData;
+    std::ofstream file;
+    file.open(_folder + "/result.txt", std::ios_base::out);
+
+    int sum = 0;
+    std::vector<PartitionClassData> partitionData;
+    for (auto const& [analysisDesc, partitionClassData] : partitionClassDataByDescription) {
+        if (partitionClassData.numberOfElements > 1 && analysisDesc.hasToken) {
+            partitionData.emplace_back(partitionClassData);
         }
     }
-    
-    if (mostFrequentClusterData.numberOfElements > 0) {
-        _repository->addAndSelectData(DataDescription().addCluster(mostFrequentClusterData.representant), { 0, 0 });
+    std::sort(partitionData.begin(), partitionData.end());
 
-        Q_EMIT _notifier->notifyDataRepositoryChanged({
-            Receiver::DataEditor, Receiver::Simulation, Receiver::VisualEditor, Receiver::ActionController
-        }, UpdateDescription::All);
+    file << "number of repetitive active clusters: " << partitionData.size() << std::endl << std::endl;
+    for (auto const& [index, partitionClassData] :
+         partitionData | boost::adaptors::reversed | boost::adaptors::indexed(1)) {
 
-        QMessageBox msgBox;
-        msgBox.setText(QString("%1 exemplars found.").arg(mostFrequentClusterData.numberOfElements));
-        msgBox.exec();
+        file << "cluster " << index << ": " << partitionClassData.numberOfElements << " exemplars" << std::endl;
+        std::string filename = _folder + "/cluster" + QString("%1").arg(index, 5, 10, QChar('0')).toStdString() + ".col";
+
+        DataDescription pattern;
+        pattern.clusters = std::vector<ClusterDescription>{partitionClassData.representant};
+        SerializationHelper::saveToFile(filename, [&]() { return _serializer->serializeDataDescription(pattern); });
     }
-    else {
-        QMessageBox msgBox;
-        msgBox.setText(QString("No exemplars found."));
-        msgBox.exec();
-    }
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Analysis result");
+    msgBox.setText(QString("%1 repetitive active clusters found. Summary saved to %2/result.txt.")
+                       .arg(partitionData.size())
+                       .arg(QString::fromStdString(_folder)));
+    msgBox.exec();
 }
 
 auto DataAnalyzer::calcPartitionData(DataDescription const& data) const
-    -> std::map<ClusterAnalysisDescription, PartitionData>
+    -> std::map<ClusterAnalysisDescription, PartitionClassData>
 {
-    std::map<ClusterAnalysisDescription, PartitionData> result;
+    std::map<ClusterAnalysisDescription, PartitionClassData> result;
 
     if (auto const& clusters = data.clusters) {
         for (auto const& cluster : *clusters) {
@@ -86,20 +101,39 @@ auto DataAnalyzer::getAnalysisDescription(ClusterDescription const& cluster) con
 {
     ClusterAnalysisDescription result;
     result.hasToken = false;
-    if (auto const& cells = cluster.cells) {
-        for (auto const& cell : *cells) {
-            CellAnalysisDescription cellAnalysisData;
-            cellAnalysisData.maxConnections = *cell.maxConnections;
-            cellAnalysisData.numConnections = cell.connectingCells->size();
-            cellAnalysisData.tokenBlocked = *cell.tokenBlocked;
-            cellAnalysisData.tokenBranchNumber = *cell.tokenBranchNumber;
+
+    std::map<uint64_t, CellAnalysisDescription> cellAnalysisDescById;
+    auto insertCellAnalysisDescription = [&cellAnalysisDescById](CellDescription const& cell) {
+        if (cellAnalysisDescById.find(cell.id) == cellAnalysisDescById.end()) {
+            CellAnalysisDescription result;
+            result.maxConnections = *cell.maxConnections;
+            result.numConnections = cell.connectingCells->size();
+            result.tokenBlocked = *cell.tokenBlocked;
+            result.tokenBranchNumber = *cell.tokenBranchNumber;
+//            result.color = cell.metadata->color;
 
             CellFeatureAnalysisDescription featureAnalysisData;
             featureAnalysisData.cellFunction = cell.cellFeature->getType();
-            featureAnalysisData.constData = cell.cellFeature->constData;
-            cellAnalysisData.feature = featureAnalysisData;
-            
-            result.cells.emplace_back(cellAnalysisData);
+            result.feature = featureAnalysisData;
+
+            cellAnalysisDescById.insert_or_assign(cell.id, result);
+        }
+    };
+
+    if (auto const& cells = cluster.cells) {
+
+        std::map<uint64_t, int> cellDescIndexById;
+        for (auto const& [index, cell] : *cells | boost::adaptors::indexed(0)) {
+            cellDescIndexById.insert_or_assign(cell.id, index);
+        }
+
+        for (auto const& cell : *cells) {
+            insertCellAnalysisDescription(cell);
+            for (auto const& connectingCellId : *cell.connectingCells) {
+                insertCellAnalysisDescription(cluster.cells->at(cellDescIndexById.at(connectingCellId)));
+                result.connectedCells.insert(std::set<CellAnalysisDescription>{
+                    cellAnalysisDescById.at(cell.id), cellAnalysisDescById.at(connectingCellId)});
+            }
             if (cell.tokens && cell.tokens->size() > 0) {
                 result.hasToken = true;
             }

@@ -317,8 +317,8 @@ ActionHolder::ActionHolder(QObject* parent) : QObject(parent)
 	actionGridMultiplier = new QAction("Grid multiplier", this);
 	actionGridMultiplier->setEnabled(false);
 
-    actionMostFrequentCluster = new QAction("Most frequent active cluster", this);
-    actionMostFrequentCluster->setEnabled(true);
+    actionRepetitiveActiveClusterAnalysis = new QAction("Repetitive pattern analysis", this);
+    actionRepetitiveActiveClusterAnalysis->setEnabled(true);
 
 	actionWriteMonitorLog = new QAction("Stream monitor data to file", this);
     actionWriteMonitorLog->setEnabled(true);

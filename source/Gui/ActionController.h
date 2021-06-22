@@ -88,7 +88,7 @@ private:
     Q_SLOT void onRandomMultiplier();
 	Q_SLOT void onGridMultiplier();
 
-    Q_SLOT void onMostFrequentCluster();
+    Q_SLOT void onRepetitiveActiveClusterAnalysis();
     Q_SLOT void onToggleWriteMonitorLog(bool toggled);
 
 	Q_SLOT void onShowAbout();

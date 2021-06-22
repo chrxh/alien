@@ -36,7 +36,7 @@ public:
 	void onUpdateSimulationParameters(SimulationParameters const& parameters);
     void onUpdateExecutionParameters(ExecutionParameters const& parameters);
     void onRestrictTPS(boost::optional<int> const& tps);
-    void onAddMostFrequentClusterToSimulation();
+    void onSaveRepetitiveActiveClusterAnalysis(std::string const& folder);
 
 	int getTimestep() const;
 	SimulationConfig getSimulationConfig() const;

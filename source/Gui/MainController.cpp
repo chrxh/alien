@@ -289,7 +289,7 @@ void MainController::initSimulation(SymbolTable* symbolTable, SimulationParamete
 	_descHelper->init(context);
 	_snapshotController->init(_simController->getContext(), _accessBuildFunc(_simController));
 	_repository->init(_notifier, _accessBuildFunc(_simController), _descHelper, context);
-    _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier);
+    _dataAnalyzer->init(_accessBuildFunc(_simController), _repository, _notifier, _serializer);
 
 	auto simMonitor = _monitorBuildFunc(_simController);
 	SET_CHILD(_simMonitor, simMonitor);
@@ -443,9 +443,9 @@ void MainController::onRestrictTPS(boost::optional<int> const& tps)
     _simController->setRestrictTimestepsPerSecond(tps);
 }
 
-void MainController::onAddMostFrequentClusterToSimulation()
+void MainController::onSaveRepetitiveActiveClusterAnalysis(std::string const& folder)
 {
-    _dataAnalyzer->addMostFrequenceClusterRepresentantToSimulation();
+    _dataAnalyzer->saveRepetitiveActiveClustersToFiles(folder);
 }
 
 int MainController::getTimestep() const
