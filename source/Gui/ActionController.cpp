@@ -177,7 +177,7 @@ void ActionController::init(
     connect(actions->actionRandomMultiplier, &QAction::triggered, this, &ActionController::onRandomMultiplier);
 	connect(actions->actionGridMultiplier, &QAction::triggered, this, &ActionController::onGridMultiplier);
 
-    connect(actions->actionMostFrequentCluster, &QAction::triggered, this, &ActionController::onMostFrequentCluster);
+    connect(actions->actionRepetitiveActiveClusterAnalysis, &QAction::triggered, this, &ActionController::onRepetitiveActiveClusterAnalysis);
     connect(actions->actionWriteMonitorLog, &QAction::toggled, this, &ActionController::onToggleWriteMonitorLog);
 
 	connect(actions->actionAbout, &QAction::triggered, this, &ActionController::onShowAbout);
@@ -838,14 +838,18 @@ void ActionController::onGridMultiplier()
     }
 }
 
-void ActionController::onMostFrequentCluster()
+void ActionController::onRepetitiveActiveClusterAnalysis()
 {
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "find most frequent active cluster");
+    QString folder = QFileDialog::getExistingDirectory(_mainView, "Select folder for repetitive pattern analysis");
+    if (!folder.isEmpty()) {
 
-    _mainController->onAddMostFrequentClusterToSimulation();
+        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+        loggingService->logMessage(Priority::Important, "repetitive pattern analysis");
 
-	loggingService->logMessage(Priority::Unimportant, "find most frequent active cluster finished");
+        _mainController->onSaveRepetitiveActiveClusterAnalysis(folder.toStdString());
+
+        loggingService->logMessage(Priority::Unimportant, "repetitive pattern analysis finished");
+    }
 }
 
 void ActionController::onToggleWriteMonitorLog(bool toggled)

@@ -282,7 +282,7 @@ void MainView::setupMenuAndToolbar()
     ui->menuCollection->addAction(actions->actionRandomMultiplier);
     ui->menuCollection->addAction(actions->actionGridMultiplier);
 
-    ui->menuTools->addAction(actions->actionMostFrequentCluster);
+    ui->menuTools->addAction(actions->actionRepetitiveActiveClusterAnalysis);
     ui->menuTools->addAction(actions->actionSimulationChanger);
     ui->menuTools->addAction(actions->actionWriteMonitorLog);
 
