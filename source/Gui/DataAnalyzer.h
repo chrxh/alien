@@ -13,9 +13,9 @@ public:
     DataAnalyzer(QObject* parent = nullptr);
     virtual ~DataAnalyzer() = default;
 
-    void init(SimulationAccess* access, DataRepository* repository, Notifier* notifier);
+    void init(SimulationAccess* access, DataRepository* repository, Notifier* notifier, Serializer* serializer);
 
-    void addMostFrequenceClusterRepresentantToSimulation() const;
+    void saveRepetitiveActiveClustersToFiles(std::string const& folder);
 
 private:
     Q_SLOT void dataFromAccessAvailable();
@@ -23,20 +23,16 @@ private:
     struct CellFeatureAnalysisDescription
     {
         int cellFunction;
-        QByteArray constData;
 
         bool operator<(CellFeatureAnalysisDescription const& other) const {
             if (cellFunction != other.cellFunction) {
                 return cellFunction < other.cellFunction;
             }
-            if (constData != other.constData) {
-                return constData < other.constData;
-            }
             return false;
         }
         bool operator==(CellFeatureAnalysisDescription const& other) const
         {
-            return cellFunction == other.cellFunction && constData == other.constData;
+            return cellFunction == other.cellFunction;
         }
         bool operator!=(CellFeatureAnalysisDescription const& other) const
         {
@@ -49,6 +45,7 @@ private:
         int numConnections;
         bool tokenBlocked;
         int tokenBranchNumber;
+        int color;
         CellFeatureAnalysisDescription feature;
 
         bool operator==(CellAnalysisDescription const& other) const
@@ -57,7 +54,8 @@ private:
                 && numConnections == other.numConnections
                 && tokenBlocked == other.tokenBlocked
                 && tokenBranchNumber == other.tokenBranchNumber
-                && feature == other.feature;
+                && feature == other.feature
+                /*&& color == other.color*/;
         }
 
         bool operator!=(CellAnalysisDescription const& other) const
@@ -82,31 +80,39 @@ private:
             if (feature != other.feature) {
                 return feature < other.feature;
             }
+/*
+            if (color != other.color) {
+                return color < other.color;
+            }
+*/
             return false;
         }
     };
     struct ClusterAnalysisDescription
     {
         bool hasToken;
-        std::vector<CellAnalysisDescription> cells;
+        std::set<std::set<CellAnalysisDescription>> connectedCells;
 
         bool operator<(ClusterAnalysisDescription const& other) const {
             if (hasToken != other.hasToken) {
                 return hasToken < other.hasToken;
             }
-            if (cells != other.cells) {
-                return cells < other.cells;
+            if (connectedCells != other.connectedCells) {
+                return connectedCells < other.connectedCells;
             }
             return false;
         }
     };
-    struct PartitionData
+    struct PartitionClassData
     {
         int numberOfElements = 0;
         ClusterDescription representant;
+
+        bool operator<(PartitionClassData const& other) const { return numberOfElements < other.numberOfElements; };
+
     };
 
-    std::map<ClusterAnalysisDescription, PartitionData> calcPartitionData(DataDescription const& data) const;
+    std::map<ClusterAnalysisDescription, PartitionClassData> calcPartitionData(DataDescription const& data) const;
 
     ClusterAnalysisDescription getAnalysisDescription(ClusterDescription const& cluster) const;
 
@@ -116,4 +122,7 @@ private:
     SimulationAccess* _access = nullptr;
     DataRepository* _repository = nullptr;
     Notifier* _notifier = nullptr;
+    Serializer* _serializer = nullptr;
+
+    std::string _folder;
 };
