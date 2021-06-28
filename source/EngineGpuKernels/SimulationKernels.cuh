@@ -69,6 +69,7 @@ __global__ void resetCellFunctionData(SimulationData data)
 {
     data.cellFunctionData.mapSectionCollector.reset_system();
 }
+/*
 __global__ void tokenProcessingStep1(SimulationData data, int numClusters)
 {
     auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
@@ -111,6 +112,8 @@ __global__ void tokenProcessingStep4(SimulationData data, int numClusters)
         tokenProcessor.processingCommunicatorsAnsSensors_block();
     }
 }
+*/
+
 /************************************************************************/
 /* Helpers for particles												*/
 /************************************************************************/
@@ -149,10 +152,12 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.dynamicMemory.reset();
     KERNEL_CALL(resetCellFunctionData, data);
     KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
+/*
     KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
+*/
     KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());

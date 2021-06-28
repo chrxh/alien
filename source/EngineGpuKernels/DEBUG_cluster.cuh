@@ -93,14 +93,14 @@ public:
             }
 
             for (int i = 0; i < cell->numConnections; ++i) {
-                auto const& connectingCell = cell->connections[i];
+                auto const& connectingCell = cell->connections[i].cell;
                 if (connectingCell->cluster != cluster) {
                     printf("connecting cell is from different cluster\n");
                     STOP(a, b)
                 }
                 bool found = false;
                 for (int j = 0; j < connectingCell->numConnections; ++j) {
-                    auto const& connectingConnectingCell = connectingCell->connections[j];
+                    auto const& connectingConnectingCell = connectingCell->connections[j].cell;
                     if (connectingConnectingCell == cell) {
                         found = true;
                     }

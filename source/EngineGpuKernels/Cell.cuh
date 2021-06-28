@@ -19,6 +19,12 @@ struct CellMetadata
     char* sourceCode;
 };
 
+struct CellConnection
+{
+    Cell* cell;
+    float distance;
+};
+
 struct Cell
 {
     uint64_t id;
@@ -30,7 +36,7 @@ struct Cell
     bool tokenBlocked;
     int maxConnections;
     int numConnections;
-    Cell* connections[MAX_CELL_BONDS];
+    CellConnection connections[MAX_CELL_BONDS];
     unsigned char numStaticBytes;
     char staticData[MAX_CELL_STATIC_BYTES];
     unsigned char numMutableBytes;

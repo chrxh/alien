@@ -49,7 +49,7 @@ __inline__ __device__ void Tagger::tagComponent_block(
             auto const& cellToEvaluate = dynamicMemory.cellsToEvaluate[index];
             auto const numConnections = cellToEvaluate->numConnections;
             for (int i = 0; i < numConnections; ++i) {
-                auto const& candidate = cellToEvaluate->connections[i];
+                auto const& candidate = cellToEvaluate->connections[i].cell;
                 if (forbiddingConnectingCell == candidate && startCell == cellToEvaluate) {
                     continue;
                 }

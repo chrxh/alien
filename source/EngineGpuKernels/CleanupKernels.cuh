@@ -180,8 +180,8 @@ __global__ void cleanupCells(Array<Cluster*> clusterPointers, Array<Cell> cells)
             origCellPtr = &newCells[cellIndex];
 
             for (int i = 0; i < newCell.numConnections; ++i) {
-                auto relCellIndex = origCellPtr->connections[i]->tag;
-                newCell.connections[i] = newCells + relCellIndex;
+                auto relCellIndex = origCellPtr->connections[i].cell->tag;
+                newCell.connections[i].cell = newCells + relCellIndex;
             }
 
         }

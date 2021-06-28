@@ -208,7 +208,7 @@ __global__ void drawClusters(
                 if (zoom > 1 - FP_PRECISION) {
                     color = color * min((zoom - 1.0f)/3, 1.0f);
                     for (int i = 0; i < cell->numConnections; ++i) {
-                        auto const otherCell = cell->connections[i];
+                        auto const otherCell = cell->connections[i].cell;
                         auto const otherCellPos = otherCell->absPos + posCorrection;
                         auto const otherCellImagePos =
                             mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);

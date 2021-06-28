@@ -229,8 +229,8 @@ private:
                         auto otherIndex = atomicAdd(&otherCell->numConnections, 1);
                         if (otherIndex < otherCell->maxConnections) {
                             auto index = cell->numConnections++;
-                            cell->connections[index] = otherCell;
-                            otherCell->connections[otherIndex] = cell;
+                            cell->connections[index].cell = otherCell;
+                            otherCell->connections[otherIndex].cell = cell;
                             cell->setFused(true);
                             otherCell->setFused(true);
                         }
@@ -984,7 +984,7 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
             Cell* cell = _cluster->cellPointers[cellIndex];
             if (1 == cell->alive) {
                 for (int i = 0; i < cell->numConnections; ++i) {
-                    Cell& otherCell = *cell->connections[i];
+                    Cell& otherCell = *cell->connections[i].cell;
                     if (1 == otherCell.alive) {
                         if (otherCell.tag < cell->tag) {
                             cell->tag = otherCell.tag;
@@ -1014,10 +1014,10 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
         auto& cell = _cluster->cellPointers[cellIndex];
         if (1 == cell->alive) {
             for (int i = 0; i < cell->numConnections; ++i) {
-                auto& otherCell = cell->connections[i];
+                auto& otherCell = cell->connections[i].cell;
                 if (1 != otherCell->alive) {
                     for (int j = i + 1; j < cell->numConnections; ++j) {
-                        cell->connections[j - 1] = cell->connections[j];
+                        cell->connections[j - 1].cell = cell->connections[j].cell;
                     }
                     --cell->numConnections;
                     --i;
