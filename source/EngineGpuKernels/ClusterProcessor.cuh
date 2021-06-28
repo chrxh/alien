@@ -34,7 +34,6 @@ private:
     __inline__ __device__ void processingDecomposition_optimizedForSmallCluster_block();
     __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_block();
 
-    __inline__ __device__ void updateCellVelocity_block(Cluster* cluster);
     __inline__ __device__ void destroyDyingCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(Cell* cell);
     __inline__ __device__ void destroyCloseCell(float2 const& pos, Cell *cell);
@@ -67,6 +66,52 @@ private:
 
  __inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
+    for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
+         auto cell = _cluster->cellPointers[index];
+         for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
+             for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
+                 Cell* otherCell = _data->cellMap.get(cell->absPos + float2{dx, dy});
+
+                 if (!otherCell || otherCell == cell) {
+                     continue;
+                 }
+
+                 auto const otherCluster = otherCell->cluster;
+                 if (_cluster == otherCluster) {
+                     continue;
+                 }
+                 if (_cluster->isActive()) {
+                     otherCluster->unfreeze(30);
+                 }
+
+/*
+                 if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
+                     continue;
+                 }
+*/
+                 if (0 == cell->alive || 0 == otherCell->alive) {
+                     continue;
+                 }
+                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)
+                     >= cudaSimulationParameters.cellMaxDistance) {
+                     continue;
+                 }
+
+                 auto delta = cell->absPos - otherCell->absPos;
+                 _data->cellMap.mapDisplacementCorrection(delta);
+                 auto force =
+                     Math::normalized(delta) * (cudaSimulationParameters.cellMaxDistance - Math::length(delta));
+
+                 atomicAdd_block(&cell->force.x, force.x);
+                 atomicAdd_block(&cell->force.y, force.y);
+                 atomicAdd_block(&otherCell->force.x, -force.x);
+                 atomicAdd_block(&otherCell->force.y, -force.y);
+             }
+         }
+     }
+     __syncthreads();
+
+/*
     __shared__ Cluster* cluster;
     __shared__ unsigned long long int largestOtherClusterData;
     __shared__ Cluster* clustersArray;
@@ -349,6 +394,7 @@ private:
         lock.releaseLock();
     }
     __syncthreads();
+*/
 }
 
 __inline__ __device__ void ClusterProcessor::destroyCloseCell_block()
@@ -405,26 +451,69 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_block()
 
 __inline__ __device__ void ClusterProcessor::processingMovement_block()
 {
-    __shared__ float rotMatrix[2][2];
-    if (0 == threadIdx.x) {
-        _cluster->angle += _cluster->getAngularVelocity();
-        Math::angleCorrection(_cluster->angle);
-        _cluster->pos = _cluster->pos + _cluster->getVelocity();
-        _data->cellMap.mapPosCorrection(_cluster->pos);
-        Math::rotationMatrix(_cluster->angle, rotMatrix);
+    for (int i = 0; i < 10; ++i) {
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+            auto cell = _cluster->cellPointers[cellIndex];
+            cell->tempForce = {0, 0};
+        }
+        __syncthreads();
+
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+            auto cell = _cluster->cellPointers[cellIndex];
+            auto dissipatedForce = cell->force / (cell->numConnections + 1);
+            for (int index = 0; index < cell->numConnections; ++index) {
+                auto connectingCell = cell->connections[index].cell;
+                atomicAdd_block(&connectingCell->tempForce.x, dissipatedForce.x);
+                atomicAdd_block(&connectingCell->tempForce.y, dissipatedForce.y);
+            }
+            atomicAdd_block(&cell->tempForce.x, dissipatedForce.x);
+            atomicAdd_block(&cell->tempForce.y, dissipatedForce.y);
+        }
+        __syncthreads();
+
+        for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+            auto cell = _cluster->cellPointers[cellIndex];
+            cell->force = cell->tempForce;
+        }
+        __syncthreads();
+    }
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto cell = _cluster->cellPointers[cellIndex];
+
+        float2 force = cell->force;
+        auto vel = cell->vel + force / 2;
+        auto pos = cell->absPos + vel / 2;
+        for (int index = 0; index < cell->numConnections; ++index) {
+            auto connectingCell = cell->connections[index].cell;
+            auto otherVel = connectingCell->vel + connectingCell->force / 2;
+            auto otherPos = connectingCell->absPos + otherVel / 2;
+
+            auto actualDistance = _data->cellMap.mapDistance(otherPos, pos);
+            auto deviation = min(actualDistance - cell->connections[index].distance, cell->connections[index].distance);
+            /*
+            if (deviation < 0) {
+                deviation = 1.0f / (cell->connections[index].distance + deviation + 1.1f)
+                    - 1.0f / (cell->connections[index].distance + 1.1f);
+            }
+*/
+            auto delta = otherPos - pos;
+            _data->cellMap.mapDisplacementCorrection(delta);
+            force = force + Math::normalized(delta) * deviation / 3;
+        }
+        cell->tempForce = force;
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        Cell *cell = _cluster->cellPointers[cellIndex];
+        auto cell = _cluster->cellPointers[cellIndex];
 
-        float2 absPos = Math::applyMatrix(cell->relPos, rotMatrix) + _cluster->pos;
-        cell->absPos = absPos;
+        cell->vel = cell->vel + cell->tempForce;
+        cell->absPos = cell->absPos + cell->vel;
+        cell->force = {0, 0};
+        //cell->tempForce / 2;
         cell->decrementProtectionCounter();
     }
-    __syncthreads();
-
-    updateCellVelocity_block(_cluster);
     __syncthreads();
 }
 
@@ -460,33 +549,13 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_block()
             }
         }
         if (cell->getEnergy_safe() < cudaSimulationParameters.cellMinEnergy) {
+/*
             atomicExch(&cell->alive, 0);
             atomicExch(&cell->cluster->decompositionRequired, 1);
+*/
         }
     }
     __syncthreads();
-}
-
-__inline__ __device__ void ClusterProcessor::updateCellVelocity_block(Cluster* cluster)
-{
-    auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-    for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-        auto const& cell = cluster->cellPointers[cellIndex];
-
-        auto r = cell->absPos - cluster->pos;
-        _data->cellMap.mapDisplacementCorrection(r);
-        auto newVel = Physics::tangentialVelocity(r, cluster->getVelocity(), cluster->getAngularVelocity());
-
-        auto a = newVel - cell->vel;
-        if (Math::length(a) > cudaSimulationParameters.cellMaxForce) {
-            if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                atomicExch(&cell->alive, 0);
-                atomicExch(&cluster->decompositionRequired, 1);
-            }
-        }
-        cell->vel = newVel;
-    }
-    __threadfence();
 }
 
 __inline__ __device__ void ClusterProcessor::destroyDyingCell(Cell * cell)
@@ -514,6 +583,7 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell(float2 const & pos
         return;
     }
 
+/*
     Cluster* mapCluster = cellFromMap->cluster;
     auto distance = _data->cellMap.mapDistance(cell->absPos, cellFromMap->absPos);
     if (distance < cudaSimulationParameters.cellMinDistance) {
@@ -527,6 +597,7 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell(float2 const & pos
             atomicExch(&mapCluster->decompositionRequired, 1);
         }
     }
+*/
 }
 
 __inline__ __device__ bool ClusterProcessor::areConnectable(Cell * cell1, Cell * cell2)
@@ -562,11 +633,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         numDecompositions = 0;
         for (int i = 0; i < MAX_DECOMPOSITIONS; ++i) {
             entries[i].tag = -1;
-            entries[i].cluster.pos = { 0.0f, 0.0f };
-            entries[i].cluster.setVelocity({ 0.0f, 0.0f });
-            entries[i].cluster.angle = _cluster->angle;
-            entries[i].cluster.setAngularVelocity(0.0f);
-            entries[i].cluster.angularMass = 0.0f;
             entries[i].cluster.numCellPointers = 0;
             entries[i].cluster.numTokenPointers = 0;
             entries[i].cluster.decompositionRequired = 1;
@@ -589,21 +655,12 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
             if (-1 == origTag) {	//use free 
                 atomicAdd(&numDecompositions, 1);
                 atomicAdd(&entries[index].cluster.numCellPointers, 1);
-                atomicAdd(&entries[index].cluster.pos.x, cell->absPos.x);
-                atomicAdd(&entries[index].cluster.pos.y, cell->absPos.y);
-                entries[index].cluster.addVelocity_safe(cell->vel);
-
                 entries[index].cluster.id = _data->numberGen.createNewId_kernel();
-                Math::inverseRotationMatrix(entries[index].cluster.angle, entries[index].invRotMatrix);
                 foundMatch = true;
                 break;
             }
             if (cell->tag == origTag) {	//matching entry
                 atomicAdd(&entries[index].cluster.numCellPointers, 1);
-                atomicAdd(&entries[index].cluster.pos.x, cell->absPos.x);
-                atomicAdd(&entries[index].cluster.pos.y, cell->absPos.y);
-                entries[index].cluster.addVelocity_safe(cell->vel);
-
                 foundMatch = true;
                 break;
             }
@@ -611,9 +668,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         if (!foundMatch) {	//no match? use last entry
             cell->tag = entries[MAX_DECOMPOSITIONS - 1].tag;
             atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.numCellPointers, 1);
-            atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.x, cell->absPos.x);
-            atomicAdd(&entries[MAX_DECOMPOSITIONS - 1].cluster.pos.y, cell->absPos.y);
-            entries[MAX_DECOMPOSITIONS - 1].cluster.addVelocity_safe(cell->vel);
         }
     }
     __syncthreads();
@@ -633,9 +687,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
     for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
         auto& clusterEntry = entries[index].cluster;
         auto numCells = clusterEntry.numCellPointers;
-        clusterEntry.pos.x /= numCells;
-        clusterEntry.pos.y /= numCells;
-        clusterEntry.setVelocity(clusterEntry.getVelocity() / numCells);
         clusterEntry.cellPointers = _data->entities.cellPointers.getNewSubarray(numCells);
         clusterEntry.numCellPointers = 0;
 
@@ -651,19 +702,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         for (int index = 0; index < numDecompositions; ++index) {
             if (cell->tag == entries[index].tag) {
                 Cluster* newCluster = newClusters[index];
-                float2 deltaPos = cell->absPos - newCluster->pos;
-                _data->cellMap.mapDisplacementCorrection(deltaPos);
-                auto angularMass = deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
-                atomicAdd(&newCluster->angularMass, angularMass);
 
-                auto r = cell->absPos - _cluster->pos;
-                _data->cellMap.mapDisplacementCorrection(r);
-                float2 relVel = cell->vel - newCluster->getVelocity();
-                float angularMomentum = Physics::angularMomentum(r, relVel);
-                newCluster->addAngularVelocity_safe(angularMomentum);
-
-                float(&invRotMatrix)[2][2] = entries[index].invRotMatrix;
-                cell->relPos = Math::applyMatrix(deltaPos, invRotMatrix);
                 int newCellIndex = atomicAdd(&newCluster->numCellPointers, 1);
                 Cell*& newCellPointer = newCluster->cellPointers[newCellIndex];
                 newCellPointer = cell;
@@ -672,14 +711,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
         }
     }
     __syncthreads();
-
-    for (int index = decompositionBlock.startIndex; index <= decompositionBlock.endIndex; ++index) {
-        Cluster* newCluster = newClusters[index];
-
-        //newCluster->angularVel contains angular momentum until here
-        newCluster->setAngularVelocity(Physics::angularVelocity(newCluster->getAngularVelocity(), newCluster->angularMass));
-    }
-
 
     for (int index = 0; index < numDecompositions; ++index) {
         Cluster* newCluster = newClusters[index];
@@ -690,6 +721,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
 
 __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
 {
+/*
     if (_cluster < _cluster->clusterToFuse) {
         __shared__ Cluster* newCluster;
         __shared__ Cluster* otherCluster;
@@ -847,6 +879,7 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
         }
     }
     __syncthreads();
+*/
 }
 
 __inline__ __device__ void ClusterProcessor::copyTokenPointers_block(Cluster* sourceCluster, Cluster* targetCluster)
