@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "sm_60_atomic_functions.h"
@@ -49,9 +50,9 @@ private:
     PartitionData _tokenPartition;
 };
 
-/************************************************************************/
-/* Implementation                                                       */
-/************************************************************************/
+/ ************************************************************************ /
+/ * Implementation                                                       * /
+/ ************************************************************************ /
 __inline__ __device__ void TokenProcessor::init_block(SimulationData& data, int clusterIndex)
 {
     _data = &data;
@@ -424,7 +425,7 @@ __inline__ __device__ void TokenProcessor::calcAnticipatedTokens(Cluster* cluste
         }
     }
     __syncthreads();
-/*
+/ *
     int result = 0;
     for (int tokenIndex = 0; tokenIndex < cluster->numTokenPointers; ++tokenIndex) {
         auto const& token = cluster->tokenPointers[tokenIndex];
@@ -450,7 +451,7 @@ __inline__ __device__ void TokenProcessor::calcAnticipatedTokens(Cluster* cluste
         }
     }
     return result;
-*/
+* /
 }
 
 __inline__ __device__ void TokenProcessor::copyToken(Token const* sourceToken, Token* targetToken, Cell* targetCell)
@@ -479,3 +480,4 @@ __inline__ __device__ void TokenProcessor::resetTags_block()
     }
     __syncthreads();
 }
+*/

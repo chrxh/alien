@@ -144,7 +144,7 @@ __global__ void getClusterAccessData(int2 universeSize, int2 rectUpperLeft, int2
                     cellTO.mutableData[i] = cell.mutableData[i];
                 }
                 for (int i = 0; i < cell.numConnections; ++i) {
-                    int connectingCellIndex = cell.connections[i]->tag + cellTOIndex;
+                    int connectingCellIndex = cell.connections[i].cell->tag + cellTOIndex;
                     cellTO.connectionIndices[i] = connectingCellIndex;
                 }
             }

@@ -134,7 +134,9 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         cell.numConnections = cellTO.numConnections;
         for (int i = 0; i < cell.numConnections; ++i) {
             int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
-            cell.connections[i] = cells + index;
+            cell.connections[i].cell = cells + index;
+            CellAccessTO const & otherCell = simulationTO->cells[cellTO.connectionIndices[i]];
+            cell.connections[i].distance = Math::length(cell.absPos - otherCell.pos);
         }
 
         cell.setCellFunctionType(cellTO.cellFunctionType);
