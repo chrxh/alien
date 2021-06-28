@@ -12,7 +12,7 @@ public:
     __inline__ __device__ static void calcEnergy_block(Cluster* cluster, float& result)
     {
         if (0 == threadIdx.x) {
-            atomicAdd_block(&result, Physics::kineticEnergy(cluster->numCellPointers, cluster->getVelocity(), cluster->angularMass, cluster->getAngularVelocity()));
+//            atomicAdd_block(&result, Physics::kineticEnergy(cluster->numCellPointers, cluster->getVelocity(), cluster->angularMass, cluster->getAngularVelocity()));
         }
         auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
         for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
