@@ -29,9 +29,10 @@ struct Cell
 {
     uint64_t id;
     Cluster* cluster;
-    float2 relPos;
     float2 absPos;
     float2 vel;
+    float2 force;
+    float2 tempForce;
     int branchNumber;
     bool tokenBlocked;
     int maxConnections;

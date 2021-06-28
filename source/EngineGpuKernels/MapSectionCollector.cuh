@@ -35,15 +35,18 @@ public:
 
     __device__ __inline__ void insert(Cluster* cluster, DynamicMemory* dynamicMemory)
     {
+/*
         auto const section = getSection(cluster->pos);
 
         auto& clusterList = _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
         clusterList.pushBack(cluster, dynamicMemory);
+*/
     }
 
     __device__ __inline__ void getClusters_block(float2 const& pos, float radius, MapInfo const& map, 
         DynamicMemory* dynamicMemory, List<Cluster*>& result)
     {
+/*
         __shared__ int2 sectionCenter;
         __shared__ int sectionLength;
         if (0 == threadIdx.x) {
@@ -78,6 +81,7 @@ public:
                 __syncthreads();
             }
         }
+*/
     }
 
 private:

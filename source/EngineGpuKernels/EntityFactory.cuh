@@ -68,22 +68,18 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
     __shared__ Cluster* cluster;
     __shared__ Cell* cells;
     __shared__ Token* tokens;
-    __shared__ float angularMass;
-    __shared__ float invRotMatrix[2][2];
     __shared__ float2 posCorrection;
+    __shared__ float2 clusterPos;
 
     if (0 == threadIdx.x) {
         auto clusterPointer = _data->entities.clusterPointers.getNewElement();
         cluster = _data->entities.clusters.getNewElement();
         *clusterPointer = cluster;
         cluster->id = clusterTO.id;
-        cluster->pos = clusterTO.pos;
-        _map.mapPosCorrection(cluster->pos);
-        posCorrection = cluster->pos - clusterTO.pos;
-        cluster->setVelocity(clusterTO.vel);
+        clusterPos = clusterTO.pos;
+        _map.mapPosCorrection(clusterPos);
+        posCorrection = clusterPos - clusterTO.pos;
         cluster->setSelected(false);
-        cluster->angle = clusterTO.angle;
-        cluster->setAngularVelocity(clusterTO.angularVel);
         cluster->numCellPointers = clusterTO.numCells;
         cluster->cellPointers = _data->entities.cellPointers.getNewSubarray(cluster->numCellPointers);
         cells = _data->entities.cells.getNewSubarray(cluster->numCellPointers);
@@ -102,9 +98,6 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         cluster->locked = 0;
         cluster->clusterToFuse = nullptr;
         cluster->init();
-
-        angularMass = 0.0f;
-        Math::inverseRotationMatrix(cluster->angle, invRotMatrix);
     }
     __syncthreads();
 
@@ -116,15 +109,13 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         cell.id = cellTO.id;
         cell.cluster = cluster;
         cell.absPos = cellTO.pos + posCorrection;
+        cell.force = { 0, 0 };
 
         float2 deltaPos = cell.absPos - clusterTO.pos;
-        cell.relPos.x = deltaPos.x * invRotMatrix[0][0] + deltaPos.y * invRotMatrix[0][1];
-        cell.relPos.y = deltaPos.x * invRotMatrix[1][0] + deltaPos.y * invRotMatrix[1][1];
-        atomicAdd(&angularMass, Math::lengthSquared(cell.relPos));
 
-        auto r = cell.absPos - cluster->pos;
+        auto r = cell.absPos - clusterPos;
         _map.mapDisplacementCorrection(r);
-        cell.vel = Physics::tangentialVelocity(r, cluster->getVelocity(), cluster->getAngularVelocity());
+        cell.vel = Physics::tangentialVelocity(r, clusterTO.vel, clusterTO.angularVel);
 
         cell.setEnergy_safe(cellTO.energy);
         cell.branchNumber = cellTO.branchNumber;
@@ -136,7 +127,7 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
             int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
             cell.connections[i].cell = cells + index;
             CellAccessTO const & otherCell = simulationTO->cells[cellTO.connectionIndices[i]];
-            cell.connections[i].distance = Math::length(cell.absPos - otherCell.pos);
+            cell.connections[i].distance = _map.mapDistance(cell.absPos, otherCell.pos);
         }
 
         cell.setCellFunctionType(cellTO.cellFunctionType);
@@ -207,10 +198,6 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
     }
 
     __syncthreads();
-
-    if (0 == threadIdx.x) {
-        cluster->angularMass = angularMass;
-    }
 }
 
 __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
@@ -227,6 +214,7 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
     result->setFused(false);
+    result->force = {0, 0};
     return result;
 }
 
@@ -267,12 +255,7 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     auto cellPointers = _data->entities.cellPointers.getNewElement();
 
     cluster->id = _data->numberGen.createNewId_kernel();
-    cluster->pos = pos;
-    cluster->setVelocity(vel);
     cluster->setSelected(false);
-    cluster->angle = 0.0f;
-    cluster->setAngularVelocity(0);
-    cluster->angularMass = 0.0f;
     cluster->numCellPointers = 1;
     cluster->cellPointers = cellPointers;
     *cellPointers = cell;
@@ -286,8 +269,8 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
 
     cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = pos;
-    cell->relPos = {0.0f, 0.0f};
     cell->vel = vel;
+    cell->force = {0, 0};
     cell->setEnergy_safe(energy);
     cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
     cell->cluster = cluster;

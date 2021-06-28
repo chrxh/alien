@@ -57,9 +57,11 @@ __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universe
                 float2 velInc;
                 float angularVelInc;
 
+/*
                 auto const relPos = cell->absPos - cluster->pos;
                 Physics::calcImpulseIncrement(
                     weightedForce, relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
+*/
                 if (!applyData.onlyRotation) {
                     atomicAdd_block(&accumulatedVelInc.x, velInc.x);
                     atomicAdd_block(&accumulatedVelInc.y, velInc.y);
@@ -70,8 +72,10 @@ __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universe
         __syncthreads();
 
         if (0 == threadIdx.x) {
+/*
             cluster->addVelocity(accumulatedVelInc);
             cluster->addAngularVelocity(accumulatedAngularVelInc);
+*/
         }
     }
 }
@@ -101,9 +105,6 @@ __global__ void moveSelectedClusters(float2 displacement, Array<Cluster*> cluste
 
         auto const& cluster = clusters.at(clusterIndex);
         if (cluster->isSelected()) {
-            if (0 == threadIdx.x) {
-                cluster->pos = cluster->pos + displacement;
-            }
             auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
             for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
                 auto const& cell = cluster->cellPointers[cellIndex];
