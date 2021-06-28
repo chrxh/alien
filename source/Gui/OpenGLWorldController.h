@@ -78,6 +78,7 @@ private:
     QTimer _updateViewTimer;
     int _scheduledViewUpdates = 0;
 
+    bool _initialized = false;
     double _zoomFactor = 0.0;
     QVector2D _center;
 

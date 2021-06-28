@@ -39,7 +39,6 @@ OpenGLWorldController::OpenGLWorldController(SimulationViewWidget* simulationVie
     viewport->makeCurrent();
     _scene = new OpenGLUniverseScene(viewport->context(), this);
 */
-
     connect(&_updateViewTimer, &QTimer::timeout, this, &OpenGLWorldController::updateViewTimeout);
 }
 
@@ -64,6 +63,15 @@ void OpenGLWorldController::init(
     _scene->update();
     _scene->installEventFilter(this);
     _simulationViewWidget->getGraphicsView()->installEventFilter(this);
+
+    QTimer::singleShot(1, [&]() {
+        _initialized = true;
+        auto graphicsView = _simulationViewWidget->getGraphicsView();
+
+        _scene->resize({graphicsView->width(), graphicsView->height() });
+        updateScrollbars();
+        requestImage();
+    });
 }
 
 void OpenGLWorldController::setSettings(SimulationViewSettings const& settings)
@@ -283,6 +291,7 @@ void OpenGLWorldController::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void OpenGLWorldController::resize(QResizeEvent* event)
 {
     auto size = event->size();
+    
     _scene->resize({size.width(), size.height()});
     updateScrollbars();
 }
@@ -298,7 +307,7 @@ void OpenGLWorldController::receivedNotifications(set<Receiver> const& targets)
 
 void OpenGLWorldController::requestImage()
 {
-    if (!_connections.empty()) {
+    if (!_connections.empty() && _initialized) {
         auto graphicsView = _simulationViewWidget->getGraphicsView();
         auto topLeft = mapViewToWorldPosition(QVector2D(0, 0));
         auto bottomRight = mapViewToWorldPosition(QVector2D(graphicsView->width() - 1, graphicsView->height() - 1));
