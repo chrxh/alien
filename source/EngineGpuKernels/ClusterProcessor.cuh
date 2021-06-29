@@ -68,8 +68,8 @@ private:
 {
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
          auto cell = _cluster->cellPointers[index];
-         for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
-             for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
+         for (float dx = -1.5f; dx < 1.51f; dx += 1.0f) {
+             for (float dy = -1.5f; dy < 1.51f; dy += 1.0f) {
                  Cell* otherCell = _data->cellMap.get(cell->absPos + float2{dx, dy});
 
                  if (!otherCell || otherCell == cell) {
@@ -451,7 +451,7 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_block()
 
 __inline__ __device__ void ClusterProcessor::processingMovement_block()
 {
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 100; ++i) {
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             auto cell = _cluster->cellPointers[cellIndex];
             cell->tempForce = {0, 0};
@@ -480,28 +480,61 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        cell->tempForce = {0, 0};
+    }
+    __syncthreads();
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto cell = _cluster->cellPointers[cellIndex];
 
         float2 force = cell->force;
         auto vel = cell->vel + force / 2;
         auto pos = cell->absPos + vel / 2;
+
+        float2 displacement;
+        float2 prevDisplacement;
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
             auto otherVel = connectingCell->vel + connectingCell->force / 2;
             auto otherPos = connectingCell->absPos + otherVel / 2;
 
             auto actualDistance = _data->cellMap.mapDistance(otherPos, pos);
-            auto deviation = min(actualDistance - cell->connections[index].distance, cell->connections[index].distance);
-            /*
-            if (deviation < 0) {
-                deviation = 1.0f / (cell->connections[index].distance + deviation + 1.1f)
-                    - 1.0f / (cell->connections[index].distance + 1.1f);
-            }
-*/
+            auto deviation =
+                min(actualDistance - cell->connections[index].distance, cell->connections[index].distance);
             auto delta = otherPos - pos;
             _data->cellMap.mapDisplacementCorrection(delta);
-            force = force + Math::normalized(delta) * deviation / 3;
+//            if (abs(deviation) > 0.05) {
+                force = force + Math::normalized(delta) * deviation / 10;
+//            }
+
+            displacement = delta;
+            _data->cellMap.mapDisplacementCorrection(displacement);
+            if (index > 0) {
+                auto angle = Math::angleOfVector(displacement);
+                auto prevAngle = Math::angleOfVector(prevDisplacement);
+                auto actualAngleToPrevious = Math::subtractAngle(angle, prevAngle);
+                auto origActualAngleToPrevious = actualAngleToPrevious;
+                if (actualAngleToPrevious > 180) {
+                    actualAngleToPrevious = abs(actualAngleToPrevious - 360.0f);
+                }
+                auto deviation = actualAngleToPrevious - cell->connections[index].angleToPrevious;
+                auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
+                if (abs(deviation) > 5) {
+                    auto forceInc = correctionMovementForLowAngle * deviation / -5000;
+                    force = force + forceInc;
+                }
+/*
+                atomicAdd_block(&connectingCell->tempForce.x, -forceInc.x / 2);
+                atomicAdd_block(&connectingCell->tempForce.y, -forceInc.y / 2);
+                atomicAdd_block(&cell->connections[index - 1].cell->tempForce.x, -forceInc.x / 2);
+                atomicAdd_block(&cell->connections[index - 1].cell->tempForce.y, -forceInc.y / 2);
+*/
+            }
+            prevDisplacement = displacement;
         }
-        cell->tempForce = force;
+        atomicAdd_block(&cell->tempForce.x, force.x);
+        atomicAdd_block(&cell->tempForce.y, force.y);
+//            cell->tempForce = force;
     }
     __syncthreads();
 
@@ -511,7 +544,7 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
         cell->vel = cell->vel + cell->tempForce;
         cell->absPos = cell->absPos + cell->vel;
         cell->force = {0, 0};
-        //cell->tempForce / 2;
+//            cell->force = cell->force / 2;
         cell->decrementProtectionCounter();
     }
     __syncthreads();
@@ -549,10 +582,8 @@ __inline__ __device__ void ClusterProcessor::processingRadiation_block()
             }
         }
         if (cell->getEnergy_safe() < cudaSimulationParameters.cellMinEnergy) {
-/*
             atomicExch(&cell->alive, 0);
             atomicExch(&cell->cluster->decompositionRequired, 1);
-*/
         }
     }
     __syncthreads();
@@ -583,7 +614,6 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell(float2 const & pos
         return;
     }
 
-/*
     Cluster* mapCluster = cellFromMap->cluster;
     auto distance = _data->cellMap.mapDistance(cell->absPos, cellFromMap->absPos);
     if (distance < cudaSimulationParameters.cellMinDistance) {
@@ -597,7 +627,6 @@ __inline__ __device__ void ClusterProcessor::destroyCloseCell(float2 const & pos
             atomicExch(&mapCluster->decompositionRequired, 1);
         }
     }
-*/
 }
 
 __inline__ __device__ bool ClusterProcessor::areConnectable(Cell * cell1, Cell * cell2)

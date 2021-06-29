@@ -123,11 +123,25 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         cell.setFused(false);
         cell.maxConnections = cellTO.maxConnections;
         cell.numConnections = cellTO.numConnections;
+        float2 displacement;
+        float2 prevDisplacement;
         for (int i = 0; i < cell.numConnections; ++i) {
             int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
             cell.connections[i].cell = cells + index;
             CellAccessTO const & otherCell = simulationTO->cells[cellTO.connectionIndices[i]];
             cell.connections[i].distance = _map.mapDistance(cell.absPos, otherCell.pos);
+            displacement = otherCell.pos - cell.absPos;
+            _map.mapDisplacementCorrection(displacement);
+            if (i > 0) {
+                auto angleToPrevious = 
+                    Math::subtractAngle(Math::angleOfVector(displacement), Math::angleOfVector(prevDisplacement));
+                if (angleToPrevious > 180) {
+                    angleToPrevious = abs(angleToPrevious - 360.0f);
+                }
+                cell.connections[i].angleToPrevious = angleToPrevious;
+            }
+            prevDisplacement = displacement;
+
         }
 
         cell.setCellFunctionType(cellTO.cellFunctionType);
