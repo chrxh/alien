@@ -558,26 +558,27 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
     //stab
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+
         cell->tempForce = {0, 0};
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
-        auto dissipatedVel = cell->vel / (cell->numConnections + 1);
+
+        auto dissipatedVel = cell->vel;
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
-            atomicAdd_block(&connectingCell->tempForce.x, dissipatedVel.x);
-            atomicAdd_block(&connectingCell->tempForce.y, dissipatedVel.y);
+            dissipatedVel = dissipatedVel + connectingCell->vel;
         }
-        atomicAdd_block(&cell->tempForce.x, dissipatedVel.x);
-        atomicAdd_block(&cell->tempForce.y, dissipatedVel.y);
+        cell->tempVel = dissipatedVel / (cell->numConnections + 1);
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
-        cell->vel = cell->tempForce;
+
+        cell->vel = cell->tempVel;
     }
     __syncthreads();
 }
