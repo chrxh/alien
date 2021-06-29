@@ -34,6 +34,9 @@ struct Cell
     float2 vel;
     float2 force;
     float2 tempForce;
+    float2 tempPos;
+    float2 tempVel;
+
     int branchNumber;
     bool tokenBlocked;
     int maxConnections;
