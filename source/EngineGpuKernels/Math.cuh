@@ -15,6 +15,7 @@ public:
     __inline__ __device__ static void inverseRotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
     __inline__ __device__ static void angleCorrection(float& angle);
+    __inline__ __device__ static void angleCorrection(int& angle);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);   //0 DEG corresponds to (0,-1)
     __inline__ __device__ static float2 unitVectorOfAngle(float angle);
@@ -28,10 +29,6 @@ public:
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float
     calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary = 0);
-
-
-private:
-    __inline__ __device__ static void angleCorrection(int &angle);
 
 };
 
@@ -91,7 +88,9 @@ __inline__ __device__ float Math::angleOfVector(float2 const & v)
         return 0;
     }
 
-    float angleSin = asinf(-v.y / length(v)) * RAD_TO_DEG;
+    auto normalizedVy = -v.y / length(v);
+    normalizedVy = max(-1.0f, min(1.0f, normalizedVy));
+    float angleSin = asinf(normalizedVy) * RAD_TO_DEG;
     if (v.x >= 0.0f) {
         return 90.0f - angleSin;
     }
