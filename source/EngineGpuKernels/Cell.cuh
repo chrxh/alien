@@ -32,10 +32,6 @@ struct Cell
     Cluster* cluster;
     float2 absPos;
     float2 vel;
-    float2 force;
-    float2 tempForce;
-    float2 tempPos;
-    float2 tempVel;
 
     int branchNumber;
     bool tokenBlocked;
@@ -53,6 +49,8 @@ struct Cell
     int locked;	//0 = unlocked, 1 = locked
     int alive;  //0 = dead, 1 == alive
     int tag;
+    float2 temp1;
+    float2 temp2;
 
     __inline__ __device__ void initProtectionCounter()
     {
