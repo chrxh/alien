@@ -31,7 +31,7 @@ public:
     __inline__ __device__ void repair_block();
 
 private:
-    __inline__ __device__ void calcForce(Cell* cell);
+    __inline__ __device__ void calcForce();
 
     __inline__ __device__ void processingDecomposition_optimizedForSmallCluster_block();
     __inline__ __device__ void processingDecomposition_optimizedForLargeCluster_block();
@@ -475,126 +475,104 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_block()
 */
 }
 
-__inline__ __device__ void ClusterProcessor::calcForce(Cell* cell)
+__inline__ __device__ void ClusterProcessor::calcForce()
 {
-    float2 force = cell->force;
-    float2 prevDisplacement;
-    for (int index = 0; index < cell->numConnections; ++index) {
-        auto connectingCell = cell->connections[index].cell;
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto cell = _cluster->cellPointers[cellIndex];
 
-        auto displacement = connectingCell->absPos - cell->absPos;
-        _data->cellMap.mapDisplacementCorrection(displacement);
-
-        auto actualDistance = Math::length(displacement);
-        auto bondDistance = cell->connections[index].distance;
-        auto deviation = actualDistance - bondDistance;
-        force = force + Math::normalized(displacement) * deviation / 2;
-
-        if (index > 0) {
-            auto angle = Math::angleOfVector(displacement);
-            auto prevAngle = Math::angleOfVector(prevDisplacement);
-            auto actualAngleToPrevious = Math::subtractAngle(angle, prevAngle);
-            if (actualAngleToPrevious > 180) {
-                actualAngleToPrevious = abs(actualAngleToPrevious - 360.0f);
-            }
-            auto deviation = actualAngleToPrevious - cell->connections[index].angleToPrevious;
-            auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
-
-            auto forceInc = correctionMovementForLowAngle * deviation / -3000;
-            force = force + forceInc;
-            atomicAdd_block(&connectingCell->tempForce.x, -forceInc.x / 2);
-            atomicAdd_block(&connectingCell->tempForce.y, -forceInc.y / 2);
-            atomicAdd_block(&cell->connections[index - 1].cell->tempForce.x, -forceInc.x / 2);
-            atomicAdd_block(&cell->connections[index - 1].cell->tempForce.y, -forceInc.y / 2);
-        }
-        prevDisplacement = displacement;
+        cell->temp1 = {0, 0};
     }
-    atomicAdd_block(&cell->tempForce.x, force.x);
-    atomicAdd_block(&cell->tempForce.y, force.y);
+    __syncthreads();
+
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto cell = _cluster->cellPointers[cellIndex];
+
+        float2 force{0, 0};
+        float2 prevDisplacement;
+        for (int index = 0; index < cell->numConnections; ++index) {
+            auto connectingCell = cell->connections[index].cell;
+
+            auto displacement = connectingCell->absPos - cell->absPos;
+            _data->cellMap.mapDisplacementCorrection(displacement);
+
+            auto actualDistance = Math::length(displacement);
+            auto bondDistance = cell->connections[index].distance;
+            auto deviation = actualDistance - bondDistance;
+            force = force + Math::normalized(displacement) * deviation / 2;
+
+            if (index > 0) {
+                auto angle = Math::angleOfVector(displacement);
+                auto prevAngle = Math::angleOfVector(prevDisplacement);
+                auto actualAngleToPrevious = Math::subtractAngle(angle, prevAngle);
+                if (actualAngleToPrevious > 180) {
+                    actualAngleToPrevious = abs(actualAngleToPrevious - 360.0f);
+                }
+                auto deviation = actualAngleToPrevious - cell->connections[index].angleToPrevious;
+                auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
+
+                auto forceInc = correctionMovementForLowAngle * deviation / -3000;
+                force = force + forceInc;
+                atomicAdd_block(&connectingCell->temp1.x, -forceInc.x / 2);
+                atomicAdd_block(&connectingCell->temp1.y, -forceInc.y / 2);
+                atomicAdd_block(&cell->connections[index - 1].cell->temp1.x, -forceInc.x / 2);
+                atomicAdd_block(&cell->connections[index - 1].cell->temp1.y, -forceInc.y / 2);
+            }
+            prevDisplacement = displacement;
+        }
+        atomicAdd_block(&cell->temp1.x, force.x);
+        atomicAdd_block(&cell->temp1.y, force.y);
+    }
+    __syncthreads();
 }
 
 __inline__ __device__ void ClusterProcessor::processingMovement_block()
 {
     //Verlet integration
+
+    calcForce();    //result in tempForce
+
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
 
-        cell->tempForce = {0, 0};
+        cell->temp2 = cell->absPos + cell->vel + cell->temp1 / 2;
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
 
-        calcForce(cell);
+        cell->absPos = cell->temp2;
+        cell->temp2 = cell->temp1;
     }
     __syncthreads();
 
+    calcForce();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
 
-        cell->tempPos = cell->absPos + cell->vel + cell->tempForce / 2;
+        cell->vel= cell->vel + (cell->temp1 + cell->temp2) / 2;
     }
     __syncthreads();
 
+    //velocity fluctuation stabilization
+    constexpr float preserveVelocityFactor = 0.8f;
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
 
-        cell->absPos = cell->tempPos;
-        cell->tempPos = cell->tempForce;
-        cell->tempForce = {0, 0};
-    }
-    __syncthreads();
-
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto cell = _cluster->cellPointers[cellIndex];
-
-        calcForce(cell);
-    }
-    __syncthreads();
-
-
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto cell = _cluster->cellPointers[cellIndex];
-
-        cell->tempVel = cell->vel + (cell->tempForce + cell->tempPos)/2;
-    }
-    __syncthreads();
-
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto cell = _cluster->cellPointers[cellIndex];
-
-        cell->vel = cell->tempVel;
-        cell->force = {0, 0};
-    }
-    __syncthreads();
-
-    //stab
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto cell = _cluster->cellPointers[cellIndex];
-
-        cell->tempForce = {0, 0};
-    }
-    __syncthreads();
-
-    constexpr float F = 0.8f;
-    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
-        auto cell = _cluster->cellPointers[cellIndex];
-
-        auto dissipatedVel = cell->vel * (1.0f - F);
+        auto dissipatedVel = cell->vel * (1.0f - preserveVelocityFactor);
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
-            dissipatedVel = dissipatedVel + connectingCell->vel * (1.0f - F);
+            dissipatedVel = dissipatedVel + connectingCell->vel * (1.0f - preserveVelocityFactor);
         }
-        cell->tempVel = cell->vel * F + dissipatedVel / (cell->numConnections + 1);
+        cell->temp1 = cell->vel * preserveVelocityFactor + dissipatedVel / (cell->numConnections + 1);
     }
     __syncthreads();
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
 
-        cell->vel = cell->tempVel;
+        cell->vel = cell->temp1;
         cell->decrementProtectionCounter();
     }
     __syncthreads();

@@ -109,7 +109,6 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         cell.id = cellTO.id;
         cell.cluster = cluster;
         cell.absPos = cellTO.pos + posCorrection;
-        cell.force = { 0, 0 };
 
         float2 deltaPos = cell.absPos - clusterTO.pos;
 
@@ -260,7 +259,6 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
     result->setFused(false);
-    result->force = {0, 0};
     return result;
 }
 
@@ -316,7 +314,6 @@ EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, floa
     cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = pos;
     cell->vel = vel;
-    cell->force = {0, 0};
     cell->setEnergy_safe(energy);
     cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
     cell->cluster = cluster;
