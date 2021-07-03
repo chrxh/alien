@@ -20,11 +20,14 @@ public:
     __inline__ __device__ void updateMap_block();
 
     __inline__ __device__ void destroyCloseCell_block();
+    __inline__ __device__ void processingCollisionPrepare_block();
 
     __inline__ __device__ void processingCollision_block();
     __inline__ __device__ void processingRadiation_block();
 
-    __inline__ __device__ void processingCellDeath_block();
+    __inline__ __device__ void processingFinalizeCollision_block();
+    __inline__ __device__
+        void processingCellDeath_block();
     __inline__ __device__ void processingDecomposition_block();
     __inline__ __device__ void processingClusterCopy_block();
 
@@ -66,6 +69,16 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
+__inline__ __device__ void ClusterProcessor::processingCollisionPrepare_block()
+{
+    for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
+        auto cell = _cluster->cellPointers[cellIndex];
+        cell->temp1 = {0, 0};
+        cell->tag = 0;
+    }
+    __syncthreads();
+}
+
  __inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
@@ -98,36 +111,24 @@ private:
                      continue;
                  }
 
-                 SystemDoubleLock lock;
-                 lock.init(&cell->locked, &otherCell->locked);
-                 lock.getLock();
-
                  auto posDelta = cell->absPos - otherCell->absPos;
                  _data->cellMap.mapDisplacementCorrection(posDelta);
-
-/*
-                 auto force =
-                    Math::normalized(posDelta) * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta));
-
-                 atomicAdd_block(&cell->force.x, force.x);
-                 atomicAdd_block(&cell->force.y, force.y);
-                 atomicAdd_block(&otherCell->force.x, -force.x);
-                 atomicAdd_block(&otherCell->force.y, -force.y);
-*/
 
                  auto velDelta = cell->vel - otherCell->vel;
                  if (Math::dot(posDelta, velDelta) < 0) {
                      
-                     //TODO billiard bouncing
-                     auto temp = cell->vel;
-                     cell->vel = otherCell->vel;
-                     otherCell->vel = temp;
-/*
-                     cell->activateProtectionCounter_safe();
-                     otherCell->activateProtectionCounter_safe();
-*/
+                     auto newVel1 =
+                         cell->vel - posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
+                     auto newVel2 =
+                         otherCell->vel + posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
+
+                     atomicAdd(&cell->temp1.x, newVel1.x);
+                     atomicAdd(&cell->temp1.y, newVel1.y);
+                     atomicAdd(&cell->tag, 1);
+                     atomicAdd(&otherCell->temp1.x, newVel2.x);
+                     atomicAdd(&otherCell->temp1.y, newVel2.y);
+                     atomicAdd(&otherCell->tag, 1);
                  }
-                 lock.releaseLock();
              }
          }
      }
@@ -419,6 +420,18 @@ private:
 */
 }
 
+__inline__ __device__ void ClusterProcessor::processingFinalizeCollision_block()
+{
+    for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
+        auto cell = _cluster->cellPointers[index];
+
+        if (cell->tag > 0) {
+            cell->vel = cell->temp1 / cell->tag;
+        }
+    }
+    __syncthreads();
+}
+
 __inline__ __device__ void ClusterProcessor::destroyCloseCell_block()
 {
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
@@ -463,16 +476,12 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_block()
         return;
     }
 
-/*
     if (_cluster->numCellPointers < 100) {
-*/
         processingDecomposition_optimizedForSmallCluster_block();
-/*
     }
     else {
         processingDecomposition_optimizedForLargeCluster_block();
     }
-*/
 }
 
 __inline__ __device__ void ClusterProcessor::calcForce()
