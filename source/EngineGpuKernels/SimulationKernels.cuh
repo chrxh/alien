@@ -35,6 +35,7 @@ __global__ void clusterProcessingStep2(SimulationData data, int numClusters)
         ClusterProcessor clusterProcessor;
         clusterProcessor.init_block(data, clusterIndex);
         clusterProcessor.destroyCloseCell_block();
+        clusterProcessor.processingCollisionPrepare_block();
     }
 }
 
@@ -56,6 +57,7 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters)
     for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
         ClusterProcessor clusterProcessor;
         clusterProcessor.init_block(data, clusterIndex);
+        clusterProcessor.processingFinalizeCollision_block();
         clusterProcessor.processingCellDeath_block();
         clusterProcessor.processingDecomposition_block();
         clusterProcessor.processingClusterCopy_block();
