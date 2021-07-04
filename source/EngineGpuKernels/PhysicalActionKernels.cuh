@@ -54,19 +54,21 @@ __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universe
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
             if (distanceToSegment < actionRadius) {
                 auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
+                cell->vel = cell->vel + weightedForce;
+/*
+
                 float2 velInc;
                 float angularVelInc;
 
-/*
                 auto const relPos = cell->absPos - cluster->pos;
                 Physics::calcImpulseIncrement(
                     weightedForce, relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
-*/
                 if (!applyData.onlyRotation) {
                     atomicAdd_block(&accumulatedVelInc.x, velInc.x);
                     atomicAdd_block(&accumulatedVelInc.y, velInc.y);
                 }
                 atomicAdd_block(&accumulatedAngularVelInc, angularVelInc);
+*/
             }
         }
         __syncthreads();
