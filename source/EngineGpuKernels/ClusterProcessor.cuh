@@ -81,7 +81,7 @@ __inline__ __device__ void ClusterProcessor::processingCollisionPrepare_block()
 
  __inline__ __device__ void ClusterProcessor::processingCollision_block()
 {
-    for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
+     for (auto index = _cellBlock.startIndex; index <= _cellBlock.endIndex; ++index) {
          auto cell = _cluster->cellPointers[index];
          for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
              for (float dy = -0.5f; dy < 0.51f; dy += 1.0f) {
@@ -106,7 +106,9 @@ __inline__ __device__ void ClusterProcessor::processingCollisionPrepare_block()
                  if (0 == cell->alive || 0 == otherCell->alive) {
                      continue;
                  }
-                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)
+
+                 //TODO use posDelta
+                 if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)    
                      >= cudaSimulationParameters.cellMaxDistance) {
                      continue;
                  }
@@ -128,6 +130,33 @@ __inline__ __device__ void ClusterProcessor::processingCollisionPrepare_block()
                      atomicAdd(&otherCell->temp1.x, newVel2.x);
                      atomicAdd(&otherCell->temp1.y, newVel2.y);
                      atomicAdd(&otherCell->tag, 1);
+
+                     SystemDoubleLock lock;
+                     lock.init(&_cluster->locked, &otherCluster->locked);
+                     lock.getLock();
+
+                     if (cell->numConnections < cell->maxConnections
+                         && otherCell->numConnections < otherCell->maxConnections
+                         && ((nullptr == _cluster->clusterToFuse && nullptr == otherCluster->clusterToFuse)
+                             || (_cluster->clusterToFuse == otherCluster && otherCluster->clusterToFuse == _cluster))) {
+
+                         auto index = cell->numConnections++;
+                         auto otherIndex = otherCell->numConnections++;
+
+                         auto bondDistance = Math::length(posDelta);
+                         cell->connections[index].cell = otherCell;
+                         cell->connections[index].distance = bondDistance;
+                         otherCell->connections[otherIndex].cell = cell;
+                         otherCell->connections[otherIndex].distance = bondDistance;
+                         cell->setFused(true);
+                         otherCell->setFused(true);
+                         
+                         _cluster->clusterToFuse = otherCluster;
+                         otherCluster->clusterToFuse = _cluster;
+                         _cluster->unfreeze(30);
+                         otherCluster->unfreeze(30);
+                     }
+                     lock.releaseLock();
                  }
              }
          }
@@ -495,11 +524,17 @@ __inline__ __device__ void ClusterProcessor::calcForce()
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive == 0) {
+            continue;
+        }
 
         float2 force{0, 0};
         float2 prevDisplacement;
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
+            if (connectingCell->alive == 0) {
+                continue;
+            }
 
             auto displacement = connectingCell->absPos - cell->absPos;
             _data->cellMap.mapDisplacementCorrection(displacement);
@@ -509,6 +544,7 @@ __inline__ __device__ void ClusterProcessor::calcForce()
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation / 2;
 
+/*
             if (index > 0) {
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
@@ -527,6 +563,7 @@ __inline__ __device__ void ClusterProcessor::calcForce()
                 atomicAdd_block(&cell->connections[index - 1].cell->temp1.y, -forceInc.y / 2);
             }
             prevDisplacement = displacement;
+*/
         }
         atomicAdd_block(&cell->temp1.x, force.x);
         atomicAdd_block(&cell->temp1.y, force.y);
@@ -542,6 +579,9 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive == 0) {
+            continue;
+        }
 
         cell->temp2 = cell->absPos + cell->vel + cell->temp1 / 2;
     }
@@ -549,8 +589,12 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive == 0) {
+            continue;
+        }
 
         cell->absPos = cell->temp2;
+        _data->cellMap.mapPosCorrection(cell->absPos);
         cell->temp2 = cell->temp1;
     }
     __syncthreads();
@@ -559,6 +603,9 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive == 0) {
+            continue;
+        }
 
         cell->vel= cell->vel + (cell->temp1 + cell->temp2) / 2;
     }
@@ -568,10 +615,16 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
     constexpr float preserveVelocityFactor = 0.8f;
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive == 0) {
+            continue;
+        }
 
         auto dissipatedVel = cell->vel * (1.0f - preserveVelocityFactor);
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
+            if (connectingCell->alive == 0) {
+                continue;
+            }
             dissipatedVel = dissipatedVel + connectingCell->vel * (1.0f - preserveVelocityFactor);
         }
         cell->temp1 = cell->vel * preserveVelocityFactor + dissipatedVel / (cell->numConnections + 1);
@@ -580,6 +633,9 @@ __inline__ __device__ void ClusterProcessor::processingMovement_block()
 
     for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
         auto cell = _cluster->cellPointers[cellIndex];
+        if (cell->alive == 0) {
+            continue;
+        }
 
         cell->vel = cell->temp1;
         cell->decrementProtectionCounter();
@@ -787,7 +843,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithDecomposition_block(
 
 __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
 {
-/*
     if (_cluster < _cluster->clusterToFuse) {
         __shared__ Cluster* newCluster;
         __shared__ Cluster* otherCluster;
@@ -799,41 +854,22 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             newCluster = factory.createCluster(_clusterPointer);
 
             newCluster->id = _cluster->id;
-            newCluster->angle = 0.0f;
             newCluster->numTokenPointers = 0;
             newCluster->numCellPointers = _cluster->numCellPointers + otherCluster->numCellPointers;
             newCluster->cellPointers = _data->entities.cellPointers.getNewSubarray(newCluster->numCellPointers);
             newCluster->decompositionRequired = 1;
             newCluster->locked = 0;
             newCluster->clusterToFuse = nullptr;
-
-            correction = _data->cellMap.correctionIncrement(_cluster->pos, otherCluster->pos);	//to be added to otherCluster
-
-            newCluster->pos = (_cluster->pos * _cluster->numCellPointers
-                + ((otherCluster->pos + correction) * otherCluster->numCellPointers))
-                / newCluster->numCellPointers;
-            newCluster->setVelocity(
-                (_cluster->getVelocity() * _cluster->numCellPointers
-                 + otherCluster->getVelocity() * otherCluster->numCellPointers)
-                / newCluster->numCellPointers);
-            newCluster->setAngularVelocity(0);
-            newCluster->angularMass = 0.0f;
+            correction = _data->cellMap.correctionIncrement(
+                _cluster->cellPointers[0]->absPos,
+                otherCluster->cellPointers[0]->absPos);  //to be added to otherCluster
         }
         __syncthreads();
 
         for (int cellIndex = _cellBlock.startIndex; cellIndex <= _cellBlock.endIndex; ++cellIndex) {
             Cell* cell = _cluster->cellPointers[cellIndex];
             newCluster->cellPointers[cellIndex] = cell;
-            auto relPos = cell->absPos - newCluster->pos;
-            cell->relPos = relPos;
             cell->cluster = newCluster;
-            atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
-
-            auto r = cell->absPos - _cluster->pos;
-            _data->cellMap.mapDisplacementCorrection(r);
-            float2 relVel = cell->vel - _cluster->getVelocity();
-            float angularMomentum = Physics::angularMomentum(r, relVel);
-            newCluster->addAngularVelocity_safe(angularMomentum);
         }
         __syncthreads();
 
@@ -842,44 +878,12 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
         for (int otherCellIndex = otherCellBlock.startIndex; otherCellIndex <= otherCellBlock.endIndex; ++otherCellIndex) {
             Cell* cell = otherCluster->cellPointers[otherCellIndex];
             newCluster->cellPointers[_cluster->numCellPointers + otherCellIndex] = cell;
-            auto r = cell->absPos - otherCluster->pos;
-            _data->cellMap.mapDisplacementCorrection(r);
-
-            cell->absPos = cell->absPos + correction;
-            auto relPos = cell->absPos - newCluster->pos;
-            cell->relPos = relPos;
             cell->cluster = newCluster;
-            atomicAdd(&newCluster->angularMass, Math::lengthSquared(relPos));
-
-            float2 relVel = cell->vel - otherCluster->getVelocity();
-            float angularMomentum = Physics::angularMomentum(r, relVel);
-            newCluster->addAngularVelocity_safe(angularMomentum);
-        }
-        __syncthreads();
-
-        __shared__ float regainedEnergy;
-        if (0 == threadIdx.x) {
-            newCluster->setAngularVelocity(Physics::angularVelocity(newCluster->getAngularVelocity(), newCluster->angularMass));
-
-            auto const origKineticEnergies =
-                Physics::kineticEnergy(
-                    _cluster->numCellPointers, _cluster->getVelocity(), _cluster->angularMass, _cluster->getAngularVelocity())
-                + Physics::kineticEnergy(
-                    otherCluster->numCellPointers,
-                    otherCluster->getVelocity(),
-                    otherCluster->angularMass,
-                    otherCluster->getAngularVelocity());
-
-            auto const newKineticEnergy =
-                Physics::kineticEnergy(
-                    newCluster->numCellPointers, newCluster->getVelocity(), newCluster->angularMass, newCluster->getAngularVelocity());
-
-            regainedEnergy = origKineticEnergies - newKineticEnergy;    //should be negative for fusion
+            cell->absPos = cell->absPos + correction;
         }
         __syncthreads();
 
         auto const newCellPartition = calcPartition(newCluster->numCellPointers, threadIdx.x, blockDim.x);
-        updateCellVelocity_block(newCluster);
 
         __shared__ int numFusedCell;
         __shared__ EntityFactory factory;
@@ -914,23 +918,15 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
             if (!cell->isFused()) {
                 continue;
             }
-            if (cell->tag < cudaSimulationParameters.cellMaxToken
-                && cell->getEnergy_safe() + regainedEnergy / numFusedCell > cudaSimulationParameters.tokenMinEnergy) {
-                auto energyForToken = regainedEnergy / numFusedCell;
-                if (energyForToken < cudaSimulationParameters.tokenMinEnergy) {
-                    auto const energyFromCell = cudaSimulationParameters.tokenMinEnergy - energyForToken;
-                    cell->setEnergy_safe(cell->getEnergy_safe() - energyFromCell);
-                    energyForToken = cudaSimulationParameters.tokenMinEnergy;
-                }
+            if (cell->tag < cudaSimulationParameters.cellMaxToken) {
+/*
                 auto newToken = factory.createToken(cell, cell);
                 auto const tokenIndex = atomicAdd_block(&newCluster->numTokenPointers, 1);
                 newCluster->tokenPointers[tokenIndex] = newToken;
                 newToken->setEnergy(energyForToken);
+*/
             }
             else {
-                if (regainedEnergy > 0) {
-                    cell->changeEnergy_safe(regainedEnergy / numFusedCell);
-                }
             }
         }
         __syncthreads();
@@ -945,7 +941,6 @@ __inline__ __device__ void ClusterProcessor::copyClusterWithFusion_block()
         }
     }
     __syncthreads();
-*/
 }
 
 __inline__ __device__ void ClusterProcessor::copyTokenPointers_block(Cluster* sourceCluster, Cluster* targetCluster)
@@ -1127,6 +1122,9 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
                         cell->connections[j - 1] = cell->connections[j];
                     }
                     cell->connections[i].angleToPrevious += prevAngle;
+                    if (cell->connections[i].angleToPrevious > 180) {
+                        cell->connections[i].angleToPrevious = abs(360 - cell->connections[i].angleToPrevious);
+                    }
                     --cell->numConnections;
                     --i;
                 }
