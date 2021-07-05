@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cluster.cuh"
 #include "Particle.cuh"
 #include "cuda_runtime_api.h"
 
@@ -95,6 +94,7 @@ public:
         BasicMap<unsigned long long int>::init(size, maxEntries);
     }
 
+/*
     __device__ __inline__ void set_block(int numEntities, Cell** cellsToSet)
     {
         if (0 == numEntities) {
@@ -123,6 +123,7 @@ public:
         }
         __syncthreads();
     }
+*/
 
     __device__ __inline__ Cell* get(float2 const& pos) const
     {

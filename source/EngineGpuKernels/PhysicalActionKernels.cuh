@@ -28,6 +28,7 @@ namespace
 
 __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universeSize, Array<Cluster*> clusters)
 {
+/*
     auto const clusterBlock =
         calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
 
@@ -55,31 +56,11 @@ __global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universe
             if (distanceToSegment < actionRadius) {
                 auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
                 cell->vel = cell->vel + weightedForce;
-/*
-
-                float2 velInc;
-                float angularVelInc;
-
-                auto const relPos = cell->absPos - cluster->pos;
-                Physics::calcImpulseIncrement(
-                    weightedForce, relPos, cluster->getMass(), cluster->angularMass, velInc, angularVelInc);
-                if (!applyData.onlyRotation) {
-                    atomicAdd_block(&accumulatedVelInc.x, velInc.x);
-                    atomicAdd_block(&accumulatedVelInc.y, velInc.y);
-                }
-                atomicAdd_block(&accumulatedAngularVelInc, angularVelInc);
-*/
             }
         }
         __syncthreads();
-
-        if (0 == threadIdx.x) {
-/*
-            cluster->addVelocity(accumulatedVelInc);
-            cluster->addAngularVelocity(accumulatedAngularVelInc);
-*/
-        }
     }
+*/
 }
 
 __global__ void applyForceToParticles(CudaApplyForceData applyData, int2 universeSize, Array<Particle*> particles)
@@ -100,6 +81,7 @@ __global__ void applyForceToParticles(CudaApplyForceData applyData, int2 univers
 
 __global__ void moveSelectedClusters(float2 displacement, Array<Cluster*> clusters)
 {
+/*
     auto const clusterBlock =
         calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
 
@@ -115,6 +97,7 @@ __global__ void moveSelectedClusters(float2 displacement, Array<Cluster*> cluste
         }
         __syncthreads();
     }
+*/
 }
 
 __global__ void moveSelectedParticles(float2 displacement, Array<Particle*> particles)
@@ -137,14 +120,16 @@ __global__ void moveSelectedParticles(float2 displacement, Array<Particle*> part
 
 __global__ void cudaApplyForce(CudaApplyForceData applyData, SimulationData data)
 {
+/*
     KERNEL_CALL(applyForceToClusters, applyData, data.size, data.entities.clusterPointers);
-    KERNEL_CALL(applyForceToClusters, applyData, data.size, data.entities.clusterFreezedPointers);
+*/
     KERNEL_CALL(applyForceToParticles, applyData, data.size, data.entities.particlePointers);
 }
 
 __global__ void cudaMoveSelection(float2 displacement, SimulationData data)
 {
+/*
     KERNEL_CALL(moveSelectedClusters, displacement, data.entities.clusterPointers);
-    KERNEL_CALL(moveSelectedClusters, displacement, data.entities.clusterFreezedPointers);
+*/
     KERNEL_CALL(moveSelectedParticles, displacement, data.entities.particlePointers);
 }

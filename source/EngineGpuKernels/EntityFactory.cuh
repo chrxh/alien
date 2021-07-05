@@ -14,13 +14,14 @@
 
 class EntityFactory
 {
-private:
-    MapInfo _map;
-    SimulationData* _data;
-
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ Cell* createCell(Cluster* cluster);
+    __inline__ __device__ Particle*
+    createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray);
+    __inline__ __device__ Cell*
+    createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
+
+    /*
     __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
     __inline__ __device__ Particle* createParticleFromTO(
         ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
@@ -30,14 +31,18 @@ public:
         float2 const& vel,
         ParticleMetadata const& metadata);  //TODO: not adding to simulation!
     __inline__ __device__ Cluster* createCluster(Cluster** clusterPointerToReuse = nullptr);
-    __inline__ __device__ void createClusterFromTO_block(
-        ClusterAccessTO const& clusterTO,
-        DataAccessTO const* _simulationTO);
+     __inline__ __device__ void createClusterFromTO_block(
+         ClusterAccessTO const& clusterTO,
+         DataAccessTO const* _simulationTO);
     __inline__ __device__ Cluster* createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
+*/
 
 private:
     __inline__ __device__ void
     copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes);
+
+    MapInfo _map;
+    SimulationData* _data;
 };
 
 /************************************************************************/
@@ -50,6 +55,114 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
     _map.init(data->size);
 }
 
+__inline__ __device__ Particle*
+EntityFactory::createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray)
+{
+    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
+    Particle* particle = particleTargetArray + targetIndex;
+    *particlePointer = particle;
+    
+    particle->id = 0 == particleTO.id ? _data->numberGen.createNewId_kernel() : particleTO.id;
+    particle->absPos = particleTO.pos;
+    _map.mapPosCorrection(particle->absPos);
+    particle->vel = particleTO.vel;
+    particle->setEnergy(particleTO.energy);
+    particle->locked = 0;
+    particle->alive = 1;
+    particle->metadata.color = particleTO.metadata.color;
+    particle->setSelected(false);
+    return particle;
+}
+
+__inline__ __device__ Cell*
+EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO)
+{
+    Cell** cellPointer = _data->entities.cellPointers.getNewElement();
+    Cell* cell = cellTargetArray + targetIndex;
+    *cellPointer = cell;
+
+    cell->id = 0 == cellTO.id ? _data->numberGen.createNewId_kernel() : cellTO.id;
+    cell->absPos = cellTO.pos;
+    _map.mapPosCorrection(cell->absPos);
+    cell->vel = {0, 0};
+    cell->branchNumber = cellTO.branchNumber;
+    cell->tokenBlocked = cellTO.tokenBlocked;
+    cell->maxConnections = cellTO.maxConnections;
+    cell->numConnections = cellTO.numConnections;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        cell->connections[i].cell = cellTargetArray + cellTO.connectionIndices[i];
+        /*
+        CellAccessTO const& otherCell = simulationTO->cells[cellTO.connectionIndices[i]];
+        cell.connections[i].distance = _map.mapDistance(cell.absPos, otherCell.pos);
+*/
+    }
+    cell->setEnergy(cellTO.energy);
+    cell->setCellFunctionType(cellTO.cellFunctionType);
+
+    switch (cell->getCellFunctionType()) {
+    case Enums::CellFunction::COMPUTER: {
+        cell->numStaticBytes = cellTO.numStaticBytes;
+        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
+    } break;
+    case Enums::CellFunction::SENSOR: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 5;
+    } break;
+    default: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 0;
+    }
+    }
+    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+        cell->staticData[i] = cellTO.staticData[i];
+    }
+    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+        cell->mutableData[i] = cellTO.mutableData[i];
+    }
+    cell->tokenUsages = cellTO.tokenUsages;
+    cell->metadata.color = cellTO.metadata.color;
+
+    copyString(
+        cell->metadata.nameLen,
+        cell->metadata.name,
+        cellTO.metadata.nameLen,
+        cellTO.metadata.nameStringIndex,
+        simulationTO->stringBytes);
+
+    copyString(
+        cell->metadata.descriptionLen,
+        cell->metadata.description,
+        cellTO.metadata.descriptionLen,
+        cellTO.metadata.descriptionStringIndex,
+        simulationTO->stringBytes);
+
+    copyString(
+        cell->metadata.sourceCodeLen,
+        cell->metadata.sourceCode,
+        cellTO.metadata.sourceCodeLen,
+        cellTO.metadata.sourceCodeStringIndex,
+        simulationTO->stringBytes);
+
+    cell->alive = 1;
+    cell->locked = 0;
+
+    return cell;
+}
+
+__inline__ __device__ void
+EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes)
+{
+    targetLen = sourceLen;
+    if (sourceLen > 0) {
+        targetString = _data->entities.strings.getArray<char>(sourceLen);
+        for (int i = 0; i < sourceLen; ++i) {
+            targetString[i] = stringBytes[sourceStringIndex + i];
+        }
+    }
+}
+
+/*
+
 __inline__ __device__ Cluster * EntityFactory::createCluster(Cluster** clusterPointerToReuse)
 {
     auto result = _data->entities.clusters.getNewElement();
@@ -60,7 +173,9 @@ __inline__ __device__ Cluster * EntityFactory::createCluster(Cluster** clusterPo
     *newClusterPointer = result;
     return result;
 }
+*/
 
+/*
 __inline__ __device__ void EntityFactory::createClusterFromTO_block(
     ClusterAccessTO const& clusterTO,
     DataAccessTO const* simulationTO)
@@ -122,14 +237,14 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
         cell.setFused(false);
         cell.maxConnections = cellTO.maxConnections;
         cell.numConnections = cellTO.numConnections;
-/*
+/ *
         for (int i = 0; i < cell.numConnections; ++i) {
             int index = cellTO.connectionIndices[i] - clusterTO.cellStartIndex;
             cell.connections[i].cell = cells + index;
             CellAccessTO const & otherCell = simulationTO->cells[cellTO.connectionIndices[i]];
             cell.connections[i].distance = _map.mapDistance(cell.absPos, otherCell.pos);
         }
-*/
+* /
 
 
         float2 displacement;
@@ -271,23 +386,6 @@ __inline__ __device__ Token* EntityFactory::createToken(Cell* cell, Cell* source
     return result;
 }
 
-__inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO)
-{
-    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
-    Particle* particle = _data->entities.particles.getNewElement();
-    *particlePointer = particle;
-    particle->id = 0 == particleTO.id ? _data->numberGen.createNewId_kernel() : particleTO.id;
-    particle->absPos = particleTO.pos;
-    _map.mapPosCorrection(particle->absPos);
-    particle->vel = particleTO.vel;
-    particle->setEnergy(particleTO.energy);
-    particle->locked = 0;
-    particle->alive = 1;
-    particle->metadata.color = particleTO.metadata.color;
-    particle->setSelected(false);
-    return particle;
-}
-
 __inline__ __device__ Cluster*
 EntityFactory::createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
@@ -381,3 +479,4 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     particle->setSelected(false);
     return particle;
 }
+*/

@@ -167,6 +167,76 @@ drawCircle(unsigned int* imageData, int2 const& imageSize, float2 pos, float3 co
     }
 }
 
+__global__ void drawCells(
+    int2 universeSize,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    Array<Cell*> cells,
+    unsigned int* imageData,
+    int2 imageSize,
+    float zoom)
+{
+    auto const partition =
+        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    MapInfo map;
+    map.init(universeSize);
+    //bool isSelected = cluster->isSelected();
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = cells.at(index);
+
+        auto cellPos = cell->absPos;
+        map.mapPosCorrection(cellPos);
+        if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
+            auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
+            auto color = calcColor(cell, false/*isSelected*/);
+            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
+
+            auto posCorrection = cellPos - cell->absPos;
+            if (zoom > 1 - FP_PRECISION) {
+                color = color * min((zoom - 1.0f) / 3, 1.0f);
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    auto const otherCell = cell->connections[i].cell;
+                    auto const otherCellPos = otherCell->absPos + posCorrection;
+                    auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
+                    float dist = Math::length(otherCellImagePos - cellImagePos);
+                    float2 const v = {
+                        static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
+                        static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8f};
+                    float2 pos = cellImagePos;
+
+
+                    for (float d = 0; d <= dist; d += 1.8f) {
+                        auto const intPos = toInt2(pos);
+                        drawDot(imageData, imageSize, pos, color);
+                        pos = pos + v;
+                    }
+                }
+            }
+        }
+        __syncthreads();
+
+/*
+        auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
+        for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
+            auto const& token = cluster->tokenPointers[tokenIndex];
+            auto const& cell = token->cell;
+
+            auto cellPos = cell->absPos;
+            map.mapPosCorrection(cellPos);
+            auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
+            if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
+                auto const color = calcColor(token, cell->cluster->isSelected());
+                drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
+            }
+        }
+        __syncthreads();
+*/
+    }
+}
+
+/*
 __global__ void drawClusters(
     int2 universeSize,
     float2 rectUpperLeft,
@@ -246,6 +316,7 @@ __global__ void drawClusters(
         __syncthreads();
     }
 }
+*/
 
 __global__ void drawParticles(
     int2 universeSize,
@@ -289,26 +360,17 @@ __global__ void drawImage(
         imageSize.x - max(toInt((rectLowerRight.x - data.size.x) * zoom), 0),
         imageSize.y - max(toInt((rectLowerRight.y - data.size.y) * zoom), 0)};
     KERNEL_CALL(clearImageMap, targetImage, imageSize, outsideRectUpperLeft, outsideRectLowerRight);
+
     KERNEL_CALL(
-        drawClusters,
+        drawCells,
         data.size,
         rectUpperLeft,
         rectLowerRight,
-        data.entities.clusterPointers,
+        data.entities.cellPointers,
         targetImage,
         imageSize,
         zoom);
-    if (data.entities.clusterFreezedPointers.getNumEntries() > 0) {
-        KERNEL_CALL(
-            drawClusters,
-            data.size,
-            rectUpperLeft,
-            rectLowerRight,
-            data.entities.clusterFreezedPointers,
-            targetImage,
-            imageSize,
-            zoom);
-    }
+
     KERNEL_CALL(
         drawParticles,
         data.size,

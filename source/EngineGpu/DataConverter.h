@@ -25,12 +25,13 @@ private:
 
 	void processDeletions();
 	void processModifications();
-	void addCell(CellDescription const& cellToAdd, ClusterDescription const& cluster, ClusterAccessTO& cudaCluster,
+    void addCell(
+        CellDescription const& cellToAdd,
+        ClusterDescription const& cluster,
 		unordered_map<uint64_t, int>& cellIndexTOByIds);
 	void setConnections(CellDescription const& cellToAdd, CellAccessTO& cellTO, unordered_map<uint64_t, int> const& cellIndexByIds);
 
 	void applyChangeDescription(ParticleChangeDescription const& particleChanges, ParticleAccessTO& particle);
-	void applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& cluster);
 	void applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell);
 
     int convertStringAndReturnStringIndex(QString const& s);

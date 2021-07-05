@@ -13,6 +13,7 @@
 __global__ void
 getMonitorDataForClusters(Array<Cluster*> clusterPointers, CudaMonitorData monitorData)
 {
+/*
     auto const clusterPartition =
         calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
     for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
@@ -56,6 +57,7 @@ getMonitorDataForClusters(Array<Cluster*> clusterPointers, CudaMonitorData monit
         __syncthreads();
 
     }
+*/
 }
 
 __global__ void getMonitorDataForParticles(SimulationData data, CudaMonitorData monitorData)
@@ -81,8 +83,9 @@ __global__ void cudaGetCudaMonitorData(SimulationData data, CudaMonitorData moni
 {
     monitorData.reset();
 
+/*
     KERNEL_CALL(getMonitorDataForClusters, data.entities.clusterPointers, monitorData);
-    KERNEL_CALL(getMonitorDataForClusters, data.entities.clusterFreezedPointers, monitorData);
     KERNEL_CALL(getMonitorDataForParticles, data, monitorData);
+*/
 }
 

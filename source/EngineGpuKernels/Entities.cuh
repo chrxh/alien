@@ -6,13 +6,10 @@
 
 struct Entities
 {
-    Array<Cluster*> clusterPointers;
-    Array<Cluster*> clusterFreezedPointers;
     Array<Cell*> cellPointers;
     Array<Token*> tokenPointers;
     Array<Particle*> particlePointers;
 
-    Array<Cluster> clusters;
     Array<Cell> cells;
     Array<Token> tokens;
     Array<Particle> particles;
@@ -21,9 +18,6 @@ struct Entities
 
     void init(CudaConstants const& cudaConstants)
     {
-        clusterPointers.init(cudaConstants.MAX_CLUSTERPOINTERS);
-        clusterFreezedPointers.init(cudaConstants.MAX_CLUSTERPOINTERS);
-        clusters.init(cudaConstants.MAX_CLUSTERS);
         cellPointers.init(cudaConstants.MAX_CELLPOINTERS);
         cells.init(cudaConstants.MAX_CELLS);
         tokenPointers.init(cudaConstants.MAX_TOKENPOINTERS);
@@ -35,9 +29,6 @@ struct Entities
 
     void free()
     {
-        clusterPointers.free();
-        clusterFreezedPointers.free();
-        clusters.free();
         cellPointers.free();
         cells.free();
         tokenPointers.free();

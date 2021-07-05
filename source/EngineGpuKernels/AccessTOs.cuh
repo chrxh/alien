@@ -63,30 +63,8 @@ struct CellAccessTO
     CellMetadataAccessTO metadata;
 };
 
-struct ClusterMetadataAccessTO
-{
-    int nameLen;
-    int nameStringIndex;
-};
-
-struct ClusterAccessTO
-{
-	uint64_t id;
-	float2 pos;
-	float2 vel;
-	float angle;
-	float angularVel;
-	int numCells;
-	int cellStartIndex;
-	int numTokens;
-	int tokenStartIndex;
-    ClusterMetadataAccessTO metadata;
-};
-
 struct DataAccessTO
 {
-	int* numClusters = nullptr;
-	ClusterAccessTO* clusters = nullptr;
 	int* numCells = nullptr;
 	CellAccessTO* cells = nullptr;
 	int* numParticles = nullptr;
@@ -98,9 +76,7 @@ struct DataAccessTO
 
 	bool operator==(DataAccessTO const& other) const
 	{
-		return numClusters == other.numClusters
-			&& clusters == other.clusters
-			&& numCells == other.numCells
+		return numCells == other.numCells
 			&& cells == other.cells
 			&& numParticles == other.numParticles
 			&& particles == other.particles

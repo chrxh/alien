@@ -137,12 +137,9 @@ CudaSimulation::CudaSimulation(
     _cudaMonitorData->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numClusters);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
-    CudaMemoryManager::getInstance().acquireMemory<ClusterAccessTO>(
-        cudaConstants.MAX_CLUSTERS, _cudaAccessTO->clusters);
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cudaConstants.MAX_CELLS, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(
         cudaConstants.MAX_PARTICLES, _cudaAccessTO->particles);
@@ -163,12 +160,10 @@ CudaSimulation::~CudaSimulation()
     _cudaSimulationData->free();
     _cudaMonitorData->free();
 
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numClusters);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->clusters);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
@@ -201,7 +196,6 @@ void CudaSimulation::DEBUG_printNumEntries()
     std::stringstream stream;
     stream << "Particles: " << _cudaSimulationData->entities.particles.retrieveNumEntries() << "; "
            << "Cells: " << _cudaSimulationData->entities.cells.retrieveNumEntries() << "; "
-           << "Clusters: " << _cudaSimulationData->entities.clusters.retrieveNumEntries() << "; "
            << "CellPointers: " << _cudaSimulationData->entities.cellPointers.retrieveNumEntries() << "; "
            << "Tokens: " << _cudaSimulationData->entities.tokens.retrieveNumEntries() << "; "
            << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; ";
@@ -272,19 +266,12 @@ void CudaSimulation::getSimulationData(
 {
     GPU_FUNCTION(cudaGetSimulationAccessData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(dataTO.numClusters, _cudaAccessTO->numClusters, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.clusters,
-        _cudaAccessTO->clusters,
-        sizeof(ClusterAccessTO) * (*dataTO.numClusters),
-        cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
         dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
@@ -306,19 +293,12 @@ void CudaSimulation::setSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(_cudaAccessTO->numClusters, dataTO.numClusters, sizeof(int), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->clusters,
-        dataTO.clusters,
-        sizeof(ClusterAccessTO) * (*dataTO.numClusters),
-        cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
         _cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
@@ -396,40 +376,10 @@ void CudaSimulation::clear()
     GPU_FUNCTION(cudaClearData, *_cudaSimulationData);
 }
 
-namespace
-{
-    void calcImageBlurFactors(int* imageBlurFactors)
-    {
-        imageBlurFactors[0] = 200;
-        imageBlurFactors[1] = 20;
-        imageBlurFactors[2] = 7;
-        imageBlurFactors[3] = 7;
-        imageBlurFactors[4] = 7;
-        imageBlurFactors[5] = 7;
-
-        int sum = 0;
-        int2 relPos;
-        for (relPos.x = -5; relPos.x <= 5; ++relPos.x) {
-            for (relPos.y = -5; relPos.y <= 5; ++relPos.y) {
-                auto r = Math::length(toFloat2(relPos));
-                if (r <= 5 + FP_PRECISION) {
-                    sum += imageBlurFactors[floorInt(r)];
-                }
-            }
-        }
-        imageBlurFactors[6] = sum - 400;
-    }
-}
-
 void CudaSimulation::setCudaConstants(CudaConstants const& cudaConstants_)
 {
     _cudaConstants = cudaConstants_;
 
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));
-
-    int imageBlurFactors[7];
-    calcImageBlurFactors(imageBlurFactors);
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(cudaImageBlurFactors, &imageBlurFactors, sizeof(int) * 7, 0, cudaMemcpyHostToDevice));
 }

@@ -10,9 +10,6 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\DebugKernels.cuh">
       <Filter>Impl\Kernels</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\FreezingKernels.cuh">
-      <Filter>Impl\Kernels</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\EngineGpuKernels\MonitorKernels.cuh">
       <Filter>Impl\Kernels</Filter>
     </ClInclude>
@@ -38,9 +35,6 @@
       <Filter>Impl\Device</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CellFunctionData.cuh">
-      <Filter>Impl\Device</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\Cluster.cuh">
       <Filter>Impl\Device</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\EngineGpuKernels\ClusterProcessor.cuh">

@@ -240,12 +240,10 @@ DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getNewDataTO()
 {
     try {
         DataAccessTO result;
-        result.numClusters = new int;
         result.numCells = new int;
         result.numParticles = new int;
         result.numTokens = new int;
         result.numStringBytes = new int;
-        result.clusters = new ClusterAccessTO[_cudaConstants.MAX_CLUSTERS];
         result.cells = new CellAccessTO[_cudaConstants.MAX_CELLS];
         result.particles = new ParticleAccessTO[_cudaConstants.MAX_PARTICLES];
         result.tokens = new TokenAccessTO[_cudaConstants.MAX_TOKENS];
@@ -258,12 +256,10 @@ DataAccessTO SimulationAccessGpuImpl::_DataTOCache::getNewDataTO()
 
 void SimulationAccessGpuImpl::_DataTOCache::deleteDataTO(DataAccessTO const& dataTO)
 {
-    delete dataTO.numClusters;
     delete dataTO.numCells;
     delete dataTO.numParticles;
     delete dataTO.numTokens;
     delete dataTO.numStringBytes;
-    delete[] dataTO.clusters;
     delete[] dataTO.cells;
     delete[] dataTO.particles;
     delete[] dataTO.tokens;
