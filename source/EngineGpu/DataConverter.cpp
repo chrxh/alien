@@ -74,6 +74,7 @@ namespace
 DataDescription DataConverter::getDataDescription() const
 {
 	DataDescription result;
+/*
 	list<uint64_t> connectingCellIds;
 	unordered_map<int, int> cellIndexByCellTOIndex;
 	unordered_map<int, int> clusterIndexByCellTOIndex;
@@ -155,6 +156,7 @@ DataDescription DataConverter::getDataDescription() const
 		}
 		cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
 	}
+*/
 
 	return result;
 }
@@ -165,6 +167,7 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
 		return;
 	}
 
+/*
     auto clusterIndex = (*_dataTO.numClusters)++;
     if (clusterIndex >= _cudaConstants.MAX_CLUSTERS) {
         throw BugReportException("Array size for clusters is chosen too small.");
@@ -190,14 +193,11 @@ void DataConverter::addCluster(ClusterDescription const& clusterDesc)
     else {
         clusterTO.metadata.nameLen = 0;
     }
+*/
     unordered_map<uint64_t, int> cellIndexByIds;
 	bool firstIndex = true;
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
-		addCell(cellDesc, clusterDesc, clusterTO, cellIndexByIds);
-		if (firstIndex) {
-			clusterTO.cellStartIndex = cellIndexByIds.begin()->second;
-			firstIndex = false;
-		}
+		addCell(cellDesc, clusterDesc, cellIndexByIds);
 	}
 	for (CellDescription const& cellDesc : *clusterDesc.cells) {
 		if (cellDesc.id != 0) {
@@ -264,27 +264,6 @@ void DataConverter::processDeletions()
 	std::unordered_set<int> tokenIndicesToDelete;
 	int clusterIndexCopyOffset = 0;
 	int tokenIndexCopyOffset = 0;
-	for (int clusterIndex = 0; clusterIndex < *_dataTO.numClusters; ++clusterIndex) {
-		ClusterAccessTO& cluster = _dataTO.clusters[clusterIndex];
-		uint64_t clusterId = cluster.id;
-		if (_clusterIdsToDelete.find(clusterId) != _clusterIdsToDelete.end()) {
-			++clusterIndexCopyOffset;
-			tokenIndexCopyOffset += cluster.numTokens;
-			for (int cellIndex = 0; cellIndex < cluster.numCells; ++cellIndex) {
-				cellIndicesToDelete.insert(cluster.cellStartIndex + cellIndex);
-			}
-			for (int tokenIndex = 0; tokenIndex < cluster.numTokens; ++tokenIndex) {
-				tokenIndicesToDelete.insert(cluster.tokenStartIndex + tokenIndex);
-			}
-		}
-		else if (clusterIndexCopyOffset > 0) {
-			_dataTO.clusters[clusterIndex - clusterIndexCopyOffset] = cluster;
-			if (tokenIndexCopyOffset > 0) {
-				cluster.tokenStartIndex -= tokenIndexCopyOffset;
-			}
-		}
-	}
-	*_dataTO.numClusters -= clusterIndexCopyOffset;
 
 	//delete cells
 	int cellIndexCopyOffset = 0;
@@ -333,13 +312,6 @@ void DataConverter::processDeletions()
 	*_dataTO.numParticles -= particleIndexCopyOffset;
 
 	//adjust cell and cluster pointers
-	for (int clusterIndex = 0; clusterIndex < *_dataTO.numClusters; ++clusterIndex) {
-		ClusterAccessTO& cluster = _dataTO.clusters[clusterIndex];
-		auto it = newByOldCellIndex.find(cluster.cellStartIndex);
-		if (it != newByOldCellIndex.end()) {
-			cluster.cellStartIndex = it->second;
-		}
-	}
 	for (int cellIndex = 0; cellIndex < *_dataTO.numCells; ++cellIndex) {
 		CellAccessTO& cell = _dataTO.cells[cellIndex];
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
@@ -353,15 +325,6 @@ void DataConverter::processDeletions()
 
 void DataConverter::processModifications()
 {
-	//modify clusters
-	for (int clusterIndex = 0; clusterIndex < *_dataTO.numClusters; ++clusterIndex) {
-		ClusterAccessTO& cluster = _dataTO.clusters[clusterIndex];
-		uint64_t clusterId = cluster.id;
-		if (_clusterToModifyById.find(clusterId) != _clusterToModifyById.end()) {
-			applyChangeDescription(_clusterToModifyById.at(clusterId), cluster);
-		}
-	}
-
 	//modify cells
 	for (int cellIndex = 0; cellIndex < *_dataTO.numCells; ++cellIndex) {
 		CellAccessTO& cell = _dataTO.cells[cellIndex];
@@ -372,6 +335,7 @@ void DataConverter::processModifications()
 	}
 
 	//modify tokens
+/*
 	std::unordered_map<uint64_t, vector<TokenAccessTO>> tokenTOsByCellId;
 	for (int index = 0; index < *_dataTO.numTokens; ++index) {
 		auto const& tokenTO = _dataTO.tokens[index];
@@ -419,6 +383,7 @@ void DataConverter::processModifications()
 			}
 		}
 	}
+*/
 
 	//modify particles
 	for (int index = 0; index < *_dataTO.numParticles; ++index) {
@@ -441,8 +406,10 @@ int DataConverter::convertStringAndReturnStringIndex(QString const& s)
     return result;
 }
 
-void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription const& cluster, ClusterAccessTO& clusterTO
-	, unordered_map<uint64_t, int>& cellIndexTOByIds)
+void DataConverter::addCell(
+    CellDescription const& cellDesc,
+    ClusterDescription const& cluster,
+    unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
 	int cellIndex = (*_dataTO.numCells)++;
     if (cellIndex >= _cudaConstants.MAX_CELLS) {
@@ -492,7 +459,6 @@ void DataConverter::addCell(CellDescription const& cellDesc, ClusterDescription 
     }
 
 	if (cellDesc.tokens) {
-		clusterTO.numTokens += cellDesc.tokens->size();
 		for (int i = 0; i < cellDesc.tokens->size(); ++i) {
 			TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
 			int tokenIndex = (*_dataTO.numTokens)++;
@@ -542,31 +508,6 @@ void DataConverter::applyChangeDescription(ParticleChangeDescription const& part
 	}
     if (particleChanges.metadata) {
         particle.metadata.color = particleChanges.metadata->color;
-    }
-}
-
-void DataConverter::applyChangeDescription(ClusterChangeDescription const& clusterChanges, ClusterAccessTO& clusterTO)
-{
-	if (clusterChanges.pos) {
-		QVector2D newPos = clusterChanges.pos.getValue();
-		convert(newPos, clusterTO.pos);
-	}
-	if (clusterChanges.vel) {
-		QVector2D newVel = clusterChanges.vel.getValue();
-		convert(newVel, clusterTO.vel);
-	}
-	if (clusterChanges.angle) {
-		clusterTO.angle = clusterChanges.angle.getValue();
-	}
-	if (clusterChanges.angularVel) {
-		clusterTO.angularVel = clusterChanges.angularVel.getValue();
-	}
-    if (clusterChanges.metadata) {
-        auto& metadataTO = clusterTO.metadata;
-        metadataTO.nameLen = clusterChanges.metadata->name.size();
-        if (metadataTO.nameLen > 0) {
-            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(clusterChanges.metadata->name);
-        }
     }
 }
 

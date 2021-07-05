@@ -106,7 +106,6 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CellComputerFunction.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CellFunctionData.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CleanupKernels.cuh" />
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\Cluster.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\ClusterProcessor.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CommunicatorFunction.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\ConstantMemory.cuh" />
@@ -123,7 +122,6 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\EnergyGuidance.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Entities.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\EntityFactory.cuh" />
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\FreezingKernels.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\HashMap.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\HashSet.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\List.cuh" />

@@ -7,15 +7,15 @@
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "ClusterProcessor.cuh"
-#include "ParticleProcessor.cuh"
-#include "TokenProcessor.cuh"
+//#include "ClusterProcessor.cuh"
+//#include "ParticleProcessor.cuh"
+//#include "TokenProcessor.cuh"
 #include "CleanupKernels.cuh"
-#include "FreezingKernels.cuh"
 
 /************************************************************************/
 /* Helpers for clusters													*/
 /************************************************************************/
+/*
 __global__ void clusterProcessingStep1(SimulationData data, int numClusters)
 {
     PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
@@ -63,15 +63,16 @@ __global__ void clusterProcessingStep4(SimulationData data, int numClusters)
         clusterProcessor.processingClusterCopy_block();
     }
 }
+*/
 
 /************************************************************************/
 /* Helpers for tokens													*/
 /************************************************************************/
+/*
 __global__ void resetCellFunctionData(SimulationData data)
 {
     data.cellFunctionData.mapSectionCollector.reset_system();
 }
-/*
 __global__ void tokenProcessingStep1(SimulationData data, int numClusters)
 {
     auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
@@ -119,6 +120,7 @@ __global__ void tokenProcessingStep4(SimulationData data, int numClusters)
 /************************************************************************/
 /* Helpers for particles												*/
 /************************************************************************/
+/*
 __global__ void particleProcessingStep1(SimulationData data)
 {
 	ParticleProcessor particleProcessor;
@@ -142,6 +144,7 @@ __global__ void particleProcessingStep3(SimulationData data)
     particleProcessor.init_system(data);
     particleProcessor.processingDataCopy_system();
 }
+*/
 
 /************************************************************************/
 /* Main      															*/
@@ -152,14 +155,13 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.cellMap.reset();
     data.particleMap.reset();
     data.dynamicMemory.reset();
+/*
     KERNEL_CALL(resetCellFunctionData, data);
     KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
-/*
     KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
-*/
     KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
@@ -167,8 +169,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(particleProcessingStep2, data);
     KERNEL_CALL(particleProcessingStep3, data);
 
-    KERNEL_CALL(freezeClustersIfAllowed, data);
-
+*/
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
 
