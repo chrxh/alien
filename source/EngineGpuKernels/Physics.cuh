@@ -9,7 +9,6 @@
 #include "SimulationData.cuh"
 #include "Math.cuh"
 #include "Cell.cuh"
-#include "Cluster.cuh"
 
 
 class Physics
