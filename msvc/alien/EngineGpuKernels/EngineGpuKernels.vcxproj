@@ -105,6 +105,7 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Cell.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CellComputerFunction.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CellFunctionData.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CellProcessor.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CleanupKernels.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\ClusterProcessor.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\CommunicatorFunction.cuh" />
@@ -154,6 +155,9 @@
     <ProjectReference Include="..\EngineInterface\EngineInterface.vcxproj">
       <Project>{29f70c63-c87a-42ae-98de-b6a5353bc2f3}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

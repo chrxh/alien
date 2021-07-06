@@ -7,9 +7,7 @@
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-//#include "ClusterProcessor.cuh"
-//#include "ParticleProcessor.cuh"
-//#include "TokenProcessor.cuh"
+#include "CellProcessor.cuh"
 #include "CleanupKernels.cuh"
 
 /************************************************************************/
@@ -146,6 +144,41 @@ __global__ void particleProcessingStep3(SimulationData data)
 }
 */
 
+__global__ void cellProcessingStep1(SimulationData data)
+{
+    CellProcessor::init(data);
+}
+
+__global__ void cellProcessingStep2(SimulationData data)
+{
+    CellProcessor::calcForces(data);
+}
+
+__global__ void cellProcessingStep3(SimulationData data)
+{
+    CellProcessor::calcPositions(data);
+}
+
+__global__ void cellProcessingStep4(SimulationData data)
+{
+    CellProcessor::calcForces(data);
+}
+
+__global__ void cellProcessingStep5(SimulationData data)
+{
+    CellProcessor::calcVelocities(data);
+}
+
+__global__ void cellProcessingStep6(SimulationData data)
+{
+    CellProcessor::calcAveragedVelocities(data);
+}
+
+__global__ void cellProcessingStep7(SimulationData data)
+{
+    CellProcessor::applyAveragedVelocities(data);
+}
+
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
@@ -155,7 +188,18 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.cellMap.reset();
     data.particleMap.reset();
     data.dynamicMemory.reset();
+
+    KERNEL_CALL(cellProcessingStep1, data);
+    KERNEL_CALL(cellProcessingStep2, data);
+    KERNEL_CALL(cellProcessingStep3, data);
+    KERNEL_CALL(cellProcessingStep4, data);
+    KERNEL_CALL(cellProcessingStep5, data);
 /*
+    KERNEL_CALL(cellProcessingStep6, data);
+    KERNEL_CALL(cellProcessingStep7, data);
+*/
+
+    /*
     KERNEL_CALL(resetCellFunctionData, data);
     KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
     KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());

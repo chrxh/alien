@@ -279,7 +279,9 @@ __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rec
         cell->tag = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
-            cellTO.connectionIndices[i] = connectingCell - firstCell;
+            cellTO.connections[i].cellIndex = connectingCell - firstCell;
+            cellTO.connections[i].distance = cell->connections[i].distance;
+            cellTO.connections[i].angleToPrevious = cell->connections[i].angleToPrevious;
         }
         for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
             cellTO.staticData[i] = cell->staticData[i];
@@ -315,8 +317,8 @@ __global__ void resolveConnections(int2 rectUpperLeft, int2 rectLowerRight, Simu
         auto& cellTO = accessTO.cells[index];
         
         for (int i = 0; i < cellTO.numConnections; ++i) {
-            auto const cellIndex = cellTO.connectionIndices[i];
-            cellTO.connectionIndices[i] = data.entities.cells.at(cellIndex).tag;
+            auto const cellIndex = cellTO.connections[i].cellIndex;
+            cellTO.connections[i].cellIndex = data.entities.cells.at(cellIndex).tag;
         }
     }
 }
@@ -324,10 +326,8 @@ __global__ void resolveConnections(int2 rectUpperLeft, int2 rectLowerRight, Simu
 __global__ void getCellAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
 {
     KERNEL_CALL_1_1(tagClusters, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
-/*
     KERNEL_CALL(getCellAccessDataWithoutConnections, rectUpperLeft, rectLowerRight, data, accessTO);
     KERNEL_CALL(resolveConnections, rectUpperLeft, rectLowerRight, data, accessTO);
-*/
 }
 
 __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)

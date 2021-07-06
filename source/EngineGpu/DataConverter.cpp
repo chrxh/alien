@@ -478,7 +478,7 @@ void DataConverter::setConnections(
 	int index = 0;
 	if (cellToAdd.connectingCells) {
 		for (uint64_t connectingCellId : *cellToAdd.connectingCells) {
-			cellTO.connectionIndices[index] = cellIndexByIds.at(connectingCellId);
+			cellTO.connections[index].cellIndex = cellIndexByIds.at(connectingCellId);
 			++index;
 		}
 	}
