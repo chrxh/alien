@@ -44,6 +44,13 @@ struct CellMetadataAccessTO
     int sourceCodeStringIndex;
 };
 
+struct CellConnectionTO
+{
+    int cellIndex;
+    float distance;
+    float angleToPrevious;
+};
+
 struct CellAccessTO
 {
 	uint64_t id;
@@ -53,7 +60,7 @@ struct CellAccessTO
 	int numConnections;
 	int branchNumber;
 	bool tokenBlocked;
-	int connectionIndices[MAX_CELL_BONDS];
+    CellConnectionTO connections[MAX_CELL_BONDS];
     int cellFunctionType;
     unsigned char numStaticBytes;
     char staticData[MAX_CELL_STATIC_BYTES];
