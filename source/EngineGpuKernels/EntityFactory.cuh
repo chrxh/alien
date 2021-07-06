@@ -90,11 +90,10 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->maxConnections = cellTO.maxConnections;
     cell->numConnections = cellTO.numConnections;
     for (int i = 0; i < cell->numConnections; ++i) {
-        cell->connections[i].cell = cellTargetArray + cellTO.connectionIndices[i];
-        /*
-        CellAccessTO const& otherCell = simulationTO->cells[cellTO.connectionIndices[i]];
-        cell.connections[i].distance = _map.mapDistance(cell.absPos, otherCell.pos);
-*/
+        auto& connectingCell = cell->connections[i];
+        connectingCell.cell = cellTargetArray + cellTO.connections[i].cellIndex;
+        connectingCell.distance = cellTO.connections[i].distance;
+        connectingCell.angleToPrevious = cellTO.connections[i].angleToPrevious;
     }
     cell->setEnergy(cellTO.energy);
     cell->setCellFunctionType(cellTO.cellFunctionType);
