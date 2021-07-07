@@ -31,7 +31,7 @@ struct SimulationData
         entities.init(cudaConstants);
         entitiesForCleanup.init(cudaConstants);
         cellFunctionData.init(universeSize);
-        cellMap.init(size, cudaConstants.MAX_CELLPOINTERS, entities.cellPointers.getArrayForHost());
+        cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);

@@ -151,13 +151,14 @@ __global__ void cellProcessingStep1(SimulationData data)
 
 __global__ void cellProcessingStep2(SimulationData data)
 {
-    CellProcessor::calcForces(data);
+    CellProcessor::collisions(data);
 }
 
 __global__ void cellProcessingStep3(SimulationData data)
 {
-    CellProcessor::calcPositions(data);
+    CellProcessor::initForces(data);
 }
+
 
 __global__ void cellProcessingStep4(SimulationData data)
 {
@@ -166,15 +167,25 @@ __global__ void cellProcessingStep4(SimulationData data)
 
 __global__ void cellProcessingStep5(SimulationData data)
 {
-    CellProcessor::calcVelocities(data);
+    CellProcessor::calcPositions(data);
 }
 
 __global__ void cellProcessingStep6(SimulationData data)
 {
-    CellProcessor::calcAveragedVelocities(data);
+    CellProcessor::calcForces(data);
 }
 
 __global__ void cellProcessingStep7(SimulationData data)
+{
+    CellProcessor::calcVelocities(data);
+}
+
+__global__ void cellProcessingStep8(SimulationData data)
+{
+    CellProcessor::calcAveragedVelocities(data);
+}
+
+__global__ void cellProcessingStep9(SimulationData data)
 {
     CellProcessor::applyAveragedVelocities(data);
 }
@@ -196,8 +207,8 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(cellProcessingStep5, data);
     KERNEL_CALL(cellProcessingStep6, data);
     KERNEL_CALL(cellProcessingStep7, data);
-    /*
-*/
+    KERNEL_CALL(cellProcessingStep8, data);
+    KERNEL_CALL(cellProcessingStep9, data);
 
     /*
     KERNEL_CALL(resetCellFunctionData, data);
