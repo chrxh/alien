@@ -146,7 +146,6 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    constexpr float preserveVelocityFactor = 0.8f;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 

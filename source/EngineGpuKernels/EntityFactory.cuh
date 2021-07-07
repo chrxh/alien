@@ -84,7 +84,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->id = 0 == cellTO.id ? _data->numberGen.createNewId_kernel() : cellTO.id;
     cell->absPos = cellTO.pos;
     _map.mapPosCorrection(cell->absPos);
-    cell->vel = {0, 0};
+    cell->vel = cellTO.vel;
     cell->branchNumber = cellTO.branchNumber;
     cell->tokenBlocked = cellTO.tokenBlocked;
     cell->maxConnections = cellTO.maxConnections;

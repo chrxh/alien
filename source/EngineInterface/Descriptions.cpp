@@ -9,13 +9,31 @@ bool TokenDescription::operator==(TokenDescription const& other) const {
 		&& data == other.data;
 }
 
+namespace
+{
+    boost::optional<list<uint64_t>> convert(
+        boost::optional<std::list<ConnectionChangeDescription>> const& connections)
+    {
+        if (!connections) {
+            return boost::none;
+        }
+        std::list<uint64_t> result;
+        for (auto const& connection : *connections) {
+            result.emplace_back(connection.cellId);
+        }
+        return result;
+    }
+
+}
+
 CellDescription::CellDescription(CellChangeDescription const & change)
 {
 	id = change.id;
 	pos = static_cast<boost::optional<QVector2D>>(change.pos);
 	energy = static_cast<boost::optional<double>>(change.energy);
 	maxConnections = static_cast<boost::optional<int>>(change.maxConnections);
-	connectingCells = static_cast<boost::optional<list<uint64_t>>>(change.connectingCells);
+    connectingCells =
+        convert(static_cast<boost::optional<std::list<ConnectionChangeDescription>>>(change.connectingCells));
 	tokenBlocked = change.tokenBlocked.getOptionalValue();	//static_cast<boost::optional<bool>> doesn't work for some reason
 	tokenBranchNumber = static_cast<boost::optional<int>>(change.tokenBranchNumber);
 	metadata = static_cast<boost::optional<CellMetadata>>(change.metadata);
@@ -71,24 +89,6 @@ QVector2D CellDescription::getPosRelativeTo(ClusterDescription const & cluster) 
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find(connectingCells->begin(), connectingCells->end(), id) != connectingCells->end();
-}
-
-ClusterDescription::ClusterDescription(ClusterChangeDescription const & change)
-{
-	id = change.id;
-	pos = static_cast<boost::optional<QVector2D>>(change.pos);
-	vel = static_cast<boost::optional<QVector2D>>(change.vel);
-	angle = static_cast<boost::optional<double>>(change.angle);
-	angularVel = static_cast<boost::optional<double>>(change.angularVel);
-	metadata = static_cast<boost::optional<ClusterMetadata>>(change.metadata);
-	for (auto const& cellTracker : change.cells) {
-		if (!cellTracker.isDeleted()) {
-			if (!cells) {
-				cells = vector<CellDescription>();
-			}
-			cells->emplace_back(CellDescription(cellTracker.getValue()));
-		}
-	}
 }
 
 QVector2D ClusterDescription::getClusterPosFromCells() const

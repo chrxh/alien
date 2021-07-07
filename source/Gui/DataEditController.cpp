@@ -94,6 +94,7 @@ void DataEditController::notificationFromClusterTab()
 {
     TRY;
 
+/*
 	DataChangeDescription changes = _model->getAndUpdateChanges();
 	if (changes.clusters.empty()) {
 		return;
@@ -124,6 +125,7 @@ void DataEditController::notificationFromClusterTab()
 	}
 
 	_repository->updateCluster(*cluster);
+*/
 
 	_view->updateDisplay();
 	Q_EMIT _notifier->notifyDataRepositoryChanged({ Receiver::Simulation, Receiver::VisualEditor }, UpdateDescription::All);

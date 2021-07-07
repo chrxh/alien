@@ -8,18 +8,25 @@
 
 #include "DataConverter.h"
 
-DataConverter::DataConverter(DataAccessTO& dataTO, NumberGenerator* numberGen, SimulationParameters const& parameters, CudaConstants const& cudaConstants)
-	: _dataTO(dataTO), _numberGen(numberGen), _parameters(parameters), _cudaConstants(cudaConstants)
+DataConverter::DataConverter(
+    DataAccessTO& dataTO,
+    NumberGenerator* numberGen,
+    SimulationParameters const& parameters,
+    CudaConstants const& cudaConstants)
+    : _dataTO(dataTO)
+    , _numberGen(numberGen)
+    , _parameters(parameters)
+    , _cudaConstants(cudaConstants)
 {}
 
 void DataConverter::updateData(DataChangeDescription const & data)
 {
-	for (auto const& cluster : data.clusters) {
-		if (cluster.isDeleted()) {
-			markDelCluster(cluster.getValue().id);
+	for (auto const& cell : data.cells) {
+		if (cell.isDeleted()) {
+			markDelCell(cell.getValue().id);
 		}
-		if (cluster.isModified()) {
-			markModifyCluster(cluster.getValue());
+		if (cell.isModified()) {
+			markModifyCell(cell.getValue());
 		}
 	}
 	for (auto const& particle : data.particles) {
@@ -34,11 +41,19 @@ void DataConverter::updateData(DataChangeDescription const & data)
 	processDeletions();
 	processModifications();
 
-	for (auto const& cluster : data.clusters) {
-		if (cluster.isAdded()) {
-			addCluster(cluster.getValue());
+    unordered_map<uint64_t, int> cellIndexByIds;
+    for (auto const& cell : data.cells) {
+		if (cell.isAdded()) {
+            addCell(cell.getValue(), cellIndexByIds);
 		}
 	}
+    for (auto const& cell : data.cells) {
+        if (cell.isAdded()) {
+            if (cell->id != 0) {
+                setConnections(cell.getValue(), cellIndexByIds);
+            }
+        }
+    }
 	for (auto const& particle : data.particles) {
 		if (particle.isAdded()) {
 			addParticle(particle.getValue());
@@ -161,51 +176,6 @@ DataDescription DataConverter::getDataDescription() const
 	return result;
 }
 
-void DataConverter::addCluster(ClusterDescription const& clusterDesc)
-{
-	if (!clusterDesc.cells) {
-		return;
-	}
-
-/*
-    auto clusterIndex = (*_dataTO.numClusters)++;
-    if (clusterIndex >= _cudaConstants.MAX_CLUSTERS) {
-        throw BugReportException("Array size for clusters is chosen too small.");
-    }
-
-	ClusterAccessTO& clusterTO = _dataTO.clusters[clusterIndex];
-	clusterTO.id = clusterDesc.id == 0 ? _numberGen->getId() : clusterDesc.id;
-	QVector2D clusterPos = clusterDesc.pos ? clusterPos = *clusterDesc.pos : clusterPos = clusterDesc.getClusterPosFromCells();
-	clusterTO.pos = { clusterPos.x(), clusterPos.y() };
-	clusterTO.vel = { clusterDesc.vel->x(), clusterDesc.vel->y() };
-	clusterTO.angle = *clusterDesc.angle;
-	clusterTO.angularVel = *clusterDesc.angularVel;
-	clusterTO.numCells = clusterDesc.cells ? clusterDesc.cells->size() : 0;
-	clusterTO.numTokens = 0;	//will be incremented in addCell
-	clusterTO.tokenStartIndex = *_dataTO.numTokens;
-    if (clusterDesc.metadata) {
-        auto& metadataTO = clusterTO.metadata;
-        metadataTO.nameLen = clusterDesc.metadata->name.size();
-        if (metadataTO.nameLen > 0) {
-            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(clusterDesc.metadata->name);
-        }
-    }
-    else {
-        clusterTO.metadata.nameLen = 0;
-    }
-*/
-    unordered_map<uint64_t, int> cellIndexByIds;
-	bool firstIndex = true;
-	for (CellDescription const& cellDesc : *clusterDesc.cells) {
-		addCell(cellDesc, clusterDesc, cellIndexByIds);
-	}
-	for (CellDescription const& cellDesc : *clusterDesc.cells) {
-		if (cellDesc.id != 0) {
-			setConnections(cellDesc, _dataTO.cells[cellIndexByIds.at(cellDesc.id)], cellIndexByIds);
-		}
-	}
-}
-
 void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
     auto particleIndex = (*_dataTO.numParticles)++;
@@ -226,9 +196,9 @@ void DataConverter::addParticle(ParticleDescription const & particleDesc)
     }
 }
 
-void DataConverter::markDelCluster(uint64_t clusterId)
+void DataConverter::markDelCell(uint64_t cellId)
 {
-	_clusterIdsToDelete.insert(clusterId);
+	_cellIdsToDelete.insert(cellId);
 }
 
 void DataConverter::markDelParticle(uint64_t particleId)
@@ -236,14 +206,9 @@ void DataConverter::markDelParticle(uint64_t particleId)
 	_particleIdsToDelete.insert(particleId);
 }
 
-void DataConverter::markModifyCluster(ClusterChangeDescription const & clusterDesc)
+void DataConverter::markModifyCell(CellChangeDescription const & clusterDesc)
 {
-	_clusterToModifyById.insert_or_assign(clusterDesc.id, clusterDesc);
-	for (auto const& cellTracker : clusterDesc.cells) {
-		if (cellTracker.isModified()) {
-			_cellToModifyById.insert_or_assign(cellTracker->id, cellTracker.getValue());
-		}
-	}
+    _cellToModifyById.insert_or_assign(clusterDesc.id, clusterDesc);
 }
 
 void DataConverter::markModifyParticle(ParticleChangeDescription const & particleDesc)
@@ -251,37 +216,29 @@ void DataConverter::markModifyParticle(ParticleChangeDescription const & particl
 	_particleToModifyById.insert_or_assign(particleDesc.id, particleDesc);
 }
 
-
-//deleting specific cells from clusters is not supported
 void DataConverter::processDeletions()
 {
-	if (_clusterIdsToDelete.empty() && _particleIdsToDelete.empty()) {
+	if (_cellIdsToDelete.empty() && _particleIdsToDelete.empty()) {
 		return;
 	}
 
-	//delete clusters
-	std::unordered_set<int> cellIndicesToDelete;
-	std::unordered_set<int> tokenIndicesToDelete;
-	int clusterIndexCopyOffset = 0;
-	int tokenIndexCopyOffset = 0;
-
 	//delete cells
-	int cellIndexCopyOffset = 0;
-	std::unordered_map<int, int> newByOldCellIndex;
-	for (int cellIndex = 0; cellIndex < *_dataTO.numCells; ++cellIndex) {
-		CellAccessTO& cell = _dataTO.cells[cellIndex];
-		uint64_t cellId = cell.id;
-		if (cellIndicesToDelete.find(cellIndex) != cellIndicesToDelete.end()) {
-			++cellIndexCopyOffset;
-		}
-		else if (cellIndexCopyOffset > 0) {
-			newByOldCellIndex.insert_or_assign(cellIndex, cellIndex - cellIndexCopyOffset);
-			_dataTO.cells[cellIndex - cellIndexCopyOffset] = cell;
-		}
-	}
-	*_dataTO.numCells -= cellIndexCopyOffset;
+    int cellIndexCopyOffset = 0;
+    std::unordered_map<int, int> newByOldCellIndex;
+    for (int index = 0; index < *_dataTO.numCells; ++index) {
+        CellAccessTO& cell = _dataTO.cells[index];
+        uint64_t cellId = cell.id;
+        if (_cellIdsToDelete.find(cellId) != _cellIdsToDelete.end()) {
+            ++cellIndexCopyOffset;
+        } else if (cellIndexCopyOffset > 0) {
+            newByOldCellIndex.insert_or_assign(index, index - cellIndexCopyOffset);
+            _dataTO.cells[index - cellIndexCopyOffset] = cell;
+        }
+    }
+    *_dataTO.numCells -= cellIndexCopyOffset;
 
 	//delete tokens
+/*
 	tokenIndexCopyOffset = 0;
 	for (int tokenIndex = 0; tokenIndex < *_dataTO.numTokens; ++tokenIndex) {
 		TokenAccessTO& token = _dataTO.tokens[tokenIndex];
@@ -296,8 +253,9 @@ void DataConverter::processDeletions()
 		}
 	}
 	*_dataTO.numTokens -= tokenIndexCopyOffset;
+*/
 
-	//delete and modify particles
+	//delete particles
 	int particleIndexCopyOffset = 0;
 	for (int index = 0; index < *_dataTO.numParticles; ++index) {
 		ParticleAccessTO& particle = _dataTO.particles[index];
@@ -311,13 +269,13 @@ void DataConverter::processDeletions()
 	}
 	*_dataTO.numParticles -= particleIndexCopyOffset;
 
-	//adjust cell and cluster pointers
+	//adjust cell connections
 	for (int cellIndex = 0; cellIndex < *_dataTO.numCells; ++cellIndex) {
 		CellAccessTO& cell = _dataTO.cells[cellIndex];
 		for (int connectionIndex = 0; connectionIndex < cell.numConnections; ++connectionIndex) {
-			auto it = newByOldCellIndex.find(cell.connectionIndices[connectionIndex]);
+            auto it = newByOldCellIndex.find(cell.connections[connectionIndex].cellIndex);
 			if (it != newByOldCellIndex.end()) {
-				cell.connectionIndices[connectionIndex] = it->second;
+				cell.connections[connectionIndex].cellIndex = it->second;
 			}
 		}
 	}
@@ -407,8 +365,7 @@ int DataConverter::convertStringAndReturnStringIndex(QString const& s)
 }
 
 void DataConverter::addCell(
-    CellDescription const& cellDesc,
-    ClusterDescription const& cluster,
+    CellChangeDescription const& cellDesc,
     unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
 	int cellIndex = (*_dataTO.numCells)++;
@@ -418,12 +375,13 @@ void DataConverter::addCell(
 	CellAccessTO& cellTO = _dataTO.cells[cellIndex];
 	cellTO.id = cellDesc.id == 0 ? _numberGen->getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos->x(), cellDesc.pos->y() };
-	cellTO.energy = *cellDesc.energy;
+    cellTO.vel = {cellDesc.vel->x(), cellDesc.vel->y()};
+    cellTO.energy = *cellDesc.energy;
 	cellTO.maxConnections = *cellDesc.maxConnections;
-	cellTO.branchNumber = cellDesc.tokenBranchNumber.get_value_or(0);
-	cellTO.tokenBlocked = cellDesc.tokenBlocked.get_value_or(false);
-    cellTO.tokenUsages = cellDesc.tokenUsages.get_value_or(0);
-    auto const& cellFunction = cellDesc.cellFeature.get_value_or(CellFeatureDescription());
+    cellTO.branchNumber = cellDesc.tokenBranchNumber.getOptionalValue().get_value_or(0);
+    cellTO.tokenBlocked = cellDesc.tokenBlocked.getOptionalValue().get_value_or(false);
+    cellTO.tokenUsages = cellDesc.tokenUsages.getOptionalValue().get_value_or(0);
+    auto const& cellFunction = cellDesc.cellFeatures.getOptionalValue().get_value_or(CellFeatureDescription());
     cellTO.cellFunctionType = cellFunction.getType();
     cellTO.numStaticBytes = std::min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
     cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
@@ -435,7 +393,7 @@ void DataConverter::addCell(
 	else {
 		cellTO.numConnections = 0;
 	}
-    if (cellDesc.metadata) {
+    if (cellDesc.metadata.getOptionalValue()) {
         auto& metadataTO = cellTO.metadata;
         metadataTO.color = cellDesc.metadata->color;
         metadataTO.nameLen = cellDesc.metadata->name.size();
@@ -458,6 +416,7 @@ void DataConverter::addCell(
         cellTO.metadata.sourceCodeLen= 0;
     }
 
+/*
 	if (cellDesc.tokens) {
 		for (int i = 0; i < cellDesc.tokens->size(); ++i) {
 			TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
@@ -468,18 +427,22 @@ void DataConverter::addCell(
 			convertToArray(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
         }
 	}
+*/
 
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
 void DataConverter::setConnections(
-    CellDescription const& cellToAdd, CellAccessTO& cellTO, unordered_map<uint64_t, int> const& cellIndexByIds)
+    CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int> const& cellIndexByIds)
 {
-	int index = 0;
 	if (cellToAdd.connectingCells) {
-		for (uint64_t connectingCellId : *cellToAdd.connectingCells) {
-			cellTO.connections[index].cellIndex = cellIndexByIds.at(connectingCellId);
-			++index;
+		int index = 0;
+        auto& cellTO = _dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
+        for (ConnectionChangeDescription const& connection : *cellToAdd.connectingCells) {
+            cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
+            cellTO.connections[index].distance = connection.distance;
+            cellTO.connections[index].angleToPrevious = connection.angleToPrevious;
+            ++index;
 		}
 	}
 }

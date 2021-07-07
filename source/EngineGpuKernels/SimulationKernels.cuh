@@ -194,9 +194,9 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(cellProcessingStep3, data);
     KERNEL_CALL(cellProcessingStep4, data);
     KERNEL_CALL(cellProcessingStep5, data);
-/*
     KERNEL_CALL(cellProcessingStep6, data);
     KERNEL_CALL(cellProcessingStep7, data);
+    /*
 */
 
     /*

@@ -86,7 +86,6 @@ struct ENGINEINTERFACE_EXPORT ClusterDescription
 
 	ClusterDescription() = default;
     
-    ClusterDescription(ClusterChangeDescription const& change);
     ClusterDescription& setId(uint64_t value) { id = value; return *this; }
 	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }

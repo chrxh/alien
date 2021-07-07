@@ -167,18 +167,16 @@ void SimulationAccessGpuImpl::createDataFromGpuModel(DataAccessTO dataTO, IntRec
 void SimulationAccessGpuImpl::metricCorrection(DataChangeDescription& data) const
 {
     SpaceProperties* space = _context->getSpaceProperties();
-    for (auto& cluster : data.clusters) {
-        QVector2D origPos = cluster->pos.getValue();
+
+    for (auto& cell : data.cells) {
+        QVector2D origPos = cell->pos.getValue();
         auto pos = origPos;
         space->correctPosition(pos);
-        auto correctionDelta = pos - origPos;
-        if (!correctionDelta.isNull()) {
-            cluster->pos.setValue(pos);
-        }
-        for (auto& cell : cluster->cells) {
-            cell->pos.setValue(cell->pos.getValue() + correctionDelta);
+        if (pos != origPos) {
+            cell->pos.setValue(pos);
         }
     }
+
     for (auto& particle : data.particles) {
         QVector2D origPos = particle->pos.getValue();
         auto pos = origPos;
