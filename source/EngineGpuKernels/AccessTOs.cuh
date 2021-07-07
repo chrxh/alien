@@ -55,6 +55,7 @@ struct CellAccessTO
 {
 	uint64_t id;
 	float2 pos;
+    float2 vel;
 	float energy;
 	int maxConnections;
 	int numConnections;
