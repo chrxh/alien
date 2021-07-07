@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Base.cuh"
+#include "Cell.cuh"
 #include "Particle.cuh"
 #include "cuda_runtime_api.h"
 
@@ -85,16 +87,16 @@ protected:
     Array<int> _mapEntries;
 };
 
-class CellMap : public BasicMap<unsigned long long int>
+/*
+class CellMap : public BasicMap<Cell*>
 {
 public:
     __host__ __inline__ void init(int2 const& size, int maxEntries, Cell** cellPointerArray)
     {
         _cellPointersArray = cellPointerArray;
-        BasicMap<unsigned long long int>::init(size, maxEntries);
+        BasicMap<Cell*>::init(size, maxEntries);
     }
 
-/*
     __device__ __inline__ void set_block(int numEntities, Cell** cellsToSet)
     {
         if (0 == numEntities) {
@@ -123,17 +125,26 @@ public:
         }
         __syncthreads();
     }
-*/
 
     __device__ __inline__ Cell* get(float2 const& pos) const
     {
         int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
         mapPosCorrection(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
-        auto cellIndex = _map[mapEntry];
+        return _map[mapEntry];
         if (0 == cellIndex) {
             return nullptr;
         }
+        return _cellPointersArray[cellIndex & 0xffffffff];
+    }
+
+    __device__ __inline__ void set(float2 const& pos, Cell* cell) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
+        auto cellIndex = _map[mapEntry] = cell;
+        
         return _cellPointersArray[cellIndex & 0xffffffff];
     }
 
@@ -150,6 +161,53 @@ public:
 private:
     Cell** _cellPointersArray;
 
+};
+*/
+
+class CellMap : public BasicMap<Cell*>
+{
+public:
+    __device__ __inline__ void set_block(int numEntities, Cell** entities)
+    {
+        if (0 == numEntities) {
+            return;
+        }
+
+        __shared__ int* entrySubarray;
+        if (0 == threadIdx.x) {
+            entrySubarray = _mapEntries.getNewSubarray(numEntities);
+        }
+        __syncthreads();
+
+        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& entity = entities[index];
+            int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
+            mapPosCorrection(posInt);
+            auto mapEntry = posInt.x + posInt.y * _size.x;
+            _map[mapEntry] = entity;
+            entrySubarray[index] = mapEntry;
+        }
+        __syncthreads();
+    }
+
+    __device__ __inline__ Cell* get(float2 const& pos) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        mapPosCorrection(posInt);
+        auto mapEntry = posInt.x + posInt.y * _size.x;
+        return _map[mapEntry];
+    }
+
+    __device__ __inline__ void cleanup_system()
+    {
+        auto partition =
+            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& mapEntry = _mapEntries.at(index);
+            _map[mapEntry] = nullptr;
+        }
+    }
 };
 
 class ParticleMap : public BasicMap<Particle*>
