@@ -135,16 +135,6 @@ void CudaWorker::processJobs()
 
     for (auto const& job : _jobs) {
 
-        if (auto _job = boost::dynamic_pointer_cast<_GetPixelImageJob>(job)) {
-            auto rect = _job->getRect();
-            auto image = _job->getTargetImage();
-            auto& mutex = _job->getMutex();
-
-            std::lock_guard<std::mutex> lock(mutex);
-            _cudaSimulation->getPixelImage(
-                {rect.p1.x, rect.p1.y}, {rect.p2.x, rect.p2.y}, {image->width(), image->height()}, image->bits());
-        }
-
         if (auto _job = boost::dynamic_pointer_cast<_GetVectorImageJob>(job)) {
             auto worldRect = _job->getWorldRect();
             auto zoom = _job->getZoom();

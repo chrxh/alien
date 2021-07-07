@@ -68,52 +68,69 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
                     continue;
                 }
-                if (0 == cell->alive || 0 == otherCell->alive) {
-                    continue;
-                }
 */
 
                 auto posDelta = cell->absPos - otherCell->absPos;
                 data.cellMap.mapDisplacementCorrection(posDelta);
 
-                if (Math::length(posDelta) >= cudaSimulationParameters.cellMaxDistance) {
+                auto distance = Math::length(posDelta);
+                if (distance >= cudaSimulationParameters.cellMaxDistance) {
                     continue;
                 }
 
                 auto velDelta = cell->vel - otherCell->vel;
                 if (Math::dot(posDelta, velDelta) < 0) {
 
-                    auto newVel1 = cell->vel - posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
-                    auto newVel2 =
-                        otherCell->vel + posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
-
-                    atomicAdd(&cell->temp1.x, newVel1.x);
-                    atomicAdd(&cell->temp1.y, newVel1.y);
-                    atomicAdd(&cell->tag, 1);
-                    atomicAdd(&otherCell->temp1.x, newVel2.x);
-                    atomicAdd(&otherCell->temp1.y, newVel2.y);
-                    atomicAdd(&otherCell->tag, 1);
-
-/*
-                    SystemDoubleLock lock;
-                    lock.init(&_cluster->locked, &otherCluster->locked);
-                    lock.getLock();
-
-                    if (cell->numConnections < cell->maxConnections
-                        && otherCell->numConnections < otherCell->maxConnections
-                        && (_cluster->clusterToFuse == otherCluster && otherCluster->clusterToFuse == _cluster))) {
-
-                        auto index = cell->numConnections++;
-                        auto otherIndex = otherCell->numConnections++;
-
-                        auto bondDistance = Math::length(posDelta);
-                        cell->connections[index].cell = otherCell;
-                        cell->connections[index].distance = bondDistance;
-                        otherCell->connections[otherIndex].cell = cell;
-                        otherCell->connections[otherIndex].distance = bondDistance;
+                    bool alreadyConnected = false;
+                    for (int i = 0; i < cell->numConnections; ++i) {
+                        if (cell->connections[i].cell == otherCell) {
+                            alreadyConnected = true;
+                            break;
+                        }
                     }
-                    lock.releaseLock();
-*/
+
+                    if (!alreadyConnected) {
+                        auto newVel1 =
+                            cell->vel - posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
+                        auto newVel2 =
+                            otherCell->vel + posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
+
+                        atomicAdd(&cell->temp1.x, newVel1.x);
+                        atomicAdd(&cell->temp1.y, newVel1.y);
+                        atomicAdd(&cell->tag, 1);
+                        atomicAdd(&otherCell->temp1.x, newVel2.x);
+                        atomicAdd(&otherCell->temp1.y, newVel2.y);
+                        atomicAdd(&otherCell->tag, 1);
+
+                        SystemDoubleLock lock;
+                        lock.init(&cell->locked, &otherCell->locked);
+                        if (lock.tryLock()) {
+                            __threadfence();
+
+                            if (cell->numConnections < cell->maxConnections
+                                && otherCell->numConnections < otherCell->maxConnections) {
+                                bool alreadyConnected = false;
+                                for (int i = 0; i < cell->numConnections; ++i) {
+                                    if (cell->connections[i].cell == otherCell) {
+                                        alreadyConnected = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyConnected) {
+                                    auto index = cell->numConnections++;
+                                    auto otherIndex = otherCell->numConnections++;
+
+                                    cell->connections[index].cell = otherCell;
+                                    cell->connections[index].distance = distance;
+                                    otherCell->connections[otherIndex].cell = cell;
+                                    otherCell->connections[otherIndex].distance = distance;
+                                }
+                            }
+                            __threadfence();
+                            lock.releaseLock();
+                        }
+                    }
                 }
             }
         }

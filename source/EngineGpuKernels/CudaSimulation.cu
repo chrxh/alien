@@ -204,26 +204,6 @@ void CudaSimulation::DEBUG_printNumEntries()
     loggingService->logMessage(Priority::Important, stream.str());
 }
 
-void CudaSimulation::getPixelImage(
-    int2 const& rectUpperLeft,
-    int2 const& rectLowerRight,
-    int2 const& imageSize,
-    unsigned char* imageData)
-{
-    if (imageSize.x * imageSize.y > _cudaSimulationData->numImageBytes) {
-        _cudaSimulationData->resizeImage(imageSize);
-    }
-
-/*
-    GPU_FUNCTION(cudaDrawImage_pixelStyle, rectUpperLeft, rectLowerRight, imageSize, * _cudaSimulationData);
-*/
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        imageData,
-        _cudaSimulationData->imageData,
-        sizeof(unsigned int) * imageSize.x * imageSize.y,
-        cudaMemcpyDeviceToHost));
-}
-
 void CudaSimulation::getVectorImage(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
