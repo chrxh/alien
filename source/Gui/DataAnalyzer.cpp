@@ -107,7 +107,7 @@ auto DataAnalyzer::getAnalysisDescription(ClusterDescription const& cluster) con
         if (cellAnalysisDescById.find(cell.id) == cellAnalysisDescById.end()) {
             CellAnalysisDescription result;
             result.maxConnections = *cell.maxConnections;
-            result.numConnections = cell.connectingCells->size();
+            result.numConnections = cell.connections->size();
             result.tokenBlocked = *cell.tokenBlocked;
             result.tokenBranchNumber = *cell.tokenBranchNumber;
 //            result.color = cell.metadata->color;
@@ -129,10 +129,10 @@ auto DataAnalyzer::getAnalysisDescription(ClusterDescription const& cluster) con
 
         for (auto const& cell : *cells) {
             insertCellAnalysisDescription(cell);
-            for (auto const& connectingCellId : *cell.connectingCells) {
-                insertCellAnalysisDescription(cluster.cells->at(cellDescIndexById.at(connectingCellId)));
+            for (auto const& connection : *cell.connections) {
+                insertCellAnalysisDescription(cluster.cells->at(cellDescIndexById.at(connection.cellId)));
                 result.connectedCells.insert(std::set<CellAnalysisDescription>{
-                    cellAnalysisDescById.at(cell.id), cellAnalysisDescById.at(connectingCellId)});
+                    cellAnalysisDescById.at(cell.id), cellAnalysisDescById.at(connection.cellId)});
             }
             if (cell.tokens && cell.tokens->size() > 0) {
                 result.hasToken = true;

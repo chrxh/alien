@@ -136,7 +136,14 @@ uint64_t CellItem::getId() const
 
 list<uint64_t> CellItem::getConnectedIds() const
 {
-	return _desc.connectingCells.get_value_or(list<uint64_t>());
+    list<uint64_t> result;
+    if (!_desc.connections) {
+        return result;
+    }
+    for (auto const& connection : *_desc.connections) {
+        result.emplace_back(connection.cellId);
+    }
+	return result;
 }
 
 CellItem::FocusState CellItem::getFocusState ()
@@ -201,7 +208,7 @@ int CellItem::getNumToken() const
 
 bool CellItem::isConnectable() const
 {
-	auto numConnections = _desc.connectingCells.get_value_or(list<uint64_t>()).size();
+	auto numConnections = _desc.connections.get_value_or(list<ConnectionDescription>()).size();
 	auto maxConnections = _desc.maxConnections.get_value_or(0);
 	return (numConnections < maxConnections);
 }

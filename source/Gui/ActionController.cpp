@@ -1057,16 +1057,16 @@ void ActionController::onNewRectangle()
 		for (int x = 0; x < size.x; ++x) {
 			for (int y = 0; y < size.y; ++y) {
 				if (x < size.x - 1) {
-					cellMatrix[x][y].addConnection(cellMatrix[x + 1][y].id);
+					cellMatrix[x][y].addConnection(cellMatrix[x + 1][y]);
 				}
 				if (x > 0) {
-					cellMatrix[x][y].addConnection(cellMatrix[x - 1][y].id);
+					cellMatrix[x][y].addConnection(cellMatrix[x - 1][y]);
 				}
 				if (y < size.y - 1) {
-					cellMatrix[x][y].addConnection(cellMatrix[x][y + 1].id);
+					cellMatrix[x][y].addConnection(cellMatrix[x][y + 1]);
 				}
 				if (y > 0) {
-					cellMatrix[x][y].addConnection(cellMatrix[x][y - 1].id);
+					cellMatrix[x][y].addConnection(cellMatrix[x][y - 1]);
 				}
 			}
 		}

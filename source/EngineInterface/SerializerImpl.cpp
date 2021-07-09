@@ -115,14 +115,52 @@ namespace boost {
 		{
 			ar & data.computerSourcecode & data.name & data.description & data.color;
 		}
+        template <class Archive>
+        inline void save(Archive& ar, ConnectionDescription const& connection, const unsigned int /*version*/)
+        {
+            ar << connection.cellId << connection.distance << connection.angleToPrevious;
+        }
+        template <class Archive>
+        inline void serialize(Archive& ar, ConnectionDescription& data, const unsigned int version)
+        {
+            boost::serialization::split_free(ar, data, version);
+        }
+
+        template <class Archive>
+        inline void save(Archive& ar, CellDescription const& data, const unsigned int /*version*/)
+        {
+            ar << data.id << data.pos << data.energy << data.maxConnections << data.connections;
+            ar << data.tokenBlocked << data.tokenBranchNumber << data.metadata << data.cellFeature;
+            ar << data.tokens << data.tokenUsages;
+        }
+        template <class Archive>
+        inline void load(Archive& ar, CellDescription& data, const unsigned int /*version*/)
+        {
+            boost::optional<list<uint64_t>> connectingCellIds;
+
+            ar >> data.id >> data.pos >> data.energy >> data.maxConnections >> connectingCellIds;
+            ar >> data.tokenBlocked >> data.tokenBranchNumber >> data.metadata >> data.cellFeature;
+            ar >> data.tokens >> data.tokenUsages;
+
+            //TODO #SoftBody
+            boost::optional<list<ConnectionDescription>> connections;
+            if (connectingCellIds) {
+                connections = list<ConnectionDescription>();
+                for (auto const& connectingCellId : *connectingCellIds) {
+                    ConnectionDescription connection;
+                    connection.cellId = connectingCellId;
+                    connections->emplace_back(connection);
+                }
+            }
+            data.connections = connections;
+        }
+		template <class Archive>
+        inline void serialize(Archive& ar, CellDescription& data, const unsigned int version)
+        {
+            boost::serialization::split_free(ar, data, version);
+        }
+
 		template<class Archive>
-		inline void serialize(Archive & ar, CellDescription& data, const unsigned int /*version*/)
-		{
-			ar & data.id & data.pos & data.energy & data.maxConnections & data.connectingCells;
-			ar & data.tokenBlocked & data.tokenBranchNumber & data.metadata & data.cellFeature;
-			ar & data.tokens & data.tokenUsages;
-		}
-        template<class Archive>
 		inline void serialize(Archive & ar, ClusterMetadata& data, const unsigned int /*version*/)
 		{
 			ar & data.name;
