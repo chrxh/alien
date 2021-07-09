@@ -329,14 +329,14 @@ namespace
             });
 
         for (auto& cell : cells) {
-            if (cell.connectingCells) {
-                list<uint64_t> newConnectingCells;
-                for (uint64_t const& connectingCell : *cell.connectingCells) {
-                    if (cellSet.find(connectingCell) != cellSet.end()) {
-                        newConnectingCells.push_back(connectingCell);
+            if (cell.connections) {
+                list<ConnectionDescription> newConnections;
+                for (auto const& connection : *cell.connections) {
+                    if (cellSet.find(connection.cellId) != cellSet.end()) {
+                        newConnections.push_back(connection);
                     }
                 }
-                cell.connectingCells = newConnectingCells;
+                cell.connections = newConnections;
             }
         }
     }

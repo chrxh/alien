@@ -56,8 +56,8 @@ DataDescription const & ActionModel::getCopiedEntity() const
 
 void ActionModel::setCellCopied(CellDescription cell, QVector2D const& vel)
 {
-	if (cell.connectingCells) {
-		cell.connectingCells->clear();
+	if (cell.connections) {
+        cell.connections->clear();
 	}
 	_copiedEntity.clear();
 	_copiedEntity.addCluster(

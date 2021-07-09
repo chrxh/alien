@@ -11,15 +11,19 @@ bool TokenDescription::operator==(TokenDescription const& other) const {
 
 namespace
 {
-    boost::optional<list<uint64_t>> convert(
+    boost::optional<list<ConnectionDescription>> convert(
         boost::optional<std::list<ConnectionChangeDescription>> const& connections)
     {
         if (!connections) {
             return boost::none;
         }
-        std::list<uint64_t> result;
-        for (auto const& connection : *connections) {
-            result.emplace_back(connection.cellId);
+        std::list<ConnectionDescription> result;
+        for (auto const& connectionChange : *connections) {
+            ConnectionDescription connection;
+            connection.cellId = connectionChange.cellId;
+            connection.distance = connectionChange.distance;
+            connection.angleToPrevious = connectionChange.angleToPrevious;
+            result.emplace_back(connection);
         }
         return result;
     }
@@ -32,7 +36,7 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	pos = static_cast<boost::optional<QVector2D>>(change.pos);
 	energy = static_cast<boost::optional<double>>(change.energy);
 	maxConnections = static_cast<boost::optional<int>>(change.maxConnections);
-    connectingCells =
+    connections =
         convert(static_cast<boost::optional<std::list<ConnectionChangeDescription>>>(change.connectingCells));
 	tokenBlocked = change.tokenBlocked.getOptionalValue();	//static_cast<boost::optional<bool>> doesn't work for some reason
 	tokenBranchNumber = static_cast<boost::optional<int>>(change.tokenBranchNumber);
@@ -42,12 +46,14 @@ CellDescription::CellDescription(CellChangeDescription const & change)
     tokenUsages = static_cast<boost::optional<int>>(change.tokenUsages);
 }
 
-CellDescription& CellDescription::addConnection(uint64_t value)
+CellDescription& CellDescription::addConnection(CellDescription const& otherCell)
 {
-	if (!connectingCells) {
-		connectingCells = list<uint64_t>();
+	if (!connections) {
+		connections = list<ConnectionDescription>();
 	}
-	connectingCells->push_back(value);
+    ConnectionDescription connection;
+    connection.cellId = otherCell.id;
+    connections->emplace_back(connection);
 	return *this;
 }
 
@@ -88,7 +94,11 @@ QVector2D CellDescription::getPosRelativeTo(ClusterDescription const & cluster) 
 
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
-    return std::find(connectingCells->begin(), connectingCells->end(), id) != connectingCells->end();
+    return std::find_if(
+               connections->begin(),
+               connections->end(),
+               [&id](auto const& connection) { return connection.cellId == id; })
+        != connections->end();
 }
 
 QVector2D ClusterDescription::getClusterPosFromCells() const

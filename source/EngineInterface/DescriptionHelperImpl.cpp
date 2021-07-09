@@ -82,9 +82,9 @@ void DescriptionHelperImpl::makeValid(ClusterDescription & cluster)
 		}
 
 		for (auto & cell : *cluster.cells) {
-			if (cell.connectingCells) {
-				for (uint64_t& connectingCellId : *cell.connectingCells) {
-					connectingCellId = newByOldIds.at(connectingCellId);
+			if (cell.connections) {
+                for (auto& connection : *cell.connections) {
+                    connection.cellId = newByOldIds.at(connection.cellId);
 				}
 			}
 		}
@@ -236,9 +236,9 @@ void DescriptionHelperImpl::lookUpCell(uint64_t cellId, ClusterDescription &newC
 	auto &cell = getCellDescRef(cellId);
 	newCluster.addCell(cell);
 
-	if (cell.connectingCells) {
-		for (uint64_t connectingCellId : *cell.connectingCells) {
-			lookUpCell(connectingCellId, newCluster, lookedUpCellIds, remainingCellIds);
+	if (cell.connections) {
+        for (auto const& connection : *cell.connections) {
+            lookUpCell(connection.cellId, newCluster, lookedUpCellIds, remainingCellIds);
 		}
 	}
     CATCH;
@@ -257,14 +257,23 @@ CellDescription & DescriptionHelperImpl::getCellDescRef(uint64_t cellId)
 void DescriptionHelperImpl::removeConnections(CellDescription &cellDesc)
 {
     TRY;
-    if (cellDesc.connectingCells) {
-		auto &connectingCellIds = *cellDesc.connectingCells;
-		for (uint64_t connectingCellId : connectingCellIds) {
-			auto &connectingCell = getCellDescRef(connectingCellId);
-			auto &connectingCellConnections = *connectingCell.connectingCells;
-			connectingCellConnections.remove(cellDesc.id);
+    if (cellDesc.connections) {
+        auto& connections = *cellDesc.connections;
+        for (auto const& connection : connections) {
+            auto& connectingCell = getCellDescRef(connection.cellId);
+			auto& connectingCellConnections = *connectingCell.connections;
+            auto it = std::find_if(
+                connectingCellConnections.begin(),
+                connectingCellConnections.end(),
+                [&cellDesc](auto const& connection) {
+                    return connection.cellId == cellDesc.id;
+				});
+            if (it != connectingCellConnections.end()) {
+                connectingCellConnections.erase(it);
+            }
+            //			connectingCellConnections.remove(cellDesc.id);
 		}
-		cellDesc.connectingCells = list<uint64_t>();
+		cellDesc.connections = list<ConnectionDescription>();
 	}
     CATCH;
 }
@@ -295,21 +304,30 @@ void DescriptionHelperImpl::establishNewConnection(CellDescription &cell1, CellD
 	if (getDistance(cell1, cell2) > _parameters.cellMaxDistance) {
 		return;
 	}
-	if (cell1.connectingCells.get_value_or({}).size() >= cell1.maxConnections.get_value_or(0)
-		|| cell2.connectingCells.get_value_or({}).size() >= cell2.maxConnections.get_value_or(0)) {
+	if (cell1.connections.get_value_or({}).size() >= cell1.maxConnections.get_value_or(0)
+        || cell2.connections.get_value_or({}).size() >= cell2.maxConnections.get_value_or(0)) {
 		return;
 	}
-	if (!cell1.connectingCells) {
-		cell1.connectingCells = list<uint64_t>();
+    if (!cell1.connections) {
+        cell1.connections = list<ConnectionDescription>();
 	}
-	if (!cell2.connectingCells) {
-		cell2.connectingCells = list<uint64_t>();
+    if (!cell2.connections) {
+        cell2.connections = list<ConnectionDescription>();
 	}
-	auto &connections1 = *cell1.connectingCells;
-	auto &connections2 = *cell2.connectingCells;
-	if (std::find(connections1.begin(), connections1.end(), cell2.id) == connections1.end()) {
-		connections1.push_back(cell2.id);
-		connections2.push_back(cell1.id);
+    auto& connections1 = *cell1.connections;
+    auto& connections2 = *cell2.connections;
+    if (std::find_if(
+            connections1.begin(),
+            connections1.end(),
+            [&cell2](auto const& connection) { return connection.cellId == cell2.id; })
+        == connections1.end()) {
+
+		ConnectionDescription connection1;
+        connection1.cellId = cell1.id;
+        ConnectionDescription connection2;
+        connection2.cellId = cell2.id;
+        connections1.emplace_back(connection2);
+        connections2.emplace_back(connection1);
 	}
     CATCH;
 }
