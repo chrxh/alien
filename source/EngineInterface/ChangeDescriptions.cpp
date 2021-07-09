@@ -6,16 +6,18 @@
 namespace
 {
     boost::optional<std::list<ConnectionChangeDescription>> convert(
-        boost::optional<list<uint64_t>> const& connectingCellIds)
+        boost::optional<list<ConnectionDescription>> const& connections)
 	{
-        if (!connectingCellIds) {
+        if (!connections) {
             return boost::none;
         }
         std::list<ConnectionChangeDescription> result;
-        for (auto const& connectingCellId : *connectingCellIds) {
-            ConnectionChangeDescription connection;
-            connection.cellId = connectingCellId;
-            result.emplace_back(connection);
+        for (auto const& connection : *connections) {
+            ConnectionChangeDescription connectionChange;
+            connectionChange.cellId = connection.cellId;
+            connectionChange.distance = connection.distance;
+            connectionChange.angleToPrevious = connection.angleToPrevious;
+            result.emplace_back(connectionChange);
         }
         return result;
     }
@@ -27,7 +29,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 	pos = desc.pos;
 	energy = desc.energy;
 	maxConnections = desc.maxConnections;
-    connectingCells = convert(desc.connectingCells);
+    connectingCells = convert(desc.connections);
 	tokenBlocked = desc.tokenBlocked;
 	tokenBranchNumber = desc.tokenBranchNumber;
 	metadata = desc.metadata;
@@ -42,9 +44,9 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
 	pos = ValueTracker<QVector2D>(before.pos, after.pos);
 	energy = ValueTracker<double>(before.energy, after.energy);
 	maxConnections = ValueTracker<int>(before.maxConnections, after.maxConnections);
-    connectingCells = ValueTracker<list<ConnectionChangeDescription>>(
-        convert(before.connectingCells), convert(after.connectingCells));
-	tokenBlocked = ValueTracker<bool>(before.tokenBlocked, after.tokenBlocked);
+    connectingCells =
+        ValueTracker<list<ConnectionChangeDescription>>(convert(before.connections), convert(after.connections));
+    tokenBlocked = ValueTracker<bool>(before.tokenBlocked, after.tokenBlocked);
 	tokenBranchNumber = ValueTracker<int>(before.tokenBranchNumber, after.tokenBranchNumber);
 	metadata = ValueTracker<CellMetadata>(before.metadata, after.metadata);
 	cellFeatures = ValueTracker<CellFeatureDescription>(before.cellFeature, after.cellFeature);
@@ -87,7 +89,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 		for (auto const& cluster : *desc.clusters) {
             for (auto const& [index, cell] : *cluster.cells | boost::adaptors::indexed(0)) {
                 CellChangeDescription cellChange(cell);
-                cellChange.vel = *cluster.vel;	//TODO remove when DataDescription has new model
+                cellChange.vel = *cluster.vel;	//TODO #SoftBody
                 addNewCell(cellChange);
             }
 		}
@@ -102,7 +104,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 
 DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
-    //TODO remove when DataDescription has new model
+    //TODO #SoftBody
     std::unordered_map<uint64_t, QVector2D> cellVelByIdBefore;
     std::unordered_map<uint64_t, QVector2D> cellVelByIdAfter;
     if (dataBefore.clusters) {
@@ -146,7 +148,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
                 auto const& cellAfter = cellsAfter.at(cellAfterIndex);
 				CellChangeDescription change(cellBefore, cellAfter);
 				if (!change.isEmpty()) {
-					//TODO remove when DataDescription has new model
+					//TODO #SoftBody
                     change.vel = ValueTracker<QVector2D>(
                         cellVelByIdBefore.at(cellBefore.id), cellVelByIdAfter.at(cellAfter.id));
 					//---
@@ -159,7 +161,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		for (auto const& cellAfterIndex : cellsAfterIndicesByIds | boost::adaptors::map_values) {
             auto const& cellAfter = cellsAfter.at(cellAfterIndex);
             CellChangeDescription change(cellAfter);
-            //TODO remove when DataDescription has new model
+            //TODO #SoftBody
             change.vel = cellVelByIdAfter.at(cellAfter.id);
             //---
             addNewCell(change);
@@ -169,7 +171,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		for (auto const& clusterAfter : *dataAfter.clusters) {
             for (auto const& cellAfter : *clusterAfter.cells) {
                 CellChangeDescription change(cellAfter);
-                //TODO remove when DataDescription has new model
+                //TODO #SoftBody
                 change.vel = cellVelByIdAfter.at(cellAfter.id);
                 //---
                 addNewCell(change);
@@ -225,7 +227,11 @@ void DataChangeDescription::completeConnections()
         std::list<ConnectionChangeDescription> connections;
         for (auto& connectingCell : *cell->connectingCells) {
             auto const& connectingCellDesc = cells.at(cellIndexById.at(connectingCell.cellId));
-            connectingCell.distance = (*connectingCellDesc->pos - *cell->pos).length();
+
+            //TODO #SoftBody
+            if (0 == connectingCell.distance) {
+                connectingCell.distance = (*connectingCellDesc->pos - *cell->pos).length();
+            }
             //TODO angleToPrevious
         }
     }

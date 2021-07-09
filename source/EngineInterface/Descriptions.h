@@ -37,14 +37,23 @@ struct ENGINEINTERFACE_EXPORT TokenDescription
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
+struct ENGINEINTERFACE_EXPORT ConnectionDescription
+{
+    uint64_t cellId;
+    float distance = 0;
+    float angleToPrevious = 0;
+};
+
+
 struct ENGINEINTERFACE_EXPORT CellDescription
 {
 	uint64_t id = 0;
 
 	boost::optional<QVector2D> pos;
-	boost::optional<double> energy;
+    boost::optional<QVector2D> vel;
+    boost::optional<double> energy;
 	boost::optional<int> maxConnections;
-	boost::optional<list<uint64_t>> connectingCells;
+    boost::optional<list<ConnectionDescription>> connections;
 	boost::optional<bool> tokenBlocked;
 	boost::optional<int> tokenBranchNumber;
 	boost::optional<CellMetadata> metadata;
@@ -58,8 +67,12 @@ struct ENGINEINTERFACE_EXPORT CellDescription
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
-	CellDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells = value; return *this; }
-	CellDescription& addConnection(uint64_t value);
+    CellDescription& setConnectingCells(list<ConnectionDescription> const& value)
+    {
+        connections = value;
+        return *this;
+    }
+    CellDescription& addConnection(CellDescription const& otherCell);
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }

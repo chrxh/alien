@@ -125,10 +125,11 @@ void ItemManager::updateConnections(DataRepository* repository)
 	map<set<uint64_t>, CellConnectionItem*> newConnectionsByIds;
 	for (auto const &cluster : *data.clusters) {
 		for (auto const &cell : *cluster.cells) {
-			if (!cell.connectingCells) {
+			if (!cell.connections) {
 				continue;
 			}
-			for (uint64_t connectingCellId : *cell.connectingCells) {
+            for (auto const& connection : *cell.connections) {
+                auto connectingCellId = connection.cellId;
 				if (!repository->isCellPresent(connectingCellId)) {
 					continue;
 				}

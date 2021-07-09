@@ -140,7 +140,7 @@ struct ENGINEINTERFACE_EXPORT DataChangeDescription
 
 	private:
 
-	//TODO remove when DataDescription has new model
+	//TODO #SoftBody
     void completeConnections();
 };
 

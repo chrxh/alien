@@ -10,8 +10,8 @@
 ClusterDescription DescriptionFactoryImpl::createHexagon(CreateHexagonParameters const& parameters) const
 {
     auto addConnection = [](CellDescription& cell1, CellDescription& cell2) {
-        cell1.addConnection(cell2.id);
-        cell2.addConnection(cell1.id);
+        cell1.addConnection(cell2);
+        cell2.addConnection(cell1);
     };
 
     auto const layers = parameters._layers;
@@ -169,10 +169,10 @@ void DescriptionFactoryImpl::generateBranchNumbers(
                 auto clusterIndex = navigator.clusterIndicesByCellIds.at(lastCellId);
                 auto cellIndex = navigator.cellIndicesByCellIds.at(lastCellId);
                 auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
-                for (auto const& connectingCellId : *cell.connectingCells) {
-                    if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()) {
-                        cellIdPath.emplace_back(connectingCellId);
-                        visitedCellIds.insert(connectingCellId);
+                for (auto const& connection : *cell.connections) {
+                    if (visitedCellIds.find(connection.cellId) == visitedCellIds.end()) {
+                        cellIdPath.emplace_back(connection.cellId);
+                        visitedCellIds.insert(connection.cellId);
                         found = true;
                         break;
                     }
@@ -228,6 +228,6 @@ void DescriptionFactoryImpl::removeFreeCellConnections(
         auto clusterIndex = navigator.clusterIndicesByCellIds.at(cellId);
         auto cellIndex = navigator.cellIndicesByCellIds.at(cellId);
         auto& cell = data.clusters->at(clusterIndex).cells->at(cellIndex);
-        cell.maxConnections = cell.connectingCells ? cell.connectingCells->size() : 0;
+        cell.maxConnections = cell.connections ? cell.connections->size() : 0;
     }
 }

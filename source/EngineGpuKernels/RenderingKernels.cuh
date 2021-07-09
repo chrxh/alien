@@ -193,24 +193,26 @@ __global__ void drawCells(
             auto color = calcColor(cell, false/*isSelected*/);
             drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
 
-            auto posCorrection = cellPos - cell->absPos;
             if (zoom > 1 - FP_PRECISION) {
                 color = color * min((zoom - 1.0f) / 3, 1.0f);
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
-                    auto const otherCellPos = otherCell->absPos + posCorrection;
-                    auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                    float dist = Math::length(otherCellImagePos - cellImagePos);
-                    float2 const v = {
-                        static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
-                        static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8f};
-                    float2 pos = cellImagePos;
+                    auto const otherCellPos = otherCell->absPos;
+                    auto topologyCorrection = map.correctionIncrement(cellPos, otherCellPos);
+                    if (Math::lengthSquared(topologyCorrection) < FP_PRECISION) {
+                        auto const otherCellImagePos =
+                            mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
+                        float dist = Math::length(otherCellImagePos - cellImagePos);
+                        float2 const v = {
+                            static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
+                            static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8f};
+                        float2 pos = cellImagePos;
 
-
-                    for (float d = 0; d <= dist; d += 1.8f) {
-                        auto const intPos = toInt2(pos);
-                        drawDot(imageData, imageSize, pos, color);
-                        pos = pos + v;
+                        for (float d = 0; d <= dist; d += 1.8f) {
+                            auto const intPos = toInt2(pos);
+                            drawDot(imageData, imageSize, pos, color);
+                            pos = pos + v;
+                        }
                     }
                 }
             }
