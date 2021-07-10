@@ -53,6 +53,7 @@ CellDescription& CellDescription::addConnection(CellDescription const& otherCell
 	}
     ConnectionDescription connection;
     connection.cellId = otherCell.id;
+    connection.distance = (*pos - *otherCell.pos).length();
     connections->emplace_back(connection);
 	return *this;
 }

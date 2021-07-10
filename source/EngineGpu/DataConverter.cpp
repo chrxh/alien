@@ -494,7 +494,7 @@ void DataConverter::addCell(
     cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
     convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
     convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
-    if (cellDesc.connectingCells) {
+    if (cellDesc.connectingCells.getOptionalValue()) {
 		cellTO.numConnections = cellDesc.connectingCells->size();
 	}
 	else {

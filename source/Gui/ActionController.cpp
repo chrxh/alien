@@ -1110,7 +1110,9 @@ void ActionController::onNewHexagon()
 
         auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
         auto hexagon = factory->createHexagon(
-            DescriptionFactory::CreateHexagonParameters().layers(layers).cellDistance(dist).cellEnergy(energy).colorCode(colorCode));
+            DescriptionFactory::CreateHexagonParameters().layers(layers).cellDistance(dist).cellEnergy(energy).colorCode(
+                colorCode),
+            _numberGenerator);
 
 		_repository->addAndSelectData(DataDescription().addCluster(hexagon), { 0, 0 });
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
