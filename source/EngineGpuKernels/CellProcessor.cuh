@@ -183,11 +183,11 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             if (index > 0) {
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
-                auto actualAngleToPrevious = Math::subtractAngle(angle, prevAngle);
-                if (actualAngleToPrevious > 180) {
-                    actualAngleToPrevious = abs(actualAngleToPrevious - 360.0f);
+                auto actualangleFromPrevious = Math::subtractAngle(angle, prevAngle);
+                if (actualangleFromPrevious > 180) {
+                    actualangleFromPrevious = abs(actualangleFromPrevious - 360.0f);
                 }
-                auto deviation = actualAngleToPrevious - cell->connections[index].angleToPrevious;
+                auto deviation = actualangleFromPrevious - cell->connections[index].angleFromPrevious;
                 auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
                 auto forceInc = correctionMovementForLowAngle * deviation / -3000;

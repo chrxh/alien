@@ -23,7 +23,7 @@ struct CellConnection
 {
     Cell* cell;
     float distance;
-    float angleToPrevious;
+    float angleFromPrevious;
 };
 
 struct Cell

@@ -93,7 +93,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
         auto& connectingCell = cell->connections[i];
         connectingCell.cell = cellTargetArray + cellTO.connections[i].cellIndex;
         connectingCell.distance = cellTO.connections[i].distance;
-        connectingCell.angleToPrevious = cellTO.connections[i].angleToPrevious;
+        connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
     cell->setEnergy(cellTO.energy);
     cell->setCellFunctionType(cellTO.cellFunctionType);
@@ -277,12 +277,12 @@ __inline__ __device__ void EntityFactory::createClusterFromTO_block(
             displacement = otherCell.pos - cell.absPos;
             _map.mapDisplacementCorrection(displacement);
             if (i > 0) {
-                auto angleToPrevious =
+                auto angleFromPrevious =
                     Math::subtractAngle(Math::angleOfVector(displacement), Math::angleOfVector(prevDisplacement));
-                if (angleToPrevious > 180) {
-                    angleToPrevious = abs(360.0f - angleToPrevious);
+                if (angleFromPrevious > 180) {
+                    angleFromPrevious = abs(360.0f - angleFromPrevious);
                 }
-                cell.connections[i].angleToPrevious = angleToPrevious;
+                cell.connections[i].angleFromPrevious = angleFromPrevious;
             }
             prevDisplacement = displacement;
         }

@@ -1,3 +1,4 @@
+/*
 #include <gtest/gtest.h>
 
 #include "EngineInterface/ChangeDescriptions.h"
@@ -110,3 +111,4 @@ TEST_F(ChangeDescriptionsTest, testCreateClusterChangeDescriptionFromClusterDesc
 	ASSERT_EQ(newEnergyCell1, *cell1.energy);
 	ASSERT_EQ(maxConnectionsCell4, *cell4.maxConnections);
 }
+*/

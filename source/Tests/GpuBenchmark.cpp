@@ -1,3 +1,4 @@
+/*
 #include <QElapsedTimer>
 
 #include "IntegrationGpuTestFramework.h"
@@ -109,3 +110,4 @@ TEST_F(GpuBenchmarkForClusterDecomposition, testClusterDecomposition)
     IntegrationTestHelper::runSimulation(1, _controller);
     std::cerr << "Time elapsed during simulation: " << timer.elapsed() << " ms" << std::endl;
 }
+*/

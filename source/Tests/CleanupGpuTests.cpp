@@ -1,3 +1,4 @@
+/*
 #include "IntegrationGpuTestFramework.h"
 
 class CleanupGpuTests : public IntegrationGpuTestFramework
@@ -43,10 +44,10 @@ EngineGpuData CleanupGpuTests::getModelDataForCleanup()
     return EngineGpuData(cudaConstants);
 }
 
-/**
+/ **
 * Situation: cluster emitting particles
 * Expected result: no crash during the number of particles of all times is growing
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupParticles)
 {
     _parameters.radiationExponent = 1;
@@ -61,10 +62,10 @@ TEST_F(CleanupGpuTests, testCleanupParticles)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1000, _controller));
 }
 
-/**
+/ **
 * Situation: few large clusters
 * Expected result: no crash during the number of cells of all times is growing
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupCells)
 {
     _parameters.radiationExponent = 1;
@@ -81,10 +82,10 @@ TEST_F(CleanupGpuTests, testCleanupCells)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(2000, _controller));
 }
 
-/**
+/ **
 * Situation: many small clusters
 * Expected result: no crash during the number of clusters of all times is growing
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupClusters)
 {
     _parameters.radiationProb = 0;
@@ -100,10 +101,10 @@ TEST_F(CleanupGpuTests, testCleanupClusters)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(2000, _controller));
 }
 
-/**
+/ **
 * Situation: few large fast moving clusters; radiate much energy with low number of particles
 * Expected result: no crash during the number of cell pointers of all times is growing
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupCellPointers)
 {
     _parameters.radiationExponent = 1;
@@ -121,10 +122,10 @@ TEST_F(CleanupGpuTests, testCleanupCellPointers)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(2000, _controller));
 }
 
-/**
+/ **
 * Situation: cluster where a token is moving in a cycle
 * Expected result: no crash during the number of token pointers of all times is growing
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupTokenPointers)
 {
     _parameters.radiationProb = 0;  //exclude radiation
@@ -150,10 +151,10 @@ TEST_F(CleanupGpuTests, testCleanupTokenPointers)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1100, _controller));
 }
 
-/**
+/ **
 * Situation: cluster where a token is moving in a cycle and branches
 * Expected result: no crash during the number of tokens of all times is growing
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupTokens)
 {
     _parameters.radiationProb = 0;  //exclude radiation
@@ -180,10 +181,10 @@ TEST_F(CleanupGpuTests, testCleanupTokens)
     EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(440, _controller));
 }
 
-/**
+/ **
 * Situation: one moving clusters and a particles which crosses old position of cluster
 * Expected result: particle is not absorbed
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupCellMap)
 {
     _parameters.radiationProb = 0;
@@ -200,10 +201,10 @@ TEST_F(CleanupGpuTests, testCleanupCellMap)
     ASSERT_EQ(1, newData.particles->size());
 }
 
-/**
+/ **
 * Situation: two moving particles where one particle crosses old position of the other one
 * Expected result: particles do not fuse
-*/
+* /
 TEST_F(CleanupGpuTests, testCleanupParticleMap)
 {
     DataDescription origData;
@@ -234,3 +235,4 @@ TEST_F(CleanupGpuTests, testCleanupMetadata)
         *prevData.clusters->at(0).cells->at(0).energy = i;
     }
 }
+*/

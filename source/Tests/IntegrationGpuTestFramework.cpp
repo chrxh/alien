@@ -48,6 +48,7 @@ IntegrationGpuTestFramework::~IntegrationGpuTestFramework()
 	delete _controller;
     delete _descHelper;
 }
+/*
 
 void IntegrationGpuTestFramework::check(DataDescription const & origData, DataDescription const & newData) const
 {
@@ -62,7 +63,7 @@ void IntegrationGpuTestFramework::checkCellAttributes(DataDescription const & da
         for (auto const& cluster : *data.clusters) {
             if (cluster.cells) {
                 for (auto const& cell : *cluster.cells) {
-                    EXPECT_LE(cell.connectingCells->size(), *cell.maxConnections);
+                    EXPECT_LE(cell.connections->size(), *cell.maxConnections);
                     EXPECT_LE(*cell.maxConnections, _parameters.cellMaxBonds);
                 }
             }
@@ -88,7 +89,7 @@ void IntegrationGpuTestFramework::checkCellConnections(DataDescription const & d
 	auto cellByCellId = IntegrationTestHelper::getCellByCellId(data);
 	for (ClusterDescription const& cluster : *data.clusters) {
 		for (CellDescription const& cell : *cluster.cells) {
-			if (!cell.connectingCells) {
+			if (!cell.connections) {
 				continue;
 			}
 			for (auto const& connectingCellId : *cell.connectingCells) {
@@ -225,3 +226,4 @@ void IntegrationGpuTestFramework::setCenterPos(ClusterDescription& cluster, QVec
         cell.pos = *cell.pos + diff;
     }
 }
+*/

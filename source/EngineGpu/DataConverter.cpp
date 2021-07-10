@@ -89,6 +89,21 @@ namespace
 DataDescription DataConverter::getDataDescription() const
 {
 	DataDescription result;
+    std::list<ClusterDescription> clusters;
+
+	std::set<int> freeCellIndices;
+    for (int i = 0; i < *_dataTO.numCells; ++i) {
+        freeCellIndices.insert(i);
+    }
+    while (!freeCellIndices.empty()) {
+        auto freeCellIndex = *freeCellIndices.begin();
+        auto cluster = scanAndCreateClusterDescription(freeCellIndex, freeCellIndices);
+        clusters.emplace_back(cluster);
+    }
+
+    result.addClusters(clusters);
+    return result;
+
 /*
 	list<uint64_t> connectingCellIds;
 	unordered_map<int, int> cellIndexByCellTOIndex;
@@ -171,9 +186,101 @@ DataDescription DataConverter::getDataDescription() const
 		}
 		cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
 	}
-*/
 
 	return result;
+*/
+}
+
+ClusterDescription DataConverter::scanAndCreateClusterDescription(int startCellIndex, std::set<int>& freeCellIndices) const
+{
+    std::list<CellDescription> cells;
+
+    std::set<int> currentCellIndices;
+    currentCellIndices.insert(startCellIndex);
+    std::set<int> scannedCellIndices = currentCellIndices;
+
+    std::set<int> nextCellIndices;
+    do {
+        for (auto const& currentCellIndex : currentCellIndices) {
+            cells.emplace_back(createCellDescription(currentCellIndex));
+            auto const& cellTO = _dataTO.cells[currentCellIndex];
+            for (int i = 0; i < cellTO.numConnections; ++i) {
+                auto connectionTO = cellTO.connections[i];
+                if (scannedCellIndices.find(connectionTO.cellIndex) == scannedCellIndices.end()) {
+                    nextCellIndices.insert(connectionTO.cellIndex);
+                    scannedCellIndices.insert(connectionTO.cellIndex);
+                }
+            }
+        }
+        currentCellIndices = nextCellIndices;
+        nextCellIndices.clear();
+    } while (!currentCellIndices.empty());
+
+    std::set<int> newFreeCellIndices;
+    std::set_difference(
+        freeCellIndices.begin(),
+        freeCellIndices.end(),
+        scannedCellIndices.begin(),
+        scannedCellIndices.end(),
+        std::inserter(newFreeCellIndices, newFreeCellIndices.begin()));
+    freeCellIndices = std::move(newFreeCellIndices);
+
+    ClusterDescription result;
+    result.id = _numberGen->getId();
+    result.addCells(cells);
+
+    return result;
+}
+
+CellDescription DataConverter::createCellDescription(int cellIndex) const
+{
+    CellDescription result;
+
+    auto const& cellTO = _dataTO.cells[cellIndex];
+    result.id = cellTO.id;
+    result.pos = QVector2D(cellTO.pos.x, cellTO.pos.y);
+    result.vel = QVector2D(cellTO.vel.x, cellTO.vel.y);
+    result.energy = cellTO.energy;
+    result.maxConnections = cellTO.maxConnections;
+    list<ConnectionDescription> connections;
+    for (int i = 0; i < cellTO.numConnections; ++i) {
+        auto const& connectionTO = cellTO.connections[i];
+        ConnectionDescription connection;
+        connection.cellId = _dataTO.cells[connectionTO.cellIndex].id;
+        connection.distance = connectionTO.distance;
+        connection.angleFromPrevious = connectionTO.angleFromPrevious;
+        connections.emplace_back(connection);
+    }
+    result.connections = connections;
+    result.tokenBlocked = cellTO.tokenBlocked;
+    result.tokenBranchNumber = cellTO.branchNumber;
+
+    auto const& metadataTO = cellTO.metadata;
+    auto metadata = CellMetadata().setColor(metadataTO.color);
+    if (metadataTO.nameLen > 0) {
+        auto const name = QString::fromLatin1(&_dataTO.stringBytes[metadataTO.nameStringIndex], metadataTO.nameLen);
+        metadata.setName(name);
+    }
+    if (metadataTO.descriptionLen > 0) {
+        auto const description =
+            QString::fromLatin1(&_dataTO.stringBytes[metadataTO.descriptionStringIndex], metadataTO.descriptionLen);
+        metadata.setDescription(description);
+    }
+    if (metadataTO.sourceCodeLen > 0) {
+        auto const sourceCode =
+            QString::fromLatin1(&_dataTO.stringBytes[metadataTO.sourceCodeStringIndex], metadataTO.sourceCodeLen);
+        metadata.setSourceCode(sourceCode);
+    }
+    result.metadata = metadata;
+
+    auto feature = CellFeatureDescription()
+                       .setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
+                       .setConstData(convertToQByteArray(cellTO.staticData, cellTO.numStaticBytes))
+                       .setVolatileData(convertToQByteArray(cellTO.mutableData, cellTO.numMutableBytes));
+    result.cellFeature = feature;
+    result.tokenUsages = cellTO.tokenUsages;
+
+    return result;
 }
 
 void DataConverter::addParticle(ParticleDescription const & particleDesc)
@@ -435,15 +542,16 @@ void DataConverter::addCell(
 void DataConverter::setConnections(
     CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int> const& cellIndexByIds)
 {
-	if (cellToAdd.connectingCells) {
+	if (cellToAdd.connectingCells.getOptionalValue()) {
 		int index = 0;
         auto& cellTO = _dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
         for (ConnectionChangeDescription const& connection : *cellToAdd.connectingCells) {
             cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
             cellTO.connections[index].distance = connection.distance;
-            cellTO.connections[index].angleToPrevious = connection.angleToPrevious;
+            cellTO.connections[index].angleFromPrevious = connection.angleFromPrevious;
             ++index;
 		}
+        cellTO.numConnections = index;
 	}
 }
 

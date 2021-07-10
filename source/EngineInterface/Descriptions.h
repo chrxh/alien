@@ -41,7 +41,7 @@ struct ENGINEINTERFACE_EXPORT ConnectionDescription
 {
     uint64_t cellId;
     float distance = 0;
-    float angleToPrevious = 0;
+    float angleFromPrevious = 0;
 };
 
 
@@ -65,6 +65,7 @@ struct ENGINEINTERFACE_EXPORT CellDescription
 	CellDescription(CellChangeDescription const& change);
 	CellDescription& setId(uint64_t value) { id = value; return *this; }
 	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
+	CellDescription& setVel(QVector2D const& value) { vel = value; return *this; }
 	CellDescription& setEnergy(double value) { energy = value; return *this; }
 	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
     CellDescription& setConnectingCells(list<ConnectionDescription> const& value)

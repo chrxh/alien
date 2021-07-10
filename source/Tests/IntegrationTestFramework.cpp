@@ -27,7 +27,81 @@ IntegrationTestFramework::~IntegrationTestFramework()
 {
 }
 
-ClusterDescription IntegrationTestFramework::createSingleCellClusterWithCompleteData(uint64_t clusterId /*= 0*/, uint64_t cellId /*= 0*/) const
+ClusterDescription IntegrationTestFramework::createRectangularCluster(
+    IntVector2D const& size,
+    boost::optional<QVector2D> const& centerPos,
+    boost::optional<QVector2D> const& centerVel,
+    Boundary boundary) const
+{
+    QVector2D pos = centerPos.get_value_or(QVector2D());
+    QVector2D vel = centerVel.get_value_or(QVector2D());
+
+    ClusterDescription cluster;
+    cluster.setId(_numberGen->getId());
+
+    for (int y = 0; y < size.y; ++y) {
+        for (int x = 0; x < size.x; ++x) {
+            QVector2D relPos(-static_cast<float>(size.x - 1) / 2.0 + x, -static_cast<float>(size.y - 1) / 2.0 + y);
+            int maxConnections = 4;
+            if (Boundary::NonSticky == boundary) {
+                if (x == 0 || x == size.x - 1) {
+                    --maxConnections;
+                }
+                if (y == 0 || y == size.y - 1) {
+                    --maxConnections;
+                }
+            }
+            cluster.addCell(CellDescription()
+                                .setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
+                                .setPos(pos + relPos)
+                                .setVel(vel)
+                                .setMaxConnections(maxConnections)
+                                .setId(_numberGen->getId())
+                                .setCellFeature(CellFeatureDescription()));
+        }
+    }
+
+    for (int x = 0; x < size.x; ++x) {
+        for (int y = 0; y < size.y; ++y) {
+            list<ConnectionDescription> connections;
+            if (x > 0) {
+                ConnectionDescription connection;
+                connection.cellId = cluster.cells->at((x - 1) + y * size.x).id;
+                connection.distance = 1;
+                connection.angleFromPrevious = 90;
+                connections.emplace_back(connection);
+            }
+            if (x < size.x - 1) {
+                ConnectionDescription connection;
+                connection.cellId = cluster.cells->at((x + 1) + y * size.x).id;
+                connection.distance = 1;
+                connection.angleFromPrevious = 90;
+                connections.emplace_back(connection);
+            }
+            if (y > 0) {
+                ConnectionDescription connection;
+                connection.cellId = cluster.cells->at(x + (y - 1) * size.x).id;
+                connection.distance = 1;
+                connection.angleFromPrevious = 90;
+                connections.emplace_back(connection);
+            }
+            if (y < size.y - 1) {
+                ConnectionDescription connection;
+                connection.cellId = cluster.cells->at(x + (y + 1) * size.x).id;
+                connection.distance = 1;
+                connection.angleFromPrevious = 90;
+                connections.emplace_back(connection);
+            }
+
+            cluster.cells->at(x + y * size.x).setConnectingCells(connections);
+        }
+    }
+
+    return cluster;
+}
+
+/*
+ClusterDescription IntegrationTestFramework::createSingleCellClusterWithCompleteData(uint64_t clusterId / *= 0* /, uint64_t cellId / *= 0* /) const
 {
 	QByteArray code("123123123");
 	QByteArray cellMemory(_parameters.cellFunctionComputerCellMemorySize, 0);
@@ -71,61 +145,6 @@ TokenDescription IntegrationTestFramework::createSimpleToken() const
 {
 	auto tokenEnergy = _parameters.tokenMinEnergy * 2.0;
 	return TokenDescription().setEnergy(tokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0));
-}
-
-ClusterDescription IntegrationTestFramework::createRectangularCluster(IntVector2D const & size, boost::optional<QVector2D> const & centerPos, 
-	boost::optional<QVector2D> const & centerVel, Boundary boundary) const
-{
-    QVector2D pos = centerPos
-        ? *centerPos
-        : QVector2D(
-            _numberGen->getRandomReal(0, _universeSize.x - 1), _numberGen->getRandomReal(0, _universeSize.y - 1));
-    QVector2D vel = centerVel ? *centerVel : QVector2D(_numberGen->getRandomReal(-1, 1), _numberGen->getRandomReal(-1, 1));
-
-	ClusterDescription cluster;
-	cluster.setId(_numberGen->getId()).setPos(pos).setVel(vel).setAngle(0).setAngularVel(0);
-
-	for (int y = 0; y < size.y; ++y) {
-		for (int x = 0; x < size.x; ++x) {
-			QVector2D relPos(-static_cast<float>(size.x - 1) / 2.0 + x, -static_cast<float>(size.y - 1) / 2.0 + y);
-			int maxConnections = 4;
-            if (Boundary::NonSticky == boundary) {
-                if (x == 0 || x == size.x - 1) {
-                    --maxConnections;
-                }
-                if (y == 0 || y == size.y - 1) {
-                    --maxConnections;
-                }
-            }
-			cluster.addCell(
-				CellDescription().setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
-				.setPos(pos + relPos)
-				.setMaxConnections(maxConnections).setId(_numberGen->getId()).setCellFeature(CellFeatureDescription())
-			);
-		}
-	}
-
-	for (int x = 0; x < size.x; ++x) {
-		for (int y = 0; y < size.y; ++y) {
-			list<uint64_t> connectingCells;
-			if (x > 0) {
-				connectingCells.emplace_back(cluster.cells->at((x - 1) + y * size.x).id);
-			}
-			if (x < size.x - 1) {
-				connectingCells.emplace_back(cluster.cells->at((x + 1) + y * size.x).id);
-			}
-			if (y > 0) {
-				connectingCells.emplace_back(cluster.cells->at(x + (y - 1) * size.x).id);
-			}
-			if (y < size.y - 1) {
-				connectingCells.emplace_back(cluster.cells->at(x + (y + 1) * size.x).id);
-			}
-
-			cluster.cells->at(x + y * size.x).setConnectingCells(connectingCells);
-		}
-	}
-
-	return cluster;
 }
 
 ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, boost::optional<QVector2D> const & centerPos,
@@ -173,7 +192,7 @@ ClusterDescription IntegrationTestFramework::createHorizontalCluster(
     boost::optional<QVector2D> const& centerPos,
     boost::optional<QVector2D> const& centerVel,
     boost::optional<double> const& optAngularVel,
-    Boundary boundary /*= Boundary::NonSticky*/) const
+    Boundary boundary / *= Boundary::NonSticky* /) const
 {
     QVector2D pos = centerPos
         ? *centerPos
@@ -267,6 +286,7 @@ QVector2D IntegrationTestFramework::addSmallDisplacement(QVector2D const & value
 {
     return{ value.x() + 0.04232f, value.y() + 0.04232f };
 }
+*/
 
 
 template<>
@@ -281,6 +301,20 @@ bool checkCompatibility<float>(float a, float b)
 {
     EXPECT_PRED2(predEqual_relative, a, b);
     return predEqual_relative(a, b);
+}
+
+template <>
+bool checkCompatibility(ConnectionDescription connection1, ConnectionDescription connection2)
+{
+    auto result = true;
+    EXPECT_TRUE(result = checkCompatibility(connection1.cellId, connection2.cellId));
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(connection1.distance, connection2.distance));
+    }
+    if (result) {
+        EXPECT_TRUE(result = checkCompatibility(connection1.angleFromPrevious, connection2.angleFromPrevious));
+    }
+    return result;
 }
 
 template<>
@@ -370,13 +404,16 @@ bool checkCompatibility<CellDescription>(CellDescription cell1, CellDescription 
         EXPECT_TRUE(result = checkCompatibility(cell1.pos, cell2.pos));
     }
     if (result) {
+        EXPECT_TRUE(result = checkCompatibility(cell1.vel, cell2.vel));
+    }
+    if (result) {
         EXPECT_TRUE(result = checkCompatibility(cell1.energy, cell2.energy));
     }
     if (result) {
         EXPECT_TRUE(result = checkCompatibility(cell1.maxConnections, cell2.maxConnections));
     }
     if (result) {
-        EXPECT_TRUE(result = checkCompatibility(cell1.connectingCells, cell2.connectingCells));
+        EXPECT_TRUE(result = checkCompatibility(cell1.connections, cell2.connections));
     }
     if (result) {
         EXPECT_TRUE(result = checkCompatibility(cell1.tokenBranchNumber, cell2.tokenBranchNumber));
@@ -438,36 +475,52 @@ bool checkCompatibility<ParticleDescription>(ParticleDescription particle1, Part
 
 namespace
 {
-	void sortById(DataDescription& data)
+    void sortById(boost::optional<std::vector<ParticleDescription>>& particles)
 	{
-		if (data.clusters) {
-			std::sort(data.clusters->begin(), data.clusters->end(), [](auto const &cluster1, auto const &cluster2) {
-				return cluster1.id <= cluster2.id;
-			});
-			for (auto& cluster : *data.clusters) {
-				std::sort(cluster.cells->begin(), cluster.cells->end(), [](auto const &cell1, auto const &cell2) {
-					return cell1.id <= cell2.id;
-				});
-			}
-		}
-		if (data.particles) {
-			std::sort(data.particles->begin(), data.particles->end(), [](auto const &particle1, auto const &particle2) {
+		if (particles) {
+			std::sort(particles->begin(), particles->end(), [](auto const &particle1, auto const &particle2) {
 				return particle1.id <= particle2.id;
 			});
 		}
 	}
+
+	void sortById(boost::optional<std::vector<CellDescription>>& cells)
+    {
+        if (cells) {
+            std::sort(cells->begin(), cells->end(), [](auto const& cell1, auto const& cell2) {
+                return cell1.id <= cell2.id;
+            });
+        }
+    }
 }
 
 template<>
 bool checkCompatibility<DataDescription>(DataDescription data1, DataDescription data2)
 {
-    sortById(data1);
-	sortById(data2);
+    auto extractCells = [](DataDescription const& data) -> boost::optional<std::vector<CellDescription>> {
+        boost::optional<std::vector<CellDescription>> result;
+        if (data.clusters) {
+            result = std::vector<CellDescription>();
+            for (auto const& cluster : *data.clusters) {
+                result->insert(result->end(), cluster.cells->begin(), cluster.cells->end());
+            }
+        }
+        return result;
+    };
+    auto cells1 = extractCells(data1);
+    auto cells2 = extractCells(data2);
+
+    auto particles1 = data1.particles;
+    auto particles2 = data2.particles;
+    sortById(cells1);
+    sortById(cells2);
+    sortById(particles1);
+    sortById(particles2);
 
     auto result = true;
-    EXPECT_TRUE(result = checkCompatibility(data1.clusters, data2.clusters));
+    EXPECT_TRUE(result = checkCompatibility(cells1, cells2));
     if (result) {
-        EXPECT_TRUE(result = checkCompatibility(data1.particles, data2.particles));
+        EXPECT_TRUE(result = checkCompatibility(particles1, particles2));
     }
     return result;
 }

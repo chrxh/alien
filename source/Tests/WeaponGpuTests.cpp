@@ -1,3 +1,4 @@
+/*
 #include "Base/ServiceLocator.h"
 #include "EngineInterface/QuantityConverter.h"
 #include "EngineInterface/Serializer.h"
@@ -184,11 +185,11 @@ TEST_F(WeaponGpuTests, testDoubleStrike)
     EXPECT_EQ(-expectedEnergyLoss, *result.energyDiffOfTarget2);
 }
 
-/**
+/ **
 * Situation: many 2x2 clusters with rotating tokens invoking weapons
 * Expected result: energy balance fulfilled
 * Fixed error: atomic operations for energy changes
-*/
+* /
 TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
 {
     _parameters.cellFusionVelocity = 100;    //exclude fusion
@@ -209,3 +210,4 @@ TEST_F(WeaponGpuTests, regressionTestManyClustersWithWeapons)
 
     check(origData, newData);
 }
+*/

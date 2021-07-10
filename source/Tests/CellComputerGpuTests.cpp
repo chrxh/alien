@@ -1,3 +1,4 @@
+/*
 #include "gtest/gtest.h"
 
 #include "Base/ServiceLocator.h"
@@ -489,3 +490,4 @@ TEST_F(CellComputerGpuTests, testDivisionByZero)
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(0, data.at(1));  
 }
+*/

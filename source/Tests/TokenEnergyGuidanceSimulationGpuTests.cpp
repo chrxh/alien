@@ -1,3 +1,4 @@
+/*
 #include "IntegrationGpuTestFramework.h"
 
 class TokenEnergyGuidanceGpuTests
@@ -18,12 +19,12 @@ void TokenEnergyGuidanceGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell command
 *			 - both cells have same high energy
 * Expected result: energy should be transferred from cell to token
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
 {
     auto const valueCell = 100.0f;
@@ -67,13 +68,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell command
 *			 - both cells have same low energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
@@ -114,13 +115,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance token command
 *			 - both cells have same energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
 {
     auto const valueToken = 30.0f;
@@ -157,13 +158,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance token command
 *			 - both cells have same energy
 *            - token has low energy
 * Expected result: energy should be transferred from token to cell
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
 {
     auto const valueCell = 100.0f;
@@ -204,13 +205,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell and token command
 *			 - both cells have same low energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
@@ -251,13 +252,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowC
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell and token command
 *			 - both cells have same high energy
 *            - token has low energy
 * Expected result: energy should be transferred from cell to token
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highCellEnergy)
 {
     auto const valueCell = 100.0f;
@@ -298,12 +299,12 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highC
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with harvest cell command
 *			 - both cells have same high energy
 * Expected result: energy should be transferred from cell to token
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
 {
     auto const valueCell = 100.0f;
@@ -341,13 +342,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with harvest cell command
 *			 - both cells have same energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
 {
     auto const valueToken = 30.0f;
@@ -384,13 +385,13 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has two tokens with harvest cell command
 *			 - both cells have same energy
 *            - both tokens has high energy
 * Expected result: energy should be transferred from token to cell twice
-*/
+* /
 TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
 {
     auto const valueToken = 30.0f;
@@ -429,3 +430,4 @@ TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
 
     check(origData, newData);
 }
+*/

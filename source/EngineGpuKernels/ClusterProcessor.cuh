@@ -548,11 +548,11 @@ __inline__ __device__ void ClusterProcessor::calcForce()
             if (index > 0) {
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
-                auto actualAngleToPrevious = Math::subtractAngle(angle, prevAngle);
-                if (actualAngleToPrevious > 180) {
-                    actualAngleToPrevious = abs(actualAngleToPrevious - 360.0f);
+                auto actualangleFromPrevious = Math::subtractAngle(angle, prevAngle);
+                if (actualangleFromPrevious > 180) {
+                    actualangleFromPrevious = abs(actualangleFromPrevious - 360.0f);
                 }
-                auto deviation = actualAngleToPrevious - cell->connections[index].angleToPrevious;
+                auto deviation = actualangleFromPrevious - cell->connections[index].angleFromPrevious;
                 auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
                 auto forceInc = correctionMovementForLowAngle * deviation / -3000;
@@ -1086,14 +1086,14 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
                         }
                     }
                     else {
-                        float prevAngle = cell->connections[i].angleToPrevious;
+                        float prevAngle = cell->connections[i].angleFromPrevious;
                         for (int j = i + 1; j < cell->numConnections; ++j) {
-                            float prevAngle = cell->connections[j - 1].angleToPrevious;
+                            float prevAngle = cell->connections[j - 1].angleFromPrevious;
                             cell->connections[j - 1] = cell->connections[j];
                         }
-                        cell->connections[i].angleToPrevious += prevAngle;
-                        if (cell->connections[i].angleToPrevious > 180) {
-                            cell->connections[i].angleToPrevious = abs(360 - cell->connections[i].angleToPrevious);
+                        cell->connections[i].angleFromPrevious += prevAngle;
+                        if (cell->connections[i].angleFromPrevious > 180) {
+                            cell->connections[i].angleFromPrevious = abs(360 - cell->connections[i].angleFromPrevious);
                         }
 
                         --cell->numConnections;
@@ -1117,13 +1117,13 @@ __inline__ __device__ void ClusterProcessor::processingDecomposition_optimizedFo
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto& otherCell = cell->connections[i].cell;
                 if (1 != otherCell->alive) {
-                    float prevAngle = cell->connections[i].angleToPrevious;
+                    float prevAngle = cell->connections[i].angleFromPrevious;
                     for (int j = i + 1; j < cell->numConnections; ++j) {
                         cell->connections[j - 1] = cell->connections[j];
                     }
-                    cell->connections[i].angleToPrevious += prevAngle;
-                    if (cell->connections[i].angleToPrevious > 180) {
-                        cell->connections[i].angleToPrevious = abs(360 - cell->connections[i].angleToPrevious);
+                    cell->connections[i].angleFromPrevious += prevAngle;
+                    if (cell->connections[i].angleFromPrevious > 180) {
+                        cell->connections[i].angleFromPrevious = abs(360 - cell->connections[i].angleFromPrevious);
                     }
                     --cell->numConnections;
                     --i;

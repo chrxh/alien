@@ -48,7 +48,7 @@ struct CellConnectionTO
 {
     int cellIndex;
     float distance;
-    float angleToPrevious;
+    float angleFromPrevious;
 };
 
 struct CellAccessTO
