@@ -1,3 +1,4 @@
+/*
 #include "IntegrationGpuTestFramework.h"
 
 class ClusterGpuTests
@@ -22,10 +23,10 @@ void ClusterGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-/**
+/ **
 * Situation: horizontal collision of two cells where both move such that no pixel overlapping occurs
 * Expected result: direction of movement of both cells changed
-*/
+* /
 TEST_F(ClusterGpuTests, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOverlapping)
 {
 	DataDescription origData;
@@ -71,10 +72,10 @@ TEST_F(ClusterGpuTests, DISABLED_testCollisionOfSingleCells_horizontal_noPixelOv
 }
 
 
-/**
+/ **
 * Situation: horizontal collision of two cells
 * Expected result: direction of movement of both cells changed
-*/
+* /
 TEST_F(ClusterGpuTests, testCollisionOfSingleCells_horizontal)
 {
 	DataDescription origData;
@@ -119,10 +120,10 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_horizontal)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: vertical collision of two cells
 * Expected result: direction of movement of both cells changed
-*/
+* /
 TEST_F(ClusterGpuTests, testCollisionOfSingleCells_vertical)
 {
 	DataDescription origData;
@@ -167,12 +168,12 @@ TEST_F(ClusterGpuTests, testCollisionOfSingleCells_vertical)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- center collision of two horizontal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: first cluster moves upward while second cluster stand stills
-*/
+* /
 TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
 {
 	DataDescription origData;
@@ -208,10 +209,10 @@ TEST_F(ClusterGpuTests, testCenterCollisionOfParallelLineClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: horizontal collision of two line clusters at boundary
 * Expected result: direction of movement of both cells changed accordingly
-*/
+* /
 TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUniverseBoundary)
 {
 	DataDescription origData;
@@ -247,12 +248,12 @@ TEST_F(ClusterGpuTests, testHorizontalCenterCollisionOfParallelLineClusters_atUn
 }
 
 
-/**
+/ **
 * Situation: vertical collision of two line clusters at boundary
 * Expected result: direction of movement of both cells changed accordingly
 *
 * Hint if failed: collision calculated twice?
-*/
+* /
 TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniverseBoundary)
 {
 	auto size = _spaceProp->getSize();
@@ -288,12 +289,12 @@ TEST_F(ClusterGpuTests, testVerticalCenterCollisionOfParallelLineClusters_atUniv
 }
 
 
-/**
+/ **
 * Situation:
 *	- sidewise collision of two horizontal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: both clusters move upwards and rotate counterclockwise
-*/
+* /
 TEST_F(ClusterGpuTests, testSidewiseCollisionOfParallelLineClusters)
 {
 	DataDescription origData;
@@ -328,12 +329,12 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfParallelLineClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- sidewise collision of two rectangular cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result: both clusters move upwards and rotate counterclockwise
-*/
+* /
 TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters)
 {
 	DataDescription origData;
@@ -366,12 +367,12 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- sidewise collision of two rectangular cell clusters
 *	- both clusters have velocity and angular velocity
 * Expected result: energy is conserved
-*/
+* /
 TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters_withAngularVelocities)
 {
 	DataDescription origData;
@@ -396,14 +397,14 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfRectangleClusters_withAngularVelo
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- sidewise collision of two orthogonal cell clusters
 *	- first cluster has no velocity while second cluster moves upward
 * Expected result:
 *	- first cluster moves upward and rotate counterclockwise
 *	- second cluster does not move on x axis and does not rotate
-*/
+* /
 TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
 {
 	DataDescription origData;
@@ -437,7 +438,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- sidewise collision of two traversal cell clusters
 *	- first cluster is arranged horizontal and has no velocity
@@ -445,7 +446,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfOrthogonalLineClusters)
 * Expected result:
 *	- first cluster moves upward and rotate clockwise
 *	- second cluster moves upward and rotate counterclockwise
-*/
+* /
 TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters)
 {
 	DataDescription origData;
@@ -479,7 +480,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- sidewise collision of two traversal cell clusters
 *	- first cluster is arranged horizontal and has no velocity
@@ -488,7 +489,7 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters)
 * Expected result:
 *	- velocity of first cluster: x: positive, y: negative, angular vel: negative
 *	- velocity of second cluster: x: negative, y: negative, angular vel: positive
-*/
+* /
 TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters_waitUntilSecondCollision)
 {
 	DataDescription origData;
@@ -522,9 +523,9 @@ TEST_F(ClusterGpuTests, testSidewiseCollisionOfTraversalLineClusters_waitUntilSe
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: same as testSidewiseCollisionOfTraversalLineClusters_waitUntilSecondCollision but with high velocities
-*/
+* /
 TEST_F(ClusterGpuTests, DISABLED_testSidewiseCollisionOfTraversalLineClusters_waitUntilSecondCollision_faster)
 {
 	DataDescription origData;
@@ -558,10 +559,10 @@ TEST_F(ClusterGpuTests, DISABLED_testSidewiseCollisionOfTraversalLineClusters_wa
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: cluster with cross structure where middle cell connecting 4 parts has low energy
 * Expected result: cluster decomposes into 4 parts
-*/
+* /
 TEST_F(ClusterGpuTests, DISABLED_testDecomposeClusterAfterLowEnergy)
 {
 	DataDescription origData;
@@ -629,12 +630,12 @@ TEST_F(ClusterGpuTests, DISABLED_testDecomposeClusterAfterLowEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- cluster with line structure where middle cell has low energy
 *	- cluster rotates
 * Expected result: cluster decomposes into 2 parts
-*/
+* /
 TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
 {
 	DataDescription origData;
@@ -676,10 +677,10 @@ TEST_F(ClusterGpuTests, testDecomposeClusterAfterLowEnergy_duringRotation)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: two clusters are situated very close
 * Expected result: the cells of the smaller clusters are destroyed
-*/
+* /
 TEST_F(ClusterGpuTests, testDestructionOfTooCloseCells)
 {
     _parameters.radiationProb = 0;    //exclude radiation
@@ -701,10 +702,10 @@ TEST_F(ClusterGpuTests, testDestructionOfTooCloseCells)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: two horizontal clusters are approaching each others vertically above critical speed
 * Expected result: fusion should take place
-*/
+* /
 TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters)
 {
 	float velocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -725,10 +726,10 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: two horizontal clusters are approaching each others vertically below critical speed
 * Expected result: fusion should take place
-*/
+* /
 TEST_F(ClusterGpuTests, testNoFusionOfHorizontalClusters)
 {
 	float velocity = static_cast<float>(_parameters.cellFusionVelocity) - 0.1f;
@@ -748,10 +749,10 @@ TEST_F(ClusterGpuTests, testNoFusionOfHorizontalClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: two line clusters are approaching each others during rotation
 * Expected result: fusion should take place with correct (angular) velocity
-*/
+* /
 TEST_F(ClusterGpuTests, testFusionOfLineClusters_duringRotation)
 {
 	float fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -780,10 +781,10 @@ TEST_F(ClusterGpuTests, testFusionOfLineClusters_duringRotation)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: two horizontal clusters with a position offset are approaching
 * Expected result: fusion should take place with correct (angular) velocity
-*/
+* /
 TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_partialContact)
 {
 	float fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -812,10 +813,10 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_partialContact)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: two horizontal clusters are approaching each others horizontally at universe boundary
 * Expected result: fusion should take place
-*/
+* /
 TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_atUniverseBoundary)
 {
 	auto fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -835,10 +836,10 @@ TEST_F(ClusterGpuTests, testFusionOfHorizontalClusters_atUniverseBoundary)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: one fast moving but not rotating cluster
 * Expected result: no cells are destroyed
-*/
+* /
 TEST_F(ClusterGpuTests, testFastMovingCluster)
 {
 	float cellMaxForce = static_cast<float>(_parameters.cellMaxForce);
@@ -854,10 +855,10 @@ TEST_F(ClusterGpuTests, testFastMovingCluster)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: cluster rotating very very fast
 * Expected result: cells are destroyed because of high forces
-*/
+* /
 TEST_F(ClusterGpuTests, testFastRotatingCluster)
 {
 	DataDescription origData;
@@ -877,13 +878,13 @@ TEST_F(ClusterGpuTests, testFastRotatingCluster)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation:
 *	- destruction of cells in two overlapping clusters
 *	- important: NUM_THREADS_PER_BLOCK should be at least 128
 * Expected result: no crash
 * Fixed error: problem due to missing __synchtreads call
-*/
+* /
 TEST_F(ClusterGpuTests, regressionTestOverlappingRectangleClusters_manyThreadsPerBlocks)
 {
 	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
@@ -896,13 +897,13 @@ TEST_F(ClusterGpuTests, regressionTestOverlappingRectangleClusters_manyThreadsPe
 	EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(1, _controller));
 }
 
-/**
+/ **
 * Situation: many overlapping and fast moving clusters
 * Expected result: no crash (test should be run at least 10 times)
 * Fixed errors:
 *	- crash in case of three fusions (error in DoubleLocker)
 *	- fusion may lead to wrong CellData::numConnections
-*/
+* /
 TEST_F(ClusterGpuTests, regressionTestManyOverlappingRectangleClusters)
 {
 	float closeDistance = static_cast<float>(_parameters.cellMinDistance) / 2.0f;
@@ -948,13 +949,13 @@ public:
 };
 
 
-/**
+/ **
 * Situation:
 *	- many moving rectangular clusters
 *	- important: NUM_THREADS_PER_BLOCK should be at least 128 and run in release build
 * Expected result: distance to connecting cells are admissible
 * Fixed error: distance to connecting cells are too large (calculation of invRotMatrix in processingDataCopyWithDecomposition)
-*/
+* /
 TEST_F(ClusterGpuWithManyThreadsPerBlockTests, regressionTestManyRectangleClusters)
 {
 	DataDescription origData;
@@ -968,12 +969,12 @@ TEST_F(ClusterGpuWithManyThreadsPerBlockTests, regressionTestManyRectangleCluste
 	checkCellConnections(newData);
 }
 
-/**
+/ **
 * Situation: many moving rectangular clusters concentrated at boundary
 * Expected result: distance to connecting cells are admissible
 * Fixed error: distance to connecting cells are too large in release build
 *			   due to missing initialization in BasicMap::correctionIncrement
-*/
+* /
 TEST_F(ClusterGpuTests, regressionTestManyRectangleClusters_concentratedAtUniverseBoundary)
 {
 	DataDescription origData;
@@ -990,11 +991,11 @@ TEST_F(ClusterGpuTests, regressionTestManyRectangleClusters_concentratedAtUniver
 	checkCellConnections(newData);
 }
 
-/**
+/ **
 * Situation: two colliding clusters where one of them loses a cell
 * Expected result: energy balance fulfilled
 * Fixed error: after collision cell velocities were not updated
-*/
+* /
 TEST_F(ClusterGpuTests, regressionTestEnergyBalanceDuringCollisionAndDecomposition)
 {
     DataDescription origData;
@@ -1043,11 +1044,11 @@ public:
     virtual ~ClusterGpuWithOneBlockTests() = default;
 };
 
-/**
+/ **
 * Situation: three overlapping clusters with high velocity differences
 * Expected result: energy balance fulfilled
 * Fixed error: particles were not always constructed after cell death
-*/
+* /
 TEST_F(ClusterGpuWithOneBlockTests, regressionTestThreeOverlappingClusters)
 {
     _parameters.radiationProb = 0;
@@ -1069,14 +1070,14 @@ TEST_F(ClusterGpuWithOneBlockTests, regressionTestThreeOverlappingClusters)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: three clusters:
 *   - one standing in the middel
 *   - left cluster approaches for fusion
 *   - right cluster approaches for collision with high velocity
 * Expected result: energy inequality fulfilled
 * Fixed error: dying cells led to several particles in processingCellDeath_block when fusion takes place simultaneously
-*/
+* /
 TEST_F(ClusterGpuWithOneBlockTests, regressionTestFusionAndHeavyCollision)
 {
     auto const fusionVelocity = static_cast<float>(_parameters.cellFusionVelocity) + 0.1f;
@@ -1127,3 +1128,4 @@ TEST_F(ClusterGpuTests, testSimultaneousCollisionOfBlocks)
 
     check(origData, newData);
 }
+*/

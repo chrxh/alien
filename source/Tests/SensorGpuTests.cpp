@@ -1,3 +1,4 @@
+/*
 #include "IntegrationGpuTestFramework.h"
 #include "EngineInterface/QuantityConverter.h"
 
@@ -31,9 +32,9 @@ protected:
     void runStandardTest(TestParameters const& testParameters, Expectations const& expectations) const;
 };
 
-/************************************************************************/
-/* Implementation                                                       */
-/************************************************************************/
+/ ************************************************************************ /
+/ * Implementation                                                       * /
+/ ************************************************************************ /
 
 void SensorGpuTests::SetUp()
 {
@@ -292,3 +293,4 @@ TEST_F(SensorGpuTests, testSearchTowardCenter_scanMassToFar)
             .repetitionOfCluster({10, 10}),
         Expectations().command(Enums::SensorOut::NOTHING_FOUND));
 }
+*/

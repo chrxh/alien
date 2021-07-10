@@ -1,3 +1,4 @@
+/*
 #include "Base/ServiceLocator.h"
 #include "EngineInterface/QuantityConverter.h"
 #include "EngineInterface/DescriptionFactory.h"
@@ -24,9 +25,9 @@ protected:
 };
 
 
-/************************************************************************/
-/* Implementation                                                       */
-/************************************************************************/
+/ ************************************************************************ /
+/ * Implementation                                                       * /
+/ ************************************************************************ /
 
 void ScannerGpuTests::SetUp()
 {
@@ -95,12 +96,12 @@ TEST_F(ScannerGpuTests, testScanOriginCell)
     EXPECT_EQ(2, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 1
 * Expected result: correct cell (at (2, 3)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanSecondCell)
 {
     DataDescription origData;
@@ -134,12 +135,12 @@ TEST_F(ScannerGpuTests, testScanSecondCell)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 2
 * Expected result: correct cell (at (2, 4)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanThirdCell)
 {
     DataDescription origData;
@@ -178,12 +179,12 @@ TEST_F(ScannerGpuTests, testScanThirdCell)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - hexagon cluster with 3 layers (edge length) with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 3
 * Expected result: correct cell (at (3, 4)-position of the hexagon) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanFourthCell_onHexagon)
 {
     auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
@@ -227,12 +228,12 @@ TEST_F(ScannerGpuTests, testScanFourthCell_onHexagon)
     EXPECT_EQ(19, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 9
 * Expected result: correct cell (at (1, 2)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanDistantCell)
 {
     DataDescription origData;
@@ -275,12 +276,12 @@ TEST_F(ScannerGpuTests, testScanDistantCell)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 24
 * Expected result: correct cell (at (1, 1)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanFinished)
 {
     DataDescription origData;
@@ -323,12 +324,12 @@ TEST_F(ScannerGpuTests, testScanFinished)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 25
 * Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanRestart1)
 {
     DataDescription origData;
@@ -361,12 +362,12 @@ TEST_F(ScannerGpuTests, testScanRestart1)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 180
 * Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanRestart2)
 {
     DataDescription origData;
@@ -399,12 +400,12 @@ TEST_F(ScannerGpuTests, testScanRestart2)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 5x5 cluster with scanner function at middle cell
 *            - token coming from left
 *            - scanning cell number is 255
 * Expected result: correct cell (at (3, 3)-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanMaxCellNumber)
 {
     DataDescription origData;
@@ -437,12 +438,12 @@ TEST_F(ScannerGpuTests, testScanMaxCellNumber)
     EXPECT_EQ(25, newToken.data->at(Enums::Scanner::OUT_MASS));
 }
 
-/**
+/ **
 * Situation: - 260 cluster with scanner function at first cell
 *            - token coming from second cell
 *            - scanning cell number is 255
 * Expected result: correct cell (at 257-position of the cluster) should be scanned
-*/
+* /
 TEST_F(ScannerGpuTests, testScanMaxCellNumber_largeCluster)
 {
     DataDescription origData;
@@ -484,3 +485,4 @@ TEST_F(ScannerGpuTests, testScanMaxCellNumber_largeCluster)
     EXPECT_EQ(0, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
     EXPECT_EQ(255, static_cast<unsigned char>(newToken.data->at(Enums::Scanner::OUT_MASS)));
 }
+*/

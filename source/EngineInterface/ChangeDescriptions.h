@@ -6,7 +6,7 @@ struct ENGINEINTERFACE_EXPORT ConnectionChangeDescription
 {
     uint64_t cellId;
     float distance;
-    float angleToPrevious;
+    float angleFromPrevious;
     bool operator==(ConnectionChangeDescription const& other) const
     {
         if (cellId != other.cellId) {
@@ -15,7 +15,7 @@ struct ENGINEINTERFACE_EXPORT ConnectionChangeDescription
         if (distance != other.distance) {
             return false;
         }
-        if (angleToPrevious != other.angleToPrevious) {
+        if (angleFromPrevious != other.angleFromPrevious) {
             return false;
         }
 		return true;
@@ -137,11 +137,6 @@ struct ENGINEINTERFACE_EXPORT DataChangeDescription
 	{
 		return cells.empty() && particles.empty();
 	}
-
-	private:
-
-	//TODO #SoftBody
-    void completeConnections();
 };
 
 

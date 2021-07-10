@@ -16,7 +16,7 @@ namespace
             ConnectionChangeDescription connectionChange;
             connectionChange.cellId = connection.cellId;
             connectionChange.distance = connection.distance;
-            connectionChange.angleToPrevious = connection.angleToPrevious;
+            connectionChange.angleFromPrevious = connection.angleFromPrevious;
             result.emplace_back(connectionChange);
         }
         return result;
@@ -27,7 +27,8 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 {
 	id = desc.id;
 	pos = desc.pos;
-	energy = desc.energy;
+    vel = desc.vel;
+    energy = desc.energy;
 	maxConnections = desc.maxConnections;
     connectingCells = convert(desc.connections);
 	tokenBlocked = desc.tokenBlocked;
@@ -42,7 +43,8 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
 {
 	id = after.id;
 	pos = ValueTracker<QVector2D>(before.pos, after.pos);
-	energy = ValueTracker<double>(before.energy, after.energy);
+    vel = ValueTracker<QVector2D>(before.vel, after.vel);
+    energy = ValueTracker<double>(before.energy, after.energy);
 	maxConnections = ValueTracker<int>(before.maxConnections, after.maxConnections);
     connectingCells =
         ValueTracker<list<ConnectionChangeDescription>>(convert(before.connections), convert(after.connections));
@@ -88,12 +90,9 @@ DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 	if (desc.clusters) {
 		for (auto const& cluster : *desc.clusters) {
             for (auto const& [index, cell] : *cluster.cells | boost::adaptors::indexed(0)) {
-                CellChangeDescription cellChange(cell);
-                cellChange.vel = *cluster.vel;	//TODO #SoftBody
-                addNewCell(cellChange);
+                addNewCell(cell);
             }
 		}
-        completeConnections();
 	}
 	if (desc.particles) {
 		for (auto const& particle : *desc.particles) {
@@ -104,25 +103,6 @@ DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 
 DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
-    //TODO #SoftBody
-    std::unordered_map<uint64_t, QVector2D> cellVelByIdBefore;
-    std::unordered_map<uint64_t, QVector2D> cellVelByIdAfter;
-    if (dataBefore.clusters) {
-        for (auto const& cluster : *dataBefore.clusters) {
-            for (auto const& cell : *cluster.cells) {
-                cellVelByIdBefore.insert_or_assign(cell.id, *cluster.vel);
-            }
-        }
-    }
-    if (dataAfter.clusters) {
-        for (auto const& cluster : *dataAfter.clusters) {
-            for (auto const& cell : *cluster.cells) {
-                cellVelByIdAfter.insert_or_assign(cell.id, *cluster.vel);
-            }
-        }
-    }
-    //---
-
 	if (dataBefore.clusters && dataAfter.clusters) {
         std::vector<CellDescription> cellsBefore;
         std::vector<CellDescription> cellsAfter;
@@ -148,10 +128,6 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
                 auto const& cellAfter = cellsAfter.at(cellAfterIndex);
 				CellChangeDescription change(cellBefore, cellAfter);
 				if (!change.isEmpty()) {
-					//TODO #SoftBody
-                    change.vel = ValueTracker<QVector2D>(
-                        cellVelByIdBefore.at(cellBefore.id), cellVelByIdAfter.at(cellAfter.id));
-					//---
 					addModifiedCell(change);
 				}
 				cellsAfterIndicesByIds.erase(cellBefore.id);
@@ -161,9 +137,6 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		for (auto const& cellAfterIndex : cellsAfterIndicesByIds | boost::adaptors::map_values) {
             auto const& cellAfter = cellsAfter.at(cellAfterIndex);
             CellChangeDescription change(cellAfter);
-            //TODO #SoftBody
-            change.vel = cellVelByIdAfter.at(cellAfter.id);
-            //---
             addNewCell(change);
 		}
 	}
@@ -171,14 +144,10 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		for (auto const& clusterAfter : *dataAfter.clusters) {
             for (auto const& cellAfter : *clusterAfter.cells) {
                 CellChangeDescription change(cellAfter);
-                //TODO #SoftBody
-                change.vel = cellVelByIdAfter.at(cellAfter.id);
-                //---
                 addNewCell(change);
             }
 		}
 	}
-    completeConnections();
 
 	if (dataBefore.particles && dataAfter.particles) {
 		unordered_map<uint64_t, int> particleAfterIndicesByIds;
@@ -212,28 +181,5 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 			addNewParticle(ParticleChangeDescription(particleAfter));
 		}
 	}
-}
-
-void DataChangeDescription::completeConnections()
-{
-    std::unordered_map<uint64_t, int> cellIndexById;
-    for (auto const& [index, cell] : cells | boost::adaptors::indexed(0)) {
-        if (cell.isDeleted()) {
-			continue;
-        }
-        cellIndexById.insert_or_assign(cell->id, index);
-    }
-    for (auto& cell : cells) {
-        std::list<ConnectionChangeDescription> connections;
-        for (auto& connectingCell : *cell->connectingCells) {
-            auto const& connectingCellDesc = cells.at(cellIndexById.at(connectingCell.cellId));
-
-            //TODO #SoftBody
-            if (0 == connectingCell.distance) {
-                connectingCell.distance = (*connectingCellDesc->pos - *cell->pos).length();
-            }
-            //TODO angleToPrevious
-        }
-    }
 }
 
