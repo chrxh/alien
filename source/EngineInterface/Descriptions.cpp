@@ -22,7 +22,7 @@ namespace
             ConnectionDescription connection;
             connection.cellId = connectionChange.cellId;
             connection.distance = connectionChange.distance;
-            connection.angleToPrevious = connectionChange.angleToPrevious;
+            connection.angleFromPrevious = connectionChange.angleFromPrevious;
             result.emplace_back(connection);
         }
         return result;

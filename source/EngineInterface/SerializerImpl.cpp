@@ -5,6 +5,7 @@
 #include <boost/serialization/optional.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/range/adaptors.hpp>
 
 #include <QVector2D>
 
@@ -118,7 +119,7 @@ namespace boost {
         template <class Archive>
         inline void save(Archive& ar, ConnectionDescription const& connection, const unsigned int /*version*/)
         {
-            ar << connection.cellId << connection.distance << connection.angleToPrevious;
+            ar << connection.cellId << connection.distance << connection.angleFromPrevious;
         }
         template <class Archive>
         inline void serialize(Archive& ar, ConnectionDescription& data, const unsigned int version)
@@ -180,11 +181,48 @@ namespace boost {
 		{
 			ar & data.id & data.pos & data.vel & data.energy & data.metadata;
 		}
-		template<class Archive>
-		inline void serialize(Archive & ar, DataDescription& data, const unsigned int /*version*/)
-		{
-			ar & data.clusters & data.particles;
-		}
+
+        template <class Archive>
+        inline void save(Archive& ar, DataDescription const& data, const unsigned int /*version*/)
+        {
+            ar << data.clusters << data.particles;
+        }
+        template <class Archive>
+        inline void load(Archive& ar, DataDescription& data, const unsigned int /*version*/)
+        {
+            boost::optional<vector<ClusterDescription>> clusters;
+            ar >> clusters >> data.particles;
+
+            //TODO #SoftBody
+            if (clusters) {
+                for (auto& cluster : *clusters) {
+                    std::unordered_map<uint64_t, int> cellIndexById;
+                    for (auto const& [index, cell] : *cluster.cells | boost::adaptors::indexed(0)) {
+                        cellIndexById.insert_or_assign(cell.id, index);
+                    }
+                    for (auto& cell : *cluster.cells) {
+                        cell.vel = cluster.vel;
+                        if (cell.connections) {
+                            std::list<ConnectionDescription> connections;
+                            for (auto& connection : *cell.connections) {
+                                auto const& connectingCellDesc = cluster.cells->at(cellIndexById.at(connection.cellId));
+
+                                if (0 == connection.distance) {
+                                    connection.distance = (*connectingCellDesc.pos - *cell.pos).length();
+                                }
+                                //TODO angleFromPrevious
+                            }
+                        }
+                    }
+                }
+            }
+            data.clusters = clusters;
+        }
+		template <class Archive>
+        inline void serialize(Archive& ar, DataDescription& data, const unsigned int version)
+        {
+            boost::serialization::split_free(ar, data, version);
+        }
 
         template<class Archive>
 		inline void save(Archive& ar, SymbolTable const& data, const unsigned int /*version*/)

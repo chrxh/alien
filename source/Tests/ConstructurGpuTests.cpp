@@ -1,3 +1,4 @@
+/*
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
@@ -307,9 +308,9 @@ public:
     virtual ~ConstructorGpuWithHighBlockCountTests() = default;
 };
 
-/************************************************************************/
-/* Implementation                                                       */
-/************************************************************************/
+/ ************************************************************************ /
+/ * Implementation                                                       * /
+/ ************************************************************************ /
 
 void ConstructorGpuTests::SetUp()
 {
@@ -3004,3 +3005,4 @@ TEST_F(ConstructorGpuTests, regressionTestNegativeValueForCommand)
         runStartConstructionOnHorizontalClusterTest(StartConstructionOnHorizontalClusterTestParameters().token(token));
     _resultChecker->check(result, Expectations().tokenOutput(Enums::ConstrOut::SUCCESS));
 }
+*/

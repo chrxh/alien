@@ -28,14 +28,79 @@ class DataDescriptionTransferGpuTests
 	: public IntegrationGpuTestFramework
 {
 public:
-	DataDescriptionTransferGpuTests();
+    DataDescriptionTransferGpuTests()
+        : IntegrationGpuTestFramework({600, 300})
+    {}
+
+	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0)
+        const
+    {
+        QByteArray code("123123123");
+        QByteArray cellMemory(_parameters.cellFunctionComputerCellMemorySize, 0);
+        QByteArray tokenMemory(_parameters.tokenMemorySize, 0);
+        cellMemory[1] = 'a';
+        cellMemory[2] = 'b';
+        tokenMemory[0] = 't';
+        tokenMemory[3] = 's';
+        CellMetadata cellMetadata;
+        cellMetadata.color = 2;
+        cellMetadata.name = "name1";
+        cellMetadata.computerSourcecode = "code";
+        cellMetadata.description = "desc";
+        ClusterMetadata clusterMetadata;
+        clusterMetadata.name = "name2";
+
+        return ClusterDescription()
+            .addCell(CellDescription()
+                         .setCellFeature(CellFeatureDescription()
+                                             .setType(Enums::CellFunction::COMPUTER)
+                                             .setConstData(code)
+                                             .setVolatileData(cellMemory))
+                         .setId(cellId)
+                         .setPos({1, 2})
+                         .setVel({-1, 1})
+                         .setEnergy(_parameters.cellMinEnergy * 2)
+                         .setFlagTokenBlocked(true)
+                         .setMaxConnections(3)
+                         .setMetadata(cellMetadata)
+                         .setTokenBranchNumber(2)
+                         .setTokenUsages(3)
+                         .setTokens({TokenDescription().setData(tokenMemory).setEnergy(89)}))
+            .setId(clusterId)
+            .setPos({1, 2})
+            .setAngle(23)
+            .setAngularVel(1.2)
+            .setMetadata(clusterMetadata);
+    }
 };
 
-DataDescriptionTransferGpuTests::DataDescriptionTransferGpuTests()
-	: IntegrationGpuTestFramework({ 600, 300 })
+TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadClusterWithSingleCell)
 {
+    DataDescription dataBefore;
+    dataBefore.addCluster(createSingleCellClusterWithCompleteData());
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+
+    DataDescription dataAfter =
+        IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    checkCompatibility(dataBefore, dataAfter);
 }
 
+TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadRectangularClusters)
+{
+    DataDescription dataBefore;
+    dataBefore.addCluster(createRectangularCluster({1, 2}, QVector2D(10, 10)));
+    dataBefore.addCluster(createRectangularCluster({3, 5}, QVector2D(20, 10)));
+    dataBefore.addCluster(createRectangularCluster({8, 2}, QVector2D(10, 20)));
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+
+    DataDescription dataAfter =
+        IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    checkCompatibility(dataBefore, dataAfter);
+}
+
+/*
 TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
 {
 	DataDescription dataBefore;
@@ -47,10 +112,10 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
     checkCompatibility(dataBefore, dataAfter);
 }
 
-/**
+/ **
 * Situation: add token to cell
 * Expected result: token in simulation added
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testAddToken)
 {
 	DataDescription dataBefore;
@@ -72,10 +137,10 @@ TEST_F(DataDescriptionTransferGpuTests, testAddToken)
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: change cell with token
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_changeClusterId)
 {
 	auto cluster = createSingleCellCluster(_numberGen->getId(), _numberGen->getId());
@@ -98,11 +163,11 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_changeClusterId)
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: - one cell has a token
 *			 - add further token
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_addSecondToken)
 {
 	auto token = createSimpleToken();
@@ -130,12 +195,12 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithToken_addSecondToken)
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: - one cluster has two cells
 *			 - one of its cells has a token, the other not
 *			 - add further token to other cell
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testChangeClusterWithToken_addSecondToken)
 {
 	auto token = createSimpleToken();
@@ -162,12 +227,12 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeClusterWithToken_addSecondToke
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: - one cluster with one cell and one token
 *			 - an other cluster with one cell and two tokens
 *			 - position of first cluster is changed
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithSeveralTokens)
 {
 	auto token = createSimpleToken();
@@ -202,12 +267,12 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeCellWithSeveralTokens)
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: - cluster with one cell and one token
 *			 - an other cluster with one cell and two tokens
 *			 - first cluster is removed
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testRemoveCellWithToken)
 {
 	auto token = createSimpleToken();
@@ -236,10 +301,10 @@ TEST_F(DataDescriptionTransferGpuTests, testRemoveCellWithToken)
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: change particle properties
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testChangeParticle)
 {
 	DataDescription dataBefore;
@@ -261,10 +326,10 @@ TEST_F(DataDescriptionTransferGpuTests, testChangeParticle)
     checkCompatibility(dataChanged, dataAfter);
 }
 
-/**
+/ **
 * Situation: create cluster and particle at a position outside universe
 * Expected result: cluster and particle should be positioned inside universe due to torus topology
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, testCreateDataOutsideBoundaries)
 {
 	auto universeSize = _spaceProp->getSize();
@@ -293,13 +358,13 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateDataOutsideBoundaries)
 	checkCompatibility(*origParticle.pos - QVector2D{ 2.0f * universeSize.x, 2.0f * universeSize.y }, *newParticle.pos);
 }
 
-/**
+/ **
 * Situation:
 * 	- one cluster with 10x10 cell and one particle
 *	- particle and some cells are moved via update
 * Fixed error: crash after moving cells in a cluster in item view
 * Expected result: no crash
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, regressionTestChangeData)
 {
 	auto descHelper = _basicFacade->buildDescriptionHelper();
@@ -327,12 +392,12 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestChangeData)
 	EXPECT_NO_THROW(IntegrationTestHelper::updateData(_access, _context, DataChangeDescription(dataBefore, dataModified)));
 }
 
-/**
+/ **
 * Situation:
 * 	- one cluster with one cell and one token is moved
 * Fixed error: token was removed in DataConverter::processModifications
 * Expected result: token is still there
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken)
 {
     DataDescription origData;
@@ -360,13 +425,13 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken)
     EXPECT_EQ(1, newCell.tokens->size());
 }
 
-/**
+/ **
 * Situation:
 * 	- two cluster with one cell each and one token
 *   - move one cluster by updating only a part of the universe where that cluster is situated
 * Fixed error: tokens were not correctly filtered in AccessKernel
 * Expected result: changes are correctly transferred to simulation
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken_partialUpdate)
 {
     auto token = createSimpleToken();
@@ -400,10 +465,10 @@ TEST_F(DataDescriptionTransferGpuTests, regressionTestMoveCellWithToken_partialU
     EXPECT_EQ(2, numToken);
 }
 
-/**
+/ **
 * Situation: partial update and running simulation several times
 * Fixed error: particles with same id emerged (due to particles array swap in setSimulationAccessData)
-*/
+* /
 TEST_F(DataDescriptionTransferGpuTests, regressionTestRepeatingPartialUpdateAndRun)
 {
     DataDescription origData;
@@ -473,3 +538,4 @@ TEST_F(DataDescriptionTransferGpuTestsWithMinClusterArraySizes, testMaxCluster)
         IntegrationTestHelper::updateData(_access, _context, data);
     }
 }
+*/

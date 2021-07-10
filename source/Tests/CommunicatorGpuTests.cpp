@@ -1,3 +1,4 @@
+/*
 #include "Base/ServiceLocator.h"
 #include "IntegrationGpuTestFramework.h"
 #include "EngineInterface/DescriptionFactory.h"
@@ -69,9 +70,9 @@ protected:
 };
 
 
-/************************************************************************/
-/* Implementation                                                       */
-/************************************************************************/
+/ ************************************************************************ /
+/ * Implementation                                                       * /
+/ ************************************************************************ /
 
 void CommunicatorGpuTests::SetUp()
 {
@@ -364,3 +365,4 @@ TEST_F(CommunicatorGpuTests, testTwoSendersAndTwoReceiversWithDifferentChannels)
              CommunicatorResult().messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES).message(123),
              CommunicatorResult().messageReceived(Enums::CommunicatorOutReceivedNewMessage::YES).message(124)}));
 }
+*/

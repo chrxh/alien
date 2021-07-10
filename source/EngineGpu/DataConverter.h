@@ -14,7 +14,10 @@ public:
 	DataDescription getDataDescription() const;
 
 private:
-    void addCell(CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int>& cellIndexTOByIds);
+    ClusterDescription scanAndCreateClusterDescription(int startCellIndex, std::set<int>& freeCellIndices) const;
+    CellDescription createCellDescription(int cellIndex) const;
+
+	void addCell(CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int>& cellIndexTOByIds);
     void addParticle(ParticleDescription const& particleDesc);
 
 	void markDelCell(uint64_t cellId);

@@ -281,7 +281,7 @@ __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rec
             auto connectingCell = cell->connections[i].cell;
             cellTO.connections[i].cellIndex = connectingCell - firstCell;
             cellTO.connections[i].distance = cell->connections[i].distance;
-            cellTO.connections[i].angleToPrevious = cell->connections[i].angleToPrevious;
+            cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
         }
         for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
             cellTO.staticData[i] = cell->staticData[i];

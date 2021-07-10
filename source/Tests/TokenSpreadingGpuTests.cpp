@@ -1,3 +1,4 @@
+/*
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SerializationHelper.h"
 
@@ -47,12 +48,12 @@ ClusterDescription TokenSpreadingGpuTests::createStickyRotatingTokenCluster(
 }
 
 
-/**
+/ **
 * Situation: - one horizontal cluster with 10 cells and ascending branch numbers
 *			 - first cell has a token
 *			 - simulating 9 time steps
 * Expected result: token should be on the last cell
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
 {
 	DataDescription origData;
@@ -95,12 +96,12 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - 50 horizontal cluster with 100 cells each and ascending branch numbers
 *			 - first cell on each cluster has cellMaxToken-many tokens
 *			 - simulating 99 time steps
 * Expected result: cellMaxToken-many tokens should be on the last cell of each cluster
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_manyLargeClusters)
 {
 	DataDescription origData;
@@ -152,13 +153,13 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_manyLargeClu
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 3 cells and branch numbers (0, 1, 0)
 *			 - first cell has 1 token
 *			 - third cell has 1 token
 *			 - simulating one time step
 * Expected result: second cell should have 2 tokens
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementWithEncounter)
 {
 	DataDescription origData;
@@ -204,12 +205,12 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithEncounter)
 }
 
 
-/**
+/ **
 * Situation: - one horizontal cluster with 10 cells and equal branch numbers
 *			 - first cell has a token
 *			 - simulating one time step
 * Expected result: no token should be on the cells
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers)
 {
 	DataDescription origData;
@@ -268,13 +269,13 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers_negativeVa
     EXPECT_TRUE(!newSecondCell.tokens || (0 == newSecondCell.tokens->size()));
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 10 cells and ascending branch numbers
 *			 - first cell has a token
 *            - last cell has flag tokenBlocked
 *			 - simulating 9 time steps
 * Expected result: no token should be on the cells
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementBlocked)
 {
 	DataDescription origData;
@@ -313,12 +314,12 @@ TEST_F(TokenSpreadingGpuTests, testMovementBlocked)
 }
 
 
-/**
+/ **
 * Situation: - one horizontal cluster with 3 cells and branch numbers (1, 0, 1)
 *			 - second cell has a token
 *			 - simulating one time step
 * Expected result: there should be two tokens: on the first and last cell
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testForking)
 {
 	DataDescription origData;
@@ -359,14 +360,14 @@ TEST_F(TokenSpreadingGpuTests, testForking)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 3 cells and branch numbers (1, 0, 1)
 *			 - second cell has a token
 *            - cells have low internal energy 
 *			 - simulating one time step
 * Expected result: there should be two tokens:
 *                  on the first and last cell with half of the energy as of the initial token
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testForking_lowCellEnergies)
 {
     DataDescription origData;
@@ -414,13 +415,13 @@ TEST_F(TokenSpreadingGpuTests, testForking_lowCellEnergies)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 5 cells and branch numbers (0, 1, 2, 1, 0)
 *			 - first and last cell has a token
 *			 - middle cell has too low energy
 *			 - simulating 1 time step
 * Expected result: cluster decomposes into two cluster, each still has a token
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementDuringDecomposition)
 {
 	DataDescription origData;
@@ -566,7 +567,7 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterSecondFusion)
 }
 
 
-/**
+/ **
 * Situation: - two horizontal clusters with each 2 cells and branch numbers (0, 1)
 *			 - each cluster has token on its first cell
 *			 - clusters are colliding for fusion
@@ -577,7 +578,7 @@ TEST_F(TokenSpreadingGpuTests, testCreationAfterSecondFusion)
 *			 - second cell has one token from spreading + one token from fusion
 *			 - third cell has one token from fusion
 *			 - fourth cell has one token from spreading
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
 {
 	DataDescription origData;
@@ -622,13 +623,13 @@ TEST_F(TokenSpreadingGpuTests, testMovementDuringFusion)
     EXPECT_EQ(1, newFourthCell.tokens->size());
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 3 cells and branch numbers (0, 1, 0)
 *			 - first cell has cellMaxToken tokens
 *			 - third cell has 1 token
 *			 - simulating one time step
 * Expected result: second cell should have cellMaxToken tokens
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementWithTooManyTokens)
 {
 	DataDescription origData;
@@ -671,14 +672,14 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithTooManyTokens)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 2 cells and ascending branch numbers
 *			 - first cell has a token
 *            - first cell has less energy than second cell
 *			 - simulating one time step
 *            - no radiation
 * Expected result: both cell should have same energy, energy balance fulfilled
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementAveragingCellEnergies)
 {
     DataDescription origData;
@@ -711,12 +712,12 @@ TEST_F(TokenSpreadingGpuTests, testMovementAveragingCellEnergies)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one rectangular cluster with 100x100 cells and random branch numbers
 *			 - each cell has random number of tokens
 *			 - simulating 100 time steps
 * Expected result: 100x100 cluster should still be there, energy balance fulfilled
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMassiveMovements)
 {
     auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -748,13 +749,13 @@ TEST_F(TokenSpreadingGpuTests, testMassiveMovements)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - horizontal cluster with 3 cells and ascending branch numbers
 *  			 - first cell has a token
 *            - first and second cell have low energy
 *			 - simulating 1 time step
 * Expected result: low energy cells including token should be destroyed
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_lowEnergy)
 {
     auto cellMinEnergy = _parameters.cellMinEnergy;
@@ -788,13 +789,13 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_lowEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - horizontal cluster with 3 cells and ascending branch numbers
 *   			 - first cell has a token
 *            - further horizontal cluster with 5 cells which overlaps
 *			 - simulating 1 time step
 * Expected result: overlapping cells of the smaller cluster should be destroyed and token should be moved
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
 {
     auto lowDistance = _parameters.cellMinDistance / 2;
@@ -861,12 +862,12 @@ TEST_F(TokenSpreadingGpuTests, testMovementOnDestroyedCell_closeCell)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - many 2x2 clusters with circular ascending branch numbers
 *  			 - first cell of each cluster has a token
 *			 - simulating 100 time steps
 * Expected result: no crash
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, regressionTestManyStickyRotatingTokenClusters)
 {
     auto const highVel = _parameters.cellFusionVelocity*2;
@@ -888,12 +889,12 @@ TEST_F(TokenSpreadingGpuTests, regressionTestManyStickyRotatingTokenClusters)
     IntegrationTestHelper::runSimulation(100, _controller);
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with 2 cells and ascending branch numbers
 *			 - first cell has a token with low energy
 *			 - simulating 1 time step
 * Expected result: energy balance fulfilled
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, regressionTestLowTokenEnergy)
 {
     auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
@@ -929,14 +930,14 @@ TEST_F(TokenSpreadingGpuTests, regressionTestLowTokenEnergy)
     check(origData, newData);
 }
 
-/**
+/ **
 * Situation: - one horizontal cluster with ascending branch numbers
 *            - first cell has token
 *			 - first and second cell have low energy
 *            - cluster approaches other cluster with fusion velocity
 *			 - simulating 1 time step
 * Expected result: energy balance fulfilled
-*/
+* /
 TEST_F(TokenSpreadingGpuTests, regressionTestMovementOnLowEnergyCellWithSimultaneousFusion)
 {
     auto const cellMinEnergy = _parameters.cellMinEnergy;
@@ -998,3 +999,4 @@ TEST_F(TokenSpreadingGpuTests, testCellDecayDueToTokenUsage)
     EXPECT_GE(2, newCluster.cells->size());
 
 }
+*/

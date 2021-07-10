@@ -30,6 +30,7 @@ public:
 	virtual ~IntegrationGpuTestFramework();
 
 protected:
+/*
     void check(DataDescription const& origData, DataDescription const& newData) const;
 
     void checkCellAttributes(DataDescription const& data) const;
@@ -48,6 +49,7 @@ protected:
     void checkKineticEnergy(DataDescription const& origData, DataDescription const& newData) const;
     void checkEnergyValue(double value) const;
 
+*/
 protected:
 	double const NearlyZero = FLOATINGPOINT_MEDIUM_PRECISION;
 

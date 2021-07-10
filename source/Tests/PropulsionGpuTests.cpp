@@ -1,3 +1,4 @@
+/*
 #include "Base/ServiceLocator.h"
 #include "EngineInterface/QuantityConverter.h"
 #include "EngineInterface/Serializer.h"
@@ -283,13 +284,13 @@ TEST_F(PropulsionGpuTests, testSlowdown)
     EXPECT_GT(0.3f - SmallVelocity, velocities.linear.length());
 }
 
-/**
+/ **
 * Situation: - two clusters with identical cells
 *			 - first cluster has "cellMaxToken" tokens on one cell
 *            - second cluster has one token
 *			 - simulating one time steps executing same propulsion function
 * Expected result: first cluster has "cellMaxToken" times higher velocity than second one
-*/
+* /
 TEST_F(PropulsionGpuTests, testParallelization1)
 {
     auto const& cellMaxToken = _parameters.cellMaxToken;
@@ -315,13 +316,13 @@ TEST_F(PropulsionGpuTests, testParallelization1)
     checkCompatibility(static_cast<float>(cellMaxToken), newCluster1.vel->length() / newCluster2.vel->length());
 }
 
-/**
+/ **
 * Situation: - two rectangular clusters with identical cells
 *			 - first cluster has two tokens on different cells
 *            - second cluster has one token
 *			 - simulating one time steps executing same propulsion function
 * Expected result: first cluster has two times higher velocity than second one
-*/
+* /
 TEST_F(PropulsionGpuTests, testParallelization2)
 {
     auto token = createSimpleToken();
@@ -390,3 +391,4 @@ TEST_F(PropulsionGpuTests, regressionTestNegativeValueForCommand)
     EXPECT_EQ(Enums::PropOut::SUCCESS, propOut);
     EXPECT_GT(0.3f - SmallVelocity, velocities.linear.length());
 }
+*/
