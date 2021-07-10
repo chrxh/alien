@@ -13,7 +13,7 @@ public:
 	virtual ~IntegrationTestFramework();
 
 protected:
-
+/*
     enum class Boundary {Sticky, NonSticky};
     ClusterDescription createRectangularCluster(
         IntVector2D const& size,
@@ -22,7 +22,7 @@ protected:
         Boundary boundary = Boundary::NonSticky) const;
 
     //important: boost::none means random
-/*    ClusterDescription createLineCluster(int numCells,
+    ClusterDescription createLineCluster(int numCells,
 		boost::optional<QVector2D> const& centerPos = boost::none,
 		boost::optional<QVector2D> const& centerVel = boost::none,
 		boost::optional<double> const& angle = boost::none,

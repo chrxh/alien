@@ -27,6 +27,7 @@ IntegrationTestFramework::~IntegrationTestFramework()
 {
 }
 
+/*
 ClusterDescription IntegrationTestFramework::createRectangularCluster(
     IntVector2D const& size,
     boost::optional<QVector2D> const& centerPos,
@@ -100,7 +101,6 @@ ClusterDescription IntegrationTestFramework::createRectangularCluster(
     return cluster;
 }
 
-/*
 ClusterDescription IntegrationTestFramework::createSingleCellClusterWithCompleteData(uint64_t clusterId / *= 0* /, uint64_t cellId / *= 0* /) const
 {
 	QByteArray code("123123123");

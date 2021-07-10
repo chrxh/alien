@@ -8,6 +8,7 @@
 #include "EngineInterface/EngineInterfaceBuilderFacade.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionFactory.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SpaceProperties.h"
 #include "EngineInterface/SimulationAccess.h"
@@ -29,7 +30,7 @@ class DataDescriptionTransferGpuTests
 {
 public:
     DataDescriptionTransferGpuTests()
-        : IntegrationGpuTestFramework({600, 300})
+        : IntegrationGpuTestFramework()
     {}
 
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0)
@@ -86,12 +87,20 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadClusterWithSingleCell)
     checkCompatibility(dataBefore, dataAfter);
 }
 
-TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadRectangularClusters)
+TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadHexagonalClusters)
 {
+    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+
     DataDescription dataBefore;
-    dataBefore.addCluster(createRectangularCluster({1, 2}, QVector2D(10, 10)));
-    dataBefore.addCluster(createRectangularCluster({3, 5}, QVector2D(20, 10)));
-    dataBefore.addCluster(createRectangularCluster({8, 2}, QVector2D(10, 20)));
+    dataBefore.addCluster(factory->createHexagon(
+        DescriptionFactory::CreateHexagonParameters().layers(2).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator()));
+    dataBefore.addCluster(factory->createHexagon(
+        DescriptionFactory::CreateHexagonParameters().layers(3).centerPosition(QVector2D(20, 10)),
+        _context->getNumberGenerator()));
+    dataBefore.addCluster(factory->createHexagon(
+        DescriptionFactory::CreateHexagonParameters().layers(4).centerPosition(QVector2D(10, 20)), _context->getNumberGenerator()));
+
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
 
     DataDescription dataAfter =
