@@ -10,6 +10,9 @@ public:
     ClusterDescription createHexagon(CreateHexagonParameters const& parameters, NumberGenerator* numberGenerator)
         const override;
 
+    ClusterDescription createRect(CreateRectParameters const& parameters, NumberGenerator* numberGenerator)
+        const override;
+
     ClusterDescription createUnconnectedDisc(CreateDiscParameters const& parameters) const override;
 
     void generateBranchNumbers(
