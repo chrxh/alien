@@ -2,6 +2,7 @@
 
 #include "Descriptions.h"
 #include "ChangeDescriptions.h"
+#include "Physics.h"
 
 
 bool TokenDescription::operator==(TokenDescription const& other) const {
@@ -44,18 +45,6 @@ CellDescription::CellDescription(CellChangeDescription const & change)
 	cellFeature = static_cast<boost::optional<CellFeatureDescription>>(change.cellFeatures);
 	tokens = static_cast<boost::optional<vector<TokenDescription>>>(change.tokens);
     tokenUsages = static_cast<boost::optional<int>>(change.tokenUsages);
-}
-
-CellDescription& CellDescription::addConnection(CellDescription const& otherCell)
-{
-	if (!connections) {
-		connections = list<ConnectionDescription>();
-	}
-    ConnectionDescription connection;
-    connection.cellId = otherCell.id;
-    connection.distance = (*pos - *otherCell.pos).length();
-    connections->emplace_back(connection);
-	return *this;
 }
 
 CellDescription& CellDescription::addToken(TokenDescription const& value)
@@ -102,6 +91,67 @@ bool CellDescription::isConnectedTo(uint64_t id) const
         != connections->end();
 }
 
+ClusterDescription& ClusterDescription::addConnection(
+    uint64_t const& cellId1,
+    uint64_t const& cellId2,
+    std::unordered_map<uint64_t, int>& cache)
+{
+    auto& cell1 = getCellRef(cellId1, cache);
+    auto& cell2 = getCellRef(cellId2, cache);
+
+	auto addConnection = [this, &cache](auto& cell, auto& otherCell) {
+        if (!cell.connections) {
+            cell.connections = list<ConnectionDescription>();
+        }
+        CHECK(cell.connections->size() < *cell.maxConnections);
+
+        list<ConnectionDescription> newConnections;
+        auto newAngle = Physics::angleOfVector(*otherCell.pos - *cell.pos);
+
+        float sumPrevAngle = 0;
+        float sumAngle = 0;
+        auto connectionIt = cell.connections->begin();
+        for (int i = 0; i <= cell.connections->size(); ++i) {
+            if (i < cell.connections->size()) {
+                auto connectedCell = getCellRef(connectionIt->cellId, cache);
+                sumAngle += Physics::angleOfVector(*connectedCell.pos - *cell.pos);
+            } else {
+                sumAngle = 361;
+            }
+
+            if (newAngle < sumAngle) {
+                ConnectionDescription newConnection;
+                newConnection.cellId = cell.id;
+                newConnection.distance = (*otherCell.pos - *cell.pos).length();
+                newConnection.angleFromPrevious = sumPrevAngle - newAngle;
+                newConnections.emplace_back(newConnection);
+
+                bool first = true;
+                for (; connectionIt != cell.connections->end(); ++connectionIt) {
+
+                    auto connection = *connectionIt;
+                    if (first) {
+                        connection.angleFromPrevious = connection.angleFromPrevious - newConnection.angleFromPrevious;
+                        first = false;
+                    }
+                    newConnections.emplace_back(connection);
+                }
+                break;
+            }
+
+            newConnections.emplace_back(*connectionIt);
+            ++connectionIt;
+            sumPrevAngle = sumAngle;
+        }
+        cell.connections = newConnections;
+    };
+
+    addConnection(cell1, cell2);
+    addConnection(cell2, cell1);
+
+    return *this;
+}
+
 QVector2D ClusterDescription::getClusterPosFromCells() const
 {
 	QVector2D result;
@@ -112,6 +162,22 @@ QVector2D ClusterDescription::getClusterPosFromCells() const
 		result /= cells->size();
 	}
 	return result;
+}
+
+CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
+{
+    auto findResult = cache.find(cellId);
+    if (findResult != cache.end()) {
+        return cells->at(findResult->second);
+    }
+    for (int i = 0; i < cells->size(); ++i) {
+        auto& cell = cells->at(i);
+        if (cell.id == cellId) {
+            cache.emplace(cellId, i);
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
 }
 
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)

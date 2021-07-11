@@ -73,7 +73,6 @@ struct ENGINEINTERFACE_EXPORT CellDescription
         connections = value;
         return *this;
     }
-    CellDescription& addConnection(CellDescription const& otherCell);
 	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
@@ -91,11 +90,13 @@ struct ENGINEINTERFACE_EXPORT ClusterDescription
 {
 	uint64_t id = 0;
 
+	//TODO #SoftBody
 	boost::optional<QVector2D> pos;
 	boost::optional<QVector2D> vel;
 	boost::optional<double> angle;
 	boost::optional<double> angularVel;
 	boost::optional<ClusterMetadata> metadata;
+
 	boost::optional<vector<CellDescription>> cells;
 
 	ClusterDescription() = default;
@@ -122,7 +123,13 @@ struct ENGINEINTERFACE_EXPORT ClusterDescription
 		return *this;
 	}
 
+    ClusterDescription&
+    addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
+
 	QVector2D getClusterPosFromCells() const;
+
+private:
+    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
 };
 
 struct ENGINEINTERFACE_EXPORT ParticleDescription

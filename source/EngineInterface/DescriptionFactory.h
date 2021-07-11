@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Base/NumberGenerator.h"
+
 #include "Descriptions.h"
 
 class ENGINEINTERFACE_EXPORT DescriptionFactory
@@ -15,12 +17,24 @@ public:
         MEMBER_DECLARATION(CreateHexagonParameters, QVector2D, centerPosition, QVector2D());
         MEMBER_DECLARATION(CreateHexagonParameters, QVector2D, velocity, QVector2D());
         MEMBER_DECLARATION(CreateHexagonParameters, int, maxConnections, 6);
-        MEMBER_DECLARATION(CreateHexagonParameters, double, angle, 0.0);
         MEMBER_DECLARATION(CreateHexagonParameters, int, colorCode, 1);
     };
     virtual ClusterDescription createHexagon(
         CreateHexagonParameters const& parameters,
         NumberGenerator* numberGenerator) const = 0;
+
+    struct CreateRectParameters
+    {
+        MEMBER_DECLARATION(CreateRectParameters, IntVector2D, size, IntVector2D({1, 1}));
+        MEMBER_DECLARATION(CreateRectParameters, double, cellDistance, 1.0);
+        MEMBER_DECLARATION(CreateRectParameters, double, cellEnergy, 100.0);
+        MEMBER_DECLARATION(CreateRectParameters, QVector2D, centerPosition, QVector2D());
+        MEMBER_DECLARATION(CreateRectParameters, QVector2D, velocity, QVector2D());
+        MEMBER_DECLARATION(CreateRectParameters, int, maxConnections, 6);
+        MEMBER_DECLARATION(CreateRectParameters, int, colorCode, 1);
+    };
+    virtual ClusterDescription createRect(CreateRectParameters const& parameters, NumberGenerator* numberGenerator)
+        const = 0;
 
     struct CreateDiscParameters
     {

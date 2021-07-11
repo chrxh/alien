@@ -1035,52 +1035,17 @@ void ActionController::onNewRectangle()
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         loggingService->logMessage(Priority::Important, "create rectangle");
 
-		IntVector2D size = dialog.getBlockSize();
-		double distance = dialog.getDistance();
-		double energy = dialog.getInternalEnergy();
-        int colorCode = dialog.getColorCode();
+        auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+        auto rect = factory->createRect(
+            DescriptionFactory::CreateRectParameters()
+                .size(dialog.getBlockSize())
+                .cellDistance(dialog.getDistance())
+                .cellEnergy(dialog.getInternalEnergy())
+                .colorCode(dialog.getColorCode()),
+            _numberGenerator);
 
-		uint64_t id = 0;
+        _repository->addAndSelectData(DataDescription().addCluster(rect), {0, 0});
 
-		vector<vector<CellDescription>> cellMatrix;
-		for (int x = 0; x < size.x; ++x) {
-			vector<CellDescription> cellRow;
-			for (int y = 0; y < size.y; ++y) {
-				cellRow.push_back(CellDescription().setId(++id).setEnergy(energy)
-					.setPos({ static_cast<float>(x), static_cast<float>(y) })
-					.setMaxConnections(4).setFlagTokenBlocked(false)
-					.setTokenBranchNumber(0).setMetadata(CellMetadata().setColor(colorCode))
-					.setCellFeature(CellFeatureDescription()));
-			}
-			cellMatrix.push_back(cellRow);
-		}
-		for (int x = 0; x < size.x; ++x) {
-			for (int y = 0; y < size.y; ++y) {
-				if (x < size.x - 1) {
-					cellMatrix[x][y].addConnection(cellMatrix[x + 1][y]);
-				}
-				if (x > 0) {
-					cellMatrix[x][y].addConnection(cellMatrix[x - 1][y]);
-				}
-				if (y < size.y - 1) {
-					cellMatrix[x][y].addConnection(cellMatrix[x][y + 1]);
-				}
-				if (y > 0) {
-					cellMatrix[x][y].addConnection(cellMatrix[x][y - 1]);
-				}
-			}
-		}
-
-		auto cluster = ClusterDescription().setPos({ static_cast<float>(size.x) / 2.0f - 0.5f, static_cast<float>(size.y) / 2.0f - 0.5f })
-			.setVel({ 0, 0 })
-			.setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata());
-		for (int x = 0; x < size.x; ++x) {
-			for (int y = 0; y < size.y; ++y) {
-				cluster.addCell(cellMatrix[x][y]);
-			}
-		}
-
-		_repository->addAndSelectData(DataDescription().addCluster(cluster), { 0, 0 });
 		Q_EMIT _notifier->notifyDataRepositoryChanged({
 			Receiver::DataEditor,
 			Receiver::Simulation,
