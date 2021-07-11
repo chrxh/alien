@@ -4,7 +4,6 @@
 
 #include <QRandomGenerator>
 
-#include "Base/NumberGenerator.h"
 #include "Physics.h"
 
 
@@ -12,11 +11,6 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(
     CreateHexagonParameters const& parameters,
     NumberGenerator* numberGenerator) const
 {
-    auto addConnection = [](CellDescription& cell1, CellDescription& cell2) {
-        cell1.addConnection(cell2);
-        cell2.addConnection(cell1);
-    };
-
     auto const layers = parameters._layers;
     std::vector<std::vector<CellDescription>> cellMatrix(2 * layers - 1, std::vector<CellDescription>(2 * layers - 1));
     list<CellDescription> cells;
@@ -41,17 +35,6 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(
                     .setMetadata(CellMetadata().setColor(parameters._colorCode))
                     .setCellFeature(CellFeatureDescription());
 
-            if (layers - 1 + i > 0) {
-                addConnection(
-                    cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i - 1][layers - 1 - j]);
-            }
-            if (j > 0) {
-                addConnection(
-                    cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i][layers - 1 - j + 1]);
-                addConnection(
-                    cellMatrix[layers - 1 + i][layers - 1 - j], cellMatrix[layers - 1 + i + 1][layers - 1 - j + 1]);
-            }
-
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 cellMatrix[layers - 1 + i][layers - 1 + j] =
@@ -67,15 +50,6 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(
                         .setTokenBranchNumber(0)
                         .setMetadata(CellMetadata().setColor(parameters._colorCode))
                         .setCellFeature(CellFeatureDescription());
-
-                if (layers - 1 + i > 0) {
-                    addConnection(
-                        cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i - 1][layers - 1 + j]);
-                }
-                addConnection(
-                    cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i][layers - 1 + j - 1]);
-                addConnection(
-                    cellMatrix[layers - 1 + i][layers - 1 + j], cellMatrix[layers - 1 + i + 1][layers - 1 + j - 1]);
             }
         }
     }
@@ -97,13 +71,98 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(
                        .addCells(cells);
     hexagon.setPos(hexagon.getClusterPosFromCells());
 
-    if (parameters._angle != 0) {
-        for (auto& cell : *hexagon.cells) {
-            cell.pos = Physics::rotateClockwise(*cell.pos - *hexagon.pos, parameters._angle) + *hexagon.pos;
+    std::unordered_map<uint64_t, int> cache;
+    for (int j = 0; j < layers; ++j) {
+        for (int i = -(layers - 1); i < layers - j; ++i) {
+
+            if (layers - 1 + i > 0) {
+                hexagon.addConnection(
+                    cellMatrix[layers - 1 + i][layers - 1 - j].id, cellMatrix[layers - 1 + i - 1][layers - 1 - j].id, cache);
+            }
+            if (j > 0) {
+                hexagon.addConnection(
+                    cellMatrix[layers - 1 + i][layers - 1 - j].id,
+                    cellMatrix[layers - 1 + i][layers - 1 - j + 1].id,
+                    cache);
+                hexagon.addConnection(
+                    cellMatrix[layers - 1 + i][layers - 1 - j].id,
+                    cellMatrix[layers - 1 + i + 1][layers - 1 - j + 1].id,
+                    cache);
+            }
+
+            if (j > 0) {
+                if (layers - 1 + i > 0) {
+                    hexagon.addConnection(
+                        cellMatrix[layers - 1 + i][layers - 1 + j].id,
+                        cellMatrix[layers - 1 + i - 1][layers - 1 + j].id,
+                        cache);
+                }
+                hexagon.addConnection(
+                    cellMatrix[layers - 1 + i][layers - 1 + j].id,
+                    cellMatrix[layers - 1 + i][layers - 1 + j - 1].id,
+                    cache);
+                hexagon.addConnection(
+                    cellMatrix[layers - 1 + i][layers - 1 + j].id,
+                    cellMatrix[layers - 1 + i + 1][layers - 1 + j - 1].id,
+                    cache);
+            }
         }
     }
 
     return hexagon;
+}
+
+ClusterDescription DescriptionFactoryImpl::createRect(
+    CreateRectParameters const& parameters,
+    NumberGenerator* numberGenerator) const
+{
+    auto size = parameters._size;
+    auto distance = parameters._cellDistance;
+    auto energy = parameters._cellEnergy;
+    auto colorCode = parameters._colorCode;
+
+    vector<vector<CellDescription>> cellMatrix;
+    for (int x = 0; x < size.x; ++x) {
+        vector<CellDescription> cellRow;
+        for (int y = 0; y < size.y; ++y) {
+            cellRow.push_back(CellDescription()
+                                  .setId(numberGenerator->getId())
+                                  .setEnergy(energy)
+                                  .setPos({static_cast<float>(x), static_cast<float>(y)})
+                                  .setMaxConnections(parameters._maxConnections)
+                                  .setFlagTokenBlocked(false)
+                                  .setTokenBranchNumber(0)
+                                  .setMetadata(CellMetadata().setColor(colorCode))
+                                  .setCellFeature(CellFeatureDescription()));
+        }
+        cellMatrix.push_back(cellRow);
+    }
+    auto result = ClusterDescription()
+                       .setId(numberGenerator->getId())
+                       .setPos({static_cast<float>(size.x) / 2.0f - 0.5f, static_cast<float>(size.y) / 2.0f - 0.5f})
+                       .setVel({0, 0})
+                       .setAngle(0)
+                       .setAngularVel(0)
+                       .setMetadata(ClusterMetadata());
+    for (int x = 0; x < size.x; ++x) {
+        for (int y = 0; y < size.y; ++y) {
+            result.addCell(cellMatrix[x][y]);
+        }
+    }
+
+    std::unordered_map<uint64_t, int> cache;
+    for (int x = 0; x < size.x; ++x) {
+        for (int y = 0; y < size.y; ++y) {
+            if (x > 0) {
+                result.addConnection(cellMatrix[x][y].id, cellMatrix[x - 1][y].id, cache);
+            }
+            if (y > 0) {
+                result.addConnection(cellMatrix[x][y].id, cellMatrix[x][y - 1].id, cache);
+            }
+        }
+    }
+
+    return result;
 }
 
 ClusterDescription DescriptionFactoryImpl::createUnconnectedDisc(
