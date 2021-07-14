@@ -179,7 +179,6 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation / 2;
 
-/*
             if (index > 0) {
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
@@ -197,7 +196,6 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
                 atomicAdd(&cell->connections[index - 1].cell->temp1.x, -forceInc.x / 2);
                 atomicAdd(&cell->connections[index - 1].cell->temp1.y, -forceInc.y / 2);
             }
-*/
             prevDisplacement = displacement;
         }
         atomicAdd(&cell->temp1.x, force.x);

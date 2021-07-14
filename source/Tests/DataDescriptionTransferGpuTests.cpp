@@ -73,6 +73,35 @@ public:
             .setAngularVel(1.2)
             .setMetadata(clusterMetadata);
     }
+
+    void checkDescription(DataDescription const& data) const
+    {
+        DescriptionNavigator navi;
+        navi.update(data);
+        if (data.clusters) {
+            for (auto const& cluster : *data.clusters) {
+                for (auto const& cell : *cluster.cells) {
+                    boost::optional<CellDescription> prevConnectedCell;
+                    if (cell.connections) {
+                        for (auto const& connection : *cell.connections) {
+                            auto connectedCell = cluster.cells->at(navi.cellIndicesByCellIds.at(connection.cellId));
+                            auto actualDistance = (*connectedCell.pos - *cell.pos).length();
+                            EXPECT_TRUE((actualDistance - connection.distance) < FLOATINGPOINT_MEDIUM_PRECISION);
+                            if (prevConnectedCell) {
+                                auto angle1 = Physics::angleOfVector(*connectedCell.pos - *cell.pos);
+                                auto angle2 = Physics::angleOfVector(*prevConnectedCell->pos - *cell.pos);
+                                EXPECT_TRUE(
+                                    abs(angle1 - angle2 - connection.angleFromPrevious)
+                                    < FLOATINGPOINT_MEDIUM_PRECISION);
+                            }
+
+                            prevConnectedCell = connectedCell;
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadClusterWithSingleCell)
@@ -106,6 +135,8 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadHexagonalClusters)
     DataDescription dataAfter =
         IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
+    checkDescription(dataBefore);
+    checkDescription(dataAfter);
     checkCompatibility(dataBefore, dataAfter);
 }
 
