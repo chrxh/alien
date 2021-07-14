@@ -60,6 +60,22 @@ void IntegrationTestHelper::runSimulation(int timesteps, SimulationController* c
     }
 }
 
+std::vector<std::pair<CellDescription, CellDescription>> IntegrationTestHelper::getBeforeAndAfterCells(
+    DataDescription const& dataBefore,
+    DataDescription const& dataAfter)
+{
+    std::vector<std::pair<CellDescription, CellDescription>> result;
+    auto cellBeforeById = getCellByCellId(dataBefore);
+    auto cellAfterById = getCellByCellId(dataAfter);
+    for (auto const& [id, cellBefore] : cellBeforeById) {
+        auto findResult = cellAfterById.find(id);
+        if (findResult != cellAfterById.end()) {
+            result.emplace_back(std::make_pair(cellBefore, findResult->second));
+        }
+    }
+    return result;
+}
+
 unordered_map<uint64_t, ParticleDescription> IntegrationTestHelper::getParticleByParticleId(DataDescription const& data)
 {
     unordered_map<uint64_t, ParticleDescription> result;

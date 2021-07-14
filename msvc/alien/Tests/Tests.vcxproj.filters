@@ -88,6 +88,9 @@
     <ClCompile Include="..\..\..\source\Tests\WeaponGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Tests\CollisionGpuTests.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Tests\IntegrationGpuTestFramework.h">

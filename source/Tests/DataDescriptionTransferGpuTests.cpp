@@ -33,6 +33,8 @@ public:
         : IntegrationGpuTestFramework()
     {}
 
+    ~DataDescriptionTransferGpuTests() = default;
+
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0)
         const
     {
@@ -69,6 +71,7 @@ public:
                          .setTokens({TokenDescription().setData(tokenMemory).setEnergy(89)}))
             .setId(clusterId)
             .setPos({1, 2})
+            .setVel({0.1, -0.2})
             .setAngle(23)
             .setAngularVel(1.2)
             .setMetadata(clusterMetadata);
@@ -122,7 +125,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadHexagonalClusters)
 
     DataDescription dataBefore;
     dataBefore.addCluster(factory->createHexagon(
-        DescriptionFactory::CreateHexagonParameters().layers(2).centerPosition(QVector2D(10, 10)),
+        DescriptionFactory::CreateHexagonParameters().layers(2).centerPosition(QVector2D(10, 10)).velocity(QVector2D(0.1, 0)),
         _context->getNumberGenerator()));
     dataBefore.addCluster(factory->createHexagon(
         DescriptionFactory::CreateHexagonParameters().layers(3).centerPosition(QVector2D(20, 10)),
