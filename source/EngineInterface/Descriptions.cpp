@@ -108,22 +108,28 @@ ClusterDescription& ClusterDescription::addConnection(
         list<ConnectionDescription> newConnections;
         auto newAngle = Physics::angleOfVector(*otherCell.pos - *cell.pos);
 
-        float sumPrevAngle = 0;
-        float sumAngle = 0;
+        float prevConnectionAngle = 0;
+        float connectionAngle = 0;
         auto connectionIt = cell.connections->begin();
         for (int i = 0; i <= cell.connections->size(); ++i) {
             if (i < cell.connections->size()) {
                 auto connectedCell = getCellRef(connectionIt->cellId, cache);
-                sumAngle += Physics::angleOfVector(*connectedCell.pos - *cell.pos);
+                connectionAngle = Physics::angleOfVector(*connectedCell.pos - *cell.pos);
             } else {
-                sumAngle = 361;
+                connectionAngle = 361;
             }
 
-            if (newAngle < sumAngle) {
+            if (newAngle < connectionAngle) {
                 ConnectionDescription newConnection;
-                newConnection.cellId = cell.id;
+                newConnection.cellId = otherCell.id;
                 newConnection.distance = (*otherCell.pos - *cell.pos).length();
-                newConnection.angleFromPrevious = sumPrevAngle - newAngle;
+                if (i == cell.connections->size()) {
+                    newConnection.angleFromPrevious = newAngle - prevConnectionAngle;
+                } else {
+                    newConnection.angleFromPrevious =
+                        connectionIt->angleFromPrevious * (newAngle - prevConnectionAngle) / (connectionAngle - prevConnectionAngle);
+                }
+
                 newConnections.emplace_back(newConnection);
 
                 bool first = true;
@@ -141,7 +147,7 @@ ClusterDescription& ClusterDescription::addConnection(
 
             newConnections.emplace_back(*connectionIt);
             ++connectionIt;
-            sumPrevAngle = sumAngle;
+            prevConnectionAngle = connectionAngle;
         }
         cell.connections = newConnections;
     };
