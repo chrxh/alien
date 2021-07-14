@@ -120,29 +120,30 @@ ClusterDescription DescriptionFactoryImpl::createRect(
     auto distance = parameters._cellDistance;
     auto energy = parameters._cellEnergy;
     auto colorCode = parameters._colorCode;
+    auto centerPos = parameters._centerPosition;
 
     vector<vector<CellDescription>> cellMatrix;
     for (int x = 0; x < size.x; ++x) {
         vector<CellDescription> cellRow;
         for (int y = 0; y < size.y; ++y) {
-            cellRow.push_back(CellDescription()
-                                  .setId(numberGenerator->getId())
-                                  .setEnergy(energy)
-                                  .setPos({static_cast<float>(x), static_cast<float>(y)})
-                                  .setMaxConnections(parameters._maxConnections)
-                                  .setFlagTokenBlocked(false)
-                                  .setTokenBranchNumber(0)
-                                  .setMetadata(CellMetadata().setColor(colorCode))
-                                  .setCellFeature(CellFeatureDescription()));
+            cellRow.push_back(
+                CellDescription()
+                    .setId(numberGenerator->getId())
+                    .setEnergy(energy)
+                    .setVel(parameters._velocity)
+                    .setPos(
+                        {static_cast<float>(size.x) / 2.0f - 0.5f + static_cast<float>(x) + centerPos.x(),
+                         static_cast<float>(size.y) / 2.0f - 0.5f + static_cast<float>(y) + centerPos.y()})
+                    .setMaxConnections(parameters._maxConnections)
+                    .setFlagTokenBlocked(false)
+                    .setTokenBranchNumber(0)
+                    .setMetadata(CellMetadata().setColor(colorCode))
+                    .setCellFeature(CellFeatureDescription()));
         }
         cellMatrix.push_back(cellRow);
     }
     auto result = ClusterDescription()
                        .setId(numberGenerator->getId())
-                       .setPos({static_cast<float>(size.x) / 2.0f - 0.5f, static_cast<float>(size.y) / 2.0f - 0.5f})
-                       .setVel({0, 0})
-                       .setAngle(0)
-                       .setAngularVel(0)
                        .setMetadata(ClusterMetadata());
     for (int x = 0; x < size.x; ++x) {
         for (int y = 0; y < size.y; ++y) {

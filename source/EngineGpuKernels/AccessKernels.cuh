@@ -245,6 +245,7 @@ __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rec
 
         cellTO.id = cell->id;
         cellTO.pos = cell->absPos;
+        cellTO.vel = cell->vel;
         cellTO.energy = cell->getEnergy_safe();
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;

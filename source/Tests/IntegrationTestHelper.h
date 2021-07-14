@@ -10,6 +10,10 @@ public:
         SimulationContext* context,
         DataChangeDescription const& data);
     static void runSimulation(int timesteps, SimulationController* controller);
+
+    static std::vector<std::pair<CellDescription, CellDescription>> getBeforeAndAfterCells(
+        DataDescription const& dataBefore,
+        DataDescription const& dataAfter);
     static unordered_map<uint64_t, ParticleDescription> getParticleByParticleId(DataDescription const& data);
     static unordered_map<uint64_t, CellDescription> getCellByCellId(DataDescription const& data);
     static unordered_map<uint64_t, ClusterDescription> getClusterByCellId(DataDescription const& data);
