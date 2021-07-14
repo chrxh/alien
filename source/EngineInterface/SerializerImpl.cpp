@@ -1,3 +1,5 @@
+#include "SerializerImpl.h"
+
 #include <sstream>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/vector.hpp>
@@ -22,8 +24,7 @@
 #include "EngineInterfaceBuilderFacade.h"
 #include "DescriptionHelper.h"
 #include "SimulationParametersParser.h"
-
-#include "SerializerImpl.h"
+#include "Physics.h"
 
 using namespace std;
 using namespace boost;
@@ -194,6 +195,7 @@ namespace boost {
             ar >> clusters >> data.particles;
 
             //TODO #SoftBody
+            //complete cell velocities, connection distances and angles
             if (clusters) {
                 for (auto& cluster : *clusters) {
                     std::unordered_map<uint64_t, int> cellIndexById;
@@ -203,14 +205,29 @@ namespace boost {
                     for (auto& cell : *cluster.cells) {
                         cell.vel = cluster.vel;
                         if (cell.connections) {
-                            std::list<ConnectionDescription> connections;
+                            cell.connections->sort(
+                                [&](ConnectionDescription const& left, ConnectionDescription const& right) {
+                                    auto const& cell1 = cluster.cells->at(cellIndexById.at(left.cellId));
+                                    auto const& cell2 = cluster.cells->at(cellIndexById.at(right.cellId));
+                                    auto angle1 = Physics::angleOfVector(*cell1.pos - *cell.pos);
+                                    auto angle2 = Physics::angleOfVector(*cell2.pos - *cell.pos);
+                                    return angle1 < angle2;
+                                });
+                            boost::optional<float> prevSumAngle;
                             for (auto& connection : *cell.connections) {
                                 auto const& connectingCellDesc = cluster.cells->at(cellIndexById.at(connection.cellId));
 
                                 if (0 == connection.distance) {
                                     connection.distance = (*connectingCellDesc.pos - *cell.pos).length();
+                                    connection.angleFromPrevious =
+                                        Physics::angleOfVector(*connectingCellDesc.pos - *cell.pos);
+                                    if (prevSumAngle) {
+                                        connection.angleFromPrevious -= *prevSumAngle;
+                                    }
+
+                                    prevSumAngle = prevSumAngle ? *prevSumAngle + connection.angleFromPrevious
+                                                                : connection.angleFromPrevious;
                                 }
-                                //TODO angleFromPrevious
                             }
                         }
                     }
