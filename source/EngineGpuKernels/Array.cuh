@@ -94,5 +94,5 @@ public:
 
     __device__ __inline__ int getNumEntries() const { return *_numEntries; }
     __device__ __inline__ void setNumEntries(int value) const { *_numEntries = value; }
-
+    __device__ __inline__ int decNumEntriesAndReturnOrigSize() { return atomicSub(_numEntries, 1); }
 };

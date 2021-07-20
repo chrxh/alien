@@ -116,7 +116,7 @@
     <ClCompile Include="..\..\..\source\Tests\ChangeDescriptionsTest.cpp" />
     <ClCompile Include="..\..\..\source\Tests\CleanupGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\ClusterGpuTests.cpp" />
-    <ClCompile Include="..\..\..\source\Tests\CollisionGpuTests.cpp" />
+    <ClCompile Include="..\..\..\source\Tests\MovementGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\CommunicatorGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\ConstructurGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\DataDescriptionTransferGpuTests.cpp" />

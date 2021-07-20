@@ -74,7 +74,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
     }
     }
 
-    float factor = min(100.0f, sqrt(cell->getEnergy()) * 5 + 20.0f) / 100.0f;
+    float factor = min(100.0f, sqrt(cell->energy) * 5 + 20.0f) / 100.0f;
     if (!selected) {
         factor *= 0.75f;
     }
