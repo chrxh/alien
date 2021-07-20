@@ -43,6 +43,8 @@ struct Cell
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int tokenUsages;
     CellMetadata metadata;
+    float energy;
+    int cellFunctionType;
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
@@ -50,49 +52,6 @@ struct Cell
     int tag;
     float2 temp1;
     float2 temp2;
-
-    __inline__ __device__ Enums::CellFunction::Type getCellFunctionType() const
-    {
-        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned int>(_cellFunctionType)
-            % Enums::CellFunction::_COUNTER);
-    }
-
-    __inline__ __device__ void setCellFunctionType(int value)
-    {
-        _cellFunctionType = value;
-    }
-
-    __device__ __inline__ void setEnergy(float value)
-    {
-        _energy = value;
-    }
-
-    __device__ __inline__ void setEnergy_safe(float value)
-    {
-        atomicExch(&_energy, value);
-    }
-
-    __device__ __inline__ void changeEnergy_safe(float changeValue)
-    {
-        atomicAdd(&_energy, changeValue);
-    }
-
-    __device__ __inline__ float getEnergy_safe()
-    {
-        return atomicAdd(&_energy, 0);
-    }
-
-    __device__ __inline__ float getEnergy() const
-    {
-        return _energy;
-    }
-
-    __device__ __inline__ void repair()
-    {
-        if (isnan(_energy) || _energy < 0.0) {
-            _energy = 0.01;
-        }
-    }
 
     __device__ __inline__ void getLock()
     {
@@ -110,8 +69,6 @@ struct Cell
     }
 
 private:
-    int _cellFunctionType;
-    float _energy;
     int _protectionCounter;
 };
 
