@@ -95,10 +95,10 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
         connectingCell.distance = cellTO.connections[i].distance;
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
-    cell->setEnergy(cellTO.energy);
-    cell->setCellFunctionType(cellTO.cellFunctionType);
+    cell->energy = cellTO.energy;
+    cell->cellFunctionType = cellTO.cellFunctionType;
 
-    switch (cell->getCellFunctionType()) {
+    switch (cell->cellFunctionType) {
     case Enums::CellFunction::COMPUTER: {
         cell->numStaticBytes = cellTO.numStaticBytes;
         cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;

@@ -12,14 +12,27 @@
 class CellProcessor
 {
 public:
-    __inline__ __device__ static void init(SimulationData& data);
-    __inline__ __device__ static void collisions(SimulationData& data);
-    __inline__ __device__ static void initForces(SimulationData& data);
-    __inline__ __device__ static void calcForces(SimulationData& data);
-    __inline__ __device__ static void calcPositions(SimulationData& data);
-    __inline__ __device__ static void calcVelocities(SimulationData& data);
-    __inline__ __device__ static void calcAveragedVelocities(SimulationData& data);
-    __inline__ __device__ static void applyAveragedVelocities(SimulationData& data);
+    __inline__ __device__ void init(SimulationData& data);
+    __inline__ __device__ void collisions(SimulationData& data);
+    __inline__ __device__ void initForces(SimulationData& data);
+    __inline__ __device__ void calcForces(SimulationData& data);
+    __inline__ __device__ void calcPositions(SimulationData& data);
+    __inline__ __device__ void calcVelocities(SimulationData& data);
+    __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
+    __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
+    __inline__ __device__ void processOperations(SimulationData& data);
+
+private:
+    __inline__ __device__ void scheduleCellForDestruction(Cell* cell1, int cellIndex);
+
+    __inline__ __device__ void connectCells(Cell* cell1, Cell* cell2);
+    __inline__ __device__ void destroyCell(Cell* cell, int cellIndex);
+
+    __inline__ __device__ void addConnection(Cell* cell1, Cell* cell2, float2 const& posDelta);
+    __inline__ __device__ void delConnection(Cell* cell1, Cell* cell2);
+
+    SimulationData* _data;
+    PartitionData _partition;
 };
 
 /************************************************************************/
@@ -30,10 +43,10 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
     {
         auto& cells = data.entities.cellPointers;
-        auto const partition =
+        _partition =
             calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
             auto& cell = cells.at(index);
 
             cell->temp1 = {0, 0};
@@ -50,10 +63,10 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
-    auto const partition =
+    _partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
         for (float dx = -0.5f; dx < 0.51f; dx += 1.0f) {
@@ -74,7 +87,8 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 data.cellMap.mapDisplacementCorrection(posDelta);
 
                 auto distance = Math::length(posDelta);
-                if (distance >= cudaSimulationParameters.cellMaxDistance) {
+                if (distance >= cudaSimulationParameters.cellMaxDistance
+                    || distance <= cudaSimulationParameters.cellMinDistance) {
                     continue;
                 }
 
@@ -102,33 +116,13 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         atomicAdd(&otherCell->temp1.y, newVel2.y);
                         atomicAdd(&otherCell->tag, 1);
 
-                        SystemDoubleLock lock;
-                        lock.init(&cell->locked, &otherCell->locked);
-                        if (lock.tryLock()) {
-                            __threadfence();
-
-                            if (cell->numConnections < cell->maxConnections
-                                && otherCell->numConnections < otherCell->maxConnections) {
-                                bool alreadyConnected = false;
-                                for (int i = 0; i < cell->numConnections; ++i) {
-                                    if (cell->connections[i].cell == otherCell) {
-                                        alreadyConnected = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!alreadyConnected) {
-                                    auto index = cell->numConnections++;
-                                    auto otherIndex = otherCell->numConnections++;
-
-                                    cell->connections[index].cell = otherCell;
-                                    cell->connections[index].distance = distance;
-                                    otherCell->connections[otherIndex].cell = cell;
-                                    otherCell->connections[otherIndex].distance = distance;
-                                }
-                            }
-                            __threadfence();
-                            lock.releaseLock();
+                        if (cell->numConnections < cell->maxConnections
+                            && otherCell->numConnections < otherCell->maxConnections) {
+                            auto index = atomicAdd(data.numOperations, 1);
+                            auto& operation = data.operations[index];
+                            operation.type = Operation::Type::Fusion;
+                            operation.cell = cell;
+                            operation.otherCell = otherCell;
                         }
                     }
                 }
@@ -142,12 +136,17 @@ __inline__ __device__ void CellProcessor::initForces(SimulationData& data)
     auto& cells = data.entities.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    _data = &data;
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
         if (cell->tag > 0) {
-            cell->vel = cell->temp1 / cell->tag;
+            auto newVel = cell->temp1 / cell->tag;
+            if (Math::length(newVel - cell->vel) > 0.5) {
+                scheduleCellForDestruction(cell, index);
+            }
+            cell->vel = newVel;
         }
         cell->temp1 = {0, 0};
         cell->tag = 0;
@@ -165,8 +164,8 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
 
         float2 force{0, 0};
         float2 prevDisplacement;
-        for (int index = 0; index < cell->numConnections; ++index) {
-            auto connectingCell = cell->connections[index].cell;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectingCell = cell->connections[i].cell;
             if (connectingCell->alive == 0) {
                 continue;
             }
@@ -175,26 +174,26 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             data.cellMap.mapDisplacementCorrection(displacement);
 
             auto actualDistance = Math::length(displacement);
-            auto bondDistance = cell->connections[index].distance;
+            auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation / 2;
 
-            if (index > 0) {
+            if (i > 0) {
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
                 auto actualangleFromPrevious = Math::subtractAngle(angle, prevAngle);
                 if (actualangleFromPrevious > 180) {
                     actualangleFromPrevious = abs(actualangleFromPrevious - 360.0f);
                 }
-                auto deviation = actualangleFromPrevious - cell->connections[index].angleFromPrevious;
+                auto deviation = actualangleFromPrevious - cell->connections[i].angleFromPrevious;
                 auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
                 auto forceInc = correctionMovementForLowAngle * deviation / -3000;
                 force = force + forceInc;
                 atomicAdd(&connectingCell->temp1.x, -forceInc.x / 2);
                 atomicAdd(&connectingCell->temp1.y, -forceInc.y / 2);
-                atomicAdd(&cell->connections[index - 1].cell->temp1.x, -forceInc.x / 2);
-                atomicAdd(&cell->connections[index - 1].cell->temp1.y, -forceInc.y / 2);
+                atomicAdd(&cell->connections[i - 1].cell->temp1.x, -forceInc.x / 2);
+                atomicAdd(&cell->connections[i - 1].cell->temp1.y, -forceInc.y / 2);
             }
             prevDisplacement = displacement;
         }
@@ -205,6 +204,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
 {
+    _data = &data;
     auto& cells = data.entities.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -221,6 +221,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
 {
+    _data = &data;
     auto& cells = data.entities.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -228,7 +229,11 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->vel = cell->vel + (cell->temp1 + cell->temp2) / 2;
+        auto acceleration = (cell->temp1 + cell->temp2) / 2;
+        if (Math::length(acceleration) > 0.5) {
+            scheduleCellForDestruction(cell, index);
+        }
+        cell->vel = cell->vel + acceleration;
     }
 }
 
@@ -264,5 +269,137 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
         auto& cell = cells.at(index);
 
         cell->vel = cell->temp1;
+    }
+}
+
+__inline__ __device__ void CellProcessor::processOperations(SimulationData& data)
+{
+    _partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    _data = &data;
+
+    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
+        auto const& operation = data.operations[index];
+        if (Operation::Type::Fusion == operation.type) {
+            connectCells(operation.cell, operation.otherCell);
+        }
+        if (Operation::Type::Destruction == operation.type) {
+            destroyCell(operation.cell, operation.cellIndex);
+        }
+    }
+}
+
+__inline__ __device__ void CellProcessor::scheduleCellForDestruction(Cell* cell, int cellIndex)
+{
+    if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+        auto index = atomicAdd(_data->numOperations, 1);
+        auto& operation = _data->operations[index];
+        operation.type = Operation::Type::Destruction;
+        operation.cell = cell;
+        operation.cellIndex = cellIndex;
+    }
+}
+
+__inline__ __device__ void CellProcessor::connectCells(Cell* cell1, Cell* cell2)
+{
+    SystemDoubleLock lock;
+    lock.init(&cell1->locked, &cell2->locked);
+    if (lock.tryLock()) {
+        __threadfence();
+
+        bool alreadyConnected = false;
+        for (int i = 0; i < cell1->numConnections; ++i) {
+            if (cell1->connections[i].cell == cell2) {
+                alreadyConnected = true;
+                break;
+            }
+        }
+
+        if (!alreadyConnected) {
+            auto posDelta = cell2->absPos - cell1->absPos;
+            _data->cellMap.mapDisplacementCorrection(posDelta);
+            addConnection(cell1, cell2, posDelta);
+            addConnection(cell2, cell1, posDelta * (-1));
+        }
+
+        __threadfence();
+        lock.releaseLock();
+    }
+}
+
+__inline__ __device__ void CellProcessor::destroyCell(Cell* cell, int cellIndex)
+{
+    if (cell->tryLock()) {
+        for (int i = cell->numConnections - 1; i >= 0; --i) {
+            auto connectedCell = cell->connections[i].cell;
+            if (connectedCell->tryLock()) {
+                __threadfence();
+      
+                delConnection(cell, connectedCell);
+                delConnection(connectedCell, cell);
+
+                __threadfence();
+                connectedCell->releaseLock();
+            }
+        }
+        if (0 == cell->numConnections && _data->entities.cellPointers.at(cellIndex) == cell) {
+            auto lastCellIndex = _data->entities.cellPointers.decNumEntriesAndReturnOrigSize() - 1;
+            _data->entities.cellPointers.at(cellIndex) = _data->entities.cellPointers.at(lastCellIndex);
+        }
+        cell->releaseLock();
+    }
+}
+
+__inline__ __device__ void CellProcessor::addConnection(Cell* cell1, Cell* cell2, float2 const& posDelta)
+{
+    auto newAngle = Math::angleOfVector(posDelta);
+
+    int i = 0;
+    float angle = 0;
+    float prevAngle = 0;
+    for (; i < cell1->numConnections; ++i) {
+        auto connectedCell = cell1->connections[i].cell;
+        auto connectedCellDelta = connectedCell->absPos - cell1->absPos;
+        _data->cellMap.mapDisplacementCorrection(connectedCellDelta);
+        angle = Math::angleOfVector(connectedCellDelta);
+        if (newAngle < angle) {
+            break;
+        }
+        prevAngle = angle;
+    }
+    for (int j = cell1->numConnections; j > i; --j) {
+        cell1->connections[j] = cell1->connections[j - 1];
+    }
+
+    cell1->numConnections++;
+    cell1->connections[i].cell = cell2;
+    cell1->connections[i].distance = Math::length(posDelta);
+
+    if (0 == i && 1 < cell1->numConnections) {
+        cell1->connections[1].angleFromPrevious = angle - newAngle;
+    }
+    if (0 < i && i + 1 == cell1->numConnections) {
+        cell1->connections[i].angleFromPrevious = newAngle - angle;
+    }
+    if (0 < i && i + 1 < cell1->numConnections) {
+        auto factor = (newAngle - prevAngle) / (angle - prevAngle);
+        cell1->connections[i].angleFromPrevious = cell1->connections[i].angleFromPrevious * factor;
+        cell1->connections[i + 1].angleFromPrevious = cell1->connections[i].angleFromPrevious * (1 - factor);
+    }
+}
+
+__inline__ __device__ void CellProcessor::delConnection(Cell* cell1, Cell* cell2)
+{
+    for (int i = 0; i < cell1->numConnections; ++i) {
+        if (cell1->connections[i].cell == cell2) {
+            if (i < cell1->numConnections - 1) {
+                float angleToAdd = i > 0 ? cell1->connections[i].angleFromPrevious : 0;
+                for (int j = i; j < cell1->numConnections - 1; ++j) {
+                    cell1->connections[j] = cell1->connections[j + 1];
+                }
+                cell1->connections[i].angleFromPrevious += angleToAdd;
+            }
+            --cell1->numConnections;
+            return;
+        }
     }
 }

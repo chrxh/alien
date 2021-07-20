@@ -4,6 +4,7 @@
 #include "Definitions.cuh"
 #include "Entities.cuh"
 #include "CellFunctionData.cuh"
+#include "Operation.cuh"
 
 struct SimulationData
 {
@@ -18,6 +19,9 @@ struct SimulationData
     Entities entitiesForCleanup;
 
     DynamicMemory dynamicMemory;
+
+    unsigned int* numOperations;
+    Operation* operations;  //uses dynamic memory
 
     CudaNumberGenerator numberGen;
     int numImageBytes;
@@ -38,12 +42,14 @@ struct SimulationData
 
         numImageBytes = size.x * size.y;
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numImageBytes, imageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     }
 
     void resizeImage(int2 const& newSize)
     {
         CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(max(newSize.x * newSize.y, size.x * size.y), imageData);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(
+            max(newSize.x * newSize.y, size.x * size.y), imageData);
         numImageBytes = newSize.x * newSize.y;
     }
 
@@ -58,6 +64,7 @@ struct SimulationData
         dynamicMemory.free();
 
         CudaMemoryManager::getInstance().freeMemory(imageData);
+        CudaMemoryManager::getInstance().freeMemory(numOperations);
     }
 };
 

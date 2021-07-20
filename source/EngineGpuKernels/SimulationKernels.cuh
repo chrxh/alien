@@ -9,6 +9,7 @@
 #include "Map.cuh"
 #include "CellProcessor.cuh"
 #include "CleanupKernels.cuh"
+#include "Operation.cuh"
 
 /************************************************************************/
 /* Helpers for clusters													*/
@@ -146,49 +147,65 @@ __global__ void particleProcessingStep3(SimulationData data)
 
 __global__ void cellProcessingStep1(SimulationData data)
 {
-    CellProcessor::init(data);
+    CellProcessor cellProcessor;
+    cellProcessor.init(data);
 }
 
 __global__ void cellProcessingStep2(SimulationData data)
 {
-    CellProcessor::collisions(data);
+    CellProcessor cellProcessor;
+    cellProcessor.collisions(data);
 }
 
 __global__ void cellProcessingStep3(SimulationData data)
 {
-    CellProcessor::initForces(data);
+    CellProcessor cellProcessor;
+    cellProcessor.initForces(data);
 }
 
 
 __global__ void cellProcessingStep4(SimulationData data)
 {
-    CellProcessor::calcForces(data);
+    CellProcessor cellProcessor;
+    cellProcessor.calcForces(data);
 }
 
 __global__ void cellProcessingStep5(SimulationData data)
 {
-    CellProcessor::calcPositions(data);
+    CellProcessor cellProcessor;
+    cellProcessor.calcPositions(data);
 }
 
 __global__ void cellProcessingStep6(SimulationData data)
 {
-    CellProcessor::calcForces(data);
+    CellProcessor cellProcessor;
+    cellProcessor.calcForces(data);
 }
 
 __global__ void cellProcessingStep7(SimulationData data)
 {
-    CellProcessor::calcVelocities(data);
+    CellProcessor cellProcessor;
+    cellProcessor.calcVelocities(data);
 }
 
 __global__ void cellProcessingStep8(SimulationData data)
 {
-    CellProcessor::calcAveragedVelocities(data);
+    CellProcessor cellProcessor;
+    cellProcessor.calcAveragedVelocities(data);
 }
 
 __global__ void cellProcessingStep9(SimulationData data)
 {
-    CellProcessor::applyAveragedVelocities(data);
+    CellProcessor cellProcessor;
+    cellProcessor.applyAveragedVelocities(data);
 }
+
+__global__ void cellProcessingStep10(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.processOperations(data);
+}
+
 
 /************************************************************************/
 /* Main      															*/
@@ -200,6 +217,9 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.particleMap.reset();
     data.dynamicMemory.reset();
 
+    *data.numOperations = 0; 
+    data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
+
     KERNEL_CALL(cellProcessingStep1, data);
     KERNEL_CALL(cellProcessingStep2, data);
     KERNEL_CALL(cellProcessingStep3, data);
@@ -209,7 +229,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(cellProcessingStep7, data);
     KERNEL_CALL(cellProcessingStep8, data);
     KERNEL_CALL(cellProcessingStep9, data);
-
+    KERNEL_CALL(cellProcessingStep10, data);
     /*
     KERNEL_CALL(resetCellFunctionData, data);
     KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
