@@ -92,7 +92,7 @@ TEST_F(MovementGpuTests, testTwoLineFusion)
     dataBefore.addCluster(createRect(QVector2D(20, 10), QVector2D(0, 0)));
 
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
-    IntegrationTestHelper::runSimulation(500, _controller);
+    IntegrationTestHelper::runSimulation(1500, _controller);
 
     DataDescription dataAfter =
         IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
@@ -139,7 +139,7 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
     dataBefore.addCluster(createRect(QVector2D(30, 10), QVector2D(0, 0)));
 
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
-    IntegrationTestHelper::runSimulation(500, _controller);
+    IntegrationTestHelper::runSimulation(1500, _controller);
 
     DataDescription dataAfter =
         IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
@@ -148,6 +148,43 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
     ASSERT_EQ(1, dataAfter.clusters->size());
     ASSERT_EQ(200, beforeAndAfterCells.size());
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        EXPECT_TRUE((*cellAfter.vel - QVector2D(0.05, 0)).length() < 0.01);
+        EXPECT_TRUE((*cellAfter.vel - QVector2D(0.05, 0)).length() < 0.005);
+    }
+}
+
+TEST_F(MovementGpuTests, testRectMovement)
+{
+    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+
+    DataDescription dataBefore;
+
+    auto createRect = [&](auto const& pos, auto const& vel) {
+        auto result = factory->createRect(
+            DescriptionFactory::CreateRectParameters().size({2, 2}).centerPosition(pos).velocity(vel),
+            _context->getNumberGenerator());
+        return result;
+    };
+    dataBefore.addCluster(createRect(QVector2D(10, 10), QVector2D(0.1, 0)));
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+    IntegrationTestHelper::runSimulation(10, _controller);
+
+    DataDescription dataAfter =
+        IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    auto beforeAndAfterCells = IntegrationTestHelper::getBeforeAndAfterCells(dataBefore, dataAfter);
+    ASSERT_EQ(1, dataAfter.clusters->size());
+    ASSERT_EQ(4, dataAfter.clusters->front().cells->size());
+
+    auto firstCellId = dataBefore.clusters->at(0).cells->at(2).id;
+    auto secondCellId = dataBefore.clusters->at(0).cells->at(3).id;
+    for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
+        EXPECT_TRUE((*cellAfter.vel - QVector2D(0.1, 0)).length() < 0.01);
+        if (cellBefore.id == firstCellId) {
+            EXPECT_TRUE((*cellAfter.pos - QVector2D(11.5, 9.5)).length() < 0.1);
+        }
+        if (cellBefore.id == secondCellId) {
+            EXPECT_TRUE((*cellAfter.pos - QVector2D(11.5, 10.5)).length() < 0.1);
+        }
     }
 }

@@ -203,7 +203,13 @@ __global__ void cellProcessingStep9(SimulationData data)
 __global__ void cellProcessingStep10(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.processOperations(data);
+    cellProcessor.processAddConnectionOperations(data);
+}
+
+__global__ void cellProcessingStep11(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.processDelCellOperations(data);
 }
 
 
@@ -217,8 +223,12 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.particleMap.reset();
     data.dynamicMemory.reset();
 
-    *data.numOperations = 0; 
-    data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
+    *data.numAddConnectionOperations = 0; 
+    *data.numDelCellOperations = 0;
+    data.addConnectionOperations =
+        data.dynamicMemory.getArray<AddConnectionOperation>(data.entities.cellPointers.getNumEntries());
+    data.delCellOperations =
+        data.dynamicMemory.getArray<DelCellOperation>(data.entities.cellPointers.getNumEntries());
 
     KERNEL_CALL(cellProcessingStep1, data);
     KERNEL_CALL(cellProcessingStep2, data);
@@ -230,6 +240,8 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(cellProcessingStep8, data);
     KERNEL_CALL(cellProcessingStep9, data);
     KERNEL_CALL(cellProcessingStep10, data);
+    KERNEL_CALL(cellProcessingStep11, data);
+
     /*
     KERNEL_CALL(resetCellFunctionData, data);
     KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
