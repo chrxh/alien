@@ -25,7 +25,7 @@ void StartupController::init()
 {
     initWidget();
 
-    _access->requestCurrentVersion();
+//    _access->requestCurrentVersion();
 
     _timer = new QTimer(this);
     connect(_timer, &QTimer::timeout, this, &StartupController::fadeout);

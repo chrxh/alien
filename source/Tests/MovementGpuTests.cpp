@@ -35,6 +35,8 @@ public:
     virtual void SetUp()
     {
         _parameters.radiationProb = 0;
+        _parameters.cellMaxForce = 2;
+        _parameters.cellFusionVelocity = 0;
         _context->setSimulationParameters(_parameters);
     }
 };
@@ -139,7 +141,7 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
     dataBefore.addCluster(createRect(QVector2D(30, 10), QVector2D(0, 0)));
 
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
-    IntegrationTestHelper::runSimulation(1500, _controller);
+    IntegrationTestHelper::runSimulation(3500, _controller);
 
     DataDescription dataAfter =
         IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
