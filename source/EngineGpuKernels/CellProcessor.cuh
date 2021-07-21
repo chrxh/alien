@@ -20,7 +20,8 @@ public:
     __inline__ __device__ void calcVelocities(SimulationData& data);
     __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
     __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
-    __inline__ __device__ void processOperations(SimulationData& data);
+    __inline__ __device__ void processAddConnectionOperations(SimulationData& data);
+    __inline__ __device__ void processDelCellOperations(SimulationData& data);
 
 private:
     __inline__ __device__ void scheduleCellForDestruction(Cell* cell1, int cellIndex);
@@ -62,6 +63,7 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 {
+    _data = &data;
     auto& cells = data.entities.cellPointers;
     _partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -88,8 +90,12 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 
                 auto distance = Math::length(posDelta);
                 if (distance >= cudaSimulationParameters.cellMaxDistance
-                    || distance <= cudaSimulationParameters.cellMinDistance) {
+                    /*|| distance <= cudaSimulationParameters.cellMinDistance*/) {
                     continue;
+                }
+
+                if (distance < cudaSimulationParameters.cellMinDistance) {
+                    scheduleCellForDestruction(cell, index);
                 }
 
                 auto velDelta = cell->vel - otherCell->vel;
@@ -117,10 +123,10 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         atomicAdd(&otherCell->tag, 1);
 
                         if (cell->numConnections < cell->maxConnections
-                            && otherCell->numConnections < otherCell->maxConnections) {
-                            auto index = atomicAdd(data.numOperations, 1);
-                            auto& operation = data.operations[index];
-                            operation.type = Operation::Type::Fusion;
+                            && otherCell->numConnections < otherCell->maxConnections
+                            && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity) {
+                            auto index = atomicAdd(data.numAddConnectionOperations, 1);
+                            auto& operation = data.addConnectionOperations[index];
                             operation.cell = cell;
                             operation.otherCell = otherCell;
                         }
@@ -143,7 +149,7 @@ __inline__ __device__ void CellProcessor::initForces(SimulationData& data)
 
         if (cell->tag > 0) {
             auto newVel = cell->temp1 / cell->tag;
-            if (Math::length(newVel - cell->vel) > 0.5) {
+            if (Math::length(newVel - cell->vel) > cudaSimulationParameters.cellMaxForce) {
                 scheduleCellForDestruction(cell, index);
             }
             cell->vel = newVel;
@@ -181,11 +187,15 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             if (i > 0) {
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
-                auto actualangleFromPrevious = Math::subtractAngle(angle, prevAngle);
-                if (actualangleFromPrevious > 180) {
-                    actualangleFromPrevious = abs(actualangleFromPrevious - 360.0f);
+                auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
+                if (actualAngleFromPrevious > 180) {
+                    actualAngleFromPrevious = abs(actualAngleFromPrevious - 360.0f);
                 }
-                auto deviation = actualangleFromPrevious - cell->connections[i].angleFromPrevious;
+                auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
+                if (referenceAngleFromPrevious > 180) {
+                    referenceAngleFromPrevious = abs(referenceAngleFromPrevious - 360.0f);
+                }
+                auto deviation = actualAngleFromPrevious - referenceAngleFromPrevious;
                 auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
                 auto forceInc = correctionMovementForLowAngle * deviation / -3000;
@@ -230,7 +240,7 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
         auto& cell = cells.at(index);
 
         auto acceleration = (cell->temp1 + cell->temp2) / 2;
-        if (Math::length(acceleration) > 0.5) {
+        if (Math::length(acceleration) > cudaSimulationParameters.cellMaxForce) {
             scheduleCellForDestruction(cell, index);
         }
         cell->vel = cell->vel + acceleration;
@@ -272,28 +282,34 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     }
 }
 
-__inline__ __device__ void CellProcessor::processOperations(SimulationData& data)
+__inline__ __device__ void CellProcessor::processAddConnectionOperations(SimulationData& data)
 {
-    _partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    _partition = calcPartition(*data.numAddConnectionOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     _data = &data;
 
     for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
-        auto const& operation = data.operations[index];
-        if (Operation::Type::Fusion == operation.type) {
-            connectCells(operation.cell, operation.otherCell);
-        }
-        if (Operation::Type::Destruction == operation.type) {
-            destroyCell(operation.cell, operation.cellIndex);
-        }
+        auto const& operation = data.addConnectionOperations[index];
+        connectCells(operation.cell, operation.otherCell);
+    }
+}
+
+__inline__ __device__ void CellProcessor::processDelCellOperations(SimulationData& data)
+{
+    _partition =
+        calcPartition(*data.numDelCellOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    _data = &data;
+
+    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
+        auto const& operation = data.delCellOperations[index];
+        destroyCell(operation.cell, operation.cellIndex);
     }
 }
 
 __inline__ __device__ void CellProcessor::scheduleCellForDestruction(Cell* cell, int cellIndex)
 {
     if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-        auto index = atomicAdd(_data->numOperations, 1);
-        auto& operation = _data->operations[index];
-        operation.type = Operation::Type::Destruction;
+        auto index = atomicAdd(_data->numDelCellOperations, 1);
+        auto& operation = _data->delCellOperations[index];
         operation.cell = cell;
         operation.cellIndex = cellIndex;
     }

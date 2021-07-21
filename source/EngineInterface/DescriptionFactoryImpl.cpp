@@ -132,8 +132,8 @@ ClusterDescription DescriptionFactoryImpl::createRect(
                     .setEnergy(energy)
                     .setVel(parameters._velocity)
                     .setPos(
-                        {static_cast<float>(size.x) / 2.0f - 0.5f + static_cast<float>(x) + centerPos.x(),
-                         static_cast<float>(size.y) / 2.0f - 0.5f + static_cast<float>(y) + centerPos.y()})
+                        {centerPos.x() - static_cast<float>(size.x - 1) / 2.0f + static_cast<float>(x),
+                         centerPos.y() - static_cast<float>(size.y - 1) / 2.0f + static_cast<float>(y)})
                     .setMaxConnections(parameters._maxConnections)
                     .setFlagTokenBlocked(false)
                     .setTokenBranchNumber(0)
