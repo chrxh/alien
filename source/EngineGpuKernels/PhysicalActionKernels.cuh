@@ -26,41 +26,21 @@ namespace
     __device__ auto const actionRadius = 20.0f;
 }
 
-__global__ void applyForceToClusters(CudaApplyForceData applyData, int2 universeSize, Array<Cluster*> clusters)
+__global__ void applyForceToCells(CudaApplyForceData applyData, int2 universeSize, Array<Cell*> cells)
 {
-/*
-    auto const clusterBlock =
-        calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    auto const particleBlock =
+        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-
-        auto const& cluster = clusters.at(clusterIndex);
-
-        __shared__ MapInfo map;
-        __shared__ float2 accumulatedVelInc;
-        __shared__ float accumulatedAngularVelInc;
-        if (0 == threadIdx.x) {
-            map.init(universeSize);
-            accumulatedVelInc.x = 0;
-            accumulatedVelInc.y = 0;
-            accumulatedAngularVelInc = 0;
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& cell = cells.at(index);
+        auto const& pos = cell->absPos;
+        auto distanceToSegment =
+            Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
+        if (distanceToSegment < actionRadius) {
+            auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
+            cell->vel = cell->vel + weightedForce;
         }
-        __syncthreads();
-
-        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-        for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = cluster->cellPointers[cellIndex];
-            auto pos = cell->absPos;
-            map.mapPosCorrection(pos);
-            auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
-            if (distanceToSegment < actionRadius) {
-                auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
-                cell->vel = cell->vel + weightedForce;
-            }
-        }
-        __syncthreads();
     }
-*/
 }
 
 __global__ void applyForceToParticles(CudaApplyForceData applyData, int2 universeSize, Array<Particle*> particles)
@@ -120,9 +100,8 @@ __global__ void moveSelectedParticles(float2 displacement, Array<Particle*> part
 
 __global__ void cudaApplyForce(CudaApplyForceData applyData, SimulationData data)
 {
-/*
-    KERNEL_CALL(applyForceToClusters, applyData, data.size, data.entities.clusterPointers);
-*/
+
+    KERNEL_CALL(applyForceToCells, applyData, data.size, data.entities.cellPointers);
     KERNEL_CALL(applyForceToParticles, applyData, data.size, data.entities.particlePointers);
 }
 

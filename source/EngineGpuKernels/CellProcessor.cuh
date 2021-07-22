@@ -94,7 +94,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     continue;
                 }
 
-                if (distance < cudaSimulationParameters.cellMinDistance) {
+                if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1) {
                     scheduleCellForDestruction(cell, index);
                 }
 
@@ -161,6 +161,7 @@ __inline__ __device__ void CellProcessor::initForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
 {
+    _data = &data;
     auto& cells = data.entities.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -172,9 +173,6 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
         float2 prevDisplacement;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
-            if (connectingCell->alive == 0) {
-                continue;
-            }
 
             auto displacement = connectingCell->absPos - cell->absPos;
             data.cellMap.mapDisplacementCorrection(displacement);
@@ -226,6 +224,21 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
         data.cellMap.mapPosCorrection(cell->absPos);
         cell->temp2 = cell->temp1;  //forces
         cell->temp1 = {0, 0};
+
+        bool destroy = false;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectingCell = cell->connections[i].cell;
+
+            auto displacement = connectingCell->absPos - cell->absPos;
+            data.cellMap.mapDisplacementCorrection(displacement);
+            auto actualDistance = Math::length(displacement);
+            if (actualDistance > cudaSimulationParameters.cellMaxDistance*2) {
+                destroy = true;
+            }
+        }
+        if (destroy) {
+            scheduleCellForDestruction(cell, index);
+        }
     }
 }
 
@@ -240,9 +253,6 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
         auto& cell = cells.at(index);
 
         auto acceleration = (cell->temp1 + cell->temp2) / 2;
-        if (Math::length(acceleration) > cudaSimulationParameters.cellMaxForce) {
-            scheduleCellForDestruction(cell, index);
-        }
         cell->vel = cell->vel + acceleration;
     }
 }
@@ -260,9 +270,6 @@ __inline__ __device__ void CellProcessor::calcAveragedVelocities(SimulationData&
         auto averagedVel = cell->vel * (1.0f - preserveVelocityFactor);
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
-            if (connectingCell->alive == 0) {
-                continue;
-            }
             averagedVel = averagedVel + connectingCell->vel * (1.0f - preserveVelocityFactor);
         }
         cell->temp1 = cell->vel * preserveVelocityFactor + averagedVel / (cell->numConnections + 1);
@@ -358,8 +365,10 @@ __inline__ __device__ void CellProcessor::destroyCell(Cell* cell, int cellIndex)
             }
         }
         if (0 == cell->numConnections && _data->entities.cellPointers.at(cellIndex) == cell) {
+/*
             auto lastCellIndex = _data->entities.cellPointers.decNumEntriesAndReturnOrigSize() - 1;
             _data->entities.cellPointers.at(cellIndex) = _data->entities.cellPointers.at(lastCellIndex);
+*/
         }
         cell->releaseLock();
     }
