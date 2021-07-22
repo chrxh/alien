@@ -209,7 +209,8 @@ __global__ void cleanupCellsStep2(SimulationData data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         for (int i = 0; i < cell.numConnections; ++i) {
-            cell.connections[i].cell = &cells.at(cell.tag);
+            auto& connectedCell = cell.connections[i].cell;
+            cell.connections[i].cell = &cells.at(connectedCell->tag);
         }
     }
 }
@@ -336,10 +337,11 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     data.entitiesForCleanup.particlePointers.reset();
     KERNEL_CALL(cleanupParticlePointers, data);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
-
+/*
     data.entitiesForCleanup.cellPointers.reset();
     KERNEL_CALL(cleanupCellPointers, data);
     data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
+*/
 
     if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
