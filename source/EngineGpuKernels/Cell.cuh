@@ -48,7 +48,6 @@ struct Cell
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
-    int alive;  //0 = dead, 1 == alive
     int tag;
     float2 temp1;
     float2 temp2;
@@ -67,9 +66,6 @@ struct Cell
     {
         atomicExch(&locked, 0);
     }
-
-private:
-    int _protectionCounter;
 };
 
 template<>

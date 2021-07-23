@@ -345,7 +345,7 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, S
             particleAccess.id = particle.id;
             particleAccess.pos = particle.absPos;
             particleAccess.vel = particle.vel;
-            particleAccess.energy = particle.getEnergy();
+            particleAccess.energy = particle.energy;
         }
     }
 }

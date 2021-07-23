@@ -71,7 +71,7 @@ __global__ void getMonitorDataForParticles(SimulationData data, CudaMonitorData 
 
     for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const particle = data.entities.particlePointers.at(index);
-        monitorData.incInternalEnergy(particle->getEnergy());
+        monitorData.incInternalEnergy(particle->energy);
     }
 }
 
