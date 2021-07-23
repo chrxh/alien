@@ -20,6 +20,7 @@ public:
     __inline__ __device__ void calcVelocities(SimulationData& data);
     __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
     __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
+    __inline__ __device__ void radiation(SimulationData& data);
     __inline__ __device__ void processAddConnectionOperations(SimulationData& data);
     __inline__ __device__ void processDelCellOperations(SimulationData& data);
 
@@ -225,7 +226,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
         cell->temp2 = cell->temp1;  //forces
         cell->temp1 = {0, 0};
 
-        bool destroy = false;
+        bool scheduleForDestruction = false;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
 
@@ -233,10 +234,10 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             data.cellMap.mapDisplacementCorrection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.cellMaxDistance*2) {
-                destroy = true;
+                scheduleForDestruction = true;
             }
         }
-        if (destroy) {
+        if (scheduleForDestruction) {
             scheduleCellForDestruction(cell, index);
         }
     }
@@ -286,6 +287,43 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
         auto& cell = cells.at(index);
 
         cell->vel = cell->temp1;
+    }
+}
+
+__inline__ __device__ void CellProcessor::radiation(SimulationData& data)
+{
+    auto& cells = data.entities.cellPointers;
+
+    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (data.numberGen.random() < cudaSimulationParameters.radiationProb) {
+
+            auto const cellEnergy = cell->energy;
+            auto& pos = cell->absPos;
+            float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+                + float2{
+                    (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                    (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+            float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+            data.cellMap.mapPosCorrection(particlePos);
+
+            particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
+            float radiationEnergy =
+                powf(cellEnergy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
+            radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
+            radiationEnergy = 2 * radiationEnergy * data.numberGen.random();
+            if (cellEnergy > 1) {
+                if (radiationEnergy > cellEnergy - 1) {
+                    radiationEnergy = cellEnergy - 1;
+                }
+                cell->energy -= radiationEnergy;
+
+                EntityFactory _factory;
+                _factory.init(&data);
+                auto particle =
+                    _factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
+            }
+        }
     }
 }
 

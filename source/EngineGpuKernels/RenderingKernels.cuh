@@ -87,7 +87,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
 
 __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 {
-    auto intensity = max(min((toInt(particle->getEnergy()) + 10) * 5, 150), 20) / 256.0f;
+    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 256.0f;
     if (!selected) {
         intensity *= 0.75f;
     }

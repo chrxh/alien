@@ -11,6 +11,10 @@
 class ParticleProcessor
 {
 public:
+    __inline__ __device__ void movement(SimulationData& data);
+    __inline__ __device__ void adsorption(SimulationData& data);
+
+    /*
 	__inline__ __device__ void init_system(SimulationData& data);
 
     __inline__ __device__ void processingMovement_system();
@@ -20,18 +24,14 @@ public:
 	__inline__ __device__ void processingDataCopy_system();
 
     __inline__ __device__ void repair_system();
-
-private:
-
-	SimulationData* _data;
-
-    PartitionData _particleBlock;
+*/
 };
 
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+/*
 __inline__ __device__ void ParticleProcessor::init_system(SimulationData & data)
 {
     _data = &data;
@@ -125,5 +125,32 @@ __inline__ __device__ void ParticleProcessor::repair_system()
     for (int particleIndex = _particleBlock.startIndex; particleIndex <= _particleBlock.endIndex; ++particleIndex) {
         auto& particle = _data->entities.particlePointers.at(particleIndex);
         particle->repair();
+    }
+}
+*/
+
+__inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
+{
+    auto partition = calcPartition(
+        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
+        auto& particle = data.entities.particlePointers.at(particleIndex);
+        particle->absPos = particle->absPos + particle->vel;
+        data.particleMap.mapPosCorrection(particle->absPos);
+    }
+}
+
+__inline__ __device__ void ParticleProcessor::adsorption(SimulationData& data)
+{
+    auto partition = calcPartition(
+        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
+        auto& particle = data.entities.particlePointers.at(particleIndex);
+        if (auto cell = data.cellMap.get(particle->absPos)) {
+            atomicAdd(&cell->energy, particle->energy);
+            particle = nullptr;
+        }
     }
 }

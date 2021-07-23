@@ -20,16 +20,16 @@ public:
     createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray);
     __inline__ __device__ Cell*
     createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
+    __inline__ __device__ Particle* createParticle(
+        float energy,
+        float2 const& pos,
+        float2 const& vel,
+        ParticleMetadata const& metadata);
 
     /*
     __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
     __inline__ __device__ Particle* createParticleFromTO(
         ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
-    __inline__ __device__ Particle* createParticle(
-        float energy,
-        float2 const& pos,
-        float2 const& vel,
-        ParticleMetadata const& metadata);  //TODO: not adding to simulation!
     __inline__ __device__ Cluster* createCluster(Cluster** clusterPointerToReuse = nullptr);
      __inline__ __device__ void createClusterFromTO_block(
          ClusterAccessTO const& clusterTO,
@@ -66,7 +66,7 @@ EntityFactory::createParticleFromTO(int targetIndex, ParticleAccessTO const& par
     particle->absPos = particleTO.pos;
     _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
-    particle->setEnergy(particleTO.energy);
+    particle->energy = particleTO.energy;
     particle->locked = 0;
     particle->alive = 1;
     particle->metadata.color = particleTO.metadata.color;
@@ -142,7 +142,6 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
         cellTO.metadata.sourceCodeStringIndex,
         simulationTO->stringBytes);
 
-    cell->alive = 1;
     cell->locked = 0;
 
     return cell;
@@ -158,6 +157,23 @@ EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, in
             targetString[i] = stringBytes[sourceStringIndex + i];
         }
     }
+}
+
+__inline__ __device__ Particle*
+EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, ParticleMetadata const& metadata)
+{
+    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
+    Particle* particle = _data->entities.particles.getNewElement();
+    *particlePointer = particle;
+    particle->id = _data->numberGen.createNewId_kernel();
+    particle->locked = 0;
+    particle->alive = 1;
+    particle->energy = energy;
+    particle->absPos = pos;
+    particle->vel = vel;
+    particle->metadata = metadata;
+    particle->setSelected(false);
+    return particle;
 }
 
 /*
@@ -460,22 +476,5 @@ EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, in
             targetString[i] = stringBytes[sourceStringIndex + i];
         }
     }
-}
-
-__inline__ __device__ Particle*
-EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, ParticleMetadata const& metadata)
-{
-    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
-    Particle* particle = _data->entities.particles.getNewElement();
-    *particlePointer = particle;
-    particle->id = _data->numberGen.createNewId_kernel();
-    particle->locked = 0;
-    particle->alive = 1;
-    particle->setEnergy(energy);
-    particle->absPos = pos;
-    particle->vel = vel;
-    particle->metadata = metadata;
-    particle->setSelected(false);
-    return particle;
 }
 */

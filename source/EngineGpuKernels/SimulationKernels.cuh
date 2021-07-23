@@ -8,6 +8,7 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "CellProcessor.cuh"
+#include "ParticleProcessor.cuh"
 #include "CleanupKernels.cuh"
 #include "Operation.cuh"
 
@@ -149,12 +150,18 @@ __global__ void cellProcessingStep1(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.init(data);
+    cellProcessor.radiation(data);
+
 }
 
 __global__ void cellProcessingStep2(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.collisions(data);
+
+    ParticleProcessor particleProcessor;
+    particleProcessor.movement(data);
+    particleProcessor.adsorption(data);
 }
 
 __global__ void cellProcessingStep3(SimulationData data)
