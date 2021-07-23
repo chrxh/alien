@@ -157,9 +157,6 @@
       <Project>{29f70c63-c87a-42ae-98de-b6a5353bc2f3}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.targets" />
