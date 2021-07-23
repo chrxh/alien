@@ -11,8 +11,9 @@
 class ParticleProcessor
 {
 public:
+    __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void movement(SimulationData& data);
-    __inline__ __device__ void adsorption(SimulationData& data);
+    __inline__ __device__ void collision(SimulationData& data);
 
     /*
 	__inline__ __device__ void init_system(SimulationData& data);
@@ -129,6 +130,14 @@ __inline__ __device__ void ParticleProcessor::repair_system()
 }
 */
 
+__inline__ __device__ void ParticleProcessor::updateMap(SimulationData& data)
+{
+    auto partition = calcPartition(data.entities.particlePointers.getNumEntries(), blockIdx.x, gridDim.x);
+
+    Particle** particlePointers = &data.entities.particlePointers.at(partition.startIndex);
+    data.particleMap.set_block(partition.numElements(), particlePointers);
+}
+
 __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 {
     auto partition = calcPartition(
@@ -141,16 +150,38 @@ __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
     }
 }
 
-__inline__ __device__ void ParticleProcessor::adsorption(SimulationData& data)
+__inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 {
     auto partition = calcPartition(
         data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.entities.particlePointers.at(particleIndex);
-        if (auto cell = data.cellMap.get(particle->absPos)) {
-            atomicAdd(&cell->energy, particle->energy);
-            particle = nullptr;
+        auto otherParticle = data.particleMap.get(particle->absPos);
+        if (otherParticle && otherParticle != particle
+            && Math::lengthSquared(particle->absPos - otherParticle->absPos) < 0.5) {
+
+            SystemDoubleLock lock;
+            lock.init(&particle->locked, &otherParticle->locked);
+            if (lock.tryLock()) {
+                __threadfence();
+
+                if (particle->energy > FP_PRECISION && otherParticle->energy > FP_PRECISION) {
+                    auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
+                    otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
+                    otherParticle->energy += particle->energy;
+                    particle->energy = 0;
+                    particle = nullptr;
+                }
+                __threadfence();
+                lock.releaseLock();
+            }
+        } else {
+            if (auto cell = data.cellMap.get(particle->absPos)) {
+                atomicAdd(&cell->energy, particle->energy);
+                particle->energy = 0;
+                particle = nullptr;
+            }
         }
     }
 }
