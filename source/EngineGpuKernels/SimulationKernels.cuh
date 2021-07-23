@@ -150,6 +150,7 @@ __global__ void cellProcessingStep1(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.init(data);
+    cellProcessor.updateMap(data);
     cellProcessor.radiation(data);
 
 }
@@ -160,14 +161,17 @@ __global__ void cellProcessingStep2(SimulationData data)
     cellProcessor.collisions(data);
 
     ParticleProcessor particleProcessor;
-    particleProcessor.movement(data);
-    particleProcessor.adsorption(data);
+    particleProcessor.updateMap(data);
 }
 
 __global__ void cellProcessingStep3(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.initForces(data);
+
+    ParticleProcessor particleProcessor;
+    particleProcessor.movement(data);
+    particleProcessor.collision(data);
 }
 
 

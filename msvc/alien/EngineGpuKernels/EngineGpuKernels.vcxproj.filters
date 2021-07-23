@@ -171,7 +171,4 @@
       <Filter>Interface</Filter>
     </CudaCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
 </Project>

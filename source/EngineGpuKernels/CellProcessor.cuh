@@ -13,6 +13,7 @@ class CellProcessor
 {
 public:
     __inline__ __device__ void init(SimulationData& data);
+    __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void collisions(SimulationData& data);
     __inline__ __device__ void initForces(SimulationData& data);
     __inline__ __device__ void calcForces(SimulationData& data);
@@ -43,23 +44,22 @@ private:
 
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
-    {
-        auto& cells = data.entities.cellPointers;
-        _partition =
-            calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto& cells = data.entities.cellPointers;
+    _partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-        for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
-            auto& cell = cells.at(index);
+    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
 
-            cell->temp1 = {0, 0};
-            cell->tag = 0;
-        }
+        cell->temp1 = {0, 0};
+        cell->tag = 0;
     }
-    {
-        auto const partition = calcPartition(data.entities.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
-        Cell** cellPointers = &data.entities.cellPointers.at(partition.startIndex);
-        data.cellMap.set_block(partition.numElements(), cellPointers);
-    }
+}
+
+__inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
+{
+    auto const partition = calcPartition(data.entities.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    Cell** cellPointers = &data.entities.cellPointers.at(partition.startIndex);
+    data.cellMap.set_block(partition.numElements(), cellPointers);
 }
 
 __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
