@@ -331,6 +331,26 @@ __global__ void getCellAccessData(int2 rectUpperLeft, int2 rectLowerRight, Simul
     KERNEL_CALL(resolveConnections, rectUpperLeft, rectLowerRight, data, accessTO);
 }
 
+__global__ void getTokenAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
+{
+    auto const& tokens = data.entities.tokenPointers;
+
+    auto partition =
+        calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (auto tokenIndex = partition.startIndex; tokenIndex <= partition.endIndex; ++tokenIndex) {
+        auto token = tokens.at(tokenIndex);
+
+        auto tokenTOIndex = atomicAdd(accessTO.numTokens, 1);
+        auto& tokenTO = accessTO.tokens[tokenTOIndex];
+
+        tokenTO.energy = token->energy;
+        for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
+            tokenTO.memory[i] = token->memory[i];
+        }
+        tokenTO.cellIndex = token->cell->tag;
+    }
+}
+
 __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
 {
     PartitionData particleBlock = calcPartition(
@@ -378,8 +398,12 @@ __global__ void filterParticles(int2 rectUpperLeft, int2 rectLowerRight, Array<P
 }
 
 
-__global__ void
-createDataFromTO(SimulationData data, DataAccessTO simulationTO, Particle* particleTargetArray, Cell* cellTargetArray)
+__global__ void createDataFromTO(
+    SimulationData data,
+    DataAccessTO simulationTO,
+    Particle* particleTargetArray,
+    Cell* cellTargetArray,
+    Token* tokenTargetArray)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -397,6 +421,12 @@ createDataFromTO(SimulationData data, DataAccessTO simulationTO, Particle* parti
         calcPartition(*simulationTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         factory.createCellFromTO(index, simulationTO.cells[index], cellTargetArray, &simulationTO);
+    }
+
+    auto tokenPartition =
+        calcPartition(*simulationTO.numTokens, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (int index = tokenPartition.startIndex; index <= tokenPartition.endIndex; ++index) {
+        factory.createTokenFromTO(index, simulationTO.tokens[index], cellTargetArray, tokenTargetArray, &simulationTO);
     }
 }
 
@@ -463,8 +493,8 @@ __global__ void cudaGetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
     *access.numTokens = 0;
     *access.numStringBytes = 0;
 
-
     KERNEL_CALL_1_1(getCellAccessData, rectUpperLeft, rectLowerRight, data, access);
+    KERNEL_CALL(getTokenAccessData, rectUpperLeft, rectLowerRight, data, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
 }
 
@@ -479,7 +509,8 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
         data,
         access,
         data.entities.particles.getNewSubarray(*access.numParticles),
-        data.entities.cells.getNewSubarray(*access.numCells));
+        data.entities.cells.getNewSubarray(*access.numCells),
+        data.entities.tokens.getNewSubarray(*access.numTokens));
 }
 
 __global__ void cudaClearData(SimulationData data)
