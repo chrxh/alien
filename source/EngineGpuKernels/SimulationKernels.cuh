@@ -191,13 +191,11 @@ __global__ void processingStep11(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.processAddConnectionOperations(data);
-//    cellProcessor.processDelOperations(data);
 }
 
 __global__ void processingStep12(SimulationData data)
 {
     CellProcessor cellProcessor;
-//    cellProcessor.processAddConnectionOperations(data);
     cellProcessor.processDelOperations(data);
 }
 

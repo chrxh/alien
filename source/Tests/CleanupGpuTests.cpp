@@ -22,7 +22,7 @@ class CleanupGpuTests : public IntegrationGpuTestFramework
 {
 public:
     CleanupGpuTests()
-        : IntegrationGpuTestFramework({30, 30}, getModelDataForCleanup())
+        : IntegrationGpuTestFramework({100, 100}, getModelDataForCleanup())
     {}
 
     virtual ~CleanupGpuTests() = default;
@@ -62,9 +62,6 @@ TEST_F(CleanupGpuTests, testCleanupCells)
         auto result = factory->createRect(
             DescriptionFactory::CreateRectParameters().size({30, 25}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
-        for (auto& cell : *result.cells) {
-            cell.maxConnections = cell.connections->size();
-        }
         return result;
     };
     dataBefore.addCluster(createRect(QVector2D(10, 10), QVector2D(1, 0)));
@@ -78,7 +75,6 @@ TEST_F(CleanupGpuTests, testCleanupCells)
         DataDescription dataAfter =
             IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
         if (dataAfter.clusters) {
-            int numCells = 0;
             DescriptionNavigator navi;
             navi.update(dataAfter);
             for (auto const& cluster : *dataAfter.clusters) {
@@ -90,9 +86,45 @@ TEST_F(CleanupGpuTests, testCleanupCells)
                         _spaceProp->correctDisplacement(displacement);
                         EXPECT_TRUE(displacement.length() < 7);
                     }
-                    ++numCells;
                 }
             }
+        }
+    }
+}
+
+TEST_F(CleanupGpuTests, testCleanupCellsWithToken)
+{
+    _parameters.radiationFactor = 0;
+    _parameters.radiationProb = 0;
+    _context->setSimulationParameters(_parameters);
+
+    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+
+    DataDescription dataBefore;
+
+    auto createRect = [&](auto const& pos, auto const& vel) {
+        auto result = factory->createRect(
+            DescriptionFactory::CreateRectParameters().size({55, 55}).centerPosition(pos).velocity(vel),
+            _context->getNumberGenerator());
+        return result;
+    };
+    auto rect = createRect(QVector2D(50, 50), QVector2D(0, 0));
+    QByteArray expectedTokenMemory(_parameters.tokenMemorySize, 0);
+    rect.cells->at(0).addToken(
+        TokenDescription().setData(expectedTokenMemory).setEnergy(_parameters.tokenMinEnergy * 2));
+    dataBefore.addCluster(rect);
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+    IntegrationTestHelper::runSimulation(1, _controller);
+    DataDescription dataAfter =
+        IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    auto beforeAndAfterCells = IntegrationTestHelper::getBeforeAndAfterCells(dataBefore, dataAfter);
+
+    auto firstCellId = dataBefore.clusters->at(0).cells->at(0).id;
+    for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
+        if (cellBefore.id == firstCellId) {
+            EXPECT_EQ(1, cellAfter.tokens->size());
         }
     }
 }
