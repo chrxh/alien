@@ -171,13 +171,20 @@ struct ENGINEINTERFACE_EXPORT DataDescription
 		addClusters({ value });
 		return *this;
 	}
-	DataDescription& addParticle(ParticleDescription const& value)
+
+	DataDescription& addParticles(list<ParticleDescription> const& value)
+    {
+        if (particles) {
+            particles->insert(particles->end(), value.begin(), value.end());
+        } else {
+            particles = vector<ParticleDescription>(value.begin(), value.end());
+        }
+        return *this;
+    }
+    DataDescription& addParticle(ParticleDescription const& value)
 	{
-		if (!particles) {
-			particles = vector<ParticleDescription>();
-		}
-		particles->emplace_back(value);
-		return *this;
+        addParticles({value});
+        return *this;
 	}
 	void clear()
 	{

@@ -1,23 +1,104 @@
-/*
+
+#include "Base/GlobalFactory.h"
+#include "Base/NumberGenerator.h"
+#include "Base/ServiceLocator.h"
+#include "EngineGpu/EngineGpuBuilderFacade.h"
+#include "EngineGpu/EngineGpuData.h"
+#include "EngineGpu/SimulationAccessGpu.h"
+#include "EngineGpu/SimulationControllerGpu.h"
+#include "EngineInterface/DescriptionFactory.h"
+#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/EngineInterfaceBuilderFacade.h"
+#include "EngineInterface/SimulationAccess.h"
+#include "EngineInterface/SimulationContext.h"
+#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/SpaceProperties.h"
 #include "IntegrationGpuTestFramework.h"
+#include "IntegrationTestHelper.h"
+#include "Predicates.h"
 
 class CleanupGpuTests : public IntegrationGpuTestFramework
 {
 public:
     CleanupGpuTests()
-        : IntegrationGpuTestFramework({600, 300}, getModelDataForCleanup())
+        : IntegrationGpuTestFramework({30, 30}, getModelDataForCleanup())
     {}
 
     virtual ~CleanupGpuTests() = default;
 
-protected:
-    virtual void SetUp();
-
 private:
-    EngineGpuData getModelDataForCleanup();
+    EngineGpuData getModelDataForCleanup()
+    {
+        CudaConstants cudaConstants;
+        cudaConstants.NUM_THREADS_PER_BLOCK = 64;
+        cudaConstants.NUM_BLOCKS = 64;
+        cudaConstants.MAX_CLUSTERS = 2500;
+        cudaConstants.MAX_CELLS = 3500;
+        cudaConstants.MAX_PARTICLES = 25000;
+        cudaConstants.MAX_TOKENS = 10000;
+        cudaConstants.MAX_CELLPOINTERS = cudaConstants.MAX_CELLS * 10;
+        cudaConstants.MAX_CLUSTERPOINTERS = cudaConstants.MAX_CLUSTERS * 10;
+        cudaConstants.MAX_PARTICLEPOINTERS = cudaConstants.MAX_PARTICLES * 10;
+        cudaConstants.MAX_TOKENPOINTERS = cudaConstants.MAX_TOKENS * 10;
+        cudaConstants.DYNAMIC_MEMORY_SIZE = 10000000;
+        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE = 10000;
+        return EngineGpuData(cudaConstants);
+    }
 };
 
 
+TEST_F(CleanupGpuTests, testCleanupCells)
+{
+    _parameters.cellFusionVelocity = 0;
+    _parameters.radiationFactor = 0.002f;
+    _context->setSimulationParameters(_parameters);
+
+    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
+
+    DataDescription dataBefore;
+
+    auto createRect = [&](auto const& pos, auto const& vel) {
+        auto result = factory->createRect(
+            DescriptionFactory::CreateRectParameters().size({30, 25}).centerPosition(pos).velocity(vel),
+            _context->getNumberGenerator());
+        for (auto& cell : *result.cells) {
+            cell.maxConnections = cell.connections->size();
+        }
+        return result;
+    };
+    dataBefore.addCluster(createRect(QVector2D(10, 10), QVector2D(1, 0)));
+    dataBefore.addCluster(createRect(QVector2D(50, 10), QVector2D(-1, 0)));
+    dataBefore.addCluster(createRect(QVector2D(80, 40), QVector2D(0, -1)));
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+
+    for (int i = 0; i < 2500; ++i) {
+        IntegrationTestHelper::runSimulation(1, _controller);
+        DataDescription dataAfter =
+            IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+        if (dataAfter.clusters) {
+            int numCells = 0;
+            DescriptionNavigator navi;
+            navi.update(dataAfter);
+            for (auto const& cluster : *dataAfter.clusters) {
+                for (auto const& cell : *cluster.cells) {
+                    for (auto const& connection : *cell.connections) {
+                        int connectedCellIndex = navi.cellIndicesByCellIds.at(connection.cellId);
+                        auto connectedCell = cluster.cells->at(connectedCellIndex);
+                        auto displacement = *connectedCell.pos - *cell.pos;
+                        _spaceProp->correctDisplacement(displacement);
+                        EXPECT_TRUE(displacement.length() < 7);
+                    }
+                    ++numCells;
+                }
+            }
+        }
+    }
+}
+
+
+/*
 void CleanupGpuTests::SetUp()
 {
     _parameters.radiationExponent = 1;

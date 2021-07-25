@@ -66,10 +66,16 @@ bool checkCompatibility(T a, T b)
 template<typename T>
 bool checkCompatibility(boost::optional<T> a, boost::optional<T> b)
 {
-	if (!a || !b) {
-		return true;
-	}
-	return checkCompatibility(*a, *b);
+    if (!a && !b) {
+        return true;
+    }
+    if (a && !b) {
+        return false;
+    }
+    if (!a && b) {
+        return true;
+    }
+    return checkCompatibility(*a, *b);
 }
 
 template<typename T>

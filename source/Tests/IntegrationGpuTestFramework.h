@@ -1,3 +1,4 @@
+#pragma once
 #include <gtest/gtest.h>
 
 #include <QEventLoop>
@@ -32,7 +33,12 @@ public:
 	virtual ~IntegrationGpuTestFramework();
 
 protected:
-/*
+    DataDescription getDataFromSimulation()
+    {
+        return IntegrationTestHelper::getContent(_access, {{-100, -100}, {_universeSize.x + 100, _universeSize.y + 100}});
+    }
+
+    /*
     void check(DataDescription const& origData, DataDescription const& newData) const;
 
     void checkCellAttributes(DataDescription const& data) const;
