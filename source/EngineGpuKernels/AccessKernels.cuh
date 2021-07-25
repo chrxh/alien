@@ -338,6 +338,8 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, S
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = *data.entities.particlePointers.at(particleIndex);
+        auto pos = particle.absPos;
+        data.particleMap.mapPosCorrection(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, particle.absPos)) {
             int particleAccessIndex = atomicAdd(access.numParticles, 1);
             ParticleAccessTO& particleAccess = access.particles[particleAccessIndex];

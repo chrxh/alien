@@ -91,6 +91,9 @@
     <ClCompile Include="..\..\..\source\Tests\MovementGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\Tests\EnergyGpuTests.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\Tests\IntegrationGpuTestFramework.h">

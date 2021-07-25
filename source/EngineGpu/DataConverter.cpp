@@ -100,8 +100,20 @@ DataDescription DataConverter::getDataDescription() const
         auto cluster = scanAndCreateClusterDescription(freeCellIndex, freeCellIndices);
         clusters.emplace_back(cluster);
     }
-
     result.addClusters(clusters);
+
+    std::list<ParticleDescription> particles;
+    for (int i = 0; i < *_dataTO.numParticles; ++i) {
+        ParticleAccessTO const& particle = _dataTO.particles[i];
+        particles.emplace_back(ParticleDescription()
+                               .setId(particle.id)
+                               .setPos({particle.pos.x, particle.pos.y})
+                               .setVel({particle.vel.x, particle.vel.y})
+                               .setEnergy(particle.energy)
+                               .setMetadata(ParticleMetadata().setColor(particle.metadata.color)));
+    }
+    result.addParticles(particles);
+
     return result;
 
 /*
@@ -523,6 +535,16 @@ void DataConverter::addCell(
         cellTO.metadata.sourceCodeLen= 0;
     }
 
+    if (cellDesc.tokens) {
+        for (int i = 0; i < cellDesc.tokens->size(); ++i) {
+            TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
+            int tokenIndex = (*_dataTO.numTokens)++;
+            TokenAccessTO& tokenTO = _dataTO.tokens[tokenIndex];
+            tokenTO.energy = *tokenDesc.energy;
+            tokenTO.cellIndex = cellIndex;
+            convertToArray(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
+        }
+    }
 /*
 	if (cellDesc.tokens) {
 		for (int i = 0; i < cellDesc.tokens->size(); ++i) {

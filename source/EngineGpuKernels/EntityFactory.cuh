@@ -25,6 +25,7 @@ public:
         float2 const& pos,
         float2 const& vel,
         ParticleMetadata const& metadata);
+    __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
 
     /*
     __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
@@ -174,6 +175,50 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     particle->metadata = metadata;
     particle->setSelected(false);
     return particle;
+}
+
+__inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
+{
+    auto cell = _data->entities.cells.getNewElement();
+    auto cellPointers = _data->entities.cellPointers.getNewElement();
+    *cellPointers = cell;
+
+    cell->id = _data->numberGen.createNewId_kernel();
+    cell->absPos = pos;
+    cell->vel = vel;
+    cell->energy = energy;
+    cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
+    cell->branchNumber = _data->numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
+    cell->numConnections = 0;
+    cell->tokenBlocked = false;
+    cell->locked = 0;
+    cell->metadata.color = 0;
+    cell->metadata.nameLen = 0;
+    cell->metadata.descriptionLen = 0;
+    cell->metadata.sourceCodeLen = 0;
+    cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
+    switch (cell->cellFunctionType) {
+    case Enums::CellFunction::COMPUTER: {
+        cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
+        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
+    } break;
+    case Enums::CellFunction::SENSOR: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 5;
+    } break;
+    default: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 0;
+    }
+    }
+    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+        cell->staticData[i] = _data->numberGen.random(255);
+    }
+    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+        cell->mutableData[i] = _data->numberGen.random(255);
+    }
+    cell->tokenUsages = 0;
+    return cell;
 }
 
 /*

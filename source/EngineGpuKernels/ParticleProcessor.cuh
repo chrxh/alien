@@ -14,6 +14,7 @@ public:
     __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void movement(SimulationData& data);
     __inline__ __device__ void collision(SimulationData& data);
+    __inline__ __device__ void transformation(SimulationData& data);
 
     /*
 	__inline__ __device__ void init_system(SimulationData& data);
@@ -173,13 +174,41 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     particle->energy = 0;
                     particle = nullptr;
                 }
+
                 __threadfence();
                 lock.releaseLock();
             }
         } else {
             if (auto cell = data.cellMap.get(particle->absPos)) {
-                atomicAdd(&cell->energy, particle->energy);
-                particle->energy = 0;
+                if (particle->tryLock()) {
+                    __threadfence();
+                    
+                    atomicAdd(&cell->energy, particle->energy);
+                    particle->energy = 0;
+
+                    __threadfence();
+                    particle->releaseLock();
+
+                    particle = nullptr;
+                }
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ParticleProcessor::transformation(SimulationData& data)
+{
+    auto partition = calcPartition(
+        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
+        if (auto& particle = data.entities.particlePointers.at(particleIndex)) {
+            if (particle->energy >= cudaSimulationParameters.cellMinEnergy) {
+                EntityFactory factory;
+                factory.init(&data);
+                auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);
+                cell->metadata.color = particle->metadata.color;
+
                 particle = nullptr;
             }
         }

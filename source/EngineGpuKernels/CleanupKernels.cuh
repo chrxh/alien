@@ -338,6 +338,10 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     KERNEL_CALL(cleanupParticlePointers, data);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
+    data.entitiesForCleanup.cellPointers.reset();
+    KERNEL_CALL(cleanupCellPointers, data);
+    data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
+
     if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
         KERNEL_CALL(cleanupParticles, data);

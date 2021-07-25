@@ -23,13 +23,16 @@ public:
     __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
     __inline__ __device__ void radiation(SimulationData& data);
     __inline__ __device__ void processAddConnectionOperations(SimulationData& data);
-    __inline__ __device__ void processDelCellOperations(SimulationData& data);
+    __inline__ __device__ void processDelOperations(SimulationData& data);
+    __inline__ __device__ void decay(SimulationData& data);
 
 private:
-    __inline__ __device__ void scheduleCellForDestruction(Cell* cell1, int cellIndex);
+    __inline__ __device__ void scheduleDelConnections(Cell* cell, int cellIndex);
+    __inline__ __device__ void scheduleDelCell(Cell* cell, int cellIndex);
 
     __inline__ __device__ void connectCells(Cell* cell1, Cell* cell2);
-    __inline__ __device__ void destroyCell(Cell* cell, int cellIndex);
+    __inline__ __device__ void delConnections(Cell* cell, int cellIndex);
+    __inline__ __device__ void delCell(Cell* cell, int cellIndex);
 
     __inline__ __device__ void addConnection(Cell* cell1, Cell* cell2, float2 const& posDelta);
     __inline__ __device__ void delConnection(Cell* cell1, Cell* cell2);
@@ -96,7 +99,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
 
                 if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1) {
-                    scheduleCellForDestruction(cell, index);
+                    scheduleDelConnections(cell, index);
                 }
 
                 auto velDelta = cell->vel - otherCell->vel;
@@ -151,7 +154,7 @@ __inline__ __device__ void CellProcessor::initForces(SimulationData& data)
         if (cell->tag > 0) {
             auto newVel = cell->temp1 / cell->tag;
             if (Math::length(newVel - cell->vel) > cudaSimulationParameters.cellMaxForce) {
-                scheduleCellForDestruction(cell, index);
+                scheduleDelConnections(cell, index);
             }
             cell->vel = newVel;
         }
@@ -238,7 +241,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             }
         }
         if (scheduleForDestruction) {
-            scheduleCellForDestruction(cell, index);
+            scheduleDelConnections(cell, index);
         }
     }
 }
@@ -264,7 +267,7 @@ __inline__ __device__ void CellProcessor::calcAveragedVelocities(SimulationData&
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    constexpr float preserveVelocityFactor = 0.8f;
+    constexpr float preserveVelocityFactor = 0.0f;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
@@ -294,11 +297,12 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
 
-    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
+    auto partition =
+        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (data.numberGen.random() < cudaSimulationParameters.radiationProb) {
 
-            auto const cellEnergy = cell->energy;
             auto& pos = cell->absPos;
             float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
                 + float2{
@@ -307,6 +311,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
             data.cellMap.mapPosCorrection(particlePos);
 
+            auto cellEnergy = cell->energy;
             particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
             float radiationEnergy =
                 powf(cellEnergy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
@@ -317,11 +322,13 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     radiationEnergy = cellEnergy - 1;
                 }
                 cell->energy -= radiationEnergy;
+                if (cell->energy < 0) {
+                    printf("ohoh\n");
+                }
 
-                EntityFactory _factory;
-                _factory.init(&data);
-                auto particle =
-                    _factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
+                EntityFactory factory;
+                factory.init(&data);
+                factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
             }
         }
     }
@@ -338,26 +345,61 @@ __inline__ __device__ void CellProcessor::processAddConnectionOperations(Simulat
     }
 }
 
-__inline__ __device__ void CellProcessor::processDelCellOperations(SimulationData& data)
+__inline__ __device__ void CellProcessor::processDelOperations(SimulationData& data)
 {
     _partition =
-        calcPartition(*data.numDelCellOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(*data.numDelOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     _data = &data;
 
     for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
-        auto const& operation = data.delCellOperations[index];
-        destroyCell(operation.cell, operation.cellIndex);
+        auto const& operation = data.delOperations[index];
+        if (DelOperation::Type::DelConnections == operation.type) {
+            delConnections(operation.cell, operation.cellIndex);
+        }
+        if (DelOperation::Type::DelCell == operation.type) {
+            delCell(operation.cell, operation.cellIndex);
+        }
     }
 }
 
-__inline__ __device__ void CellProcessor::scheduleCellForDestruction(Cell* cell, int cellIndex)
+__inline__ __device__ void CellProcessor::decay(SimulationData& data)
+{
+    _data = &data;
+    auto& cells = data.entities.cellPointers;
+    auto partition =
+        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
+            if (cell->numConnections > 0) {
+                scheduleDelConnections(cell, index);
+            } else {
+                scheduleDelCell(cell, index);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void CellProcessor::scheduleDelConnections(Cell* cell, int cellIndex)
 {
     if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-        auto index = atomicAdd(_data->numDelCellOperations, 1);
-        auto& operation = _data->delCellOperations[index];
+        auto index = atomicAdd(_data->numDelOperations, 1);
+        auto& operation = _data->delOperations[index];
+        operation.type = DelOperation::Type::DelConnections;
         operation.cell = cell;
         operation.cellIndex = cellIndex;
     }
+}
+
+__inline__ __device__ void CellProcessor::scheduleDelCell(Cell* cell, int cellIndex)
+{
+    auto index = atomicAdd(_data->numDelOperations, 1);
+    auto& operation = _data->delOperations[index];
+    operation.type = DelOperation::Type::DelCell;
+    operation.cell = cell;
+    operation.cellIndex = cellIndex;
 }
 
 __inline__ __device__ void CellProcessor::connectCells(Cell* cell1, Cell* cell2)
@@ -387,7 +429,7 @@ __inline__ __device__ void CellProcessor::connectCells(Cell* cell1, Cell* cell2)
     }
 }
 
-__inline__ __device__ void CellProcessor::destroyCell(Cell* cell, int cellIndex)
+__inline__ __device__ void CellProcessor::delConnections(Cell* cell, int cellIndex)
 {
     if (cell->tryLock()) {
         for (int i = cell->numConnections - 1; i >= 0; --i) {
@@ -402,12 +444,25 @@ __inline__ __device__ void CellProcessor::destroyCell(Cell* cell, int cellIndex)
                 connectedCell->releaseLock();
             }
         }
-        if (0 == cell->numConnections && _data->entities.cellPointers.at(cellIndex) == cell) {
-/*
-            auto lastCellIndex = _data->entities.cellPointers.decNumEntriesAndReturnOrigSize() - 1;
-            _data->entities.cellPointers.at(cellIndex) = _data->entities.cellPointers.at(lastCellIndex);
-*/
+        cell->releaseLock();
+    }
+}
+
+__inline__ __device__ void CellProcessor::delCell(Cell* cell, int cellIndex)
+{
+    if (cell->tryLock()) {
+        __threadfence();
+        
+        if (0 == cell->numConnections && cell->energy != 0/* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
+            EntityFactory factory;
+            factory.init(_data);
+            factory.createParticle(cell->energy, cell->absPos, cell->vel, {cell->metadata.color});
+            cell->energy = 0;
+
+            _data->entities.cellPointers.at(cellIndex) = nullptr;
         }
+
+        __threadfence();
         cell->releaseLock();
     }
 }
