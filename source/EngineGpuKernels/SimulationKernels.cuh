@@ -11,6 +11,7 @@
 #include "ParticleProcessor.cuh"
 #include "CleanupKernels.cuh"
 #include "Operation.cuh"
+#include "DebugKernels.cuh"
 
 /************************************************************************/
 /* Helpers for clusters													*/
@@ -117,45 +118,15 @@ __global__ void tokenProcessingStep4(SimulationData data, int numClusters)
 }
 */
 
-/************************************************************************/
-/* Helpers for particles												*/
-/************************************************************************/
-/*
-__global__ void particleProcessingStep1(SimulationData data)
-{
-	ParticleProcessor particleProcessor;
-    particleProcessor.init_system(data);
-    particleProcessor.repair_system();
-    particleProcessor.processingMovement_system();
-    particleProcessor.updateMap_system();
-    particleProcessor.processingTransformation_system();
-}
-
-__global__ void particleProcessingStep2(SimulationData data)
-{
-    ParticleProcessor particleProcessor;
-    particleProcessor.init_system(data);
-    particleProcessor.processingCollision_system();
-}
-
-__global__ void particleProcessingStep3(SimulationData data)
-{
-	ParticleProcessor particleProcessor;
-    particleProcessor.init_system(data);
-    particleProcessor.processingDataCopy_system();
-}
-*/
-
-__global__ void cellProcessingStep1(SimulationData data)
+__global__ void processingStep1(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.init(data);
     cellProcessor.updateMap(data);
-    cellProcessor.radiation(data);
-
+    cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
 }
 
-__global__ void cellProcessingStep2(SimulationData data)
+__global__ void processingStep2(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.collisions(data);
@@ -164,65 +135,77 @@ __global__ void cellProcessingStep2(SimulationData data)
     particleProcessor.updateMap(data);
 }
 
-__global__ void cellProcessingStep3(SimulationData data)
+__global__ void processingStep3(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.initForces(data);
+}
+
+__global__ void processingStep4(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.calcForces(data);
 
     ParticleProcessor particleProcessor;
     particleProcessor.movement(data);
     particleProcessor.collision(data);
 }
 
-
-__global__ void cellProcessingStep4(SimulationData data)
-{
-    CellProcessor cellProcessor;
-    cellProcessor.calcForces(data);
-}
-
-__global__ void cellProcessingStep5(SimulationData data)
+__global__ void processingStep5(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcPositions(data);
 }
 
-__global__ void cellProcessingStep6(SimulationData data)
+__global__ void processingStep6(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcForces(data);
 }
 
-__global__ void cellProcessingStep7(SimulationData data)
+__global__ void processingStep7(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcVelocities(data);
 }
 
-__global__ void cellProcessingStep8(SimulationData data)
+__global__ void processingStep8(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcAveragedVelocities(data);
 }
 
-__global__ void cellProcessingStep9(SimulationData data)
+__global__ void processingStep9(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.applyAveragedVelocities(data);
 }
 
-__global__ void cellProcessingStep10(SimulationData data)
+__global__ void processingStep10(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.decay(data);
+} 
+
+__global__ void processingStep11(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.processAddConnectionOperations(data);
+//    cellProcessor.processDelOperations(data);
 }
 
-__global__ void cellProcessingStep11(SimulationData data)
+__global__ void processingStep12(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.processDelCellOperations(data);
+//    cellProcessor.processAddConnectionOperations(data);
+    cellProcessor.processDelOperations(data);
 }
 
+__global__ void processingStep13(SimulationData data)
+{
+    ParticleProcessor particleProcessor;
+    particleProcessor.transformation(data);
+}
 
 /************************************************************************/
 /* Main      															*/
@@ -235,39 +218,26 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.dynamicMemory.reset();
 
     *data.numAddConnectionOperations = 0; 
-    *data.numDelCellOperations = 0;
+    *data.numDelOperations = 0;
     data.addConnectionOperations =
         data.dynamicMemory.getArray<AddConnectionOperation>(data.entities.cellPointers.getNumEntries());
-    data.delCellOperations =
-        data.dynamicMemory.getArray<DelCellOperation>(data.entities.cellPointers.getNumEntries());
+    data.delOperations =
+        data.dynamicMemory.getArray<DelOperation>(data.entities.cellPointers.getNumEntries());
 
-    KERNEL_CALL(cellProcessingStep1, data);
-    KERNEL_CALL(cellProcessingStep2, data);
-    KERNEL_CALL(cellProcessingStep3, data);
-    KERNEL_CALL(cellProcessingStep4, data);
-    KERNEL_CALL(cellProcessingStep5, data);
-    KERNEL_CALL(cellProcessingStep6, data);
-    KERNEL_CALL(cellProcessingStep7, data);
-    KERNEL_CALL(cellProcessingStep8, data);
-    KERNEL_CALL(cellProcessingStep9, data);
-    KERNEL_CALL(cellProcessingStep10, data);
-    KERNEL_CALL(cellProcessingStep11, data);
+    KERNEL_CALL(processingStep1, data);
+    KERNEL_CALL(processingStep2, data);
+    KERNEL_CALL(processingStep3, data);
+    KERNEL_CALL(processingStep4, data);
+    KERNEL_CALL(processingStep5, data);
+    KERNEL_CALL(processingStep6, data);
+    KERNEL_CALL(processingStep7, data);
+    KERNEL_CALL(processingStep8, data);
+    KERNEL_CALL(processingStep9, data);
+    KERNEL_CALL(processingStep10, data);
+    KERNEL_CALL(processingStep11, data);
+    KERNEL_CALL(processingStep12, data);
+    KERNEL_CALL(processingStep13, data);
 
-    /*
-    KERNEL_CALL(resetCellFunctionData, data);
-    KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(particleProcessingStep1, data);
-    KERNEL_CALL(particleProcessingStep2, data);
-    KERNEL_CALL(particleProcessingStep3, data);
-
-*/
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
 

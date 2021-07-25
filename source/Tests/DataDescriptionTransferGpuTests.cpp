@@ -107,7 +107,25 @@ public:
     }
 };
 
-TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadClusterWithSingleCell)
+TEST_F(DataDescriptionTransferGpuTests, testTransferEnergyParticle)
+{
+    DataDescription dataBefore;
+    dataBefore.addParticle(ParticleDescription()
+                               .setId(_numberGen->getId())
+                               .setPos(QVector2D(10.2, 5.3))
+                               .setVel(QVector2D(-0.3, 1.2))
+                               .setEnergy(134)
+                               .setMetadata(ParticleMetadata().setColor(3)));
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+
+    DataDescription dataAfter =
+        IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    checkCompatibility(dataBefore, dataAfter);
+}
+
+TEST_F(DataDescriptionTransferGpuTests, testTransferClusterWithSingleCell)
 {
     DataDescription dataBefore;
     dataBefore.addCluster(createSingleCellClusterWithCompleteData());
@@ -119,7 +137,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadClusterWithSingleCell)
     checkCompatibility(dataBefore, dataAfter);
 }
 
-TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadHexagonalClusters)
+TEST_F(DataDescriptionTransferGpuTests, testTransferHexagonalClusters)
 {
     auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
 
@@ -142,19 +160,7 @@ TEST_F(DataDescriptionTransferGpuTests, testCreateAndReadHexagonalClusters)
     checkDescription(dataAfter);
     checkCompatibility(dataBefore, dataAfter);
 }
-
 /*
-TEST_F(DataDescriptionTransferGpuTests, testCreateClusterWithCompleteCell)
-{
-	DataDescription dataBefore;
-	dataBefore.addCluster(createSingleCellClusterWithCompleteData());
-	IntegrationTestHelper::updateData(_access, _context, dataBefore);
-
-	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-    checkCompatibility(dataBefore, dataAfter);
-}
-
 / **
 * Situation: add token to cell
 * Expected result: token in simulation added
