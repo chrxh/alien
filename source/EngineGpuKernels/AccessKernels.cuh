@@ -503,7 +503,6 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
 {
     KERNEL_CALL_1_1(filterCells, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
-    KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
     KERNEL_CALL(
         createDataFromTO,
         data,
@@ -511,6 +510,7 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
         data.entities.particles.getNewSubarray(*access.numParticles),
         data.entities.cells.getNewSubarray(*access.numCells),
         data.entities.tokens.getNewSubarray(*access.numTokens));
+    KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
 }
 
 __global__ void cudaClearData(SimulationData data)

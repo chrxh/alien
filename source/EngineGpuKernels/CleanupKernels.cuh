@@ -203,14 +203,29 @@ __global__ void cleanupCellsStep1(SimulationData data)
 __global__ void cleanupCellsStep2(SimulationData data)
 {
     auto& cells = data.entitiesForCleanup.cells;
-    auto partition=
-        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    {
+        auto partition =
+            calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        for (int i = 0; i < cell.numConnections; ++i) {
-            auto& connectedCell = cell.connections[i].cell;
-            cell.connections[i].cell = &cells.at(connectedCell->tag);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
+            for (int i = 0; i < cell.numConnections; ++i) {
+                auto& connectedCell = cell.connections[i].cell;
+                cell.connections[i].cell = &cells.at(connectedCell->tag);
+            }
+        }
+    }
+    {
+        auto& tokens  = data.entities.tokenPointers;
+        auto partition =
+            calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            if (auto& token = tokens.at(index)) {
+//            printf("x: %f, y: %f, id: %llu\n", token->cell->absPos.x, token->cell->absPos.y, (token->cell->id));
+                token->cell = &cells.at(token->cell->tag);
+                token->sourceCell = &cells.at(token->sourceCell->tag);
+            }
         }
     }
 }

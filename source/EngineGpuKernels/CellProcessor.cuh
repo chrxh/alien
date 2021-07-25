@@ -27,6 +27,7 @@ public:
     __inline__ __device__ void decay(SimulationData& data);
 
 private:
+    __inline__ __device__ void scheduleAddConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ void scheduleDelConnections(Cell* cell, int cellIndex);
     __inline__ __device__ void scheduleDelCell(Cell* cell, int cellIndex);
 
@@ -129,10 +130,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         if (cell->numConnections < cell->maxConnections
                             && otherCell->numConnections < otherCell->maxConnections
                             && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity) {
-                            auto index = atomicAdd(data.numAddConnectionOperations, 1);
-                            auto& operation = data.addConnectionOperations[index];
-                            operation.cell = cell;
-                            operation.otherCell = otherCell;
+                            scheduleAddConnections(cell, otherCell);
                         }
                     }
                 }
@@ -381,6 +379,15 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
     }
 }
+
+__inline__ __device__ void CellProcessor::scheduleAddConnections(Cell* cell1, Cell* cell2)
+{
+    auto index = atomicAdd(_data->numAddConnectionOperations, 1);
+    auto& operation = _data->addConnectionOperations[index];
+    operation.cell = cell1;
+    operation.otherCell = cell2;
+}
+
 
 __inline__ __device__ void CellProcessor::scheduleDelConnections(Cell* cell, int cellIndex)
 {

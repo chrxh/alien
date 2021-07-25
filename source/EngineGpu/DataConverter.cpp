@@ -244,8 +244,8 @@ auto DataConverter::scanAndCreateClusterDescription(
 
     std::list<CellDescription> cells;
     std::set<int> nextCellIndices;
+    int cellDescIndex = 0;
     do {
-        int cellDescIndex = 0;
         for (auto const& currentCellIndex : currentCellIndices) {
             cells.emplace_back(createCellDescription(currentCellIndex));
             result.cellTOIndexToCellDescIndex.emplace(currentCellIndex, cellDescIndex);
