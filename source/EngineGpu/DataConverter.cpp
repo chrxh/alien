@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <boost/range/adaptor/map.hpp>
 
 #include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
@@ -89,19 +90,47 @@ namespace
 DataDescription DataConverter::getDataDescription() const
 {
 	DataDescription result;
-    std::list<ClusterDescription> clusters;
 
+    //cells
+    std::list<ClusterDescription> clusters;
 	std::set<int> freeCellIndices;
     for (int i = 0; i < *_dataTO.numCells; ++i) {
         freeCellIndices.insert(i);
     }
+    std::unordered_map<int, int> cellTOIndexToCellDescIndex;
+    std::unordered_map<int, int> cellTOIndexToClusterDescIndex;
+    int clusterDescIndex = 0;
     while (!freeCellIndices.empty()) {
         auto freeCellIndex = *freeCellIndices.begin();
-        auto cluster = scanAndCreateClusterDescription(freeCellIndex, freeCellIndices);
-        clusters.emplace_back(cluster);
+        auto createClusterData = scanAndCreateClusterDescription(freeCellIndex, freeCellIndices);
+        clusters.emplace_back(createClusterData.cluster);
+
+        //update index maps
+        cellTOIndexToCellDescIndex.insert(
+            createClusterData.cellTOIndexToCellDescIndex.begin(), createClusterData.cellTOIndexToCellDescIndex.end());
+        for (auto const& cellTOIndex : createClusterData.cellTOIndexToCellDescIndex | boost::adaptors::map_keys) {
+            cellTOIndexToClusterDescIndex.emplace(cellTOIndex, clusterDescIndex);
+        }
+        ++clusterDescIndex;
     }
     result.addClusters(clusters);
 
+    //tokens
+    for (int i = 0; i < *_dataTO.numTokens; ++i) {
+        TokenAccessTO const& token = _dataTO.tokens[i];
+
+  		QByteArray data(_parameters.tokenMemorySize, 0);
+        for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
+            data[i] = token.memory[i];
+        }
+        auto clusterDescIndex = cellTOIndexToClusterDescIndex.at(token.cellIndex); 
+        auto cellDescIndex = cellTOIndexToCellDescIndex.at(token.cellIndex);
+        CellDescription& cell = result.clusters->at(clusterDescIndex).cells->at(cellDescIndex);
+            
+        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
+    }
+
+    //particles
     std::list<ParticleDescription> particles;
     for (int i = 0; i < *_dataTO.numParticles; ++i) {
         ParticleAccessTO const& particle = _dataTO.particles[i];
@@ -203,18 +232,23 @@ DataDescription DataConverter::getDataDescription() const
 */
 }
 
-ClusterDescription DataConverter::scanAndCreateClusterDescription(int startCellIndex, std::set<int>& freeCellIndices) const
+auto DataConverter::scanAndCreateClusterDescription(
+    int startCellIndex, std::set<int>& freeCellIndices) const
+    -> CreateClusterReturnData
 {
-    std::list<CellDescription> cells;
+    CreateClusterReturnData result; 
 
     std::set<int> currentCellIndices;
     currentCellIndices.insert(startCellIndex);
     std::set<int> scannedCellIndices = currentCellIndices;
 
+    std::list<CellDescription> cells;
     std::set<int> nextCellIndices;
     do {
+        int cellDescIndex = 0;
         for (auto const& currentCellIndex : currentCellIndices) {
             cells.emplace_back(createCellDescription(currentCellIndex));
+            result.cellTOIndexToCellDescIndex.emplace(currentCellIndex, cellDescIndex);
             auto const& cellTO = _dataTO.cells[currentCellIndex];
             for (int i = 0; i < cellTO.numConnections; ++i) {
                 auto connectionTO = cellTO.connections[i];
@@ -223,6 +257,7 @@ ClusterDescription DataConverter::scanAndCreateClusterDescription(int startCellI
                     scannedCellIndices.insert(connectionTO.cellIndex);
                 }
             }
+            ++cellDescIndex;
         }
         currentCellIndices = nextCellIndices;
         nextCellIndices.clear();
@@ -237,9 +272,8 @@ ClusterDescription DataConverter::scanAndCreateClusterDescription(int startCellI
         std::inserter(newFreeCellIndices, newFreeCellIndices.begin()));
     freeCellIndices = std::move(newFreeCellIndices);
 
-    ClusterDescription result;
-    result.id = _numberGen->getId();
-    result.addCells(cells);
+    result.cluster.id = _numberGen->getId();
+    result.cluster.addCells(cells);
 
     return result;
 }
@@ -535,7 +569,7 @@ void DataConverter::addCell(
         cellTO.metadata.sourceCodeLen= 0;
     }
 
-    if (cellDesc.tokens) {
+    if (cellDesc.tokens.getOptionalValue()) {
         for (int i = 0; i < cellDesc.tokens->size(); ++i) {
             TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
             int tokenIndex = (*_dataTO.numTokens)++;

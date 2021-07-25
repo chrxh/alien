@@ -14,7 +14,14 @@ public:
 	DataDescription getDataDescription() const;
 
 private:
-    ClusterDescription scanAndCreateClusterDescription(int startCellIndex, std::set<int>& freeCellIndices) const;
+	struct CreateClusterReturnData
+    {
+        ClusterDescription cluster;
+        std::unordered_map<int, int> cellTOIndexToCellDescIndex;
+	};
+    CreateClusterReturnData scanAndCreateClusterDescription(
+        int startCellIndex,
+        std::set<int>& freeCellIndices) const;
     CellDescription createCellDescription(int cellIndex) const;
 
 	void addCell(CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int>& cellIndexTOByIds);

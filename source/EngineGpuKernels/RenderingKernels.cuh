@@ -190,7 +190,7 @@ __global__ void drawCells(
         map.mapPosCorrection(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-            auto color = calcColor(cell, false/*isSelected*/);
+            auto color = calcColor(cell, false /*isSelected*/);
             drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
 
             if (zoom > 1 - FP_PRECISION) {
@@ -217,108 +217,36 @@ __global__ void drawCells(
                 }
             }
         }
-        __syncthreads();
-
-/*
-        auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
-        for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-            auto const& token = cluster->tokenPointers[tokenIndex];
-            auto const& cell = token->cell;
-
-            auto cellPos = cell->absPos;
-            map.mapPosCorrection(cellPos);
-            auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-            if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
-                auto const color = calcColor(token, cell->cluster->isSelected());
-                drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
-            }
-        }
-        __syncthreads();
-*/
     }
 }
 
-/*
-__global__ void drawClusters(
+__global__ void drawTokens(
     int2 universeSize,
     float2 rectUpperLeft,
     float2 rectLowerRight,
-    Array<Cluster*> clusters,
+    Array<Token*> tokens,
     unsigned int* imageData,
     int2 imageSize,
     float zoom)
 {
-    auto const clusterBlock = calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
+    MapInfo map;
+    map.init(universeSize);
 
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
+    auto partition =
+        calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    for (auto tokenIndex = partition.startIndex; tokenIndex <= partition.endIndex; ++tokenIndex) {
+        auto const& token = tokens.at(tokenIndex);
+        auto const& cell = token->cell;
 
-        auto const& cluster = clusters.at(clusterIndex);
-        if (nullptr == cluster) {
-            continue;
+        auto cellPos = cell->absPos;
+        map.mapPosCorrection(cellPos);
+        auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
+        if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
+            auto const color = calcColor(token, false);
+            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
         }
-
-        __shared__ MapInfo map;
-        __shared__ bool isSelected;
-        if (0 == threadIdx.x) {
-            map.init(universeSize);
-            isSelected = cluster->isSelected();
-        }
-        __syncthreads();
-
-        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-        for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            auto const& cell = cluster->cellPointers[cellIndex];
-
-            auto cellPos = cell->absPos;
-            map.mapPosCorrection(cellPos);
-            if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
-                auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-                auto color = calcColor(cell, isSelected);
-                drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
-
-                auto posCorrection = cellPos - cell->absPos;
-                if (zoom > 1 - FP_PRECISION) {
-                    color = color * min((zoom - 1.0f)/3, 1.0f);
-                    for (int i = 0; i < cell->numConnections; ++i) {
-                        auto const otherCell = cell->connections[i].cell;
-                        auto const otherCellPos = otherCell->absPos + posCorrection;
-                        auto const otherCellImagePos =
-                            mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                        float dist = Math::length(otherCellImagePos - cellImagePos);
-                        float2 const v = {
-                            static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
-                            static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8f};
-                        float2 pos = cellImagePos;
-
-
-                        for (float d = 0; d <= dist; d += 1.8f) {
-                            auto const intPos = toInt2(pos);
-                            drawDot(imageData, imageSize, pos, color);
-                            pos = pos + v;
-                        }
-                    }
-                }
-            }
-        }
-        __syncthreads();
-
-        auto const tokenBlock = calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
-        for (auto tokenIndex = tokenBlock.startIndex; tokenIndex <= tokenBlock.endIndex; ++tokenIndex) {
-            auto const& token = cluster->tokenPointers[tokenIndex];
-            auto const& cell = token->cell;
-
-            auto cellPos = cell->absPos;
-            map.mapPosCorrection(cellPos);
-            auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-            if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
-                auto const color = calcColor(token, cell->cluster->isSelected());
-                drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
-            }
-        }
-        __syncthreads();
     }
 }
-*/
 
 __global__ void drawParticles(
     int2 universeSize,
@@ -372,6 +300,9 @@ __global__ void drawImage(
         targetImage,
         imageSize,
         zoom);
+
+    KERNEL_CALL(
+        drawTokens, data.size, rectUpperLeft, rectLowerRight, data.entities.tokenPointers, targetImage, imageSize, zoom);
 
     KERNEL_CALL(
         drawParticles,

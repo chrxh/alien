@@ -125,7 +125,7 @@ TEST_F(DataDescriptionTransferGpuTests, testTransferEnergyParticle)
     checkCompatibility(dataBefore, dataAfter);
 }
 
-TEST_F(DataDescriptionTransferGpuTests, testTransferClusterWithSingleCell)
+TEST_F(DataDescriptionTransferGpuTests, testTransferSingleCell)
 {
     DataDescription dataBefore;
     dataBefore.addCluster(createSingleCellClusterWithCompleteData());
