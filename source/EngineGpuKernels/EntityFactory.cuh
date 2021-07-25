@@ -20,7 +20,14 @@ public:
     createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray);
     __inline__ __device__ Cell*
     createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
-    __inline__ __device__ Particle* createParticle(
+    __inline__ __device__ Token* createTokenFromTO(
+        int targetIndex,
+        TokenAccessTO const& tokenTO,
+        Cell* cellArray,
+        Token* tokenArray,
+        DataAccessTO* simulationTO);
+    __inline__ __device__ Particle*
+    createParticle(
         float energy,
         float2 const& pos,
         float2 const& vel,
@@ -146,6 +153,26 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->locked = 0;
 
     return cell;
+}
+
+__inline__ __device__ Token* EntityFactory::createTokenFromTO(
+    int targetIndex,
+    TokenAccessTO const& tokenTO,
+    Cell* cellArray,
+    Token* tokenArray,
+    DataAccessTO* simulationTO)
+{
+    Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
+    Token* token = tokenArray + targetIndex;
+    *tokenPointer = token;
+
+    token->energy = tokenTO.energy;
+    for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
+        token->memory[i] = tokenTO.memory[i];
+    }
+    token->cell = cellArray + tokenTO.cellIndex;
+    token->sourceCell = token->cell;
+    return token;
 }
 
 __inline__ __device__ void
