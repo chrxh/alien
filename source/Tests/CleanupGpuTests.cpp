@@ -36,7 +36,7 @@ private:
         cudaConstants.MAX_CLUSTERS = 2500;
         cudaConstants.MAX_CELLS = 3500;
         cudaConstants.MAX_PARTICLES = 25000;
-        cudaConstants.MAX_TOKENS = 10000;
+        cudaConstants.MAX_TOKENS = 500;
         cudaConstants.MAX_CELLPOINTERS = cudaConstants.MAX_CELLS * 10;
         cudaConstants.MAX_CLUSTERPOINTERS = cudaConstants.MAX_CLUSTERS * 10;
         cudaConstants.MAX_PARTICLEPOINTERS = cudaConstants.MAX_PARTICLES * 10;
@@ -54,12 +54,10 @@ TEST_F(CleanupGpuTests, testCleanupCells)
     _parameters.radiationFactor = 0.002f;
     _context->setSimulationParameters(_parameters);
 
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
 
     auto createRect = [&](auto const& pos, auto const& vel) {
-        auto result = factory->createRect(
+        auto result = _factory->createRect(
             DescriptionFactory::CreateRectParameters().size({30, 25}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
         return result;
@@ -98,12 +96,10 @@ TEST_F(CleanupGpuTests, testCleanupCellsWithToken)
     _parameters.radiationProb = 0;
     _context->setSimulationParameters(_parameters);
 
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
 
     auto createRect = [&](auto const& pos, auto const& vel) {
-        auto result = factory->createRect(
+        auto result = _factory->createRect(
             DescriptionFactory::CreateRectParameters().size({55, 55}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
         return result;
@@ -127,6 +123,39 @@ TEST_F(CleanupGpuTests, testCleanupCellsWithToken)
             EXPECT_EQ(1, cellAfter.tokens->size());
         }
     }
+}
+
+/**
+ * Situation: cluster where a token is moving in a cycle and branches
+ * Expected result: no crash during the number of tokens of all times is growing
+ */
+TEST_F(CleanupGpuTests, testCleanupTokens)
+{
+    _parameters.radiationProb = 0;  //exclude radiation
+    _parameters.cellMaxTokenBranchNumber = 4;
+    _context->setSimulationParameters(_parameters);
+
+    DataDescription origData;
+
+    auto token = createSimpleToken();
+    auto cluster =
+        _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({3, 2}),
+        _context->getNumberGenerator());
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(3);
+    auto& fourthCell = cluster.cells->at(2);
+    auto& fifthCell = cluster.cells->at(4);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    thirdCell.tokenBranchNumber = 2;
+    fourthCell.tokenBranchNumber = 3;
+    fifthCell.tokenBranchNumber = 0;
+    firstCell.addToken(token);
+    origData.addCluster(cluster);
+    IntegrationTestHelper::updateData(_access, _context, origData);
+    EXPECT_NO_THROW(IntegrationTestHelper::runSimulation(4000, _controller));
 }
 
 

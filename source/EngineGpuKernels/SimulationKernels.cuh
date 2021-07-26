@@ -91,7 +91,7 @@ __global__ void processingStep3(SimulationData data)
     cellProcessor.clearTag(data);
 }
 
-__global__ void processingStep4(SimulationData data)
+__global__ void processingStep4(SimulationData data, int numTokenPointers)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcForces(data);
@@ -101,7 +101,7 @@ __global__ void processingStep4(SimulationData data)
     particleProcessor.collision(data);
 
     TokenProcessor tokenProcessor;
-    tokenProcessor.movement(data, data.entities.tokenPointers.getNumEntries());
+    tokenProcessor.movement(data, numTokenPointers);
 }
 
 __global__ void processingStep5(SimulationData data)
@@ -178,7 +178,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep1, data);
     KERNEL_CALL(processingStep2, data);
     KERNEL_CALL(processingStep3, data);
-    KERNEL_CALL(processingStep4, data);
+    KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep5, data);
     KERNEL_CALL(processingStep6, data);
     KERNEL_CALL(processingStep7, data);
