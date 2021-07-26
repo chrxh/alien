@@ -82,13 +82,13 @@
     <ClCompile Include="..\..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Tests\TokenSpreadingGpuTests.cpp">
+    <ClCompile Include="..\..\..\source\Tests\TokenMovementGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Tests\WeaponGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Tests\MovementGpuTests.cpp">
+    <ClCompile Include="..\..\..\source\Tests\CellMovementGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Tests\EnergyGpuTests.cpp">

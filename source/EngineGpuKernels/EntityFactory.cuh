@@ -33,6 +33,7 @@ public:
         float2 const& vel,
         ParticleMetadata const& metadata);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
+    __inline__ __device__ Token* createToken(Cell* targetCell, Token* sourceToken);
 
     /*
     __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
@@ -246,6 +247,19 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     }
     cell->tokenUsages = 0;
     return cell;
+}
+
+__inline__ __device__ Token* EntityFactory::createToken(Cell* targetCell, Token* sourceToken)
+{
+    Token* token = _data->entities.tokens.getNewElement();
+    Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
+    *tokenPointer = token;
+
+    *token = *sourceToken;
+    token->memory[0] = targetCell->branchNumber;
+    token->sourceCell = token->cell;
+    token->cell = targetCell;
+    return token;
 }
 
 /*

@@ -2,6 +2,8 @@
 
 #include <boost/range/combine.hpp>
 #include <gtest/gtest.h>
+
+#include "EngineInterface/DescriptionFactory.h"
 #include "EngineGpu/Definitions.h"
 
 #include "TestSettings.h"
@@ -13,6 +15,8 @@ public:
 	virtual ~IntegrationTestFramework();
 
 protected:
+    TokenDescription createSimpleToken() const;
+    
 /*
     enum class Boundary {Sticky, NonSticky};
     ClusterDescription createRectangularCluster(
@@ -37,7 +41,6 @@ protected:
 		boost::optional<QVector2D> const& centerVel = boost::none) const;	
 	ClusterDescription createSingleCellCluster(uint64_t clusterId = 0, uint64_t cellId = 0) const;
 	ClusterDescription createSingleCellClusterWithCompleteData(uint64_t clusterId = 0, uint64_t cellId = 0) const;
-	TokenDescription createSimpleToken() const;
 
     ParticleDescription createParticle(
         boost::optional<QVector2D> const& pos = boost::none,
@@ -46,7 +49,7 @@ protected:
     //prevent indeterminism when position is between two pixels
     QVector2D addSmallDisplacement(QVector2D const& value) const;
 */
-
+    DescriptionFactory* _factory = nullptr;
     EngineInterfaceBuilderFacade* _basicFacade = nullptr;
 	EngineGpuBuilderFacade* _gpuFacade = nullptr;
 	SimulationParameters _parameters;

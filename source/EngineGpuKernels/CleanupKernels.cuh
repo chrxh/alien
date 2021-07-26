@@ -11,37 +11,37 @@ namespace {
     __device__ const float FillLevelFactor = 2.0f / 3.0f;
 }
 
-__global__ void cleanupParticlePointers(SimulationData data)
+template<typename Entity>
+__global__ void cleanupEntityPointers(Array<Entity*> entityPointers, Array<Entity*> entityPointersForCleanup)
 {
-    auto& particlePointers = data.entities.particlePointers;
-    PartitionData pointerBlock = calcPartition(
-        particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto pointerBlock =
+        calcPartition(entityPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    __shared__ int numParticlePointers;
+    __shared__ int numEntityPointers;
     if (0 == threadIdx.x) {
-        numParticlePointers = 0;
+        numEntityPointers = 0;
     }
     __syncthreads();
 
     for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        if (particlePointers.at(index) != nullptr) {
-            atomicAdd(&numParticlePointers, 1);
+        if (entityPointers.at(index) != nullptr) {
+            atomicAdd_block(&numEntityPointers, 1);
         }
     }
     __syncthreads();
 
-    __shared__ Particle** newParticlePointers;
+    __shared__ Entity** newEntityPointers;
     if (0 == threadIdx.x) {
-        newParticlePointers = data.entitiesForCleanup.particlePointers.getNewSubarray(numParticlePointers);
-        numParticlePointers = 0;
+        newEntityPointers = entityPointersForCleanup.getNewSubarray(numEntityPointers);
+        numEntityPointers = 0;
     }
     __syncthreads();
 
     for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        auto const& particlePointer = particlePointers.at(index);
-        if (particlePointer != nullptr) {
-            int newIndex = atomicAdd(&numParticlePointers, 1);
-            newParticlePointers[newIndex] = particlePointer;
+        auto const& entityPointer = entityPointers.at(index);
+        if (entityPointer != nullptr) {
+            int newIndex = atomicAdd(&numEntityPointers, 1);
+            newEntityPointers[newIndex] = entityPointer;
         }
     }
     __syncthreads();
@@ -69,72 +69,6 @@ __global__ void cleanupParticles(SimulationData data)
         }
     }
 }
-
-__global__ void cleanupCellPointers(SimulationData data)
-{
-    auto& cellPointers = data.entities.cellPointers;
-    PartitionData pointerBlock =
-        calcPartition(cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-    __shared__ int numCellPointers;
-    if (0 == threadIdx.x) {
-        numCellPointers = 0;
-    }
-    __syncthreads();
-
-    for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        if (cellPointers.at(index) != nullptr) {
-            atomicAdd(&numCellPointers, 1);
-        }
-    }
-    __syncthreads();
-
-    __shared__ Cell** newCellPointers;
-    if (0 == threadIdx.x) {
-        newCellPointers = data.entitiesForCleanup.cellPointers.getNewSubarray(numCellPointers);
-        numCellPointers = 0;
-    }
-    __syncthreads();
-
-    for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
-        auto const& particlePointer = cellPointers.at(index);
-        if (particlePointer != nullptr) {
-            int newIndex = atomicAdd(&numCellPointers, 1);
-            newCellPointers[newIndex] = particlePointer;
-        }
-    }
-    __syncthreads();
-}
-
-/*
-__global__ void cleanupCellPointers(Array<Cluster*> clusterPointers, Array<Cell*> cellPointers)
-{
-    PartitionData clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusterPointers.at(clusterIndex);
-
-        __shared__ Cell** newCellPointers;
-        if (0 == threadIdx.x) {
-            newCellPointers = cellPointers.getNewSubarray(cluster->numCellPointers);
-        }
-        __syncthreads();
-
-
-        auto cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-
-        for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            auto& origCell = cluster->cellPointers[cellIndex];
-            newCellPointers[cellIndex] = origCell;
-        }
-        __syncthreads();
-
-        if (0 == threadIdx.x) {
-            cluster->cellPointers = newCellPointers;
-        }
-        __syncthreads();
-    }
-}
-*/
 
 __global__ void cleanupCellsStep1(SimulationData data)
 {
@@ -350,12 +284,17 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     KERNEL_CALL(cleanupParticleMap, data);
 
     data.entitiesForCleanup.particlePointers.reset();
-    KERNEL_CALL(cleanupParticlePointers, data);
+    KERNEL_CALL(
+        cleanupEntityPointers<Particle>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
     data.entitiesForCleanup.cellPointers.reset();
-    KERNEL_CALL(cleanupCellPointers, data);
+    KERNEL_CALL(cleanupEntityPointers<Cell>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
     data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
+
+    data.entitiesForCleanup.tokenPointers.reset();
+    KERNEL_CALL(cleanupEntityPointers<Token>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
+    data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 
     if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
@@ -370,13 +309,7 @@ __global__ void cleanupAfterSimulation(SimulationData data)
         data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     }
         
-/*
-        if (data.entities.tokenPointers.getNumEntries() > cudaConstants.MAX_TOKENPOINTERS * FillLevelFactor) {
-            data.entitiesForCleanup.tokenPointers.reset();
-            KERNEL_CALL(cleanupTokenPointers, data.entities.clusterPointers, data.entitiesForCleanup.tokenPointers);
-            data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
-        }
-
+    /*
         if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
             data.entitiesForCleanup.tokens.reset();
             KERNEL_CALL(cleanupTokens, data.entities.clusterPointers, data.entitiesForCleanup.tokens);
@@ -394,23 +327,28 @@ __global__ void cleanupAfterSimulation(SimulationData data)
 __global__ void cleanupAfterDataManipulation(SimulationData data)
 {
     data.entitiesForCleanup.particlePointers.reset();
-    KERNEL_CALL(cleanupParticlePointers, data);
+    KERNEL_CALL(
+        cleanupEntityPointers<Particle>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
+
+    data.entitiesForCleanup.cellPointers.reset();
+    KERNEL_CALL(cleanupEntityPointers<Cell>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
+    data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
+
+    data.entitiesForCleanup.tokenPointers.reset();
+    KERNEL_CALL(cleanupEntityPointers<Token>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
+    data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 
     data.entitiesForCleanup.particles.reset();
     KERNEL_CALL(cleanupParticles, data);
     data.entities.particles.swapContent(data.entitiesForCleanup.particles);
-
-    data.entitiesForCleanup.cellPointers.reset();
-    KERNEL_CALL(cleanupCellPointers, data);
-    data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
 
     data.entitiesForCleanup.cells.reset();
     KERNEL_CALL(cleanupCellsStep1, data);
     KERNEL_CALL(cleanupCellsStep2, data);
     data.entities.cells.swapContent(data.entitiesForCleanup.cells);
 
-/*
+    /*
     data.entitiesForCleanup.tokenPointers.reset();
     KERNEL_CALL(cleanupTokenPointers, data.entities.clusterPointers, data.entitiesForCleanup.tokenPointers);
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);

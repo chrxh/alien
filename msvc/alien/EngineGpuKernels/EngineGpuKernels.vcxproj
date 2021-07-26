@@ -144,7 +144,6 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationData.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationExecutionParameters.h" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationKernels.cuh" />
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\Tagger.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Token.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\TokenProcessor.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\WeaponFunction.cuh" />

@@ -1,31 +1,33 @@
-/*
+#include "Base/ServiceLocator.h"
+
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SerializationHelper.h"
 
 #include "IntegrationGpuTestFramework.h"
 
-class TokenSpreadingGpuTests
+class TokenMovementGpuTests
 	: public IntegrationGpuTestFramework
 {
 public:
-	virtual ~TokenSpreadingGpuTests() = default;
+	virtual ~TokenMovementGpuTests() = default;
 
 protected:
-    virtual void SetUp();
+    virtual void SetUp()
+    {
+        _parameters.radiationProb = 0;           //exclude radiation
+        _parameters.cellTransformationProb = 0;  //excluding transformation of particle to cell
+        _parameters.cellFusionVelocity = 0.4;
+        _context->setSimulationParameters(_parameters);
+    }
 
+/*
     ClusterDescription createStickyRotatingTokenCluster(QVector2D const& pos, QVector2D const& vel);
 
     const float tokenTransferEnergyAmount = 10.0;
+*/
 };
 
-void TokenSpreadingGpuTests::SetUp()
-{
-    _parameters.radiationProb = 0;    //exclude radiation
-    _parameters.cellTransformationProb = 0; //excluding transformation of particle to cell
-    _parameters.cellFusionVelocity = 0.4;
-    _context->setSimulationParameters(_parameters);
-}
-
+/*
 ClusterDescription TokenSpreadingGpuTests::createStickyRotatingTokenCluster(
     QVector2D const& pos,
     QVector2D const& vel)
@@ -46,20 +48,23 @@ ClusterDescription TokenSpreadingGpuTests::createStickyRotatingTokenCluster(
     firstCell.addToken(token);
     return cluster;
 }
+*/
 
 
-/ **
-* Situation: - one horizontal cluster with 10 cells and ascending branch numbers
-*			 - first cell has a token
-*			 - simulating 9 time steps
-* Expected result: token should be on the last cell
-* /
-TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
+/**
+ * Situation: - one horizontal cluster with 10 cells and ascending branch numbers
+ *			 - first cell has a token
+ *			 - simulating 9 time steps
+ * Expected result: token should be on the last cell
+ */
+TEST_F(TokenMovementGpuTests, testMovementWithFittingBranchNumbers)
 {
 	DataDescription origData;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
-	auto cluster = createHorizontalCluster(10, QVector2D{}, QVector2D{}, 0);
+	auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({10, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
 	for (int i = 0; i < 10; ++i) {
 		auto& cell = cluster.cells->at(i);
 		cell.tokenBranchNumber = 1 + i % cellMaxTokenBranchNumber;
@@ -75,27 +80,235 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_oneCluster)
 	IntegrationTestHelper::updateData(_access, _context, origData);
 	IntegrationTestHelper::runSimulation(9, _controller);
 
-	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
+	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
 
-	ASSERT_EQ(1, newData.clusters->size());
-	auto const& newCluster = newData.clusters->at(0);
+	ASSERT_EQ(1, dataAfter.clusters->size());
+	auto const& clusterAfter = dataAfter.clusters->at(0);
 
-	EXPECT_EQ(10, newCluster.cells->size());
+	EXPECT_EQ(10, clusterAfter.cells->size());
 
-	for (auto const& newCell : *newCluster.cells) {
-		if (newCell.id == lastCellId) {
-			ASSERT_EQ(1, newCell.tokens->size());
-			auto const& newToken = newCell.tokens->at(0);
-            EXPECT_EQ(*token.energy, *newToken.energy);
-		}
-		else if (newCell.tokens) {
-			EXPECT_TRUE(newCell.tokens->empty());
+	for (auto const& cellAfter : *clusterAfter.cells) {
+        if (cellAfter.id == lastCellId) {
+            ASSERT_EQ(1, cellAfter.tokens->size());
+            auto const& tokenAfter = cellAfter.tokens->at(0);
+            EXPECT_EQ(*token.energy, *tokenAfter.energy);
+        } else if (cellAfter.tokens) {
+            EXPECT_TRUE(cellAfter.tokens->empty());
 		}
 	}
-
-    check(origData, newData);
 }
 
+/**
+ * Situation:
+ * - one horizontal cluster with 10 cells and equal branch numbers 
+ * - first cell has a token
+ * - simulating one time step
+ * Expected result: no token should be on the cells
+ */
+TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers)
+{
+    DataDescription dataBefore;
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({10, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    auto& firstCell = cluster.cells->at(0);
+    auto token = createSimpleToken();
+    (*token.data)[0] = 1;
+    firstCell.addToken(token);
+    dataBefore.addCluster(cluster);
+
+    uint64_t lastCellId = cluster.cells->at(9).id;
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+    IntegrationTestHelper::runSimulation(9, _controller);
+
+    DataDescription dataAfter = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    ASSERT_EQ(1, dataAfter.clusters->size());
+    auto const& clusterAfter = dataAfter.clusters->at(0);
+
+    EXPECT_EQ(10, clusterAfter.cells->size());
+
+    for (auto const& cellAfter : *clusterAfter.cells) {
+        EXPECT_TRUE(cellAfter.tokens->empty());
+    }
+}
+
+/**
+ * Situation:
+ * - one horizontal cluster with 10 cells and ascending branch numbers
+ * - first cell has a token
+ * - last cell has flag tokenBlocked
+ * - simulating 9 time steps
+ * Expected result: no token should be on the cells
+ */
+TEST_F(TokenMovementGpuTests, testMovementBlocked)
+{
+    DataDescription origData;
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({10, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    for (int i = 0; i < 10; ++i) {
+        auto& cell = cluster.cells->at(i);
+        cell.tokenBranchNumber = 1 + i % cellMaxTokenBranchNumber;
+    }
+    auto& firstCell = cluster.cells->at(0);
+    firstCell.addToken(createSimpleToken());
+
+    auto& lastCell = cluster.cells->at(9);
+    lastCell.tokenBlocked = true;
+    origData.addCluster(cluster);
+
+    uint64_t lastCellId = cluster.cells->at(9).id;
+
+    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::runSimulation(9, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(10, newCluster.cells->size());
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
+}
+
+TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers_negativeValue)
+{
+    DataDescription origData;
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({2, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 5;
+    secondCell.tokenBranchNumber = 4;
+
+    QByteArray memory(_parameters.tokenMemorySize, 0);
+    memory[0] = 0xa9;
+    firstCell.addToken(TokenDescription().setEnergy(30).setData(memory));
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    auto const newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const newSecondCell = newCellByCellId.at(secondCell.id);
+    EXPECT_EQ(0, newSecondCell.tokens->size());
+}
+
+/**
+ * Situation:
+ * - one horizontal cluster with 3 cells and branch numbers(0, 1, 0)
+ * - first cell has 1 token
+ * - third cell has 1 token
+ * - simulating one time step
+ * Expected result:
+ * second cell should have 2 tokens
+ */
+TEST_F(TokenMovementGpuTests, testMovementWithEncounter)
+{
+    DataDescription origData;
+    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({3, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(2);
+    firstCell.tokenBranchNumber = 0;
+    secondCell.tokenBranchNumber = 1;
+    thirdCell.tokenBranchNumber = 0;
+    auto token = createSimpleToken();
+    firstCell.addToken(token);
+    thirdCell.addToken(token);
+    origData.addCluster(cluster);
+
+    uint64_t secondCellId = secondCell.id;
+
+    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(3, newCluster.cells->size());
+
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id == secondCellId) {
+            ASSERT_EQ(2, newCell.tokens->size());
+            for (auto const& newToken : *newCell.tokens) {
+                EXPECT_EQ(*token.energy, *newToken.energy);
+            }
+        } else if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
+}
+
+/**
+ * Situation:
+ * - one horizontal cluster with 3 cells and branch numbers(1, 0, 1)
+ * - second cell has a token
+ * - simulating one time step
+ * Expected result:
+ * there should be two tokens: on the first and last cell
+ */
+TEST_F(TokenMovementGpuTests, testForking)
+{
+    DataDescription origData;
+    auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
+
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({3, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    auto& firstCell = cluster.cells->at(0);
+    auto& secondCell = cluster.cells->at(1);
+    auto& thirdCell = cluster.cells->at(2);
+    firstCell.tokenBranchNumber = 1;
+    secondCell.tokenBranchNumber = 0;
+    thirdCell.tokenBranchNumber = 1;
+    secondCell.addToken(createSimpleToken());
+    origData.addCluster(cluster);
+
+    uint64_t firstCellId = firstCell.id;
+    uint64_t thirdCellId = thirdCell.id;
+
+    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+
+    ASSERT_EQ(1, newData.clusters->size());
+    auto newCluster = newData.clusters->at(0);
+
+    EXPECT_EQ(3, newCluster.cells->size());
+
+    for (auto const& newCell : *newCluster.cells) {
+        if (newCell.id == firstCellId || newCell.id == thirdCellId) {
+            EXPECT_EQ(1, newCell.tokens->size());
+        } else if (newCell.tokens) {
+            EXPECT_TRUE(newCell.tokens->empty());
+        }
+    }
+}
+
+/*
 / **
 * Situation: - 50 horizontal cluster with 100 cells each and ascending branch numbers
 *			 - first cell on each cluster has cellMaxToken-many tokens
@@ -147,166 +360,6 @@ TEST_F(TokenSpreadingGpuTests, testMovementWithFittingBranchNumbers_manyLargeClu
 			else if (newCell.tokens) {
 				EXPECT_TRUE(newCell.tokens->empty());
 			}
-		}
-	}
-
-    check(origData, newData);
-}
-
-/ **
-* Situation: - one horizontal cluster with 3 cells and branch numbers (0, 1, 0)
-*			 - first cell has 1 token
-*			 - third cell has 1 token
-*			 - simulating one time step
-* Expected result: second cell should have 2 tokens
-* /
-TEST_F(TokenSpreadingGpuTests, testMovementWithEncounter)
-{
-	DataDescription origData;
-	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
-
-	auto cluster = createHorizontalCluster(3, QVector2D{}, QVector2D{}, 0);
-	auto& firstCell = cluster.cells->at(0);
-	auto& secondCell = cluster.cells->at(1);
-	auto& thirdCell = cluster.cells->at(2);
-	firstCell.tokenBranchNumber = 0;
-	secondCell.tokenBranchNumber = 1;
-	thirdCell.tokenBranchNumber = 0;
-    auto token = createSimpleToken();
-    firstCell.addToken(token);
-	thirdCell.addToken(token);
-	origData.addCluster(cluster);
-
-	uint64_t secondCellId = secondCell.id;
-
-	IntegrationTestHelper::updateData(_access, _context, origData);
-	IntegrationTestHelper::runSimulation(1, _controller);
-
-	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-	ASSERT_EQ(1, newData.clusters->size());
-	auto newCluster = newData.clusters->at(0);
-
-	EXPECT_EQ(3, newCluster.cells->size());
-
-	for (auto const& newCell : *newCluster.cells) {
-		if (newCell.id == secondCellId) {
-			ASSERT_EQ(2, newCell.tokens->size());
-            for (auto const& newToken : *newCell.tokens) {
-                EXPECT_EQ(*token.energy, *newToken.energy);
-            }
-		}
-		else if (newCell.tokens) {
-			EXPECT_TRUE(newCell.tokens->empty());
-		}
-	}
-
-    check(origData, newData);
-}
-
-
-/ **
-* Situation: - one horizontal cluster with 10 cells and equal branch numbers
-*			 - first cell has a token
-*			 - simulating one time step
-* Expected result: no token should be on the cells
-* /
-TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers)
-{
-	DataDescription origData;
-	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
-
-	auto cluster = createHorizontalCluster(10, QVector2D{}, QVector2D{}, 0);
-	for (int i = 0; i < 10; ++i) {
-		auto& cell = cluster.cells->at(i);
-		cell.tokenBranchNumber = 0;
-	}
-	auto& firstCell = cluster.cells->at(0);
-	firstCell.addToken(TokenDescription().setEnergy(30).setData(QByteArray(_parameters.tokenMemorySize, 0)));
-	origData.addCluster(cluster);
-
-	IntegrationTestHelper::updateData(_access, _context, origData);
-	IntegrationTestHelper::runSimulation(1, _controller);
-
-	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-	ASSERT_EQ(1, newData.clusters->size());
-	auto newCluster = newData.clusters->at(0);
-
-	EXPECT_EQ(10, newCluster.cells->size());
-	for (auto const& newCell : *newCluster.cells) {
-		if (newCell.tokens) {
-			EXPECT_TRUE(newCell.tokens->empty());
-		}
-	}
-
-    check(origData, newData);
-}
-
-TEST_F(TokenSpreadingGpuTests, testMovementWithUnfittingBranchNumbers_negativeValue)
-{
-    DataDescription origData;
-    auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
-
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
-    auto& firstCell = cluster.cells->at(0);
-    auto& secondCell = cluster.cells->at(1);
-    firstCell.tokenBranchNumber = 5;
-    secondCell.tokenBranchNumber = 4;
-
-    QByteArray memory(_parameters.tokenMemorySize, 0);
-    memory[0] = 0xa9;
-    firstCell.addToken(TokenDescription().setEnergy(30).setData(memory));
-    origData.addCluster(cluster);
-
-    IntegrationTestHelper::updateData(_access, _context, origData);
-    IntegrationTestHelper::runSimulation(1, _controller);
-
-    auto const newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
-    auto const newSecondCell = newCellByCellId.at(secondCell.id);
-    EXPECT_TRUE(!newSecondCell.tokens || (0 == newSecondCell.tokens->size()));
-}
-
-/ **
-* Situation: - one horizontal cluster with 10 cells and ascending branch numbers
-*			 - first cell has a token
-*            - last cell has flag tokenBlocked
-*			 - simulating 9 time steps
-* Expected result: no token should be on the cells
-* /
-TEST_F(TokenSpreadingGpuTests, testMovementBlocked)
-{
-	DataDescription origData;
-	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
-
-	auto cluster = createHorizontalCluster(10, QVector2D{}, QVector2D{}, 0);
-	for (int i = 0; i < 10; ++i) {
-		auto& cell = cluster.cells->at(i);
-		cell.tokenBranchNumber = 1 + i % cellMaxTokenBranchNumber;
-	}
-	auto& firstCell = cluster.cells->at(0);
-	firstCell.addToken(createSimpleToken());
-
-	auto& lastCell = cluster.cells->at(9);
-	lastCell.tokenBlocked = true;
-	origData.addCluster(cluster);
-
-	uint64_t lastCellId = cluster.cells->at(9).id;
-
-	IntegrationTestHelper::updateData(_access, _context, origData);
-	IntegrationTestHelper::runSimulation(9, _controller);
-
-	DataDescription newData = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
-
-	ASSERT_EQ(1, newData.clusters->size());
-	auto newCluster = newData.clusters->at(0);
-
-	EXPECT_EQ(10, newCluster.cells->size());
-	for (auto const& newCell : *newCluster.cells) {
-		if (newCell.tokens) {
-			EXPECT_TRUE(newCell.tokens->empty());
 		}
 	}
 

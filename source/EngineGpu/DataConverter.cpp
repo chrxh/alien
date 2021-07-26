@@ -325,6 +325,7 @@ CellDescription DataConverter::createCellDescription(int cellIndex) const
                        .setVolatileData(convertToQByteArray(cellTO.mutableData, cellTO.numMutableBytes));
     result.cellFeature = feature;
     result.tokenUsages = cellTO.tokenUsages;
+    result.tokens = std::vector<TokenDescription>{};
 
     return result;
 }
