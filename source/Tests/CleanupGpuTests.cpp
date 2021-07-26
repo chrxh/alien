@@ -110,8 +110,8 @@ TEST_F(CleanupGpuTests, testCleanupCellsWithToken)
     };
     auto rect = createRect(QVector2D(50, 50), QVector2D(0, 0));
     QByteArray expectedTokenMemory(_parameters.tokenMemorySize, 0);
-    rect.cells->at(0).addToken(
-        TokenDescription().setData(expectedTokenMemory).setEnergy(_parameters.tokenMinEnergy * 2));
+    rect.cells->at(0).addToken(createSimpleToken());
+    rect.cells->at(1).tokenBranchNumber = 1;
     dataBefore.addCluster(rect);
 
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
@@ -121,7 +121,7 @@ TEST_F(CleanupGpuTests, testCleanupCellsWithToken)
 
     auto beforeAndAfterCells = IntegrationTestHelper::getBeforeAndAfterCells(dataBefore, dataAfter);
 
-    auto firstCellId = dataBefore.clusters->at(0).cells->at(0).id;
+    auto firstCellId = dataBefore.clusters->at(0).cells->at(1).id;
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
         if (cellBefore.id == firstCellId) {
             EXPECT_EQ(1, cellAfter.tokens->size());

@@ -43,12 +43,10 @@ public:
 
 TEST_F(MovementGpuTests, testTwoRectCollision)
 {
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
 
     auto createRect = [&](auto const& pos, auto const& vel) {
-        auto result = factory->createRect(
+        auto result = _factory->createRect(
             DescriptionFactory::CreateRectParameters()
                 .size({10, 10}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
@@ -80,12 +78,10 @@ TEST_F(MovementGpuTests, testTwoRectCollision)
 
 TEST_F(MovementGpuTests, testTwoLineFusion)
 {
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
 
     auto createRect = [&](auto const& pos, auto const& vel) {
-        auto result = factory->createRect(
+        auto result = _factory->createRect(
             DescriptionFactory::CreateRectParameters().size({1, 10}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
         return result;
@@ -127,12 +123,10 @@ TEST_F(MovementGpuTests, testTwoLineFusion)
 
 TEST_F(MovementGpuTests, testTwoRectFusion)
 {
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
 
     auto createRect = [&](auto const& pos, auto const& vel) {
-        auto result = factory->createRect(
+        auto result = _factory->createRect(
             DescriptionFactory::CreateRectParameters().size({10, 10}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
         return result;
@@ -156,12 +150,10 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
 
 TEST_F(MovementGpuTests, testRectMovement)
 {
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
 
     auto createRect = [&](auto const& pos, auto const& vel) {
-        auto result = factory->createRect(
+        auto result = _factory->createRect(
             DescriptionFactory::CreateRectParameters().size({2, 2}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
         return result;

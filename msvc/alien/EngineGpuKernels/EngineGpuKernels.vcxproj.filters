@@ -121,9 +121,6 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\SimulationExecutionParameters.h">
       <Filter>Impl\Device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\Tagger.cuh">
-      <Filter>Impl\Device</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Token.cuh">
       <Filter>Impl\Device</Filter>
     </ClInclude>
