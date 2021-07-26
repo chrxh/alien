@@ -9,62 +9,10 @@
 #include "Map.cuh"
 #include "CellProcessor.cuh"
 #include "ParticleProcessor.cuh"
+#include "TokenProcessor.cuh"
 #include "CleanupKernels.cuh"
 #include "Operation.cuh"
 #include "DebugKernels.cuh"
-
-/************************************************************************/
-/* Helpers for clusters													*/
-/************************************************************************/
-/*
-__global__ void clusterProcessingStep1(SimulationData data, int numClusters)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor.repair_block();
-        clusterProcessor.processingMovement_block();
-        clusterProcessor.updateMap_block();
-    }
-}
-
-__global__ void clusterProcessingStep2(SimulationData data, int numClusters)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor.destroyCloseCell_block();
-        clusterProcessor.processingCollisionPrepare_block();
-    }
-}
-
-__global__ void clusterProcessingStep3(SimulationData data, int numClusters)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor
-            .processingCollision_block();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
-        clusterProcessor.processingRadiation_block();
-    }
-}
-
-__global__ void clusterProcessingStep4(SimulationData data, int numClusters)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor.processingFinalizeCollision_block();
-        clusterProcessor.processingCellDeath_block();
-        clusterProcessor.processingDecomposition_block();
-        clusterProcessor.processingClusterCopy_block();
-    }
-}
-*/
 
 /************************************************************************/
 /* Helpers for tokens													*/
@@ -122,6 +70,7 @@ __global__ void processingStep1(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.init(data);
+    cellProcessor.clearTag(data);
     cellProcessor.updateMap(data);
     cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
 }
@@ -139,6 +88,7 @@ __global__ void processingStep3(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.initForces(data);
+    cellProcessor.clearTag(data);
 }
 
 __global__ void processingStep4(SimulationData data)
@@ -149,6 +99,9 @@ __global__ void processingStep4(SimulationData data)
     ParticleProcessor particleProcessor;
     particleProcessor.movement(data);
     particleProcessor.collision(data);
+
+    TokenProcessor tokenProcessor;
+    tokenProcessor.movement(data, data.entities.tokenPointers.getNumEntries());
 }
 
 __global__ void processingStep5(SimulationData data)

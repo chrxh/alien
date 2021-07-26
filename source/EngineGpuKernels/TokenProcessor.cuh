@@ -1,3 +1,64 @@
+#pragma once
+
+#include "AccessTOs.cuh"
+#include "Base.cuh"
+#include "EntityFactory.cuh"
+#include "Map.cuh"
+#include "Physics.cuh"
+#include "cuda_runtime_api.h"
+
+class TokenProcessor
+{
+public:
+    __inline__ __device__ void movement(
+        SimulationData& data,
+        int numTokenPointers);  //prerequisite: clearTag, need numTokenPointers because it might be changed
+};
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+
+__inline__ __device__ void TokenProcessor::movement(SimulationData& data, int numTokenPointers)
+{
+    auto& tokens = data.entities.tokenPointers;
+    auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& token = tokens.at(index);
+        auto cell = token->cell;
+        int numMovedTokens = 0;
+        EntityFactory factory;
+        factory.init(&data);
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            if (((cell->branchNumber + 1 - connectedCell->branchNumber)
+                 % cudaSimulationParameters.cellMaxTokenBranchNumber)
+                != 0) {
+                continue;
+            }
+            if (connectedCell->tokenBlocked) {
+                continue;
+            }
+
+            auto tokenIndex = atomicAdd(&connectedCell->tag, 1);
+            if (tokenIndex < cudaSimulationParameters.cellMaxToken) {
+                if (0 == numMovedTokens) {
+                    token->sourceCell = token->cell; 
+                    token->cell = connectedCell;
+                } else {
+                    factory.createToken(connectedCell, token);
+                }
+                ++numMovedTokens;
+            }
+        }
+        if (0 == numMovedTokens) {
+            token = nullptr;
+        }
+    }
+}
+
+
 /*
 #pragma once
 

@@ -21,11 +21,19 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
 	_gpuFacade = ServiceLocator::getInstance().getService<EngineGpuBuilderFacade>();
 	_symbols = _basicFacade->getDefaultSymbolTable();
 	_parameters = _basicFacade->getDefaultSimulationParameters();
+    _factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
 }
+
+TokenDescription IntegrationTestFramework::createSimpleToken() const
+{
+    auto tokenEnergy = _parameters.tokenMinEnergy * 2.0;
+    return TokenDescription().setEnergy(tokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0));
+}
+
 
 /*
 ClusterDescription IntegrationTestFramework::createRectangularCluster(
@@ -139,12 +147,6 @@ ClusterDescription IntegrationTestFramework::createSingleCellClusterWithComplete
         .setAngle(23)
         .setAngularVel(1.2)
         .setMetadata(clusterMetadata);
-}
-
-TokenDescription IntegrationTestFramework::createSimpleToken() const
-{
-	auto tokenEnergy = _parameters.tokenMinEnergy * 2.0;
-	return TokenDescription().setEnergy(tokenEnergy).setData(QByteArray(_parameters.tokenMemorySize, 0));
 }
 
 ClusterDescription IntegrationTestFramework::createLineCluster(int numCells, boost::optional<QVector2D> const & centerPos,

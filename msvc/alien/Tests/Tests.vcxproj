@@ -117,7 +117,7 @@
     <ClCompile Include="..\..\..\source\Tests\CleanupGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\ClusterGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\EnergyGpuTests.cpp" />
-    <ClCompile Include="..\..\..\source\Tests\MovementGpuTests.cpp" />
+    <ClCompile Include="..\..\..\source\Tests\CellMovementGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\CommunicatorGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\ConstructurGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\DataDescriptionTransferGpuTests.cpp" />
@@ -135,7 +135,7 @@
     <ClCompile Include="..\..\..\source\Tests\SensorGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\TestSuite.cpp" />
     <ClCompile Include="..\..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp" />
-    <ClCompile Include="..\..\..\source\Tests\TokenSpreadingGpuTests.cpp" />
+    <ClCompile Include="..\..\..\source\Tests\TokenMovementGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\WeaponGpuTests.cpp" />
   </ItemGroup>
   <ItemGroup>

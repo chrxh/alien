@@ -5,7 +5,6 @@
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
-#include "Tagger.cuh"
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
@@ -13,9 +12,10 @@ class CellProcessor
 {
 public:
     __inline__ __device__ void init(SimulationData& data);
+    __inline__ __device__ void clearTag(SimulationData& data);
     __inline__ __device__ void updateMap(SimulationData& data);
-    __inline__ __device__ void collisions(SimulationData& data);
-    __inline__ __device__ void initForces(SimulationData& data);
+    __inline__ __device__ void collisions(SimulationData& data);    //prerequisite: clearTag
+    __inline__ __device__ void initForces(SimulationData& data);    //prerequisite: tag from collisions
     __inline__ __device__ void calcForces(SimulationData& data);
     __inline__ __device__ void calcPositions(SimulationData& data);
     __inline__ __device__ void calcVelocities(SimulationData& data);
@@ -55,6 +55,17 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
         auto& cell = cells.at(index);
 
         cell->temp1 = {0, 0};
+    }
+}
+
+__inline__ __device__ void CellProcessor::clearTag(SimulationData& data)
+{
+    auto& cells = data.entities.cellPointers;
+    _partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
         cell->tag = 0;
     }
 }
@@ -157,7 +168,6 @@ __inline__ __device__ void CellProcessor::initForces(SimulationData& data)
             cell->vel = newVel;
         }
         cell->temp1 = {0, 0};
-        cell->tag = 0;
     }
 }
 
@@ -299,7 +309,8 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (data.numberGen.random() < cudaSimulationParameters.radiationProb) {
+        if (cudaSimulationParameters.radiationFactor > 0
+            && data.numberGen.random() < cudaSimulationParameters.radiationProb) {
 
             auto& pos = cell->absPos;
             float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
