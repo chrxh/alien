@@ -161,11 +161,11 @@ void OpenGLWorldScene::updateTexture(IntVector2D const& size)
     m_texture->setMinificationFilter(QOpenGLTexture::Linear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
     m_texture->setWrapMode(QOpenGLTexture::ClampToBorder);
-    m_texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+    m_texture->setFormat(QOpenGLTexture::RGBA16_UNorm);
 
     m_texture->bind();
     m_texture->setSize(size.x, size.y);
-    m_texture->allocateStorage(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8);
+    m_texture->allocateStorage(QOpenGLTexture::RGBA, QOpenGLTexture::UInt16);
     m_texture->release();
 
     _imageResource = _access->registerImageResource(m_texture->textureId());
