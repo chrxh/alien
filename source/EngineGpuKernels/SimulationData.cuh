@@ -26,7 +26,7 @@ struct SimulationData
     DelOperation* delOperations;  //uses dynamic memory
 
     CudaNumberGenerator numberGen;
-    int numImageBytes;
+    int numPixels;
     unsigned int* imageData;
 
     void init(int2 const& universeSize, CudaConstants const& cudaConstants, int timestep_)
@@ -42,8 +42,8 @@ struct SimulationData
         dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
         numberGen.init(40312357);
 
-        numImageBytes = size.x * size.y;
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numImageBytes, imageData);
+        numPixels = size.x * size.y;
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numPixels*2, imageData);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numAddConnectionOperations);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numDelOperations);
     }
@@ -52,8 +52,8 @@ struct SimulationData
     {
         CudaMemoryManager::getInstance().freeMemory(imageData);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(
-            max(newSize.x * newSize.y, size.x * size.y), imageData);
-        numImageBytes = newSize.x * newSize.y;
+            max(newSize.x * newSize.y, size.x * size.y)*2, imageData);
+        numPixels = newSize.x * newSize.y;
     }
 
     void free()

@@ -12,7 +12,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-__global__ void clearImageMap(unsigned int* imageData, int2 size, int2 outsideRectUpperLeft, int2 outsideRectLowerRight)
+__global__ void drawBackground(unsigned int* imageData, int2 size, int2 outsideRectUpperLeft, int2 outsideRectLowerRight)
 {
     auto const block = calcPartition(size.x * size.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
@@ -20,9 +20,11 @@ __global__ void clearImageMap(unsigned int* imageData, int2 size, int2 outsideRe
         auto y = index / size.x;
         if (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x
             || y >= outsideRectLowerRight.y) {
-            imageData[index] = Const::NothingnessColor;
+            imageData[2 * index] = 0;
+            imageData[2 * index + 1] = 0;
         } else {
-            imageData[index] = Const::SpaceColor;
+            imageData[2 * index] = 0x00000000;
+            imageData[2 * index + 1] = (Const::SpaceColor >> 16) & 0xff;
         }
     }
 }
@@ -101,22 +103,13 @@ __device__ __inline__ float3 calcColor(Token* token, bool selected)
     return selected ? float3{1.0f, 1.0f, 1.0f} : float3{0.75f, 0.75f, 0.75f};
 }
 
-__device__ __inline__ void addingColor(unsigned int& pixel, float3 const& colorToAdd)
+__device__ __inline__ void addingColor(unsigned int* imageData, unsigned int index, float3 const& colorToAdd)
 {
-    unsigned int colorFlat =
-        toInt(colorToAdd.z * 255.0f) << 16 | toInt(colorToAdd.y * 255.0f) << 8 | toInt(colorToAdd.x * 255.0f);
+    unsigned int greenRed = toInt(colorToAdd.y * 255.0f) << 16 | toInt(colorToAdd.x * 255.0f);
+    unsigned int blue = toInt(colorToAdd.z * 255.0f);
 
-    auto newColor = (pixel & 0xfefefe) + (colorFlat & 0xfefefe);
-    if ((newColor & 0x1000000) != 0) {
-        newColor |= 0xff0000;
-    }
-    if ((newColor & 0x10000) != 0) {
-        newColor |= 0xff00;
-    }
-    if ((newColor & 0x100) != 0) {
-        newColor |= 0xff;
-    }
-    pixel = newColor | 0xff000000;
+    atomicAdd(&imageData[2 * index], greenRed);
+    atomicAdd(&imageData[2 * index + 1], blue);
 }
 
 __device__ __inline__ void
@@ -129,16 +122,16 @@ drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float
         unsigned int index = intPos.x + intPos.y * imageSize.x;
 
         float3 colorToAdd1 = colorToAdd * (1.0f - posFrac.x) * (1.0f - posFrac.y);
-        addingColor(imageData[index], colorToAdd1);
+        addingColor(imageData, index, colorToAdd1);
 
         float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
-        addingColor(imageData[index + 1], colorToAdd2);
+        addingColor(imageData, index, colorToAdd2);
 
         float3 colorToAdd3 = colorToAdd * (1.0f - posFrac.x) * posFrac.y;
-        addingColor(imageData[index + imageSize.x], colorToAdd3);
+        addingColor(imageData, index + imageSize.x, colorToAdd3);
 
         float3 colorToAdd4 = colorToAdd * posFrac.x * posFrac.y;
-        addingColor(imageData[index + imageSize.x + 1], colorToAdd4);
+        addingColor(imageData, index + imageSize.x + 1, colorToAdd4);
     }
 }
 
@@ -289,7 +282,7 @@ __global__ void drawImage(
     int2 outsideRectLowerRight{
         imageSize.x - max(toInt((rectLowerRight.x - data.size.x) * zoom), 0),
         imageSize.y - max(toInt((rectLowerRight.y - data.size.y) * zoom), 0)};
-    KERNEL_CALL(clearImageMap, targetImage, imageSize, outsideRectUpperLeft, outsideRectLowerRight);
+    KERNEL_CALL(drawBackground, targetImage, imageSize, outsideRectUpperLeft, outsideRectLowerRight);
 
     KERNEL_CALL(
         drawCells,

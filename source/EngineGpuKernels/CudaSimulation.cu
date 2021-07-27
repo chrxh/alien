@@ -217,7 +217,7 @@ void CudaSimulation::getVectorImage(
     cudaArray* mappedArray;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResource, 0, 0));
 
-    if (imageSize.x * imageSize.y > _cudaSimulationData->numImageBytes) {
+    if (imageSize.x * imageSize.y > _cudaSimulationData->numPixels) {
         _cudaSimulationData->resizeImage(imageSize);
     }
     GPU_FUNCTION(
@@ -233,7 +233,7 @@ void CudaSimulation::getVectorImage(
         0,
         0,
         _cudaSimulationData->imageData,
-        sizeof(unsigned int) * imageSize.x * imageSize.y,
+        sizeof(unsigned int) * imageSize.x * imageSize.y * 2,
         cudaMemcpyDeviceToDevice);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResource));
