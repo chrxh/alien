@@ -32,8 +32,9 @@ void main()
         } else {
             result = vec3(texture(texture1, mirroredCoord).rgb);
         }
+        result = sqrt(result * 256.0) - 0.2;
         if (motionEffect) {
-            result = result * motionBlurFactor /*0.55*/ + texture(texture2, texCoord).rgb * (1 - motionBlurFactor)/*0.45*/;
+            result = result * motionBlurFactor + texture(texture2, texCoord).rgb * (1 - motionBlurFactor);
         }
         FragColor = vec4(result, 1.0);
     } else {
