@@ -95,12 +95,6 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     continue;
                 }
 
-/*
-                if (cell->getProtectionCounter_safe() > 0 || otherCell->getProtectionCounter_safe() > 0) {
-                    continue;
-                }
-*/
-
                 auto posDelta = cell->absPos - otherCell->absPos;
                 data.cellMap.mapDisplacementCorrection(posDelta);
 
@@ -114,35 +108,50 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     scheduleDelConnections(cell, index);
                 }
 
-                auto velDelta = cell->vel - otherCell->vel;
-                if (Math::dot(posDelta, velDelta) < 0) {
-
-                    bool alreadyConnected = false;
-                    for (int i = 0; i < cell->numConnections; ++i) {
-                        if (cell->connections[i].cell == otherCell) {
-                            alreadyConnected = true;
-                            break;
-                        }
+                bool alreadyConnected = false;
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    auto const& connectedCell = cell->connections[i].cell;
+                    if (connectedCell == otherCell) {
+                        alreadyConnected = true;
+                        break;
                     }
+                }
 
-                    if (!alreadyConnected) {
-                        auto newVel1 =
-                            cell->vel - posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
-                        auto newVel2 =
-                            otherCell->vel + posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
+                if (!alreadyConnected) {
+                    auto velDelta = cell->vel - otherCell->vel;
 
-                        atomicAdd(&cell->temp1.x, newVel1.x);
-                        atomicAdd(&cell->temp1.y, newVel1.y);
-                        atomicAdd(&cell->tag, 1);
-                        atomicAdd(&otherCell->temp1.x, newVel2.x);
-                        atomicAdd(&otherCell->temp1.y, newVel2.y);
-                        atomicAdd(&otherCell->tag, 1);
-
-                        if (cell->numConnections < cell->maxConnections
-                            && otherCell->numConnections < otherCell->maxConnections
-                            && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity) {
-                            scheduleAddConnections(cell, otherCell);
+                    auto newVel1 = cell->vel;
+                    auto newVel2 = otherCell->vel;
+                    auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+                    if (distance <= cudaSimulationParameters.cellMinDistance * 2) {
+                        newVel1 = (newVel1
+                                    + Math::normalized(posDelta)
+                                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6)
+                            * 0.95;
+                        newVel2 = (newVel2
+                                    - Math::normalized(posDelta)
+                                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6)
+                            * 0.95;
+                    } else {
+                        if (isApproaching) {
+                            newVel1 =
+                                newVel1 - posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
+                            newVel2 =
+                                newVel2 + posDelta * Math::dot(velDelta, posDelta) / Math::lengthSquared(posDelta);
                         }
+                     }
+
+                    atomicAdd(&cell->temp1.x, newVel1.x);
+                    atomicAdd(&cell->temp1.y, newVel1.y);
+                    atomicAdd(&cell->tag, 1);
+                    atomicAdd(&otherCell->temp1.x, newVel2.x);
+                    atomicAdd(&otherCell->temp1.y, newVel2.y);
+                    atomicAdd(&otherCell->tag, 1);
+
+                    if (cell->numConnections < cell->maxConnections
+                        && otherCell->numConnections < otherCell->maxConnections
+                        && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
+                        scheduleAddConnections(cell, otherCell);
                     }
                 }
             }
@@ -208,7 +217,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
                 auto deviation = actualAngleFromPrevious - referenceAngleFromPrevious;
                 auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
-                auto forceInc = correctionMovementForLowAngle * deviation / -3000;
+                auto forceInc = correctionMovementForLowAngle * deviation / -500;
                 force = force + forceInc;
                 atomicAdd(&connectingCell->temp1.x, -forceInc.x / 2);
                 atomicAdd(&connectingCell->temp1.y, -forceInc.y / 2);
