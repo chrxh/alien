@@ -24,12 +24,18 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
     auto& tokens = data.entities.tokenPointers;
     auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
+    Cell* cellsForEnergyAveraging[MAX_CELL_BONDS + 1];
+
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
         auto cell = token->cell;
         int numMovedTokens = 0;
         EntityFactory factory;
         factory.init(&data);
+        int numCellForEnergyAveraging = 0;
+        if (cell->tryLock()) {
+            cellsForEnergyAveraging[numCellForEnergyAveraging++] = cell;
+        }
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
             if (((cell->branchNumber + 1 - connectedCell->branchNumber)
@@ -42,18 +48,34 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
             }
 
             auto tokenIndex = atomicAdd(&connectedCell->tag, 1);
-            if (tokenIndex < cudaSimulationParameters.cellMaxToken) {
-                if (0 == numMovedTokens) {
-                    token->sourceCell = token->cell; 
-                    token->cell = connectedCell;
-                } else {
-                    factory.createToken(connectedCell, token);
-                }
-                ++numMovedTokens;
+            if (tokenIndex >= cudaSimulationParameters.cellMaxToken) {
+                continue;
             }
+            if (0 == numMovedTokens) {
+                token->sourceCell = token->cell; 
+                token->cell = connectedCell;
+            } else {
+                factory.createToken(connectedCell, token);
+            }
+
+            if (connectedCell->tryLock()) {
+                cellsForEnergyAveraging[numCellForEnergyAveraging++] = connectedCell;
+            }
+            ++numMovedTokens;
         }
         if (0 == numMovedTokens) {
             token = nullptr;
+        }
+        if (numCellForEnergyAveraging > 0) {
+            float averageEnergy = 0;
+            for (int i = 0; i < numCellForEnergyAveraging; ++i) {
+                averageEnergy += cellsForEnergyAveraging[i]->energy;
+            }
+            averageEnergy /= numCellForEnergyAveraging;
+            for (int i = 0; i < numCellForEnergyAveraging; ++i) {
+                cellsForEnergyAveraging[i]->energy = averageEnergy;
+                cellsForEnergyAveraging[i]->releaseLock();
+            }
         }
     }
 }

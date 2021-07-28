@@ -117,7 +117,7 @@ void OpenGLWorldScene::resize(IntVector2D const& size)
 
     delete m_frameBufferObject;
     m_frameBufferObject =
-        new QOpenGLFramebufferObject(QSize(size.x - 2, size.y - 2), QOpenGLFramebufferObject::CombinedDepthStencil);
+        new QOpenGLFramebufferObject(QSize(size.x, size.y), QOpenGLFramebufferObject::CombinedDepthStencil);
 
     glViewport(0, 0, size.x, size.y);
 }

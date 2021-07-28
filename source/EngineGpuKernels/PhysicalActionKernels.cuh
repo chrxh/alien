@@ -37,7 +37,8 @@ __global__ void applyForceToCells(CudaApplyForceData applyData, int2 universeSiz
         auto distanceToSegment =
             Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
         if (distanceToSegment < actionRadius) {
-            auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
+            auto weightedForce = applyData.force;
+            //*(actionRadius - distanceToSegment) / actionRadius;
             cell->vel = cell->vel + weightedForce;
         }
     }
