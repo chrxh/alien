@@ -139,16 +139,14 @@ TEST_F(DataDescriptionTransferGpuTests, testTransferSingleCell)
 
 TEST_F(DataDescriptionTransferGpuTests, testTransferHexagonalClusters)
 {
-    auto const factory = ServiceLocator::getInstance().getService<DescriptionFactory>();
-
     DataDescription dataBefore;
-    dataBefore.addCluster(factory->createHexagon(
+    dataBefore.addCluster(_factory->createHexagon(
         DescriptionFactory::CreateHexagonParameters().layers(2).centerPosition(QVector2D(10, 10)).velocity(QVector2D(0.1, 0)),
         _context->getNumberGenerator()));
-    dataBefore.addCluster(factory->createHexagon(
+    dataBefore.addCluster(_factory->createHexagon(
         DescriptionFactory::CreateHexagonParameters().layers(3).centerPosition(QVector2D(20, 10)),
         _context->getNumberGenerator()));
-    dataBefore.addCluster(factory->createHexagon(
+    dataBefore.addCluster(_factory->createHexagon(
         DescriptionFactory::CreateHexagonParameters().layers(4).centerPosition(QVector2D(10, 20)), _context->getNumberGenerator()));
 
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
