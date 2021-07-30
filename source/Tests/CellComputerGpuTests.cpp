@@ -1,4 +1,3 @@
-/*
 #include "gtest/gtest.h"
 
 #include "Base/ServiceLocator.h"
@@ -36,7 +35,8 @@ QByteArray CellComputerGpuTests::runSimpleCellComputer(string const & program) c
     CompilationResult compiledProgram = compiler->compileSourceCode(program);
 
     DataDescription origData;
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     firstCell.tokenBranchNumber = 0;
     auto& secondCell = cluster.cells->at(1);
@@ -490,4 +490,3 @@ TEST_F(CellComputerGpuTests, testDivisionByZero)
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(0, data.at(1));  
 }
-*/
