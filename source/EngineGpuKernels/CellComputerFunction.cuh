@@ -1,6 +1,11 @@
 #pragma once
 
+#include "EngineInterface/ElementaryTypes.h"
+
 #include "SimulationData.cuh"
+#include "Cell.cuh"
+#include "Token.cuh"
+#include "AccessTOs.cuh"
 
 class CellComputerFunction
 {

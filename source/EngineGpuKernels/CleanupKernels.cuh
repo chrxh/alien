@@ -138,6 +138,7 @@ __global__ void cleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& token = tokenPointers.at(index);
             newEntities[targetIndex] = *token;
+            token = &newEntities[targetIndex];
             ++targetIndex;
         }
     }

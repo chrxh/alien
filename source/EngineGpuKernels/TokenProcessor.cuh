@@ -8,6 +8,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "EnergyGuidance.cuh"
+#include "CellComputerFunction.cuh"
 
 class TokenProcessor
 {
@@ -91,17 +92,22 @@ __inline__ __device__ void TokenProcessor::executeCellFunctions(SimulationData& 
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
+        auto& cell = token->cell;
         if (token) {
+            auto cellFunctionType = cell->getCellFunctionType();
             bool success = false;
             do {
-                if (token->cell->tryLock()) {
+                if (cell->tryLock()) {
                     __threadfence();
 
                     EnergyGuidance::processing(token);
+                    if (Enums::CellFunction::COMPUTER == cellFunctionType) {
+                        CellComputerFunction::processing(token);
+                    }
 
                     __threadfence();
                     success = true;
-                    token->cell->releaseLock();
+                    cell->releaseLock();
                 }
             } while (!success);
         }
