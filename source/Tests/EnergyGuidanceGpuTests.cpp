@@ -1,11 +1,10 @@
-/*
 #include "IntegrationGpuTestFramework.h"
 
-class TokenEnergyGuidanceGpuTests
+class EnergyGuidanceGpuTests
     : public IntegrationGpuTestFramework
 {
 public:
-    virtual ~TokenEnergyGuidanceGpuTests() = default;
+    virtual ~EnergyGuidanceGpuTests() = default;
 
 protected:
     virtual void SetUp();
@@ -13,25 +12,26 @@ protected:
     const float tokenTransferEnergyAmount = 10.0;
 };
 
-void TokenEnergyGuidanceGpuTests::SetUp()
+void EnergyGuidanceGpuTests::SetUp()
 {
     _parameters.radiationProb = 0;    //exclude radiation
     _context->setSimulationParameters(_parameters);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell command
 *			 - both cells have same high energy
 * Expected result: energy should be transferred from cell to token
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
+*/
+TEST_F(EnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
 {
     auto const valueCell = 100.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -64,25 +64,24 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_highCellEnergy)
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell command
 *			 - both cells have same low energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
+*/
+TEST_F(EnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -111,24 +110,23 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCell_lowCellEnergy)
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance token command
 *			 - both cells have same energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
+*/
+TEST_F(EnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
 {
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -154,25 +152,24 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_highTokenEnergy)
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance token command
 *			 - both cells have same energy
 *            - token has low energy
 * Expected result: energy should be transferred from token to cell
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
+*/
+TEST_F(EnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -201,25 +198,24 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceToken_lowTokenEnergy)
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell and token command
 *			 - both cells have same low energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowCellEnergy)
+*/
+TEST_F(EnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -248,25 +244,24 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_highTokenEnergy_lowC
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with balance cell and token command
 *			 - both cells have same high energy
 *            - token has low energy
 * Expected result: energy should be transferred from cell to token
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highCellEnergy)
+*/
+TEST_F(EnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highCellEnergy)
 {
     auto const valueCell = 100.0f;
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -295,23 +290,22 @@ TEST_F(TokenEnergyGuidanceGpuTests, testBalanceCellAndToken_lowTokenEnergy_highC
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with harvest cell command
 *			 - both cells have same high energy
 * Expected result: energy should be transferred from cell to token
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
+*/
+TEST_F(EnergyGuidanceGpuTests, testHarvestCell)
 {
     auto const valueCell = 100.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -338,24 +332,23 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestCell)
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy + tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy - tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has one token with harvest cell command
 *			 - both cells have same energy
 *            - token has high energy
 * Expected result: energy should be transferred from token to cell
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
+*/
+TEST_F(EnergyGuidanceGpuTests, testHarvestToken)
 {
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -381,24 +374,23 @@ TEST_F(TokenEnergyGuidanceGpuTests, testHarvestToken)
     auto const& newToken = newCell.tokens->at(0);
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken.energy);
     EXPECT_EQ(*secondCell.energy + tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
 
-/ **
+/**
 * Situation: - one cluster with 2 cells with fitting branch number
 *			 - first cell has two tokens with harvest cell command
 *			 - both cells have same energy
 *            - both tokens has high energy
 * Expected result: energy should be transferred from token to cell twice
-* /
-TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
+*/
+TEST_F(EnergyGuidanceGpuTests, testParallelization)
 {
     auto const valueToken = 30.0f;
 
     DataDescription origData;
 
-    auto cluster = createHorizontalCluster(2, QVector2D{}, QVector2D{}, 0);
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
     auto& firstCell = cluster.cells->at(0);
     auto& secondCell = cluster.cells->at(1);
     firstCell.tokenBranchNumber = 0;
@@ -427,7 +419,4 @@ TEST_F(TokenEnergyGuidanceGpuTests, testParallelization)
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken1.energy);
     EXPECT_EQ(*token.energy - tokenTransferEnergyAmount, *newToken2.energy);
     EXPECT_EQ(*secondCell.energy + 2*tokenTransferEnergyAmount, *newCell.energy);
-
-    check(origData, newData);
 }
-*/

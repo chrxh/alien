@@ -79,7 +79,7 @@
     <ClCompile Include="..\..\..\source\Tests\TestSuite.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp">
+    <ClCompile Include="..\..\..\source\Tests\EnergyGuidanceGpuTests.cpp">
       <Filter>Impl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\source\Tests\TokenMovementGpuTests.cpp">

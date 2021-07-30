@@ -134,7 +134,7 @@
     <ClCompile Include="..\..\..\source\Tests\ScannerGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\SensorGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\TestSuite.cpp" />
-    <ClCompile Include="..\..\..\source\Tests\TokenEnergyGuidanceSimulationGpuTests.cpp" />
+    <ClCompile Include="..\..\..\source\Tests\EnergyGuidanceGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\TokenMovementGpuTests.cpp" />
     <ClCompile Include="..\..\..\source\Tests\WeaponGpuTests.cpp" />
   </ItemGroup>
