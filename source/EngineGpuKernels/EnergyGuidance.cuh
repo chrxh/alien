@@ -1,6 +1,10 @@
 #pragma once
 
+#include "EngineInterface/ElementaryTypes.h"
+
 #include "SimulationData.cuh"
+#include "Token.cuh"
+#include "Cell.cuh"
 
 class EnergyGuidance
 {
@@ -18,47 +22,46 @@ public:
         }
 
         if (Enums::EnergyGuidanceIn::BALANCE_CELL == cmd) {
-            if (cell->getEnergy_safe() > (cudaSimulationParameters.cellMinEnergy + valueCell + amount)) {
-                cell->changeEnergy_safe(-amount);
-                token->changeEnergy(amount);
+            if (cell->energy > (cudaSimulationParameters.cellMinEnergy + valueCell + amount)) {
+                cell->energy -= amount;
+                token->energy += amount;
             }
-            else if (token->getEnergy() > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
-                cell->changeEnergy_safe(amount);
-                token->changeEnergy(-amount);
+            else if (token->energy > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
+                cell->energy += amount;
+                token->energy -= amount;
             }
         }
         if (Enums::EnergyGuidanceIn::BALANCE_TOKEN == cmd) {
-            if (token->getEnergy() > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
-                cell->changeEnergy_safe(amount);
-                token->changeEnergy(-amount);
-            }
-            else if (cell->getEnergy_safe() > (cudaSimulationParameters.cellMinEnergy + valueCell + amount)) {
-                cell->changeEnergy_safe(-amount);
-                token->changeEnergy(amount);
+            if (token->energy > (cudaSimulationParameters.tokenMinEnergy + valueToken + amount)) {
+                cell->energy += amount;
+                token->energy -= amount;
+            } else if (cell->energy > (cudaSimulationParameters.cellMinEnergy + valueCell + amount)) {
+                cell->energy -= amount;
+                token->energy += amount;
             }
         }
         if (Enums::EnergyGuidanceIn::BALANCE_BOTH == cmd) {
-            if (token->getEnergy() > cudaSimulationParameters.tokenMinEnergy + valueToken + amount
-                && cell->getEnergy_safe() < cudaSimulationParameters.cellMinEnergy + valueCell) {
-                cell->changeEnergy_safe(amount);
-                token->changeEnergy(-amount);
+            if (token->energy > cudaSimulationParameters.tokenMinEnergy + valueToken + amount
+                && cell->energy < cudaSimulationParameters.cellMinEnergy + valueCell) {
+                cell->energy += amount;
+                token->energy -= amount;
             }
-            if (token->getEnergy() < cudaSimulationParameters.tokenMinEnergy + valueToken
-                && cell->getEnergy_safe() > cudaSimulationParameters.cellMinEnergy + valueCell + amount) {
-                cell->changeEnergy_safe(-amount);
-                token->changeEnergy(amount);
+            if (token->energy < cudaSimulationParameters.tokenMinEnergy + valueToken
+                && cell->energy > cudaSimulationParameters.cellMinEnergy + valueCell + amount) {
+                cell->energy -= amount;
+                token->energy += amount;
             }
         }
         if (Enums::EnergyGuidanceIn::HARVEST_CELL == cmd) {
-            if (cell->getEnergy_safe() > cudaSimulationParameters.cellMinEnergy + valueCell + amount) {
-                cell->changeEnergy_safe(-amount);
-                token->changeEnergy(amount);
+            if (cell->energy > cudaSimulationParameters.cellMinEnergy + valueCell + amount) {
+                cell->energy -= amount;
+                token->energy += amount;
             }
         }
         if (Enums::EnergyGuidanceIn::HARVEST_TOKEN == cmd) {
-            if (token->getEnergy() > cudaSimulationParameters.tokenMinEnergy + valueToken + amount) {
-                cell->changeEnergy_safe(amount);
-                token->changeEnergy(-amount);
+            if (token->energy > cudaSimulationParameters.tokenMinEnergy + valueToken + amount) {
+                cell->energy += amount;
+                token->energy -= amount;
             }
         }
     }

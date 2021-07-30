@@ -123,15 +123,15 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     auto newVel1 = cell->vel;
                     auto newVel2 = otherCell->vel;
                     auto isApproaching = Math::dot(posDelta, velDelta) < 0;
-                    if (distance <= cudaSimulationParameters.cellMinDistance * 2) {
+                    if (/*distance <= cudaSimulationParameters.cellMinDistance * 2*/1 == otherCell->numConnections ) {
                         newVel1 = (newVel1
                                     + Math::normalized(posDelta)
-                                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6)
-                            * 0.95;
+                                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 20/*6*/)
+                            /** 0.95*/;
                         newVel2 = (newVel2
                                     - Math::normalized(posDelta)
-                                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6)
-                            * 0.95;
+                                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 20/*6*/)
+                            /** 0.95*/;
                     } else {
                         if (isApproaching) {
                             newVel1 =
@@ -284,7 +284,7 @@ __inline__ __device__ void CellProcessor::calcAveragedVelocities(SimulationData&
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    constexpr float preserveVelocityFactor = 0.0f;
+    constexpr float preserveVelocityFactor = 0.8f;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 

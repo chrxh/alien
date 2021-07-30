@@ -1,11 +1,13 @@
 #pragma once
 
+#include "cuda_runtime_api.h"
+
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
-#include "cuda_runtime_api.h"
+#include "EnergyGuidance.cuh"
 
 class TokenProcessor
 {
@@ -13,6 +15,8 @@ public:
     __inline__ __device__ void movement(
         SimulationData& data,
         int numTokenPointers);  //prerequisite: clearTag, need numTokenPointers because it might be changed
+
+    __inline__ __device__ void executeCellFunctions(SimulationData& data, int numTokenPointers);
 };
 
 /************************************************************************/
@@ -76,6 +80,30 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
                 cellsForEnergyAveraging[i]->energy = averageEnergy;
                 cellsForEnergyAveraging[i]->releaseLock();
             }
+        }
+    }
+}
+
+__inline__ __device__ void TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
+{
+    auto& tokens = data.entities.tokenPointers;
+    auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& token = tokens.at(index);
+        if (token) {
+            bool success = false;
+            do {
+                if (token->cell->tryLock()) {
+                    __threadfence();
+
+                    EnergyGuidance::processing(token);
+
+                    __threadfence();
+                    success = true;
+                    token->cell->releaseLock();
+                }
+            } while (!success);
         }
     }
 }
