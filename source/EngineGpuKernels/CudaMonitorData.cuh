@@ -82,20 +82,9 @@ public:
         atomicAdd(_numClustersWithTokens, changeValue);
     }
 
-    __inline__ __device__ void incNumCells(int changeValue)
-    {
-        atomicAdd(_numCells, changeValue);
-    }
-
-    __inline__ __device__ void incNumParticles(int changeValue)
-    {
-        atomicAdd(_numParticles, changeValue);
-    }
-
-    __inline__ __device__ void incNumTokens(int changeValue)
-    {
-        atomicAdd(_numTokens, changeValue);
-    }
+    __inline__ __device__ void setNumCells(int value) { *_numCells = value; }
+    __inline__ __device__ void setNumParticles(int value) { *_numParticles = value; }
+    __inline__ __device__ void setNumTokens(int value) { *_numTokens = value; }
 
     __inline__ __device__ void incRotationalKineticEnergy(float changeValue)
     {
