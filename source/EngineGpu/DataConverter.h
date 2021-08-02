@@ -21,7 +21,7 @@ private:
 	};
     CreateClusterReturnData scanAndCreateClusterDescription(
         int startCellIndex,
-        std::set<int>& freeCellIndices) const;
+        std::unordered_set<int>& freeCellIndices) const;
     CellDescription createCellDescription(int cellIndex) const;
 
 	void addCell(CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int>& cellIndexTOByIds);
