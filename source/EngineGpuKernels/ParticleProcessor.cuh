@@ -179,7 +179,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 lock.releaseLock();
             }
         } else {
-            if (auto cell = data.cellMap.get(particle->absPos)) {
+            if (auto cell = data.cellMap.getFirst(particle->absPos)) {
                 if (particle->tryLock()) {
                     __threadfence();
                     
