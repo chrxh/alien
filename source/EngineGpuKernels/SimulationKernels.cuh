@@ -87,7 +87,7 @@ __global__ void processingStep2(SimulationData data)
 __global__ void processingStep3(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.initForces(data);
+    cellProcessor.applyAndInitForces(data);
     cellProcessor.clearTag(data);
 }
 
