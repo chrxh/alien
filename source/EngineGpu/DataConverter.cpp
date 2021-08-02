@@ -93,7 +93,7 @@ DataDescription DataConverter::getDataDescription() const
 
     //cells
     std::list<ClusterDescription> clusters;
-	std::set<int> freeCellIndices;
+	std::unordered_set<int> freeCellIndices;
     for (int i = 0; i < *_dataTO.numCells; ++i) {
         freeCellIndices.insert(i);
     }
@@ -232,18 +232,28 @@ DataDescription DataConverter::getDataDescription() const
 */
 }
 
-auto DataConverter::scanAndCreateClusterDescription(
-    int startCellIndex, std::set<int>& freeCellIndices) const
+namespace
+{
+    template <typename T>
+    void setInplaceDifference(std::unordered_set<T>& a, std::unordered_set<T> const& b)
+    {
+        for (auto const& element : b) {
+            a.erase(element);
+        }
+    }
+}
+
+auto DataConverter::scanAndCreateClusterDescription(int startCellIndex, std::unordered_set<int>& freeCellIndices) const
     -> CreateClusterReturnData
 {
     CreateClusterReturnData result; 
 
-    std::set<int> currentCellIndices;
+    std::unordered_set<int> currentCellIndices;
     currentCellIndices.insert(startCellIndex);
-    std::set<int> scannedCellIndices = currentCellIndices;
+    std::unordered_set<int> scannedCellIndices = currentCellIndices;
 
     std::list<CellDescription> cells;
-    std::set<int> nextCellIndices;
+    std::unordered_set<int> nextCellIndices;
     int cellDescIndex = 0;
     do {
         for (auto const& currentCellIndex : currentCellIndices) {
@@ -263,6 +273,9 @@ auto DataConverter::scanAndCreateClusterDescription(
         nextCellIndices.clear();
     } while (!currentCellIndices.empty());
 
+    setInplaceDifference(freeCellIndices, scannedCellIndices);
+
+    /*
     std::set<int> newFreeCellIndices;
     std::set_difference(
         freeCellIndices.begin(),
@@ -271,6 +284,7 @@ auto DataConverter::scanAndCreateClusterDescription(
         scannedCellIndices.end(),
         std::inserter(newFreeCellIndices, newFreeCellIndices.begin()));
     freeCellIndices = std::move(newFreeCellIndices);
+*/
 
     result.cluster.id = _numberGen->getId();
     result.cluster.addCells(cells);

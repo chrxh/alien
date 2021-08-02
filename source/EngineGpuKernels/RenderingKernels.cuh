@@ -76,7 +76,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
     }
     }
 
-    float factor = min(100.0f, sqrt(cell->energy) * 5 + 20.0f) / 100.0f;
+    float factor = min(400.0f, cell->energy) / 250.0f;
     if (!selected) {
         factor *= 0.75f;
     }
@@ -89,12 +89,55 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
 
 __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 {
+    unsigned int particleColor;
+    switch (particle->metadata.color % 7) {
+    case 0: {
+        particleColor = Const::IndividualCellColor1;
+        break;
+    }
+    case 1: {
+        particleColor = Const::IndividualCellColor2;
+        break;
+    }
+    case 2: {
+        particleColor = Const::IndividualCellColor3;
+        break;
+    }
+    case 3: {
+        particleColor = Const::IndividualCellColor4;
+        break;
+    }
+    case 4: {
+        particleColor = Const::IndividualCellColor5;
+        break;
+    }
+    case 5: {
+        particleColor = Const::IndividualCellColor6;
+        break;
+    }
+    case 6: {
+        particleColor = Const::IndividualCellColor7;
+        break;
+    }
+    }
+
+    float factor = min(100.0f, sqrt(particle->energy) * 5 + 20.0f) / 100.0f;
+    if (!selected) {
+        factor *= 0.75f;
+    }
+
+    return {
+        toFloat((particleColor >> 16) & 0xff) / 256.0f * factor,
+        toFloat((particleColor >> 8) & 0xff) / 256.0f * factor,
+        toFloat(particleColor & 0xff) / 256.0f * factor};
+    /*
     auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 256.0f;
     if (!selected) {
         intensity *= 0.75f;
     }
 
     return {intensity, 0, 0.08f};
+*/
 
 }
 
