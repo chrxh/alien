@@ -1,4 +1,312 @@
 #pragma once
+
+#include "EngineInterface/ElementaryTypes.h"
+
+#include "Math.cuh"
+#include "QuantityConverter.cuh"
+
+class ConstructorFunction
+{
+public:
+    __inline__ __device__ static void processing(Token* token, SimulationData& data);
+
+private:
+    struct ConstructionData
+    {
+        Enums::ConstrIn::Type constrIn;
+        Enums::ConstrInOption::Type constrInOption;
+        char angle;
+        char distance;
+        char maxConnections;
+        char branchNumber;
+        char metaData;
+        char cellFunctionType;
+    };
+    __inline__ __device__ static void readConstructionData(Token* token, ConstructionData& data);
+
+    __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Token* token);
+    __inline__ __device__ static void startNewConstruction(
+        Token* token, SimulationData& data, ConstructionData const& constructionData);
+
+    __inline__ __device__ static void constructNewCell(
+        SimulationData& data,
+        Token* token,
+        float2 const& posOfNewCell,
+        float const energyOfNewCell,
+        ConstructionData const& constructionData,
+        Cell*& result);
+
+    enum class AdaptMaxConnections
+    {
+        No,
+        Yes
+    };
+    __inline__ __device__ static AdaptMaxConnections isAdaptMaxConnections(
+        ConstructionData const& data);
+
+    __inline__ __device__ static int getMaxConnections(ConstructionData const& data);
+
+    __inline__ __device__ static bool
+    isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections);
+
+    __inline__ __device__ static float calcFreeAngle(Cell* cell);
+
+    struct EnergyForNewEntities
+    {
+        bool energyAvailable;
+        float cell;
+        float token;
+    };
+    __inline__ __device__ static EnergyForNewEntities adaptEnergies(Token* token, ConstructionData const& data);
+};
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+__inline__ __device__ void
+ConstructorFunction::processing(Token* token, SimulationData& data)
+{
+    ConstructionData constructionData;
+    readConstructionData(token, constructionData);
+
+    if (Enums::ConstrIn::DO_NOTHING == constructionData.constrIn) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
+        return;
+    }
+
+    Cell* firstCellOfConstructionSite = getFirstCellOfConstructionSite(token);
+
+    if (firstCellOfConstructionSite) {
+
+    } else {
+        startNewConstruction(token, data, constructionData);
+    }
+}
+
+__inline__ __device__ void ConstructorFunction::readConstructionData(Token* token, ConstructionData& data)
+{
+    auto const& memory = token->memory;
+    data.constrIn = static_cast<Enums::ConstrIn::Type>(
+        static_cast<unsigned char>(token->memory[Enums::Constr::INPUT]) % Enums::ConstrIn::_COUNTER);
+    data.constrInOption = static_cast<Enums::ConstrInOption::Type>(
+        static_cast<unsigned char>(token->memory[Enums::Constr::IN_OPTION]) % Enums::ConstrInOption::_COUNTER);
+    data.angle = memory[Enums::Constr::INOUT_ANGLE];
+    data.distance = memory[Enums::Constr::IN_DIST];
+    data.maxConnections = memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
+    data.branchNumber = memory[Enums::Constr::IN_CELL_BRANCH_NO];
+    data.metaData = memory[Enums::Constr::IN_CELL_METADATA];
+    data.cellFunctionType = memory[Enums::Constr::IN_CELL_FUNCTION];
+}
+
+__inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(Token* token)
+{
+    Cell* result = nullptr;
+    auto const& cell = token->cell;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto const& connectingCell = cell->connections[i].cell;
+        if (connectingCell->tokenBlocked) {
+            result = connectingCell;
+        }
+    }
+    return result;
+}
+
+__inline__ __device__ void
+ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, ConstructionData const& constructionData)
+{
+    auto const& cell = token->cell;
+    auto const adaptMaxConnections = isAdaptMaxConnections(constructionData);
+
+    if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        return;
+    }
+
+    /*
+    auto const& command = constructionData.constrIn;
+    auto const& option = constructionData.constrInOption;
+*/
+    auto const freeAngle = calcFreeAngle(cell);
+    auto const newCellAngle = QuantityConverter::convertDataToAngle(constructionData.angle) + freeAngle;
+
+/*
+    bool const separation = Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP_RED == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+*/
+
+    auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
+    auto const relPosOfNewCellDelta = Math::unitVectorOfAngle(newCellAngle)
+        * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
+    float2 posOfNewCell = /*separation
+        ? cell->relPos + relPosOfNewCellDelta + Math::unitVectorOfAngle(newCellAngle) * distance : */
+        cell->absPos + relPosOfNewCellDelta;
+
+    auto energyForNewEntities = adaptEnergies(token, constructionData);
+
+    if (!energyForNewEntities.energyAvailable) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        return;
+    }
+
+    Cell* newCell;
+    constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
+
+/*
+    establishConnection(newCell, cell, adaptMaxConnections);
+
+    separateConstructionWhenFinished(newCell, constructionData);
+    createEmptyToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option;
+    createDuplicateToken = Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option;
+
+    if (createEmptyToken || createDuplicateToken) {
+        constructNewToken(newCell, cell, energyForNewEntities.token, createDuplicateToken, newToken);
+    }
+*/
+
+    token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
+    token->memory[Enums::Constr::INOUT_ANGLE] = 0;
+}
+
+__inline__ __device__ void ConstructorFunction::constructNewCell(
+    SimulationData& data,
+    Token* token,
+    float2 const& posOfNewCell,
+    float const energyOfNewCell,
+    ConstructionData const& constructionData,
+    Cell*& result)
+{
+    EntityFactory factory;
+    factory.init(&data);
+    result = factory.createCell();
+    result->energy = energyOfNewCell;
+    result->absPos = posOfNewCell;
+    data.cellMap.mapPosCorrection(result->absPos);
+    result->maxConnections = getMaxConnections(constructionData);
+    result->numConnections = 0;
+    result->branchNumber = static_cast<unsigned char>(constructionData.branchNumber)
+        % cudaSimulationParameters.cellMaxTokenBranchNumber;
+    result->tokenBlocked = true;
+    result->cellFunctionType = constructionData.cellFunctionType;
+    result->numStaticBytes = static_cast<unsigned char>(token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA])
+        % (MAX_CELL_STATIC_BYTES + 1);
+    auto offset = result->numStaticBytes + 1;
+    result->numMutableBytes =
+        static_cast<unsigned char>(
+            token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset) % MAX_TOKEN_MEM_SIZE])
+        % (MAX_CELL_MUTABLE_BYTES + 1);
+    result->metadata.color = constructionData.metaData;
+
+    for (int i = 0; i < result->numStaticBytes; ++i) {
+        result->staticData[i] = token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1) % MAX_TOKEN_MEM_SIZE];
+    }
+    for (int i = 0; i <= result->numMutableBytes; ++i) {
+        result->mutableData[i] =
+            token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
+    }
+}
+
+__inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(ConstructionData const& data)
+    -> AdaptMaxConnections
+{
+    return 0 == getMaxConnections(data) ? AdaptMaxConnections::Yes : AdaptMaxConnections::No;
+}
+
+__inline__ __device__ int ConstructorFunction::getMaxConnections(ConstructionData const& data)
+{
+    return static_cast<unsigned char>(data.maxConnections) % (cudaSimulationParameters.cellMaxBonds + 1);
+}
+
+__inline__ __device__ bool
+ConstructorFunction::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
+{
+    if (AdaptMaxConnections::Yes == adaptMaxConnections) {
+        if (numConnections >= cudaSimulationParameters.cellMaxBonds) {
+            return false;
+        }
+    }
+    if (AdaptMaxConnections::No == adaptMaxConnections) {
+        if (numConnections >= maxConnections) {
+            return false;
+        }
+    }
+    return true;
+}
+
+__inline__ __device__ float ConstructorFunction::calcFreeAngle(Cell* cell)
+{
+    auto const numConnections = cell->numConnections;
+    float angles[MAX_CELL_BONDS];
+    for (int i = 0; i < numConnections; ++i) {
+        auto const displacement = cell->connections[i].cell->absPos - cell->absPos;
+        auto const angleToAdd = Math::angleOfVector(displacement);
+        auto indexToAdd = 0;
+        for (; indexToAdd < i; ++indexToAdd) {
+            if (angles[indexToAdd] > angleToAdd) {
+                break;
+            }
+        }
+        for (int j = indexToAdd; j < numConnections - 1; ++j) {
+            angles[j + 1] = angles[j];
+        }
+        angles[indexToAdd] = angleToAdd;
+    }
+
+    auto largestAnglesDiff = 0.0f;
+    auto result = 0.0f;
+    for (int i = 0; i < numConnections; ++i) {
+        auto angleDiff = angles[(i + 1) % numConnections] - angles[i];
+        if (angleDiff <= 0.0f) {
+            angleDiff += 360.0f;
+        }
+        if (angleDiff > 360.0f) {
+            angleDiff -= 360.0f;
+        }
+        if (angleDiff > largestAnglesDiff) {
+            largestAnglesDiff = angleDiff;
+            result = angles[i] + angleDiff / 2;
+        }
+    }
+
+    return result;
+}
+
+__inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, ConstructionData const& data)
+    -> EnergyForNewEntities
+{
+    EnergyForNewEntities result;
+    result.energyAvailable = true;
+    result.token = 0.0f;
+    result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
+
+    auto const& cell = token->cell;
+    auto const& option = data.constrInOption;
+
+    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        result.token = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
+    }
+
+    if (token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token
+            + cudaSimulationParameters.tokenMinEnergy) {
+        result.energyAvailable = false;
+        return result;
+    }
+
+    token->energy -= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token;
+    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+        auto const averageEnergy = (cell->energy + result.cell) / 2;
+        cell->energy = averageEnergy;
+        result.cell = averageEnergy;
+    }
+
+    return result;
+}
+
+/*
+#pragma once
 #include "EngineInterface/ElementaryTypes.h"
 
 #include "HashMap.cuh"
@@ -204,9 +512,9 @@ private:
     DynamicMemory _dynamicMemory;
 };
 
-/************************************************************************/
-/* Implementation                                                       */
-/************************************************************************/
+/ ************************************************************************ /
+/ * Implementation                                                       * /
+/ ************************************************************************ /
 
 __inline__ __device__ void ConstructorFunction::processing_block(Token* token)
 {
@@ -1754,3 +2062,4 @@ __inline__ __device__ int ConstructorFunction::check(int index, int arraySize)
     }
     return index;
 }
+*/

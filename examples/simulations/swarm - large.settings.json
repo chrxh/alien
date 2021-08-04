@@ -10,7 +10,7 @@
         "maxParticles": "500000",
         "maxTokens": "200000",
         "metadataDynamicMemorySize": "50000000",
-        "numBlocks": "256",
-        "numThreadsPerBlock": "32"
+        "numBlocks": "2048",
+        "numThreadsPerBlock": "8"
     }
 }

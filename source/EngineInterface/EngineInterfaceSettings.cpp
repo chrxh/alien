@@ -39,9 +39,7 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     symbolTable->addEntry("CONSTR_OUT::ERROR_DIST",std::to_string(Enums::ConstrOut::ERROR_DIST));
     symbolTable->addEntry("CONSTR_IN","["+std::to_string(Enums::Constr::INPUT)+"]");
     symbolTable->addEntry("CONSTR_IN::DO_NOTHING",std::to_string(Enums::ConstrIn::DO_NOTHING));
-    symbolTable->addEntry("CONSTR_IN::SAFE",std::to_string(Enums::ConstrIn::SAFE));
-    symbolTable->addEntry("CONSTR_IN::UNSAFE",std::to_string(Enums::ConstrIn::UNSAFE));
-    symbolTable->addEntry("CONSTR_IN::BRUTEFORCE",std::to_string(Enums::ConstrIn::BRUTEFORCE));
+    symbolTable->addEntry("CONSTR_IN::CONSTRUCT", std::to_string(Enums::ConstrIn::CONSTRUCT));
     symbolTable->addEntry("CONSTR_IN_OPTION","["+std::to_string(Enums::Constr::IN_OPTION)+"]");
     symbolTable->addEntry("CONSTR_IN_OPTION::STANDARD",std::to_string(Enums::ConstrInOption::STANDARD));
     symbolTable->addEntry("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN",std::to_string(Enums::ConstrInOption::CREATE_EMPTY_TOKEN));

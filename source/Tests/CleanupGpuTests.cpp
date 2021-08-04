@@ -119,8 +119,8 @@ TEST_F(CleanupGpuTests, testCleanupCellsWithToken)
 
     auto firstCellId = dataBefore.clusters->at(0).cells->at(1).id;
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        if (cellBefore.id == firstCellId) {
-            EXPECT_EQ(1, cellAfter.tokens->size());
+        if (cellBefore && cellBefore->id == firstCellId) {
+            EXPECT_EQ(1, cellAfter->tokens->size());
         }
     }
 }

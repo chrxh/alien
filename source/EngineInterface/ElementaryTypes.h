@@ -110,9 +110,7 @@ namespace Enums
     struct ConstrIn {
         enum Type {
             DO_NOTHING,
-            SAFE,
-            UNSAFE,
-            BRUTEFORCE,
+            CONSTRUCT,
             _COUNTER
         };
     };

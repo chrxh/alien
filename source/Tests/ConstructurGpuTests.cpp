@@ -1,3 +1,102 @@
+#include "gtest/gtest.h"
+
+#include "Base/Definitions.h"
+#include "Base/ServiceLocator.h"
+
+#include "EngineInterface/CellComputerCompiler.h"
+#include "EngineInterface/QuantityConverter.h"
+
+#include "IntegrationGpuTestFramework.h"
+
+class ConstructorGpuTests : public IntegrationGpuTestFramework
+{
+public:
+    ConstructorGpuTests()
+        : IntegrationGpuTestFramework({100, 100})
+    {}
+
+    virtual ~ConstructorGpuTests() = default;
+
+protected:
+    virtual void SetUp();
+
+    struct TestParameters
+    {
+        MEMBER_DECLARATION(TestParameters, Enums::ConstrIn::Type, command, Enums::ConstrIn::DO_NOTHING);
+        MEMBER_DECLARATION(TestParameters, Enums::ConstrInOption::Type, option, Enums::ConstrInOption::STANDARD);
+        MEMBER_DECLARATION(TestParameters, int, maxConnection, 0);
+        MEMBER_DECLARATION(TestParameters, int, cellBranchNumber, 0);
+        MEMBER_DECLARATION(TestParameters, QByteArray, staticData, QByteArray());
+        MEMBER_DECLARATION(TestParameters, QByteArray, mutableData, QByteArray());
+        MEMBER_DECLARATION(TestParameters, float, angle, 0.0f);
+        MEMBER_DECLARATION(TestParameters, float, distance, 1.0f);
+    };
+    struct TestResult
+    {
+        CellDescription constructorCell;
+        boost::optional<CellDescription> constructedCell;
+    };
+    TestResult testConstructor(TestParameters const& parameters) const;
+};
+
+
+void ConstructorGpuTests::SetUp()
+{
+    _parameters.radiationProb = 0;  //exclude radiation
+    _context->setSimulationParameters(_parameters);
+}
+
+auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) const -> TestResult
+{
+    auto basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
+
+    DataDescription dataBefore;
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({2, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    auto& firstCell = cluster.cells->at(0);
+    firstCell.tokenBranchNumber = 0;
+    auto& secondCell = cluster.cells->at(1);
+    secondCell.tokenBranchNumber = 1;
+    secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+    auto token = createSimpleToken();
+    auto& tokenData = *token.data;
+    tokenData[Enums::Constr::INPUT] = parameters._command;
+    tokenData[Enums::Constr::IN_OPTION] = Enums::ConstrInOption::STANDARD;
+    tokenData[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(parameters._angle);
+    tokenData[Enums::Constr::IN_DIST] = QuantityConverter::convertDistanceToData(parameters._distance);
+    tokenData[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = parameters._maxConnection;
+    tokenData[Enums::Constr::IN_CELL_BRANCH_NO] = parameters._cellBranchNumber;
+    tokenData[Enums::Constr::IN_CELL_FUNCTION_DATA] = parameters._staticData.size();
+    tokenData.replace(Enums::Constr::IN_CELL_FUNCTION_DATA + 1, parameters._staticData.size(), parameters._staticData);
+    int const mutableDataIndex = Enums::Constr::IN_CELL_FUNCTION_DATA + 1 + parameters._staticData.size();
+    tokenData[mutableDataIndex] = parameters._mutableData.size();
+    tokenData.replace(mutableDataIndex + 1, parameters._mutableData.size(), parameters._mutableData);
+    token.energy = 2 * _parameters.tokenMinEnergy + 2 * _parameters.cellFunctionConstructorOffspringCellEnergy;
+
+    firstCell.addToken(token);
+    dataBefore.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+    IntegrationTestHelper::runSimulation(1, _controller);
+    DataDescription dataAfter = getDataFromSimulation();
+
+    TestResult result;
+    auto cellAfterByBefore = IntegrationTestHelper::getBeforeAndAfterCells(dataBefore, dataAfter);
+    for (auto const& [cellBefore, cellAfter] : cellAfterByBefore) {
+        if (!cellBefore) {
+            result.constructedCell = cellAfter;
+        }
+    }
+    return result;
+}
+
+TEST_F(ConstructorGpuTests, constructFirstCell)
+{
+    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT));
+    ASSERT_TRUE(result.constructedCell);
+}
+
 /*
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm/copy.hpp>

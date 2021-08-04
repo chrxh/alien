@@ -33,7 +33,7 @@ public:
 	virtual ~IntegrationGpuTestFramework();
 
 protected:
-    DataDescription getDataFromSimulation()
+    DataDescription getDataFromSimulation() const
     {
         return IntegrationTestHelper::getContent(_access, {{-100, -100}, {_universeSize.x + 100, _universeSize.y + 100}});
     }
