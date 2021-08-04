@@ -11,7 +11,8 @@ public:
         DataChangeDescription const& data);
     static void runSimulation(int timesteps, SimulationController* controller);
 
-    static std::vector<std::pair<CellDescription, CellDescription>> getBeforeAndAfterCells(
+    static std::vector<std::pair<boost::optional<CellDescription>, boost::optional<CellDescription>>>
+    getBeforeAndAfterCells(
         DataDescription const& dataBefore,
         DataDescription const& dataAfter);
     static unordered_map<uint64_t, ParticleDescription> getParticleByParticleId(DataDescription const& data);

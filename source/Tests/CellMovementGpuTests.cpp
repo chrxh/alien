@@ -68,10 +68,10 @@ TEST_F(MovementGpuTests, testTwoRectCollision)
     ASSERT_EQ(2, dataAfter.clusters->size());
     ASSERT_EQ(200, beforeAndAfterCells.size());
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        if (cellBefore.vel->length() > FLOATINGPOINT_MEDIUM_PRECISION) {
-            EXPECT_TRUE(cellAfter.vel->length() < 0.03);
+        if (cellBefore->vel->length() > FLOATINGPOINT_MEDIUM_PRECISION) {
+            EXPECT_TRUE(cellAfter->vel->length() < 0.03);
         } else {
-            EXPECT_TRUE((*cellAfter.vel - QVector2D(0.1, 0)).length() < 0.03);
+            EXPECT_TRUE((*cellAfter->vel - QVector2D(0.1, 0)).length() < 0.03);
         }
     }
 }
@@ -103,16 +103,16 @@ TEST_F(MovementGpuTests, testTwoLineFusion)
     auto secondCellIdOfFirstCluster = dataBefore.clusters->at(0).cells->at(1).id;
     auto firstCellIdOfSecondCluster = dataBefore.clusters->at(1).cells->at(0).id;
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        EXPECT_TRUE((*cellAfter.vel - QVector2D(0.05, 0)).length() < 0.01);
-        if (cellBefore.id == firstCellIdOfFirstCluster) {
-            EXPECT_EQ(2, cellAfter.connections->size());
+        EXPECT_TRUE((*cellAfter->vel - QVector2D(0.05, 0)).length() < 0.01);
+        if (cellBefore->id == firstCellIdOfFirstCluster) {
+            EXPECT_EQ(2, cellAfter->connections->size());
             {
-                auto connection = *cellAfter.connections->begin();
+                auto connection = *cellAfter->connections->begin();
                 EXPECT_EQ(firstCellIdOfSecondCluster, connection.cellId);
                 EXPECT_LE(0.9, connection.distance);
             }
             {
-                auto connection = *(++cellAfter.connections->begin());
+                auto connection = *(++cellAfter->connections->begin());
                 EXPECT_EQ(secondCellIdOfFirstCluster, connection.cellId);
                 EXPECT_LE(0.9, connection.distance);
                 EXPECT_EQ(90, connection.angleFromPrevious);
@@ -144,7 +144,7 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
     ASSERT_EQ(1, dataAfter.clusters->size());
     ASSERT_EQ(200, beforeAndAfterCells.size());
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        EXPECT_TRUE((*cellAfter.vel - QVector2D(0.05, 0)).length() < 0.005);
+        EXPECT_TRUE((*cellAfter->vel - QVector2D(0.05, 0)).length() < 0.005);
     }
 }
 
@@ -173,12 +173,12 @@ TEST_F(MovementGpuTests, testRectMovement)
     auto firstCellId = dataBefore.clusters->at(0).cells->at(2).id;
     auto secondCellId = dataBefore.clusters->at(0).cells->at(3).id;
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        EXPECT_TRUE((*cellAfter.vel - QVector2D(0.1, 0)).length() < 0.01);
-        if (cellBefore.id == firstCellId) {
-            EXPECT_TRUE((*cellAfter.pos - QVector2D(11.5, 9.5)).length() < 0.1);
+        EXPECT_TRUE((*cellAfter->vel - QVector2D(0.1, 0)).length() < 0.01);
+        if (cellBefore->id == firstCellId) {
+            EXPECT_TRUE((*cellAfter->pos - QVector2D(11.5, 9.5)).length() < 0.1);
         }
-        if (cellBefore.id == secondCellId) {
-            EXPECT_TRUE((*cellAfter.pos - QVector2D(11.5, 10.5)).length() < 0.1);
+        if (cellBefore->id == secondCellId) {
+            EXPECT_TRUE((*cellAfter->pos - QVector2D(11.5, 10.5)).length() < 0.1);
         }
     }
 }
