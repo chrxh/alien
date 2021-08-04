@@ -60,17 +60,26 @@ void IntegrationTestHelper::runSimulation(int timesteps, SimulationController* c
     }
 }
 
-std::vector<std::pair<CellDescription, CellDescription>> IntegrationTestHelper::getBeforeAndAfterCells(
+std::vector<std::pair<boost::optional<CellDescription>, boost::optional<CellDescription>>>
+IntegrationTestHelper::getBeforeAndAfterCells(
     DataDescription const& dataBefore,
     DataDescription const& dataAfter)
 {
-    std::vector<std::pair<CellDescription, CellDescription>> result;
+    std::vector<std::pair<boost::optional<CellDescription>, boost::optional<CellDescription>>> result;
     auto cellBeforeById = getCellByCellId(dataBefore);
     auto cellAfterById = getCellByCellId(dataAfter);
     for (auto const& [id, cellBefore] : cellBeforeById) {
         auto findResult = cellAfterById.find(id);
         if (findResult != cellAfterById.end()) {
             result.emplace_back(std::make_pair(cellBefore, findResult->second));
+        } else {
+            result.emplace_back(std::make_pair(cellBefore, boost::optional<CellDescription>()));
+        }
+    }
+    for (auto const& [id, cellAfter] : cellAfterById) {
+        auto findResult = cellBeforeById.find(id);
+        if (findResult == cellBeforeById.end()) {
+            result.emplace_back(std::make_pair(boost::optional<CellDescription>(), cellAfter));
         }
     }
     return result;

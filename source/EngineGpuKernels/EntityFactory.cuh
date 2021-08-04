@@ -33,6 +33,7 @@ public:
         float2 const& vel,
         ParticleMetadata const& metadata);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
+    __inline__ __device__ Cell* createCell();
     __inline__ __device__ Token* createToken(Cell* targetCell, Token* sourceToken);
 
     /*
@@ -247,6 +248,21 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     }
     cell->tokenUsages = 0;
     return cell;
+}
+
+__inline__ __device__ Cell* EntityFactory::createCell()
+{
+    auto result = _data->entities.cells.getNewElement();
+    auto cellPointer = _data->entities.cellPointers.getNewElement();
+    *cellPointer = result;
+    result->tokenUsages = 0;
+    result->id = _data->numberGen.createNewId_kernel();
+    result->locked = 0;
+    result->metadata.color = 0;
+    result->metadata.nameLen = 0;
+    result->metadata.descriptionLen = 0;
+    result->metadata.sourceCodeLen = 0;
+    return result;
 }
 
 __inline__ __device__ Token* EntityFactory::createToken(Cell* targetCell, Token* sourceToken)

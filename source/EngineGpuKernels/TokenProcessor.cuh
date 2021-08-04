@@ -9,6 +9,7 @@
 #include "Physics.cuh"
 #include "EnergyGuidance.cuh"
 #include "CellComputerFunction.cuh"
+#include "ConstructorFunction.cuh"
 
 class TokenProcessor
 {
@@ -85,7 +86,8 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
     }
 }
 
-__inline__ __device__ void TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
+__inline__ __device__ void
+TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
 {
     auto& tokens = data.entities.tokenPointers;
     auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -103,6 +105,9 @@ __inline__ __device__ void TokenProcessor::executeCellFunctions(SimulationData& 
                     EnergyGuidance::processing(token);
                     if (Enums::CellFunction::COMPUTER == cellFunctionType) {
                         CellComputerFunction::processing(token);
+                    }
+                    if (Enums::CellFunction::CONSTRUCTOR == cellFunctionType) {
+                        ConstructorFunction::processing(token, data);
                     }
 
                     __threadfence();
