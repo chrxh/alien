@@ -377,9 +377,13 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 __inline__ __device__ void CellProcessor::scheduleAddConnections(Cell* cell1, Cell* cell2)
 {
     auto index = atomicAdd(_data->numAddConnectionOperations, 1);
-    auto& operation = _data->addConnectionOperations[index];
-    operation.cell = cell1;
-    operation.otherCell = cell2;
+    if (index < _data->entities.cellPointers.getNumEntries()) {
+        auto& operation = _data->addConnectionOperations[index];
+        operation.cell = cell1;
+        operation.otherCell = cell2;
+    } else {
+        atomicSub(_data->numAddConnectionOperations, 1);
+    }
 }
 
 
@@ -387,20 +391,28 @@ __inline__ __device__ void CellProcessor::scheduleDelConnections(Cell* cell, int
 {
     if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
         auto index = atomicAdd(_data->numDelOperations, 1);
-        auto& operation = _data->delOperations[index];
-        operation.type = DelOperation::Type::DelConnections;
-        operation.cell = cell;
-        operation.cellIndex = cellIndex;
+        if (index < _data->entities.cellPointers.getNumEntries()) {
+            auto& operation = _data->delOperations[index];
+            operation.type = DelOperation::Type::DelConnections;
+            operation.cell = cell;
+            operation.cellIndex = cellIndex;
+        } else {
+            atomicSub(_data->numDelOperations, 1);
+        }
     }
 }
 
 __inline__ __device__ void CellProcessor::scheduleDelCell(Cell* cell, int cellIndex)
 {
     auto index = atomicAdd(_data->numDelOperations, 1);
-    auto& operation = _data->delOperations[index];
-    operation.type = DelOperation::Type::DelCell;
-    operation.cell = cell;
-    operation.cellIndex = cellIndex;
+    if (index < _data->entities.cellPointers.getNumEntries()) {
+        auto& operation = _data->delOperations[index];
+        operation.type = DelOperation::Type::DelCell;
+        operation.cell = cell;
+        operation.cellIndex = cellIndex;
+    } else {
+        atomicSub(_data->numDelOperations, 1);
+    }
 }
 
 __inline__ __device__ void CellProcessor::connectCells(Cell* cell1, Cell* cell2)
