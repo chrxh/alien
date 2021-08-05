@@ -39,7 +39,10 @@ struct SimulationData
         cellFunctionData.init(universeSize);
         cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
-        dynamicMemory.init(cudaConstants.DYNAMIC_MEMORY_SIZE);
+
+        int upperBoundDynamicMemory =
+            (sizeof(AddConnectionOperation) + sizeof(DelOperation)) * cudaConstants.MAX_CELLPOINTERS + 1000;
+        dynamicMemory.init(upperBoundDynamicMemory);
         numberGen.init(40312357);
 
         numPixels = size.x * size.y;
