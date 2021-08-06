@@ -12,7 +12,8 @@ public:
     __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
     __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex);
 
-    __inline__ __device__ static void processOperations(SimulationData& data);
+    __inline__ __device__ static void processDelOperations(SimulationData& data);
+    __inline__ __device__ static void processOtherOperations(SimulationData& data);
 
 private:
     __inline__ __device__ static void addConnections(SimulationData& data, Cell* cell1, Cell* cell2);
@@ -68,7 +69,22 @@ __inline__ __device__ void OperationScheduler::scheduleDelCell(SimulationData& d
     }
 }
 
-__inline__ __device__ void OperationScheduler::processOperations(SimulationData& data)
+__inline__ __device__ void OperationScheduler::processDelOperations(SimulationData& data)
+{
+    auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& operation = data.operations[index];
+        if (Operation::Type::DelConnections == operation.type) {
+            delConnections(operation.data.delConnectionsOperation.cell);
+        }
+        if (Operation::Type::DelCell == operation.type) {
+            delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
+        }
+    }
+}
+
+__inline__ __device__ void OperationScheduler::processOtherOperations(SimulationData& data)
 {
     auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -76,12 +92,6 @@ __inline__ __device__ void OperationScheduler::processOperations(SimulationData&
         auto const& operation = data.operations[index];
         if (Operation::Type::AddConnections == operation.type) {
             addConnections(data, operation.data.addConnectionOperation.cell, operation.data.addConnectionOperation.otherCell);
-        }
-        if (Operation::Type::DelConnections == operation.type) {
-            delConnections(operation.data.delConnectionsOperation.cell);
-        }
-        if (Operation::Type::DelCell == operation.type) {
-            delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
         }
     }
 }

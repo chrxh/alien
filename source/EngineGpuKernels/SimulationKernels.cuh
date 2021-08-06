@@ -145,10 +145,15 @@ __global__ void processingStep10(SimulationData data)
 
 __global__ void processingStep11(SimulationData data)
 {
-    OperationScheduler::processOperations(data);
+    OperationScheduler::processDelOperations(data);
 }
 
 __global__ void processingStep12(SimulationData data)
+{
+    OperationScheduler::processOtherOperations(data);
+}
+
+__global__ void processingStep13(SimulationData data)
 {
     ParticleProcessor particleProcessor;
     particleProcessor.transformation(data);
@@ -183,6 +188,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep10, data);
     KERNEL_CALL(processingStep11, data);
     KERNEL_CALL(processingStep12, data);
+    KERNEL_CALL(processingStep13, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
