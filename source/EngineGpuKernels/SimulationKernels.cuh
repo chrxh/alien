@@ -145,12 +145,12 @@ __global__ void processingStep10(SimulationData data)
 
 __global__ void processingStep11(SimulationData data)
 {
-    OperationScheduler::processDelOperations(data);
+    OperationScheduler::processOtherOperations(data);
 }
 
 __global__ void processingStep12(SimulationData data)
 {
-    OperationScheduler::processOtherOperations(data);
+    OperationScheduler::processDelOperations(data);
 }
 
 __global__ void processingStep13(SimulationData data)
