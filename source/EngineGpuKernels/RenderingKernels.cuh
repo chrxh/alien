@@ -89,6 +89,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
 
 __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 {
+/*
     unsigned int particleColor;
     switch (particle->metadata.color % 7) {
     case 0: {
@@ -130,15 +131,13 @@ __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
         toFloat((particleColor >> 16) & 0xff) / 256.0f * factor,
         toFloat((particleColor >> 8) & 0xff) / 256.0f * factor,
         toFloat(particleColor & 0xff) / 256.0f * factor};
-    /*
-    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 256.0f;
+*/
+    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 150.0f;
     if (!selected) {
         intensity *= 0.75f;
     }
 
     return {intensity, 0, 0.08f};
-*/
-
 }
 
 __device__ __inline__ float3 calcColor(Token* token, bool selected)
