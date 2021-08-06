@@ -1,12 +1,14 @@
 ﻿#pragma once
 
+#include "cuda_runtime_api.h"
+#include "sm_60_atomic_functions.h"
+
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
-#include "cuda_runtime_api.h"
-#include "sm_60_atomic_functions.h"
+#include "OperationScheduler.cuh"
 
 class CellProcessor
 {
@@ -27,10 +29,6 @@ public:
     __inline__ __device__ void decay(SimulationData& data);
 
 private:
-    __inline__ __device__ void scheduleAddConnections(Cell* cell1, Cell* cell2);
-    __inline__ __device__ void scheduleDelConnections(Cell* cell, int cellIndex);
-    __inline__ __device__ void scheduleDelCell(Cell* cell, int cellIndex);
-
     __inline__ __device__ void connectCells(Cell* cell1, Cell* cell2);
     __inline__ __device__ void delConnections(Cell* cell, int cellIndex);
     __inline__ __device__ void delCell(Cell* cell, int cellIndex);
@@ -105,7 +103,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             }
 
             if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1) {
-                scheduleDelConnections(cell, index);
+                OperationScheduler::scheduleDelConnections(data, cell, index);
             }
 
             bool alreadyConnected = false;
@@ -128,7 +126,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                     && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
-                    scheduleAddConnections(cell, otherCell);
+                    OperationScheduler::scheduleAddConnections(data, cell, otherCell);
                 }
             }
         }
@@ -147,7 +145,7 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
 
         auto force = cell->temp1;
         if (Math::length(force) > cudaSimulationParameters.cellMaxForce) {
-            scheduleDelConnections(cell, index);
+            OperationScheduler::scheduleDelConnections(data, cell, index);
         }
         cell->vel = cell->vel + force;
         cell->temp1 = {0, 0};
@@ -232,7 +230,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             }
         }
         if (scheduleForDestruction) {
-            scheduleDelConnections(cell, index);
+            OperationScheduler::scheduleDelConnections(data, cell, index);
         }
     }
 }
@@ -366,52 +364,11 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
             if (cell->numConnections > 0) {
-                scheduleDelConnections(cell, index);
+                OperationScheduler::scheduleDelConnections(data, cell, index);
             } else {
-                scheduleDelCell(cell, index);
+                OperationScheduler::scheduleDelCell(data, cell, index);
             }
         }
-    }
-}
-
-__inline__ __device__ void CellProcessor::scheduleAddConnections(Cell* cell1, Cell* cell2)
-{
-    auto index = atomicAdd(_data->numAddConnectionOperations, 1);
-    if (index < _data->entities.cellPointers.getNumEntries()) {
-        auto& operation = _data->addConnectionOperations[index];
-        operation.cell = cell1;
-        operation.otherCell = cell2;
-    } else {
-        atomicSub(_data->numAddConnectionOperations, 1);
-    }
-}
-
-
-__inline__ __device__ void CellProcessor::scheduleDelConnections(Cell* cell, int cellIndex)
-{
-    if (_data->numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-        auto index = atomicAdd(_data->numDelOperations, 1);
-        if (index < _data->entities.cellPointers.getNumEntries()) {
-            auto& operation = _data->delOperations[index];
-            operation.type = DelOperation::Type::DelConnections;
-            operation.cell = cell;
-            operation.cellIndex = cellIndex;
-        } else {
-            atomicSub(_data->numDelOperations, 1);
-        }
-    }
-}
-
-__inline__ __device__ void CellProcessor::scheduleDelCell(Cell* cell, int cellIndex)
-{
-    auto index = atomicAdd(_data->numDelOperations, 1);
-    if (index < _data->entities.cellPointers.getNumEntries()) {
-        auto& operation = _data->delOperations[index];
-        operation.type = DelOperation::Type::DelCell;
-        operation.cell = cell;
-        operation.cellIndex = cellIndex;
-    } else {
-        atomicSub(_data->numDelOperations, 1);
     }
 }
 

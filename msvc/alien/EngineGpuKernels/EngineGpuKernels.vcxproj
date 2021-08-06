@@ -132,6 +132,7 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Math.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\MonitorKernels.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Operation.cuh" />
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\OperationScheduler.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Particle.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\ParticleProcessor.cuh" />
     <ClInclude Include="..\..\..\source\EngineGpuKernels\PhysicalActionKernels.cuh" />

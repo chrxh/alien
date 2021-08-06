@@ -24,6 +24,7 @@ protected:
     {
         MEMBER_DECLARATION(TestParameters, Enums::ConstrIn::Type, command, Enums::ConstrIn::DO_NOTHING);
         MEMBER_DECLARATION(TestParameters, Enums::ConstrInOption::Type, option, Enums::ConstrInOption::STANDARD);
+        MEMBER_DECLARATION(TestParameters, int, metadata, 0);
         MEMBER_DECLARATION(TestParameters, int, maxConnection, 0);
         MEMBER_DECLARATION(TestParameters, int, cellBranchNumber, 0);
         MEMBER_DECLARATION(TestParameters, QByteArray, staticData, QByteArray());
@@ -68,6 +69,7 @@ auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) cons
     tokenData[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = parameters._maxConnection;
     tokenData[Enums::Constr::IN_CELL_BRANCH_NO] = parameters._cellBranchNumber;
     tokenData[Enums::Constr::IN_CELL_FUNCTION_DATA] = parameters._staticData.size();
+    tokenData[Enums::Constr::IN_CELL_METADATA] = parameters._metadata;
     tokenData.replace(Enums::Constr::IN_CELL_FUNCTION_DATA + 1, parameters._staticData.size(), parameters._staticData);
     int const mutableDataIndex = Enums::Constr::IN_CELL_FUNCTION_DATA + 1 + parameters._staticData.size();
     tokenData[mutableDataIndex] = parameters._mutableData.size();
@@ -87,14 +89,19 @@ auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) cons
         if (!cellBefore) {
             result.constructedCell = cellAfter;
         }
+        if (cellAfter && cellAfter->id == secondCell.id) {
+            result.constructorCell = *cellAfter;
+        }
     }
     return result;
 }
 
 TEST_F(ConstructorGpuTests, constructFirstCell)
 {
-    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT));
+    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2));
     ASSERT_TRUE(result.constructedCell);
+    EXPECT_EQ(2, result.constructedCell->metadata->color);
+    EXPECT_TRUE((QVector2D(1, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
 }
 
 /*

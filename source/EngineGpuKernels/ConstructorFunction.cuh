@@ -4,6 +4,7 @@
 
 #include "Math.cuh"
 #include "QuantityConverter.cuh"
+#include "OperationScheduler.cuh"
 
 class ConstructorFunction
 {
@@ -152,7 +153,8 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
-/*
+    OperationScheduler::scheduleAddConnections(data, cell, newCell);
+        /*
     establishConnection(newCell, cell, adaptMaxConnections);
 
     separateConstructionWhenFinished(newCell, constructionData);
