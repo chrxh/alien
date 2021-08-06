@@ -145,17 +145,10 @@ __global__ void processingStep10(SimulationData data)
 
 __global__ void processingStep11(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.processAddConnectionOperations(data);
+    OperationScheduler::processOperations(data);
 }
 
 __global__ void processingStep12(SimulationData data)
-{
-    CellProcessor cellProcessor;
-    cellProcessor.processDelOperations(data);
-}
-
-__global__ void processingStep13(SimulationData data)
 {
     ParticleProcessor particleProcessor;
     particleProcessor.transformation(data);
@@ -171,12 +164,8 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     data.particleMap.reset();
     data.dynamicMemory.reset();
 
-    *data.numAddConnectionOperations = 0; 
-    *data.numDelOperations = 0;
-    data.addConnectionOperations =
-        data.dynamicMemory.getArray<AddConnectionOperation>(data.entities.cellPointers.getNumEntries());
-    data.delOperations =
-        data.dynamicMemory.getArray<DelOperation>(data.entities.cellPointers.getNumEntries());
+    *data.numOperations = 0; 
+    data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
 
     KERNEL_CALL(processingStep1, data);
     KERNEL_CALL(processingStep2, data);
@@ -194,7 +183,6 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep10, data);
     KERNEL_CALL(processingStep11, data);
     KERNEL_CALL(processingStep12, data);
-    KERNEL_CALL(processingStep13, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }
