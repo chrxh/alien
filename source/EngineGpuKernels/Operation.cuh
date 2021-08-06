@@ -8,14 +8,32 @@ struct AddConnectionOperation {
     Cell* otherCell;
 };
 
-struct DelOperation
+struct DelConnectionsOperation
+{
+    Cell* cell;
+};
+
+struct DelCellOperation
+{
+    Cell* cell;
+    int cellIndex;
+};
+
+union OperationData
+{
+    AddConnectionOperation addConnectionOperation;
+    DelConnectionsOperation delConnectionsOperation;
+    DelCellOperation delCellOperation;
+};
+
+struct Operation
 {
     enum class Type
     {
+        AddConnections,
         DelConnections,
         DelCell
     };
     Type type;
-    Cell* cell;
-    int cellIndex;
+    OperationData data;
 };

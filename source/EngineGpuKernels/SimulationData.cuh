@@ -20,10 +20,8 @@ struct SimulationData
 
     DynamicMemory dynamicMemory;
 
-    unsigned int* numAddConnectionOperations;
-    AddConnectionOperation* addConnectionOperations;  //uses dynamic memory
-    unsigned int* numDelOperations;
-    DelOperation* delOperations;  //uses dynamic memory
+    unsigned int* numOperations;
+    Operation* operations;  //uses dynamic memory
 
     CudaNumberGenerator numberGen;
     int numPixels;
@@ -40,15 +38,13 @@ struct SimulationData
         cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
         particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
 
-        int upperBoundDynamicMemory =
-            (sizeof(AddConnectionOperation) + sizeof(DelOperation)) * cudaConstants.MAX_CELLPOINTERS + 1000;
+        int upperBoundDynamicMemory = sizeof(Operation) * cudaConstants.MAX_CELLPOINTERS + 1000;
         dynamicMemory.init(upperBoundDynamicMemory);
         numberGen.init(40312357);
 
         numPixels = size.x * size.y;
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numPixels*2, imageData);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numAddConnectionOperations);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numDelOperations);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     }
 
     void resizeImage(int2 const& newSize)
@@ -70,8 +66,7 @@ struct SimulationData
         dynamicMemory.free();
 
         CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().freeMemory(numAddConnectionOperations);
-        CudaMemoryManager::getInstance().freeMemory(numDelOperations);
+        CudaMemoryManager::getInstance().freeMemory(numOperations);
     }
 };
 
