@@ -8,7 +8,7 @@
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
-#include "OperationScheduler.cuh"
+#include "CellConnectionProcessor.cuh"
 
 class CellProcessor
 {
@@ -101,7 +101,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             }
 
             if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1) {
-                OperationScheduler::scheduleDelConnections(data, cell);
+                CellConnectionProcessor::scheduleDelConnections(data, cell);
             }
 
             bool alreadyConnected = false;
@@ -124,7 +124,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                     && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
-                    OperationScheduler::scheduleAddConnections(data, cell, otherCell);
+                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
         }
@@ -143,9 +143,12 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
 
         auto force = cell->temp1;
         if (Math::length(force) > cudaSimulationParameters.cellMaxForce) {
-            OperationScheduler::scheduleDelConnections(data, cell);
+            CellConnectionProcessor::scheduleDelConnections(data, cell);
         }
         cell->vel = cell->vel + force;
+        if (Math::length(cell->vel) > 2) {
+            cell->vel = Math::normalized(cell->vel) * 2;
+        }
         cell->temp1 = {0, 0};
     }
 }
@@ -159,9 +162,12 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
+        if (0 == cell->numConnections) {
+            continue;
+        }
         float2 force{0, 0};
-        float2 prevDisplacement;
+        float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->absPos - cell->absPos;
+        data.cellMap.mapDisplacementCorrection(prevDisplacement);
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
 
@@ -173,27 +179,32 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation / 2;
 
-            if (i > 0) {
-                auto angle = Math::angleOfVector(displacement);
-                auto prevAngle = Math::angleOfVector(prevDisplacement);
-                auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
-                if (actualAngleFromPrevious > 180) {
-                    actualAngleFromPrevious = abs(actualAngleFromPrevious - 360.0f);
-                }
-                auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
-                if (referenceAngleFromPrevious > 180) {
-                    referenceAngleFromPrevious = abs(referenceAngleFromPrevious - 360.0f);
-                }
-                auto deviation = actualAngleFromPrevious - referenceAngleFromPrevious;
-                auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
+            auto angle = Math::angleOfVector(displacement);
+            auto prevAngle = Math::angleOfVector(prevDisplacement);
+            auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
+            if (actualAngleFromPrevious > 180) {
+                actualAngleFromPrevious = abs(actualAngleFromPrevious - 360.0f);
+            }
+            auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
+            if (referenceAngleFromPrevious > 180) {
+                referenceAngleFromPrevious = abs(referenceAngleFromPrevious - 360.0f);
+            }
+            auto angleDeviation = actualAngleFromPrevious - referenceAngleFromPrevious;
+            auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
-                auto forceInc = correctionMovementForLowAngle * deviation / -500;
-                force = force + forceInc;
-                atomicAdd(&connectingCell->temp1.x, -forceInc.x / 2);
-                atomicAdd(&connectingCell->temp1.y, -forceInc.y / 2);
+            auto forceInc = correctionMovementForLowAngle * angleDeviation / -800;
+            force = force + forceInc;
+            atomicAdd(&connectingCell->temp1.x, -forceInc.x / 2);
+            atomicAdd(&connectingCell->temp1.y, -forceInc.y / 2);
+            if (i > 0) {
                 atomicAdd(&cell->connections[i - 1].cell->temp1.x, -forceInc.x / 2);
                 atomicAdd(&cell->connections[i - 1].cell->temp1.y, -forceInc.y / 2);
+            } else {
+                auto lastIndex = cell->numConnections - 1;
+                atomicAdd(&cell->connections[lastIndex].cell->temp1.x, -forceInc.x / 2);
+                atomicAdd(&cell->connections[lastIndex].cell->temp1.y, -forceInc.y / 2);
             }
+
             prevDisplacement = displacement;
         }
         atomicAdd(&cell->temp1.x, force.x);
@@ -228,7 +239,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             }
         }
         if (scheduleForDestruction) {
-            OperationScheduler::scheduleDelConnections(data, cell);
+            CellConnectionProcessor::scheduleDelConnections(data, cell);
         }
     }
 }
@@ -334,9 +345,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
             if (cell->numConnections > 0) {
-                OperationScheduler::scheduleDelConnections(data, cell);
+                CellConnectionProcessor::scheduleDelConnections(data, cell);
             } else {
-                OperationScheduler::scheduleDelCell(data, cell, index);
+                CellConnectionProcessor::scheduleDelCell(data, cell, index);
             }
         }
     }

@@ -105,51 +105,83 @@ ClusterDescription& ClusterDescription::addConnection(
         }
         CHECK(cell.connections->size() < *cell.maxConnections);
 
-        list<ConnectionDescription> newConnections;
         auto newAngle = Physics::angleOfVector(*otherCell.pos - *cell.pos);
+        if (cell.id == 281474976710658 && otherCell.id == 281474976710660 && cell.connections
+            && cell.connections->size() == 2) {
+            int dummy = 0;
+        }
+        if (cell.id == 281474976710660 && otherCell.id == 281474976710662 && cell.connections
+            && cell.connections->size() == 2) {
+            int dummy = 0;
+        }
 
-        float prevConnectionAngle = 0;
-        float connectionAngle = 0;
-        auto connectionIt = cell.connections->begin();
-        for (int i = 0; i <= cell.connections->size(); ++i) {
-            if (i < cell.connections->size()) {
-                auto connectedCell = getCellRef(connectionIt->cellId, cache);
-                connectionAngle = Physics::angleOfVector(*connectedCell.pos - *cell.pos);
+        if (cell.connections->empty()) {
+            ConnectionDescription newConnection;
+            newConnection.cellId = otherCell.id;
+            newConnection.distance = (*otherCell.pos - *cell.pos).length();
+            cell.connections->emplace_back(newConnection);
+            return;
+        }
+        if (1 == cell.connections->size()) {
+            ConnectionDescription newConnection;
+            newConnection.cellId = otherCell.id;
+            newConnection.distance = (*otherCell.pos - *cell.pos).length();
+
+            auto connectedCell = getCellRef(cell.connections->front().cellId, cache);
+            auto connectedCellDelta = *connectedCell.pos - *cell.pos;
+            auto prevAngle = Physics::angleOfVector(connectedCellDelta);
+            auto angleDiff = newAngle - prevAngle;
+            if (angleDiff >= 0) {
+                newConnection.angleFromPrevious = angleDiff;
+                cell.connections->begin()->angleFromPrevious = 360.0f - angleDiff;
             } else {
-                connectionAngle = 361;
+                newConnection.angleFromPrevious = 360.0f + angleDiff;
+                cell.connections->begin()->angleFromPrevious = -angleDiff;
             }
+            cell.connections->emplace_back(newConnection);
+            return;
+        }
 
-            if (newAngle < connectionAngle) {
-                ConnectionDescription newConnection;
-                newConnection.cellId = otherCell.id;
-                newConnection.distance = (*otherCell.pos - *cell.pos).length();
-                if (i == cell.connections->size()) {
-                    newConnection.angleFromPrevious = newAngle - prevConnectionAngle;
-                } else {
-                    newConnection.angleFromPrevious =
-                        connectionIt->angleFromPrevious * (newAngle - prevConnectionAngle) / (connectionAngle - prevConnectionAngle);
-                }
+        auto firstConnectedCell = getCellRef(cell.connections->front().cellId, cache);
+        auto firstConnectedCellDelta = *firstConnectedCell.pos - *cell.pos;
+        auto angle = Physics::angleOfVector(firstConnectedCellDelta);
+        auto connectionIt = ++cell.connections->begin();
+        while (true) {
+            auto nextAngle = angle + connectionIt->angleFromPrevious;
 
-                newConnections.emplace_back(newConnection);
-
-                bool first = true;
-                for (; connectionIt != cell.connections->end(); ++connectionIt) {
-
-                    auto connection = *connectionIt;
-                    if (first) {
-                        connection.angleFromPrevious = connection.angleFromPrevious - newConnection.angleFromPrevious;
-                        first = false;
-                    }
-                    newConnections.emplace_back(connection);
-                }
+            if ((angle < newAngle && newAngle <= nextAngle)
+                || (angle < (newAngle + 360.0f) && (newAngle + 360.0f) <= nextAngle)) {
                 break;
             }
 
-            newConnections.emplace_back(*connectionIt);
             ++connectionIt;
-            prevConnectionAngle = connectionAngle;
+            if (connectionIt == cell.connections->end()) {
+                connectionIt = cell.connections->begin();
+            }
+            angle = nextAngle;
+            if (angle > 360.0f) {
+                angle -= 360.0f;
+            }
         }
-        cell.connections = newConnections;
+
+        ConnectionDescription newConnection;
+        newConnection.cellId = otherCell.id;
+        newConnection.distance = (*otherCell.pos - *cell.pos).length();
+
+        auto angleDiff1 = newAngle - angle;
+        if (angleDiff1 < 0) {
+            angleDiff1 += 360.0f;
+        }
+        auto angleDiff2 = connectionIt->angleFromPrevious;
+
+        auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
+        newConnection.angleFromPrevious = angleDiff2 * factor;
+        connectionIt = cell.connections->insert(connectionIt, newConnection);
+        ++connectionIt;
+        if (connectionIt == cell.connections->end()) {
+            connectionIt = cell.connections->begin();
+        }
+        connectionIt->angleFromPrevious = angleDiff2 * (1 - factor);
     };
 
     addConnection(cell1, cell2);

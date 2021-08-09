@@ -148,7 +148,7 @@
     <ClInclude Include="..\..\..\source\EngineGpuKernels\Operation.cuh">
       <Filter>Impl\Device</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\EngineGpuKernels\OperationScheduler.cuh">
+    <ClInclude Include="..\..\..\source\EngineGpuKernels\CellConnectionProcessor.cuh">
       <Filter>Impl\Device</Filter>
     </ClInclude>
   </ItemGroup>
