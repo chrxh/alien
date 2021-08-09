@@ -22,6 +22,7 @@ protected:
 
     struct TestParameters
     {
+        MEMBER_DECLARATION(TestParameters, float, clusterAngle, 0);
         MEMBER_DECLARATION(TestParameters, Enums::ConstrIn::Type, command, Enums::ConstrIn::DO_NOTHING);
         MEMBER_DECLARATION(TestParameters, Enums::ConstrInOption::Type, option, Enums::ConstrInOption::STANDARD);
         MEMBER_DECLARATION(TestParameters, int, metadata, 0);
@@ -38,6 +39,9 @@ protected:
         boost::optional<CellDescription> constructedCell;
     };
     TestResult testConstructor(TestParameters const& parameters) const;
+
+    void genericCheck(TestResult const& testResult) const;
+    bool isConnected(CellDescription const& cell1, CellDescription const& cell2) const;
 };
 
 
@@ -55,6 +59,10 @@ auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) cons
     auto cluster = _factory->createRect(
         DescriptionFactory::CreateRectParameters().size({2, 1}).centerPosition(QVector2D(10, 10)),
         _context->getNumberGenerator());
+    for (auto& cell : *cluster.cells) {
+        cell.pos =
+            Physics::rotateClockwise(*cell.pos - QVector2D(10, 10), parameters._clusterAngle) + QVector2D(10, 10);
+    }
     auto& firstCell = cluster.cells->at(0);
     firstCell.tokenBranchNumber = 0;
     auto& secondCell = cluster.cells->at(1);
@@ -96,12 +104,45 @@ auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) cons
     return result;
 }
 
-TEST_F(ConstructorGpuTests, constructFirstCell)
+void ConstructorGpuTests::genericCheck(TestResult const& testResult) const
+{
+    if (testResult.constructedCell) {
+        EXPECT_TRUE(isConnected(*testResult.constructedCell, testResult.constructorCell));
+    }
+}
+
+bool ConstructorGpuTests::isConnected(CellDescription const& cell1, CellDescription const& cell2) const
+{
+    auto isConnectedTo = [](CellDescription const& cell1, CellDescription const& cell2) {
+        for (auto const& connection : *cell1.connections) {
+            if (connection.cellId == cell2.id) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    return isConnectedTo(cell1, cell2) && isConnectedTo(cell2, cell1);
+}
+
+TEST_F(ConstructorGpuTests, constructFirstCellOnLeft)
 {
     auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2));
+    genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE((QVector2D(1, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
+}
+
+TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
+{
+    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2).clusterAngle(90));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_EQ(2, result.constructedCell->metadata->color);
+    EXPECT_TRUE(
+        (QVector2D(0, 1) - (*result.constructedCell->pos - *result.constructorCell.pos)).length()
+        < FLOATINGPOINT_LOW_PRECISION);
 }
 
 /*

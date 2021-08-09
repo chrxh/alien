@@ -203,8 +203,10 @@ namespace boost {
                         cellIndexById.insert_or_assign(cell.id, index);
                     }
                     for (auto& cell : *cluster.cells) {
-                        cell.vel = cluster.vel;
-                        if (cell.connections) {
+                        
+                        cell.vel = Physics::tangentialVelocity(
+                            *cell.pos - *cluster.pos, Physics::Velocities{*cluster.vel, *cluster.angularVel});
+                        if (cell.connections && !cell.connections->empty()) {
                             cell.connections->sort(
                                 [&](ConnectionDescription const& left, ConnectionDescription const& right) {
                                     auto const& cell1 = cluster.cells->at(cellIndexById.at(left.cellId));
@@ -213,20 +215,19 @@ namespace boost {
                                     auto angle2 = Physics::angleOfVector(*cell2.pos - *cell.pos);
                                     return angle1 < angle2;
                                 });
-                            boost::optional<float> prevSumAngle;
+                            auto lastCell = cluster.cells->at(cellIndexById.at(cell.connections->back().cellId));
+                            float prevAngle = Physics::angleOfVector(*lastCell.pos - *cell.pos);
                             for (auto& connection : *cell.connections) {
                                 auto const& connectingCellDesc = cluster.cells->at(cellIndexById.at(connection.cellId));
 
                                 if (0 == connection.distance) {
                                     connection.distance = (*connectingCellDesc.pos - *cell.pos).length();
-                                    connection.angleFromPrevious =
-                                        Physics::angleOfVector(*connectingCellDesc.pos - *cell.pos);
-                                    if (prevSumAngle) {
-                                        connection.angleFromPrevious -= *prevSumAngle;
+                                    auto angle = Physics::angleOfVector(*connectingCellDesc.pos - *cell.pos);
+                                    connection.angleFromPrevious = angle - prevAngle;
+                                    if (connection.angleFromPrevious < 0) {
+                                        connection.angleFromPrevious += 360.0f;
                                     }
-
-                                    prevSumAngle = prevSumAngle ? *prevSumAngle + connection.angleFromPrevious
-                                                                : connection.angleFromPrevious;
+                                    prevAngle = angle;
                                 }
                             }
                         }
