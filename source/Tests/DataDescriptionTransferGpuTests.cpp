@@ -93,9 +93,12 @@ public:
                             if (prevConnectedCell) {
                                 auto angle1 = Physics::angleOfVector(*connectedCell.pos - *cell.pos);
                                 auto angle2 = Physics::angleOfVector(*prevConnectedCell->pos - *cell.pos);
+                                auto angleDiff = angle1 - angle2;
+                                if (angleDiff < 0) {
+                                    angleDiff += 360.0f;
+                                }
                                 EXPECT_TRUE(
-                                    abs(angle1 - angle2 - connection.angleFromPrevious)
-                                    < FLOATINGPOINT_MEDIUM_PRECISION);
+                                    abs(angleDiff - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
                             }
 
                             prevConnectedCell = connectedCell;

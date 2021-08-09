@@ -4,7 +4,7 @@
 
 #include "Math.cuh"
 #include "QuantityConverter.cuh"
-#include "OperationScheduler.cuh"
+#include "CellConnectionProcessor.cuh"
 
 class ConstructorFunction
 {
@@ -50,7 +50,7 @@ private:
     __inline__ __device__ static bool
     isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections);
 
-    __inline__ __device__ static float calcFreeAngle(Cell* cell);
+    __inline__ __device__ static float calcFreeAngle(SimulationData& data, Cell* cell);
 
     struct EnergyForNewEntities
     {
@@ -127,8 +127,7 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     auto const& command = constructionData.constrIn;
     auto const& option = constructionData.constrInOption;
 */
-    auto const freeAngle = calcFreeAngle(cell);
-    auto const newCellAngle = QuantityConverter::convertDataToAngle(constructionData.angle) + freeAngle;
+    auto const freeAngle = calcFreeAngle(data, cell);
 
 /*
     bool const separation = Enums::ConstrInOption::FINISH_WITH_SEP == option
@@ -137,7 +136,8 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
 */
 
     auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
-    auto const relPosOfNewCellDelta = Math::unitVectorOfAngle(newCellAngle)
+    auto const relPosOfNewCellDelta =
+        Math::unitVectorOfAngle(freeAngle)
         * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
     float2 posOfNewCell = /*separation
         ? cell->relPos + relPosOfNewCellDelta + Math::unitVectorOfAngle(newCellAngle) * distance : */
@@ -153,7 +153,7 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
-    OperationScheduler::scheduleAddConnections(data, cell, newCell);
+//    OperationScheduler::addConnectionsForConstructor(data, cell, newCell);
         /*
     establishConnection(newCell, cell, adaptMaxConnections);
 
@@ -236,12 +236,13 @@ ConstructorFunction::isConnectable(int numConnections, int maxConnections, Adapt
     return true;
 }
 
-__inline__ __device__ float ConstructorFunction::calcFreeAngle(Cell* cell)
+__inline__ __device__ float ConstructorFunction::calcFreeAngle(SimulationData& data, Cell* cell)
 {
     auto const numConnections = cell->numConnections;
     float angles[MAX_CELL_BONDS];
     for (int i = 0; i < numConnections; ++i) {
-        auto const displacement = cell->connections[i].cell->absPos - cell->absPos;
+        auto displacement = cell->connections[i].cell->absPos - cell->absPos;
+        data.cellMap.mapDisplacementCorrection(displacement);
         auto const angleToAdd = Math::angleOfVector(displacement);
         auto indexToAdd = 0;
         for (; indexToAdd < i; ++indexToAdd) {
