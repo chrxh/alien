@@ -82,7 +82,7 @@ TEST_F(MovementGpuTests, testTwoLineFusion)
 
     auto createRect = [&](auto const& pos, auto const& vel) {
         auto result = _factory->createRect(
-            DescriptionFactory::CreateRectParameters().size({1, 10}).centerPosition(pos).velocity(vel),
+            DescriptionFactory::CreateRectParameters().size({1, 2}).centerPosition(pos).velocity(vel),
             _context->getNumberGenerator());
         return result;
     };
@@ -97,7 +97,7 @@ TEST_F(MovementGpuTests, testTwoLineFusion)
 
     auto beforeAndAfterCells = IntegrationTestHelper::getBeforeAndAfterCells(dataBefore, dataAfter);
     ASSERT_EQ(1, dataAfter.clusters->size());
-    ASSERT_EQ(20, beforeAndAfterCells.size());
+    ASSERT_EQ(4, beforeAndAfterCells.size());
 
     auto firstCellIdOfFirstCluster = dataBefore.clusters->at(0).cells->at(0).id;
     auto secondCellIdOfFirstCluster = dataBefore.clusters->at(0).cells->at(1).id;
@@ -107,12 +107,12 @@ TEST_F(MovementGpuTests, testTwoLineFusion)
         if (cellBefore->id == firstCellIdOfFirstCluster) {
             EXPECT_EQ(2, cellAfter->connections->size());
             {
-                auto connection = *cellAfter->connections->begin();
+                auto connection = *(++cellAfter->connections->begin());
                 EXPECT_EQ(firstCellIdOfSecondCluster, connection.cellId);
                 EXPECT_LE(0.9, connection.distance);
             }
             {
-                auto connection = *(++cellAfter->connections->begin());
+                auto connection = *cellAfter->connections->begin();
                 EXPECT_EQ(secondCellIdOfFirstCluster, connection.cellId);
                 EXPECT_LE(0.9, connection.distance);
                 EXPECT_EQ(90, connection.angleFromPrevious);
@@ -135,7 +135,7 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
     dataBefore.addCluster(createRect(QVector2D(30, 10), QVector2D(0, 0)));
 
     IntegrationTestHelper::updateData(_access, _context, dataBefore);
-    IntegrationTestHelper::runSimulation(3500, _controller);
+    IntegrationTestHelper::runSimulation(1500, _controller);
 
     DataDescription dataAfter =
         IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
@@ -144,7 +144,7 @@ TEST_F(MovementGpuTests, testTwoRectFusion)
     ASSERT_EQ(1, dataAfter.clusters->size());
     ASSERT_EQ(200, beforeAndAfterCells.size());
     for (auto const& [cellBefore, cellAfter] : beforeAndAfterCells) {
-        EXPECT_TRUE((*cellAfter->vel - QVector2D(0.05, 0)).length() < 0.005);
+        EXPECT_TRUE((*cellAfter->vel - QVector2D(0.05, 0)).length() < 0.009);
     }
 }
 

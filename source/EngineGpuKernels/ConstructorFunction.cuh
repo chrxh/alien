@@ -50,7 +50,13 @@ private:
     __inline__ __device__ static bool
     isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections);
 
-    __inline__ __device__ static float calcFreeAngle(SimulationData& data, Cell* cell);
+    struct AnglesForNewConnection
+    {
+        float angleFromPreviousConnection;
+        float angleForCell;
+    };
+    __inline__ __device__ static AnglesForNewConnection
+    calcAnglesForNewConnection(SimulationData& data, Cell* cell, float angleDeviation);
 
     struct EnergyForNewEntities
     {
@@ -127,7 +133,7 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     auto const& command = constructionData.constrIn;
     auto const& option = constructionData.constrInOption;
 */
-    auto const freeAngle = calcFreeAngle(data, cell);
+    auto const anglesForNewConnection = calcAnglesForNewConnection(data, cell, QuantityConverter::convertDataToAngle(constructionData.angle));
 
 /*
     bool const separation = Enums::ConstrInOption::FINISH_WITH_SEP == option
@@ -136,8 +142,7 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
 */
 
     auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
-    auto const relPosOfNewCellDelta =
-        Math::unitVectorOfAngle(freeAngle)
+    auto const relPosOfNewCellDelta = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell)
         * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
     float2 posOfNewCell = /*separation
         ? cell->relPos + relPosOfNewCellDelta + Math::unitVectorOfAngle(newCellAngle) * distance : */
@@ -153,7 +158,8 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
-//    OperationScheduler::addConnectionsForConstructor(data, cell, newCell);
+    CellConnectionProcessor::addConnectionsForConstructor(
+        data, cell, newCell, anglesForNewConnection.angleFromPreviousConnection);
         /*
     establishConnection(newCell, cell, adaptMaxConnections);
 
@@ -236,43 +242,35 @@ ConstructorFunction::isConnectable(int numConnections, int maxConnections, Adapt
     return true;
 }
 
-__inline__ __device__ float ConstructorFunction::calcFreeAngle(SimulationData& data, Cell* cell)
+__inline__ __device__ auto ConstructorFunction::calcAnglesForNewConnection(
+    SimulationData& data,
+    Cell* cell,
+    float angleDeviation)
+    -> AnglesForNewConnection
 {
-    auto const numConnections = cell->numConnections;
-    float angles[MAX_CELL_BONDS];
-    for (int i = 0; i < numConnections; ++i) {
-        auto displacement = cell->connections[i].cell->absPos - cell->absPos;
-        data.cellMap.mapDisplacementCorrection(displacement);
-        auto const angleToAdd = Math::angleOfVector(displacement);
-        auto indexToAdd = 0;
-        for (; indexToAdd < i; ++indexToAdd) {
-            if (angles[indexToAdd] > angleToAdd) {
-                break;
-            }
-        }
-        for (int j = indexToAdd; j < numConnections - 1; ++j) {
-            angles[j + 1] = angles[j];
-        }
-        angles[indexToAdd] = angleToAdd;
+    if (0 == cell->numConnections) {
+        return AnglesForNewConnection{0, 0};
     }
-
-    auto largestAnglesDiff = 0.0f;
-    auto result = 0.0f;
-    for (int i = 0; i < numConnections; ++i) {
-        auto angleDiff = angles[(i + 1) % numConnections] - angles[i];
-        if (angleDiff <= 0.0f) {
-            angleDiff += 360.0f;
+    auto displacement = cell->connections[0].cell->absPos - cell->absPos;
+    data.cellMap.mapDisplacementCorrection(displacement);
+    auto angle = Math::angleOfVector(displacement);
+    int index = 0;
+    float largestAngleDiff = 0;
+    auto numConnections = cell->numConnections;
+    for (int i = 1; i <= numConnections; ++i) {
+        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
+        if (angleDiff > largestAngleDiff) {
+            largestAngleDiff = angleDiff;
+            index = i % numConnections;
         }
-        if (angleDiff > 360.0f) {
-            angleDiff -= 360.0f;
-        }
-        if (angleDiff > largestAnglesDiff) {
-            largestAnglesDiff = angleDiff;
-            result = angles[i] + angleDiff / 2;
-        }
+        angle += angleDiff;
     }
-
-    return result;
+    auto angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2 + angleDeviation;
+    if (angleFromPreviousConnection > 360.0f) {
+        angleFromPreviousConnection -= 360;
+    }
+    angleFromPreviousConnection = max(min(angleFromPreviousConnection, cell->connections[index].angleFromPrevious), 0.0f);
+    return AnglesForNewConnection{angleFromPreviousConnection, angle + angleFromPreviousConnection};
 }
 
 __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, ConstructionData const& data)

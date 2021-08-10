@@ -119,6 +119,7 @@ ClusterDescription& ClusterDescription::addConnection(
             ConnectionDescription newConnection;
             newConnection.cellId = otherCell.id;
             newConnection.distance = (*otherCell.pos - *cell.pos).length();
+            newConnection.angleFromPrevious = 360.0f;
             cell.connections->emplace_back(newConnection);
             return;
         }
