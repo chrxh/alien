@@ -125,13 +125,36 @@ bool ConstructorGpuTests::isConnected(CellDescription const& cell1, CellDescript
     return isConnectedTo(cell1, cell2) && isConnectedTo(cell2, cell1);
 }
 
-TEST_F(ConstructorGpuTests, constructFirstCellOnLeft)
+TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
 {
     auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2));
     genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE((QVector2D(1, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    for (auto const& connection : *result.constructorCell.connections) {
+        if (connection.cellId == result.constructedCell->connections->front().cellId) {
+            EXPECT_TRUE(abs(90 - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
+        }
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithPositiveAngle)
+{
+    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2).angle(90));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_EQ(2, result.constructedCell->metadata->color);
+    EXPECT_TRUE(
+        (QVector2D(0, 1) - (*result.constructedCell->pos - *result.constructorCell.pos)).length()
+        < FLOATINGPOINT_LOW_PRECISION);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    for (auto const& connection : *result.constructorCell.connections) {
+        if (connection.cellId == result.constructedCell->connections->front().cellId) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
+        }
+    }
 }
 
 TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
@@ -143,6 +166,12 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
     EXPECT_TRUE(
         (QVector2D(0, 1) - (*result.constructedCell->pos - *result.constructorCell.pos)).length()
         < FLOATINGPOINT_LOW_PRECISION);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    for (auto const& connection : *result.constructorCell.connections) {
+        if (connection.cellId == result.constructedCell->connections->front().cellId) {
+            EXPECT_TRUE(abs(90 - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
+        }
+    }
 }
 
 /*
