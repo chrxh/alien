@@ -135,28 +135,20 @@ __global__ void processingStep9(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.applyAveragedVelocities(data);
+    cellProcessor.decay(data);
 }
 
 __global__ void processingStep10(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.decay(data);
+    CellConnectionProcessor::processConnectionsOperations(data);
 } 
 
 __global__ void processingStep11(SimulationData data)
 {
-    CellConnectionProcessor::processOtherOperations(data);
-}
-
-__global__ void processingStep12(SimulationData data)
-{
-    CellConnectionProcessor::processDelOperations(data);
-}
-
-__global__ void processingStep13(SimulationData data)
-{
     ParticleProcessor particleProcessor;
     particleProcessor.transformation(data);
+
+    CellConnectionProcessor::processDelCellOperations(data);
 }
 
 /************************************************************************/
@@ -183,8 +175,6 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep9, data);
     KERNEL_CALL(processingStep10, data);
     KERNEL_CALL(processingStep11, data);
-    KERNEL_CALL(processingStep12, data);
-    KERNEL_CALL(processingStep13, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }

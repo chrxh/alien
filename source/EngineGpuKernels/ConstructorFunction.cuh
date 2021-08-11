@@ -28,6 +28,8 @@ private:
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Token* token);
     __inline__ __device__ static void startNewConstruction(
         Token* token, SimulationData& data, ConstructionData const& constructionData);
+    __inline__ __device__ static void
+    continueConstruction(Token* token, SimulationData& data, ConstructionData const& constructionData, Cell* firstConstructedCell);
 
     __inline__ __device__ static void constructNewCell(
         SimulationData& data,
@@ -84,7 +86,7 @@ ConstructorFunction::processing(Token* token, SimulationData& data)
     Cell* firstCellOfConstructionSite = getFirstCellOfConstructionSite(token);
 
     if (firstCellOfConstructionSite) {
-
+        continueConstruction(token, data, constructionData, firstCellOfConstructionSite);
     } else {
         startNewConstruction(token, data, constructionData);
     }
@@ -159,8 +161,12 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
     CellConnectionProcessor::addConnectionsForConstructor(
-        data, cell, newCell, anglesForNewConnection.angleFromPreviousConnection);
-        /*
+        data,
+        cell,
+        newCell,
+        anglesForNewConnection.angleFromPreviousConnection,
+        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+/*
     establishConnection(newCell, cell, adaptMaxConnections);
 
     separateConstructionWhenFinished(newCell, constructionData);
@@ -175,6 +181,43 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
 
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
     token->memory[Enums::Constr::INOUT_ANGLE] = 0;
+}
+
+__inline__ __device__ void ConstructorFunction::continueConstruction(
+    Token* token,
+    SimulationData& data,
+    ConstructionData const& constructionData,
+    Cell* firstConstructedCell)
+{
+    auto cell = token->cell;
+    auto energyForNewEntities = adaptEnergies(token, constructionData);
+    auto posDelta = firstConstructedCell->absPos - cell->absPos;
+    data.cellMap.mapDisplacementCorrection(posDelta);
+    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
+        return;
+    }
+    auto posOfNewCell = cell->absPos + posDelta / 2;
+
+    Cell* newCell;
+    constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
+
+    float angleFromPrevious;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        if (cell->connections[i].cell == firstConstructedCell) {
+            angleFromPrevious = cell->connections[i].angleFromPrevious;
+            break;
+        }
+    }
+    CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
+
+    auto const distance = QuantityConverter::convertDataToDistance(constructionData.distance);
+    CellConnectionProcessor::addConnectionsForConstructor(
+        data, cell, newCell, angleFromPrevious, cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    CellConnectionProcessor::addConnectionsForConstructor(
+        data, newCell, firstConstructedCell, QuantityConverter::convertDataToAngle(constructionData.angle), distance);
+
+    token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
 }
 
 __inline__ __device__ void ConstructorFunction::constructNewCell(
@@ -255,13 +298,15 @@ __inline__ __device__ auto ConstructorFunction::calcAnglesForNewConnection(
     data.cellMap.mapDisplacementCorrection(displacement);
     auto angle = Math::angleOfVector(displacement);
     int index = 0;
-    float largestAngleDiff = 0;
+    float largestAngleGap = 0;
+    float angleOfLargestAngleGap = 0;
     auto numConnections = cell->numConnections;
     for (int i = 1; i <= numConnections; ++i) {
         auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
-        if (angleDiff > largestAngleDiff) {
-            largestAngleDiff = angleDiff;
+        if (angleDiff > largestAngleGap) {
+            largestAngleGap = angleDiff;
             index = i % numConnections;
+            angleOfLargestAngleGap = angle;
         }
         angle += angleDiff;
     }
@@ -269,8 +314,10 @@ __inline__ __device__ auto ConstructorFunction::calcAnglesForNewConnection(
     if (angleFromPreviousConnection > 360.0f) {
         angleFromPreviousConnection -= 360;
     }
+
     angleFromPreviousConnection = max(min(angleFromPreviousConnection, cell->connections[index].angleFromPrevious), 0.0f);
-    return AnglesForNewConnection{angleFromPreviousConnection, angle + angleFromPreviousConnection};
+
+    return AnglesForNewConnection{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
 __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, ConstructionData const& data)

@@ -42,9 +42,10 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
         if (cell->tryLock()) {
             cellsForEnergyAveraging[numCellForEnergyAveraging++] = cell;
         }
+        auto tokenBranchNumber = token->memory[Enums::Branching::TOKEN_BRANCH_NUMBER];
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
-            if (((cell->branchNumber + 1 - connectedCell->branchNumber)
+            if (((tokenBranchNumber + 1 - connectedCell->branchNumber)
                  % cudaSimulationParameters.cellMaxTokenBranchNumber)
                 != 0) {
                 continue;
@@ -57,6 +58,8 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
             if (tokenIndex >= cudaSimulationParameters.cellMaxToken) {
                 continue;
             }
+
+            token->memory[Enums::Branching::TOKEN_BRANCH_NUMBER] = connectedCell->branchNumber;
             if (0 == numMovedTokens) {
                 token->sourceCell = token->cell; 
                 token->cell = connectedCell;
