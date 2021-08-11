@@ -12,11 +12,16 @@ public:
     __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
     __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex);
 
-    __inline__ __device__ static void processDelOperations(SimulationData& data);
-    __inline__ __device__ static void processOtherOperations(SimulationData& data);
+    __inline__ __device__ static void processConnectionsOperations(SimulationData& data);
+    __inline__ __device__ static void processDelCellOperations(SimulationData& data);
 
-    __inline__ __device__ static void
-    addConnectionsForConstructor(SimulationData& data, Cell* cell1, Cell* cell2, float desiredAngleOnCell1);
+    __inline__ __device__ static void addConnectionsForConstructor(
+        SimulationData& data,
+        Cell* cell1,
+        Cell* cell2,
+        float desiredAngleOnCell1,
+        float desiredDistance);
+    __inline__ __device__ static void delConnectionsForConstructor(Cell* cell1, Cell* cell2);
 
 private:
     __inline__ __device__ static void addConnections(SimulationData& data, Cell* cell1, Cell* cell2);
@@ -25,6 +30,7 @@ private:
         Cell* cell1,
         Cell* cell2,
         float2 const& posDelta,
+        float desiredDistance,
         float desiredAngleOnCell1 = 0);
 
     __inline__ __device__ static void delConnections(Cell* cell);
@@ -78,7 +84,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationDa
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::processDelOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processConnectionsOperations(SimulationData& data)
 {
     auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -87,20 +93,21 @@ __inline__ __device__ void CellConnectionProcessor::processDelOperations(Simulat
         if (Operation::Type::DelConnections == operation.type) {
             delConnections(operation.data.delConnectionsOperation.cell);
         }
-        if (Operation::Type::DelCell == operation.type) {
-            delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
+        if (Operation::Type::AddConnections == operation.type) {
+            addConnections(
+                data, operation.data.addConnectionOperation.cell, operation.data.addConnectionOperation.otherCell);
         }
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::processOtherOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processDelCellOperations(SimulationData& data)
 {
     auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.operations[index];
-        if (Operation::Type::AddConnections == operation.type) {
-            addConnections(data, operation.data.addConnectionOperation.cell, operation.data.addConnectionOperation.otherCell);
+        if (Operation::Type::DelCell == operation.type) {
+            delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
         }
     }
 }
@@ -109,12 +116,20 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionsForConstructor
     SimulationData& data,
     Cell* cell1,
     Cell* cell2,
-    float desiredAngleOnCell1)
+    float desiredAngleOnCell1,
+    float desiredDistance)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
-    addConnection(data, cell1, cell2, posDelta, desiredAngleOnCell1);
-    addConnection(data, cell2, cell1, posDelta * (-1));
+    addConnection(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1);
+    addConnection(data, cell2, cell1, posDelta * (-1), desiredDistance);
+}
+
+__inline__ __device__ void
+CellConnectionProcessor::delConnectionsForConstructor(Cell* cell1, Cell* cell2)
+{
+    delConnection(cell1, cell2);
+    delConnection(cell2, cell1);
 }
 
 __inline__ __device__ void CellConnectionProcessor::addConnections(SimulationData& data, Cell* cell1, Cell* cell2)
@@ -132,11 +147,12 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(SimulationDat
             }
         }
 
-        if (!alreadyConnected) {
+        if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
+            && cell2->numConnections < cell2->maxConnections) {
             auto posDelta = cell2->absPos - cell1->absPos;
             data.cellMap.mapDisplacementCorrection(posDelta);
-            addConnection(data, cell1, cell2, posDelta);
-            addConnection(data, cell2, cell1, posDelta * (-1));
+            addConnection(data, cell1, cell2, posDelta, Math::length(posDelta));
+            addConnection(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
         }
 
         __threadfence();
@@ -149,6 +165,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
     Cell* cell1,
     Cell* cell2,
     float2 const& posDelta,
+    float desiredDistance,
     float desiredAngleOnCell1)
 {
     auto newAngle = Math::angleOfVector(posDelta);
@@ -156,14 +173,14 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
     if (0 == cell1->numConnections) {
         cell1->numConnections++;
         cell1->connections[0].cell = cell2;
-        cell1->connections[0].distance = Math::length(posDelta);
+        cell1->connections[0].distance = desiredDistance;
         cell1->connections[0].angleFromPrevious = 360.0f;
         return;
     }
     if (1 == cell1->numConnections) {
         cell1->numConnections++;
         cell1->connections[1].cell = cell2;
-        cell1->connections[1].distance = Math::length(posDelta);
+        cell1->connections[1].distance = desiredDistance;
 
         auto connectedCellDelta = cell1->connections[0].cell->absPos - cell1->absPos;
         data.cellMap.mapDisplacementCorrection(connectedCellDelta);
@@ -204,7 +221,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
 
     CellConnection newConnection;
     newConnection.cell = cell2;
-    newConnection.distance = Math::length(posDelta);
+    newConnection.distance = desiredDistance;
 
     auto angleDiff1 = newAngle - angle;
     if (angleDiff1 < 0) {
