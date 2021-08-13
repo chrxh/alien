@@ -165,8 +165,9 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
         cell,
         newCell,
         anglesForNewConnection.angleFromPreviousConnection,
+        0,
         cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
-/*
+    /*
     establishConnection(newCell, cell, adaptMaxConnections);
 
     separateConstructionWhenFinished(newCell, constructionData);
@@ -202,20 +203,39 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
-    float angleFromPrevious;
+    float angleFromPreviousForCell;
     for (int i = 0; i < cell->numConnections; ++i) {
         if (cell->connections[i].cell == firstConstructedCell) {
-            angleFromPrevious = cell->connections[i].angleFromPrevious;
+            angleFromPreviousForCell = cell->connections[i].angleFromPrevious;
+            break;
+        }
+    }
+
+    float angleFromPreviousForFirstConstructedCell;
+    for (int i = 0; i < firstConstructedCell->numConnections; ++i) {
+        if (firstConstructedCell->connections[i].cell == cell) {
+            angleFromPreviousForFirstConstructedCell = firstConstructedCell->connections[i].angleFromPrevious;
             break;
         }
     }
     CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
 
-    auto const distance = QuantityConverter::convertDataToDistance(constructionData.distance);
     CellConnectionProcessor::addConnectionsForConstructor(
-        data, cell, newCell, angleFromPrevious, cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+        data,
+        cell,
+        newCell,
+        angleFromPreviousForCell,
+        0,
+        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    auto distance = QuantityConverter::convertDataToDistance(constructionData.distance);
+    auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
     CellConnectionProcessor::addConnectionsForConstructor(
-        data, newCell, firstConstructedCell, QuantityConverter::convertDataToAngle(constructionData.angle), distance);
+        data,
+        newCell,
+        firstConstructedCell,
+        angleFromPreviousForNewCell,
+        angleFromPreviousForFirstConstructedCell,
+        distance);
 
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
 }
