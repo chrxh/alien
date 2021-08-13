@@ -16,6 +16,7 @@ public:
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
     __inline__ __device__ static void angleCorrection(float& angle);
     __inline__ __device__ static void angleCorrection(int& angle);
+    __inline__ __device__ static void rotateQuarterClockwise(float2& v);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);   //0 DEG corresponds to (0,-1)
     __inline__ __device__ static float2 unitVectorOfAngle(float angle);
@@ -97,6 +98,13 @@ __inline__ __device__ float Math::angleOfVector(float2 const & v)
     else {
         return angleSin + 270.0f;
     }
+}
+
+__inline__ __device__ void Math::rotateQuarterClockwise(float2& v)
+{
+    float temp = v.x;
+    v.x = -v.y;
+    v.y = temp;
 }
 
 __device__ __inline__ void Math::rotateQuarterCounterClockwise(float2 &v)

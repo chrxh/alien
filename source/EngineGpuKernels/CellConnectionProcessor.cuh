@@ -20,6 +20,7 @@ public:
         Cell* cell1,
         Cell* cell2,
         float desiredAngleOnCell1,
+        float desiredAngleOnCell2,
         float desiredDistance);
     __inline__ __device__ static void delConnectionsForConstructor(Cell* cell1, Cell* cell2);
 
@@ -117,12 +118,13 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionsForConstructor
     Cell* cell1,
     Cell* cell2,
     float desiredAngleOnCell1,
+    float desiredAngleOnCell2,
     float desiredDistance)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
     addConnection(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1);
-    addConnection(data, cell2, cell1, posDelta * (-1), desiredDistance);
+    addConnection(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2);
 }
 
 __inline__ __device__ void
@@ -186,6 +188,9 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
         data.cellMap.mapDisplacementCorrection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
         auto angleDiff = newAngle - prevAngle;
+        if (0 != desiredAngleOnCell1) {
+            angleDiff = desiredAngleOnCell1;
+        }
         if (angleDiff >= 0) {
             cell1->connections[1].angleFromPrevious = angleDiff;
             cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
@@ -275,7 +280,7 @@ __inline__ __device__ void CellConnectionProcessor::delConnection(Cell* cell1, C
 {
     for (int i = 0; i < cell1->numConnections; ++i) {
         if (cell1->connections[i].cell == cell2) {
-            float angleToAdd = i > 0 ? cell1->connections[i].angleFromPrevious : 0;
+            float angleToAdd = cell1->connections[i].angleFromPrevious;
             for (int j = i; j < cell1->numConnections - 1; ++j) {
                 cell1->connections[j] = cell1->connections[j + 1];
             }

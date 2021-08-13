@@ -182,28 +182,31 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
             auto angle = Math::angleOfVector(displacement);
             auto prevAngle = Math::angleOfVector(prevDisplacement);
             auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
-            if (actualAngleFromPrevious > 180) {
-                actualAngleFromPrevious = abs(actualAngleFromPrevious - 360.0f);
-            }
             auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
-            if (referenceAngleFromPrevious > 180) {
-                referenceAngleFromPrevious = abs(referenceAngleFromPrevious - 360.0f);
-            }
-            auto angleDeviation = actualAngleFromPrevious - referenceAngleFromPrevious;
-            auto correctionMovementForLowAngle = Math::normalized((displacement + prevDisplacement) / 2);
 
-            auto forceInc = correctionMovementForLowAngle * angleDeviation / -800;
-            force = force + forceInc;
-            atomicAdd(&connectingCell->temp1.x, -forceInc.x / 2);
-            atomicAdd(&connectingCell->temp1.y, -forceInc.y / 2);
+            auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000;
+
+            auto force1 = Math::normalized(displacement) * angleDeviation;
+            Math::rotateQuarterClockwise(force1);
+
+            auto force2 = Math::normalized(prevDisplacement) * angleDeviation;
+            Math::rotateQuarterCounterClockwise(force2);
+
+            if (referenceAngleFromPrevious < actualAngleFromPrevious) {
+                force1 = force1 * (-1);
+                force2 = force2 * (-1);
+            }
+            atomicAdd(&connectingCell->temp1.x, force1.x);
+            atomicAdd(&connectingCell->temp1.y, force1.y);
             if (i > 0) {
-                atomicAdd(&cell->connections[i - 1].cell->temp1.x, -forceInc.x / 2);
-                atomicAdd(&cell->connections[i - 1].cell->temp1.y, -forceInc.y / 2);
+                atomicAdd(&cell->connections[i - 1].cell->temp1.x, force2.x);
+                atomicAdd(&cell->connections[i - 1].cell->temp1.y, force2.y);
             } else {
                 auto lastIndex = cell->numConnections - 1;
-                atomicAdd(&cell->connections[lastIndex].cell->temp1.x, -forceInc.x / 2);
-                atomicAdd(&cell->connections[lastIndex].cell->temp1.y, -forceInc.y / 2);
+                atomicAdd(&cell->connections[lastIndex].cell->temp1.x, force2.x);
+                atomicAdd(&cell->connections[lastIndex].cell->temp1.y, force2.y);
             }
+            force = force - (force1 + force2);
 
             prevDisplacement = displacement;
         }
@@ -321,9 +324,6 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     radiationEnergy = cellEnergy - 1;
                 }
                 cell->energy -= radiationEnergy;
-                if (cell->energy < 0) {
-                    printf("ohoh\n");
-                }
 
                 EntityFactory factory;
                 factory.init(&data);
