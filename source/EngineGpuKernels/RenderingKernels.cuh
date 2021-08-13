@@ -132,7 +132,7 @@ __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
         toFloat((particleColor >> 8) & 0xff) / 256.0f * factor,
         toFloat(particleColor & 0xff) / 256.0f * factor};
 */
-    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 150.0f;
+    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 200.0f;
     if (!selected) {
         intensity *= 0.75f;
     }

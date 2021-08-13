@@ -115,13 +115,22 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 
             if (!alreadyConnected) {
                 auto velDelta = cell->vel - otherCell->vel;
-
-                auto force = Math::normalized(posDelta)
-                    * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
-                atomicAdd(&cell->temp1.x, force.x);
-                atomicAdd(&cell->temp1.y, force.y);
-
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+
+                if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
+                    auto force = Math::normalized(posDelta)
+                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
+                    atomicAdd(&cell->temp1.x, force.x);
+                    atomicAdd(&cell->temp1.y, force.y);
+                } else {
+                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2*Math::lengthSquared(posDelta));
+                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2*Math::lengthSquared(posDelta));
+                    atomicAdd(&cell->temp1.x, force1.x);
+                    atomicAdd(&cell->temp1.y, force1.y);
+                    atomicAdd(&otherCell->temp1.x, force2.x);
+                    atomicAdd(&otherCell->temp1.y, force2.y);
+                }
+
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                     && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
                     CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
@@ -179,34 +188,36 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation / 2;
 
-            auto angle = Math::angleOfVector(displacement);
-            auto prevAngle = Math::angleOfVector(prevDisplacement);
-            auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
-            auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
+            if (cell->numConnections > 1) {
+                auto angle = Math::angleOfVector(displacement);
+                auto prevAngle = Math::angleOfVector(prevDisplacement);
+                auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
+                auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-            auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000;
+                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000;
 
-            auto force1 = Math::normalized(displacement) * angleDeviation;
-            Math::rotateQuarterClockwise(force1);
+                auto force1 = Math::normalized(displacement) * angleDeviation;
+                Math::rotateQuarterClockwise(force1);
 
-            auto force2 = Math::normalized(prevDisplacement) * angleDeviation;
-            Math::rotateQuarterCounterClockwise(force2);
+                auto force2 = Math::normalized(prevDisplacement) * angleDeviation;
+                Math::rotateQuarterCounterClockwise(force2);
 
-            if (referenceAngleFromPrevious < actualAngleFromPrevious) {
-                force1 = force1 * (-1);
-                force2 = force2 * (-1);
+                if (referenceAngleFromPrevious < actualAngleFromPrevious) {
+                    force1 = force1 * (-1);
+                    force2 = force2 * (-1);
+                }
+                atomicAdd(&connectingCell->temp1.x, force1.x);
+                atomicAdd(&connectingCell->temp1.y, force1.y);
+                if (i > 0) {
+                    atomicAdd(&cell->connections[i - 1].cell->temp1.x, force2.x);
+                    atomicAdd(&cell->connections[i - 1].cell->temp1.y, force2.y);
+                } else {
+                    auto lastIndex = cell->numConnections - 1;
+                    atomicAdd(&cell->connections[lastIndex].cell->temp1.x, force2.x);
+                    atomicAdd(&cell->connections[lastIndex].cell->temp1.y, force2.y);
+                }
+                force = force - (force1 + force2);
             }
-            atomicAdd(&connectingCell->temp1.x, force1.x);
-            atomicAdd(&connectingCell->temp1.y, force1.y);
-            if (i > 0) {
-                atomicAdd(&cell->connections[i - 1].cell->temp1.x, force2.x);
-                atomicAdd(&cell->connections[i - 1].cell->temp1.y, force2.y);
-            } else {
-                auto lastIndex = cell->numConnections - 1;
-                atomicAdd(&cell->connections[lastIndex].cell->temp1.x, force2.x);
-                atomicAdd(&cell->connections[lastIndex].cell->temp1.y, force2.y);
-            }
-            force = force - (force1 + force2);
 
             prevDisplacement = displacement;
         }

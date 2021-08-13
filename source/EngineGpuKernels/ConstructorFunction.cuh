@@ -194,11 +194,15 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto energyForNewEntities = adaptEnergies(token, constructionData);
     auto posDelta = firstConstructedCell->absPos - cell->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
+
+    auto distance = QuantityConverter::convertDataToDistance(constructionData.distance);
+    posDelta =
+        Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - distance);
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance) {
         token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
         return;
     }
-    auto posOfNewCell = cell->absPos + posDelta / 2;
+    auto posOfNewCell = cell->absPos + posDelta;
 
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
@@ -227,7 +231,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         angleFromPreviousForCell,
         0,
         cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
-    auto distance = QuantityConverter::convertDataToDistance(constructionData.distance);
     auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
     CellConnectionProcessor::addConnectionsForConstructor(
         data,
