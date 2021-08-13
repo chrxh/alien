@@ -14,7 +14,7 @@ public:
     __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void movement(SimulationData& data);
     __inline__ __device__ void collision(SimulationData& data);
-    __inline__ __device__ void transformation(SimulationData& data);
+    __inline__ __device__ void transformation(SimulationData& data, int numParticlePointers);
 
     /*
 	__inline__ __device__ void init_system(SimulationData& data);
@@ -196,10 +196,9 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
     }
 }
 
-__inline__ __device__ void ParticleProcessor::transformation(SimulationData& data)
+__inline__ __device__ void ParticleProcessor::transformation(SimulationData& data, int numParticlePointers)
 {
-    auto partition = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcPartition(numParticlePointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.entities.particlePointers.at(particleIndex)) {

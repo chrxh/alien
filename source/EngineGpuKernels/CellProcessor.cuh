@@ -194,7 +194,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
                 auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                 auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000;
+                auto angleDeviation = (abs(referenceAngleFromPrevious - actualAngleFromPrevious) + 15) / 2000;
 
                 auto force1 = Math::normalized(displacement) * angleDeviation;
                 Math::rotateQuarterClockwise(force1);
