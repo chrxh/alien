@@ -167,6 +167,10 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
         anglesForNewConnection.angleFromPreviousConnection,
         0,
         cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    if (AdaptMaxConnections::Yes == adaptMaxConnections) {
+        newCell->maxConnections = 1;
+    }
+
     /*
     establishConnection(newCell, cell, adaptMaxConnections);
 
@@ -198,10 +202,17 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto distance = QuantityConverter::convertDataToDistance(constructionData.distance);
     posDelta =
         Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - distance);
+
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance) {
         token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
         return;
     }
+    auto adaptMaxConnections = isAdaptMaxConnections(constructionData);
+    if (AdaptMaxConnections::No == adaptMaxConnections && 1 == constructionData.maxConnections) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        return;
+    }
+
     auto posOfNewCell = cell->absPos + posDelta;
 
     Cell* newCell;
@@ -223,7 +234,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         }
     }
     CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
-
     CellConnectionProcessor::addConnectionsForConstructor(
         data,
         cell,
@@ -240,6 +250,55 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         angleFromPreviousForFirstConstructedCell,
         distance);
 
+    if (AdaptMaxConnections::Yes == adaptMaxConnections) {
+        newCell->maxConnections = 2;
+    }
+
+    Math::normalize(posDelta);
+    Math::rotateQuarterClockwise(posDelta);
+    if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
+        Cell* otherCells[18];
+        int numOtherCells;
+        data.cellMap.get(
+            otherCells,
+            numOtherCells,
+            posOfNewCell,
+            cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+        for (int i = 0; i < numOtherCells; ++i) {
+            Cell* otherCell = otherCells[i];
+            if (otherCell == firstConstructedCell) {
+                continue;
+            }
+            if (otherCell == cell) {
+                continue;
+            }
+
+            bool connected = false;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (connectedCell == otherCell) {
+                    connected = true;
+                    break;
+                }
+            }
+            if (connected) {
+                continue;
+            }
+
+            auto otherPosDelta = otherCell->absPos - newCell->absPos;
+            data.cellMap.mapDisplacementCorrection(otherPosDelta);
+            Math::normalize(otherPosDelta);
+            if (Math::dot(posDelta, otherPosDelta) < 0.1) {
+                continue;
+            }
+            if (isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)
+                && otherCell->tryLock()) {
+                CellConnectionProcessor::addConnectionsForConstructor(
+                    data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
+                otherCell->releaseLock();
+            }
+        }
+    }
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
 }
 

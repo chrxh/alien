@@ -24,7 +24,7 @@
             "constructor": {
                 "offspring": {
                     "cell energy": "100",
-                    "cell distance": "1",
+                    "cell distance": "1.6",
                     "token energy": "60",
                     "token suppress memory copy": "false"
                 },
