@@ -122,9 +122,10 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
-                } else {
+                }
+                else {
                     auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2*Math::lengthSquared(posDelta));
-                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2*Math::lengthSquared(posDelta));
+                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
                     atomicAdd(&cell->temp1.x, force1.x);
                     atomicAdd(&cell->temp1.y, force1.y);
                     atomicAdd(&otherCell->temp1.x, force2.x);

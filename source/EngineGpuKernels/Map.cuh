@@ -3,6 +3,7 @@
 #include "Base.cuh"
 #include "Cell.cuh"
 #include "Particle.cuh"
+#include "Math.cuh"
 #include "cuda_runtime_api.h"
 
 class MapInfo
@@ -151,6 +152,32 @@ public:
                 if (cells[numCells] = _map[mapEntry]) {
                     ++numCells;
                     if (cells[numCells] = _map[mapEntry + 1]) {
+                        ++numCells;
+                    }
+                }
+            }
+        }
+    }
+
+    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos, float radius) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        numCells = 0;
+        int radiusInt = ceilf(radius);
+        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                mapPosCorrection(scanPos);
+
+                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
+                auto cell1 = _map[mapEntry];
+                if (cell1 && Math::length(cell1->absPos - pos) <= radius) {
+                    cells[numCells] = cell1;
+                    ++numCells;
+
+                    auto cell2 = _map[mapEntry + 1];
+                    if (cell2 && Math::length(cell2->absPos - pos) <= radius) {
+                        cells[numCells] = cell2;
                         ++numCells;
                     }
                 }
