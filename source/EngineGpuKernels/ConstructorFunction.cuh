@@ -273,6 +273,18 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
                 continue;
             }
 
+            bool connected = false;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (connectedCell == otherCell) {
+                    connected = true;
+                    break;
+                }
+            }
+            if (connected) {
+                continue;
+            }
+
             auto otherPosDelta = otherCell->absPos - newCell->absPos;
             data.cellMap.mapDisplacementCorrection(otherPosDelta);
             Math::normalize(otherPosDelta);
