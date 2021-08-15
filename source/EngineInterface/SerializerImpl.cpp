@@ -203,7 +203,6 @@ namespace boost {
                         cellIndexById.insert_or_assign(cell.id, index);
                     }
                     for (auto& cell : *cluster.cells) {
-                        
                         cell.vel = Physics::tangentialVelocity(
                             *cell.pos - *cluster.pos, Physics::Velocities{*cluster.vel, *cluster.angularVel});
                         if (cell.connections && !cell.connections->empty()) {
