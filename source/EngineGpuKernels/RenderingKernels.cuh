@@ -76,7 +76,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
     }
     }
 
-    float factor = min(400.0f, cell->energy) / 250.0f;
+    float factor = min(400.0f, cell->energy) / 220.0f;
     if (!selected) {
         factor *= 0.75f;
     }
@@ -180,7 +180,7 @@ drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float
 __device__ __inline__ void
 drawCircle(unsigned int* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
 {
-    if (radius > 1.0 - FP_PRECISION) {
+    if (radius > 1.5 - FP_PRECISION) {
         auto radiusSquared = radius * radius;
         for (float x = -radius; x <= radius; x += 1.0f) {
             for (float y = -radius; y <= radius; y += 1.0f) {
