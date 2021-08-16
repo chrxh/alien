@@ -196,6 +196,11 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
 {
     auto cell = token->cell;
     auto energyForNewEntities = adaptEnergies(token, constructionData);
+    if (!energyForNewEntities.energyAvailable) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        return;
+    }
+
     auto posDelta = firstConstructedCell->absPos - cell->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
 
