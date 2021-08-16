@@ -42,7 +42,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
         if (cell->tryLock()) {
             cellsForEnergyAveraging[numCellForEnergyAveraging++] = cell;
         }
-        auto tokenBranchNumber = token->memory[Enums::Branching::TOKEN_BRANCH_NUMBER];
+        auto tokenBranchNumber = token->getTokenBranchNumber();
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
             if (((tokenBranchNumber + 1 - connectedCell->branchNumber)

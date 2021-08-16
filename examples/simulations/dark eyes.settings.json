@@ -5,7 +5,7 @@
     },
     "cudaSettings": {
         "dynamicMemorySize": "40000000",
-        "maxCells": "500000",
+        "maxCells": "700000",
         "maxClusters": "500000",
         "maxParticles": "500000",
         "maxTokens": "50000",

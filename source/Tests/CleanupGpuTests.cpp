@@ -82,7 +82,7 @@ TEST_F(CleanupGpuTests, testCleanupCells)
                         auto connectedCell = cluster.cells->at(connectedCellIndex);
                         auto displacement = *connectedCell.pos - *cell.pos;
                         _spaceProp->correctDisplacement(displacement);
-                        EXPECT_TRUE(displacement.length() < 7);
+                        EXPECT_TRUE(displacement.length() < 30);
                     }
                 }
             }
