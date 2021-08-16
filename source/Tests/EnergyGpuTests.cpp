@@ -27,30 +27,6 @@ public:
 
     virtual ~EnergyGpuTests() = default;
 
-protected:
-    double getEnergy(DataDescription const& data) const
-    {
-        double result = 0;
-        if (data.clusters) {
-            for (auto const& cluster : *data.clusters) {
-                for (auto const& cell : *cluster.cells) {
-                    result += *cell.energy;
-                    if (cell.tokens) {
-                        for (auto const& token : *cell.tokens) {
-                            result += *token.energy;
-                        }
-                    }
-                }
-            }
-        }
-        if (data.particles) {
-            for (auto const& particle : *data.particles) {
-                result += *particle.energy;
-            }
-        }
-        return result;
-    }
-
 private:
     EngineGpuData getModelDataForCleanup()
     {
@@ -105,5 +81,5 @@ TEST_F(EnergyGpuTests, testEnergyConservation)
     auto energyBefore = getEnergy(dataBefore);
     auto energyAfter = getEnergy(dataAfter);
 
-    EXPECT_TRUE(abs(energyAfter - energyBefore) < 1);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }

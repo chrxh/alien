@@ -16,6 +16,30 @@ public:
 
 protected:
     TokenDescription createSimpleToken() const;
+
+    double getEnergy(DataDescription const& data) const
+    {
+        double result = 0;
+        if (data.clusters) {
+            for (auto const& cluster : *data.clusters) {
+                for (auto const& cell : *cluster.cells) {
+                    result += *cell.energy;
+                    if (cell.tokens) {
+                        for (auto const& token : *cell.tokens) {
+                            result += *token.energy;
+                        }
+                    }
+                }
+            }
+        }
+        if (data.particles) {
+            for (auto const& particle : *data.particles) {
+                result += *particle.energy;
+            }
+        }
+        return result;
+    }
+
     
 /*
     enum class Boundary {Sticky, NonSticky};

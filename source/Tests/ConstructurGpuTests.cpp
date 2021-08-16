@@ -37,6 +37,9 @@ protected:
     {
         CellDescription constructorCell;
         boost::optional<CellDescription> constructedCell;
+
+        DataDescription dataBefore;
+        DataDescription dataAfter;
     };
     TestResult testConstructor(TestParameters const& parameters) const;
 
@@ -101,6 +104,8 @@ auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) cons
             result.constructorCell = *cellAfter;
         }
     }
+    result.dataBefore = dataBefore;
+    result.dataAfter = dataAfter;
     return result;
 }
 
@@ -109,6 +114,10 @@ void ConstructorGpuTests::genericCheck(TestResult const& testResult) const
     if (testResult.constructedCell) {
         EXPECT_TRUE(isConnected(*testResult.constructedCell, testResult.constructorCell));
     }
+    auto energyBefore = getEnergy(testResult.dataBefore);
+    auto energyAfter = getEnergy(testResult.dataAfter);
+
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 bool ConstructorGpuTests::isConnected(CellDescription const& cell1, CellDescription const& cell2) const
@@ -131,7 +140,7 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
     genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
-    EXPECT_TRUE((QVector2D(1, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
+    EXPECT_TRUE((QVector2D(_parameters.cellFunctionConstructorOffspringCellDistance, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
     for (auto const& connection : *result.constructorCell.connections) {
         if (connection.cellId == result.constructedCell->connections->front().cellId) {
@@ -147,7 +156,9 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithPositiveAngle)
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE(
-        (QVector2D(0, 1) - (*result.constructedCell->pos - *result.constructorCell.pos)).length()
+        (QVector2D(0, _parameters.cellFunctionConstructorOffspringCellDistance)
+         - (*result.constructedCell->pos - *result.constructorCell.pos))
+            .length()
         < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
     for (auto const& connection : *result.constructorCell.connections) {
@@ -164,7 +175,9 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE(
-        (QVector2D(0, 1) - (*result.constructedCell->pos - *result.constructorCell.pos)).length()
+        (QVector2D(0, _parameters.cellFunctionConstructorOffspringCellDistance)
+         - (*result.constructedCell->pos - *result.constructorCell.pos))
+            .length()
         < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
     for (auto const& connection : *result.constructorCell.connections) {
