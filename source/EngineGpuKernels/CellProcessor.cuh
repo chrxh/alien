@@ -20,7 +20,7 @@ public:
     __inline__ __device__ void applyAndInitForces(SimulationData& data);    //prerequisite: tag from collisions
     __inline__ __device__ void calcForces(SimulationData& data, int numCellPointers);
     __inline__ __device__ void calcPositions(SimulationData& data);
-    __inline__ __device__ void calcVelocities(SimulationData& data);
+    __inline__ __device__ void calcVelocities(SimulationData& data, int numCellPointers);
     __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
     __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
     __inline__ __device__ void radiation(SimulationData& data);
@@ -259,12 +259,12 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data, int numCellPointers)
 {
     _data = &data;
     auto& cells = data.entities.cellPointers;
     auto const partition =
-        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(numCellPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -283,7 +283,6 @@ __inline__ __device__ void CellProcessor::calcAveragedVelocities(SimulationData&
     constexpr float preserveVelocityFactor = 0.8f;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
         auto averagedVel = cell->vel * (1.0f - preserveVelocityFactor);
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
