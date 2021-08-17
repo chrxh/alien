@@ -23,6 +23,7 @@ protected:
     struct TestParameters
     {
         MEMBER_DECLARATION(TestParameters, float, clusterAngle, 0);
+
         MEMBER_DECLARATION(TestParameters, Enums::ConstrIn::Type, command, Enums::ConstrIn::DO_NOTHING);
         MEMBER_DECLARATION(TestParameters, Enums::ConstrInOption::Type, option, Enums::ConstrInOption::STANDARD);
         MEMBER_DECLARATION(TestParameters, int, metadata, 0);
@@ -37,11 +38,13 @@ protected:
     {
         CellDescription constructorCell;
         boost::optional<CellDescription> constructedCell;
+        boost::optional<CellDescription> constructionSiteCell;
 
         DataDescription dataBefore;
         DataDescription dataAfter;
     };
-    TestResult testConstructor(TestParameters const& parameters) const;
+    TestResult testStartConstruction(TestParameters const& parameters) const;
+    TestResult testContinueConstruction(TestParameters const& parameters) const;
 
     void genericCheck(TestResult const& testResult) const;
     bool isConnected(CellDescription const& cell1, CellDescription const& cell2) const;
@@ -54,7 +57,7 @@ void ConstructorGpuTests::SetUp()
     _context->setSimulationParameters(_parameters);
 }
 
-auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) const -> TestResult
+auto ConstructorGpuTests::testStartConstruction(TestParameters const& parameters) const -> TestResult
 {
     auto basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 
@@ -109,6 +112,68 @@ auto ConstructorGpuTests::testConstructor(TestParameters const& parameters) cons
     return result;
 }
 
+auto ConstructorGpuTests::testContinueConstruction(TestParameters const& parameters) const -> TestResult
+{
+    auto basicFacade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
+
+    DataDescription dataBefore;
+    auto cluster = _factory->createRect(
+        DescriptionFactory::CreateRectParameters().size({3, 1}).centerPosition(QVector2D(10, 10)),
+        _context->getNumberGenerator());
+    for (auto& cell : *cluster.cells) {
+        cell.pos =
+            Physics::rotateClockwise(*cell.pos - QVector2D(10, 10), parameters._clusterAngle) + QVector2D(10, 10);
+    }
+    auto& firstCell = cluster.cells->at(0);
+    firstCell.tokenBranchNumber = 0;
+    auto& secondCell = cluster.cells->at(1);
+    secondCell.tokenBranchNumber = 1;
+    secondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+    auto& thirdCell = cluster.cells->at(2);
+    thirdCell.tokenBlocked = true;
+
+
+    auto token = createSimpleToken();
+    auto& tokenData = *token.data;
+    tokenData[Enums::Constr::INPUT] = parameters._command;
+    tokenData[Enums::Constr::IN_OPTION] = Enums::ConstrInOption::STANDARD;
+    tokenData[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(parameters._angle);
+    tokenData[Enums::Constr::IN_DIST] = QuantityConverter::convertDistanceToData(parameters._distance);
+    tokenData[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = parameters._maxConnection;
+    tokenData[Enums::Constr::IN_CELL_BRANCH_NO] = parameters._cellBranchNumber;
+    tokenData[Enums::Constr::IN_CELL_FUNCTION_DATA] = parameters._staticData.size();
+    tokenData[Enums::Constr::IN_CELL_METADATA] = parameters._metadata;
+    tokenData.replace(Enums::Constr::IN_CELL_FUNCTION_DATA + 1, parameters._staticData.size(), parameters._staticData);
+    int const mutableDataIndex = Enums::Constr::IN_CELL_FUNCTION_DATA + 1 + parameters._staticData.size();
+    tokenData[mutableDataIndex] = parameters._mutableData.size();
+    tokenData.replace(mutableDataIndex + 1, parameters._mutableData.size(), parameters._mutableData);
+    token.energy = 2 * _parameters.tokenMinEnergy + 2 * _parameters.cellFunctionConstructorOffspringCellEnergy;
+
+    firstCell.addToken(token);
+    dataBefore.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
+    IntegrationTestHelper::runSimulation(1, _controller);
+    DataDescription dataAfter = getDataFromSimulation();
+
+    TestResult result;
+    auto cellAfterByBefore = IntegrationTestHelper::getBeforeAndAfterCells(dataBefore, dataAfter);
+    for (auto const& [cellBefore, cellAfter] : cellAfterByBefore) {
+        if (!cellBefore) {
+            result.constructedCell = cellAfter;
+        }
+        if (cellAfter && cellAfter->id == secondCell.id) {
+            result.constructorCell = *cellAfter;
+        }
+        if (cellAfter && cellAfter->id == thirdCell.id) {
+            result.constructionSiteCell = *cellAfter;
+        }
+    }
+    result.dataBefore = dataBefore;
+    result.dataAfter = dataAfter;
+    return result;
+}
+
 void ConstructorGpuTests::genericCheck(TestResult const& testResult) const
 {
     if (testResult.constructedCell) {
@@ -136,41 +201,49 @@ bool ConstructorGpuTests::isConnected(CellDescription const& cell1, CellDescript
 
 TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
 {
-    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2));
+    auto result = testStartConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2));
     genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE((QVector2D(_parameters.cellFunctionConstructorOffspringCellDistance, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
     for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->connections->front().cellId) {
-            EXPECT_TRUE(abs(90 - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
+        if (connection.cellId == result.constructedCell->id) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
         }
     }
 }
 
+TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithNonDefaultMaxConnections)
+{
+    auto result = testStartConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).maxConnection(5));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_EQ(5, result.constructedCell->maxConnections);
+}
+
 TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithPositiveAngle)
 {
-    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2).angle(90));
+    auto result = testStartConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2).angle(45));
     genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE(
-        (QVector2D(0, _parameters.cellFunctionConstructorOffspringCellDistance)
+        (Physics::unitVectorOfAngle(45 + 90) * _parameters.cellFunctionConstructorOffspringCellDistance
          - (*result.constructedCell->pos - *result.constructorCell.pos))
             .length()
         < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
     for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->connections->front().cellId) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
+        if (connection.cellId == result.constructedCell->id) {
+            EXPECT_TRUE(abs(180 + 45 - connection.angleFromPrevious) < 1);
         }
     }
 }
 
 TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
 {
-    auto result = testConstructor(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2).clusterAngle(90));
+    auto result = testStartConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2).clusterAngle(90));
     genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_EQ(2, result.constructedCell->metadata->color);
@@ -181,8 +254,31 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
         < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
     for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->connections->front().cellId) {
-            EXPECT_TRUE(abs(90 - connection.angleFromPrevious) < FLOATINGPOINT_MEDIUM_PRECISION);
+        if (connection.cellId == result.constructedCell->id) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
+        }
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithDefaultAngle)
+{
+    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
+    EXPECT_LT(result.constructedCell->pos->x(), result.constructionSiteCell->pos->x());
+    EXPECT_TRUE((result.constructorCell.pos->y() - result.constructedCell->pos->y()) < 0.1);
+    EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
+
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    for (auto const& connection : *result.constructorCell.connections) {
+        if (connection.cellId == result.constructedCell->id) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
+        }
+    }
+    for (auto const& connection : *result.constructedCell->connections) {
+        if (connection.cellId == result.constructionSiteCell->id) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
         }
     }
 }
