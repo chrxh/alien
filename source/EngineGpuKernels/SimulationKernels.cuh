@@ -116,10 +116,10 @@ __global__ void processingStep6(SimulationData data, int numCellPointers)
     cellProcessor.calcForces(data, numCellPointers);
 }
 
-__global__ void processingStep7(SimulationData data, int numTokenPointers)
+__global__ void processingStep7(SimulationData data, int numCellPointers, int numTokenPointers)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcVelocities(data);
+    cellProcessor.calcVelocities(data, numCellPointers);
 
     TokenProcessor tokenProcessor;
     tokenProcessor.executeCellFunctions(data, numTokenPointers);
@@ -170,7 +170,8 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep5, data);
     KERNEL_CALL(processingStep6, data, data.entities.cellPointers.getNumEntries());
-    KERNEL_CALL(processingStep7, data, data.entities.tokenPointers.getNumEntries());
+    KERNEL_CALL(
+        processingStep7, data, data.entities.cellPointers.getNumEntries(), data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep8, data);
     KERNEL_CALL(processingStep9, data);
     KERNEL_CALL(processingStep10, data);
