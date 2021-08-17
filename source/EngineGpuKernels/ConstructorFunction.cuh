@@ -86,7 +86,10 @@ ConstructorFunction::processing(Token* token, SimulationData& data)
     Cell* firstCellOfConstructionSite = getFirstCellOfConstructionSite(token);
 
     if (firstCellOfConstructionSite) {
-        continueConstruction(token, data, constructionData, firstCellOfConstructionSite);
+        if (firstCellOfConstructionSite->tryLock()) {
+            continueConstruction(token, data, constructionData, firstCellOfConstructionSite);
+            firstCellOfConstructionSite->releaseLock();
+        }
     } else {
         startNewConstruction(token, data, constructionData);
     }
@@ -222,46 +225,47 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
 
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
+    firstConstructedCell->tokenBlocked = false;
+    if (newCell->tryLock()) {
 
-    float angleFromPreviousForCell;
-    for (int i = 0; i < cell->numConnections; ++i) {
-        if (cell->connections[i].cell == firstConstructedCell) {
-            angleFromPreviousForCell = cell->connections[i].angleFromPrevious;
-            break;
+        float angleFromPreviousForCell;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            if (cell->connections[i].cell == firstConstructedCell) {
+                angleFromPreviousForCell = cell->connections[i].angleFromPrevious;
+                break;
+            }
         }
-    }
 
-    float angleFromPreviousForFirstConstructedCell;
-    for (int i = 0; i < firstConstructedCell->numConnections; ++i) {
-        if (firstConstructedCell->connections[i].cell == cell) {
-            angleFromPreviousForFirstConstructedCell = firstConstructedCell->connections[i].angleFromPrevious;
-            break;
+        float angleFromPreviousForFirstConstructedCell;
+        for (int i = 0; i < firstConstructedCell->numConnections; ++i) {
+            if (firstConstructedCell->connections[i].cell == cell) {
+                angleFromPreviousForFirstConstructedCell = firstConstructedCell->connections[i].angleFromPrevious;
+                break;
+            }
         }
-    }
-    CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
-    CellConnectionProcessor::addConnectionsForConstructor(
-        data,
-        cell,
-        newCell,
-        angleFromPreviousForCell,
-        0,
-        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
-    auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
-    CellConnectionProcessor::addConnectionsForConstructor(
-        data,
-        newCell,
-        firstConstructedCell,
-        angleFromPreviousForNewCell,
-        angleFromPreviousForFirstConstructedCell,
-        distance);
+        CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
+        CellConnectionProcessor::addConnectionsForConstructor(
+            data,
+            cell,
+            newCell,
+            angleFromPreviousForCell,
+            0,
+            cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+        auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
+        CellConnectionProcessor::addConnectionsForConstructor(
+            data,
+            newCell,
+            firstConstructedCell,
+            angleFromPreviousForNewCell,
+            angleFromPreviousForFirstConstructedCell,
+            distance);
 
-    if (AdaptMaxConnections::Yes == adaptMaxConnections) {
-        newCell->maxConnections = 2;
-    }
+        if (AdaptMaxConnections::Yes == adaptMaxConnections) {
+            newCell->maxConnections = 2;
+        }
 
-    Math::normalize(posDelta);
-    Math::rotateQuarterClockwise(posDelta);
-    if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)) {
+        Math::normalize(posDelta);
+        Math::rotateQuarterClockwise(posDelta);
         Cell* otherCells[18];
         int numOtherCells;
         data.cellMap.get(
@@ -298,7 +302,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             }
             if (otherCell->tryLock()) {
                 __threadfence();
-                if (isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
+                if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
+                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
                     CellConnectionProcessor::addConnectionsForConstructor(
                         data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
                 }
@@ -306,7 +311,9 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
                 otherCell->releaseLock();
             }
         }
+        newCell->releaseLock();
     }
+
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
 }
 
