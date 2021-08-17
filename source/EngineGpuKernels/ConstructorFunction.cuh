@@ -296,10 +296,13 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             if (Math::dot(posDelta, otherPosDelta) < 0.1) {
                 continue;
             }
-            if (isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)
-                && otherCell->tryLock()) {
-                CellConnectionProcessor::addConnectionsForConstructor(
-                    data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
+            if (otherCell->tryLock()) {
+                __threadfence();
+                if (isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
+                    CellConnectionProcessor::addConnectionsForConstructor(
+                        data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
+                }
+                __threadfence();
                 otherCell->releaseLock();
             }
         }
