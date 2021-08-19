@@ -149,7 +149,7 @@ bool ZoomActionController::isSimulationRunning() const
 
 void ZoomActionController::setItemView()
 {
-    _actions->actionItemView->setChecked(true);
+//    _actions->actionItemView->setChecked(true);
 }
 
 
