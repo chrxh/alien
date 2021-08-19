@@ -100,8 +100,12 @@ TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
         auto& cell = token->cell;
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
+            //IMPORTANT:
+            //loop would lead to time out problems on GeForce 10-series
+/*
             bool success = false;
             do {
+*/
                 if (cell->tryLock()) {
                     __threadfence();
 
@@ -114,10 +118,10 @@ TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
                     }
 
                     __threadfence();
-                    success = true;
+//                    success = true;
                     cell->releaseLock();
                 }
-            } while (!success);
+/*            } while (!success);*/
         }
     }
 }
