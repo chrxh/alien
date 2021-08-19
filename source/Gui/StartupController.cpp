@@ -25,7 +25,7 @@ void StartupController::init()
 {
     initWidget();
 
-    _access->requestCurrentVersion();
+//    _access->requestCurrentVersion();
 
     _timer = new QTimer(this);
     connect(_timer, &QTimer::timeout, this, &StartupController::fadeout);
@@ -53,7 +53,7 @@ void StartupController::initWidget()
     QTextStream in(&file);
     _thisVersion = in.readLine();
 
-    auto versionTextItem = new QGraphicsSimpleTextItem("Version " + _thisVersion);
+    auto versionTextItem = new QGraphicsSimpleTextItem("Version 3 preview"/* + _thisVersion*/);
     auto font = versionTextItem->font();
     font.setPixelSize(15);
     versionTextItem->setFont(font);
