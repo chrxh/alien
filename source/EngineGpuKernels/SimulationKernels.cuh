@@ -14,58 +14,6 @@
 #include "Operation.cuh"
 #include "DebugKernels.cuh"
 
-/************************************************************************/
-/* Helpers for tokens													*/
-/************************************************************************/
-/*
-__global__ void resetCellFunctionData(SimulationData data)
-{
-    data.cellFunctionData.mapSectionCollector.reset_system();
-}
-__global__ void tokenProcessingStep1(SimulationData data, int numClusters)
-{
-    auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.repair_block();
-        tokenProcessor.processingEnergyAveraging_block();
-        tokenProcessor.processingSpreading_block();
-        tokenProcessor.processingLightWeigthedFeatures_block();
-    }
-}
-
-__global__ void tokenProcessingStep2(SimulationData data, int numClusters)
-{
-    auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.createCellFunctionData_block();
-    }
-}
-
-__global__ void tokenProcessingStep3(SimulationData data, int numClusters)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.processingConstructors_block();
-    }
-}
-
-__global__ void tokenProcessingStep4(SimulationData data, int numClusters)
-{
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.processingCommunicatorsAnsSensors_block();
-    }
-}
-*/
-
 __global__ void processingStep1(SimulationData data)
 {
     CellProcessor cellProcessor;
