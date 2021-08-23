@@ -101,10 +101,9 @@ namespace Enums
             SUCCESS,
             SUCCESS_ROT,
             ERROR_NO_ENERGY,
-            ERROR_OBSTACLE,
             ERROR_CONNECTION,
-            ERROR_DIST,
-            ERROR_MAX_RADIUS
+            ERROR_LOCK,
+            ERROR_DIST
         };
     };
     struct ConstrIn {
@@ -121,8 +120,8 @@ namespace Enums
             CREATE_DUP_TOKEN,
             FINISH_NO_SEP,
             FINISH_WITH_SEP,
-            FINISH_WITH_SEP_RED,
-            FINISH_WITH_TOKEN_SEP_RED,
+            FINISH_WITH_EMPTY_TOKEN_SEP,
+            FINISH_WITH_DUP_TOKEN_SEP,
             _COUNTER
         };
     };

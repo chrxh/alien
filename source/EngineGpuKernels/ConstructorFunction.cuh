@@ -15,7 +15,10 @@ private:
     struct ConstructionData
     {
         Enums::ConstrIn::Type constrIn;
-        Enums::ConstrInOption::Type constrInOption;
+        bool constructToken;
+        bool duplicateTokenMemory;
+        bool finishConstruction;
+        bool separateConstruction;
         char angle;
         char distance;
         char maxConnections;
@@ -86,10 +89,13 @@ ConstructorFunction::processing(Token* token, SimulationData& data)
     Cell* firstCellOfConstructionSite = getFirstCellOfConstructionSite(token);
 
     if (firstCellOfConstructionSite) {
-        if (firstCellOfConstructionSite->tryLock()) {
-            continueConstruction(token, data, constructionData, firstCellOfConstructionSite);
-            firstCellOfConstructionSite->releaseLock();
+        if (!firstCellOfConstructionSite->tryLock()) {
+            token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
+            return;
         }
+
+        continueConstruction(token, data, constructionData, firstCellOfConstructionSite);
+        firstCellOfConstructionSite->releaseLock();
     } else {
         startNewConstruction(token, data, constructionData);
     }
@@ -100,8 +106,24 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token* toke
     auto const& memory = token->memory;
     data.constrIn = static_cast<Enums::ConstrIn::Type>(
         static_cast<unsigned char>(token->memory[Enums::Constr::INPUT]) % Enums::ConstrIn::_COUNTER);
-    data.constrInOption = static_cast<Enums::ConstrInOption::Type>(
+
+    auto option = static_cast<Enums::ConstrInOption::Type>(
         static_cast<unsigned char>(token->memory[Enums::Constr::IN_OPTION]) % Enums::ConstrInOption::_COUNTER);
+
+    data.constructToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+        || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+        || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
+    data.duplicateTokenMemory =
+        Enums::ConstrInOption::CREATE_DUP_TOKEN == option || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
+    data.finishConstruction = Enums::ConstrInOption::FINISH_NO_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
+    data.separateConstruction = Enums::ConstrInOption::FINISH_WITH_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
+        || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
+    
     data.angle = memory[Enums::Constr::INOUT_ANGLE];
     data.distance = memory[Enums::Constr::IN_DIST];
     data.maxConnections = memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
@@ -226,93 +248,95 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
     firstConstructedCell->tokenBlocked = false;
-    if (newCell->tryLock()) {
 
-        float angleFromPreviousForCell;
-        for (int i = 0; i < cell->numConnections; ++i) {
-            if (cell->connections[i].cell == firstConstructedCell) {
-                angleFromPreviousForCell = cell->connections[i].angleFromPrevious;
-                break;
-            }
-        }
-
-        float angleFromPreviousForFirstConstructedCell;
-        for (int i = 0; i < firstConstructedCell->numConnections; ++i) {
-            if (firstConstructedCell->connections[i].cell == cell) {
-                angleFromPreviousForFirstConstructedCell = firstConstructedCell->connections[i].angleFromPrevious;
-                break;
-            }
-        }
-        CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
-        CellConnectionProcessor::addConnectionsForConstructor(
-            data,
-            cell,
-            newCell,
-            angleFromPreviousForCell,
-            0,
-            cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
-        auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
-        CellConnectionProcessor::addConnectionsForConstructor(
-            data,
-            newCell,
-            firstConstructedCell,
-            angleFromPreviousForNewCell,
-            angleFromPreviousForFirstConstructedCell,
-            distance);
-
-        if (AdaptMaxConnections::Yes == adaptMaxConnections) {
-            newCell->maxConnections = 2;
-        }
-
-        Math::normalize(posDelta);
-        Math::rotateQuarterClockwise(posDelta);
-        Cell* otherCells[18];
-        int numOtherCells;
-        data.cellMap.get(
-            otherCells,
-            numOtherCells,
-            posOfNewCell,
-            cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
-        for (int i = 0; i < numOtherCells; ++i) {
-            Cell* otherCell = otherCells[i];
-            if (otherCell == firstConstructedCell) {
-                continue;
-            }
-            if (otherCell == cell) {
-                continue;
-            }
-
-            bool connected = false;
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto const& connectedCell = cell->connections[i].cell;
-                if (connectedCell == otherCell) {
-                    connected = true;
-                    break;
-                }
-            }
-            if (connected) {
-                continue;
-            }
-
-            auto otherPosDelta = otherCell->absPos - newCell->absPos;
-            data.cellMap.mapDisplacementCorrection(otherPosDelta);
-            Math::normalize(otherPosDelta);
-            if (Math::dot(posDelta, otherPosDelta) < 0.1) {
-                continue;
-            }
-            if (otherCell->tryLock()) {
-                __threadfence();
-                if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
-                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
-                    CellConnectionProcessor::addConnectionsForConstructor(
-                        data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
-                }
-                __threadfence();
-                otherCell->releaseLock();
-            }
-        }
-        newCell->releaseLock();
+    if (!newCell->tryLock()) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
+        return;
     }
+
+    float angleFromPreviousForCell;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        if (cell->connections[i].cell == firstConstructedCell) {
+            angleFromPreviousForCell = cell->connections[i].angleFromPrevious;
+            break;
+        }
+    }
+
+    float angleFromPreviousForFirstConstructedCell;
+    for (int i = 0; i < firstConstructedCell->numConnections; ++i) {
+        if (firstConstructedCell->connections[i].cell == cell) {
+            angleFromPreviousForFirstConstructedCell = firstConstructedCell->connections[i].angleFromPrevious;
+            break;
+        }
+    }
+    CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
+    CellConnectionProcessor::addConnectionsForConstructor(
+        data,
+        cell,
+        newCell,
+        angleFromPreviousForCell,
+        0,
+        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
+    CellConnectionProcessor::addConnectionsForConstructor(
+        data,
+        newCell,
+        firstConstructedCell,
+        angleFromPreviousForNewCell,
+        angleFromPreviousForFirstConstructedCell,
+        distance);
+
+    if (AdaptMaxConnections::Yes == adaptMaxConnections) {
+        newCell->maxConnections = 2;
+    }
+
+    Math::normalize(posDelta);
+    Math::rotateQuarterClockwise(posDelta);
+    Cell* otherCells[18];
+    int numOtherCells;
+    data.cellMap.get(
+        otherCells,
+        numOtherCells,
+        posOfNewCell,
+        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    for (int i = 0; i < numOtherCells; ++i) {
+        Cell* otherCell = otherCells[i];
+        if (otherCell == firstConstructedCell) {
+            continue;
+        }
+        if (otherCell == cell) {
+            continue;
+        }
+
+        bool connected = false;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            if (connectedCell == otherCell) {
+                connected = true;
+                break;
+            }
+        }
+        if (connected) {
+            continue;
+        }
+
+        auto otherPosDelta = otherCell->absPos - newCell->absPos;
+        data.cellMap.mapDisplacementCorrection(otherPosDelta);
+        Math::normalize(otherPosDelta);
+        if (Math::dot(posDelta, otherPosDelta) < 0.1) {
+            continue;
+        }
+        if (otherCell->tryLock()) {
+            if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
+                && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
+                CellConnectionProcessor::addConnectionsForConstructor(
+                    data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
+            }
+            otherCell->releaseLock();
+        }
+    }
+
+    newCell->releaseLock();
 
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
 }
@@ -426,10 +450,8 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, Cons
     result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
 
     auto const& cell = token->cell;
-    auto const& option = data.constrInOption;
 
-    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
-        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+    if (data.constructToken) {
         result.token = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
     }
 
@@ -440,8 +462,7 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, Cons
     }
 
     token->energy -= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token;
-    if (Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
-        || Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED == option) {
+    if (data.constructToken) {
         auto const averageEnergy = (cell->energy + result.cell) / 2;
         cell->energy = averageEnergy;
         result.cell = averageEnergy;

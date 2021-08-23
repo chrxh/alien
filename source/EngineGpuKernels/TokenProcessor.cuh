@@ -107,7 +107,6 @@ TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
             do {
 */
                 if (cell->tryLock()) {
-                    __threadfence();
 
                     EnergyGuidance::processing(token);
                     if (Enums::CellFunction::COMPUTER == cellFunctionType) {
@@ -117,7 +116,6 @@ TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
                         ConstructorFunction::processing(token, data);
                     }
 
-                    __threadfence();
 //                    success = true;
                     cell->releaseLock();
                 }

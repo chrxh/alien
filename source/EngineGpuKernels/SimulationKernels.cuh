@@ -119,7 +119,10 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep5, data);
     KERNEL_CALL(processingStep6, data, data.entities.cellPointers.getNumEntries());
     KERNEL_CALL(
-        processingStep7, data, data.entities.cellPointers.getNumEntries(), data.entities.tokenPointers.getNumEntries());
+        processingStep7,
+        data,
+        data.entities.cellPointers.getNumEntries(),
+        data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep8, data);
     KERNEL_CALL(processingStep9, data);
     KERNEL_CALL(processingStep10, data);

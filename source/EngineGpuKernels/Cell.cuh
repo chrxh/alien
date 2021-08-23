@@ -59,11 +59,16 @@ struct Cell
 
     __device__ __inline__ bool tryLock()
     {
-        return 0 == atomicExch(&locked, 1);
+        auto result = 0 == atomicExch(&locked, 1);
+        if (result) {
+            __threadfence();
+        }
+        return result;
     }
 
     __device__ __inline__ void releaseLock()
     {
+        __threadfence();
         atomicExch(&locked, 0);
     }
 
