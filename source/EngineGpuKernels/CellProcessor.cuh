@@ -42,6 +42,12 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
+namespace
+{
+    float constexpr TimestepSize = 1.0f;
+    float constexpr ForceFactor = 1.0f;
+}
+
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
@@ -152,7 +158,7 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
         auto& cell = cells.at(index);
 
         auto force = cell->temp1;
-        if (Math::length(force) > cudaSimulationParameters.cellMaxForce) {
+        if (Math::length(force) > cudaSimulationParameters.cellMaxForce * ForceFactor) {
             CellConnectionProcessor::scheduleDelConnections(data, cell);
         }
         cell->vel = cell->vel + force;
@@ -187,7 +193,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation / 2;
+            force = force + Math::normalized(displacement) * deviation / 2 * ForceFactor;
 
             if (cell->numConnections > 1) {
                 auto angle = Math::angleOfVector(displacement);
@@ -195,7 +201,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data, int n
                 auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                 auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000;
+                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * ForceFactor;
 
                 auto force1 = Math::normalized(displacement) * angleDeviation;
                 Math::rotateQuarterClockwise(force1);
@@ -237,7 +243,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->absPos = cell->absPos + cell->vel + cell->temp1 / 2;
+        cell->absPos = cell->absPos + cell->vel * TimestepSize + cell->temp1 * TimestepSize * TimestepSize / 2;
         data.cellMap.mapPosCorrection(cell->absPos);
         cell->temp2 = cell->temp1;  //forces
         cell->temp1 = {0, 0};
@@ -270,7 +276,7 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data, i
         auto& cell = cells.at(index);
 
         auto acceleration = (cell->temp1 + cell->temp2) / 2;
-        cell->vel = cell->vel + acceleration;
+        cell->vel = cell->vel + acceleration * TimestepSize;
     }
 }
 
