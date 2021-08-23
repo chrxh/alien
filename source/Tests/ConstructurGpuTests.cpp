@@ -271,6 +271,7 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithDefaultAngle)
     EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
 
     ASSERT_EQ(2, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
     for (auto const& connection : *result.constructorCell.connections) {
         if (connection.cellId == result.constructedCell->id) {
             EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
@@ -279,6 +280,52 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithDefaultAngle)
     for (auto const& connection : *result.constructedCell->connections) {
         if (connection.cellId == result.constructionSiteCell->id) {
             EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
+        }
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithPositiveAngle)
+{
+    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(45));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
+    EXPECT_LT(result.constructedCell->pos->x(), result.constructionSiteCell->pos->x());
+    EXPECT_TRUE((result.constructorCell.pos->y() - result.constructedCell->pos->y()) < 0.1);
+    EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
+
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    for (auto const& connection : *result.constructorCell.connections) {
+        if (connection.cellId == result.constructedCell->id) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
+        }
+    }
+    for (auto const& connection : *result.constructedCell->connections) {
+        if (connection.cellId == result.constructionSiteCell->id) {
+            EXPECT_TRUE(abs(180 + 45 - connection.angleFromPrevious) < 1);
+        }
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithNegativeAngle)
+{
+    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(-45));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
+    EXPECT_LT(result.constructedCell->pos->x(), result.constructionSiteCell->pos->x());
+    EXPECT_TRUE((result.constructorCell.pos->y() - result.constructedCell->pos->y()) < 0.1);
+    EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
+
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    for (auto const& connection : *result.constructorCell.connections) {
+        if (connection.cellId == result.constructedCell->id) {
+            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
+        }
+    }
+    for (auto const& connection : *result.constructedCell->connections) {
+        if (connection.cellId == result.constructionSiteCell->id) {
+            EXPECT_TRUE(abs(180 - 45 - connection.angleFromPrevious) < 1);
         }
     }
 }

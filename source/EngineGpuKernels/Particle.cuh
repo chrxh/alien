@@ -29,9 +29,18 @@ struct Particle
         _selected = value;
     }
 
-    __device__ __inline__ bool tryLock() { return 0 == atomicExch(&locked, 1); }
+    __device__ __inline__ bool tryLock() {
+        auto result = 0 == atomicExch(&locked, 1);
+        if (result) {
+            __threadfence();
+        }
+        return result;
+    }
 
-    __device__ __inline__ void releaseLock() { atomicExch(&locked, 0); }
+    __device__ __inline__ void releaseLock() {
+        __threadfence();
+        atomicExch(&locked, 0);
+    }
 
 private:
     bool _selected;

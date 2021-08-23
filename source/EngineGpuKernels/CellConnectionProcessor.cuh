@@ -263,12 +263,10 @@ __inline__ __device__ void CellConnectionProcessor::delConnections(Cell* cell)
         for (int i = cell->numConnections - 1; i >= 0; --i) {
             auto connectedCell = cell->connections[i].cell;
             if (connectedCell->tryLock()) {
-                __threadfence();
 
                 delConnection(cell, connectedCell);
                 delConnection(connectedCell, cell);
 
-                __threadfence();
                 connectedCell->releaseLock();
             }
         }
@@ -300,7 +298,6 @@ __inline__ __device__ void CellConnectionProcessor::delConnection(Cell* cell1, C
 __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data, Cell* cell, int cellIndex)
 {
     if (cell->tryLock()) {
-        __threadfence();
 
         if (0 == cell->numConnections && cell->energy != 0 /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
             EntityFactory factory;
@@ -311,7 +308,6 @@ __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data
             data.entities.cellPointers.at(cellIndex) = nullptr;
         }
 
-        __threadfence();
         cell->releaseLock();
     }
 }

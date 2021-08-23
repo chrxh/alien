@@ -34,7 +34,7 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     symbolTable->addEntry("CONSTR_OUT::SUCCESS",std::to_string(Enums::ConstrOut::SUCCESS));
     symbolTable->addEntry("CONSTR_OUT::SUCCESS_ROT",std::to_string(Enums::ConstrOut::SUCCESS_ROT));
     symbolTable->addEntry("CONSTR_OUT::ERROR_NO_ENERGY",std::to_string(Enums::ConstrOut::ERROR_NO_ENERGY));
-    symbolTable->addEntry("CONSTR_OUT::ERROR_OBSTACLE",std::to_string(Enums::ConstrOut::ERROR_OBSTACLE));
+    symbolTable->addEntry("CONSTR_OUT::ERROR_LOCK", std::to_string(Enums::ConstrOut::ERROR_LOCK));
     symbolTable->addEntry("CONSTR_OUT::ERROR_CONNECTION",std::to_string(Enums::ConstrOut::ERROR_CONNECTION));
     symbolTable->addEntry("CONSTR_OUT::ERROR_DIST",std::to_string(Enums::ConstrOut::ERROR_DIST));
     symbolTable->addEntry("CONSTR_IN","["+std::to_string(Enums::Constr::INPUT)+"]");
@@ -46,8 +46,11 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     symbolTable->addEntry("CONSTR_IN_OPTION::CREATE_DUP_TOKEN",std::to_string(Enums::ConstrInOption::CREATE_DUP_TOKEN));
     symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_NO_SEP",std::to_string(Enums::ConstrInOption::FINISH_NO_SEP));
     symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP",std::to_string(Enums::ConstrInOption::FINISH_WITH_SEP));
-    symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_WITH_SEP_RED",std::to_string(Enums::ConstrInOption::FINISH_WITH_SEP_RED));
-    symbolTable->addEntry("CONSTR_IN_OPTION::FINISH_WITH_TOKEN_SEP_RED",std::to_string(Enums::ConstrInOption::FINISH_WITH_TOKEN_SEP_RED));
+    symbolTable->addEntry(
+        "CONSTR_IN_OPTION::FINISH_WITH_EMPTY_TOKEN_SEP", std::to_string(Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP));
+    symbolTable->addEntry(
+        "CONSTR_IN_OPTION::FINISH_WITH_DUP_TOKEN_SEP",
+        std::to_string(Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP));
     symbolTable->addEntry("CONSTR_INOUT_ANGLE","["+std::to_string(Enums::Constr::INOUT_ANGLE)+"]");
     symbolTable->addEntry("CONSTR_IN_DIST","["+std::to_string(Enums::Constr::IN_DIST)+"]");
     symbolTable->addEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","["+std::to_string(Enums::Constr::IN_CELL_MAX_CONNECTIONS)+"]");

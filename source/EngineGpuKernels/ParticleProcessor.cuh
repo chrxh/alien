@@ -181,12 +181,10 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
         } else {
             if (auto cell = data.cellMap.getFirst(particle->absPos)) {
                 if (particle->tryLock()) {
-                    __threadfence();
                     
                     atomicAdd(&cell->energy, particle->energy);
                     particle->energy = 0;
 
-                    __threadfence();
                     particle->releaseLock();
 
                     particle = nullptr;
