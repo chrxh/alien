@@ -490,3 +490,17 @@ TEST_F(CellComputerGpuTests, testDivisionByZero)
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(0, data.at(1));  
 }
+
+TEST_F(CellComputerGpuTests, testNestedIf)
+{
+    string program = "mov [1], 0\n"\
+                     "mov [2], 4\n"\
+                     "mov [3], 5\n"\
+                     "if [2] = 4\n"\
+                     "if [3] = 5\n"\
+                     "mov [1] = 10\n"\
+                     "endif\n"\
+                     "endif\n";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(10, data.at(1));
+}

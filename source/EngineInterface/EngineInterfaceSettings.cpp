@@ -32,7 +32,6 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     //constructor
     symbolTable->addEntry("CONSTR_OUT","["+std::to_string(Enums::Constr::OUTPUT)+"]");
     symbolTable->addEntry("CONSTR_OUT::SUCCESS",std::to_string(Enums::ConstrOut::SUCCESS));
-    symbolTable->addEntry("CONSTR_OUT::SUCCESS_ROT",std::to_string(Enums::ConstrOut::SUCCESS_ROT));
     symbolTable->addEntry("CONSTR_OUT::ERROR_NO_ENERGY",std::to_string(Enums::ConstrOut::ERROR_NO_ENERGY));
     symbolTable->addEntry("CONSTR_OUT::ERROR_LOCK", std::to_string(Enums::ConstrOut::ERROR_LOCK));
     symbolTable->addEntry("CONSTR_OUT::ERROR_CONNECTION",std::to_string(Enums::ConstrOut::ERROR_CONNECTION));
@@ -52,7 +51,8 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
         "CONSTR_IN_OPTION::FINISH_WITH_DUP_TOKEN_SEP",
         std::to_string(Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP));
     symbolTable->addEntry("CONSTR_INOUT_ANGLE","["+std::to_string(Enums::Constr::INOUT_ANGLE)+"]");
-    symbolTable->addEntry("CONSTR_IN_DIST","["+std::to_string(Enums::Constr::IN_DIST)+"]");
+    symbolTable->addEntry("CONSTR_IN_ANGLE_ALIGNMENT", "[" + std::to_string(Enums::Constr::IN_ANGLE_ALIGNMENT) + "]");
+    symbolTable->addEntry("CONSTR_IN_DIST", "[" + std::to_string(Enums::Constr::IN_DIST) + "]");
     symbolTable->addEntry("CONSTR_IN_CELL_MAX_CONNECTIONS","["+std::to_string(Enums::Constr::IN_CELL_MAX_CONNECTIONS)+"]");
     symbolTable->addEntry("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO","0");       //artificial entry (has no symbol in enum class)
     symbolTable->addEntry("CONSTR_IN_CELL_BRANCH_NO","["+std::to_string(Enums::Constr::IN_CELL_BRANCH_NO)+"]");
