@@ -51,6 +51,7 @@ protected:
     boost::optional<ConnectionDescription> checkConnectedAndReturnConnection(
         CellDescription const& cell1,
         CellDescription const& cell2) const;
+    void checkDisconnected(CellDescription const& cell1, CellDescription const& cell2) const;
 };
 
 
@@ -66,7 +67,7 @@ auto ConstructorGpuTests::testStartConstruction(TestParameters const& parameters
 
     DataDescription dataBefore;
     auto cluster = _factory->createRect(
-        DescriptionFactory::CreateRectParameters().size({2, 1}).centerPosition(QVector2D(10, 10)),
+        DescriptionFactory::CreateRectParameters().size({2, 1}).centerPosition(QVector2D(10, 10)).maxConnections(2),
         _context->getNumberGenerator());
     for (auto& cell : *cluster.cells) {
         cell.pos =
@@ -121,7 +122,7 @@ auto ConstructorGpuTests::testContinueConstruction(TestParameters const& paramet
 
     DataDescription dataBefore;
     auto cluster = _factory->createRect(
-        DescriptionFactory::CreateRectParameters().size({3, 1}).centerPosition(QVector2D(10, 10)),
+        DescriptionFactory::CreateRectParameters().size({3, 1}).centerPosition(QVector2D(10, 10)).maxConnections(2),
         _context->getNumberGenerator());
     for (auto& cell : *cluster.cells) {
         cell.pos =
@@ -205,6 +206,30 @@ boost::optional<ConnectionDescription> ConstructorGpuTests::checkConnectedAndRet
     return isConnectedTo(cell1, cell2);
 }
 
+void ConstructorGpuTests::checkDisconnected(CellDescription const& cell1, CellDescription const& cell2) const
+{
+    auto isConnectedTo = [](CellDescription const& cell1,
+                            CellDescription const& cell2) {
+        for (auto const& connection : *cell1.connections) {
+            if (connection.cellId == cell2.id) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    EXPECT_FALSE(isConnectedTo(cell1, cell2));
+    EXPECT_FALSE(isConnectedTo(cell2, cell1));
+}
+
+TEST_F(ConstructorGpuTests, doNothing)
+{
+    auto result = testStartConstruction(TestParameters().command(Enums::ConstrIn::DO_NOTHING));
+    genericCheck(result);
+    ASSERT_FALSE(result.constructedCell);
+    EXPECT_EQ(2, result.constructorCell.maxConnections);
+}
+
 TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
 {
     auto result = testStartConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).metadata(2));
@@ -213,6 +238,8 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE((QVector2D(_parameters.cellFunctionConstructorOffspringCellDistance, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
+    EXPECT_EQ(1, result.constructedCell->maxConnections);
+    EXPECT_EQ(2, result.constructorCell.maxConnections);
 
     auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
     EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
@@ -402,10 +429,95 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithoutSeparation)
     ASSERT_EQ(2, result.constructedCell->connections->size());
     EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
     EXPECT_FALSE(*result.constructedCell->tokenBlocked);
-    EXPECT_FALSE(result.constructedCell->tokens->empty());
+    EXPECT_TRUE(result.constructedCell->tokens->empty());
+    EXPECT_EQ(2, result.constructedCell->maxConnections);
+    EXPECT_EQ(2, result.constructorCell.maxConnections);
 
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithSeparation)
+{
+    auto result = testContinueConstruction(
+        TestParameters().command(Enums::ConstrIn::CONSTRUCT).option(Enums::ConstrInOption::FINISH_WITH_SEP));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    EXPECT_FALSE(*result.constructedCell->tokenBlocked);
+    EXPECT_TRUE(result.constructedCell->tokens->empty());
+    EXPECT_EQ(1, result.constructedCell->maxConnections);
+    EXPECT_EQ(1, result.constructorCell.maxConnections);
+
+    checkDisconnected(result.constructorCell, *result.constructedCell);
     auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
-    EXPECT_TRUE(abs(10 - connection->angleFromPrevious) < 1);
+    EXPECT_TRUE(abs(360 - connection->angleFromPrevious) < 1);
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithSeparation_maxConnection)
+{
+    auto result = testContinueConstruction(
+        TestParameters().command(Enums::ConstrIn::CONSTRUCT).option(Enums::ConstrInOption::FINISH_WITH_SEP).maxConnection(3));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    EXPECT_FALSE(*result.constructedCell->tokenBlocked);
+    EXPECT_TRUE(result.constructedCell->tokens->empty());
+    EXPECT_EQ(3, result.constructedCell->maxConnections);
+    EXPECT_EQ(2, result.constructorCell.maxConnections);
+
+    checkDisconnected(result.constructorCell, *result.constructedCell);
+    checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithEmptyTokenSeparation)
+{
+    auto result = testContinueConstruction(TestParameters()
+                                               .command(Enums::ConstrIn::CONSTRUCT)
+                                               .option(Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    EXPECT_FALSE(*result.constructedCell->tokenBlocked);
+    EXPECT_EQ(1, result.constructedCell->tokens->size());
+
+    checkDisconnected(result.constructorCell, *result.constructedCell);
+    checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+
+    auto token = result.constructedCell->tokens->front();
+    for (int i = 1; i < _parameters.tokenMemorySize; ++i) {
+        EXPECT_EQ(0, token.data->at(i));
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithDuplicatedTokenSeparation)
+{
+    auto result = testContinueConstruction(
+        TestParameters().command(Enums::ConstrIn::CONSTRUCT).option(Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(1, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    EXPECT_FALSE(*result.constructedCell->tokenBlocked);
+    EXPECT_EQ(1, result.constructedCell->tokens->size());
+
+    checkDisconnected(result.constructorCell, *result.constructedCell);
+    checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+
+    auto token = result.constructedCell->tokens->front();
+    auto origToken = result.tokenBefore;
+    for (int i = 1; i < _parameters.tokenMemorySize; ++i) {
+        EXPECT_EQ(origToken.data->at(i), token.data->at(i));
+    }
 }
 
 
