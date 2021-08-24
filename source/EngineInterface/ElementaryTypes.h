@@ -87,6 +87,7 @@ namespace Enums
             OUTPUT = 5,
             INPUT = 6,
             IN_OPTION = 7,
+            IN_ANGLE_ALIGNMENT = 38,  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ...
             INOUT_ANGLE = 15,
             IN_DIST = 16,
             IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
@@ -99,7 +100,6 @@ namespace Enums
     struct ConstrOut {
         enum Type {
             SUCCESS,
-            SUCCESS_ROT,
             ERROR_NO_ENERGY,
             ERROR_CONNECTION,
             ERROR_LOCK,

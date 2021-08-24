@@ -21,7 +21,8 @@ public:
         Cell* cell2,
         float desiredAngleOnCell1,
         float desiredAngleOnCell2,
-        float desiredDistance);
+        float desiredDistance,
+        int angleAlignment = 0);
     __inline__ __device__ static void delConnectionsForConstructor(Cell* cell1, Cell* cell2);
 
 private:
@@ -32,7 +33,8 @@ private:
         Cell* cell2,
         float2 const& posDelta,
         float desiredDistance,
-        float desiredAngleOnCell1 = 0);
+        float desiredAngleOnCell1 = 0,
+        int angleAlignment = 0);
 
     __inline__ __device__ static void delConnections(Cell* cell);
     __inline__ __device__ static void delConnection(Cell* cell1, Cell* cell2);
@@ -119,12 +121,13 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionsForConstructor
     Cell* cell2,
     float desiredAngleOnCell1,
     float desiredAngleOnCell2,
-    float desiredDistance)
+    float desiredDistance,
+    int angleAlignment)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
-    addConnection(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1);
-    addConnection(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2);
+    addConnection(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment);
+    addConnection(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment);
 }
 
 __inline__ __device__ void
@@ -168,7 +171,8 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
     Cell* cell2,
     float2 const& posDelta,
     float desiredDistance,
-    float desiredAngleOnCell1)
+    float desiredAngleOnCell1,
+    int angleAlignment)
 {
     auto newAngle = Math::angleOfVector(posDelta);
 
@@ -192,6 +196,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
             angleDiff = desiredAngleOnCell1;
         }
         if (angleDiff >= 0) {
+            angleDiff = Math::alignAngle(angleDiff, angleAlignment);
             cell1->connections[1].angleFromPrevious = angleDiff;
             cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
         } else {
@@ -233,6 +238,9 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
         angleDiff1 += 360.0f;
     }
     auto angleDiff2 = cell1->connections[i].angleFromPrevious;
+    if (angleDiff1 > angleDiff2) {
+        angleDiff1 = angleDiff2;
+    }
 
     auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
     if (0 == desiredAngleOnCell1) {
@@ -243,6 +251,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
         }
         newConnection.angleFromPrevious = desiredAngleOnCell1;
     }
+    newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment);
 
     for (int j = cell1->numConnections; j > i; --j) {
         cell1->connections[j] = cell1->connections[j - 1];
@@ -250,11 +259,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
     cell1->connections[i] = newConnection;
     ++cell1->numConnections;
 
-    if (0 == desiredAngleOnCell1) {
-        cell1->connections[(++i) % cell1->numConnections].angleFromPrevious = angleDiff2 * (1 - factor);
-    } else {
-        cell1->connections[(++i) % cell1->numConnections].angleFromPrevious = angleDiff2 - desiredAngleOnCell1;
-    }
+    cell1->connections[(++i) % cell1->numConnections].angleFromPrevious = angleDiff2 - newConnection.angleFromPrevious;
 }
 
 __inline__ __device__ void CellConnectionProcessor::delConnections(Cell* cell)

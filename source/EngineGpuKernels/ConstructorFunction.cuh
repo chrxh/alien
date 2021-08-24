@@ -19,6 +19,7 @@ private:
         bool isDuplicateTokenMemory;
         bool isFinishConstruction;
         bool isSeparateConstruction;
+        int angleAlignment;
         char angle;
         char distance;
         char maxConnections;
@@ -132,7 +133,8 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token* toke
     data.isSeparateConstruction = Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
-    
+
+    data.angleAlignment = static_cast<unsigned char>(memory[Enums::Constr::IN_ANGLE_ALIGNMENT]);
     data.angle = memory[Enums::Constr::INOUT_ANGLE];
     data.distance = memory[Enums::Constr::IN_DIST];
     data.maxConnections = memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
@@ -233,7 +235,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     posDelta =
         Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - distance);
 
-    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
+        || cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - distance < 0) {
         token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
         return;
     }
@@ -291,7 +294,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         firstConstructedCell,
         angleFromPreviousForNewCell,
         angleFromPreviousForFirstConstructedCell,
-        distance);
+        distance,
+        constructionData.angleAlignment);
 
     if (constructionData.isFinishConstruction) {
         newCell->tokenBlocked = false;
@@ -337,7 +341,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
                 CellConnectionProcessor::addConnectionsForConstructor(
-                    data, newCell, otherCell, 0, 0, Math::length(otherPosDelta));
+                    data, newCell, otherCell, 0, 0, Math::length(otherPosDelta), constructionData.angleAlignment);
             }
             otherCell->releaseLock();
         }
