@@ -15,10 +15,10 @@ private:
     struct ConstructionData
     {
         Enums::ConstrIn::Type constrIn;
-        bool constructToken;
-        bool duplicateTokenMemory;
-        bool finishConstruction;
-        bool separateConstruction;
+        bool isConstructToken;
+        bool isDuplicateTokenMemory;
+        bool isFinishConstruction;
+        bool isSeparateConstruction;
         char angle;
         char distance;
         char maxConnections;
@@ -70,6 +70,14 @@ private:
         float token;
     };
     __inline__ __device__ static EnergyForNewEntities adaptEnergies(Token* token, ConstructionData const& data);
+
+    __inline__ __device__ static Token* constructToken(
+        SimulationData& data,
+        Cell* cell,
+        Token* token,
+        Cell* sourceCell,
+        float energy,
+        bool duplicateMemory);
 };
 
 /************************************************************************/
@@ -110,17 +118,18 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token* toke
     auto option = static_cast<Enums::ConstrInOption::Type>(
         static_cast<unsigned char>(token->memory[Enums::Constr::IN_OPTION]) % Enums::ConstrInOption::_COUNTER);
 
-    data.constructToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
+    data.isConstructToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
         || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
         || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
-    data.duplicateTokenMemory =
-        Enums::ConstrInOption::CREATE_DUP_TOKEN == option || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
-    data.finishConstruction = Enums::ConstrInOption::FINISH_NO_SEP == option
+    data.isDuplicateTokenMemory = (Enums::ConstrInOption::CREATE_DUP_TOKEN == option
+                                   || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option)
+        && !cudaSimulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy;
+    data.isFinishConstruction = Enums::ConstrInOption::FINISH_NO_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
-    data.separateConstruction = Enums::ConstrInOption::FINISH_WITH_SEP == option
+    data.isSeparateConstruction = Enums::ConstrInOption::FINISH_WITH_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
         || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
     
@@ -185,13 +194,18 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
     Cell* newCell;
     constructNewCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
-    CellConnectionProcessor::addConnectionsForConstructor(
-        data,
-        cell,
-        newCell,
-        anglesForNewConnection.angleFromPreviousConnection,
-        0,
-        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    if (!constructionData.isFinishConstruction || !constructionData.isSeparateConstruction) {
+        CellConnectionProcessor::addConnectionsForConstructor(
+            data,
+            cell,
+            newCell,
+            anglesForNewConnection.angleFromPreviousConnection,
+            0,
+            cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    }
+    if (constructionData.isFinishConstruction) {
+        newCell->tokenBlocked = false;
+    }
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
         newCell->maxConnections = 1;
     }
@@ -250,8 +264,13 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     firstConstructedCell->tokenBlocked = false;
 
     if (!newCell->tryLock()) {
+        cell->energy += energyForNewEntities.token;
         token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
         return;
+    }
+
+    if (constructionData.isConstructToken) {
+        constructToken(data, newCell, token, cell, energyForNewEntities.token, constructionData.isDuplicateTokenMemory);
     }
 
     float angleFromPreviousForCell;
@@ -270,13 +289,15 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         }
     }
     CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
-    CellConnectionProcessor::addConnectionsForConstructor(
-        data,
-        cell,
-        newCell,
-        angleFromPreviousForCell,
-        0,
-        cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    if (!constructionData.isFinishConstruction || !constructionData.isSeparateConstruction) {
+        CellConnectionProcessor::addConnectionsForConstructor(
+            data,
+            cell,
+            newCell,
+            angleFromPreviousForCell,
+            0,
+            cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+    }
     auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
     CellConnectionProcessor::addConnectionsForConstructor(
         data,
@@ -285,6 +306,10 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         angleFromPreviousForNewCell,
         angleFromPreviousForFirstConstructedCell,
         distance);
+
+    if (constructionData.isFinishConstruction) {
+        newCell->tokenBlocked = false;
+    }
 
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
         newCell->maxConnections = 2;
@@ -444,30 +469,46 @@ __inline__ __device__ auto ConstructorFunction::calcAnglesForNewConnection(
 __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, ConstructionData const& data)
     -> EnergyForNewEntities
 {
-    EnergyForNewEntities result;
-    result.energyAvailable = true;
-    result.token = 0.0f;
-    result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
-
     auto const& cell = token->cell;
 
-    if (data.constructToken) {
-        result.token = cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy;
-    }
+    EnergyForNewEntities result;
+    result.energyAvailable = true;
+    result.cell = cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy;
+    result.token = data.isConstructToken ? cudaSimulationParameters.cellFunctionConstructorOffspringTokenEnergy : 0.0f;
 
-    if (token->energy <= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token
-            + cudaSimulationParameters.tokenMinEnergy) {
+    if (token->energy <= result.cell + result.token + cudaSimulationParameters.tokenMinEnergy) {
         result.energyAvailable = false;
         return result;
     }
 
-    token->energy -= cudaSimulationParameters.cellFunctionConstructorOffspringCellEnergy + result.token;
-    if (data.constructToken) {
+    token->energy -= result.cell + result.token;
+    if (data.isConstructToken) {
         auto const averageEnergy = (cell->energy + result.cell) / 2;
         cell->energy = averageEnergy;
         result.cell = averageEnergy;
     }
 
+    return result;
+}
+
+__inline__ __device__ Token* ConstructorFunction::constructToken(
+    SimulationData& data,
+    Cell* cell,
+    Token* token,
+    Cell* sourceCell,
+    float energy,
+    bool duplicateMemory)
+{
+    EntityFactory factory;
+    factory.init(&data);
+
+    Token* result;
+    if (duplicateMemory) {
+        result = factory.duplicateToken(cell, token);
+    } else {
+        result = factory.createToken(cell, sourceCell);
+    }
+    result->energy = energy;
     return result;
 }
 

@@ -42,12 +42,15 @@ protected:
 
         DataDescription dataBefore;
         DataDescription dataAfter;
+        TokenDescription tokenBefore;
     };
     TestResult testStartConstruction(TestParameters const& parameters) const;
     TestResult testContinueConstruction(TestParameters const& parameters) const;
 
     void genericCheck(TestResult const& testResult) const;
-    bool isConnected(CellDescription const& cell1, CellDescription const& cell2) const;
+    boost::optional<ConnectionDescription> checkConnectedAndReturnConnection(
+        CellDescription const& cell1,
+        CellDescription const& cell2) const;
 };
 
 
@@ -136,7 +139,7 @@ auto ConstructorGpuTests::testContinueConstruction(TestParameters const& paramet
     auto token = createSimpleToken();
     auto& tokenData = *token.data;
     tokenData[Enums::Constr::INPUT] = parameters._command;
-    tokenData[Enums::Constr::IN_OPTION] = Enums::ConstrInOption::STANDARD;
+    tokenData[Enums::Constr::IN_OPTION] = parameters._option;
     tokenData[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(parameters._angle);
     tokenData[Enums::Constr::IN_DIST] = QuantityConverter::convertDistanceToData(parameters._distance);
     tokenData[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = parameters._maxConnection;
@@ -171,32 +174,35 @@ auto ConstructorGpuTests::testContinueConstruction(TestParameters const& paramet
     }
     result.dataBefore = dataBefore;
     result.dataAfter = dataAfter;
+    result.tokenBefore = token;
     return result;
 }
 
 void ConstructorGpuTests::genericCheck(TestResult const& testResult) const
 {
-    if (testResult.constructedCell) {
-        EXPECT_TRUE(isConnected(*testResult.constructedCell, testResult.constructorCell));
-    }
     auto energyBefore = getEnergy(testResult.dataBefore);
     auto energyAfter = getEnergy(testResult.dataAfter);
 
     EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
-bool ConstructorGpuTests::isConnected(CellDescription const& cell1, CellDescription const& cell2) const
+boost::optional<ConnectionDescription> ConstructorGpuTests::checkConnectedAndReturnConnection(
+    CellDescription const& cell1,
+    CellDescription const& cell2) const
 {
-    auto isConnectedTo = [](CellDescription const& cell1, CellDescription const& cell2) {
+    auto isConnectedTo = [](CellDescription const& cell1,
+                            CellDescription const& cell2) -> boost::optional<ConnectionDescription> {
         for (auto const& connection : *cell1.connections) {
             if (connection.cellId == cell2.id) {
-                return true;
+                return connection;
             }
         }
-        return false;
+        return boost::none;
     };
 
-    return isConnectedTo(cell1, cell2) && isConnectedTo(cell2, cell1);
+    EXPECT_TRUE(isConnectedTo(cell1, cell2).is_initialized());
+    EXPECT_TRUE(isConnectedTo(cell2, cell1).is_initialized());
+    return isConnectedTo(cell1, cell2);
 }
 
 TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
@@ -207,11 +213,9 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithDefaultAngle)
     EXPECT_EQ(2, result.constructedCell->metadata->color);
     EXPECT_TRUE((QVector2D(_parameters.cellFunctionConstructorOffspringCellDistance, 0) - (*result.constructedCell->pos - *result.constructorCell.pos)).length() < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
-    for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->id) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
-        }
-    }
+
+    auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+    EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
 }
 
 TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithNonDefaultMaxConnections)
@@ -234,11 +238,9 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnLeftWithPositiveAngle)
             .length()
         < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
-    for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->id) {
-            EXPECT_TRUE(abs(180 + 45 - connection.angleFromPrevious) < 1);
-        }
-    }
+
+    auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+    EXPECT_TRUE(abs(180 + 45 - connection->angleFromPrevious) < 1);
 }
 
 TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
@@ -253,11 +255,9 @@ TEST_F(ConstructorGpuTests, constructFirstCellOnBelow)
             .length()
         < FLOATINGPOINT_LOW_PRECISION);
     ASSERT_EQ(1, result.constructedCell->connections->size());
-    for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->id) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
-        }
-    }
+
+    auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+    EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
 }
 
 TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithDefaultAngle)
@@ -272,21 +272,21 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithDefaultAngle)
 
     ASSERT_EQ(2, result.constructedCell->connections->size());
     EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
-    for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->id) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
-        }
+
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
     }
-    for (auto const& connection : *result.constructedCell->connections) {
-        if (connection.cellId == result.constructionSiteCell->id) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
-        }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
     }
 }
 
-TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithPositiveAngle)
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithEmptyToken)
 {
-    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(45));
+    auto result = testContinueConstruction(
+        TestParameters().command(Enums::ConstrIn::CONSTRUCT).option(Enums::ConstrInOption::CREATE_EMPTY_TOKEN));
     genericCheck(result);
     ASSERT_TRUE(result.constructedCell);
     EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
@@ -295,15 +295,59 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithPositiveAngle)
     EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
 
     ASSERT_EQ(2, result.constructedCell->connections->size());
-    for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->id) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
-        }
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
     }
-    for (auto const& connection : *result.constructedCell->connections) {
-        if (connection.cellId == result.constructionSiteCell->id) {
-            EXPECT_TRUE(abs(180 + 45 - connection.angleFromPrevious) < 1);
-        }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+
+    ASSERT_EQ(1, result.constructedCell->tokens->size());
+
+    auto token = result.constructedCell->tokens->front();
+    for (int i = 1; i < _parameters.tokenMemorySize; ++i) {
+        EXPECT_EQ(0, token.data->at(i));
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithDuplicatedToken)
+{
+    auto result = testContinueConstruction(
+        TestParameters().command(Enums::ConstrIn::CONSTRUCT).option(Enums::ConstrInOption::CREATE_DUP_TOKEN));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    ASSERT_EQ(1, result.constructedCell->tokens->size());
+
+    auto token = result.constructedCell->tokens->front();
+    auto origToken = result.tokenBefore;
+    for (int i = 1; i < _parameters.tokenMemorySize; ++i) {
+        EXPECT_EQ(origToken.data->at(i), token.data->at(i));
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithPositiveAngle)
+{
+    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(170));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
+    EXPECT_LT(result.constructedCell->pos->x(), result.constructionSiteCell->pos->x());
+    EXPECT_TRUE((result.constructorCell.pos->y() - result.constructedCell->pos->y()) < 0.1);
+    EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
+
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 + 170 - connection->angleFromPrevious) < 1);
     }
 }
 
@@ -318,17 +362,52 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithNegativeAngle)
     EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
 
     ASSERT_EQ(2, result.constructedCell->connections->size());
-    for (auto const& connection : *result.constructorCell.connections) {
-        if (connection.cellId == result.constructedCell->id) {
-            EXPECT_TRUE(abs(180 - connection.angleFromPrevious) < 1);
-        }
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
     }
-    for (auto const& connection : *result.constructedCell->connections) {
-        if (connection.cellId == result.constructionSiteCell->id) {
-            EXPECT_TRUE(abs(180 - 45 - connection.angleFromPrevious) < 1);
-        }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - 45 - connection->angleFromPrevious) < 1);
     }
 }
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithTooLargeAngle)
+{
+    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(190));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
+    EXPECT_LT(result.constructedCell->pos->x(), result.constructionSiteCell->pos->x());
+    EXPECT_TRUE((result.constructorCell.pos->y() - result.constructedCell->pos->y()) < 0.1);
+    EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
+
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(10 - connection->angleFromPrevious) < 1);
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithoutSeparation)
+{
+    auto result = testContinueConstruction(
+        TestParameters().command(Enums::ConstrIn::CONSTRUCT).option(Enums::ConstrInOption::FINISH_NO_SEP));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    EXPECT_FALSE(*result.constructionSiteCell->tokenBlocked);
+    EXPECT_FALSE(*result.constructedCell->tokenBlocked);
+    EXPECT_FALSE(result.constructedCell->tokens->empty());
+
+    auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+    EXPECT_TRUE(abs(10 - connection->angleFromPrevious) < 1);
+}
+
 
 /*
 #include <boost/range/adaptors.hpp>

@@ -34,18 +34,8 @@ public:
         ParticleMetadata const& metadata);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
     __inline__ __device__ Cell* createCell();
-    __inline__ __device__ Token* createToken(Cell* targetCell, Token* sourceToken);
-
-    /*
+    __inline__ __device__ Token* duplicateToken(Cell* targetCell, Token* sourceToken);
     __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
-    __inline__ __device__ Particle* createParticleFromTO(
-        ParticleAccessTO const& particleTO);  //TODO: not adding to simulation!
-    __inline__ __device__ Cluster* createCluster(Cluster** clusterPointerToReuse = nullptr);
-     __inline__ __device__ void createClusterFromTO_block(
-         ClusterAccessTO const& clusterTO,
-         DataAccessTO const* _simulationTO);
-    __inline__ __device__ Cluster* createClusterWithRandomCell(float energy, float2 const& pos, float2 const& vel);
-*/
 
 private:
     __inline__ __device__ void
@@ -265,7 +255,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     return result;
 }
 
-__inline__ __device__ Token* EntityFactory::createToken(Cell* targetCell, Token* sourceToken)
+__inline__ __device__ Token* EntityFactory::duplicateToken(Cell* targetCell, Token* sourceToken)
 {
     Token* token = _data->entities.tokens.getNewElement();
     Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
@@ -275,6 +265,21 @@ __inline__ __device__ Token* EntityFactory::createToken(Cell* targetCell, Token*
     token->memory[0] = targetCell->branchNumber;
     token->sourceCell = token->cell;
     token->cell = targetCell;
+    return token;
+}
+
+__inline__ __device__ Token* EntityFactory::createToken(Cell* cell, Cell* sourceCell)
+{
+    Token* token = _data->entities.tokens.getNewSubarray(1);
+    Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
+    *tokenPointer = token;
+
+    token->cell = cell;
+    token->sourceCell = sourceCell;
+    token->memory[0] = cell->branchNumber;
+    for (int i = 1; i < MAX_TOKEN_MEM_SIZE; ++i) {
+        token->memory[i] = 0;
+    }
     return token;
 }
 
@@ -491,15 +496,6 @@ __inline__ __device__ Cell* EntityFactory::createCell(Cluster* cluster)
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
     result->setFused(false);
-    return result;
-}
-
-__inline__ __device__ Token* EntityFactory::createToken(Cell* cell, Cell* sourceCell)
-{
-    auto result =  _data->entities.tokens.getNewSubarray(1);
-    result->cell = cell;
-    result->sourceCell = sourceCell;
-    result->memory[0] = cell->branchNumber;
     return result;
 }
 

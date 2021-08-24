@@ -64,7 +64,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
                 token->sourceCell = token->cell; 
                 token->cell = connectedCell;
             } else {
-                factory.createToken(connectedCell, token);
+                factory.duplicateToken(connectedCell, token);
             }
 
             if (connectedCell->tryLock()) {
