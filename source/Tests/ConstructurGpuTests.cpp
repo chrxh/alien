@@ -33,6 +33,7 @@ protected:
         MEMBER_DECLARATION(TestParameters, QByteArray, mutableData, QByteArray());
         MEMBER_DECLARATION(TestParameters, float, angle, 0.0f);
         MEMBER_DECLARATION(TestParameters, float, distance, 1.0f);
+        MEMBER_DECLARATION(TestParameters, int, angleAlignment, 0);
     };
     struct TestResult
     {
@@ -142,6 +143,7 @@ auto ConstructorGpuTests::testContinueConstruction(TestParameters const& paramet
     tokenData[Enums::Constr::INPUT] = parameters._command;
     tokenData[Enums::Constr::IN_OPTION] = parameters._option;
     tokenData[Enums::Constr::INOUT_ANGLE] = QuantityConverter::convertAngleToData(parameters._angle);
+    tokenData[Enums::Constr::IN_ANGLE_ALIGNMENT] = parameters._angleAlignment;
     tokenData[Enums::Constr::IN_DIST] = QuantityConverter::convertDistanceToData(parameters._distance);
     tokenData[Enums::Constr::IN_CELL_MAX_CONNECTIONS] = parameters._maxConnection;
     tokenData[Enums::Constr::IN_CELL_BRANCH_NO] = parameters._cellBranchNumber;
@@ -520,6 +522,77 @@ TEST_F(ConstructorGpuTests, constructSecondCellOnLeftFinishWithDuplicatedTokenSe
     }
 }
 
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithAlignedAngle_positiveLowerAngle)
+{
+    auto result = testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(43).angleAlignment(4));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    EXPECT_LT(result.constructorCell.pos->x(), result.constructedCell->pos->x());
+    EXPECT_LT(result.constructedCell->pos->x(), result.constructionSiteCell->pos->x());
+    EXPECT_TRUE((result.constructorCell.pos->y() - result.constructedCell->pos->y()) < 0.1);
+    EXPECT_TRUE((result.constructedCell->pos->y() - result.constructionSiteCell->pos->y()) < 0.1);
+
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithAlignedAngle_positiveUpperAngle)
+{
+    auto result =
+        testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(47).angleAlignment(4));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 + 90 - connection->angleFromPrevious) < 1);
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithAlignedAngle_negativeLowerAngle)
+{
+    auto result =
+        testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(-43).angleAlignment(4));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+}
+
+TEST_F(ConstructorGpuTests, constructSecondCellOnLeftWithAlignedAngle_negativeUpperAngle)
+{
+    auto result =
+        testContinueConstruction(TestParameters().command(Enums::ConstrIn::CONSTRUCT).angle(-47).angleAlignment(4));
+    genericCheck(result);
+    ASSERT_TRUE(result.constructedCell);
+    ASSERT_EQ(2, result.constructedCell->connections->size());
+    {
+        auto connection = checkConnectedAndReturnConnection(result.constructorCell, *result.constructedCell);
+        EXPECT_TRUE(abs(180 - connection->angleFromPrevious) < 1);
+    }
+    {
+        auto connection = checkConnectedAndReturnConnection(*result.constructedCell, *result.constructionSiteCell);
+        EXPECT_TRUE(abs(180 - 90 - connection->angleFromPrevious) < 1);
+    }
+}
 
 /*
 #include <boost/range/adaptors.hpp>

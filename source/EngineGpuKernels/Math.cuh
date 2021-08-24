@@ -31,6 +31,7 @@ public:
     __inline__ __device__ static float
     calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary = 0);
 
+    __inline__ __device__ static float alignAngle(float angle, int alignment);
 };
 
 __inline__ __device__ float2 operator+(float2 const& p, float2 const& q)
@@ -232,4 +233,15 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
     }
 
     return abs(signedDistanceFromLine);
+}
+
+__inline__ __device__ float Math::alignAngle(float angle, int alignment)
+{
+    if (0 == alignment) {
+        return angle;
+    }
+    float unitAngle = 360.0f / alignment;
+    float factor = angle / unitAngle + 0.5f;
+    factor = floorf(factor);
+    return factor * unitAngle;
 }
