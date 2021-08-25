@@ -196,7 +196,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
             angleDiff = desiredAngleOnCell1;
         }
         if (angleDiff >= 0) {
-            angleDiff = Math::alignAngle(angleDiff, angleAlignment);
+            angleDiff = Math::alignAngle(angleDiff, angleAlignment % 7);
             cell1->connections[1].angleFromPrevious = angleDiff;
             cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
         } else {
@@ -251,7 +251,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnection(
         }
         newConnection.angleFromPrevious = desiredAngleOnCell1;
     }
-    newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment);
+    newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % 7);
 
     for (int j = cell1->numConnections; j > i; --j) {
         cell1->connections[j] = cell1->connections[j - 1];

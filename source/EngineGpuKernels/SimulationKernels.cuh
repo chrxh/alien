@@ -42,7 +42,7 @@ __global__ void processingStep3(SimulationData data)
 __global__ void processingStep4(SimulationData data, int numTokenPointers)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcForces(data, data.entities.cellPointers.getNumEntries());
+    cellProcessor.calcForces(data);
 
     ParticleProcessor particleProcessor;
     particleProcessor.movement(data);
@@ -58,10 +58,13 @@ __global__ void processingStep5(SimulationData data)
     cellProcessor.calcPositions(data);
 }
 
-__global__ void processingStep6(SimulationData data, int numCellPointers)
+__global__ void processingStep6(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcForces(data, numCellPointers);
+    cellProcessor.calcForces(data);
+
+    TokenProcessor tokenProcessor;
+    tokenProcessor.executeReadonlyCellFunctions(data);
 }
 
 __global__ void processingStep7(SimulationData data, int numCellPointers, int numTokenPointers)
@@ -70,7 +73,7 @@ __global__ void processingStep7(SimulationData data, int numCellPointers, int nu
     cellProcessor.calcVelocities(data, numCellPointers);
 
     TokenProcessor tokenProcessor;
-    tokenProcessor.executeCellFunctions(data, numTokenPointers);
+    tokenProcessor.executeModifyingCellFunctions(data, numTokenPointers);
 }
 
 __global__ void processingStep8(SimulationData data)
@@ -117,7 +120,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep3, data);
     KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep5, data);
-    KERNEL_CALL(processingStep6, data, data.entities.cellPointers.getNumEntries());
+    KERNEL_CALL(processingStep6, data);
     KERNEL_CALL(
         processingStep7,
         data,

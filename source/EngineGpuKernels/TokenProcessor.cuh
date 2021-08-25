@@ -10,6 +10,7 @@
 #include "EnergyGuidance.cuh"
 #include "CellComputerFunction.cuh"
 #include "ConstructorFunction.cuh"
+#include "ScannerFunction.cuh"
 
 class TokenProcessor
 {
@@ -18,7 +19,8 @@ public:
         SimulationData& data,
         int numTokenPointers);  //prerequisite: clearTag, need numTokenPointers because it might be changed
 
-    __inline__ __device__ void executeCellFunctions(SimulationData& data, int numTokenPointers);
+    __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data);
+    __inline__ __device__ void executeModifyingCellFunctions(SimulationData& data, int numTokenPointers);
 };
 
 /************************************************************************/
@@ -89,8 +91,25 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
     }
 }
 
-__inline__ __device__ void
-TokenProcessor::executeCellFunctions(SimulationData& data, int numTokenPointers)
+__inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(SimulationData& data)
+{
+    auto& tokens = data.entities.tokenPointers;
+    auto partition =
+        calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& token = tokens.at(index);
+        auto& cell = token->cell;
+        if (token) {
+            auto cellFunctionType = cell->getCellFunctionType();
+            if (Enums::CellFunction::SCANNER == cellFunctionType) {
+                ScannerFunction::processing(token);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void TokenProcessor::executeModifyingCellFunctions(SimulationData& data, int numTokenPointers)
 {
     auto& tokens = data.entities.tokenPointers;
     auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
