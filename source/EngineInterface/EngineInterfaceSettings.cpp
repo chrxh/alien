@@ -85,7 +85,6 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     //scanner
     symbolTable->addEntry("SCANNER_OUT","["+std::to_string(Enums::Scanner::OUTPUT)+"]");
     symbolTable->addEntry("SCANNER_OUT::SUCCESS",std::to_string(Enums::ScannerOut::SUCCESS));
-    symbolTable->addEntry("SCANNER_OUT::FINISHED",std::to_string(Enums::ScannerOut::FINISHED));
     symbolTable->addEntry("SCANNER_OUT::RESTART",std::to_string(Enums::ScannerOut::RESTART));
     symbolTable->addEntry("SCANNER_INOUT_CELL_NUMBER","["+std::to_string(Enums::Scanner::INOUT_CELL_NUMBER)+"]");
     symbolTable->addEntry("SCANNER_OUT_ENERGY","["+std::to_string(Enums::Scanner::OUT_ENERGY)+"]");

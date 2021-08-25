@@ -243,7 +243,9 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto desiredDistance = QuantityConverter::convertDataToDistance(constructionData.distance);
     posDelta =
         Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance);
+/*
     printf("distance: %f\n", desiredDistance);
+*/
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
         || cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance < 0) {
@@ -351,13 +353,16 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                 auto distance = constructionData.uniformDist ? desiredDistance : Math::length(otherPosDelta);
+/*
                 printf(
                     "uni: %d, distance: %f, alignment: %d\n",
                     constructionData.uniformDist,
                     distance,
                     constructionData.angleAlignment);
+*/
                 CellConnectionProcessor::addConnectionsForConstructor(
                     data, newCell, otherCell, 0, 0, distance, constructionData.angleAlignment);
+/*
                 for (int i = 0; i < newCell->numConnections; ++i) {
                     printf(
                         "newCell: %d, angle: %f, dist: %f\n",
@@ -373,6 +378,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
                         otherCell->connections[i].angleFromPrevious,
                         otherCell->connections[i].distance);
                 }
+*/
             }
             otherCell->releaseLock();
         }

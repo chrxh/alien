@@ -23,6 +23,8 @@ private:
         Cell * prevPrevCell;
     };
     __device__ static SpiralLookupResult spiralLookupAlgorithm(int depth, Cell * cell, Cell * sourceCell);
+
+    __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
 };
 
 /************************************************************************/
@@ -47,15 +49,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     //no restart? => increase cell number
     else {
         tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = n + 1;
-
-        //prove whether finished or not
-        auto lookupResult = spiralLookupAlgorithm(n + 1, cell, token->sourceCell);
-        if (lookupResult.finish) {
-            tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::FINISHED;
-        }
-        else {
-            tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::SUCCESS;
-        }
+        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::SUCCESS;
     }
 
     //start cell
@@ -65,16 +59,33 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
 
     //further cell
     if (n > 0) {
+        //distance from cell n-1 to cell n-2
+        auto prevCellToPrevPrevCellIndex = getConnectionIndex(lookupResult.prevCell, lookupResult.prevPrevCell);
+        auto distance = lookupResult.prevCell->connections[prevCellToPrevPrevCellIndex].distance;
+        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(distance);
 
-        //calc angle from cell n to cell n-1
-        auto a1 = Math::angleOfVector(lookupResult.prevPrevCell->absPos - lookupResult.prevCell->absPos);
-        auto a2 = Math::angleOfVector(lookupResult.prevCell->absPos - lookupResult.cell->absPos);
-        auto angle = a1 - a2;
-        tokenMem[Enums::Scanner::OUT_ANGLE] = QuantityConverter::convertAngleToData(angle);
+        if (!lookupResult.finish) {
+            auto prevCellToCellIndex = getConnectionIndex(lookupResult.prevCell, lookupResult.cell);
 
-        //calc dist from cell n to cell n-1
-        auto len = Math::length(lookupResult.prevCell->absPos - lookupResult.prevPrevCell->absPos);
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(len);
+            //calc angle from cell (n-1, n-2) to (n-1, n)
+            auto prevCellNumConnections = lookupResult.prevCell->numConnections;
+            float angle = 0;
+            int index;
+            for (index = prevCellToCellIndex + 1; index < prevCellNumConnections; ++index) {
+                auto const& connection = lookupResult.prevCell->connections[index];
+                angle += connection.angleFromPrevious;
+                if (index == prevCellToPrevPrevCellIndex) {
+                    break;
+                }
+            }
+            if (index != prevCellToPrevPrevCellIndex) {
+                for (index = 0; index <= prevCellToPrevPrevCellIndex; ++index) {
+                    auto const& connection = lookupResult.prevCell->connections[index];
+                    angle += connection.angleFromPrevious;
+                }
+            }
+            tokenMem[Enums::Scanner::OUT_ANGLE] = QuantityConverter::convertAngleToData(angle - 180.0f);
+        }
     }
 
     //scan cell
@@ -160,4 +171,15 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell * cell, C
     }
     result.finish = false;
     return result;
+}
+
+__device__ int ScannerFunction::getConnectionIndex(Cell* cell, Cell* otherCell)
+{
+    for (int i = 0; i < cell->numConnections; ++i) {
+        if (cell->connections[i].cell == otherCell) {
+            return i;
+        }
+    }
+    CUDA_THROW_NOT_IMPLEMENTED();
+    return 0;
 }

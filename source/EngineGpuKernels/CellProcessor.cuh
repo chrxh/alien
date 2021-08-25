@@ -125,7 +125,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 
                 if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
                     auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
+                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 16;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                 }
