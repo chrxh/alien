@@ -87,7 +87,8 @@ namespace Enums
             OUTPUT = 5,
             INPUT = 6,
             IN_OPTION = 7,
-            IN_ANGLE_ALIGNMENT = 38,  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ...
+            IN_ANGLE_ALIGNMENT = 38,  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
+            IN_UNIFORM_DIST = 13,
             INOUT_ANGLE = 15,
             IN_DIST = 16,
             IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
@@ -122,6 +123,14 @@ namespace Enums
             FINISH_WITH_SEP,
             FINISH_WITH_EMPTY_TOKEN_SEP,
             FINISH_WITH_DUP_TOKEN_SEP,
+            _COUNTER
+        };
+    };
+
+    struct ConstrInUniformDist {
+        enum Type {
+            NO,
+            YES,
             _COUNTER
         };
     };

@@ -20,6 +20,7 @@ private:
         bool isFinishConstruction;
         bool isSeparateConstruction;
         int angleAlignment;
+        bool uniformDist;
         char angle;
         char distance;
         char maxConnections;
@@ -135,6 +136,14 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token* toke
         || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
 
     data.angleAlignment = static_cast<unsigned char>(memory[Enums::Constr::IN_ANGLE_ALIGNMENT]);
+
+    data.uniformDist = static_cast<Enums::ConstrInUniformDist::Type>(
+                           static_cast<unsigned char>(token->memory[Enums::Constr::IN_UNIFORM_DIST])
+                           % Enums::ConstrInUniformDist::_COUNTER)
+            == Enums::ConstrInUniformDist::YES
+        ? true
+        : false;
+
     data.angle = memory[Enums::Constr::INOUT_ANGLE];
     data.distance = memory[Enums::Constr::IN_DIST];
     data.maxConnections = memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
@@ -231,12 +240,13 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto posDelta = firstConstructedCell->absPos - cell->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
 
-    auto distance = QuantityConverter::convertDataToDistance(constructionData.distance);
+    auto desiredDistance = QuantityConverter::convertDataToDistance(constructionData.distance);
     posDelta =
-        Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - distance);
+        Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance);
+    printf("distance: %f\n", desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
-        || cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - distance < 0) {
+        || cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance < 0) {
         token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
         return;
     }
@@ -294,8 +304,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         firstConstructedCell,
         angleFromPreviousForNewCell,
         angleFromPreviousForFirstConstructedCell,
-        distance,
-        constructionData.angleAlignment);
+        desiredDistance);
 
     if (constructionData.isFinishConstruction) {
         newCell->tokenBlocked = false;
@@ -340,8 +349,30 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         if (otherCell->tryLock()) {
             if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
+
+                auto distance = constructionData.uniformDist ? desiredDistance : Math::length(otherPosDelta);
+                printf(
+                    "uni: %d, distance: %f, alignment: %d\n",
+                    constructionData.uniformDist,
+                    distance,
+                    constructionData.angleAlignment);
                 CellConnectionProcessor::addConnectionsForConstructor(
-                    data, newCell, otherCell, 0, 0, Math::length(otherPosDelta), constructionData.angleAlignment);
+                    data, newCell, otherCell, 0, 0, distance, constructionData.angleAlignment);
+                for (int i = 0; i < newCell->numConnections; ++i) {
+                    printf(
+                        "newCell: %d, angle: %f, dist: %f\n",
+                        i,
+                        newCell->connections[i].angleFromPrevious,
+                        newCell->connections[i].distance);
+                }
+
+                for (int i = 0; i < otherCell->numConnections; ++i) {
+                    printf(
+                        "otherCell: %d, angle: %f, dist: %f\n",
+                        i,
+                        otherCell->connections[i].angleFromPrevious,
+                        otherCell->connections[i].distance);
+                }
             }
             otherCell->releaseLock();
         }
