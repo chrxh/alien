@@ -158,7 +158,6 @@ namespace Enums
         enum Type {
             OUTPUT = 5,
             INOUT_CELL_NUMBER = 12,
-            OUT_MASS = 13,
             OUT_ENERGY = 14,
             OUT_ANGLE = 15,
             OUT_DISTANCE = 16,

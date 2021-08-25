@@ -87,9 +87,7 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     symbolTable->addEntry("SCANNER_OUT::SUCCESS",std::to_string(Enums::ScannerOut::SUCCESS));
     symbolTable->addEntry("SCANNER_OUT::FINISHED",std::to_string(Enums::ScannerOut::FINISHED));
     symbolTable->addEntry("SCANNER_OUT::RESTART",std::to_string(Enums::ScannerOut::RESTART));
-//    meta->addEntry("SCANNER_IN","[11]");
     symbolTable->addEntry("SCANNER_INOUT_CELL_NUMBER","["+std::to_string(Enums::Scanner::INOUT_CELL_NUMBER)+"]");
-    symbolTable->addEntry("SCANNER_OUT_MASS","["+std::to_string(Enums::Scanner::OUT_MASS)+"]");
     symbolTable->addEntry("SCANNER_OUT_ENERGY","["+std::to_string(Enums::Scanner::OUT_ENERGY)+"]");
     symbolTable->addEntry("SCANNER_OUT_ANGLE","["+std::to_string(Enums::Scanner::OUT_ANGLE)+"]");
     symbolTable->addEntry("SCANNER_OUT_DISTANCE","["+std::to_string(Enums::Scanner::OUT_DISTANCE)+"]");
