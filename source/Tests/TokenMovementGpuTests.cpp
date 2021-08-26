@@ -59,7 +59,7 @@ ClusterDescription TokenSpreadingGpuTests::createStickyRotatingTokenCluster(
  */
 TEST_F(TokenMovementGpuTests, testMovementWithFittingBranchNumbers)
 {
-	DataDescription origData;
+	DataDescription dataBefore;
 	auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
 	auto cluster = _factory->createRect(
@@ -73,11 +73,11 @@ TEST_F(TokenMovementGpuTests, testMovementWithFittingBranchNumbers)
 	auto token = createSimpleToken();
     (*token.data)[0] = 1;
 	firstCell.addToken(token);
-	origData.addCluster(cluster);
+	dataBefore.addCluster(cluster);
 	
 	uint64_t lastCellId = cluster.cells->at(9).id;
 
-	IntegrationTestHelper::updateData(_access, _context, origData);
+	IntegrationTestHelper::updateData(_access, _context, dataBefore);
 	IntegrationTestHelper::runSimulation(9, _controller);
 
 	DataDescription dataAfter = IntegrationTestHelper::getContent(_access, { { 0, 0 },{ _universeSize.x, _universeSize.y } });
@@ -96,6 +96,10 @@ TEST_F(TokenMovementGpuTests, testMovementWithFittingBranchNumbers)
             EXPECT_TRUE(cellAfter.tokens->empty());
 		}
 	}
+
+    auto energyBefore = getEnergy(dataBefore);
+    auto energyAfter = getEnergy(dataAfter);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 /**
@@ -134,6 +138,10 @@ TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers)
     for (auto const& cellAfter : *clusterAfter.cells) {
         EXPECT_TRUE(cellAfter.tokens->empty());
     }
+    
+    auto energyBefore = getEnergy(dataBefore);
+    auto energyAfter = getEnergy(dataAfter);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 /**
@@ -146,7 +154,7 @@ TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers)
  */
 TEST_F(TokenMovementGpuTests, testMovementBlocked)
 {
-    DataDescription origData;
+    DataDescription dataBefore;
     auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = _factory->createRect(
@@ -161,17 +169,17 @@ TEST_F(TokenMovementGpuTests, testMovementBlocked)
 
     auto& lastCell = cluster.cells->at(9);
     lastCell.tokenBlocked = true;
-    origData.addCluster(cluster);
+    dataBefore.addCluster(cluster);
 
     uint64_t lastCellId = cluster.cells->at(9).id;
 
-    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
     IntegrationTestHelper::runSimulation(9, _controller);
 
-    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+    DataDescription dataAfter = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    ASSERT_EQ(1, newData.clusters->size());
-    auto newCluster = newData.clusters->at(0);
+    ASSERT_EQ(1, dataAfter.clusters->size());
+    auto newCluster = dataAfter.clusters->at(0);
 
     EXPECT_EQ(10, newCluster.cells->size());
     for (auto const& newCell : *newCluster.cells) {
@@ -179,11 +187,15 @@ TEST_F(TokenMovementGpuTests, testMovementBlocked)
             EXPECT_TRUE(newCell.tokens->empty());
         }
     }
+
+    auto energyBefore = getEnergy(dataBefore);
+    auto energyAfter = getEnergy(dataAfter);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers_negativeValue)
 {
-    DataDescription origData;
+    DataDescription dataBefore;
     auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = _factory->createRect(
@@ -197,16 +209,20 @@ TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers_negativeVal
     QByteArray memory(_parameters.tokenMemorySize, 0);
     memory[0] = 0xa9;
     firstCell.addToken(TokenDescription().setEnergy(30).setData(memory));
-    origData.addCluster(cluster);
+    dataBefore.addCluster(cluster);
 
-    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
     IntegrationTestHelper::runSimulation(1, _controller);
 
-    auto const newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+    auto const dataAfter = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const newCellByCellId = IntegrationTestHelper::getCellByCellId(dataAfter);
     auto const newSecondCell = newCellByCellId.at(secondCell.id);
     EXPECT_EQ(0, newSecondCell.tokens->size());
+    
+    auto energyBefore = getEnergy(dataBefore);
+    auto energyAfter = getEnergy(dataAfter);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 /**
@@ -220,7 +236,7 @@ TEST_F(TokenMovementGpuTests, testMovementWithUnfittingBranchNumbers_negativeVal
  */
 TEST_F(TokenMovementGpuTests, testMovementWithEncounter)
 {
-    DataDescription origData;
+    DataDescription dataBefore;
     auto const& cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = _factory->createRect(
@@ -235,17 +251,17 @@ TEST_F(TokenMovementGpuTests, testMovementWithEncounter)
     auto token = createSimpleToken();
     firstCell.addToken(token);
     thirdCell.addToken(token);
-    origData.addCluster(cluster);
+    dataBefore.addCluster(cluster);
 
     uint64_t secondCellId = secondCell.id;
 
-    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
     IntegrationTestHelper::runSimulation(1, _controller);
 
-    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+    DataDescription dataAfter = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    ASSERT_EQ(1, newData.clusters->size());
-    auto newCluster = newData.clusters->at(0);
+    ASSERT_EQ(1, dataAfter.clusters->size());
+    auto newCluster = dataAfter.clusters->at(0);
 
     EXPECT_EQ(3, newCluster.cells->size());
 
@@ -259,6 +275,10 @@ TEST_F(TokenMovementGpuTests, testMovementWithEncounter)
             EXPECT_TRUE(newCell.tokens->empty());
         }
     }
+
+    auto energyBefore = getEnergy(dataBefore);
+    auto energyAfter = getEnergy(dataAfter);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 /**
@@ -271,7 +291,7 @@ TEST_F(TokenMovementGpuTests, testMovementWithEncounter)
  */
 TEST_F(TokenMovementGpuTests, testForking)
 {
-    DataDescription origData;
+    DataDescription dataBefore;
     auto cellMaxTokenBranchNumber = _parameters.cellMaxTokenBranchNumber;
 
     auto cluster = _factory->createRect(
@@ -284,18 +304,18 @@ TEST_F(TokenMovementGpuTests, testForking)
     secondCell.tokenBranchNumber = 0;
     thirdCell.tokenBranchNumber = 1;
     secondCell.addToken(createSimpleToken());
-    origData.addCluster(cluster);
+    dataBefore.addCluster(cluster);
 
     uint64_t firstCellId = firstCell.id;
     uint64_t thirdCellId = thirdCell.id;
 
-    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::updateData(_access, _context, dataBefore);
     IntegrationTestHelper::runSimulation(1, _controller);
 
-    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+    DataDescription dataAfter = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
 
-    ASSERT_EQ(1, newData.clusters->size());
-    auto newCluster = newData.clusters->at(0);
+    ASSERT_EQ(1, dataAfter.clusters->size());
+    auto newCluster = dataAfter.clusters->at(0);
 
     EXPECT_EQ(3, newCluster.cells->size());
 
@@ -306,6 +326,10 @@ TEST_F(TokenMovementGpuTests, testForking)
             EXPECT_TRUE(newCell.tokens->empty());
         }
     }
+
+    auto energyBefore = getEnergy(dataBefore);
+    auto energyAfter = getEnergy(dataAfter);
+    EXPECT_TRUE(abs(energyAfter - energyBefore) < 0.1);
 }
 
 /*

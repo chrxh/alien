@@ -32,7 +32,7 @@ private:
 
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Token* token);
     __inline__ __device__ static void startNewConstruction(
-        Token* token, SimulationData& data, ConstructionData const& constructionData);
+        Token* token, SimulationData& data, ConstructionData& constructionData);
     __inline__ __device__ static void
     continueConstruction(Token* token, SimulationData& data, ConstructionData const& constructionData, Cell* firstConstructedCell);
 
@@ -170,7 +170,7 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
 }
 
 __inline__ __device__ void
-ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, ConstructionData const& constructionData)
+ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, ConstructionData& constructionData)
 {
     auto const& cell = token->cell;
     auto const adaptMaxConnections = isAdaptMaxConnections(constructionData);
@@ -189,6 +189,7 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
         ? cell->relPos + relPosOfNewCellDelta + Math::unitVectorOfAngle(newCellAngle) * distance : */
         cell->absPos + relPosOfNewCellDelta;
 
+    constructionData.isConstructToken = false;  //not supported
     auto energyForNewEntities = adaptEnergies(token, constructionData);
 
     if (!energyForNewEntities.energyAvailable) {
@@ -235,12 +236,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     Cell* firstConstructedCell)
 {
     auto cell = token->cell;
-    auto energyForNewEntities = adaptEnergies(token, constructionData);
-    if (!energyForNewEntities.energyAvailable) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
-        return;
-    }
-
     auto posDelta = firstConstructedCell->absPos - cell->absPos;
     data.cellMap.mapDisplacementCorrection(posDelta);
 
@@ -262,14 +257,20 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         return;
     }
 
-    auto posOfNewCell = cell->absPos + posDelta;
+    auto energyForNewEntities = adaptEnergies(token, constructionData);
+    if (!energyForNewEntities.energyAvailable) {
+        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        return;
+    }
 
     Cell* newCell;
+    auto posOfNewCell = cell->absPos + posDelta;
     constructCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
     firstConstructedCell->tokenBlocked = false;
 
     if (!newCell->tryLock()) {
-        cell->energy += energyForNewEntities.token;
+        cell->energy +=
+            energyForNewEntities.token;  //token could not be constructed anymore => transfer energy back to cell
         token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
         return;
     }
@@ -514,7 +515,7 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, Cons
         return result;
     }
 
-    token->energy -= result.cell + result.token;
+    token->energy -= (result.cell + result.token);
     if (data.isConstructToken) {
         auto const averageEnergy = (cell->energy + result.cell) / 2;
         cell->energy = averageEnergy;
