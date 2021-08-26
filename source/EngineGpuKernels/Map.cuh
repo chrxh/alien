@@ -159,7 +159,7 @@ public:
         }
     }
 
-    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos, float radius) const
+    __device__ __inline__ void get(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -171,12 +171,12 @@ public:
 
                 auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
                 auto cell1 = _map[mapEntry];
-                if (cell1 && Math::length(cell1->absPos - pos) <= radius) {
+                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
                     cells[numCells] = cell1;
                     ++numCells;
 
                     auto cell2 = _map[mapEntry + 1];
-                    if (cell2 && Math::length(cell2->absPos - pos) <= radius) {
+                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
                         cells[numCells] = cell2;
                         ++numCells;
                     }
