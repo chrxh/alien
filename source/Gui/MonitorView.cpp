@@ -52,16 +52,14 @@ QString MonitorView::generateString() const
 	QString text;
 
 	//generate formatted string
-	text += parStart + colorTextStart + "Clusters:" + StringHelper::ws(12) + colorEnd;
-	text += " " + StringHelper::generateFormattedIntString(_model->numClusters, true)+ " " + parEnd;
-	text += parStart + colorTextStart + "Cells:" + StringHelper::ws(15) + colorEnd;
+	text += parStart + colorTextStart + "Cells:" + StringHelper::ws(5) + colorEnd;
 	text += " " + StringHelper::generateFormattedIntString(_model->numCells, true) + " " + parEnd;
-	text += parStart + colorTextStart + "Particles:" + StringHelper::ws(11) + colorEnd;
+	text += parStart + colorTextStart + "Particles:" + StringHelper::ws(1) + colorEnd;
 	text += " " + StringHelper::generateFormattedIntString(_model->numParticles, true) + " " + parEnd;
-	text += parStart + colorTextStart + "Tokens:" + StringHelper::ws(14) + colorEnd;
+	text += parStart + colorTextStart + "Tokens:" + StringHelper::ws(4) + colorEnd;
     text += " " + StringHelper::generateFormattedIntString(_model->numTokens, true) + " " + parEnd;
-    text += parStart + colorTextStart + "Active clusters:" + StringHelper::ws(5) + colorEnd;
-    text += " " + StringHelper::generateFormattedIntString(_model->numClustersWithTokens, true) + " " + parEnd;
+    text += parStart + colorTextStart + "Energy:" + StringHelper::ws(4) + colorEnd;
+    text += " " + StringHelper::generateFormattedIntString(_model->totalInternalEnergy, true) + " " + parEnd;
 	return text;
 }
 

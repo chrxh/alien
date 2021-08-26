@@ -100,14 +100,14 @@ void SimulationChangerImpl::monitorDataAvailable()
     ++_measurementsSinceBeginning;
 
     auto data = _monitor->retrieveData();
-    auto activeClusters = data.numClustersWithTokens;
+    auto numTokens = data.numTokens;
 
     if (State::Init == _state) {
         if (InitDuration == _measurementsSinceBeginning) {
-            _activeClustersReference = activeClusters;
+            _tokensReference = numTokens;
 
             std::stringstream stream;
-            stream << "parameter changer: measurement finished: " << *_activeClustersReference << " active clusters";
+            stream << "parameter changer: measurement finished: " << *_tokensReference << " tokens";
             loggingService->logMessage(Priority::Important, stream.str());
 
             _state = State::FindEpochTarget;
@@ -123,9 +123,9 @@ void SimulationChangerImpl::monitorDataAvailable()
         loggingService->logMessage(Priority::Important, "parameter changer: start epoch");
     }
     else if (State::Epoch == _state) {
-        if (activeClusters < *_activeClustersReference * RetreatStartFactor) {
+        if (numTokens < *_tokensReference * RetreatStartFactor) {
             std::stringstream stream;
-            stream << "parameter changer: critical number of " << activeClusters << " active clusters reached ";
+            stream << "parameter changer: critical number of " << numTokens << " tokens reached ";
             loggingService->logMessage(Priority::Important, stream.str());
 
             ++_numRetreats;
@@ -152,10 +152,10 @@ void SimulationChangerImpl::monitorDataAvailable()
         }
     }
     else if (State::Retreat == _state) {
-        if (activeClusters < *_activeClustersReference * EmergencyRetreatStartFactor) {
+        if (numTokens < *_tokensReference * EmergencyRetreatStartFactor) {
 
             std::stringstream stream;
-            stream << "parameter changer: very critical number of " << activeClusters << " active clusters reached";
+            stream << "parameter changer: very critical number of " << numTokens << " tokens reached";
             loggingService->logMessage(Priority::Important, stream.str());
 
             _state = State::EmergencyRetreat;
@@ -164,7 +164,7 @@ void SimulationChangerImpl::monitorDataAvailable()
             _parameters = _initialParameters;
             Q_EMIT simulationParametersChanged();
         }
-        if (activeClusters > *_activeClustersReference * RetreatEndFactor
+        if (numTokens > *_tokensReference * RetreatEndFactor
             || _measurementsOfCurrentRetreat + RetreatDuration < _measurementsSinceBeginning) {
             loggingService->logMessage(Priority::Important, "parameter changer: end retreat");
 
@@ -179,7 +179,7 @@ void SimulationChangerImpl::monitorDataAvailable()
         }
     }
     else if (State::EmergencyRetreat == _state) {
-        if (activeClusters > *_activeClustersReference * RetreatEndFactor) {
+        if (numTokens > *_tokensReference * RetreatEndFactor) {
             loggingService->logMessage(Priority::Important, "parameter changer: end emergency retreat");
 
             _state = State::FindEpochTarget;
