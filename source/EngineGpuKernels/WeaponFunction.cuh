@@ -37,11 +37,6 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
 
         if (otherCell->tryLock()) {
             if (!isConnectedConnected(cell, otherCell)) {
-/*
-            auto const mass = static_cast<float>(cell->cluster->numCellPointers);
-            auto const otherMass = static_cast<float>(otherCell->cluster->numCellPointers);
-            auto const energyToTransfer = / *sqrt* /(mass / otherMass)*(mass / otherMass)*cudaSimulationParameters.cellFunctionWeaponStrength;
-*/
                 auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
 
                 if (abs(cudaSimulationParameters.cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
@@ -66,11 +61,10 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     energyToTransfer =
                         energyToTransfer * cudaSimulationParameters.cellFunctionWeaponInhomogeneousColorFactor;
                 }
-
                 if (otherCell->energy > energyToTransfer) {
-                    otherCell->energy += -energyToTransfer;
-                    token->energy += energyToTransfer / 2.0f;
-                    cell->energy += energyToTransfer / 2.0f;
+                    otherCell->energy -= energyToTransfer;
+                    token->energy += energyToTransfer / 2;
+                    cell->energy += energyToTransfer / 2;
                     token->memory[Enums::Weapon::OUTPUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
                 }
             }

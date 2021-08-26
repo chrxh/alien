@@ -38,44 +38,56 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
         auto cell = token->cell;
+
+        if (!cell->tryLock()) {
+            continue;
+        }
+
         int numMovedTokens = 0;
         EntityFactory factory;
         factory.init(&data);
         int numCellForEnergyAveraging = 0;
-        if (cell->tryLock()) {
-            cellsForEnergyAveraging[numCellForEnergyAveraging++] = cell;
-        }
-        auto tokenBranchNumber = token->getTokenBranchNumber();
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto const& connectedCell = cell->connections[i].cell;
-            if (((tokenBranchNumber + 1 - connectedCell->branchNumber)
-                 % cudaSimulationParameters.cellMaxTokenBranchNumber)
-                != 0) {
-                continue;
-            }
-            if (connectedCell->tokenBlocked) {
-                continue;
-            }
+        cellsForEnergyAveraging[numCellForEnergyAveraging++] = cell;
+        if (token->energy >= cudaSimulationParameters.tokenMinEnergy) {
+            auto tokenBranchNumber = token->getTokenBranchNumber();
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (((tokenBranchNumber + 1 - connectedCell->branchNumber)
+                     % cudaSimulationParameters.cellMaxTokenBranchNumber)
+                    != 0) {
+                    continue;
+                }
+                if (connectedCell->tokenBlocked) {
+                    continue;
+                }
 
-            auto tokenIndex = atomicAdd(&connectedCell->tag, 1);
-            if (tokenIndex >= cudaSimulationParameters.cellMaxToken) {
-                continue;
-            }
+                auto tokenIndex = atomicAdd(&connectedCell->tag, 1);
+                if (tokenIndex >= cudaSimulationParameters.cellMaxToken) {
+                    continue;
+                }
 
-            token->memory[Enums::Branching::TOKEN_BRANCH_NUMBER] = connectedCell->branchNumber;
-            if (0 == numMovedTokens) {
-                token->sourceCell = token->cell; 
-                token->cell = connectedCell;
-            } else {
-                factory.duplicateToken(connectedCell, token);
-            }
+                token->memory[Enums::Branching::TOKEN_BRANCH_NUMBER] = connectedCell->branchNumber;
+                if (0 == numMovedTokens) {
+                    token->sourceCell = token->cell;
+                    token->cell = connectedCell;
+                } else {
+                    if (connectedCell->tryLock()) {
+                        if (connectedCell->energy > cudaSimulationParameters.cellMinEnergy + token->energy) {
+                            factory.duplicateToken(connectedCell, token);
+                            connectedCell->energy -= token->energy;
+                        }
+                        connectedCell->releaseLock();
+                    }
+                }
 
-            if (connectedCell->tryLock()) {
-                cellsForEnergyAveraging[numCellForEnergyAveraging++] = connectedCell;
+                if (connectedCell->tryLock()) {
+                    cellsForEnergyAveraging[numCellForEnergyAveraging++] = connectedCell;
+                    ++numMovedTokens;
+                }
             }
-            ++numMovedTokens;
         }
         if (0 == numMovedTokens) {
+            cell->energy += token->energy;
             token = nullptr;
         }
         if (numCellForEnergyAveraging > 0) {

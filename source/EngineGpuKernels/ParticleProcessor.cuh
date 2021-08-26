@@ -180,6 +180,9 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             }
         } else {
             if (auto cell = data.cellMap.getFirst(particle->absPos)) {
+                if (!cell->tryLock()) {
+                    continue;
+                }
                 if (particle->tryLock()) {
                     
                     atomicAdd(&cell->energy, particle->energy);
@@ -189,6 +192,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 
                     particle = nullptr;
                 }
+                cell->releaseLock();
             }
         }
     }
