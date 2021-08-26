@@ -11,6 +11,7 @@
 #include "CellComputerFunction.cuh"
 #include "ConstructorFunction.cuh"
 #include "ScannerFunction.cuh"
+#include "WeaponFunction.cuh"
 
 class TokenProcessor
 {
@@ -134,8 +135,11 @@ __inline__ __device__ void TokenProcessor::executeModifyingCellFunctions(Simulat
                     if (Enums::CellFunction::CONSTRUCTOR == cellFunctionType) {
                         ConstructorFunction::processing(token, data);
                     }
+                    if (Enums::CellFunction::WEAPON == cellFunctionType) {
+                        WeaponFunction::processing(token, data);
+                    }
 
-//                    success = true;
+                    //                    success = true;
                     cell->releaseLock();
                 }
 /*            } while (!success);*/

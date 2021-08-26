@@ -80,6 +80,8 @@ private:
         Cell* sourceCell,
         float energy,
         bool duplicateMemory);
+
+    __inline__ __device__ static void mutateToken(Token* token, SimulationData& data);
 };
 
 /************************************************************************/
@@ -88,6 +90,8 @@ private:
 __inline__ __device__ void
 ConstructorFunction::processing(Token* token, SimulationData& data)
 {
+    mutateToken(token, data);
+
     ConstructionData constructionData;
     readConstructionData(token, constructionData);
 
@@ -318,6 +322,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     int numOtherCells;
     data.cellMap.get(
         otherCells,
+        18,
         numOtherCells,
         posOfNewCell,
         cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
@@ -540,72 +545,74 @@ __inline__ __device__ Token* ConstructorFunction::constructToken(
     return result;
 }
 
+__inline__ __device__ void ConstructorFunction::mutateToken(Token* token, SimulationData& data)
+{
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorTokenDataMutationProb) {
+        auto index = data.numberGen.random(255) % cudaSimulationParameters.tokenMemorySize;
+        token->memory[index] = data.numberGen.random(255);
+    }
+}
+
+
 /*
-__inline__ __device__ void ConstructorFunction::mutateConstructionData(ConstructionData& constructionData)
+__inline__ __device__ void ConstructorFunction::mutateConstructionData(
+    SimulationData& data,
+    ConstructionData& constructionData)
 {
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
-        constructionData.constrInOption = static_cast<Enums::ConstrInOption::Type>(
-            static_cast<unsigned char>(_data->numberGen.random(255)) % Enums::ConstrInOption::_COUNTER);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.constrIn = static_cast<Enums::ConstrIn::Type>(
+            static_cast<unsigned char>(data.numberGen.random(255)) % Enums::ConstrIn::_COUNTER);
     }
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
-        constructionData.angle = _data->numberGen.random(255);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
+        constructionData.angle = data.numberGen.random(255);
     }
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
-        constructionData.distance = _data->numberGen.random(255);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
+        constructionData.distance = data.numberGen.random(255);
     }
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
-        constructionData.maxConnections = _data->numberGen.random(255);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.maxConnections = data.numberGen.random(255);
     }
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
-        constructionData.branchNumber = _data->numberGen.random(255);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.branchNumber = data.numberGen.random(255);
     }
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
-        constructionData.metaData = _data->numberGen.random(255);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.metaData = data.numberGen.random(255);
     }
-    if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
-        constructionData.cellFunctionType = _data->numberGen.random(255);
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
+        constructionData.cellFunctionType = data.numberGen.random(255);
     }
 }
 
-__inline__ __device__ void ConstructorFunction::mutateCellFunctionData(Cell * cell)
+__inline__ __device__ void ConstructorFunction::mutateCellFunctionData(SimulationData& data, Cell* cell)
 {
-    if (0 == threadIdx.x) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
-            cell->numStaticBytes = _data->numberGen.random(MAX_CELL_STATIC_BYTES);
-        }
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+        cell->numStaticBytes = data.numberGen.random(MAX_CELL_STATIC_BYTES);
     }
-    __syncthreads();
 
-    auto const staticDataBlock = calcPartition(MAX_CELL_STATIC_BYTES, threadIdx.x, blockDim.x);
-    for (int i = staticDataBlock.startIndex; i <= staticDataBlock.endIndex; ++i) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
-            cell->staticData[i] = _data->numberGen.random(255);
+    for (int i = 0; i <= MAX_CELL_STATIC_BYTES; ++i) {
+        if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+            cell->staticData[i] = data.numberGen.random(255);
         }
     }
 
-    if (0 == threadIdx.x) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
-            cell->numMutableBytes = _data->numberGen.random(MAX_CELL_MUTABLE_BYTES);
-        }
+    if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+        cell->numMutableBytes = data.numberGen.random(MAX_CELL_MUTABLE_BYTES);
     }
-    __syncthreads();
 
-    auto const mutableDataBlock = calcPartition(MAX_CELL_MUTABLE_BYTES, threadIdx.x, blockDim.x);
-    for (int i = mutableDataBlock.startIndex; i <= mutableDataBlock.endIndex; ++i) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
-            cell->mutableData[i] = _data->numberGen.random(255);
+    for (int i = 0; i <= MAX_CELL_MUTABLE_BYTES; ++i) {
+        if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellDataMutationProb) {
+            cell->mutableData[i] = data.numberGen.random(255);
         }
     }
 }
 
-__inline__ __device__ void ConstructorFunction::mutateDuplicatedToken(Token * token)
+__inline__ __device__ void ConstructorFunction::mutateDuplicatedToken(SimulationData& data, Token* token)
 {
     auto const memoryPartition = calcPartition(MAX_TOKEN_MEM_SIZE, threadIdx.x, blockDim.x);
     for (auto index = memoryPartition.startIndex; index <= memoryPartition.endIndex; ++index) {
-        if (_data->numberGen.random() < cudaSimulationParameters.cellFunctionConstructorTokenDataMutationProb) {
-            token->memory[index] = _data->numberGen.random(255);
+        if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorTokenDataMutationProb) {
+            token->memory[index] = data.numberGen.random(255);
         }
     }
 }
-
 */
