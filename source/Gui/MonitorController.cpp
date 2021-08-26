@@ -51,8 +51,7 @@ void MonitorController::startWritingToFile(std::string const& filename)
 
     FileInfo info;
     info.file.open(filename, std::ios_base::out);
-    info.file << "time step, number of clusters, number of active clusters, number of cells, number of particles, "
-                 "number of tokens, total internal energy, total kinetic energy"
+    info.file << "time step, number of cells, number of particles, number of tokens, total internal energy"
               << std::endl;
 
     _fileInfo = std::move(info);
@@ -99,10 +98,8 @@ void MonitorController::dataReadyToRetrieve()
 void MonitorController::writeDataToFile()
 {
     if (_model->timeStep != _fileInfo->lastTimestep) {
-        _fileInfo->file << _model->timeStep << ", " << _model->numClusters << ", " << _model->numClustersWithTokens
-                        << ", " << _model->numCells << ", " << _model->numParticles << ", " << _model->numTokens << ", "
-                        << _model->totalInternalEnergy << ", "
-                        << _model->totalLinearKineticEnergy + _model->totalRotationalKineticEnergy << std::endl;
+        _fileInfo->file << _model->timeStep << ", " << _model->numCells << ", " << _model->numParticles << ", " << _model->numTokens << ", "
+                        << _model->totalInternalEnergy << std::endl;
 
         _fileInfo->lastTimestep = _model->timeStep;
     }

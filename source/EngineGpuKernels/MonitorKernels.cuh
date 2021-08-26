@@ -9,72 +9,40 @@
 /************************************************************************/
 /* Helpers    															*/
 /************************************************************************/
-/*
-
-__global__ void
-getMonitorDataForClusters(Array<Cluster*> clusterPointers, CudaMonitorData monitorData)
+__global__ void getEnergyForMonitorData(SimulationData data, CudaMonitorData monitorData)
 {
-    auto const clusterPartition =
-        calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    for (auto clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        auto const cluster = clusterPointers.at(clusterIndex);
-        if (nullptr == cluster) {
-            continue;
-        }
-        auto const mass = static_cast<float>(cluster->numCellPointers);
-        if (0 == threadIdx.x) {
-            monitorData.incNumClusters(1);
-            monitorData.incNumCells(cluster->numCellPointers);
-            monitorData.incNumTokens(cluster->numTokenPointers);
-            if (cluster->numTokenPointers > 0) {
-                monitorData.incNumClustersWithTokens(1);
-            }
-        }
+    {
+        auto& cells = data.entities.cellPointers;
+        auto const partition =
+            calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-        __shared__ float clusterInternalEnergy;
-        if (0 == threadIdx.x) {
-            clusterInternalEnergy = 0.0f;
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
+            monitorData.incInternalEnergy(cell->energy);
         }
-        __syncthreads();
+    }
+    {
+        auto& particles = data.entities.particlePointers;
+        auto const partition =
+            calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-        auto const cellPartition =
-            calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-        for (auto cellIndex = cellPartition.startIndex; cellIndex <= cellPartition.endIndex; ++cellIndex) {
-            auto const cell = cluster->cellPointers[cellIndex];
-            atomicAdd_block(&clusterInternalEnergy, cell->getEnergy());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& particle = particles.at(index);
+            monitorData.incInternalEnergy(particle->energy);
         }
-        auto const tokenPartition =
-            calcPartition(cluster->numTokenPointers, threadIdx.x, blockDim.x);
-        for (auto tokenIndex = tokenPartition.startIndex; tokenIndex <= tokenPartition.endIndex; ++tokenIndex) {
-            auto const token = cluster->tokenPointers[tokenIndex];
-            atomicAdd_block(&clusterInternalEnergy, token->getEnergy());
-        }
-        __syncthreads();
+    }
+    {
+        auto& tokens = data.entities.tokenPointers;
+        auto const partition =
+            calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-        if (0 == threadIdx.x) {
-            monitorData.incInternalEnergy(clusterInternalEnergy);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& token = tokens.at(index);
+            monitorData.incInternalEnergy(token->energy);
         }
-        __syncthreads();
-
     }
 }
 
-__global__ void getMonitorDataForParticles(SimulationData data, CudaMonitorData monitorData)
-{
-    if (0 == threadIdx.x && 0 == blockIdx.x) {
-        monitorData.incNumParticles(data.entities.particlePointers.getNumEntries());
-    }
-
-    auto const partition = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-    for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const particle = data.entities.particlePointers.at(index);
-        monitorData.incInternalEnergy(particle->energy);
-    }
-}
-
-*/
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
@@ -87,9 +55,6 @@ __global__ void cudaGetCudaMonitorData(SimulationData data, CudaMonitorData moni
     monitorData.setNumParticles(data.entities.particlePointers.getNumEntries());
     monitorData.setNumTokens(data.entities.tokenPointers.getNumEntries());
 
-    /*
-    KERNEL_CALL(getMonitorDataForClusters, data.entities.clusterPointers, monitorData);
-    KERNEL_CALL(getMonitorDataForParticles, data, monitorData);
-*/
+    KERNEL_CALL(getEnergyForMonitorData, data, monitorData);
 }
 

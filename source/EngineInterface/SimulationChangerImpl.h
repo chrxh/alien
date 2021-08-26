@@ -48,5 +48,5 @@ private:
 
     list<QMetaObject::Connection> _monitorConnections;
 
-    boost::optional<int> _activeClustersReference;
+    boost::optional<int> _tokensReference;
 };
