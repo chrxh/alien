@@ -60,10 +60,7 @@ void ActionModel::setCellCopied(CellDescription cell, QVector2D const& vel)
         cell.connections->clear();
 	}
 	_copiedEntity.clear();
-	_copiedEntity.addCluster(
-		ClusterDescription().setVel(vel).setAngle(0.0).setPos(*cell.pos).setAngularVel(0.0).addCell(cell)
-		.setMetadata(ClusterMetadata())
-	);
+    _copiedEntity.addCluster(ClusterDescription().addCell(cell));
 }
 
 void ActionModel::setParticleCopied(ParticleDescription const & value)

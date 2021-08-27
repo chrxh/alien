@@ -108,11 +108,6 @@ void DataRepository::addAndSelectCell(QVector2D const& posDelta)
     QVector2D pos = _rect.center().toQVector2D() + posDelta;
     int memorySize = _parameters.cellFunctionComputerCellMemorySize;
     auto desc = ClusterDescription()
-                    .setPos(pos)
-                    .setVel({})
-                    .setAngle(0)
-                    .setAngularVel(0)
-                    .setMetadata(ClusterMetadata())
                     .addCell(CellDescription()
                                  .setEnergy(_parameters.cellFunctionConstructorOffspringCellEnergy)
                                  .setMaxConnections(_parameters.cellMaxBonds)
@@ -252,8 +247,6 @@ namespace
             for (auto& cell : *cluster.cells) {
                 *cell.pos = transform.map(QVector3D(*cell.pos)).toVector2D();
             }
-            *cluster.angle += angle;
-            *cluster.pos = transform.map(QVector3D(*cluster.pos)).toVector2D();
         }
         for (int i = 0; i < numParticles; ++i) {
             auto& particle = particleResolver(i);
@@ -622,12 +615,6 @@ void DataRepository::moveSelection(QVector2D const& delta)
 void DataRepository::moveExtendedSelection(QVector2D const& delta)
 {
     TRY;
-    for (uint64_t selectedClusterId : _selectedClusterIds) {
-        auto selectedClusterIndex = _navi.clusterIndicesByClusterIds.at(selectedClusterId);
-        ClusterDescription& clusterDesc = _data.clusters->at(selectedClusterIndex);
-        clusterDesc.pos = *clusterDesc.pos + delta;
-    }
-
     list<uint64_t> extSelectedCellIds;
     for (auto clusterIdByCellId : _navi.clusterIdsByCellIds) {
         uint64_t cellId = clusterIdByCellId.first;

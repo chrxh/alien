@@ -70,6 +70,7 @@ void StartupController::initWidget()
     _graphicsView = new QGraphicsView(_parent);
     _graphicsView->setScene(_scene);
     _graphicsView->setGeometry(0, 0, 800, 400);
+    _graphicsView->setFrameStyle(0);
 }
 
 void StartupController::fadeout()

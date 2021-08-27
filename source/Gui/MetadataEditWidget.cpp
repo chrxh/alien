@@ -24,15 +24,12 @@ void MetadataEditWidget::updateModel ()
         return;
     }
 
-	auto& clusterMetadata = *cluster->metadata;
     auto& cellMetadata = *cell->metadata;
 	int row = QTextEdit::textCursor().blockNumber();
 
     //collect new data
     QString currentText = QTextEdit::textCursor().block().text();
     currentText.remove(0, 14);
-    if(row == 0)
-        clusterMetadata.name = currentText;
     if(row == 1)
         cellMetadata.name = currentText;
 
@@ -54,7 +51,6 @@ void MetadataEditWidget::updateDisplay ()
         return;
     }
 
-    auto& clusterMetadata = *cluster->metadata;
     auto& cellMetadata = *cell->metadata;
 
 	//define auxiliary strings
@@ -127,7 +123,7 @@ void MetadataEditWidget::updateDisplay ()
     //create string of display
     QString text;
     text = parStart+colorTextStart+ "cluster name:"+colorEnd;
-    text += colorDataStart+" " + clusterMetadata.name+colorEnd+parEnd;
+    text += colorDataStart + " " + "obsolete" + colorEnd + parEnd;
     text += parStart+colorTextStart+ "cell name:&nbsp;&nbsp;&nbsp;"+colorEnd;
     text += colorDataStart+" " + cellMetadata.name+colorEnd+parEnd;
     text += parStart+colorTextStart+ "cell color: &nbsp;&nbsp;"+colorEnd;
@@ -206,7 +202,6 @@ void MetadataEditWidget::mousePressEvent (QMouseEvent* e)
             return;
         }
 
-        auto& clusterMetadata = *cluster->metadata;
         auto& cellMetadata = *cell->metadata;
 
         if ((col == 15) || (col == 16) || (col == 17))

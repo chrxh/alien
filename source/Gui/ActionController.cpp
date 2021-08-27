@@ -581,7 +581,7 @@ void ActionController::onCopyEntity()
 		CHECK(selectedParticleIds.empty());
 		auto const& cell = _repository->getCellDescRef(*selectedCellIds.begin());
 		auto const& cluster = _repository->getClusterDescRef(*selectedCellIds.begin());
-		QVector2D vel = Physics::tangentialVelocity(*cell.pos - *cluster.pos, { *cluster.vel, *cluster.angularVel });
+        QVector2D vel = *cell.vel;
 		_model->setCellCopied(cell, vel);
 	}
 	if (!selectedParticleIds.empty()) {
@@ -708,6 +708,7 @@ namespace
 	{
 		if (data.clusters) {
 			for (auto& cluster : data.clusters.get()) {
+/*
 				*cluster.pos += posDelta;
 				if (velocityXDelta) {
 					cluster.vel->setX(cluster.vel->x() + *velocityXDelta);
@@ -718,6 +719,7 @@ namespace
 				if (angularVelocityDelta) {
 					*cluster.angularVel += *angularVelocityDelta;
 				}
+*/
 				if (cluster.cells) {
 					for (auto& cell : cluster.cells.get()) {
 						*cell.pos += posDelta;

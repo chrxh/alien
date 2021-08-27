@@ -119,25 +119,28 @@ namespace boost {
 			ar & data.computerSourcecode & data.name & data.description & data.color;
 		}
         template <class Archive>
-        inline void save(Archive& ar, ConnectionDescription const& connection, const unsigned int /*version*/)
+        inline void serialize(Archive& ar, ConnectionDescription& data, const unsigned int /*version*/)
         {
-            ar << connection.cellId << connection.distance << connection.angleFromPrevious;
+            ar& data.cellId& data.distance& data.angleFromPrevious;
         }
         template <class Archive>
-        inline void serialize(Archive& ar, ConnectionDescription& data, const unsigned int version)
+        inline void serialize(Archive& ar, CellDescription& data, const unsigned int /*version */)
         {
-            boost::serialization::split_free(ar, data, version);
+            ar& data.id& data.pos& data.vel& data.energy& data.maxConnections& data.connections;
+            ar& data.tokenBlocked& data.tokenBranchNumber& data.metadata& data.cellFeature;
+            ar& data.tokens& data.tokenUsages;
         }
 
+/*
         template <class Archive>
-        inline void save(Archive& ar, CellDescription const& data, const unsigned int /*version*/)
+        inline void save(Archive& ar, CellDescription const& data, const unsigned int / *version* /)
         {
             ar << data.id << data.pos << data.energy << data.maxConnections << data.connections;
             ar << data.tokenBlocked << data.tokenBranchNumber << data.metadata << data.cellFeature;
             ar << data.tokens << data.tokenUsages;
         }
         template <class Archive>
-        inline void load(Archive& ar, CellDescription& data, const unsigned int /*version*/)
+        inline void load(Archive& ar, CellDescription& data, const unsigned int / *version* /)
         {
             boost::optional<list<uint64_t>> connectingCellIds;
 
@@ -162,6 +165,7 @@ namespace boost {
         {
             boost::serialization::split_free(ar, data, version);
         }
+*/
 
 		template<class Archive>
 		inline void serialize(Archive & ar, ClusterMetadata& data, const unsigned int /*version*/)
@@ -171,9 +175,10 @@ namespace boost {
 		template<class Archive>
 		inline void serialize(Archive & ar, ClusterDescription& data, const unsigned int /*version*/)
 		{
-			ar & data.id & data.pos & data.vel & data.angle & data.angularVel & data.metadata & data.cells;
-		}
-		template<class Archive>
+            ar& data.id& data.cells;
+        }
+
+        template <class Archive>
 		inline void serialize(Archive & ar, ParticleMetadata& data, const unsigned int /*version*/)
 		{
 			ar & data.color;
@@ -185,12 +190,33 @@ namespace boost {
 		}
 
         template <class Archive>
-        inline void save(Archive& ar, DataDescription const& data, const unsigned int /*version*/)
+        inline void serialize(Archive& ar, DataDescription& data, const unsigned int /*version*/)
         {
-            ar << data.clusters << data.particles;
+            ar & data.clusters & data.particles;
+        }
+
+        //DEPRECATED
+        template <class Archive>
+        inline void serialize(Archive& ar, DEPRECATED_CellDescription& data, const unsigned int /*version */)
+        {
+            ar& data.id& data.pos& data.energy& data.maxConnections& data.connections;
+            ar& data.tokenBlocked& data.tokenBranchNumber& data.metadata& data.cellFeature;
+            ar& data.tokens& data.tokenUsages;
         }
         template <class Archive>
-        inline void load(Archive& ar, DataDescription& data, const unsigned int /*version*/)
+        inline void serialize(Archive& ar, DEPRECATED_ClusterDescription& data, const unsigned int /*version*/)
+        {
+            ar& data.id& data.pos& data.vel& data.angle& data.angularVel& data.metadata& data.cells;
+        }
+        template <class Archive>
+        inline void serialize(Archive& ar, DEPRECATED_DataDescription& data, const unsigned int /*version*/)
+        {
+            ar& data.clusters& data.particles;
+        }
+
+        /*
+        template <class Archive>
+        inline void load(Archive& ar, DataDescription& data, const unsigned int / *version* /)
         {
             boost::optional<vector<ClusterDescription>> clusters;
             ar >> clusters >> data.particles;
@@ -241,6 +267,7 @@ namespace boost {
         {
             boost::serialization::split_free(ar, data, version);
         }
+*/
 
         template<class Archive>
 		inline void save(Archive& ar, SymbolTable const& data, const unsigned int /*version*/)
@@ -337,13 +364,15 @@ SimulationController* SerializerImpl::deserializeSimulation(SerializedSimulation
     istringstream stream(data.content);
 	boost::archive::binary_iarchive ia(stream);
 
-	DataDescription content;
+	DEPRECATED_DataDescription DEPRECATED_content;
 	SimulationParameters parameters = deserializeSimulationParameters(data.simulationParameters);
     SymbolTable* symbolMap = deserializeSymbolTable(data.symbolMap);
     auto [worldSize, specificData] = deserializeGeneralSettings(data.generalSettings);
 	uint timestep;
 	int typeId;
-	ia >> content >> typeId >> timestep;
+	ia >> DEPRECATED_content >> typeId >> timestep;
+
+    auto content = DEPRECATED_content.getConverted();
 
 	auto facade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 

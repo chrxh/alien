@@ -74,8 +74,6 @@ void DataEditController::notificationFromCellTab()
             return;
 		}
 
-        cluster->pos = calcCenterPosOfCells(*cluster);
-
         _repository->updateCluster(*cluster);
         _repository->reconnectSelectedCells();
 

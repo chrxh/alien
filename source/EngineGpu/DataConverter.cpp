@@ -275,17 +275,6 @@ auto DataConverter::scanAndCreateClusterDescription(int startCellIndex, std::uno
 
     setInplaceDifference(freeCellIndices, scannedCellIndices);
 
-    /*
-    std::set<int> newFreeCellIndices;
-    std::set_difference(
-        freeCellIndices.begin(),
-        freeCellIndices.end(),
-        scannedCellIndices.begin(),
-        scannedCellIndices.end(),
-        std::inserter(newFreeCellIndices, newFreeCellIndices.begin()));
-    freeCellIndices = std::move(newFreeCellIndices);
-*/
-
     result.cluster.id = _numberGen->getId();
     result.cluster.addCells(cells);
 
