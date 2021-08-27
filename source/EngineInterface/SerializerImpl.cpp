@@ -366,11 +366,13 @@ SimulationController* SerializerImpl::deserializeSimulation(SerializedSimulation
 
 //	DEPRECATED_DataDescription DEPRECATED_content;
     DataDescription content;
+
 	SimulationParameters parameters = deserializeSimulationParameters(data.simulationParameters);
     SymbolTable* symbolMap = deserializeSymbolTable(data.symbolMap);
     auto [worldSize, specificData] = deserializeGeneralSettings(data.generalSettings);
 	uint timestep;
 	int typeId;
+
 //    ia >> DEPRECATED_content >> typeId >> timestep;
     ia >> content >> typeId >> timestep;
 
