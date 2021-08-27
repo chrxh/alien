@@ -44,7 +44,7 @@ private:
 
 namespace
 {
-    float constexpr TimestepSize = 1.0f;
+    float constexpr TimestepSize = 0.5f;
     float constexpr ForceFactor = 1.0f;
 }
 
@@ -123,19 +123,20 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto velDelta = cell->vel - otherCell->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
 
-                if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
-                    auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 16;
-                    atomicAdd(&cell->temp1.x, force.x);
-                    atomicAdd(&cell->temp1.y, force.y);
-                }
-                else {
-                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2*Math::lengthSquared(posDelta));
+                if (Math::length(cell->vel) > 0.5f && cell->numConnections == 0 && isApproaching) {
+                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * Math::lengthSquared(posDelta));
                     auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
                     atomicAdd(&cell->temp1.x, force1.x);
                     atomicAdd(&cell->temp1.y, force1.y);
                     atomicAdd(&otherCell->temp1.x, force2.x);
                     atomicAdd(&otherCell->temp1.y, force2.y);
+                } else {
+                    auto force = Math::normalized(posDelta)
+                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 32;
+                    atomicAdd(&cell->temp1.x, force.x);
+                    atomicAdd(&cell->temp1.y, force.y);
+                    atomicAdd(&otherCell->temp1.x, -force.x);
+                    atomicAdd(&otherCell->temp1.y, -force.y);
                 }
 
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections

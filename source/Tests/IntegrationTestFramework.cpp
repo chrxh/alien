@@ -439,19 +439,6 @@ template<>
 bool checkCompatibility<ClusterDescription>(ClusterDescription cluster1, ClusterDescription cluster2)
 {
     auto result = true;
-    EXPECT_TRUE(result = checkCompatibility(cluster1.pos, cluster2.pos));
-    if (result) {
-        EXPECT_TRUE(result = checkCompatibility(cluster1.vel, cluster2.vel));
-    }
-    if (result) {
-        EXPECT_TRUE(result = checkCompatibility(cluster1.angle, cluster2.angle));
-    }
-    if (result) {
-        EXPECT_TRUE(result = checkCompatibility(cluster1.angularVel, cluster2.angularVel));
-    }
-    if (result) {
-        EXPECT_TRUE(result = checkCompatibility(cluster1.metadata, cluster2.metadata));
-    }
     if (result) {
         EXPECT_TRUE(result = checkCompatibility(cluster1.cells, cluster2.cells));
     }

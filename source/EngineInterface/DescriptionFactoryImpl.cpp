@@ -62,14 +62,7 @@ ClusterDescription DescriptionFactoryImpl::createHexagon(
         }
     }
 
-    auto hexagon = ClusterDescription()
-                       .setId(numberGenerator->getId())
-                       .setVel({0, 0})
-                       .setAngle(0)
-                       .setAngularVel(0)
-                       .setMetadata(ClusterMetadata())
-                       .addCells(cells);
-    hexagon.setPos(hexagon.getClusterPosFromCells());
+    auto hexagon = ClusterDescription().setId(numberGenerator->getId()).addCells(cells);
 
     std::unordered_map<uint64_t, int> cache;
     for (int j = 0; j < layers; ++j) {
@@ -142,9 +135,7 @@ ClusterDescription DescriptionFactoryImpl::createRect(
         }
         cellMatrix.push_back(cellRow);
     }
-    auto result = ClusterDescription()
-                       .setId(numberGenerator->getId())
-                       .setMetadata(ClusterMetadata());
+    auto result = ClusterDescription().setId(numberGenerator->getId());
     for (int x = 0; x < size.x; ++x) {
         for (int y = 0; y < size.y; ++y) {
             result.addCell(cellMatrix[x][y]);
@@ -169,8 +160,7 @@ ClusterDescription DescriptionFactoryImpl::createRect(
 ClusterDescription DescriptionFactoryImpl::createUnconnectedDisc(
     CreateDiscParameters const& parameters) const
 {
-    auto circle =
-        ClusterDescription().setVel({0, 0}).setAngle(0).setAngularVel(0).setMetadata(ClusterMetadata());
+    auto circle = ClusterDescription();
 
     uint64_t id = 0;
     for (double radius = parameters._innerRadius; radius - FLOATINGPOINT_HIGH_PRECISION <= parameters._outerRadius;
@@ -193,8 +183,6 @@ ClusterDescription DescriptionFactoryImpl::createUnconnectedDisc(
             circle.addCell(cell);
         }
     }
-
-    circle.setPos(circle.getClusterPosFromCells());
 
     return circle;
 }
