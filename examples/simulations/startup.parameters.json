@@ -19,7 +19,9 @@
             },
             "weapon": {
                 "strength": "0.1",
-                "energy cost": "0.5"
+                "energy cost": "0.5",
+                "geometry deviation exponent": "0",
+                "inhomogeneous color factor": "1"
             },
             "constructor": {
                 "offspring": {
