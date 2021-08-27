@@ -364,15 +364,17 @@ SimulationController* SerializerImpl::deserializeSimulation(SerializedSimulation
     istringstream stream(data.content);
 	boost::archive::binary_iarchive ia(stream);
 
-	DEPRECATED_DataDescription DEPRECATED_content;
+//	DEPRECATED_DataDescription DEPRECATED_content;
+    DataDescription content;
 	SimulationParameters parameters = deserializeSimulationParameters(data.simulationParameters);
     SymbolTable* symbolMap = deserializeSymbolTable(data.symbolMap);
     auto [worldSize, specificData] = deserializeGeneralSettings(data.generalSettings);
 	uint timestep;
 	int typeId;
-	ia >> DEPRECATED_content >> typeId >> timestep;
+//    ia >> DEPRECATED_content >> typeId >> timestep;
+    ia >> content >> typeId >> timestep;
 
-    auto content = DEPRECATED_content.getConverted();
+//    auto content = DEPRECATED_content.getConverted();
 
 	auto facade = ServiceLocator::getInstance().getService<EngineInterfaceBuilderFacade>();
 
