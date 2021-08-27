@@ -82,7 +82,6 @@ struct ENGINEINTERFACE_EXPORT CellDescription
 	CellDescription& addToken(uint index, TokenDescription const& value);
 	CellDescription& delToken(uint index);
     CellDescription& setTokenUsages(int value) { tokenUsages = value; return *this; }
-    QVector2D getPosRelativeTo(ClusterDescription const& cluster) const;
     bool isConnectedTo(uint64_t id) const;
 };
 
@@ -90,23 +89,11 @@ struct ENGINEINTERFACE_EXPORT ClusterDescription
 {
 	uint64_t id = 0;
 
-	//TODO #SoftBody
-	boost::optional<QVector2D> pos;
-	boost::optional<QVector2D> vel;
-	boost::optional<double> angle;
-	boost::optional<double> angularVel;
-	boost::optional<ClusterMetadata> metadata;
-
 	boost::optional<vector<CellDescription>> cells;
 
 	ClusterDescription() = default;
     
     ClusterDescription& setId(uint64_t value) { id = value; return *this; }
-	ClusterDescription& setPos(QVector2D const& value) { pos = value; return *this; }
-	ClusterDescription& setVel(QVector2D const& value) { vel = value; return *this; }
-	ClusterDescription& setAngle(double value) { angle = value; return *this; }
-	ClusterDescription& setAngularVel(double value) { angularVel = value; return *this; }
-	ClusterDescription& setMetadata(ClusterMetadata const& value) { metadata = value; return *this; }
 	ClusterDescription& addCells(list<CellDescription> const& value)
 	{
 		if (cells) {
@@ -258,4 +245,41 @@ struct DescriptionNavigator
 			}
 		}
 	}
+};
+
+//DEPRECATED
+struct ENGINEINTERFACE_EXPORT DEPRECATED_CellDescription
+{
+    uint64_t id = 0;
+
+    boost::optional<QVector2D> pos;
+    boost::optional<double> energy;
+    boost::optional<int> maxConnections;
+    boost::optional<list<uint64_t>> connections;
+    boost::optional<bool> tokenBlocked;
+    boost::optional<int> tokenBranchNumber;
+    boost::optional<CellMetadata> metadata;
+    boost::optional<CellFeatureDescription> cellFeature;
+    boost::optional<vector<TokenDescription>> tokens;
+    boost::optional<int> tokenUsages;
+};
+
+struct ENGINEINTERFACE_EXPORT DEPRECATED_ClusterDescription
+{
+    uint64_t id = 0;
+
+    boost::optional<QVector2D> pos;
+    boost::optional<QVector2D> vel;
+    boost::optional<double> angle;
+    boost::optional<double> angularVel;
+    boost::optional<ClusterMetadata> metadata;
+    boost::optional<vector<DEPRECATED_CellDescription>> cells;
+};
+
+struct ENGINEINTERFACE_EXPORT DEPRECATED_DataDescription
+{
+    boost::optional<vector<DEPRECATED_ClusterDescription>> clusters;
+    boost::optional<vector<ParticleDescription>> particles;
+
+    DataDescription getConverted() const;
 };

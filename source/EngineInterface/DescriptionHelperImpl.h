@@ -38,11 +38,6 @@ private:
 	unordered_set<int> reclusteringSingleClusterAndReturnDiscardedClusterIndices(int clusterIndex, vector<ClusterDescription> &newClusters);
 	void lookUpCell(uint64_t cellId, ClusterDescription &newCluster, unordered_set<uint64_t> &lookedUpCellIds, unordered_set<uint64_t> &remainingCellIds);
 
-	void setClusterAttributes(ClusterDescription& cluster);
-	double calcAngleBasedOnOrigClusters(vector<CellDescription> const & cells) const;
-	Physics::Velocities calcVelocitiesBasedOnOrigClusters(vector<CellDescription> const & cells) const;
-	boost::optional<ClusterMetadata> calcMetadataBasedOnOrigClusters(vector<CellDescription> const & cells) const;
-
 	SpaceProperties* _metric = nullptr;
 	SimulationParameters _parameters;
 	NumberGenerator* _numberGen = nullptr;

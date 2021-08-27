@@ -69,12 +69,7 @@ public:
                          .setTokenBranchNumber(2)
                          .setTokenUsages(3)
                          .setTokens({TokenDescription().setData(tokenMemory).setEnergy(89)}))
-            .setId(clusterId)
-            .setPos({1, 2})
-            .setVel({0.1, -0.2})
-            .setAngle(23)
-            .setAngularVel(1.2)
-            .setMetadata(clusterMetadata);
+            .setId(clusterId);
     }
 
     void checkDescription(DataDescription const& data) const
