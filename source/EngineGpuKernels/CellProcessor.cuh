@@ -44,7 +44,7 @@ private:
 
 namespace
 {
-    float constexpr TimestepSize = 0.5f;
+    float constexpr TimestepSize = 1.0f;
     float constexpr ForceFactor = 1.0f;
 }
 
