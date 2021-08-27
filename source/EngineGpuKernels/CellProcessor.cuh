@@ -123,14 +123,16 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto velDelta = cell->vel - otherCell->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
 
-                if (Math::length(cell->vel) > 0.5f && cell->numConnections == 0 && isApproaching) {
-                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * Math::lengthSquared(posDelta));
-                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
+                if (Math::length(cell->vel) > 0.5f /* && cell->numConnections == 0 && */ && isApproaching) {
+                    auto distanceSquared = distance * distance + 0.25;
+                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared);
+                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * distanceSquared);
                     atomicAdd(&cell->temp1.x, force1.x);
                     atomicAdd(&cell->temp1.y, force1.y);
                     atomicAdd(&otherCell->temp1.x, force2.x);
                     atomicAdd(&otherCell->temp1.y, force2.y);
-                } else {
+                }
+                else {
                     auto force = Math::normalized(posDelta)
                         * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 32;
                     atomicAdd(&cell->temp1.x, force.x);
