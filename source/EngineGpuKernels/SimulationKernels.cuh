@@ -37,6 +37,10 @@ __global__ void processingStep3(SimulationData data)
     CellProcessor cellProcessor;
     cellProcessor.applyAndInitForces(data);
     cellProcessor.clearTag(data);
+
+    ParticleProcessor particleProcessor;
+    particleProcessor.movement(data);
+    particleProcessor.collision(data);
 }
 
 __global__ void processingStep4(SimulationData data, int numTokenPointers)
@@ -44,12 +48,8 @@ __global__ void processingStep4(SimulationData data, int numTokenPointers)
     CellProcessor cellProcessor;
     cellProcessor.calcForces(data);
 
-    ParticleProcessor particleProcessor;
-    particleProcessor.movement(data);
-    particleProcessor.collision(data);
-
     TokenProcessor tokenProcessor;
-    tokenProcessor.movement(data, numTokenPointers);
+    tokenProcessor.movement(data, numTokenPointers);    //changes cell energy without lock
 }
 
 __global__ void processingStep5(SimulationData data)
