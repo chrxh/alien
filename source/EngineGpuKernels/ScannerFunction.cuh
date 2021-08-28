@@ -12,7 +12,7 @@
 class ScannerFunction
 {
 public:
-    __inline__ __device__ static void processing(Token* token);
+    __inline__ __device__ static void processing(Token* token, SimulationData& data);
 
 private:
     struct SpiralLookupResult
@@ -22,7 +22,8 @@ private:
         Cell * prevCell;
         Cell * prevPrevCell;
     };
-    __device__ static SpiralLookupResult spiralLookupAlgorithm(int depth, Cell * cell, Cell * sourceCell);
+    __device__ static SpiralLookupResult
+    spiralLookupAlgorithm(int depth, Cell* cell, Cell* sourceCell, SimulationData& data);
 
     __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
 };
@@ -30,13 +31,13 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ScannerFunction::processing(Token * token)
+__inline__ __device__ void ScannerFunction::processing(Token* token, SimulationData& data)
 {
     auto& tokenMem = token->memory;
     unsigned int n = static_cast<unsigned char>(tokenMem[Enums::Scanner::INOUT_CELL_NUMBER]);
     auto cell = token->cell;
 
-    auto lookupResult = spiralLookupAlgorithm(n + 1, cell, token->sourceCell);
+    auto lookupResult = spiralLookupAlgorithm(n + 1, cell, token->sourceCell, data);
 
     //restart?
     if (lookupResult.finish) {
@@ -107,7 +108,7 @@ __inline__ __device__ void ScannerFunction::processing(Token * token)
     }
 }
 
-__device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell * cell, Cell * sourceCell)
+__device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell* cell, Cell* sourceCell, SimulationData& data)
     -> SpiralLookupResult
 {
     SpiralLookupResult result;
@@ -121,7 +122,9 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell * cell, C
     for (int currentDepth = 0; currentDepth < depth; ++currentDepth) {
         visitedCell.insert(result.cell);
 
-        auto originAngle = Math::angleOfVector(result.prevCell->absPos - result.cell->absPos);
+        auto posDelta = result.prevCell->absPos - result.cell->absPos;
+        data.cellMap.mapDisplacementCorrection(posDelta);
+        auto originAngle = Math::angleOfVector(posDelta);
 
         auto nextCellFound = false;
         Cell* nextCell = nullptr;
@@ -131,7 +134,9 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell * cell, C
             if (!visitedCell.contains(nextCandidateCell) && !nextCandidateCell->tokenBlocked) {
 
                 //calc angle from nextCandidateCell
-                auto angle = Math::angleOfVector(nextCandidateCell->absPos - cell->absPos);
+                auto nextPosDelta = nextCandidateCell->absPos - cell->absPos;
+                data.cellMap.mapDisplacementCorrection(nextPosDelta);
+                auto angle = Math::angleOfVector(nextPosDelta);
 
                 //another cell already found? => compare angles
                 if (nextCellFound) {

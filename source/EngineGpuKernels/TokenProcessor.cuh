@@ -70,11 +70,13 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
                 if (0 == numMovedTokens) {
                     token->sourceCell = token->cell;
                     token->cell = connectedCell;
+                    ++numMovedTokens;
                 } else {
                     if (connectedCell->tryLock()) {
                         if (connectedCell->energy > cudaSimulationParameters.cellMinEnergy + token->energy) {
                             factory.duplicateToken(connectedCell, token);
                             connectedCell->energy -= token->energy;
+                            ++numMovedTokens;
                         }
                         connectedCell->releaseLock();
                     }
@@ -82,7 +84,6 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
 
                 if (connectedCell->tryLock()) {
                     cellsForEnergyAveraging[numCellForEnergyAveraging++] = connectedCell;
-                    ++numMovedTokens;
                 }
             }
         }
@@ -116,7 +117,7 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
             if (Enums::CellFunction::SCANNER == cellFunctionType) {
-                ScannerFunction::processing(token);
+                ScannerFunction::processing(token, data);
             }
         }
     }
