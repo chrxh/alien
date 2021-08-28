@@ -311,7 +311,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         firstConstructedCell,
         angleFromPreviousForNewCell,
         angleFromPreviousForFirstConstructedCell,
-        desiredDistance);
+        desiredDistance,
+        constructionData.angleAlignment);
 
     if (constructionData.isFinishConstruction) {
         newCell->tokenBlocked = false;
@@ -359,32 +360,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                 auto distance = constructionData.uniformDist ? desiredDistance : Math::length(otherPosDelta);
-/*
-                printf(
-                    "uni: %d, distance: %f, alignment: %d\n",
-                    constructionData.uniformDist,
-                    distance,
-                    constructionData.angleAlignment);
-*/
                 CellConnectionProcessor::addConnectionsForConstructor(
                     data, newCell, otherCell, 0, 0, distance, constructionData.angleAlignment);
-/*
-                for (int i = 0; i < newCell->numConnections; ++i) {
-                    printf(
-                        "newCell: %d, angle: %f, dist: %f\n",
-                        i,
-                        newCell->connections[i].angleFromPrevious,
-                        newCell->connections[i].distance);
-                }
-
-                for (int i = 0; i < otherCell->numConnections; ++i) {
-                    printf(
-                        "otherCell: %d, angle: %f, dist: %f\n",
-                        i,
-                        otherCell->connections[i].angleFromPrevious,
-                        otherCell->connections[i].distance);
-                }
-*/
             }
             otherCell->releaseLock();
         }

@@ -47,7 +47,10 @@ public:
     __device__ __inline__ void insert(T const& element)
     {
         int index = _hash(element) % _size;
-        while (_data[index]) {
+        for (int i = 0; i < _size; ++i) {
+            if (nullptr == _data[index]) {
+                break;
+            }
             if (_data[index] == element) {
                 return;
             }
