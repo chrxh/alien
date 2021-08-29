@@ -12,6 +12,7 @@
 #include "ConstructorFunction.cuh"
 #include "ScannerFunction.cuh"
 #include "WeaponFunction.cuh"
+#include "PropulsionFunction.cuh"
 
 class TokenProcessor
 {
@@ -36,6 +37,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
         auto cell = token->cell;
+        atomicAdd(&cell->tokenUsages, 1);
 
         int numMovedTokens = 0;
         EntityFactory factory;
@@ -127,6 +129,9 @@ __inline__ __device__ void TokenProcessor::executeModifyingCellFunctions(Simulat
                     }
                     if (Enums::CellFunction::WEAPON == cellFunctionType) {
                         WeaponFunction::processing(token, data);
+                    }
+                    if (Enums::CellFunction::PROPULSION == cellFunctionType) {
+                        PropulsionFunction::processing(token, data);
                     }
 
                     //                    success = true;
