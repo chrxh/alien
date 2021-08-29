@@ -62,7 +62,9 @@ CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell
 
 __inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(SimulationData& data, Cell* cell)
 {
+/*
     if (data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+*/
         auto index = atomicAdd(data.numOperations, 1);
         if (index < data.entities.cellPointers.getNumEntries()) {
             Operation& operation = data.operations[index];
@@ -71,7 +73,9 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(Simul
         } else {
             atomicSub(data.numOperations, 1);
         }
+/*
     }
+*/
 }
 
 __inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex)

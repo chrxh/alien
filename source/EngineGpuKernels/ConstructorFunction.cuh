@@ -311,8 +311,8 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
         firstConstructedCell,
         angleFromPreviousForNewCell,
         angleFromPreviousForFirstConstructedCell,
-        desiredDistance,
-        constructionData.angleAlignment);
+        desiredDistance/*,
+        constructionData.angleAlignment*/);
 
     if (constructionData.isFinishConstruction) {
         newCell->tokenBlocked = false;
