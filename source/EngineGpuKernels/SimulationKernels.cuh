@@ -67,34 +67,37 @@ __global__ void processingStep6(SimulationData data)
     tokenProcessor.executeReadonlyCellFunctions(data);
 }
 
-__global__ void processingStep7(SimulationData data, int numCellPointers, int numTokenPointers)
+__global__ void processingStep7(SimulationData data, int numCellPointers)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcVelocities(data, numCellPointers);
+}
 
+__global__ void processingStep8(SimulationData data, int numTokenPointers)
+{
     TokenProcessor tokenProcessor;
     tokenProcessor.executeModifyingCellFunctions(data, numTokenPointers);
 }
 
-__global__ void processingStep8(SimulationData data)
+__global__ void processingStep9(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcAveragedVelocities(data);
 }
 
-__global__ void processingStep9(SimulationData data)
+__global__ void processingStep10(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.applyAveragedVelocities(data);
     cellProcessor.decay(data);
 }
 
-__global__ void processingStep10(SimulationData data)
+__global__ void processingStep11(SimulationData data)
 {
     CellConnectionProcessor::processConnectionsOperations(data);
 } 
 
-__global__ void processingStep11(SimulationData data, int numParticlePointers)
+__global__ void processingStep12(SimulationData data, int numParticlePointers)
 {
     ParticleProcessor particleProcessor;
     particleProcessor.transformation(data, numParticlePointers);
@@ -121,15 +124,12 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep5, data);
     KERNEL_CALL(processingStep6, data);
-    KERNEL_CALL(
-        processingStep7,
-        data,
-        data.entities.cellPointers.getNumEntries(),
-        data.entities.tokenPointers.getNumEntries());
-    KERNEL_CALL(processingStep8, data);
+    KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
+    KERNEL_CALL(processingStep8, data, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep9, data);
     KERNEL_CALL(processingStep10, data);
-    KERNEL_CALL(processingStep11, data, data.entities.particlePointers.getNumEntries());
+    KERNEL_CALL(processingStep11, data);
+    KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
 }

@@ -69,16 +69,10 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     //propulsion
     symbolTable->addEntry("PROP_OUT","["+std::to_string(Enums::Prop::OUTPUT)+"]");
     symbolTable->addEntry("PROP_OUT::SUCCESS",std::to_string(Enums::PropOut::SUCCESS));
-    symbolTable->addEntry("PROP_OUT::SUCCESS_DAMPING_FINISHED",std::to_string(Enums::PropOut::SUCCESS_DAMPING_FINISHED));
     symbolTable->addEntry("PROP_OUT::ERROR_NO_ENERGY",std::to_string(Enums::PropOut::ERROR_NO_ENERGY));
     symbolTable->addEntry("PROP_IN","["+std::to_string(Enums::Prop::INPUT)+"]");
     symbolTable->addEntry("PROP_IN::DO_NOTHING",std::to_string(Enums::PropIn::DO_NOTHING));
     symbolTable->addEntry("PROP_IN::BY_ANGLE",std::to_string(Enums::PropIn::BY_ANGLE));
-    symbolTable->addEntry("PROP_IN::FROM_CENTER",std::to_string(Enums::PropIn::FROM_CENTER));
-    symbolTable->addEntry("PROP_IN::TOWARD_CENTER",std::to_string(Enums::PropIn::TOWARD_CENTER));
-    symbolTable->addEntry("PROP_IN::ROTATION_CLOCKWISE",std::to_string(Enums::PropIn::ROTATION_CLOCKWISE));
-    symbolTable->addEntry("PROP_IN::ROTATION_COUNTERCLOCKWISE",std::to_string(Enums::PropIn::ROTATION_COUNTERCLOCKWISE));
-    symbolTable->addEntry("PROP_IN::DAMP_ROTATION",std::to_string(Enums::PropIn::DAMP_ROTATION));
     symbolTable->addEntry("PROP_IN_ANGLE","["+std::to_string(Enums::Prop::IN_ANGLE)+"]");
     symbolTable->addEntry("PROP_IN_POWER","["+std::to_string(Enums::Prop::IN_POWER)+"]");
 

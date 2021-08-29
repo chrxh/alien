@@ -447,3 +447,37 @@ TEST_F(ScannerGpuTests, testScanMaxCellNumber_largeCluster)
     EXPECT_EQ(Enums::ScannerOut::SUCCESS, newToken.data->at(Enums::Scanner::OUTPUT));
     EXPECT_EQ(0, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
 }
+
+TEST_F(ScannerGpuTests, testScanCell_exceed)
+{
+    DataDescription origData;
+    auto cluster =
+        _factory->createRect(DescriptionFactory::CreateRectParameters().size({2, 1}), _context->getNumberGenerator());
+
+    auto& tokenSourceCell = cluster.cells->at(0);
+    tokenSourceCell.tokenBranchNumber = 0;
+    auto token = createSimpleToken();
+    (*token.data)[Enums::Scanner::INOUT_CELL_NUMBER] = 1;
+    tokenSourceCell.addToken(token);
+    tokenSourceCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::CONSTRUCTOR);
+
+    auto& firstCell = cluster.cells->at(1);
+    firstCell.tokenBranchNumber = 1;
+    firstCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::SCANNER);
+
+
+    origData.addCluster(cluster);
+
+    IntegrationTestHelper::updateData(_access, _context, origData);
+    IntegrationTestHelper::runSimulation(1, _controller);
+
+    DataDescription newData = IntegrationTestHelper::getContent(_access, {{0, 0}, {_universeSize.x, _universeSize.y}});
+    auto const& cellByCellId = IntegrationTestHelper::getCellByCellId(newData);
+    auto const& newFirstCell = cellByCellId.at(firstCell.id);
+    auto const& newScanCell = cellByCellId.at(tokenSourceCell.id);
+    auto const& newToken = newFirstCell.tokens->at(0);
+
+    checkScannedCellWithToken(newScanCell, newFirstCell, newScanCell, newToken);
+    EXPECT_EQ(Enums::ScannerOut::RESTART, newToken.data->at(Enums::Scanner::OUTPUT));
+    EXPECT_EQ(0, newToken.data->at(Enums::Scanner::INOUT_CELL_NUMBER));
+}

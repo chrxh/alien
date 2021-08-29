@@ -185,6 +185,5 @@ __device__ int ScannerFunction::getConnectionIndex(Cell* cell, Cell* otherCell)
             return i;
         }
     }
-    CUDA_THROW_NOT_IMPLEMENTED();
     return 0;
 }

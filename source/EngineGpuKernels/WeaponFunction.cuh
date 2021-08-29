@@ -82,7 +82,8 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
         data.cellMap.mapPosCorrection(particlePos);
 
         particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-        auto const radiationEnergy = min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
+        auto const radiationEnergy =
+            min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
         cell->energy -= radiationEnergy;
         EntityFactory factory;
         factory.init(&data);
@@ -94,6 +95,8 @@ __inline__ __device__ bool WeaponFunction::isHomogene(Cell* cell)
 {
     int color = cell->metadata.color;
     for (int i = 0; i < cell->numConnections; ++i) {
+
+        //TODO tryLock
         auto otherCell = cell->connections[i].cell;
         if (color != otherCell->metadata.color) {
             return false;

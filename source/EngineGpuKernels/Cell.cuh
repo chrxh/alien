@@ -46,11 +46,12 @@ struct Cell
     float energy;
     int cellFunctionType;
 
-    //auxiliary data
+    //temporary data
     int locked;	//0 = unlocked, 1 = locked
     int tag;
     float2 temp1;
     float2 temp2;
+    float2 temp3;
 
     __device__ __inline__ void getLock()
     {

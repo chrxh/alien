@@ -162,7 +162,9 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
 
         auto force = cell->temp1;
         if (Math::length(force) > cudaSimulationParameters.cellMaxForce * ForceFactor) {
-            CellConnectionProcessor::scheduleDelConnections(data, cell);
+            if(data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+                CellConnectionProcessor::scheduleDelConnections(data, cell);
+            }
         }
         cell->vel = cell->vel + force;
         if (Math::length(cell->vel) > 2) {
@@ -309,7 +311,7 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->vel = cell->temp1;
+        cell->vel = cell->temp1 * 0.99f;
     }
 }
 
@@ -362,7 +364,14 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        if (cell->energy < cudaSimulationParameters.cellMinEnergy) {
+        bool destroyDueToTokenUsage = false;
+        if (cell->tokenUsages > cudaSimulationParameters.cellMinTokenUsages) {
+            if (_data->numberGen.random() < cudaSimulationParameters.cellTokenUsageDecayProb) {
+                destroyDueToTokenUsage = true;
+            }
+        }
+
+        if (cell->energy < cudaSimulationParameters.cellMinEnergy || destroyDueToTokenUsage) {
             if (cell->numConnections > 0) {
                 CellConnectionProcessor::scheduleDelConnections(data, cell);
             } else {

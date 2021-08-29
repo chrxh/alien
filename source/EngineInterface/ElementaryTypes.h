@@ -16,7 +16,7 @@ namespace Enums
             WEAPON,
             CONSTRUCTOR,
             SENSOR,
-            COMMUNICATOR,
+            MUSCLE,
             _COUNTER
         };
     };
@@ -146,7 +146,6 @@ namespace Enums
     struct PropOut {
         enum Type {
             SUCCESS,
-            SUCCESS_DAMPING_FINISHED,
             ERROR_NO_ENERGY
         };
     };
@@ -154,10 +153,6 @@ namespace Enums
         enum Type {
             DO_NOTHING,
             BY_ANGLE,
-            FROM_CENTER,
-            TOWARD_CENTER,
-            ROTATION_CLOCKWISE,
-            ROTATION_COUNTERCLOCKWISE,
             DAMP_ROTATION,
             _COUNTER
         };
@@ -221,6 +216,27 @@ namespace Enums
         enum Type {
             NO_TARGET,
             STRIKE_SUCCESSFUL
+        };
+    };
+
+    struct Muscle {
+        enum Type {
+            OUTPUT = 36,
+            INPUT = 37,
+        };
+    };
+    struct MuscleOut {
+        enum Type {
+            SUCCESS,
+            LIMIT_REACHED
+        };
+    };
+    struct MuscleIn {
+        enum Type {
+            DO_NOTHING,
+            CONTRACT,
+            EXPAND,
+            _COUNTER
         };
     };
 }

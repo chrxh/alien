@@ -17,7 +17,6 @@ struct Particle
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
-    int alive;  //0 = dead, 1 == alive
 
     __device__ __inline__ bool isSelected()
     {
