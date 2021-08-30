@@ -8,7 +8,7 @@
         "maxCells": "500000",
         "maxClusters": "500000",
         "maxParticles": "500000",
-        "maxTokens": "50000",
+        "maxTokens": "500000",
         "metadataDynamicMemorySize": "10000000",
         "numBlocks": "256",
         "numThreadsPerBlock": "32"
