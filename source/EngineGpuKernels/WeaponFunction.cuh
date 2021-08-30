@@ -18,6 +18,10 @@ private:
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 };
 
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+
 __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationData& data)
 {
     auto const& cell = token->cell;

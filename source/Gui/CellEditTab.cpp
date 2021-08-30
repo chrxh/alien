@@ -318,7 +318,7 @@ void CellEditTab::mousePressEvent(QMouseEvent* e)
         if( row == 12 )
 			cell->cellFeature->setType(Enums::CellFunction::SENSOR);
         if( row == 13 )
-			cell->cellFeature->setType(Enums::CellFunction::COMMUNICATOR);
+			cell->cellFeature->setType(Enums::CellFunction::MUSCLE);
         updateDisplay();
 		_controller->notificationFromCellTab();
     }
@@ -444,8 +444,8 @@ QString CellEditTab::generateFormattedCellFunctionString (Enums::CellFunction::T
         text += parStart+colorDataStart+StringHelper::ws(22)+"> sensor"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+StringHelper::ws(24)+"sensor"+colorEnd+parEnd;
-    if( type == Enums::CellFunction::COMMUNICATOR )
-        text += parStart+colorDataStart+StringHelper::ws(22)+"> communicator"+colorEnd+parEnd;
+    if( type == Enums::CellFunction::MUSCLE )
+        text += parStart+colorDataStart+StringHelper::ws(22)+"> muscle"+colorEnd+parEnd;
     else
         text += parStart+colorData2Start+StringHelper::ws(24)+"communicator"+colorEnd+parEnd;
     return text;

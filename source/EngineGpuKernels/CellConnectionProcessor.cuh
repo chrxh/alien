@@ -162,6 +162,22 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(SimulationDat
             data.cellMap.mapDisplacementCorrection(posDelta);
             addConnection(data, cell1, cell2, posDelta, Math::length(posDelta));
             addConnection(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
+
+            EntityFactory factory;
+            factory.init(&data);
+
+            auto newTokenEnergy = cudaSimulationParameters.tokenMinEnergy * 1.5f;
+            if (cell1->energy > cudaSimulationParameters.cellMinEnergy + newTokenEnergy) {
+                auto token = factory.createToken(cell1, cell2);
+                token->energy = newTokenEnergy;
+                cell1->energy -= newTokenEnergy;
+            }
+            if (cell2->energy > cudaSimulationParameters.cellMinEnergy + newTokenEnergy) {
+                auto token = factory.createToken(cell2, cell1);
+                token->energy = newTokenEnergy;
+                cell2->energy -= newTokenEnergy;
+            }
+
         }
 
         __threadfence();

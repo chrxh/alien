@@ -221,8 +221,8 @@ namespace Enums
 
     struct Muscle {
         enum Type {
-            OUTPUT = 36,
-            INPUT = 37,
+            OUTPUT = 5,
+            INPUT = 36,
         };
     };
     struct MuscleOut {
@@ -236,6 +236,8 @@ namespace Enums
             DO_NOTHING,
             CONTRACT,
             EXPAND,
+            CONTRACT_ANGLE,
+            EXPAND_ANGLE,
             _COUNTER
         };
     };
