@@ -13,6 +13,7 @@
 #include "ScannerFunction.cuh"
 #include "WeaponFunction.cuh"
 #include "PropulsionFunction.cuh"
+#include "MuscleFunction.cuh"
 
 class TokenProcessor
 {
@@ -132,6 +133,9 @@ __inline__ __device__ void TokenProcessor::executeModifyingCellFunctions(Simulat
                     }
                     if (Enums::CellFunction::PROPULSION == cellFunctionType) {
                         PropulsionFunction::processing(token, data);
+                    }
+                    if (Enums::CellFunction::MUSCLE == cellFunctionType) {
+                        MuscleFunction::processing(token, data);
                     }
 
                     //                    success = true;

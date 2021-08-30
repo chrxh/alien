@@ -63,7 +63,6 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::WEAPON",std::to_string(Enums::CellFunction::WEAPON));
     symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::CONSTR",std::to_string(Enums::CellFunction::CONSTRUCTOR));
     symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::SENSOR",std::to_string(Enums::CellFunction::SENSOR));
-    symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION::COMMUNICATOR",std::to_string(Enums::CellFunction::COMMUNICATOR));
     symbolTable->addEntry("CONSTR_IN_CELL_FUNCTION_DATA","["+std::to_string(Enums::Constr::IN_CELL_FUNCTION_DATA)+"]");
 
     //propulsion
@@ -93,7 +92,6 @@ SymbolTable* EngineInterfaceSettings::getDefaultSymbolTable()
     symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::WEAPON",std::to_string(Enums::CellFunction::WEAPON));
     symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::CONSTR",std::to_string(Enums::CellFunction::CONSTRUCTOR));
     symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::SENSOR",std::to_string(Enums::CellFunction::SENSOR));
-    symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION::COMMUNICATOR",std::to_string(Enums::CellFunction::COMMUNICATOR));
     symbolTable->addEntry("SCANNER_OUT_CELL_FUNCTION_DATA","["+std::to_string(Enums::Scanner::OUT_CELL_FUNCTION_DATA)+"]");
 
     //weapon

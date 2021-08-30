@@ -25,7 +25,7 @@ private:
     __device__ static SpiralLookupResult
     spiralLookupAlgorithm(int depth, Cell* cell, Cell* sourceCell, SimulationData& data);
 
-    __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
+    __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
 };
 
 /************************************************************************/
@@ -178,7 +178,7 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell* cell, Ce
     return result;
 }
 
-__device__ int ScannerFunction::getConnectionIndex(Cell* cell, Cell* otherCell)
+__inline__ __device__ int ScannerFunction::getConnectionIndex(Cell* cell, Cell* otherCell)
 {
     for (int i = 0; i < cell->numConnections; ++i) {
         if (cell->connections[i].cell == otherCell) {

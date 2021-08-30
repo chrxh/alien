@@ -26,8 +26,8 @@ namespace
 			return "Constructor";
 		else if (type == Enums::CellFunction::SENSOR)
 			return "Sensor";
-		else if (type == Enums::CellFunction::COMMUNICATOR)
-			return "Communicator";
+		else if (type == Enums::CellFunction::MUSCLE)
+			return "Muscle";
 		else
 			return QString();
 	}
