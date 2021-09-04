@@ -1,10 +1,7 @@
 #pragma once
 
 #include "EngineImpl/Definitions.h"
-
-struct GLFWwindow;
-
-class Shader;
+#include "Definitions.h"
 
 class MainWindow
 {
@@ -17,9 +14,6 @@ private:
     void drawMenubar();
     void drawToolbar();
 
-    unsigned int VAO, VBO, EBO;
-    Shader* _shader = nullptr;
-    void* _cudaResource = nullptr;
-    unsigned int _textureId;
     SimulationController* _simController = nullptr;
+    MacroView* _macroView = nullptr;
 };
