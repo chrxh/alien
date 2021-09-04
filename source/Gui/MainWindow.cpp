@@ -1,13 +1,12 @@
 #include "MainWindow.h"
 
-#include <string>
-#include <fstream>
-#include <sstream>
 #include <iostream>
 
 #include <glad/glad.h>
 
 #include "EngineImpl/SimulationController.h"
+
+#include "MacroView.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -27,146 +26,10 @@ static void glfw_error_callback(int error, const char* description)
     std::cerr << "Glfw Error " << error << ": " << description << std::endl;
 }
 
-class Shader
-{
-public:
-    unsigned int ID;
-    // constructor generates the shader on the fly
-    // ------------------------------------------------------------------------
-    Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)
-    {
-        // 1. retrieve the vertex/fragment source code from filePath
-        std::string vertexCode;
-        std::string fragmentCode;
-        std::string geometryCode;
-        std::ifstream vShaderFile;
-        std::ifstream fShaderFile;
-        std::ifstream gShaderFile;
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        try
-        {
-            // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
-            std::stringstream vShaderStream, fShaderStream;
-            // read file's buffer contents into streams
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();
-            // close file handlers
-            vShaderFile.close();
-            fShaderFile.close();
-            // convert stream into string
-            vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();
-            // if geometry shader path is present, also load a geometry shader
-            if (geometryPath != nullptr)
-            {
-                gShaderFile.open(geometryPath);
-                std::stringstream gShaderStream;
-                gShaderStream << gShaderFile.rdbuf();
-                gShaderFile.close();
-                geometryCode = gShaderStream.str();
-            }
-        }
-        catch (std::ifstream::failure& e)
-        {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        }
-        const char* vShaderCode = vertexCode.c_str();
-        const char* fShaderCode = fragmentCode.c_str();
-        // 2. compile shaders
-        unsigned int vertex, fragment;
-        // vertex shader
-        vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
-        glCompileShader(vertex);
-        checkCompileErrors(vertex, "VERTEX");
-        // fragment Shader
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
-        // if geometry shader is given, compile geometry shader
-        unsigned int geometry;
-        if (geometryPath != nullptr)
-        {
-            const char* gShaderCode = geometryCode.c_str();
-            geometry = glCreateShader(GL_GEOMETRY_SHADER);
-            glShaderSource(geometry, 1, &gShaderCode, NULL);
-            glCompileShader(geometry);
-            checkCompileErrors(geometry, "GEOMETRY");
-        }
-        // shader Program
-        ID = glCreateProgram();
-        glAttachShader(ID, vertex);
-        glAttachShader(ID, fragment);
-        if (geometryPath != nullptr)
-            glAttachShader(ID, geometry);
-        glLinkProgram(ID);
-        checkCompileErrors(ID, "PROGRAM");
-        // delete the shaders as they're linked into our program now and no longer necessery
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
-        if (geometryPath != nullptr)
-            glDeleteShader(geometry);
-    }
-    // activate the shader
-    // ------------------------------------------------------------------------
-    void use()
-    {
-        glUseProgram(ID);
-    }
-    // utility uniform functions
-    // ------------------------------------------------------------------------
-    void setBool(const std::string& name, bool value) const
-    {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
-    }
-    // ------------------------------------------------------------------------
-    void setInt(const std::string& name, int value) const
-    {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
-    }
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string& name, float value) const
-    {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
-    }
-
-private:
-    // utility function for checking shader compilation/linking errors.
-    // ------------------------------------------------------------------------
-    void checkCompileErrors(GLuint shader, std::string type)
-    {
-        GLint success;
-        GLchar infoLog[1024];
-        if (type != "PROGRAM")
-        {
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if (!success)
-            {
-                glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-            }
-        }
-        else
-        {
-            glGetProgramiv(shader, GL_LINK_STATUS, &success);
-            if (!success)
-            {
-                glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-            }
-        }
-    }
-};
-
 GLFWwindow* MainWindow::init(SimulationController* simController)
 {
     _simController = simController;
+    _macroView = new MacroView();
 
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()) {
@@ -224,75 +87,20 @@ GLFWwindow* MainWindow::init(SimulationController* simController)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    //---
-    glfwMakeContextCurrent(window);
+//    glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return nullptr;
     }
 
-    _shader = new Shader("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
-
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    float vertices[] = {
-        // positions          // colors           // texture coords
-        1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-        1.0f, -1.0f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
-    };
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-
-    glGenTextures(1, &_textureId);
-    glBindTexture(GL_TEXTURE_2D, _textureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, 100, 100, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-
-    _cudaResource = simController->registerImageResource(_textureId);
-
-    _shader->use(); // don't forget to activate/use the shader before setting uniforms!
-                     // either set it manually like so:
-    _shader->setInt("texture1", 0);
+    _macroView->init(simController, {mode->width, mode->height});
 
     return window;
 }
 
 void MainWindow::mainLoop(GLFWwindow* window)
 {
-
-    //-------------
-
     // Our state
     bool show_demo_window = true;
     bool show_another_window = true;
@@ -320,31 +128,8 @@ void MainWindow::mainLoop(GLFWwindow* window)
             ImGui::ShowDemoWindow(&show_demo_window);
         {}
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        static float f = 0.0f;
-        static int counter = 0;
-
         drawToolbar();
         drawMenubar();
-
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-                                                                /*
-                                                                ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-                                                                ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-                                                                ImGui::Checkbox("Another Window", &show_another_window);
-
-                                                                ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-                                                                ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-                                                                if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                                                                counter++;
-                                                                ImGui::SameLine();
-                                                                ImGui::Text("counter = %d", counter);
-
-                                                                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-                                                                */
-        ImGui::End();
 
         // 3. Show another simple window.
         if (show_another_window) {
@@ -357,8 +142,6 @@ void MainWindow::mainLoop(GLFWwindow* window)
         }
 
         // Rendering
-        _simController->getVectorImage({0, 0}, {99, 99}, _cudaResource, {100, 100}, 1);
-
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -366,9 +149,7 @@ void MainWindow::mainLoop(GLFWwindow* window)
         glClearColor(spaceColor.x * spaceColor.w, spaceColor.y * spaceColor.w, spaceColor.z * spaceColor.w, spaceColor.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        _shader->use();
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        _macroView->render();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -384,6 +165,8 @@ void MainWindow::shutdown(GLFWwindow* window)
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    delete _macroView;
 }
 
 void MainWindow::drawMenubar()

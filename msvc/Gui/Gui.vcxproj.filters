@@ -60,6 +60,12 @@
     <ClInclude Include="..\..\source\Gui\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MacroView.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Shader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -91,6 +97,12 @@
     </ClCompile>
     <ClCompile Include="..\..\external\glad\src\glad.c">
       <Filter>glad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MacroView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Shader.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
