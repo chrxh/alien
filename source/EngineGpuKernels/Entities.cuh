@@ -16,15 +16,15 @@ struct Entities
 
     DynamicMemory strings;
 
-    void init(CudaConstants const& cudaConstants)
+    void init(GpuConstants const& gpuConstants)
     {
-        cellPointers.init(cudaConstants.MAX_CELLPOINTERS);
-        cells.init(cudaConstants.MAX_CELLS);
-        tokenPointers.init(cudaConstants.MAX_TOKENPOINTERS);
-        tokens.init(cudaConstants.MAX_TOKENS);
-        particles.init(cudaConstants.MAX_PARTICLES);
-        particlePointers.init(cudaConstants.MAX_PARTICLEPOINTERS);
-        strings.init(cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE);
+        cellPointers.init(gpuConstants.MAX_CELLPOINTERS);
+        cells.init(gpuConstants.MAX_CELLS);
+        tokenPointers.init(gpuConstants.MAX_TOKENPOINTERS);
+        tokens.init(gpuConstants.MAX_TOKENS);
+        particles.init(gpuConstants.MAX_PARTICLES);
+        particlePointers.init(gpuConstants.MAX_PARTICLEPOINTERS);
+        strings.init(gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE);
     }
 
     void free()

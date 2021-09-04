@@ -61,7 +61,15 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     energyToTransfer =
                         energyToTransfer * cudaSimulationParameters.cellFunctionWeaponInhomogeneousColorFactor;
                 }
-                if (homogene && otherHomogene && cell->metadata.color != otherCell->metadata.color) {
+                auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
+                    color1 = color1 % 7;
+                    color2 = color2 % 7;
+                    if (color1 == color2 + 1 || (color1 == 0 && color2 == 6 )) {
+                        return true;
+                    }
+                    return false;
+                };
+                if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
                     energyToTransfer =
                         energyToTransfer * cudaSimulationParameters.cellFunctionWeaponInhomogeneousColorFactor;
                 }
@@ -99,11 +107,15 @@ __inline__ __device__ bool WeaponFunction::isHomogene(Cell* cell)
 {
     int color = cell->metadata.color;
     for (int i = 0; i < cell->numConnections; ++i) {
-
-        //TODO tryLock
         auto otherCell = cell->connections[i].cell;
         if (color != otherCell->metadata.color) {
             return false;
+        }
+        for (int j = 0; j < otherCell->numConnections; ++j) {
+            auto otherOtherCell = otherCell->connections[j].cell;
+            if (color != otherOtherCell->metadata.color) {
+                return false;
+            }
         }
     }
     return true;
