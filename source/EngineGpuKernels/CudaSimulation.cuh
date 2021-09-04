@@ -6,20 +6,23 @@
 #endif
 #include <GL/gl.h>
 
-#include "CudaConstants.h"
-#include "Definitions.cuh"
-#include "DllExport.h"
 #include "EngineInterface/ExecutionParameters.h"
 #include "EngineInterface/MonitorData.h"
+#include "EngineGpuKernels/GpuConstants.h"
+
+#include "Definitions.cuh"
+#include "DllExport.h"
 
 class ENGINEGPUKERNELS_EXPORT CudaSimulation
 {
 public:
+    static void initCuda();
+
     CudaSimulation(
         int2 const& worldSize,
         int timestep,
         SimulationParameters const& parameters,
-        CudaConstants const& cudaConstants);
+        GpuConstants const& cudaConstants);
     ~CudaSimulation();
 
     void* registerImageResource(GLuint image);
@@ -48,7 +51,7 @@ public:
     void applyForce(ApplyForceData const& applyData);
     void moveSelection(float2 const& displacement);
 
-    CudaConstants getCudaConstants() const;
+    GpuConstants getGpuConstants() const;
     MonitorData getMonitorData();
     int getTimestep() const;
     void setTimestep(int timestep);
@@ -59,11 +62,11 @@ public:
     void clear();
 
 private:
-    void setCudaConstants(CudaConstants const& cudaConstants);
+    void setGpuConstants(GpuConstants const& cudaConstants);
     void DEBUG_printNumEntries();
 
 private:
-    CudaConstants _cudaConstants;
+    GpuConstants _gpuConstants;
     SimulationData* _cudaSimulationData;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;

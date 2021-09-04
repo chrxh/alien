@@ -311,7 +311,7 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->vel = cell->temp1 * 0.99f;
+        cell->vel = cell->temp1 * 0.999f;
     }
 }
 

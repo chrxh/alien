@@ -529,6 +529,9 @@ __inline__ __device__ void ConstructorFunction::mutateToken(Token* token, Simula
         auto index = data.numberGen.random(255) % cudaSimulationParameters.tokenMemorySize;
         token->memory[index] = data.numberGen.random(255);
     }
+    if (data.numberGen.random() < 0.01) {
+        token->memory[Enums::Constr::IN_CELL_METADATA] = data.numberGen.random(255);
+    }
 }
 
 

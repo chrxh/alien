@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>dna-replicator.col</file>
-        <file>replicator.col</file>
-        <file>replicator.parameters.json</file>
-    </qresource>
-</RCC>
