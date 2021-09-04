@@ -2,45 +2,45 @@
 
 struct SimulationParameters
 {
-	float cellMinDistance = 0.0;
-	float cellMaxDistance = 0.0;
-	float cellMaxForce = 0.0;
-	float cellMaxForceDecayProb = 0.0;
-    int cellMinTokenUsages = 0;
-    float cellTokenUsageDecayProb = 0;
-    int cellMaxBonds = 0;
-	int cellMaxToken = 0;
-	int cellMaxTokenBranchNumber = 0;
-	int cellCreationMaxConnection = 0;	//TODO: add to editor
-	int cellCreationTokenAccessNumber = 0; //TODO: add to editor
-    float cellMinEnergy = 0.0;
-	float cellTransformationProb = 0.0;
-	float cellFusionVelocity = 0.0;
+    float cellMinDistance = 0.3f;
+    float cellMaxDistance = 1.3f;
+    float cellMaxForce = 0.8f;
+    float cellMaxForceDecayProb = 0.2f;
+    int cellMinTokenUsages = 40000;
+    float cellTokenUsageDecayProb = 0.000001f;
+    int cellMaxBonds = 6;
+    int cellMaxToken = 3;
+    int cellMaxTokenBranchNumber = 6;
+    int cellCreationMaxConnection = 4;
+    int cellCreationTokenAccessNumber = 0;
+    float cellMinEnergy = 50.0f;
+    float cellTransformationProb = 0.2f;
+    float cellFusionVelocity = 0.4f;
 
-	int cellFunctionComputerMaxInstructions = 0;
-	int cellFunctionComputerCellMemorySize = 0;
-	float cellFunctionWeaponStrength = 0.0;
-    float cellFunctionWeaponEnergyCost = 0.0;
-    float cellFunctionWeaponGeometryDeviationExponent = 0.0;
-    float cellFunctionWeaponInhomogeneousColorFactor = 0.0;
-    float cellFunctionConstructorOffspringCellEnergy = 0.0;
-	float cellFunctionConstructorOffspringCellDistance = 0.0;
-	float cellFunctionConstructorOffspringTokenEnergy = 0.0;
+    float cellFunctionWeaponStrength = 0.1f;
+    float cellFunctionWeaponEnergyCost = 0.2f;
+    float cellFunctionWeaponGeometryDeviationExponent = 0;
+    float cellFunctionWeaponInhomogeneousColorFactor = 1.0f;
+    int cellFunctionComputerMaxInstructions = 15;
+    int cellFunctionComputerCellMemorySize = 8;
+    float cellFunctionConstructorOffspringCellEnergy = 100.0f;
+    float cellFunctionConstructorOffspringCellDistance = 1.6f;
+    float cellFunctionConstructorOffspringTokenEnergy = 60.0f;
     bool cellFunctionConstructorOffspringTokenSuppressMemoryCopy = false;
-    float cellFunctionConstructorTokenDataMutationProb = 0.0;
-    float cellFunctionConstructorCellDataMutationProb = 0.0;
-    float cellFunctionConstructorCellPropertyMutationProb = 0.0;
-    float cellFunctionConstructorCellStructureMutationProb = 0.0;
-    float cellFunctionSensorRange = 0.0;
-	float cellFunctionCommunicatorRange = 0.0;
+    float cellFunctionConstructorTokenDataMutationProb = 0.002f;
+    float cellFunctionConstructorCellDataMutationProb = 0.002f;
+    float cellFunctionConstructorCellPropertyMutationProb = 0.002f;
+    float cellFunctionConstructorCellStructureMutationProb = 0.002f;
+    float cellFunctionSensorRange = 50.0f;
+    float cellFunctionCommunicatorRange = 50.0f;
 
-	int tokenMemorySize = 0;
-	float tokenMinEnergy = 0.0;
+    int tokenMemorySize = 256;
+    float tokenMinEnergy = 3.0f;
 
-	float radiationExponent = 0.0;
-	float radiationFactor = 0.0;
-	float radiationProb = 0.0;
-	float radiationVelocityMultiplier = 0.0;
-	float radiationVelocityPerturbation = 0.0;
+    float radiationExponent = 1;
+    float radiationFactor = 0.0002f;
+    float radiationProb = 0.03f;
+    float radiationVelocityMultiplier = 1.0f;
+    float radiationVelocityPerturbation = 0.5f;
 };
 

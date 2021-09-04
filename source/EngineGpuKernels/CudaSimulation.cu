@@ -1,11 +1,8 @@
+#include "CudaSimulation.cuh"
+
 #include <functional>
 #include <iostream>
 #include <list>
-
-#if defined(_WIN32)
-#define NOMINMAX
-#include <windows.h>
-#endif
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
@@ -23,10 +20,8 @@
 #include "Base/ServiceLocator.h"
 #include "CleanupKernels.cuh"
 #include "ConstantMemory.cuh"
-#include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
 #include "CudaMonitorData.cuh"
-#include "CudaSimulation.cuh"
 #include "Entities.cuh"
 #include "Map.cuh"
 #include "MonitorKernels.cuh"
@@ -69,6 +64,7 @@ namespace
         int getDeviceNumberOfHighestComputeCapability()
         {
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+            int result = 0;
 
             int numberOfDevices;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
@@ -85,7 +81,6 @@ namespace
                 loggingService->logMessage(Priority::Important, stream.str());
             }
 
-            int result = 0;
             int highestComputeCapability = 0;
             for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
                 cudaDeviceProp prop;
@@ -112,17 +107,21 @@ namespace
     };
 }
 
+void CudaSimulation::initCuda()
+{
+    CudaInitializer::init();
+}
+
 CudaSimulation::CudaSimulation(
     int2 const& worldSize,
     int timestep,
     SimulationParameters const& parameters,
-    CudaConstants const& cudaConstants)
+    GpuConstants const& gpuConstants)
 {
-    CudaInitializer::init();
     CudaMemoryManager::getInstance().reset();
 
     setSimulationParameters(parameters);
-    setCudaConstants(cudaConstants);
+    setGpuConstants(gpuConstants);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "acquire GPU memory");
@@ -133,19 +132,19 @@ CudaSimulation::CudaSimulation(
 
     auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    _cudaSimulationData->init(worldSize, cudaConstants, timestep);
+    _cudaSimulationData->init(worldSize, gpuConstants, timestep);
     _cudaMonitorData->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
-    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cudaConstants.MAX_CELLS, _cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(gpuConstants.MAX_CELLS, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(
-        cudaConstants.MAX_PARTICLES, _cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(cudaConstants.MAX_TOKENS, _cudaAccessTO->tokens);
+        gpuConstants.MAX_PARTICLES, _cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(gpuConstants.MAX_TOKENS, _cudaAccessTO->tokens);
     CudaMemoryManager::getInstance().acquireMemory<char>(
-        cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE, _cudaAccessTO->stringBytes);
+        gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE, _cudaAccessTO->stringBytes);
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
@@ -318,9 +317,9 @@ void CudaSimulation::moveSelection(float2 const& displacement)
     GPU_FUNCTION(cudaMoveSelection, displacement, *_cudaSimulationData);
 }
 
-CudaConstants CudaSimulation::getCudaConstants() const
+GpuConstants CudaSimulation::getGpuConstants() const
 {
-    return _cudaConstants;
+    return _gpuConstants;
 }
 
 MonitorData CudaSimulation::getMonitorData()
@@ -356,10 +355,10 @@ void CudaSimulation::clear()
     GPU_FUNCTION(cudaClearData, *_cudaSimulationData);
 }
 
-void CudaSimulation::setCudaConstants(CudaConstants const& cudaConstants_)
+void CudaSimulation::setGpuConstants(GpuConstants const& cudaConstants_)
 {
-    _cudaConstants = cudaConstants_;
+    _gpuConstants = cudaConstants_;
 
     CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(CudaConstants), 0, cudaMemcpyHostToDevice));
+        cudaMemcpyToSymbol(cudaConstants, &cudaConstants_, sizeof(GpuConstants), 0, cudaMemcpyHostToDevice));
 }
