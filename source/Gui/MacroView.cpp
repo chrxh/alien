@@ -6,8 +6,12 @@
 
 #include "Shader.h"
 
-void MacroView::init(SimulationController* simController, IntVector2D const& viewportSize)
+void MacroView::init(SimulationController* simController, IntVector2D const& viewportSize, float zoomFactor)
 {
+    auto worldSize = simController->getWorldSize();
+    _worldCenter = {toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2};
+    _zoomFactor = zoomFactor;
+
     _simController = simController;
     _shader =
         new Shader("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
@@ -65,7 +69,6 @@ void MacroView::resize(IntVector2D const& size)
         glDeleteFramebuffers(1, &_fbo);
         glDeleteTextures(1, &_textureId);
         glDeleteTextures(1, &_textureFramebufferId);
-        //TODO delete textures
 
         _areTexturesInitialized = true;
     }
@@ -97,7 +100,7 @@ void MacroView::resize(IntVector2D const& size)
 
 void MacroView::render()
 {
-    _simController->getVectorImage({-150, -250}, {99, 99}, _cudaResource, {_viewportSize.x, _viewportSize.y}, 1);
+    requestImageFromSimulation();
 
     _shader->use();
 
@@ -116,4 +119,20 @@ void MacroView::render()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void MacroView::requestImageFromSimulation()
+{
+    auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
+    auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
+
+    _simController->getVectorImage(topLeft, bottomRight, _cudaResource, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
+}
+
+RealVector2D MacroView::mapViewToWorldPosition(RealVector2D const& viewPos) const
+{
+    RealVector2D relCenter{
+        toFloat(_viewportSize.x / (2.0 * _zoomFactor)), toFloat(_viewportSize.y / (2.0 * _zoomFactor))};
+    RealVector2D relWorldPos{viewPos.x / _zoomFactor, viewPos.y / _zoomFactor};
+    return _worldCenter - relCenter + relWorldPos;
 }
