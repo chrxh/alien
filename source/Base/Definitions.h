@@ -85,4 +85,5 @@ struct BASE_EXPORT RealVector2D
     void operator-=(RealVector2D const& vec);
     RealVector2D operator+(RealVector2D const& other) const;
     RealVector2D operator-(RealVector2D const& other) const;
+    RealVector2D operator/(float divisor) const;
 };

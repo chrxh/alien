@@ -9,12 +9,15 @@ class MacroView
 public:
     void init(SimulationController* simController, IntVector2D const& viewportSize, float zoomFactor);
     void resize(IntVector2D const& viewportSize);
+    void continuousZoomIn(IntVector2D const& viewPos);
+    void continuousZoomOut(IntVector2D const& viewPos);
 
     void render();
 
 private:
     void requestImageFromSimulation();
 
+    void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
 
 
