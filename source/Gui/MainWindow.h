@@ -11,6 +11,8 @@ public:
     void shutdown(GLFWwindow* window);
 
 private:
+    void processEvents();
+
     void drawMenubar();
     void drawToolbar();
 
