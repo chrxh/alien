@@ -43,3 +43,13 @@ void RealVector2D::operator-=(RealVector2D const& vec)
     x -= vec.x;
     y -= vec.y;
 }
+
+RealVector2D RealVector2D::operator+(RealVector2D const& other) const
+{
+    return RealVector2D{x + other.x, y + other.y};
+}
+
+RealVector2D RealVector2D::operator-(RealVector2D const& other) const
+{
+    return RealVector2D{x - other.x, y - other.y};
+}

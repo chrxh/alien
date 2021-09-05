@@ -27,7 +27,11 @@ public:
 
     void closeSimulation();
 
+    IntVector2D getWorldSize() const;
+
 private:
+    IntVector2D _worldSize;
+
     EngineWorker _worker;
     std::thread* _thread = nullptr;
 };
