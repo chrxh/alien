@@ -52,23 +52,48 @@ void MacroView::init(SimulationController* simController, IntVector2D const& vie
     glEnableVertexAttribArray(2);
 
     resize(viewportSize);
+
+    _shader->use();
+    _shader->setInt("texture1", 0);
+    _shader->setInt("texture2", 0);
+    _shader->setBool("glowEffect", true);
+    _shader->setBool("motionEffect", true);
+    _shader->setFloat("motionBlurFactor", 0.6f);
 }
 
 void MacroView::resize(IntVector2D const& size)
 {
+    if (_areTexturesInitialized) {
+        glDeleteFramebuffers(1, &_fbo);
+        glDeleteTextures(1, &_textureId);
+        glDeleteTextures(1, &_textureFramebufferId);
+        //TODO delete textures
+
+        _areTexturesInitialized = true;
+    }
+
     glGenTextures(1, &_textureId);
     glBindTexture(GL_TEXTURE_2D, _textureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-
     _cudaResource = _simController->registerImageResource(_textureId);
 
-    _shader->use();
-    _shader->setInt("texture1", 0);
+    glGenTextures(1, &_textureFramebufferId);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
+
+    glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);  
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+
     _viewportSize = size;
 }
 
@@ -77,6 +102,20 @@ void MacroView::render()
     _simController->getVectorImage({-50, 0}, {99, 99}, _cudaResource, {_viewportSize.x, _viewportSize.y}, 1);
 
     _shader->use();
+
+    GLint currentFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    _shader->setInt("phase", 0);
     glBindVertexArray(_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _textureId);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+    _shader->setInt("phase", 1);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
