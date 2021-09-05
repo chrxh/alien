@@ -14,6 +14,7 @@ void SimulationController::initCuda()
 
 void SimulationController::newSimulation(IntVector2D size, int timestep, SimulationParameters const& parameters, GpuConstants const& gpuConstants)
 {
+    _worldSize = size;
     _worker.newSimulation(size, timestep, parameters, gpuConstants);
 
     _thread = new std::thread(runEngineWorker, &_worker);
@@ -41,4 +42,9 @@ void SimulationController::closeSimulation()
     delete _thread;
 
     _worker.shutdown();
+}
+
+IntVector2D SimulationController::getWorldSize() const
+{
+    return _worldSize;
 }

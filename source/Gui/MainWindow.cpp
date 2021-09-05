@@ -21,9 +21,52 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-static void glfw_error_callback(int error, const char* description)
+namespace
 {
-    std::cerr << "Glfw Error " << error << ": " << description << std::endl;
+    struct InputState
+    {
+        bool leftMouseButtonHold = false;
+        bool rightMouseButtonHold = false;
+        int posX = 0;
+        int posY = 0;
+    };
+    InputState inputState;
+
+    void mouseClickEvent(GLFWwindow* window, int button, int action, int mods)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.WantCaptureMouse) {
+            ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+        } else {
+            if (0 == button) {
+                if (1 == action) {
+                    inputState.leftMouseButtonHold = true;
+                }
+                if (0 == action) {
+                    inputState.leftMouseButtonHold = false;
+                }
+            }
+            if (1 == button) {
+                if (1 == action) {
+                    inputState.rightMouseButtonHold = true;
+                }
+                if (0 == action) {
+                    inputState.rightMouseButtonHold = false;
+                }
+            }
+        }
+    }
+
+    void mouseMoveEvent(GLFWwindow* window, double posX, double posY)
+    {
+        inputState.posX = static_cast<int>(posX);
+        inputState.posY = static_cast<int>(posY);
+    }
+
+    void glfwErrorCallback(int error, const char* description)
+    {
+        std::cerr << "Glfw Error " << error << ": " << description << std::endl;
+    }
 }
 
 GLFWwindow* MainWindow::init(SimulationController* simController)
@@ -31,7 +74,8 @@ GLFWwindow* MainWindow::init(SimulationController* simController)
     _simController = simController;
     _macroView = new MacroView();
 
-    glfwSetErrorCallback(glfw_error_callback);
+    glfwSetErrorCallback(glfwErrorCallback);
+
     if (!glfwInit()) {
         return nullptr;
     }
@@ -76,7 +120,7 @@ GLFWwindow* MainWindow::init(SimulationController* simController)
                          // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -87,14 +131,17 @@ GLFWwindow* MainWindow::init(SimulationController* simController)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-//    glfwMakeContextCurrent(window);
+    glfwSetMouseButtonCallback(window, mouseClickEvent);
+    glfwSetCursorPosCallback(window, mouseMoveEvent);
+
+    //    glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return nullptr;
     }
 
-    _macroView->init(simController, {mode->width, mode->height});
+    _macroView->init(simController, {mode->width, mode->height}, 1);
 
     return window;
 }
@@ -150,9 +197,7 @@ void MainWindow::mainLoop(GLFWwindow* window)
         glClear(GL_COLOR_BUFFER_BIT);
 
         _macroView->render();
-
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
     }
 }
