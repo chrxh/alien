@@ -98,6 +98,20 @@ void MacroView::resize(IntVector2D const& size)
     _viewportSize = size;
 }
 
+void MacroView::continuousZoomIn(IntVector2D const& viewPos)
+{
+    auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+    _zoomFactor *= 1.02f;
+    centerTo(worldPos, viewPos);
+}
+
+void MacroView::continuousZoomOut(IntVector2D const& viewPos)
+{
+    auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+    _zoomFactor /= 1.02f;
+    centerTo(worldPos, viewPos);
+}
+
 void MacroView::render()
 {
     requestImageFromSimulation();
@@ -127,6 +141,14 @@ void MacroView::requestImageFromSimulation()
     auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
 
     _simController->getVectorImage(topLeft, bottomRight, _cudaResource, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
+}
+
+void MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
+{
+    RealVector2D deltaViewPos{
+        toFloat(viewPos.x) - toFloat(_viewportSize.x) / 2.0f, toFloat(viewPos.y) - toFloat(_viewportSize.y) / 2.0f};
+    auto deltaWorldPos = deltaViewPos / _zoomFactor;
+    _worldCenter = worldPosition - deltaWorldPos;
 }
 
 RealVector2D MacroView::mapViewToWorldPosition(RealVector2D const& viewPos) const

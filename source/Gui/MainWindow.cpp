@@ -27,8 +27,7 @@ namespace
     {
         bool leftMouseButtonHold = false;
         bool rightMouseButtonHold = false;
-        int posX = 0;
-        int posY = 0;
+        IntVector2D mousePos;
     };
     InputState inputState;
 
@@ -59,8 +58,8 @@ namespace
 
     void mouseMoveEvent(GLFWwindow* window, double posX, double posY)
     {
-        inputState.posX = static_cast<int>(posX);
-        inputState.posY = static_cast<int>(posY);
+        inputState.mousePos.x = static_cast<int>(posX);
+        inputState.mousePos.y = static_cast<int>(posY);
     }
 
     void glfwErrorCallback(int error, const char* description)
@@ -110,7 +109,7 @@ GLFWwindow* MainWindow::init(SimulationController* simController)
     auto screenWidth = mode->width;
     auto screenHeight = mode->height;
 
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "alien", /*primaryMonitor*/NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "alien", primaryMonitor, NULL);
     if (window == NULL) {
         return nullptr;
     }
@@ -165,6 +164,8 @@ void MainWindow::mainLoop(GLFWwindow* window)
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
+        processEvents();
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -212,6 +213,16 @@ void MainWindow::shutdown(GLFWwindow* window)
     glfwTerminate();
 
     delete _macroView;
+}
+
+void MainWindow::processEvents()
+{
+    if (inputState.leftMouseButtonHold) {
+        _macroView->continuousZoomIn(inputState.mousePos);
+    }
+    if (inputState.rightMouseButtonHold) {
+        _macroView->continuousZoomOut(inputState.mousePos);
+    }
 }
 
 void MainWindow::drawMenubar()
