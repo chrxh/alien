@@ -27,6 +27,9 @@ namespace
     {
         bool leftMouseButtonHold = false;
         bool rightMouseButtonHold = false;
+        bool middleMouseButtonPressed = false;
+        bool middleMouseButtonHold = false;
+        bool middleMouseButtonReleased = false;
         IntVector2D mousePos;
     };
     InputState inputState;
@@ -53,6 +56,16 @@ namespace
                     inputState.rightMouseButtonHold = false;
                 }
             }
+            if (2 == button) {
+                if (1 == action) {
+                    inputState.middleMouseButtonPressed = true;
+                    inputState.middleMouseButtonHold = true;
+                }
+                if (0 == action) {
+                    inputState.middleMouseButtonReleased = true;
+                    inputState.middleMouseButtonHold = false;
+                }
+            }
         }
     }
 
@@ -60,6 +73,12 @@ namespace
     {
         inputState.mousePos.x = static_cast<int>(posX);
         inputState.mousePos.y = static_cast<int>(posY);
+    }
+
+    void eventProcessingFinished()
+    {
+        inputState.middleMouseButtonPressed = false;
+        inputState.middleMouseButtonReleased = false;
     }
 
     void glfwErrorCallback(int error, const char* description)
@@ -218,11 +237,22 @@ void MainWindow::shutdown(GLFWwindow* window)
 void MainWindow::processEvents()
 {
     if (inputState.leftMouseButtonHold) {
-        _macroView->continuousZoomIn(inputState.mousePos);
+        _macroView->leftMouseButtonHold(inputState.mousePos);
     }
     if (inputState.rightMouseButtonHold) {
-        _macroView->continuousZoomOut(inputState.mousePos);
+        _macroView->rightMouseButtonHold(inputState.mousePos);
     }
+    if (inputState.middleMouseButtonPressed) {
+        _macroView->middleMouseButtonPressed(inputState.mousePos);
+    }
+    if (inputState.middleMouseButtonHold) {
+        _macroView->middleMouseButtonHold(inputState.mousePos);
+    }
+    if (inputState.middleMouseButtonReleased) {
+        _macroView->middleMouseButtonReleased();
+    }
+
+    eventProcessingFinished();
 }
 
 void MainWindow::drawMenubar()

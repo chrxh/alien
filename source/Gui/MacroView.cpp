@@ -98,18 +98,33 @@ void MacroView::resize(IntVector2D const& size)
     _viewportSize = size;
 }
 
-void MacroView::continuousZoomIn(IntVector2D const& viewPos)
+void MacroView::leftMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
     _zoomFactor *= 1.02f;
     centerTo(worldPos, viewPos);
 }
 
-void MacroView::continuousZoomOut(IntVector2D const& viewPos)
+void MacroView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
     _zoomFactor /= 1.02f;
     centerTo(worldPos, viewPos);
+}
+
+void MacroView::middleMouseButtonPressed(IntVector2D const& viewPos)
+{
+    _worldPosForMovement = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+}
+
+void MacroView::middleMouseButtonHold(IntVector2D const& viewPos)
+{
+    centerTo(*_worldPosForMovement, viewPos);
+}
+
+void MacroView::middleMouseButtonReleased()
+{
+    _worldPosForMovement = boost::none;
 }
 
 void MacroView::render()
