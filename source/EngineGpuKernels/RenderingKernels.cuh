@@ -24,7 +24,7 @@ __global__ void drawBackground(unsigned int* imageData, int2 size, int2 outsideR
             imageData[2 * index + 1] = 0;
         } else {
             imageData[2 * index] = 0;
-            imageData[2 * index + 1] = ((Const::SpaceColor >> 16) & 0xff) << 8;
+            imageData[2 * index + 1] = (Const::SpaceColor >> 16) & 0xff;
         }
     }
 }

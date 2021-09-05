@@ -14,9 +14,13 @@ public:
 
 private:
     unsigned int _vao, _vbo, _ebo;
+    unsigned int _fbo;
     Shader* _shader = nullptr;
     void* _cudaResource = nullptr;
+
+    bool _areTexturesInitialized = false;
     unsigned int _textureId = 0;
+    unsigned int _textureFramebufferId = 0;
 
     SimulationController* _simController = nullptr;
     IntVector2D _viewportSize;
