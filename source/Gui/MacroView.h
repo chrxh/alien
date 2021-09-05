@@ -9,9 +9,11 @@ class MacroView
 public:
     void init(SimulationController* simController, IntVector2D const& viewportSize, float zoomFactor);
     void resize(IntVector2D const& viewportSize);
-    void continuousZoomIn(IntVector2D const& viewPos);
-    void continuousZoomOut(IntVector2D const& viewPos);
-
+    void leftMouseButtonHold(IntVector2D const& viewPos);
+    void rightMouseButtonHold(IntVector2D const& viewPos);
+    void middleMouseButtonPressed(IntVector2D const& viewPos);
+    void middleMouseButtonHold(IntVector2D const& viewPos);
+    void middleMouseButtonReleased();
     void render();
 
 private:
@@ -19,7 +21,6 @@ private:
 
     void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
-
 
     //shader data
     unsigned int _vao, _vbo, _ebo;
@@ -34,6 +35,7 @@ private:
     //simulation view data
     float _zoomFactor = 0.0f;
     RealVector2D _worldCenter;
+    boost::optional<RealVector2D> _worldPosForMovement;
 
     SimulationController* _simController = nullptr;
     IntVector2D _viewportSize;
