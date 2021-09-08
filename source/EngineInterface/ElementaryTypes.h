@@ -235,9 +235,9 @@ namespace Enums
         enum Type {
             DO_NOTHING,
             CONTRACT,
+            CONTRACT_RELAX,
             EXPAND,
-            CONTRACT_ANGLE,
-            EXPAND_ANGLE,
+            EXPAND_RELAX,
             _COUNTER
         };
     };
