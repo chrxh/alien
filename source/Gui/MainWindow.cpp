@@ -87,10 +87,10 @@ namespace
     }
 }
 
-GLFWwindow* MainWindow::init(SimulationController* simController)
+GLFWwindow* _MainWindow::init(SimulationController const& simController)
 {
     _simController = simController;
-    _macroView = new MacroView();
+    _macroView = boost::make_shared<_MacroView>();
 
     glfwSetErrorCallback(glfwErrorCallback);
 
@@ -164,7 +164,7 @@ GLFWwindow* MainWindow::init(SimulationController* simController)
     return window;
 }
 
-void MainWindow::mainLoop(GLFWwindow* window)
+void _MainWindow::mainLoop(GLFWwindow* window)
 {
     // Our state
     bool show_demo_window = true;
@@ -216,13 +216,16 @@ void MainWindow::mainLoop(GLFWwindow* window)
         glClearColor(spaceColor.x * spaceColor.w, spaceColor.y * spaceColor.w, spaceColor.z * spaceColor.w, spaceColor.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        for (int i = 0; i < 20; ++i) {
+            _simController->calcNextTimestep();
+        }
         _macroView->render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
 }
 
-void MainWindow::shutdown(GLFWwindow* window)
+void _MainWindow::shutdown(GLFWwindow* window)
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -231,10 +234,10 @@ void MainWindow::shutdown(GLFWwindow* window)
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    delete _macroView;
+    _macroView.reset();
 }
 
-void MainWindow::processEvents()
+void _MainWindow::processEvents()
 {
     if (inputState.leftMouseButtonHold) {
         _macroView->leftMouseButtonHold(inputState.mousePos);
@@ -255,7 +258,7 @@ void MainWindow::processEvents()
     eventProcessingFinished();
 }
 
-void MainWindow::drawMenubar()
+void _MainWindow::drawMenubar()
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Simulation")) {
@@ -276,7 +279,7 @@ void MainWindow::drawMenubar()
     }
 }
 
-void MainWindow::drawToolbar()
+void _MainWindow::drawToolbar()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 19));
