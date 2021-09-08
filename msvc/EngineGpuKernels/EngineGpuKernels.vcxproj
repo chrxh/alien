@@ -31,12 +31,12 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\DebugKernels.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\DEBUG_cluster.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Definitions.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Definitions.h" />
     <ClInclude Include="..\..\source\EngineGpuKernels\DllExport.h" />
     <ClInclude Include="..\..\source\EngineGpuKernels\DynamicMemory.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\EnergyGuidance.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Entities.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\EntityFactory.cuh" />
-    <ClInclude Include="..\..\source\EngineGpuKernels\GpuConstants.h" />
     <ClInclude Include="..\..\source\EngineGpuKernels\HashMap.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\HashSet.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\List.cuh" />
@@ -57,7 +57,6 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\ScannerFunction.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SensorFunction.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationData.cuh" />
-    <ClInclude Include="..\..\source\EngineGpuKernels\SimulationExecutionParameters.h" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationKernels.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Swap.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Token.cuh" />
@@ -118,7 +117,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Include>$(SolutionDir)\..\external\cuda;$(SolutionDir)\..\source</Include>
+      <Include>$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\external\cuda;$(SolutionDir)\..\source</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_60,sm_60</CodeGeneration>
       <Defines>ENGINEGPUKERNELS_LIB</Defines>
@@ -141,7 +140,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Include>$(SolutionDir)\..\external\cuda;$(SolutionDir)\..\source</Include>
+      <Include>$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\external\cuda;$(SolutionDir)\..\source</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_60,sm_60</CodeGeneration>
       <Defines>ENGINEGPUKERNELS_LIB</Defines>

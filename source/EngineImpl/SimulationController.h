@@ -2,32 +2,39 @@
 
 #include <thread>
 
+#include "EngineInterface/Definitions.h"
 #include "EngineWorker.h"
 
-class ENGINEIMPL_EXPORT SimulationController
+#include "Definitions.h"
+
+class _SimulationController
 {
 public:
 
-    void initCuda();
+    ENGINEIMPL_EXPORT void initCuda();
 
-    void newSimulation(
+    ENGINEIMPL_EXPORT void newSimulation(
         IntVector2D size,
         int timestep,
         SimulationParameters const& parameters,
         GpuConstants const& gpuConstants);
 
-    void* registerImageResource(GLuint image);
+    ENGINEIMPL_EXPORT void* registerImageResource(GLuint image);
 
-    void getVectorImage(
+    ENGINEIMPL_EXPORT void getVectorImage(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         void* const& resource,
         IntVector2D const& imageSize,
         double zoom);
 
-    void closeSimulation();
+    ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
 
-    IntVector2D getWorldSize() const;
+    ENGINEIMPL_EXPORT void calcNextTimestep();
+
+    ENGINEIMPL_EXPORT void closeSimulation();
+
+    ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
 
 private:
     IntVector2D _worldSize;

@@ -8,35 +8,46 @@
 
 #include "Base/Definitions.h"
 
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineGpuKernels/GpuConstants.h"
+#include "EngineInterface/GpuConstants.h"
+#include "EngineGpuKernels/Definitions.h"
 
+#include "Definitions.h"
 #include "DllExport.h"
 
-class CudaSimulation;
-
-class ENGINEIMPL_EXPORT EngineWorker
+class EngineWorker
 {
 public:
-    void initCuda();
+    ENGINEIMPL_EXPORT void initCuda();
 
-    void newSimulation(
-        IntVector2D size,
+    ENGINEIMPL_EXPORT void newSimulation(
+        IntVector2D worldSize,
         int timestep,
         SimulationParameters const& parameters,
         GpuConstants const& gpuConstants);
 
-    void* registerImageResource(GLuint image);
+    ENGINEIMPL_EXPORT void* registerImageResource(GLuint image);
 
-    void getVectorImage(
+    ENGINEIMPL_EXPORT void getVectorImage(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         void* const& resource,
         IntVector2D const& imageSize,
         double zoom);
 
-    void shutdown();
+    ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
+
+    ENGINEIMPL_EXPORT void calcNextTimestep();
+
+    ENGINEIMPL_EXPORT void shutdown();
 
 private:
-    CudaSimulation* _cudaSimulation;
+    CudaSimulation _cudaSimulation;
+
+    IntVector2D _worldSize;
+    SimulationParameters _parameters;
+    GpuConstants _gpuConstants;
+
+    AccessDataTOCache _dataTOCache;
 };

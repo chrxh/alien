@@ -33,17 +33,14 @@ const double FLOATINGPOINT_HIGH_PRECISION = 1.0e-7;
 const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
 const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1;
 
-inline float toFloat(double value)
+template <typename T>
+inline float toFloat(T const& value)
 {
     return static_cast<float>(value);
 }
 
-inline float toFloat(int value)
-{
-    return static_cast<float>(value);
-}
-
-inline int toInt(float value)
+template<typename T>
+inline int toInt(T const& value)
 {
     return static_cast<int>(value);
 }
@@ -70,7 +67,7 @@ struct BASE_EXPORT IntVector2D
 
     IntVector2D() = default;
     IntVector2D(std::initializer_list<int> l);
-    bool operator==(IntVector2D const& vec);
+    bool operator==(IntVector2D const& vec) const;
     void operator-=(IntVector2D const& vec);
 };
 
@@ -80,9 +77,29 @@ struct BASE_EXPORT RealVector2D
     float y = 0.0f;
 
     RealVector2D() = default;
+    RealVector2D(float x_, float y_);
     RealVector2D(std::initializer_list<float> l);
-    bool operator==(RealVector2D const& vec);
+    bool operator==(RealVector2D const& vec) const;
+    bool operator!=(RealVector2D const& vec) const { return !operator==(vec); }
+    void operator+=(RealVector2D const& vec);
     void operator-=(RealVector2D const& vec);
+    template <typename T>
+    void operator*=(T divisor)
+    {
+        x *= divisor;
+        y *= divisor;
+    }
+    template <typename T>
+    void operator/=(T divisor)
+    {
+        x /= divisor;
+        y /= divisor;
+    }
+    template <typename T>
+    RealVector2D operator*(T factor) const
+    {
+        return RealVector2D{x * factor, y * factor};
+    }
     RealVector2D operator+(RealVector2D const& other) const;
     RealVector2D operator-(RealVector2D const& other) const;
     RealVector2D operator/(float divisor) const;

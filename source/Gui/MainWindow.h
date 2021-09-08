@@ -3,10 +3,10 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
-class MainWindow
+class _MainWindow
 {
 public:
-    GLFWwindow* init(SimulationController* simController);
+    GLFWwindow* init(SimulationController const& simController);
     void mainLoop(GLFWwindow* window);
     void shutdown(GLFWwindow* window);
 
@@ -16,6 +16,6 @@ private:
     void drawMenubar();
     void drawToolbar();
 
-    SimulationController* _simController = nullptr;
-    MacroView* _macroView = nullptr;
+    SimulationController _simController;
+    MacroView _macroView;
 };

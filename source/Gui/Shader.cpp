@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath /*= nullptr*/)
+_Shader::_Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath /*= nullptr*/)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -81,24 +81,24 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         glDeleteShader(geometry);
 }
 
-void Shader::use()
+void _Shader::use()
 {
     glUseProgram(ID);
 }
-void Shader::setBool(const std::string& name, bool value) const
+void _Shader::setBool(const std::string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
-void Shader::setInt(const std::string& name, int value) const
+void _Shader::setInt(const std::string& name, int value) const
 {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
-void Shader::setFloat(const std::string& name, float value) const
+void _Shader::setFloat(const std::string& name, float value) const
 {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::checkCompileErrors(GLuint shader, std::string type)
+void _Shader::checkCompileErrors(GLuint shader, std::string type)
 {
     GLint success;
     GLchar infoLog[1024];

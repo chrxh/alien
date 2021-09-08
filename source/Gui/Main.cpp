@@ -1,6 +1,8 @@
 #include "Base/BaseServices.h"
 #include "EngineImpl/SimulationController.h"
 #include "EngineInterface/EngineInterfaceSettings.h"
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/ChangeDescriptions.h"
 
 #include "MainWindow.h"
 
@@ -8,21 +10,34 @@ int main(int, char**)
 {
     BaseServices baseServices;
 
-    MainWindow mainWindow;
-    SimulationController simController;
+    MainWindow mainWindow = boost::make_shared<_MainWindow>();
+    SimulationController simController = boost::make_shared<_SimulationController>();
 
-    simController.initCuda();
+    simController->initCuda();
 
-    simController.newSimulation({ 600, 300 }, 0, SimulationParameters(), GpuConstants());
+    Serializer serializer = boost::make_shared<_Serializer>();
+    
+    SerializedSimulation serializedData;
+    serializer->loadSimulationDataFromFile("d:\\temp\\simulations\\evolution.sim", serializedData);
+    auto deserializedData = serializer->deserializeSimulation(serializedData);
 
-    auto glfwWindow = mainWindow.init(&simController);
+//    simController->newSimulation({ 600, 300 }, 0, SimulationParameters(), GpuConstants());
+    simController->newSimulation(
+        deserializedData.generalSettings.worldSize,
+        deserializedData.timestep,
+        deserializedData.simulationParameters,
+        deserializedData.generalSettings.gpuConstants);
+
+    simController->updateData(deserializedData.content);
+
+    auto glfwWindow = mainWindow->init(simController);
     if (!glfwWindow) {
         return 1;
     }
 
-    mainWindow.mainLoop(glfwWindow);
-    mainWindow.shutdown(glfwWindow);
-    simController.closeSimulation();
+    mainWindow->mainLoop(glfwWindow);
+    mainWindow->shutdown(glfwWindow);
+    simController->closeSimulation();
 
     return 0;
 }

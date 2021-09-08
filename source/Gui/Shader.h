@@ -4,12 +4,14 @@
 
 #include "glad/glad.h"
 
-class Shader
+#include "Definitions.h"
+
+class _Shader
 {
 public:
     unsigned int ID;
 
-    Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+    _Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
     
     void use();
     void setBool(const std::string& name, bool value) const;

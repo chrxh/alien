@@ -6,15 +6,14 @@
 
 #include "Shader.h"
 
-void MacroView::init(SimulationController* simController, IntVector2D const& viewportSize, float zoomFactor)
+void _MacroView::init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor)
 {
     auto worldSize = simController->getWorldSize();
     _worldCenter = {toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2};
     _zoomFactor = zoomFactor;
 
     _simController = simController;
-    _shader =
-        new Shader("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
+    _shader = boost::make_shared<_Shader>("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -63,7 +62,7 @@ void MacroView::init(SimulationController* simController, IntVector2D const& vie
     _shader->setFloat("motionBlurFactor", 0.6f);
 }
 
-void MacroView::resize(IntVector2D const& size)
+void _MacroView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
         glDeleteFramebuffers(1, &_fbo);
@@ -98,36 +97,36 @@ void MacroView::resize(IntVector2D const& size)
     _viewportSize = size;
 }
 
-void MacroView::leftMouseButtonHold(IntVector2D const& viewPos)
+void _MacroView::leftMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
     _zoomFactor *= 1.02f;
     centerTo(worldPos, viewPos);
 }
 
-void MacroView::rightMouseButtonHold(IntVector2D const& viewPos)
+void _MacroView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
     _zoomFactor /= 1.02f;
     centerTo(worldPos, viewPos);
 }
 
-void MacroView::middleMouseButtonPressed(IntVector2D const& viewPos)
+void _MacroView::middleMouseButtonPressed(IntVector2D const& viewPos)
 {
     _worldPosForMovement = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
 }
 
-void MacroView::middleMouseButtonHold(IntVector2D const& viewPos)
+void _MacroView::middleMouseButtonHold(IntVector2D const& viewPos)
 {
     centerTo(*_worldPosForMovement, viewPos);
 }
 
-void MacroView::middleMouseButtonReleased()
+void _MacroView::middleMouseButtonReleased()
 {
     _worldPosForMovement = boost::none;
 }
 
-void MacroView::render()
+void _MacroView::render()
 {
     requestImageFromSimulation();
 
@@ -150,7 +149,7 @@ void MacroView::render()
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void MacroView::requestImageFromSimulation()
+void _MacroView::requestImageFromSimulation()
 {
     auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
     auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
@@ -158,7 +157,7 @@ void MacroView::requestImageFromSimulation()
     _simController->getVectorImage(topLeft, bottomRight, _cudaResource, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
 }
 
-void MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
+void _MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
 {
     RealVector2D deltaViewPos{
         toFloat(viewPos.x) - toFloat(_viewportSize.x) / 2.0f, toFloat(viewPos.y) - toFloat(_viewportSize.y) / 2.0f};
@@ -166,7 +165,7 @@ void MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& v
     _worldCenter = worldPosition - deltaWorldPos;
 }
 
-RealVector2D MacroView::mapViewToWorldPosition(RealVector2D const& viewPos) const
+RealVector2D _MacroView::mapViewToWorldPosition(RealVector2D const& viewPos) const
 {
     RealVector2D relCenter{
         toFloat(_viewportSize.x / (2.0 * _zoomFactor)), toFloat(_viewportSize.y / (2.0 * _zoomFactor))};

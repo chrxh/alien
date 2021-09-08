@@ -114,13 +114,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>ENGINEINTERFACE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_BIND_GLOBAL_PLACEHOLDERS;ENGINEINTERFACE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\external\boost_1_75_0\stage\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,31 +131,46 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>ENGINEINTERFACE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BOOST_BIND_GLOBAL_PLACEHOLDERS;ENGINEINTERFACE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\external\boost_1_75_0\stage\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\EngineInterface\ChangeDescriptions.h" />
     <ClInclude Include="..\..\source\EngineInterface\Colors.h" />
     <ClInclude Include="..\..\source\EngineInterface\Definitions.h" />
+    <ClInclude Include="..\..\source\EngineInterface\Descriptions.h" />
     <ClInclude Include="..\..\source\EngineInterface\DllExport.h" />
     <ClInclude Include="..\..\source\EngineInterface\ElementaryTypes.h" />
-    <ClInclude Include="..\..\source\EngineInterface\ExecutionParameters.h" />
+    <ClInclude Include="..\..\source\EngineInterface\GeneralSettings.h" />
+    <ClInclude Include="..\..\source\EngineInterface\GpuConstants.h" />
+    <ClInclude Include="..\..\source\EngineInterface\Metadata.h" />
     <ClInclude Include="..\..\source\EngineInterface\MonitorData.h" />
+    <ClInclude Include="..\..\source\EngineInterface\Serializer.h" />
     <ClInclude Include="..\..\source\EngineInterface\SimulationParameters.h" />
+    <ClInclude Include="..\..\source\EngineInterface\Parser.h" />
+    <ClInclude Include="..\..\source\EngineInterface\SymbolMap.h" />
     <ClInclude Include="..\..\source\EngineInterface\ZoomLevels.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.vcxproj">
       <Project>{2561deee-049f-48fa-8b0e-420419893891}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\source\EngineInterface\ChangeDescriptions.cpp" />
+    <ClCompile Include="..\..\source\EngineInterface\Descriptions.cpp" />
+    <ClCompile Include="..\..\source\EngineInterface\Serializer.cpp" />
+    <ClCompile Include="..\..\source\EngineInterface\Parser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

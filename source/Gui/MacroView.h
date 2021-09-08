@@ -4,10 +4,10 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
-class MacroView
+class _MacroView
 {
 public:
-    void init(SimulationController* simController, IntVector2D const& viewportSize, float zoomFactor);
+    void init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor);
     void resize(IntVector2D const& viewportSize);
     void leftMouseButtonHold(IntVector2D const& viewPos);
     void rightMouseButtonHold(IntVector2D const& viewPos);
@@ -25,7 +25,7 @@ private:
     //shader data
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo;
-    Shader* _shader = nullptr;
+    Shader _shader;
     void* _cudaResource = nullptr;
 
     bool _areTexturesInitialized = false;
@@ -37,6 +37,6 @@ private:
     RealVector2D _worldCenter;
     boost::optional<RealVector2D> _worldPosForMovement;
 
-    SimulationController* _simController = nullptr;
+    SimulationController _simController;
     IntVector2D _viewportSize;
 };

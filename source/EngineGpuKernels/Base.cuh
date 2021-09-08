@@ -6,8 +6,9 @@
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
+#include "EngineInterface/GpuConstants.h"
+
 #include "Array.cuh"
-#include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"

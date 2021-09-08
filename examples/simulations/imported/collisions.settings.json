@@ -1,0 +1,16 @@
+{
+    "worldSize": {
+        "x": "2000",
+        "y": "1000"
+    },
+    "cudaSettings": {
+        "dynamicMemorySize": "10000000",
+        "maxCells": "300000",
+        "maxClusters": "300000",
+        "maxParticles": "300000",
+        "maxTokens": "10000",
+        "metadataDynamicMemorySize": "100000",
+        "numBlocks": "256",
+        "numThreadsPerBlock": "32"
+    }
+}
