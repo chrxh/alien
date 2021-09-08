@@ -21,7 +21,6 @@ int main(int, char**)
     serializer->loadSimulationDataFromFile("d:\\temp\\simulations\\evolution.sim", serializedData);
     auto deserializedData = serializer->deserializeSimulation(serializedData);
 
-//    simController->newSimulation({ 600, 300 }, 0, SimulationParameters(), GpuConstants());
     simController->newSimulation(
         deserializedData.generalSettings.worldSize,
         deserializedData.timestep,
@@ -30,12 +29,16 @@ int main(int, char**)
 
     simController->updateData(deserializedData.content);
 
+    simController->runSimulation();
+
     auto glfwWindow = mainWindow->init(simController);
     if (!glfwWindow) {
         return 1;
     }
 
     mainWindow->mainLoop(glfwWindow);
+
+    simController->pauseSimulatio();
     mainWindow->shutdown(glfwWindow);
     simController->closeSimulation();
 
