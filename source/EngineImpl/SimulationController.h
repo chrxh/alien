@@ -31,7 +31,7 @@ public:
 
     ENGINEIMPL_EXPORT void calcNextTimestep();
     ENGINEIMPL_EXPORT void runSimulation();
-    ENGINEIMPL_EXPORT void pauseSimulatio();
+    ENGINEIMPL_EXPORT void pauseSimulation();
 
     ENGINEIMPL_EXPORT void closeSimulation();
 

@@ -87,10 +87,6 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_currentIndex);
         CudaMemoryManager::getInstance().freeMemory(_array);
         CudaMemoryManager::getInstance().freeMemory(_currentId);
-
-        cudaFree(_currentId);
-        cudaFree(_currentIndex);
-        cudaFree(_array);
     }
 
 private:

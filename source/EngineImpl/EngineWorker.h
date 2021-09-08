@@ -59,6 +59,7 @@ private:
     std::atomic<bool> _requireAccess = false;
 
     CudaSimulation _cudaSimulation;
+    void* _cudaResource;     //for rendering
 
     IntVector2D _worldSize;
     SimulationParameters _parameters;

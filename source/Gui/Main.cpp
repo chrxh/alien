@@ -13,34 +13,35 @@ int main(int, char**)
     MainWindow mainWindow = boost::make_shared<_MainWindow>();
     SimulationController simController = boost::make_shared<_SimulationController>();
 
-    simController->initCuda();
+    try {
+        simController->initCuda();
 
-    Serializer serializer = boost::make_shared<_Serializer>();
-    
-    SerializedSimulation serializedData;
-    serializer->loadSimulationDataFromFile("d:\\temp\\simulations\\evolution.sim", serializedData);
-    auto deserializedData = serializer->deserializeSimulation(serializedData);
+        Serializer serializer = boost::make_shared<_Serializer>();
+        SerializedSimulation serializedData;
+        serializer->loadSimulationDataFromFile("d:\\temp\\simulations\\evolution.sim", serializedData);
+        auto deserializedData = serializer->deserializeSimulation(serializedData);
 
-    simController->newSimulation(
-        deserializedData.generalSettings.worldSize,
-        deserializedData.timestep,
-        deserializedData.simulationParameters,
-        deserializedData.generalSettings.gpuConstants);
+        simController->newSimulation(
+            deserializedData.generalSettings.worldSize,
+            deserializedData.timestep,
+            deserializedData.simulationParameters,
+            deserializedData.generalSettings.gpuConstants);
 
-    simController->updateData(deserializedData.content);
+        simController->updateData(deserializedData.content);
 
-    simController->runSimulation();
+        simController->runSimulation();
 
-    auto glfwWindow = mainWindow->init(simController);
-    if (!glfwWindow) {
-        return 1;
+        auto glfwWindow = mainWindow->init(simController);
+        if (!glfwWindow) {
+            return 1;
+        }
+
+        mainWindow->mainLoop(glfwWindow);
+
+        mainWindow->shutdown(glfwWindow);
+        simController->closeSimulation();
+    } catch (std::exception const& e) {
+        printf("%s\n", e.what());
     }
-
-    mainWindow->mainLoop(glfwWindow);
-
-    simController->pauseSimulatio();
-    mainWindow->shutdown(glfwWindow);
-    simController->closeSimulation();
-
     return 0;
 }

@@ -64,7 +64,9 @@ struct SimulationData
         cellFunctionData.free();
         cellMap.free();
         particleMap.free();
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         numberGen.free();
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         dynamicMemory.free();
 
         CudaMemoryManager::getInstance().freeMemory(imageData);
