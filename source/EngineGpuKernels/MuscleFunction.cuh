@@ -32,42 +32,36 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
         return;
     }
 
-    if (Enums::MuscleIn::CONTRACT == command || Enums::MuscleIn::EXPAND == command) {
-        auto factor = Enums::MuscleIn::CONTRACT == command ? (1.0f / 1.2f) : 1.2f;
-        for (int index = 0; index < cell->numConnections; ++index) {
-            auto& connection = cell->connections[index];
-            if (connection.cell->tryLock()) {
+    auto index = getConnectionIndex(cell, sourceCell);
+    auto& connection = cell->connections[index];
+    auto factor =
+        (Enums::MuscleIn::CONTRACT == command || Enums::MuscleIn::CONTRACT_RELAX == command) ? (1.0f / 1.2f) : 1.2f;
+    auto origDistance = connection.distance;
+    auto distance = origDistance * factor;
 
-                auto distance = connection.distance * factor;
-                if (distance > cudaSimulationParameters.cellMinDistance
-                    && distance < cudaSimulationParameters.cellMaxDistance) {
+    if (sourceCell->tryLock()) {
+        if (distance > cudaSimulationParameters.cellMinDistance
+            && distance < cudaSimulationParameters.cellMaxDistance) {
 
-                    connection.distance *= factor;
+            connection.distance = distance;
 
-                    auto connectingCell = connection.cell;
-                    auto otherIndex = getConnectionIndex(connectingCell, cell);
-                    connectingCell->connections[otherIndex].distance *= factor;
-                } else {
-                    tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::LIMIT_REACHED;
-                    connection.cell->releaseLock();
-                    return;
-                }
-                connection.cell->releaseLock();
-            }
+            auto connectingCell = connection.cell;
+            auto otherIndex = getConnectionIndex(connectingCell, cell);
+            connectingCell->connections[otherIndex].distance *= factor;
+        } else {
+            tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::LIMIT_REACHED;
+            sourceCell->releaseLock();
+            return;
         }
-    }
-    if (Enums::MuscleIn::CONTRACT_ANGLE == command || Enums::MuscleIn::EXPAND_ANGLE == command) {
-/*
-        auto factor = Enums::MuscleIn::CONTRACT_ANGLE == command ? (1.0f / 1.2f) : 1.2f;
-        auto index = getConnectionIndex(cell, sourceCell);
-        auto& connection = cell->connections[index];
-        auto origAngle = connection.angleFromPrevious;
-        connection.angleFromPrevious *= factor;
 
-        auto otherIndex = (index + 1) % cell->numConnections;
-        auto& otherConnection = cell->connections[otherIndex];
-        otherConnection.angleFromPrevious -= (connection.angleFromPrevious - origAngle);
-*/
+        if (Enums::MuscleIn::CONTRACT == command || Enums::MuscleIn::EXPAND == command) {
+            auto velInc = cell->absPos - sourceCell->absPos;
+            data.cellMap.mapDisplacementCorrection(velInc);
+            Math::normalize(velInc);
+            cell->vel = cell->vel + velInc * (origDistance - distance) * 0.5f;
+        }
+
+        sourceCell->releaseLock();
     }
 
     tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::SUCCESS;
