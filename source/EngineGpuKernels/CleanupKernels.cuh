@@ -224,20 +224,20 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     KERNEL_CALL(cleanupEntities<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 
-    if (data.entities.particles.getNumEntries() > cudaConstants.MAX_PARTICLES * FillLevelFactor) {
+    if (data.entities.particles.getNumEntries() > gpuConstants.MAX_PARTICLES * FillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
         KERNEL_CALL(cleanupParticles, data);
         data.entities.particles.swapContent(data.entitiesForCleanup.particles);
     }
 
-    if (data.entities.cells.getNumEntries() > cudaConstants.MAX_CELLS * FillLevelFactor) {
+    if (data.entities.cells.getNumEntries() > gpuConstants.MAX_CELLS * FillLevelFactor) {
         data.entitiesForCleanup.cells.reset();
         KERNEL_CALL(cleanupCellsStep1, data);
         KERNEL_CALL(cleanupCellsStep2, data);
         data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     }
         
-    if (data.entities.tokens.getNumEntries() > cudaConstants.MAX_TOKENS * FillLevelFactor) {
+    if (data.entities.tokens.getNumEntries() > gpuConstants.MAX_TOKENS * FillLevelFactor) {
         data.entitiesForCleanup.tokens.reset();
         KERNEL_CALL(cleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
         data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);

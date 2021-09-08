@@ -21,6 +21,12 @@
     <ClCompile Include="..\..\source\EngineImpl\SimulationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\EngineImpl\AccessDataTOCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\EngineImpl\DataConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\EngineImpl\EngineWorker.h">
@@ -33,6 +39,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineImpl\Definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineImpl\AccessDataTOCache.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineImpl\DataConverter.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

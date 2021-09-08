@@ -9,7 +9,7 @@ IntVector2D::IntVector2D(std::initializer_list<int> l)
     y = *it;
 }
 
-bool IntVector2D::operator==(IntVector2D const& vec)
+bool IntVector2D::operator==(IntVector2D const& vec) const
 {
     return x == vec.x && y == vec.y;
 }
@@ -26,6 +26,11 @@ std::ostream& operator<<(std::ostream& os, const IntVector2D& vec)
     return os;
 }
 
+RealVector2D::RealVector2D(float x_, float y_)
+    : x(x_)
+    , y(y_)
+{}
+
 RealVector2D::RealVector2D(std::initializer_list<float> l)
 {
     auto it = l.begin();
@@ -33,9 +38,15 @@ RealVector2D::RealVector2D(std::initializer_list<float> l)
     y = *it;
 }
 
-bool RealVector2D::operator==(RealVector2D const& vec)
+bool RealVector2D::operator==(RealVector2D const& vec) const
 {
     return x == vec.x && y == vec.y;
+}
+
+void RealVector2D::operator+=(RealVector2D const& vec)
+{
+    x += vec.x;
+    y += vec.y;
 }
 
 void RealVector2D::operator-=(RealVector2D const& vec)

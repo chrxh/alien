@@ -117,6 +117,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BASE_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\external\boost_1_75_0</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,6 +133,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BASE_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\external\boost_1_75_0</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,12 +149,19 @@
     <ClInclude Include="..\..\source\Base\Exceptions.h" />
     <ClInclude Include="..\..\source\Base\LoggingService.h" />
     <ClInclude Include="..\..\source\Base\LoggingServiceImpl.h" />
+    <ClInclude Include="..\..\source\Base\Math.h" />
+    <ClInclude Include="..\..\source\Base\NumberGenerator.h" />
+    <ClInclude Include="..\..\source\Base\Physics.h" />
     <ClInclude Include="..\..\source\Base\ServiceLocator.h" />
+    <ClInclude Include="..\..\source\Base\Tracker.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Base\BaseServices.cpp" />
     <ClCompile Include="..\..\source\Base\Definitions.cpp" />
     <ClCompile Include="..\..\source\Base\LoggingServiceImpl.cpp" />
+    <ClCompile Include="..\..\source\Base\Math.cpp" />
+    <ClCompile Include="..\..\source\Base\NumberGenerator.cpp" />
+    <ClCompile Include="..\..\source\Base\Physics.cpp" />
     <ClCompile Include="..\..\source\Base\ServiceLocator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
