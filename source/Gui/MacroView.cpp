@@ -79,7 +79,7 @@ void _MacroView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-    _cudaResource = _simController->registerImageResource(_textureId);
+    _simController->registerImageResource(_textureId);
 
     glGenTextures(1, &_textureFramebufferId);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
@@ -154,7 +154,7 @@ void _MacroView::requestImageFromSimulation()
     auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
     auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
 
-    _simController->getVectorImage(topLeft, bottomRight, _cudaResource, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
+    _simController->getVectorImage(topLeft, bottomRight, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
 }
 
 void _MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)

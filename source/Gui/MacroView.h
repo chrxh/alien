@@ -26,7 +26,6 @@ private:
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo;
     Shader _shader;
-    void* _cudaResource = nullptr;
 
     bool _areTexturesInitialized = false;
     unsigned int _textureId = 0;

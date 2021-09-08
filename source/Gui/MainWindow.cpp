@@ -216,10 +216,8 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         glClearColor(spaceColor.x * spaceColor.w, spaceColor.y * spaceColor.w, spaceColor.z * spaceColor.w, spaceColor.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        for (int i = 0; i < 20; ++i) {
-            _simController->calcNextTimestep();
-        }
         _macroView->render();
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
