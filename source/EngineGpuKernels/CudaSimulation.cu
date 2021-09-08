@@ -176,12 +176,10 @@ _CudaSimulation::~_CudaSimulation()
     delete _cudaMonitorData;
 }
 
-void* _CudaSimulation::registerImageResource(GLuint image)
+void _CudaSimulation::registerImageResource(GLuint image)
 {
-    cudaGraphicsResource* resource;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsGLRegisterImage(&resource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
-
-    return reinterpret_cast<void*>(resource);
+    CHECK_FOR_CUDA_ERROR(
+        cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
 }
 
 void _CudaSimulation::calcCudaTimestep()
@@ -206,15 +204,13 @@ void _CudaSimulation::DEBUG_printNumEntries()
 void _CudaSimulation::getVectorImage(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
-    void* const& resource,
     int2 const& imageSize,
     double zoom)
 {
-    auto cudaResource = reinterpret_cast<cudaGraphicsResource*>(resource);
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResource));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &_cudaResource));
 
     cudaArray* mappedArray;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResource, 0, 0));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, _cudaResource, 0, 0));
 
     if (imageSize.x * imageSize.y > _cudaSimulationData->numPixels) {
         _cudaSimulationData->resizeImage(imageSize);
@@ -235,7 +231,7 @@ void _CudaSimulation::getVectorImage(
         sizeof(unsigned int) * imageSize.x * imageSize.y * 2,
         cudaMemcpyDeviceToDevice);
 
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResource));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &_cudaResource));
 }
 
 void _CudaSimulation::getSimulationData(

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -27,12 +29,11 @@ public:
         SimulationParameters const& parameters,
         GpuConstants const& gpuConstants);
 
-    ENGINEIMPL_EXPORT void* registerImageResource(GLuint image);
+    ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
 
     ENGINEIMPL_EXPORT void getVectorImage(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
-        void* const& resource,
         IntVector2D const& imageSize,
         double zoom);
 
@@ -40,9 +41,23 @@ public:
 
     ENGINEIMPL_EXPORT void calcNextTimestep();
 
-    ENGINEIMPL_EXPORT void shutdown();
+    ENGINEIMPL_EXPORT void beginShutdown(); //caller should wait for termination of thread
+    ENGINEIMPL_EXPORT void endShutdown();
+
+    void runThreadLoop();
+    void runSimulation();
+    void pauseSimulation();
 
 private:
+    mutable std::mutex _mutexForLoop;
+    mutable std::mutex _mutexForAccess;
+    std::condition_variable _conditionForWorkerLoop;
+    std::condition_variable _conditionForAccess;
+
+    std::atomic<bool> _isSimulationRunning = false;
+    std::atomic<bool> _isShutdown = false;
+    std::atomic<bool> _requireAccess = false;
+
     CudaSimulation _cudaSimulation;
 
     IntVector2D _worldSize;

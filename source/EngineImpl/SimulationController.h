@@ -19,18 +19,19 @@ public:
         SimulationParameters const& parameters,
         GpuConstants const& gpuConstants);
 
-    ENGINEIMPL_EXPORT void* registerImageResource(GLuint image);
+    ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
 
     ENGINEIMPL_EXPORT void getVectorImage(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
-        void* const& resource,
         IntVector2D const& imageSize,
         double zoom);
 
     ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcNextTimestep();
+    ENGINEIMPL_EXPORT void runSimulation();
+    ENGINEIMPL_EXPORT void pauseSimulatio();
 
     ENGINEIMPL_EXPORT void closeSimulation();
 
