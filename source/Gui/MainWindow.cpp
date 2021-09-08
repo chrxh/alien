@@ -4,6 +4,8 @@
 
 #include <glad/glad.h>
 
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 
 #include "MacroView.h"
@@ -20,6 +22,8 @@
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
+
+#include "ImFileDialog.h"
 
 namespace
 {
@@ -142,8 +146,8 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    //ImGui::StyleColorsDark();
+//    ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -161,6 +165,25 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
     _macroView->init(simController, {mode->width, mode->height}, 1);
 
+    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
+        GLuint tex;
+
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return (void*)tex;
+    };
+    ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
+        GLuint texID = (GLuint)((uintptr_t)tex);
+        glDeleteTextures(1, &texID);
+    };
     return window;
 }
 
@@ -197,6 +220,7 @@ void _MainWindow::mainLoop(GLFWwindow* window)
 
         drawToolbar();
         drawMenubar();
+        drawDialogs();
 
         // 3. Show another simple window.
         if (show_another_window) {
@@ -208,16 +232,15 @@ void _MainWindow::mainLoop(GLFWwindow* window)
             ImGui::End();
         }
 
+
         // Rendering
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(spaceColor.x * spaceColor.w, spaceColor.y * spaceColor.w, spaceColor.z * spaceColor.w, spaceColor.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         _macroView->render();
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
@@ -260,6 +283,13 @@ void _MainWindow::drawMenubar()
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Simulation")) {
+            if (ImGui::MenuItem("Open", "CTRL+O")) {
+                ifd::FileDialog::Instance().Open(
+                    "SimulationOpenDialog",
+                    "Open a simulation",
+                    "Simulation file (*.sim){.sim},.*",
+                    true);
+            }
             if (ImGui::MenuItem("Close", "ALT+F4")) {
             }
             ImGui::EndMenu();
@@ -300,4 +330,54 @@ void _MainWindow::drawToolbar()
     ImGui::Button("Zoom out", ImVec2(0, 37));
 
     ImGui::End();
+}
+
+void _MainWindow::drawDialogs()
+{
+    // Simple window
+    ImGui::Begin("Control Panel");
+    if (ImGui::Button("Open directory"))
+        ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
+    if (ImGui::Button("Save file"))
+        ifd::FileDialog::Instance().Save("ShaderSaveDialog", "Save a shader", "*.sprj {.sprj}");
+    ImGui::End();
+
+    // file dialogs
+    if (ifd::FileDialog::Instance().IsDone("SimulationOpenDialog")) {
+        if (ifd::FileDialog::Instance().HasResult()) {
+            const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+            auto firstFilename = res.front();
+
+            _simController->closeSimulation();
+
+            Serializer serializer = boost::make_shared<_Serializer>();
+            SerializedSimulation serializedData;
+            serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
+
+            auto deserializedData = serializer->deserializeSimulation(serializedData);
+
+            _simController->newSimulation(
+                deserializedData.generalSettings.worldSize,
+                deserializedData.timestep,
+                deserializedData.simulationParameters,
+                deserializedData.generalSettings.gpuConstants);
+            _simController->updateData(deserializedData.content);
+            _simController->runSimulation();
+        }
+        ifd::FileDialog::Instance().Close();
+    }
+    if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog")) {
+        if (ifd::FileDialog::Instance().HasResult()) {
+            std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+            printf("DIRECTORY[%s]\n", res.c_str());
+        }
+        ifd::FileDialog::Instance().Close();
+    }
+    if (ifd::FileDialog::Instance().IsDone("ShaderSaveDialog")) {
+        if (ifd::FileDialog::Instance().HasResult()) {
+            std::string res = ifd::FileDialog::Instance().GetResult().u8string();
+            printf("SAVE[%s]\n", res.c_str());
+        }
+        ifd::FileDialog::Instance().Close();
+    }
 }

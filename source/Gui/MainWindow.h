@@ -15,6 +15,7 @@ private:
 
     void drawMenubar();
     void drawToolbar();
+    void drawDialogs();
 
     SimulationController _simController;
     MacroView _macroView;

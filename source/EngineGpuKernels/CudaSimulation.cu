@@ -118,6 +118,8 @@ _CudaSimulation::_CudaSimulation(
     SimulationParameters const& parameters,
     GpuConstants const& gpuConstants)
 {
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+
     CudaMemoryManager::getInstance().reset();
 
     setSimulationParameters(parameters);
@@ -156,17 +158,28 @@ _CudaSimulation::_CudaSimulation(
 
 _CudaSimulation::~_CudaSimulation()
 {
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     _cudaSimulationData->free();
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     _cudaMonitorData->free();
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numTokens);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "GPU memory released");
@@ -176,10 +189,14 @@ _CudaSimulation::~_CudaSimulation()
     delete _cudaMonitorData;
 }
 
-void _CudaSimulation::registerImageResource(GLuint image)
+void* _CudaSimulation::registerImageResource(GLuint image)
 {
+    cudaGraphicsResource* cudaResource;
+
     CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+        cudaGraphicsGLRegisterImage(&cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+
+    return reinterpret_cast<void*>(cudaResource);
 }
 
 void _CudaSimulation::calcCudaTimestep()
@@ -188,29 +205,18 @@ void _CudaSimulation::calcCudaTimestep()
     ++_cudaSimulationData->timestep;
 }
 
-void _CudaSimulation::DEBUG_printNumEntries()
-{
-    std::stringstream stream;
-    stream << "Particles: " << _cudaSimulationData->entities.particles.retrieveNumEntries() << "; "
-           << "Cells: " << _cudaSimulationData->entities.cells.retrieveNumEntries() << "; "
-           << "CellPointers: " << _cudaSimulationData->entities.cellPointers.retrieveNumEntries() << "; "
-           << "Tokens: " << _cudaSimulationData->entities.tokens.retrieveNumEntries() << "; "
-           << "TokenPointers: " << _cudaSimulationData->entities.tokenPointers.retrieveNumEntries() << "; ";
-
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, stream.str());
-}
-
 void _CudaSimulation::getVectorImage(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
+    void* cudaResource,
     int2 const& imageSize,
     double zoom)
 {
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &_cudaResource));
+    auto cudaResource_ = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResource_));
 
     cudaArray* mappedArray;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, _cudaResource, 0, 0));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResource_, 0, 0));
 
     if (imageSize.x * imageSize.y > _cudaSimulationData->numPixels) {
         _cudaSimulationData->resizeImage(imageSize);
@@ -231,7 +237,7 @@ void _CudaSimulation::getVectorImage(
         sizeof(unsigned int) * imageSize.x * imageSize.y * 2,
         cudaMemcpyDeviceToDevice);
 
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &_cudaResource));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResource_));
 }
 
 void _CudaSimulation::getSimulationData(

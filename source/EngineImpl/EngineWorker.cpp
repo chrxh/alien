@@ -61,7 +61,9 @@ void EngineWorker::newSimulation(
 
 void EngineWorker::registerImageResource(GLuint image)
 {
-    return _cudaSimulation->registerImageResource(image);
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+
+    _cudaResource = _cudaSimulation->registerImageResource(image);
 }
 
 void EngineWorker::getVectorImage(
@@ -75,6 +77,7 @@ void EngineWorker::getVectorImage(
     _cudaSimulation->getVectorImage(
         {rectUpperLeft.x, rectUpperLeft.y},
         {rectLowerRight.x, rectLowerRight.y},
+        _cudaResource,
         {imageSize.x, imageSize.y},
         zoom);
 }
@@ -88,6 +91,8 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 
     DataConverter converter(dataTO, _parameters, _gpuConstants);
     converter.updateData(dataToUpdate);
+
+    _dataTOCache->releaseDataTO(dataTO);
 
     _cudaSimulation->setSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
 }
@@ -107,6 +112,10 @@ void EngineWorker::beginShutdown()
 
 void EngineWorker::endShutdown()
 {
+    _isSimulationRunning = false;
+    _isShutdown = false;
+    _requireAccess = false;
+
     _cudaSimulation.reset();
 }
 

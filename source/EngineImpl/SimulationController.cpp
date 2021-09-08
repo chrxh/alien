@@ -42,7 +42,7 @@ void _SimulationController::runSimulation()
     _worker.runSimulation();
 }
 
-void _SimulationController::pauseSimulatio()
+void _SimulationController::pauseSimulation()
 {
     _worker.pauseSimulation();
 }
