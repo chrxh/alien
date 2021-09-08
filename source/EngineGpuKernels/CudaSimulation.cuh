@@ -24,13 +24,14 @@ public:
         GpuConstants const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT ~_CudaSimulation();
 
-    ENGINEGPUKERNELS_EXPORT void registerImageResource(GLuint image);
+    ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
 
     ENGINEGPUKERNELS_EXPORT void calcCudaTimestep();
 
     ENGINEGPUKERNELS_EXPORT void getVectorImage(
         float2 const& rectUpperLeft,
         float2 const& rectLowerRight,
+        void* cudaResource,
         int2 const& imageSize,
         double zoom);
     ENGINEGPUKERNELS_EXPORT void
@@ -62,13 +63,10 @@ public:
 
 private:
     void setGpuConstants(GpuConstants const& cudaConstants);
-    void DEBUG_printNumEntries();
 
 private:
     GpuConstants _gpuConstants;
     SimulationData* _cudaSimulationData;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
-
-    cudaGraphicsResource* _cudaResource;
 };

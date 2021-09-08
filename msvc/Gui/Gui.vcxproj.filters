@@ -13,43 +13,52 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{c9f31f55-2385-439d-8deb-39fc7c86aa19}</UniqueIdentifier>
-    </Filter>
     <Filter Include="glad">
       <UniqueIdentifier>{c67e7597-5425-4314-be12-4e04be1c8795}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shader Files">
       <UniqueIdentifier>{514a28e9-a764-4119-96d3-ed99904671b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{3b35d393-be41-4059-8479-13118ed593b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ImFileDialog">
+      <UniqueIdentifier>{1865c2e8-ecb9-4eca-9e40-3347c5bdde59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ImGui">
+      <UniqueIdentifier>{c9f31f55-2385-439d-8deb-39fc7c86aa19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\stb">
+      <UniqueIdentifier>{05c0e9ed-5ea2-47b3-9b33-4097ee35f288}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\external\imgui\imconfig.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\imgui.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\backends\imgui_impl_glfw.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\backends\imgui_impl_opengl3.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\imgui\backends\imgui_impl_opengl3_loader.h">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\MainWindow.h">
       <Filter>Source Files</Filter>
@@ -66,31 +75,37 @@
     <ClInclude Include="..\..\source\Gui\Shader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\external\ImFileDialog\ImFileDialog.h">
+      <Filter>external\ImFileDialog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\stb\stb_image.h">
+      <Filter>external\stb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\imgui\backends\imgui_impl_glfw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\imgui\backends\imgui_impl_opengl3.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\MainWindow.cpp">
       <Filter>Source Files</Filter>
@@ -103,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Shader.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImFileDialog\ImFileDialog.cpp">
+      <Filter>external\ImFileDialog</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

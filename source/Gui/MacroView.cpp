@@ -100,14 +100,14 @@ void _MacroView::resize(IntVector2D const& size)
 void _MacroView::leftMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-    _zoomFactor *= 1.02f;
+    _zoomFactor *= 1.05f;
     centerTo(worldPos, viewPos);
 }
 
 void _MacroView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-    _zoomFactor /= 1.02f;
+    _zoomFactor /= 1.05f;
     centerTo(worldPos, viewPos);
 }
 
