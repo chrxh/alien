@@ -8,7 +8,7 @@
 #include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 
-#include "MacroView.h"
+#include "SimulationView.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -94,7 +94,7 @@ namespace
 GLFWwindow* _MainWindow::init(SimulationController const& simController)
 {
     _simController = simController;
-    _macroView = boost::make_shared<_MacroView>();
+    _simulationView = boost::make_shared<_SimulationView>();
 
     glfwSetErrorCallback(glfwErrorCallback);
 
@@ -163,7 +163,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         return nullptr;
     }
 
-    _macroView->init(simController, {mode->width, mode->height}, 1);
+    _simulationView->init(simController, {mode->width, mode->height}, 1);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -189,15 +189,8 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
 void _MainWindow::mainLoop(GLFWwindow* window)
 {
-    // Our state
     bool show_demo_window = true;
-    bool show_another_window = true;
-    ImVec4 spaceColor = ImVec4(0.0f, 0.0f, 0.2f, 1.00f);
-
-    // Main loop
-    bool isClose = false;
-
-    while (!glfwWindowShouldClose(window) && !isClose)
+    while (!glfwWindowShouldClose(window))
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -205,7 +198,6 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
-
         processEvents();
 
         // Start the Dear ImGui frame
@@ -221,24 +213,15 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         drawToolbar();
         drawMenubar();
         drawDialogs();
-
-        // 3. Show another simple window.
-        if (show_another_window) {
-            ImGui::SetNextWindowBgAlpha(0.8f);
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+        _simulationView->drawControls();
 
 
-        // Rendering
+        // render content
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        _macroView->render();
+        _simulationView->drawContent();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -255,25 +238,25 @@ void _MainWindow::shutdown(GLFWwindow* window)
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    _macroView.reset();
+    _simulationView.reset();
 }
 
 void _MainWindow::processEvents()
 {
     if (inputState.leftMouseButtonHold) {
-        _macroView->leftMouseButtonHold(inputState.mousePos);
+        _simulationView->leftMouseButtonHold(inputState.mousePos);
     }
     if (inputState.rightMouseButtonHold) {
-        _macroView->rightMouseButtonHold(inputState.mousePos);
+        _simulationView->rightMouseButtonHold(inputState.mousePos);
     }
     if (inputState.middleMouseButtonPressed) {
-        _macroView->middleMouseButtonPressed(inputState.mousePos);
+        _simulationView->middleMouseButtonPressed(inputState.mousePos);
     }
     if (inputState.middleMouseButtonHold) {
-        _macroView->middleMouseButtonHold(inputState.mousePos);
+        _simulationView->middleMouseButtonHold(inputState.mousePos);
     }
     if (inputState.middleMouseButtonReleased) {
-        _macroView->middleMouseButtonReleased();
+        _simulationView->middleMouseButtonReleased();
     }
 
     eventProcessingFinished();
@@ -309,6 +292,7 @@ void _MainWindow::drawMenubar()
 
 void _MainWindow::drawToolbar()
 {
+/*
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 19));
     ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 50));
@@ -330,17 +314,20 @@ void _MainWindow::drawToolbar()
     ImGui::Button("Zoom out", ImVec2(0, 37));
 
     ImGui::End();
+*/
 }
 
 void _MainWindow::drawDialogs()
 {
     // Simple window
+/*
     ImGui::Begin("Control Panel");
     if (ImGui::Button("Open directory"))
         ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
     if (ImGui::Button("Save file"))
         ifd::FileDialog::Instance().Save("ShaderSaveDialog", "Save a shader", "*.sprj {.sprj}");
     ImGui::End();
+*/
 
     // file dialogs
     if (ifd::FileDialog::Instance().IsDone("SimulationOpenDialog")) {
@@ -366,6 +353,7 @@ void _MainWindow::drawDialogs()
         }
         ifd::FileDialog::Instance().Close();
     }
+/*
     if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog")) {
         if (ifd::FileDialog::Instance().HasResult()) {
             std::string res = ifd::FileDialog::Instance().GetResult().u8string();
@@ -380,4 +368,5 @@ void _MainWindow::drawDialogs()
         }
         ifd::FileDialog::Instance().Close();
     }
+*/
 }

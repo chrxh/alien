@@ -69,7 +69,7 @@
     <ClInclude Include="..\..\source\Gui\Definitions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\MacroView.h">
+    <ClInclude Include="..\..\source\Gui\SimulationView.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\Shader.h">
@@ -80,6 +80,9 @@
     </ClInclude>
     <ClInclude Include="..\..\external\stb\stb_image.h">
       <Filter>external\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Scrollbar.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,7 +116,7 @@
     <ClCompile Include="..\..\external\glad\src\glad.c">
       <Filter>glad</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\MacroView.cpp">
+    <ClCompile Include="..\..\source\Gui\SimulationView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\Shader.cpp">
@@ -121,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="..\..\external\ImFileDialog\ImFileDialog.cpp">
       <Filter>external\ImFileDialog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Scrollbar.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
