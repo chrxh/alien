@@ -158,7 +158,8 @@
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
-    <ClInclude Include="..\..\source\Gui\MacroView.h" />
+    <ClInclude Include="..\..\source\Gui\Scrollbar.h" />
+    <ClInclude Include="..\..\source\Gui\SimulationView.h" />
     <ClInclude Include="..\..\source\Gui\MainWindow.h" />
     <ClInclude Include="..\..\source\Gui\Shader.h" />
   </ItemGroup>
@@ -172,7 +173,8 @@
     <ClCompile Include="..\..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="..\..\source\Gui\MacroView.cpp" />
+    <ClCompile Include="..\..\source\Gui\Scrollbar.cpp" />
+    <ClCompile Include="..\..\source\Gui\SimulationView.cpp" />
     <ClCompile Include="..\..\source\Gui\main.cpp" />
     <ClCompile Include="..\..\source\Gui\MainWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\Shader.cpp" />

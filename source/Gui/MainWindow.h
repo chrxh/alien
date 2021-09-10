@@ -18,5 +18,5 @@ private:
     void drawDialogs();
 
     SimulationController _simController;
-    MacroView _macroView;
+    SimulationView _simulationView;
 };

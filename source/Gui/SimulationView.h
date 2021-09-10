@@ -4,7 +4,7 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
-class _MacroView
+class _SimulationView
 {
 public:
     void init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor);
@@ -14,7 +14,9 @@ public:
     void middleMouseButtonPressed(IntVector2D const& viewPos);
     void middleMouseButtonHold(IntVector2D const& viewPos);
     void middleMouseButtonReleased();
-    void render();
+
+    void drawContent();
+    void drawControls();
 
 private:
     void requestImageFromSimulation();

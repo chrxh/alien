@@ -5,8 +5,8 @@
 class _MainWindow;
 using MainWindow = boost::shared_ptr<_MainWindow>;
 
-class _MacroView;
-using MacroView= boost::shared_ptr<_MacroView>;
+class _SimulationView;
+using SimulationView= boost::shared_ptr<_SimulationView>;
 
 class _Shader;
 using Shader = boost::shared_ptr<_Shader>;
