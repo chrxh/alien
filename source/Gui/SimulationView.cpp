@@ -1,12 +1,13 @@
-#include "MacroView.h"
+#include "SimulationView.h"
 
 #include <glad/glad.h>
+#include "imgui.h"
 
 #include "EngineImpl/SimulationController.h"
 
 #include "Shader.h"
 
-void _MacroView::init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor)
+void _SimulationView::init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor)
 {
     auto worldSize = simController->getWorldSize();
     _worldCenter = {toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2};
@@ -62,7 +63,7 @@ void _MacroView::init(SimulationController const& simController, IntVector2D con
     _shader->setFloat("motionBlurFactor", 0.6f);
 }
 
-void _MacroView::resize(IntVector2D const& size)
+void _SimulationView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
         glDeleteFramebuffers(1, &_fbo);
@@ -97,36 +98,36 @@ void _MacroView::resize(IntVector2D const& size)
     _viewportSize = size;
 }
 
-void _MacroView::leftMouseButtonHold(IntVector2D const& viewPos)
+void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
     _zoomFactor *= 1.05f;
     centerTo(worldPos, viewPos);
 }
 
-void _MacroView::rightMouseButtonHold(IntVector2D const& viewPos)
+void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
     _zoomFactor /= 1.05f;
     centerTo(worldPos, viewPos);
 }
 
-void _MacroView::middleMouseButtonPressed(IntVector2D const& viewPos)
+void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
 {
     _worldPosForMovement = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
 }
 
-void _MacroView::middleMouseButtonHold(IntVector2D const& viewPos)
+void _SimulationView::middleMouseButtonHold(IntVector2D const& viewPos)
 {
     centerTo(*_worldPosForMovement, viewPos);
 }
 
-void _MacroView::middleMouseButtonReleased()
+void _SimulationView::middleMouseButtonReleased()
 {
     _worldPosForMovement = boost::none;
 }
 
-void _MacroView::render()
+void _SimulationView::drawContent()
 {
     requestImageFromSimulation();
 
@@ -149,7 +150,47 @@ void _MacroView::render()
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void _MacroView::requestImageFromSimulation()
+void _SimulationView::drawControls()
+{
+    auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
+    auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
+    auto visibleWorldSize = bottomRight - topLeft;
+    auto worldSize = _simController->getWorldSize();
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float childHeight = 1 + style.ScrollbarSize + style.WindowPadding.y * 2.0f;
+    float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
+
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    {
+        ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Size.y - childHeight));
+        auto size = ImVec2(viewport->Size.x - childHeight, 1);
+        ImGui::SetNextWindowSize(size);
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+            | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysHorizontalScrollbar
+            | ImGuiWindowFlags_NoDecoration
+            | ImGuiWindowFlags_NoBackground;
+        ImGui::SetNextWindowContentSize(ImVec2(toFloat(worldSize.x) / visibleWorldSize.x * size.x, 0));
+        ImGui::Begin("ScrollbarX", NULL, windowFlags);
+        ImGui::SetScrollX(toFloat(topLeft.x) / visibleWorldSize.x * size.x);
+        ImGui::End();
+    }
+
+    {
+        ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - childWidth, viewport->Pos.y + 19));
+        auto size = ImVec2(1, viewport->Size.y - 19 - childWidth);
+        ImGui::SetNextWindowSize(size);
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+            | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysVerticalScrollbar
+            | ImGuiWindowFlags_NoBackground;
+        ImGui::SetNextWindowContentSize(ImVec2(0, toFloat(worldSize.y) / visibleWorldSize.y * size.y));
+        ImGui::Begin("ScrollbarY", NULL, windowFlags);
+        //    ImGui::SetScrollX(4000);
+        ImGui::End();
+    }
+}
+
+void _SimulationView::requestImageFromSimulation()
 {
     auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
     auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
@@ -157,7 +198,7 @@ void _MacroView::requestImageFromSimulation()
     _simController->getVectorImage(topLeft, bottomRight, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
 }
 
-void _MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
+void _SimulationView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
 {
     RealVector2D deltaViewPos{
         toFloat(viewPos.x) - toFloat(_viewportSize.x) / 2.0f, toFloat(viewPos.y) - toFloat(_viewportSize.y) / 2.0f};
@@ -165,7 +206,7 @@ void _MacroView::centerTo(RealVector2D const& worldPosition, IntVector2D const& 
     _worldCenter = worldPosition - deltaWorldPos;
 }
 
-RealVector2D _MacroView::mapViewToWorldPosition(RealVector2D const& viewPos) const
+RealVector2D _SimulationView::mapViewToWorldPosition(RealVector2D const& viewPos) const
 {
     RealVector2D relCenter{
         toFloat(_viewportSize.x / (2.0 * _zoomFactor)), toFloat(_viewportSize.y / (2.0 * _zoomFactor))};
