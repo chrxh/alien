@@ -27,64 +27,6 @@
 
 namespace
 {
-    struct InputState
-    {
-        bool leftMouseButtonHold = false;
-        bool rightMouseButtonHold = false;
-        bool middleMouseButtonPressed = false;
-        bool middleMouseButtonHold = false;
-        bool middleMouseButtonReleased = false;
-        IntVector2D mousePos;
-    };
-    InputState inputState;
-
-    void mouseClickEvent(GLFWwindow* window, int button, int action, int mods)
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-        } else {
-            if (0 == button) {
-                if (1 == action) {
-                    inputState.leftMouseButtonHold = true;
-                }
-                if (0 == action) {
-                    inputState.leftMouseButtonHold = false;
-                }
-            }
-            if (1 == button) {
-                if (1 == action) {
-                    inputState.rightMouseButtonHold = true;
-                }
-                if (0 == action) {
-                    inputState.rightMouseButtonHold = false;
-                }
-            }
-            if (2 == button) {
-                if (1 == action) {
-                    inputState.middleMouseButtonPressed = true;
-                    inputState.middleMouseButtonHold = true;
-                }
-                if (0 == action) {
-                    inputState.middleMouseButtonReleased = true;
-                    inputState.middleMouseButtonHold = false;
-                }
-            }
-        }
-    }
-
-    void mouseMoveEvent(GLFWwindow* window, double posX, double posY)
-    {
-        inputState.mousePos.x = static_cast<int>(posX);
-        inputState.mousePos.y = static_cast<int>(posY);
-    }
-
-    void eventProcessingFinished()
-    {
-        inputState.middleMouseButtonPressed = false;
-        inputState.middleMouseButtonReleased = false;
-    }
-
     void glfwErrorCallback(int error, const char* description)
     {
         std::cerr << "Glfw Error " << error << ": " << description << std::endl;
@@ -152,8 +94,10 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+/*
     glfwSetMouseButtonCallback(window, mouseClickEvent);
     glfwSetCursorPosCallback(window, mouseMoveEvent);
+*/
 
     //    glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -197,7 +141,6 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
-        processEvents();
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -212,6 +155,7 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         drawToolbar();
         drawMenubar();
         drawDialogs();
+        _simulationView->processEvents();
         _simulationView->drawControls();
 
         // render content
@@ -237,27 +181,6 @@ void _MainWindow::shutdown(GLFWwindow* window)
     glfwTerminate();
 
     _simulationView.reset();
-}
-
-void _MainWindow::processEvents()
-{
-    if (inputState.leftMouseButtonHold) {
-        _simulationView->leftMouseButtonHold(inputState.mousePos);
-    }
-    if (inputState.rightMouseButtonHold) {
-        _simulationView->rightMouseButtonHold(inputState.mousePos);
-    }
-    if (inputState.middleMouseButtonPressed) {
-        _simulationView->middleMouseButtonPressed(inputState.mousePos);
-    }
-    if (inputState.middleMouseButtonHold) {
-        _simulationView->middleMouseButtonHold(inputState.mousePos);
-    }
-    if (inputState.middleMouseButtonReleased) {
-        _simulationView->middleMouseButtonReleased();
-    }
-
-    eventProcessingFinished();
 }
 
 void _MainWindow::drawMenubar()

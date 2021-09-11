@@ -132,6 +132,33 @@ void _SimulationView::middleMouseButtonReleased()
     _worldPosForMovement = boost::none;
 }
 
+void _SimulationView::processEvents()
+{
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        auto mousePos = ImGui::GetMousePos();
+        IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
+
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+            leftMouseButtonHold(mousePosInt);
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+            rightMouseButtonHold(mousePosInt);
+        }
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
+            middleMouseButtonPressed(mousePosInt);
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+            middleMouseButtonHold(mousePosInt);
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
+            middleMouseButtonReleased();
+        }
+    } else {
+        _scrollbarX->processEvents();
+        _scrollbarY->processEvents();
+    }
+}
+
 void _SimulationView::drawContent()
 {
     requestImageFromSimulation();
