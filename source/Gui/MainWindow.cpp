@@ -127,7 +127,6 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
     // Create window with graphics context
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor(); // The primary monitor.. Later Occulus?..
-
     auto mode = glfwGetVideoMode(primaryMonitor);
     auto screenWidth = mode->width;
     auto screenHeight = mode->height;
@@ -214,7 +213,6 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         drawMenubar();
         drawDialogs();
         _simulationView->drawControls();
-
 
         // render content
         ImGui::Render();
