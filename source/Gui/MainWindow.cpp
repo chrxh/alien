@@ -155,15 +155,14 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         drawToolbar();
         drawMenubar();
         drawDialogs();
-        _simulationView->processEvents();
-        _simulationView->drawControls();
+        _simulationView->processControls();
 
         // render content
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        _simulationView->drawContent();
+        _simulationView->processContent();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

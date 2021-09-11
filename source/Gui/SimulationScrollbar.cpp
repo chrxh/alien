@@ -19,18 +19,53 @@ _SimulationScrollbar::_SimulationScrollbar(
     , _viewport(viewport)
 {}
 
-void _SimulationScrollbar::processEvents()
+void _SimulationScrollbar::process(RealRect const& rect)
+{
+    auto size = rect.bottomRight - rect.topLeft;
+    auto sliderbarRect = calcSliderbarRect(rect);
+    ImGuiWindowFlags windowFlags =
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDecoration;
+
+    ImGui::SetNextWindowPos(ImVec2(rect.topLeft.x, rect.topLeft.y));
+    ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
+    ImGui::SetNextWindowBgAlpha(0.7f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+    ImGui::Begin(_id.c_str(), NULL, windowFlags);
+
+    ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+    ImColor sliderColor;
+    if (mousePositionAbsolute.x >= rect.topLeft.x + sliderbarRect.topLeft.x - 3
+        && mousePositionAbsolute.x <= rect.topLeft.x + sliderbarRect.bottomRight.x + 3
+        && mousePositionAbsolute.y >= rect.topLeft.y + sliderbarRect.topLeft.y - 3
+        && mousePositionAbsolute.y <= rect.topLeft.y + sliderbarRect.bottomRight.y + 3) {
+        sliderColor = ImColor{0.6f, 0.6f, 0.6f, 1.0f};
+    } else {
+        sliderColor = ImColor{0.3f, 0.3f, 0.3f, 1.0f};
+    }
+
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImVec2(rect.topLeft.x + sliderbarRect.topLeft.x, rect.topLeft.y + sliderbarRect.topLeft.y),
+        ImVec2(rect.topLeft.x + sliderbarRect.bottomRight.x, rect.topLeft.y + sliderbarRect.bottomRight.y),
+        sliderColor,
+        5.0f);
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+}
+
+void _SimulationScrollbar::processEvents(RealRect const& rect)
 {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
     }
 }
 
-void _SimulationScrollbar::draw(RealVector2D const& topLeft, RealVector2D const& size2d)
+RealRect _SimulationScrollbar::calcSliderbarRect(RealRect const& scrollbarRect) const
 {
+    auto size2d = scrollbarRect.bottomRight - scrollbarRect.topLeft;
     auto worldSize =
         Orientation::Horizontal == _orientation ? _simController->getWorldSize().x : _simController->getWorldSize().y;
     auto size = Orientation::Horizontal == _orientation ? size2d.x : size2d.y;
-   
+
     auto worldRect = _viewport->getVisibleWorldRect();
     auto startWorldPos = Orientation::Horizontal == _orientation ? worldRect.topLeft.x : worldRect.topLeft.y;
     auto endWorldPos = Orientation::Horizontal == _orientation ? worldRect.bottomRight.x : worldRect.bottomRight.y;
@@ -44,43 +79,6 @@ void _SimulationScrollbar::draw(RealVector2D const& topLeft, RealVector2D const&
         Orientation::Horizontal == _orientation ? ImVec2{4 + sliderBarStartPos, 4} : ImVec2{4, 4 + sliderBarStartPos};
     auto sliderBarSize = Orientation::Horizontal == _orientation ? ImVec2{sliderBarEndPos - sliderBarStartPos - 8, 10}
                                                                  : ImVec2{10, sliderBarEndPos - sliderBarStartPos - 8};
-
-    ImGuiWindowFlags windowFlags =
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDecoration;
-
-    ImGui::SetNextWindowPos(ImVec2(topLeft.x, topLeft.y));
-    ImGui::SetNextWindowSize(ImVec2(size2d.x, size2d.y));
-    ImGui::SetNextWindowBgAlpha(0.7f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-    ImGui::Begin(_id.c_str(), NULL, windowFlags);
-
-    ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
-    ImColor sliderColor;
-    if (mousePositionAbsolute.x >= topLeft.x + sliderBarPos.x - 3
-        && mousePositionAbsolute.x <= topLeft.x + sliderBarPos.x + sliderBarSize.x + 3
-        && mousePositionAbsolute.y >= topLeft.y + sliderBarPos.y - 3
-        && mousePositionAbsolute.y <= topLeft.y + sliderBarPos.y + sliderBarSize.y + 3) {
-        sliderColor = ImColor{0.6f, 0.6f, 0.6f, 1.0f};
-    } else {
-        sliderColor = ImColor{0.3f, 0.3f, 0.3f, 1.0f};
-    }
-
-    ImGui::GetWindowDrawList()->AddRectFilled(
-        ImVec2(topLeft.x + sliderBarPos.x, topLeft.y + sliderBarPos.y),
-        ImVec2(topLeft.x + sliderBarPos.x + sliderBarSize.x, topLeft.y + sliderBarPos.y + sliderBarSize.y),
-        sliderColor,
-        5.0f);
-
-    ImGui::End();
-    ImGui::PopStyleVar();
-
-/*
-    ImGui::SetNextWindowPos(ImVec2(/ *topLeft.x, topLeft.y* /0, 150));
-//    printf("%f, %f\n", topLeft.x, topLeft.y);
-    ImGui::SetNextWindowSize(ImVec2(size2d.x, size2d.y));
-//    ImGui::SetNextWindowBgAlpha(0.7f);
-    ImGui::Begin((_id + "1").c_str(), NULL, windowFlags);
-    ImGui::GetWindowDrawList()->AddRectFilled({0, 0}, {200, 200}, IM_COL32(255, 0, 255, 255));
-    ImGui::End();
-*/
+    return {
+        {sliderBarPos.x, sliderBarPos.y}, {sliderBarPos.x + sliderBarSize.x - 1, sliderBarPos.y + sliderBarSize.y - 1}};
 }
