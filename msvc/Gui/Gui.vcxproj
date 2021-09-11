@@ -162,6 +162,7 @@
     <ClInclude Include="..\..\source\Gui\SimulationView.h" />
     <ClInclude Include="..\..\source\Gui\MainWindow.h" />
     <ClInclude Include="..\..\source\Gui\Shader.h" />
+    <ClInclude Include="..\..\source\Gui\Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\glad\src\glad.c" />
@@ -178,6 +179,7 @@
     <ClCompile Include="..\..\source\Gui\main.cpp" />
     <ClCompile Include="..\..\source\Gui\MainWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\Shader.cpp" />
+    <ClCompile Include="..\..\source\Gui\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.vcxproj">

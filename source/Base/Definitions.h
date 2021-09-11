@@ -104,3 +104,9 @@ struct BASE_EXPORT RealVector2D
     RealVector2D operator-(RealVector2D const& other) const;
     RealVector2D operator/(float divisor) const;
 };
+
+struct RealRect
+{
+    RealVector2D topLeft;
+    RealVector2D bottomRight;
+};
