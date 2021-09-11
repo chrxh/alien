@@ -18,9 +18,12 @@ public:
         SimulationController const& simController,
         Viewport const& viewport);
 
-    void processEvents();
-    void draw(RealVector2D const& topLeft, RealVector2D const& size);
+    void process(RealRect const& rect);
+
 private:
+    void processEvents(RealRect const& rect);
+    RealRect calcSliderbarRect(RealRect const& scrollbarRect) const;
+
     std::string _id;
     Orientation _orientation = Orientation::Horizontal;
     SimulationController _simController;

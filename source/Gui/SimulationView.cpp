@@ -153,14 +153,13 @@ void _SimulationView::processEvents()
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
             middleMouseButtonReleased();
         }
-    } else {
-        _scrollbarX->processEvents();
-        _scrollbarY->processEvents();
     }
 }
 
-void _SimulationView::drawContent()
+void _SimulationView::processContent()
 {
+    processEvents();
+
     requestImageFromSimulation();
 
     _shader->use();
@@ -182,7 +181,7 @@ void _SimulationView::drawContent()
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void _SimulationView::drawControls()
+void _SimulationView::processControls()
 {
     auto worldRect = _viewport->getVisibleWorldRect();
     auto visibleWorldSize = worldRect.bottomRight - worldRect.topLeft;
@@ -193,8 +192,8 @@ void _SimulationView::drawControls()
     float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    _scrollbarX->draw(RealVector2D(viewport->Pos.x, viewport->Size.y - 17), RealVector2D(viewport->Size.x - 1 - 17, 1));
-    _scrollbarY->draw(RealVector2D(viewport->Size.x - 17, viewport->Pos.y + 20), RealVector2D(1, viewport->Size.y - 1 - 20 - 17));
+    _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - 17}, {viewport->Size.x - 1 - 17, 1}});
+    _scrollbarY->process({{viewport->Size.x - 17, viewport->Pos.y + 20}, {1, viewport->Size.y - 1 - 20 - 17}});
 }
 
 void _SimulationView::requestImageFromSimulation()

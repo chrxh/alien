@@ -15,11 +15,11 @@ public:
     void middleMouseButtonHold(IntVector2D const& viewPos);
     void middleMouseButtonReleased();
 
-    void processEvents();
-    void drawContent();
-    void drawControls();
+    void processContent();
+    void processControls();
 
 private:
+    void processEvents();
     void requestImageFromSimulation();
 
     //widgets
