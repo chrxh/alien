@@ -18,6 +18,7 @@ public:
         SimulationController const& simController,
         Viewport const& viewport);
 
+    void processEvents();
     void draw(RealVector2D const& topLeft, RealVector2D const& size);
 private:
     std::string _id;
