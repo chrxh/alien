@@ -7,20 +7,23 @@
 
 #include "Shader.h"
 #include "SimulationScrollbar.h"
+#include "Viewport.h"
 
 void _SimulationView::init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor)
 {
     auto worldSize = simController->getWorldSize();
-    _worldCenter = {toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2};
-    _zoomFactor = zoomFactor;
+    _viewport = boost::make_shared<_Viewport>();
+    _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
+    _viewport->setZoomFactor(zoomFactor);
+    _viewport->setViewSize(viewportSize);
 
     _simController = simController;
     _shader = boost::make_shared<_Shader>("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
 
     _scrollbarX = boost::make_shared<_SimulationScrollbar>(
-        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController);
+        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController, _viewport);
     _scrollbarY = boost::make_shared<_SimulationScrollbar>(
-        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController);
+        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController, _viewport);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -55,7 +58,7 @@ void _SimulationView::init(SimulationController const& simController, IntVector2
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
   
-    // texture coord attribute
+    // texture coordinate attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -101,31 +104,27 @@ void _SimulationView::resize(IntVector2D const& size)
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 
-    _viewportSize = size;
+    _viewport->setViewSize(size);
 }
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos)
 {
-    auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-    _zoomFactor *= 1.05f;
-    centerTo(worldPos, viewPos);
+    _viewport->zoom(viewPos, 1.05f);
 }
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
-    auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-    _zoomFactor /= 1.05f;
-    centerTo(worldPos, viewPos);
+    _viewport->zoom(viewPos, 1.0f/1.05f);
 }
 
 void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
 {
-    _worldPosForMovement = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+    _worldPosForMovement = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
 }
 
 void _SimulationView::middleMouseButtonHold(IntVector2D const& viewPos)
 {
-    centerTo(*_worldPosForMovement, viewPos);
+    _viewport->centerTo(*_worldPosForMovement, viewPos);
 }
 
 void _SimulationView::middleMouseButtonReleased()
@@ -158,9 +157,8 @@ void _SimulationView::drawContent()
 
 void _SimulationView::drawControls()
 {
-    auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
-    auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
-    auto visibleWorldSize = bottomRight - topLeft;
+    auto worldRect = _viewport->getVisibleWorldRect();
+    auto visibleWorldSize = worldRect.bottomRight - worldRect.topLeft;
     auto worldSize = _simController->getWorldSize();
 
     ImGuiStyle& style = ImGui::GetStyle();
@@ -168,32 +166,15 @@ void _SimulationView::drawControls()
     float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    _scrollbarX->setVisibleWorldSection(topLeft.x, bottomRight.x);
     _scrollbarX->draw(RealVector2D(viewport->Pos.x, viewport->Size.y - 17), RealVector2D(viewport->Size.x - 1 - 17, 1));
-    _scrollbarY->setVisibleWorldSection(topLeft.y, bottomRight.y);
     _scrollbarY->draw(RealVector2D(viewport->Size.x - 17, viewport->Pos.y + 20), RealVector2D(1, viewport->Size.y - 1 - 20 - 17));
 }
 
 void _SimulationView::requestImageFromSimulation()
 {
-    auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
-    auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewportSize.x - 1), toFloat(_viewportSize.y - 1)});
-
-    _simController->getVectorImage(topLeft, bottomRight, {_viewportSize.x, _viewportSize.y}, _zoomFactor);
+    auto worldRect = _viewport->getVisibleWorldRect();
+    auto viewSize = _viewport->getViewSize();
+    _simController->getVectorImage(
+        worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, _viewport->getZoomFactor());
 }
 
-void _SimulationView::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
-{
-    RealVector2D deltaViewPos{
-        toFloat(viewPos.x) - toFloat(_viewportSize.x) / 2.0f, toFloat(viewPos.y) - toFloat(_viewportSize.y) / 2.0f};
-    auto deltaWorldPos = deltaViewPos / _zoomFactor;
-    _worldCenter = worldPosition - deltaWorldPos;
-}
-
-RealVector2D _SimulationView::mapViewToWorldPosition(RealVector2D const& viewPos) const
-{
-    RealVector2D relCenter{
-        toFloat(_viewportSize.x / (2.0 * _zoomFactor)), toFloat(_viewportSize.y / (2.0 * _zoomFactor))};
-    RealVector2D relWorldPos{viewPos.x / _zoomFactor, viewPos.y / _zoomFactor};
-    return _worldCenter - relCenter + relWorldPos;
-}
