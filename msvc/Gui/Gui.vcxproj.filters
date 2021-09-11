@@ -81,7 +81,7 @@
     <ClInclude Include="..\..\external\stb\stb_image.h">
       <Filter>external\stb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\Scrollbar.h">
+    <ClInclude Include="..\..\source\Gui\SimulationScrollbar.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -125,7 +125,7 @@
     <ClCompile Include="..\..\external\ImFileDialog\ImFileDialog.cpp">
       <Filter>external\ImFileDialog</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Scrollbar.cpp">
+    <ClCompile Include="..\..\source\Gui\SimulationScrollbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

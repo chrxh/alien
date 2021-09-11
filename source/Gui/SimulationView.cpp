@@ -6,6 +6,7 @@
 #include "EngineImpl/SimulationController.h"
 
 #include "Shader.h"
+#include "SimulationScrollbar.h"
 
 void _SimulationView::init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor)
 {
@@ -15,6 +16,11 @@ void _SimulationView::init(SimulationController const& simController, IntVector2
 
     _simController = simController;
     _shader = boost::make_shared<_Shader>("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
+
+    _scrollbarX = boost::make_shared<_SimulationScrollbar>(
+        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController);
+    _scrollbarY = boost::make_shared<_SimulationScrollbar>(
+        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -162,32 +168,10 @@ void _SimulationView::drawControls()
     float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    {
-        ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Size.y - childHeight));
-        auto size = ImVec2(viewport->Size.x - childHeight, 1);
-        ImGui::SetNextWindowSize(size);
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-            | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysHorizontalScrollbar
-            | ImGuiWindowFlags_NoDecoration
-            | ImGuiWindowFlags_NoBackground;
-        ImGui::SetNextWindowContentSize(ImVec2(toFloat(worldSize.x) / visibleWorldSize.x * size.x, 0));
-        ImGui::Begin("ScrollbarX", NULL, windowFlags);
-        ImGui::SetScrollX(toFloat(topLeft.x) / visibleWorldSize.x * size.x);
-        ImGui::End();
-    }
-
-    {
-        ImGui::SetNextWindowPos(ImVec2(viewport->Size.x - childWidth, viewport->Pos.y + 19));
-        auto size = ImVec2(1, viewport->Size.y - 19 - childWidth);
-        ImGui::SetNextWindowSize(size);
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-            | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysVerticalScrollbar
-            | ImGuiWindowFlags_NoBackground;
-        ImGui::SetNextWindowContentSize(ImVec2(0, toFloat(worldSize.y) / visibleWorldSize.y * size.y));
-        ImGui::Begin("ScrollbarY", NULL, windowFlags);
-        //    ImGui::SetScrollX(4000);
-        ImGui::End();
-    }
+    _scrollbarX->setVisibleWorldSection(topLeft.x, bottomRight.x);
+    _scrollbarX->draw(RealVector2D(viewport->Pos.x, viewport->Size.y - 17), RealVector2D(viewport->Size.x - 1 - 17, 1));
+    _scrollbarY->setVisibleWorldSection(topLeft.y, bottomRight.y);
+    _scrollbarY->draw(RealVector2D(viewport->Size.x - 17, viewport->Pos.y + 20), RealVector2D(1, viewport->Size.y - 1 - 20 - 17));
 }
 
 void _SimulationView::requestImageFromSimulation()
