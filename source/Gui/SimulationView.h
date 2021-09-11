@@ -24,6 +24,10 @@ private:
     void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
 
+    //widgets
+    SimulationScrollbar _scrollbarX;
+    SimulationScrollbar _scrollbarY;
+
     //shader data
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo;
