@@ -84,6 +84,9 @@
     <ClInclude Include="..\..\source\Gui\SimulationScrollbar.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Viewport.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -126,6 +129,9 @@
       <Filter>external\ImFileDialog</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\SimulationScrollbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Viewport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

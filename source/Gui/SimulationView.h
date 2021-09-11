@@ -21,10 +21,8 @@ public:
 private:
     void requestImageFromSimulation();
 
-    void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
-    RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
-
     //widgets
+    Viewport _viewport;
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
 
@@ -37,11 +35,8 @@ private:
     unsigned int _textureId = 0;
     unsigned int _textureFramebufferId = 0;
 
-    //simulation view data
-    float _zoomFactor = 0.0f;
-    RealVector2D _worldCenter;
+    //navigation
     boost::optional<RealVector2D> _worldPosForMovement;
 
     SimulationController _simController;
-    IntVector2D _viewportSize;
 };

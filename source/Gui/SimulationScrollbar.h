@@ -5,7 +5,6 @@
 
 #include "Definitions.h"
 
-//TODO ViewDataRepository
 class _SimulationScrollbar
 {
 public:
@@ -13,15 +12,16 @@ public:
     {
         Horizontal, Vertical
     };
-    _SimulationScrollbar(std::string const& id, Orientation orientation, SimulationController const& simController);
+    _SimulationScrollbar(
+        std::string const& id,
+        Orientation orientation,
+        SimulationController const& simController,
+        Viewport const& viewport);
 
-    void setVisibleWorldSection(float startWorldPos, float endWorldPos);
     void draw(RealVector2D const& topLeft, RealVector2D const& size);
 private:
     std::string _id;
     Orientation _orientation = Orientation::Horizontal;
     SimulationController _simController;
-
-    float _startWorldPos = 0.0f;
-    float _endWorldPos = 0.0f;
+    Viewport _viewport;
 };

@@ -6,21 +6,18 @@
 #include "imgui.h"
 
 #include "EngineImpl/SimulationController.h"
+#include "Viewport.h"
 
 _SimulationScrollbar::_SimulationScrollbar(
     std::string const& id,
     Orientation orientation,
-    SimulationController const& simController)
+    SimulationController const& simController,
+    Viewport const& viewport)
     : _id(id)
     , _orientation(orientation)
     , _simController(simController)
+    , _viewport(viewport)
 {}
-
-void _SimulationScrollbar::setVisibleWorldSection(float startWorldPos, float endWorldPos)
-{
-    _startWorldPos = startWorldPos;
-    _endWorldPos = endWorldPos;
-}
 
 void _SimulationScrollbar::draw(RealVector2D const& topLeft, RealVector2D const& size2d)
 {
@@ -38,16 +35,20 @@ void _SimulationScrollbar::draw(RealVector2D const& topLeft, RealVector2D const&
     
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5);
     ImGui::PushStyleColor(ImGuiCol_ChildBg, {0.3f, 0.3f, 0.3f, 1.0f});
-    auto sliderBarStartPos = std::min(std::max(_startWorldPos / worldSize * size, 0.0f), size);
-    auto sliderBarEndPos = std::min(std::max(_endWorldPos / worldSize * size, 0.0f), size);
+    auto worldRect = _viewport->getVisibleWorldRect();
+    auto startWorldPos = Orientation::Horizontal == _orientation ? worldRect.topLeft.x : worldRect.topLeft.y;
+    auto endWorldPos = Orientation::Horizontal == _orientation ? worldRect.bottomRight.x : worldRect.bottomRight.y;
+
+    auto sliderBarStartPos = std::min(std::max(startWorldPos / worldSize * size, 0.0f), size);
+    auto sliderBarEndPos = std::min(std::max(endWorldPos / worldSize * size, 0.0f), size);
     if (sliderBarEndPos < sliderBarStartPos) {
         sliderBarEndPos = sliderBarStartPos;
     }
     auto sliderBarPos =
-        Orientation::Horizontal == _orientation ? ImVec2{sliderBarStartPos, 4} : ImVec2{4, sliderBarStartPos};
+        Orientation::Horizontal == _orientation ? ImVec2{4 + sliderBarStartPos, 4} : ImVec2{4, 4 + sliderBarStartPos};
     ImGui::SetCursorPos(sliderBarPos);
-    auto sliderBarSize = Orientation::Horizontal == _orientation ? ImVec2{sliderBarEndPos - sliderBarStartPos, 10}
-                                                                 : ImVec2{10, sliderBarEndPos - sliderBarStartPos};
+    auto sliderBarSize = Orientation::Horizontal == _orientation ? ImVec2{sliderBarEndPos - sliderBarStartPos - 8, 10}
+                                                                 : ImVec2{10, sliderBarEndPos - sliderBarStartPos - 8};
     ImGui::BeginChild((_id + "child").c_str(), sliderBarSize);
     ImGui::EndChild();
 

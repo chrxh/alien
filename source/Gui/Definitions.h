@@ -14,4 +14,7 @@ using Shader = boost::shared_ptr<_Shader>;
 class _SimulationScrollbar;
 using SimulationScrollbar = boost::shared_ptr<_SimulationScrollbar>;
 
+class _Viewport;
+using Viewport = boost::shared_ptr<_Viewport>;
+
 struct GLFWwindow;
