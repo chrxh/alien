@@ -21,6 +21,8 @@ _SimulationScrollbar::_SimulationScrollbar(
 
 void _SimulationScrollbar::process(RealRect const& rect)
 {
+    processEvents(rect);
+
     auto size = rect.bottomRight - rect.topLeft;
     auto sliderbarRect = calcSliderbarRect(rect);
     ImGuiWindowFlags windowFlags =
@@ -32,16 +34,8 @@ void _SimulationScrollbar::process(RealRect const& rect)
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::Begin(_id.c_str(), NULL, windowFlags);
 
-    ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
-    ImColor sliderColor;
-    if (mousePositionAbsolute.x >= rect.topLeft.x + sliderbarRect.topLeft.x - 3
-        && mousePositionAbsolute.x <= rect.topLeft.x + sliderbarRect.bottomRight.x + 3
-        && mousePositionAbsolute.y >= rect.topLeft.y + sliderbarRect.topLeft.y - 3
-        && mousePositionAbsolute.y <= rect.topLeft.y + sliderbarRect.bottomRight.y + 3) {
-        sliderColor = ImColor{0.6f, 0.6f, 0.6f, 1.0f};
-    } else {
-        sliderColor = ImColor{0.3f, 0.3f, 0.3f, 1.0f};
-    }
+    ImColor sliderColor =
+        doesMouseCursorIntersectSliderBar(rect) ? ImColor{0.6f, 0.6f, 0.6f, 1.0f} : ImColor{0.3f, 0.3f, 0.3f, 1.0f};
 
     ImGui::GetWindowDrawList()->AddRectFilled(
         ImVec2(rect.topLeft.x + sliderbarRect.topLeft.x, rect.topLeft.y + sliderbarRect.topLeft.y),
@@ -55,7 +49,27 @@ void _SimulationScrollbar::process(RealRect const& rect)
 
 void _SimulationScrollbar::processEvents(RealRect const& rect)
 {
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        if (doesMouseCursorIntersectSliderBar(rect)) {
+            _worldCenterForDragging = _viewport->getCenterInWorldPos();
+        }
+    }
+    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging) {
+        auto dragViewDelta = ImGui::GetMouseDragDelta();
+        auto scrollbarSize = rect.bottomRight - rect.topLeft;
+        auto worldSize = _simController->getWorldSize();
+        auto dragWorldDelta = RealVector2D{
+            dragViewDelta.x / scrollbarSize.x * worldSize.x, dragViewDelta.y / scrollbarSize.y * worldSize.y};
+        auto centerInWorldPos = _viewport->getCenterInWorldPos();
+        if (Orientation::Horizontal == _orientation) {
+            centerInWorldPos.x = _worldCenterForDragging->x + dragWorldDelta.x;
+        } else {
+            centerInWorldPos.y = _worldCenterForDragging->y + dragWorldDelta.y;
+        }
+        _viewport->setCenterInWorldPos(centerInWorldPos);
+    }
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        _worldCenterForDragging = boost::none;
     }
 }
 
@@ -81,4 +95,15 @@ RealRect _SimulationScrollbar::calcSliderbarRect(RealRect const& scrollbarRect) 
                                                                  : ImVec2{10, sliderBarEndPos - sliderBarStartPos - 8};
     return {
         {sliderBarPos.x, sliderBarPos.y}, {sliderBarPos.x + sliderBarSize.x - 1, sliderBarPos.y + sliderBarSize.y - 1}};
+}
+
+bool _SimulationScrollbar::doesMouseCursorIntersectSliderBar(RealRect const& rect) const
+{
+    auto sliderbarRect = calcSliderbarRect(rect);
+
+    ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+    return mousePositionAbsolute.x >= rect.topLeft.x + sliderbarRect.topLeft.x - 3
+        && mousePositionAbsolute.x <= rect.topLeft.x + sliderbarRect.bottomRight.x + 3
+        && mousePositionAbsolute.y >= rect.topLeft.y + sliderbarRect.topLeft.y - 3
+        && mousePositionAbsolute.y <= rect.topLeft.y + sliderbarRect.bottomRight.y + 3;
 }

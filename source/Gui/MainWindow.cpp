@@ -106,7 +106,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         return nullptr;
     }
 
-    _simulationView->init(simController, {mode->width, mode->height}, 1);
+    _simulationView->init(simController, {mode->width, mode->height}, 4);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
