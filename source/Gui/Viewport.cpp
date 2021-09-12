@@ -10,6 +10,11 @@ void _Viewport::setZoomFactor(float zoomFactor)
     _zoomFactor = zoomFactor;
 }
 
+RealVector2D _Viewport::getCenterInWorldPos() const
+{
+    return _worldCenter;
+}
+
 void _Viewport::setCenterInWorldPos(RealVector2D const& worldCenter)
 {
     _worldCenter = worldCenter;

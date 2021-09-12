@@ -10,7 +10,8 @@ class _SimulationScrollbar
 public:
     enum class Orientation
     {
-        Horizontal, Vertical
+        Horizontal,
+        Vertical
     };
     _SimulationScrollbar(
         std::string const& id,
@@ -23,9 +24,12 @@ public:
 private:
     void processEvents(RealRect const& rect);
     RealRect calcSliderbarRect(RealRect const& scrollbarRect) const;
+    bool doesMouseCursorIntersectSliderBar(RealRect const& rect) const;
 
     std::string _id;
     Orientation _orientation = Orientation::Horizontal;
     SimulationController _simController;
     Viewport _viewport;
+
+    boost::optional<RealVector2D> _worldCenterForDragging;
 };

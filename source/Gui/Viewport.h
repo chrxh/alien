@@ -10,6 +10,7 @@ public:
     float getZoomFactor() const;
     void setZoomFactor(float zoomFactor);
 
+    RealVector2D getCenterInWorldPos() const;
     void setCenterInWorldPos(RealVector2D const& worldCenter);
 
     IntVector2D getViewSize() const;
