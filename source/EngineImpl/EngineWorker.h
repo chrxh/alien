@@ -44,20 +44,28 @@ public:
     ENGINEIMPL_EXPORT void beginShutdown(); //caller should wait for termination of thread
     ENGINEIMPL_EXPORT void endShutdown();
 
+    ENGINEIMPL_EXPORT int getTpsRestriction() const;
+    ENGINEIMPL_EXPORT void setTpsRestriction(int value);
+
+    ENGINEIMPL_EXPORT int getTps() const;
+
     void runThreadLoop();
     void runSimulation();
     void pauseSimulation();
 
 private:
     mutable std::mutex _mutexForLoop;
-    mutable std::mutex _mutexForAccess;
     std::condition_variable _conditionForWorkerLoop;
     std::condition_variable _conditionForAccess;
 
     std::atomic<bool> _isSimulationRunning = false;
     std::atomic<bool> _isShutdown = false;
     std::atomic<bool> _requireAccess = false;
-
+    std::atomic<int> _tpsRestriction = 0;   //0 = no restriction
+    std::atomic<int> _tps;
+    boost::optional<std::chrono::steady_clock::time_point> _timepoint;
+    int _timestepsSinceTimepoint = 0;
+  
     CudaSimulation _cudaSimulation;
     void* _cudaResource;     //for rendering
 

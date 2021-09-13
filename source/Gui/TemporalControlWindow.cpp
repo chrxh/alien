@@ -3,13 +3,17 @@
 #include "imgui.h"
 
 #include "Base/Definitions.h"
+#include "EngineImpl/SimulationController.h"
 
 #include "Style.h"
 #include "StyleRepository.h"
 #include "OpenGLHelper.h"
 
-_TemporalControlWindow::_TemporalControlWindow(StyleRepository const& styleRepository)
-    : _styleRepository(styleRepository)
+_TemporalControlWindow::_TemporalControlWindow(
+    SimulationController const& simController,
+    StyleRepository const& styleRepository)
+    : _simController(simController)
+    , _styleRepository(styleRepository)
 {
     _runTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\run.png");
     _pauseTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\pause.png");
@@ -28,7 +32,7 @@ void _TemporalControlWindow::process()
 
     ImGui::PushFont(_styleRepository->getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, 0xff909090);
-    ImGui::Text("100");
+    ImGui::Text(std::to_string(_simController->getTps()).c_str());
     ImGui::PopFont();
     ImGui::PopStyleColor();
 
@@ -45,57 +49,38 @@ void _TemporalControlWindow::process()
     static int slowDown = false;
     ImGui::CheckboxFlags("Slow down", &slowDown, ImGuiSliderFlags_AlwaysClamp);
     ImGui::SameLine();
-    static int restrictTps = 30;
+    static int tpsRestriction = 30;
     if (!slowDown) {
         ImGui::BeginDisabled();
     }
-    ImGui::SliderInt("", &restrictTps, 0, 100, "%d TPS");
+    ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS");
     if (!slowDown) {
         ImGui::EndDisabled();
+    }
+    if (slowDown) {
+        _simController->setTpsRestriction(tpsRestriction);
+    } else {
+        _simController->setTpsRestriction(boost::none);
     }
     ImGui::Spacing();
     ImGui::Spacing();
 
-    ImGui::ImageButton(
-        (void*)(intptr_t)_runTexture.textureId,
-        {toFloat(_runTexture.width), toFloat(_runTexture.height)},
-        {0, 0},
-        {1.0f, 1.0f});
+    ImGui::ImageButton((void*)(intptr_t)_runTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
 
     ImGui::SameLine();
-    ImGui::ImageButton(
-        (void*)(intptr_t)_pauseTexture.textureId,
-        {toFloat(_pauseTexture.width), toFloat(_pauseTexture.height)},
-        {0, 0},
-        {1.0f, 1.0f});
+    ImGui::ImageButton((void*)(intptr_t)_pauseTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
 
     ImGui::SameLine();
-    ImGui::ImageButton(
-        (void*)(intptr_t)_stepBackwardTexture.textureId,
-        {toFloat(_stepBackwardTexture.width), toFloat(_stepBackwardTexture.height)},
-        {0, 0},
-        {1.0f, 1.0f});
+    ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
 
     ImGui::SameLine();
-    ImGui::ImageButton(
-        (void*)(intptr_t)_stepForwardTexture.textureId,
-        {toFloat(_stepForwardTexture.width), toFloat(_stepForwardTexture.height)},
-        {0, 0},
-        {1.0f, 1.0f});
+    ImGui::ImageButton((void*)(intptr_t)_stepForwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
 
     ImGui::SameLine();
-    ImGui::ImageButton(
-        (void*)(intptr_t)_snapshotTexture.textureId,
-        {toFloat(_snapshotTexture.width), toFloat(_snapshotTexture.height)},
-        {0, 0},
-        {1.0f, 1.0f});
+    ImGui::ImageButton((void*)(intptr_t)_snapshotTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
 
     ImGui::SameLine();
-    ImGui::ImageButton(
-        (void*)(intptr_t)_restoreTexture.textureId,
-        {toFloat(_restoreTexture.width), toFloat(_restoreTexture.height)},
-        {0, 0},
-        {1.0f, 1.0f});
+    ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
 
     ImGui::End();
 }

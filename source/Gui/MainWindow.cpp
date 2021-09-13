@@ -75,7 +75,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
     _simulationView =
         boost::make_shared<_SimulationView>(simController, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
-    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(_styleRepository);
+    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;

@@ -59,3 +59,19 @@ IntVector2D _SimulationController::getWorldSize() const
 {
     return _worldSize;
 }
+
+boost::optional<int> _SimulationController::getTpsRestriction() const
+{
+    auto result = _worker.getTpsRestriction();
+    return 0 != result ? boost::optional<int>(result) : boost::optional<int>();
+}
+
+void _SimulationController::setTpsRestriction(boost::optional<int> const& value)
+{
+    _worker.setTpsRestriction(value ? *value : 0);
+}
+
+int _SimulationController::getTps() const
+{
+    return _worker.getTps();
+}
