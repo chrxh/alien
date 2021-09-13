@@ -9,7 +9,10 @@
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
 
-void _SimulationView::init(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor)
+_SimulationView::_SimulationView(
+    SimulationController const& simController,
+    IntVector2D const& viewportSize,
+    float zoomFactor)
 {
     auto worldSize = simController->getWorldSize();
     _viewport = boost::make_shared<_Viewport>();
@@ -18,7 +21,9 @@ void _SimulationView::init(SimulationController const& simController, IntVector2
     _viewport->setViewSize(viewportSize);
 
     _simController = simController;
-    _shader = boost::make_shared<_Shader>("d:\\temp\\alien-imgui\\source\\Gui\\texture.vs", "d:\\temp\\alien-imgui\\source\\Gui\\texture.fs");
+    _shader = boost::make_shared<_Shader>(
+        "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\shader.vs",
+        "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\shader.fs");
 
     _scrollbarX = boost::make_shared<_SimulationScrollbar>(
         "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController, _viewport);
@@ -193,7 +198,7 @@ void _SimulationView::processControls()
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - 17}, {viewport->Size.x - 1 - 17, 1}});
-    _scrollbarY->process({{viewport->Size.x - 17, viewport->Pos.y + 20}, {1, viewport->Size.y - 1 - 20 - 17}});
+    _scrollbarY->process({{viewport->Size.x - 17, viewport->Pos.y + 22}, {1, viewport->Size.y - 1 - 17}});
 }
 
 void _SimulationView::requestImageFromSimulation()
