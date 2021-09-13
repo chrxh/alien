@@ -1,0 +1,26 @@
+#include "StyleRepository.h"
+
+#include <stdexcept>
+
+#include "imgui.h"
+
+_StyleRepository::_StyleRepository()
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    io = ImGui::GetIO();
+    if (io.Fonts->AddFontFromFileTTF("d:\\temp\\alien-imgui\\external\\imgui\\misc\\fonts\\DroidSans.ttf", 16.0f)
+        == NULL) {
+        throw std::runtime_error("Could not load font.");
+    };
+    _largeFont =
+        io.Fonts->AddFontFromFileTTF("d:\\temp\\alien-imgui\\external\\imgui\\misc\\fonts\\DroidSans.ttf", 48.0f);
+    if (_largeFont == NULL) {
+        throw std::runtime_error("Could not load font.");
+    }
+}
+
+ImFont* _StyleRepository::getLargeFont() const
+{
+    return _largeFont;
+}

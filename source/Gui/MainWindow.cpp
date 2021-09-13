@@ -4,12 +4,6 @@
 
 #include <glad/glad.h>
 
-#include "EngineInterface/Serializer.h"
-#include "EngineInterface/ChangeDescriptions.h"
-#include "EngineImpl/SimulationController.h"
-
-#include "SimulationView.h"
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -25,6 +19,15 @@
 
 #include "ImFileDialog.h"
 
+#include "EngineInterface/Serializer.h"
+#include "EngineInterface/ChangeDescriptions.h"
+#include "EngineImpl/SimulationController.h"
+
+#include "SimulationView.h"
+#include "Style.h"
+#include "StyleRepository.h"
+#include "TemporalControlWindow.h"
+
 namespace
 {
     void glfwErrorCallback(int error, const char* description)
@@ -36,65 +39,29 @@ namespace
 GLFWwindow* _MainWindow::init(SimulationController const& simController)
 {
     _simController = simController;
-    _simulationView = boost::make_shared<_SimulationView>();
-
-    glfwSetErrorCallback(glfwErrorCallback);
-
-    if (!glfwInit()) {
+    
+    auto glfwData = initGlfw();
+    if (!glfwData.window) {
         return nullptr;
     }
-
-    // Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-    // GL ES 2.0 + GLSL 100
-    const char* glsl_version = "#version 100";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__APPLE__)
-    // GL 3.2 + GLSL 150
-    const char* glsl_version = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
-    // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
-
-    // Create window with graphics context
-    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor(); // The primary monitor.. Later Occulus?..
-    auto mode = glfwGetVideoMode(primaryMonitor);
-    auto screenWidth = mode->width;
-    auto screenHeight = mode->height;
-
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "alien", primaryMonitor, NULL);
-    if (window == NULL) {
-        return nullptr;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
-
                          // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
+
+    _styleRepository = boost::make_shared<_StyleRepository>();
+
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     //ImGui::StyleColorsDark();
-//    ImGui::StyleColorsClassic();
+//    ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplGlfw_InitForOpenGL(glfwData.window, true);
+    ImGui_ImplOpenGL3_Init(glfwData.glsl_version);
 
-/*
+    /*
     glfwSetMouseButtonCallback(window, mouseClickEvent);
     glfwSetCursorPosCallback(window, mouseMoveEvent);
 */
@@ -106,7 +73,9 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         return nullptr;
     }
 
-    _simulationView->init(simController, {mode->width, mode->height}, 4);
+    _simulationView =
+        boost::make_shared<_SimulationView>(simController, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
+    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(_styleRepository);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -127,7 +96,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         GLuint texID = (GLuint)((uintptr_t)tex);
         glDeleteTextures(1, &texID);
     };
-    return window;
+    return glfwData.window;
 }
 
 void _MainWindow::mainLoop(GLFWwindow* window)
@@ -154,7 +123,8 @@ void _MainWindow::mainLoop(GLFWwindow* window)
 
         drawToolbar();
         drawMenubar();
-        drawDialogs();
+        processDialogs();
+        processWindows();
         _simulationView->processControls();
 
         // render content
@@ -180,6 +150,53 @@ void _MainWindow::shutdown(GLFWwindow* window)
     glfwTerminate();
 
     _simulationView.reset();
+}
+
+auto _MainWindow::initGlfw() -> GlfwData
+{
+    glfwSetErrorCallback(glfwErrorCallback);
+
+    if (!glfwInit()) {
+        return {nullptr, nullptr, nullptr};
+    }
+
+    // Decide GL+GLSL versions
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+    // GL ES 2.0 + GLSL 100
+    const char* glsl_version = "#version 100";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+    // GL 3.2 + GLSL 150
+    const char* glsl_version = "#version 150";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#else
+    // GL 3.0 + GLSL 130
+    const char* glsl_version = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+#endif
+
+    // Create window with graphics context
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();  // The primary monitor.. Later Occulus?..
+    auto mode = glfwGetVideoMode(primaryMonitor);
+    auto screenWidth = mode->width;
+    auto screenHeight = mode->height;
+
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "alien", primaryMonitor, NULL);
+    if (window == NULL) {
+        return {nullptr, nullptr, nullptr};
+    }
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);  // Enable vsync
+
+    return {window, mode, glsl_version};
 }
 
 void _MainWindow::drawMenubar()
@@ -237,7 +254,7 @@ void _MainWindow::drawToolbar()
 */
 }
 
-void _MainWindow::drawDialogs()
+void _MainWindow::processDialogs()
 {
     // Simple window
 /*
@@ -289,4 +306,9 @@ void _MainWindow::drawDialogs()
         ifd::FileDialog::Instance().Close();
     }
 */
+}
+
+void _MainWindow::processWindows()
+{
+    _temporalControlWindow->process();
 }
