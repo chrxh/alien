@@ -1,5 +1,7 @@
 #include "EngineWorker.h"
 
+#include <chrono>
+
 #include "EngineGpuKernels/AccessTOs.cuh"
 #include "EngineInterface/ChangeDescriptions.h"
 
@@ -23,8 +25,8 @@ namespace
                 return;
             }
             std::mutex mutex;
-            std::unique_lock<std::mutex> uniqueLock(mutex);
             accessFlag.store(true);
+            std::unique_lock<std::mutex> uniqueLock(mutex);
             conditionForAccess.wait(uniqueLock);
             conditionForWorkerLoop.notify_all();
         }
@@ -72,7 +74,8 @@ void EngineWorker::getVectorImage(
     IntVector2D const& imageSize, 
     double zoom)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
     _cudaSimulation->getVectorImage(
         {rectUpperLeft.x, rectUpperLeft.y},
@@ -84,7 +87,8 @@ void EngineWorker::getVectorImage(
 
 void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
     DataAccessTO dataTO = _dataTOCache->getDataTO();
     _cudaSimulation->getSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
@@ -99,7 +103,8 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 
 void EngineWorker::calcNextTimestep()
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
     _cudaSimulation->calcCudaTimestep();
 }
@@ -119,25 +124,75 @@ void EngineWorker::endShutdown()
     _cudaSimulation.reset();
 }
 
+int EngineWorker::getTpsRestriction() const
+{
+    auto result = _tpsRestriction.load();
+    return result;
+}
+
+void EngineWorker::setTpsRestriction(int value)
+{
+    _tpsRestriction.store(value);
+}
+
+int EngineWorker::getTps() const
+{
+    return _tps.load();
+}
+
 void EngineWorker::runThreadLoop()
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
+    boost::optional<std::chrono::steady_clock::time_point> startTimestepTime;
     while (true) {
         if (!_isSimulationRunning.load()) {
             
             //sleep...
+            _tps.store(0);
             _conditionForWorkerLoop.wait(uniqueLock);
         }
         if (_isShutdown.load()) {
             return;
         }
-        if(_requireAccess.load()) {
+        while (_requireAccess.load()) {
             _conditionForAccess.notify_all();
-            _conditionForWorkerLoop.wait(uniqueLock);
         }
 
         if (_isSimulationRunning.load()) {
+            if (startTimestepTime && _tpsRestriction.load() > 0) {
+                long long int actualDuration, desiredDuration;
+                do {
+                    auto tpsRestriction = _tpsRestriction.load();
+                    desiredDuration = (0 != tpsRestriction) ? 1000000 / tpsRestriction : 0;
+                    actualDuration = std::chrono::duration_cast<std::chrono::microseconds>(
+                                         std::chrono::steady_clock::now() - *startTimestepTime)
+                                         .count();
+
+                    _conditionForAccess.notify_all();
+//                    std::this_thread::sleep_for(std::chrono::microseconds(1));
+                } while (actualDuration < desiredDuration || _requireAccess.load());
+            }
+
+            auto timepoint = std::chrono::steady_clock::now();
+            if (!_timepoint) {
+                _timepoint = timepoint;
+            } else {
+                int duration = static_cast<int>(
+                    std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_timepoint).count());
+                if (duration > 199) {
+                    _timepoint = timepoint;
+                    if (duration < 350) {
+                        _tps.store(_timestepsSinceTimepoint * 5 * 200 / duration);
+                    } else {
+                        _tps.store(1000 / duration);
+                    }
+                    _timestepsSinceTimepoint = 0;
+                }
+            }
+
+            startTimestepTime = std::chrono::steady_clock::now();
             _cudaSimulation->calcCudaTimestep();
+            ++_timestepsSinceTimepoint;
         }
     }
 }

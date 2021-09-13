@@ -37,6 +37,11 @@ public:
 
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
 
+    ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;
+    ENGINEIMPL_EXPORT void setTpsRestriction(boost::optional<int> const& value);
+
+    ENGINEIMPL_EXPORT int getTps() const;
+
 private:
     IntVector2D _worldSize;
 
