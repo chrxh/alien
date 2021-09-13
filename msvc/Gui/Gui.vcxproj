@@ -158,10 +158,14 @@
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
+    <ClInclude Include="..\..\source\Gui\OpenGLHelper.h" />
     <ClInclude Include="..\..\source\Gui\SimulationScrollbar.h" />
     <ClInclude Include="..\..\source\Gui\SimulationView.h" />
     <ClInclude Include="..\..\source\Gui\MainWindow.h" />
     <ClInclude Include="..\..\source\Gui\Shader.h" />
+    <ClInclude Include="..\..\source\Gui\Style.h" />
+    <ClInclude Include="..\..\source\Gui\StyleRepository.h" />
+    <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h" />
     <ClInclude Include="..\..\source\Gui\Viewport.h" />
   </ItemGroup>
   <ItemGroup>
@@ -174,11 +178,14 @@
     <ClCompile Include="..\..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationScrollbar.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationView.cpp" />
     <ClCompile Include="..\..\source\Gui\main.cpp" />
     <ClCompile Include="..\..\source\Gui\MainWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\Shader.cpp" />
+    <ClCompile Include="..\..\source\Gui\StyleRepository.cpp" />
+    <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -196,8 +203,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\source\Gui\texture.fs" />
-    <None Include="..\..\source\Gui\texture.vs" />
+    <None Include="..\..\source\Gui\Resources\texture.fs" />
+    <None Include="..\..\source\Gui\Resources\texture.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

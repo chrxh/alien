@@ -87,6 +87,18 @@
     <ClInclude Include="..\..\source\Gui\Viewport.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Style.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\StyleRepository.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\OpenGLHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -134,12 +146,21 @@
     <ClCompile Include="..\..\source\Gui\Viewport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Gui\StyleRepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\source\Gui\texture.vs">
+    <None Include="..\..\source\Gui\Resources\texture.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="..\..\source\Gui\texture.fs">
+    <None Include="..\..\source\Gui\Resources\texture.vs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

@@ -7,6 +7,7 @@
 
 #include "EngineImpl/SimulationController.h"
 #include "Viewport.h"
+#include "Style.h"
 
 _SimulationScrollbar::_SimulationScrollbar(
     std::string const& id,
@@ -30,12 +31,12 @@ void _SimulationScrollbar::process(RealRect const& rect)
 
     ImGui::SetNextWindowPos(ImVec2(rect.topLeft.x, rect.topLeft.y));
     ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
-    ImGui::SetNextWindowBgAlpha(0.7f);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::Begin(_id.c_str(), NULL, windowFlags);
 
-    ImColor sliderColor =
-        doesMouseCursorIntersectSliderBar(rect) ? ImColor{0.6f, 0.6f, 0.6f, 1.0f} : ImColor{0.3f, 0.3f, 0.3f, 1.0f};
+    ImColor sliderColor = doesMouseCursorIntersectSliderBar(rect) ? ImColor(Const::SimulationSliderColor_Active)
+                                                                  : ImColor(Const::SimulationSliderColor_Base);
 
     ImGui::GetWindowDrawList()->AddRectFilled(
         ImVec2(rect.topLeft.x + sliderbarRect.topLeft.x, rect.topLeft.y + sliderbarRect.topLeft.y),

@@ -3,6 +3,7 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
+struct GLFWvidmode;
 class _MainWindow
 {
 public:
@@ -11,10 +12,21 @@ public:
     void shutdown(GLFWwindow* window);
 
 private:
+    struct GlfwData
+    {
+        GLFWwindow* window;
+        GLFWvidmode const* mode;
+        char const* glsl_version;
+    };
+    GlfwData initGlfw();
+
     void drawMenubar();
     void drawToolbar();
-    void drawDialogs();
+    void processDialogs();
+    void processWindows();
 
     SimulationController _simController;
     SimulationView _simulationView;
+    TemporalControlWindow _temporalControlWindow;
+    StyleRepository _styleRepository;
 };
