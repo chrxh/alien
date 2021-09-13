@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 class _MainWindow;
 using MainWindow = boost::shared_ptr<_MainWindow>;

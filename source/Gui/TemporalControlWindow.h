@@ -1,16 +1,18 @@
 #pragma once
 
-#include "Definitions.h"
+#include "EngineImpl/Definitions.h"
 
+#include "Definitions.h"
 
 class _TemporalControlWindow
 {
 public:
-    _TemporalControlWindow(StyleRepository const& styleRepository);
+    _TemporalControlWindow(SimulationController const& simController, StyleRepository const& styleRepository);
 
     void process();
 
 private:
+    SimulationController _simController; 
     StyleRepository _styleRepository;
 
     TextureData _runTexture;
