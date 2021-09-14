@@ -4,6 +4,7 @@
 
 #include "Base/Definitions.h"
 #include "Base/StringFormatter.h"
+#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 
 #include "Style.h"
@@ -108,6 +109,7 @@ void _TemporalControlWindow::processRunButton()
         ImGui::BeginDisabled();
     }
     if (ImGui::ImageButton((void*)(intptr_t)_runTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        _history.clear();
         _simController->runSimulation();
     }
     if (isRunning) {
@@ -131,20 +133,64 @@ void _TemporalControlWindow::processPauseButton()
 
 void _TemporalControlWindow::processStepBackwardButton()
 {
-    ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+    auto isRunning = _simController->isSimulationRunning();
+    if (_history.empty() || isRunning) {
+        ImGui::BeginDisabled();
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        auto const& snapshot = _history.back();
+        _simController->clear();
+        _simController->setCurrentTimestep(snapshot.timestep);
+        _simController->updateData(snapshot.data);
+        _history.pop_back();
+    }
+    if (_history.empty() || isRunning) {
+        ImGui::EndDisabled();
+    }
 }
 
 void _TemporalControlWindow::processStepForwardButton()
 {
-    ImGui::ImageButton((void*)(intptr_t)_stepForwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+    auto isRunning = _simController->isSimulationRunning();
+    if (isRunning) {
+        ImGui::BeginDisabled();
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)_stepForwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        Snapshot newSnapshot;
+        newSnapshot.timestep = _simController->getCurrentTimestep();
+        auto size = _simController->getWorldSize();
+        newSnapshot.data = _simController->getSimulationData({0, 0}, size);
+        _history.emplace_back(newSnapshot);
+
+        _simController->calcSingleTimestep();
+    }
+    if (isRunning) {
+        ImGui::EndDisabled();
+    }
 }
 
 void _TemporalControlWindow::processSnapshotButton()
 {
-    ImGui::ImageButton((void*)(intptr_t)_snapshotTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+    if (ImGui::ImageButton((void*)(intptr_t)_snapshotTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        Snapshot newSnapshot;
+        newSnapshot.timestep = _simController->getCurrentTimestep();
+        auto size = _simController->getWorldSize();
+        newSnapshot.data = _simController->getSimulationData({0, 0}, size);
+        _snapshot = newSnapshot;
+    }
 }
 
 void _TemporalControlWindow::processRestoreButton()
 {
-    ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+    if (!_snapshot) {
+        ImGui::BeginDisabled();
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        _simController->clear();
+        _simController->setCurrentTimestep(_snapshot->timestep);
+        _simController->updateData(_snapshot->data);
+    }
+    if (!_snapshot) {
+        ImGui::EndDisabled();
+    }
 }
