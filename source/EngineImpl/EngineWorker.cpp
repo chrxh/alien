@@ -208,3 +208,8 @@ void EngineWorker::pauseSimulation()
     _isSimulationRunning.store(false);
     _conditionForWorkerLoop.notify_all();
 }
+
+bool EngineWorker::isSimulationRunning() const
+{
+    return _isSimulationRunning.load();
+}

@@ -47,12 +47,22 @@ void _SimulationController::pauseSimulation()
     _worker.pauseSimulation();
 }
 
+bool _SimulationController::isSimulationRunning() const
+{
+    return _worker.isSimulationRunning();
+}
+
 void _SimulationController::closeSimulation()
 {
     _worker.beginShutdown();
     _thread->join();
     delete _thread;
     _worker.endShutdown();
+}
+
+uint64_t _SimulationController::getCurrentTimestep() const
+{
+    return uint64_t();
 }
 
 IntVector2D _SimulationController::getWorldSize() const

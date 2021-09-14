@@ -52,6 +52,7 @@ public:
     void runThreadLoop();
     void runSimulation();
     void pauseSimulation();
+    bool isSimulationRunning() const;
 
 private:
     mutable std::mutex _mutexForLoop;

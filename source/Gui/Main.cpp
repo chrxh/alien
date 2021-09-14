@@ -29,7 +29,7 @@ int main(int, char**)
 
         simController->updateData(deserializedData.content);
 
-        simController->runSimulation();
+//        simController->runSimulation();
 
         auto glfwWindow = mainWindow->init(simController);
         if (!glfwWindow) {

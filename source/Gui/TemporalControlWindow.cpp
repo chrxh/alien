@@ -65,10 +65,27 @@ void _TemporalControlWindow::process()
     ImGui::Spacing();
     ImGui::Spacing();
 
-    ImGui::ImageButton((void*)(intptr_t)_runTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+    auto isRunning = _simController->isSimulationRunning();
+    if (isRunning) {
+        ImGui::BeginDisabled();
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)_runTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        _simController->runSimulation();
+    }
+    if (isRunning) {
+        ImGui::EndDisabled(); 
+    }
 
+    if (!isRunning) {
+        ImGui::BeginDisabled();
+    }
     ImGui::SameLine();
-    ImGui::ImageButton((void*)(intptr_t)_pauseTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+    if (ImGui::ImageButton((void*)(intptr_t)_pauseTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        _simController->pauseSimulation();
+    }
+    if (!isRunning) {
+        ImGui::EndDisabled();
+    }
 
     ImGui::SameLine();
     ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
