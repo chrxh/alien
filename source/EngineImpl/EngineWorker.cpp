@@ -61,6 +61,12 @@ void EngineWorker::newSimulation(
     _cudaSimulation = boost::make_shared<_CudaSimulation>(int2{size.x, size.y}, timestep, parameters, gpuConstants);
 }
 
+void EngineWorker::clear()
+{
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    return _cudaSimulation->clear();
+}
+
 void EngineWorker::registerImageResource(GLuint image)
 {
     CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
@@ -85,6 +91,18 @@ void EngineWorker::getVectorImage(
         zoom);
 }
 
+DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+{
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+
+    DataAccessTO dataTO = _dataTOCache->getDataTO();
+    _cudaSimulation->getSimulationData(
+        {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
+
+    DataConverter converter(dataTO, _parameters, _gpuConstants);
+    return converter.getDataDescription();
+}
+
 void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
     CudaAccess access(
@@ -101,7 +119,7 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
     _cudaSimulation->setSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
 }
 
-void EngineWorker::calcNextTimestep()
+void EngineWorker::calcSingleTimestep()
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
@@ -143,6 +161,12 @@ int EngineWorker::getTps() const
 uint64_t EngineWorker::getCurrentTimestep() const
 {
     return _cudaSimulation->getCurrentTimestep();
+}
+
+void EngineWorker::setCurrentTimestep(uint64_t value)
+{
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    _cudaSimulation->setCurrentTimestep(value);
 }
 
 void EngineWorker::runThreadLoop()

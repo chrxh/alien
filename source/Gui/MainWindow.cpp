@@ -38,8 +38,10 @@ namespace
     _SimulationView* simulationViewPtr;
     void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     {
-        simulationViewPtr->resize({width, height});
-        glViewport(0, 0, width, height);
+        if (width > 0 && height > 0) {
+            simulationViewPtr->resize({width, height});
+            glViewport(0, 0, width, height);
+        }
     }
 }
 

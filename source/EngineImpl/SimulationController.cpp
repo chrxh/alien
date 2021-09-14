@@ -1,5 +1,7 @@
 #include "SimulationController.h"
 
+#include "EngineInterface/Descriptions.h"
+
 void _SimulationController::initCuda()
 {
     _worker.initCuda();
@@ -11,6 +13,11 @@ void _SimulationController::newSimulation(IntVector2D size, int timestep, Simula
     _worker.newSimulation(size, timestep, parameters, gpuConstants);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
+}
+
+void _SimulationController::clear()
+{
+    _worker.clear();
 }
 
 void _SimulationController::registerImageResource(GLuint image)
@@ -27,14 +34,19 @@ void _SimulationController::getVectorImage(
     _worker.getVectorImage(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
+DataDescription _SimulationController::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+{
+    return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
+}
+
 void _SimulationController::updateData(DataChangeDescription const& dataToUpdate)
 {
     _worker.updateData(dataToUpdate);
 }
 
-void _SimulationController::calcNextTimestep()
+void _SimulationController::calcSingleTimestep()
 {
-    _worker.calcNextTimestep();
+    _worker.calcSingleTimestep();
 }
 
 void _SimulationController::runSimulation()
@@ -63,6 +75,11 @@ void _SimulationController::closeSimulation()
 uint64_t _SimulationController::getCurrentTimestep() const
 {
     return _worker.getCurrentTimestep();
+}
+
+void _SimulationController::setCurrentTimestep(uint64_t value)
+{
+    _worker.setCurrentTimestep(value);
 }
 
 IntVector2D _SimulationController::getWorldSize() const
