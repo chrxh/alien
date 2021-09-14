@@ -34,6 +34,13 @@ namespace
     {
         std::cerr << "Glfw Error " << error << ": " << description << std::endl;
     }
+
+    _SimulationView* simulationViewPtr;
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+    {
+        simulationViewPtr->resize({width, height});
+        glViewport(0, 0, width, height);
+    }
 }
 
 GLFWwindow* _MainWindow::init(SimulationController const& simController)
@@ -61,12 +68,6 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     ImGui_ImplGlfw_InitForOpenGL(glfwData.window, true);
     ImGui_ImplOpenGL3_Init(glfwData.glsl_version);
 
-    /*
-    glfwSetMouseButtonCallback(window, mouseClickEvent);
-    glfwSetCursorPosCallback(window, mouseMoveEvent);
-*/
-
-    //    glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -75,6 +76,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
     _simulationView =
         boost::make_shared<_SimulationView>(simController, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
+    simulationViewPtr = _simulationView.get();
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
@@ -183,8 +185,7 @@ auto _MainWindow::initGlfw() -> GlfwData
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-    // Create window with graphics context
-    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();  // The primary monitor.. Later Occulus?..
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     auto mode = glfwGetVideoMode(primaryMonitor);
     auto screenWidth = mode->width;
     auto screenHeight = mode->height;
@@ -194,6 +195,7 @@ auto _MainWindow::initGlfw() -> GlfwData
         return {nullptr, nullptr, nullptr};
     }
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSwapInterval(1);  // Enable vsync
 
     return {window, mode, glsl_version};
@@ -286,7 +288,6 @@ void _MainWindow::processDialogs()
                 deserializedData.simulationParameters,
                 deserializedData.generalSettings.gpuConstants);
             _simController->updateData(deserializedData.content);
-            _simController->runSimulation();
         }
         ifd::FileDialog::Instance().Close();
     }

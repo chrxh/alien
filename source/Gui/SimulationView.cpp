@@ -83,10 +83,8 @@ void _SimulationView::resize(IntVector2D const& size)
         glDeleteFramebuffers(1, &_fbo);
         glDeleteTextures(1, &_textureId);
         glDeleteTextures(1, &_textureFramebufferId);
-
         _areTexturesInitialized = true;
     }
-
     glGenTextures(1, &_textureId);
     glBindTexture(GL_TEXTURE_2D, _textureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);

@@ -33,8 +33,11 @@ public:
     ENGINEIMPL_EXPORT void runSimulation();
     ENGINEIMPL_EXPORT void pauseSimulation();
 
+    ENGINEIMPL_EXPORT bool isSimulationRunning() const;
+
     ENGINEIMPL_EXPORT void closeSimulation();
 
+    ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
 
     ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;
