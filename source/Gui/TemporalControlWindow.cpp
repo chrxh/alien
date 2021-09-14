@@ -30,16 +30,6 @@ void _TemporalControlWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::Begin("Temporal control");
 
-    processTpsInfo();
-
-    processTotalTimestepsInfo();
-
-    ImGui::Spacing();
-    ImGui::Spacing();
-    processTpsRestriction();
-    ImGui::Spacing();
-    ImGui::Spacing();
-
     processRunButton();
 
     ImGui::SameLine();
@@ -56,6 +46,21 @@ void _TemporalControlWindow::process()
 
     ImGui::SameLine();
     processRestoreButton();
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    processTpsInfo();
+
+    processTotalTimestepsInfo();
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+    processTpsRestriction();
+
 
     ImGui::End();
 }
