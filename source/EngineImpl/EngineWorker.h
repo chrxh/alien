@@ -48,6 +48,7 @@ public:
     ENGINEIMPL_EXPORT void setTpsRestriction(int value);
 
     ENGINEIMPL_EXPORT int getTps() const;
+    ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
 
     void runThreadLoop();
     void runSimulation();

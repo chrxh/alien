@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "Base/Definitions.h"
+#include "Base/StringFormatter.h"
 #include "EngineImpl/SimulationController.h"
 
 #include "Style.h"
@@ -28,24 +29,60 @@ void _TemporalControlWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::Begin("Temporal control");
 
+    processTpsInfo();
+
+    processTotalTimestepsInfo();
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+    processTpsRestriction();
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    processRunButton();
+
+    ImGui::SameLine();
+    processPauseButton();
+
+    ImGui::SameLine();
+    processStepBackwardButton();
+
+    ImGui::SameLine();
+    processStepForwardButton();
+
+    ImGui::SameLine();
+    processSnapshotButton();
+
+    ImGui::SameLine();
+    processRestoreButton();
+
+    ImGui::End();
+}
+
+void _TemporalControlWindow::processTpsInfo()
+{
     ImGui::Text("Time steps per second");
 
     ImGui::PushFont(_styleRepository->getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, 0xff909090);
-    ImGui::Text(std::to_string(_simController->getTps()).c_str());
-    ImGui::PopFont();
+    ImGui::Text(StringFormatter::format(_simController->getTps()).c_str());
     ImGui::PopStyleColor();
+    ImGui::PopFont();
+}
 
+void _TemporalControlWindow::processTotalTimestepsInfo()
+{
     ImGui::Text("Total time steps");
-    
+
     ImGui::PushFont(_styleRepository->getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, 0xff909090);
-    ImGui::Text("112,323");
-    ImGui::PopFont();
+    ImGui::Text(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
+    ImGui::PopFont();
+}
 
-    ImGui::Spacing();
-    ImGui::Spacing();
+void _TemporalControlWindow::processTpsRestriction()
+{
     static int slowDown = false;
     ImGui::CheckboxFlags("Slow down", &slowDown, ImGuiSliderFlags_AlwaysClamp);
     ImGui::SameLine();
@@ -62,9 +99,10 @@ void _TemporalControlWindow::process()
     } else {
         _simController->setTpsRestriction(boost::none);
     }
-    ImGui::Spacing();
-    ImGui::Spacing();
+}
 
+void _TemporalControlWindow::processRunButton()
+{
     auto isRunning = _simController->isSimulationRunning();
     if (isRunning) {
         ImGui::BeginDisabled();
@@ -73,31 +111,40 @@ void _TemporalControlWindow::process()
         _simController->runSimulation();
     }
     if (isRunning) {
-        ImGui::EndDisabled(); 
+        ImGui::EndDisabled();
     }
+}
 
+void _TemporalControlWindow::processPauseButton()
+{
+    auto isRunning = _simController->isSimulationRunning();
     if (!isRunning) {
         ImGui::BeginDisabled();
     }
-    ImGui::SameLine();
     if (ImGui::ImageButton((void*)(intptr_t)_pauseTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         _simController->pauseSimulation();
     }
     if (!isRunning) {
         ImGui::EndDisabled();
     }
+}
 
-    ImGui::SameLine();
+void _TemporalControlWindow::processStepBackwardButton()
+{
     ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+}
 
-    ImGui::SameLine();
+void _TemporalControlWindow::processStepForwardButton()
+{
     ImGui::ImageButton((void*)(intptr_t)_stepForwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+}
 
-    ImGui::SameLine();
+void _TemporalControlWindow::processSnapshotButton()
+{
     ImGui::ImageButton((void*)(intptr_t)_snapshotTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
+}
 
-    ImGui::SameLine();
+void _TemporalControlWindow::processRestoreButton()
+{
     ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f});
-
-    ImGui::End();
 }

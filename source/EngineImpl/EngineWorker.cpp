@@ -140,6 +140,11 @@ int EngineWorker::getTps() const
     return _tps.load();
 }
 
+uint64_t EngineWorker::getCurrentTimestep() const
+{
+    return _cudaSimulation->getCurrentTimestep();
+}
+
 void EngineWorker::runThreadLoop()
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);

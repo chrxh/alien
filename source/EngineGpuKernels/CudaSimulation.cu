@@ -124,6 +124,7 @@ _CudaSimulation::_CudaSimulation(
 
     setSimulationParameters(parameters);
     setGpuConstants(gpuConstants);
+    _currentTimestep.store(timestep);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "acquire GPU memory");
@@ -203,6 +204,7 @@ void _CudaSimulation::calcCudaTimestep()
 {
     GPU_FUNCTION(cudaCalcSimulationTimestep, *_cudaSimulationData);
     ++_cudaSimulationData->timestep;
+    ++_currentTimestep;
 }
 
 void _CudaSimulation::getVectorImage(
@@ -327,17 +329,18 @@ GpuConstants _CudaSimulation::getGpuConstants() const
 MonitorData _CudaSimulation::getMonitorData()
 {
     GPU_FUNCTION(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
-    return _cudaMonitorData->getMonitorData(getTimestep());
+    return _cudaMonitorData->getMonitorData(getCurrentTimestep());
 }
 
-int _CudaSimulation::getTimestep() const
+uint64_t _CudaSimulation::getCurrentTimestep() const
 {
-    return _cudaSimulationData->timestep;
+    return _currentTimestep.load();
 }
 
-void _CudaSimulation::setTimestep(int timestep)
+void _CudaSimulation::setCurrentTimestep(uint64_t timestep)
 {
-    _cudaSimulationData->timestep = timestep;
+    _cudaSimulationData->timestep = static_cast<int>(timestep);
+    _currentTimestep.store(timestep);
 }
 
 void _CudaSimulation::setSimulationParameters(SimulationParameters const& parameters)

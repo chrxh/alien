@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\source\Base\NumberGenerator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Base\StringFormatter.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Base\LoggingServiceImpl.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Base\NumberGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Base\StringFormatter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
