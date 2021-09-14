@@ -18,6 +18,7 @@ public:
         int timestep,
         SimulationParameters const& parameters,
         GpuConstants const& gpuConstants);
+    ENGINEIMPL_EXPORT void clear();
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
 
@@ -27,9 +28,12 @@ public:
         IntVector2D const& imageSize,
         double zoom);
 
+    ENGINEIMPL_EXPORT DataDescription
+    getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+
     ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
 
-    ENGINEIMPL_EXPORT void calcNextTimestep();
+    ENGINEIMPL_EXPORT void calcSingleTimestep();
     ENGINEIMPL_EXPORT void runSimulation();
     ENGINEIMPL_EXPORT void pauseSimulation();
 
@@ -38,6 +42,8 @@ public:
     ENGINEIMPL_EXPORT void closeSimulation();
 
     ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
+    ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
+
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
 
     ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;

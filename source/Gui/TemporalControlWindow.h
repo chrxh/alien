@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineInterface/Descriptions.h"
 #include "EngineImpl/Definitions.h"
 
 #include "Definitions.h"
@@ -32,4 +33,13 @@ private:
     TextureData _stepForwardTexture;
     TextureData _snapshotTexture;
     TextureData _restoreTexture;
+
+    struct Snapshot
+    {
+        uint64_t timestep;
+        DataDescription data;
+    };
+    boost::optional<Snapshot> _snapshot;
+
+    std::vector<Snapshot> _history;
 };
