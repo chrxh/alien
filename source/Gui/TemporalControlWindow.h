@@ -12,6 +12,17 @@ public:
     void process();
 
 private:
+    void processTpsInfo();
+    void processTotalTimestepsInfo();
+    void processTpsRestriction();
+
+    void processRunButton();
+    void processPauseButton();
+    void processStepBackwardButton();
+    void processStepForwardButton();
+    void processSnapshotButton();
+    void processRestoreButton();
+
     SimulationController _simController; 
     StyleRepository _styleRepository;
 
