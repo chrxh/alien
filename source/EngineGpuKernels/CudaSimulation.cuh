@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <atomic>
+
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -54,8 +57,8 @@ public:
 
     ENGINEGPUKERNELS_EXPORT GpuConstants getGpuConstants() const;
     ENGINEGPUKERNELS_EXPORT MonitorData getMonitorData();
-    ENGINEGPUKERNELS_EXPORT int getTimestep() const;
-    ENGINEGPUKERNELS_EXPORT void setTimestep(int timestep);
+    ENGINEGPUKERNELS_EXPORT uint64_t getCurrentTimestep() const;
+    ENGINEGPUKERNELS_EXPORT void setCurrentTimestep(uint64_t timestep);
 
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
 
@@ -65,6 +68,7 @@ private:
     void setGpuConstants(GpuConstants const& cudaConstants);
 
 private:
+    std::atomic<uint64_t> _currentTimestep;
     GpuConstants _gpuConstants;
     SimulationData* _cudaSimulationData;
     DataAccessTO* _cudaAccessTO;

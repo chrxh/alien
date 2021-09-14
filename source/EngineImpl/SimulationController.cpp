@@ -62,7 +62,7 @@ void _SimulationController::closeSimulation()
 
 uint64_t _SimulationController::getCurrentTimestep() const
 {
-    return uint64_t();
+    return _worker.getCurrentTimestep();
 }
 
 IntVector2D _SimulationController::getWorldSize() const

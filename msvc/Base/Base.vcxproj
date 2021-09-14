@@ -153,6 +153,7 @@
     <ClInclude Include="..\..\source\Base\NumberGenerator.h" />
     <ClInclude Include="..\..\source\Base\Physics.h" />
     <ClInclude Include="..\..\source\Base\ServiceLocator.h" />
+    <ClInclude Include="..\..\source\Base\StringFormatter.h" />
     <ClInclude Include="..\..\source\Base\Tracker.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
     <ClCompile Include="..\..\source\Base\NumberGenerator.cpp" />
     <ClCompile Include="..\..\source\Base\Physics.cpp" />
     <ClCompile Include="..\..\source\Base\ServiceLocator.cpp" />
+    <ClCompile Include="..\..\source\Base\StringFormatter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
