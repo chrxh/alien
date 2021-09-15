@@ -149,13 +149,29 @@ bool _Serializer::loadSimulationDataFromFile(string const& filename, SerializedS
     return true;
 }
 
-bool _Serializer::loadDataFromFile(std::string const& filename, std::string& data)
+bool _Serializer::saveSimulationDataToFile(string const& filename, SerializedSimulation& data)
 {
-    ifstream stream(filename, ios::binary);
-    if (!stream) {
+    std::regex fileEndingExpr("\\.\\w+$");
+    if (!std::regex_search(filename, fileEndingExpr)) {
         return false;
     }
-    data = std::string(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
+    auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
+    auto parametersFilename = std::regex_replace(filename, fileEndingExpr, ".parameters.json");
+    auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
+
+    if (!saveDataToFile(filename, data.content)) {
+        return false;
+    }
+    if (!saveDataToFile(settingsFilename, data.generalSettings)) {
+        return false;
+    }
+    if (!saveDataToFile(parametersFilename, data.simulationParameters)) {
+        return false;
+    }
+    if (!saveDataToFile(symbolsFilename, data.symbolMap)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -265,4 +281,26 @@ GeneralSettings _Serializer::deserializeGeneralSettings(std::string const& data)
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(ss, tree);
     return Parser::decodeGeneralSettings(tree);
+}
+
+bool _Serializer::loadDataFromFile(std::string const& filename, std::string& data)
+{
+    ifstream stream(filename, ios::binary);
+    if (!stream) {
+        return false;
+    }
+    data = std::string(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>());
+    stream.close();
+    return true;
+}
+
+bool _Serializer::saveDataToFile(std::string const& filename, std::string const& data)
+{
+    ofstream stream(filename, ios::binary);
+    if (!stream) {
+        return false;
+    }
+    stream << data;
+    stream.close();
+    return true;
 }

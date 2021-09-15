@@ -22,10 +22,10 @@ int main(int, char**)
         auto deserializedData = serializer->deserializeSimulation(serializedData);
 
         simController->newSimulation(
-            deserializedData.generalSettings.worldSize,
             deserializedData.timestep,
+            deserializedData.generalSettings,
             deserializedData.simulationParameters,
-            deserializedData.generalSettings.gpuConstants);
+            SymbolMap());
 
         simController->updateData(deserializedData.content);
 

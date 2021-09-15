@@ -7,10 +7,16 @@ void _SimulationController::initCuda()
     _worker.initCuda();
 }
 
-void _SimulationController::newSimulation(IntVector2D size, int timestep, SimulationParameters const& parameters, GpuConstants const& gpuConstants)
+void _SimulationController::newSimulation(
+    int timestep,
+    GeneralSettings const& generalSettings,
+    SimulationParameters const& parameters,
+    SymbolMap const& symbolMap)
 {
-    _worldSize = size;
-    _worker.newSimulation(size, timestep, parameters, gpuConstants);
+    _generalSettings = generalSettings;
+    _parameters = parameters;
+    _symbolMap = symbolMap;
+    _worker.newSimulation(generalSettings.worldSize, timestep, parameters, generalSettings.gpuConstants);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 }
@@ -82,9 +88,24 @@ void _SimulationController::setCurrentTimestep(uint64_t value)
     _worker.setCurrentTimestep(value);
 }
 
+SimulationParameters _SimulationController::getSimulationParameters() const
+{
+    return _parameters;
+}
+
+GeneralSettings _SimulationController::getGeneralSettings() const
+{
+    return _generalSettings;
+}
+
 IntVector2D _SimulationController::getWorldSize() const
 {
-    return _worldSize;
+    return _generalSettings.worldSize;
+}
+
+SymbolMap _SimulationController::getSymbolMap() const
+{
+    return _symbolMap;
 }
 
 boost::optional<int> _SimulationController::getTpsRestriction() const
