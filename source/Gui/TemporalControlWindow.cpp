@@ -93,13 +93,9 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::CheckboxFlags("Slow down", &slowDown, ImGuiSliderFlags_AlwaysClamp);
     ImGui::SameLine();
     static int tpsRestriction = 30;
-    if (!slowDown) {
-        ImGui::BeginDisabled();
-    }
+    ImGui::BeginDisabled(!slowDown);
     ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS");
-    if (!slowDown) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
     if (slowDown) {
         _simController->setTpsRestriction(tpsRestriction);
     } else {
@@ -109,39 +105,26 @@ void _TemporalControlWindow::processTpsRestriction()
 
 void _TemporalControlWindow::processRunButton()
 {
-    auto isRunning = _simController->isSimulationRunning();
-    if (isRunning) {
-        ImGui::BeginDisabled();
-    }
+    ImGui::BeginDisabled(_simController->isSimulationRunning());
     if (ImGui::ImageButton((void*)(intptr_t)_runTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         _history.clear();
         _simController->runSimulation();
     }
-    if (isRunning) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processPauseButton()
 {
-    auto isRunning = _simController->isSimulationRunning();
-    if (!isRunning) {
-        ImGui::BeginDisabled();
-    }
+    ImGui::BeginDisabled(!_simController->isSimulationRunning());
     if (ImGui::ImageButton((void*)(intptr_t)_pauseTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         _simController->pauseSimulation();
     }
-    if (!isRunning) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processStepBackwardButton()
 {
-    auto isRunning = _simController->isSimulationRunning();
-    if (_history.empty() || isRunning) {
-        ImGui::BeginDisabled();
-    }
+    ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
     if (ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         auto const& snapshot = _history.back();
         _simController->clear();
@@ -149,17 +132,12 @@ void _TemporalControlWindow::processStepBackwardButton()
         _simController->updateData(snapshot.data);
         _history.pop_back();
     }
-    if (_history.empty() || isRunning) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processStepForwardButton()
 {
-    auto isRunning = _simController->isSimulationRunning();
-    if (isRunning) {
-        ImGui::BeginDisabled();
-    }
+    ImGui::BeginDisabled(_simController->isSimulationRunning());
     if (ImGui::ImageButton((void*)(intptr_t)_stepForwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         Snapshot newSnapshot;
         newSnapshot.timestep = _simController->getCurrentTimestep();
@@ -169,9 +147,7 @@ void _TemporalControlWindow::processStepForwardButton()
 
         _simController->calcSingleTimestep();
     }
-    if (isRunning) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processSnapshotButton()
@@ -187,15 +163,11 @@ void _TemporalControlWindow::processSnapshotButton()
 
 void _TemporalControlWindow::processRestoreButton()
 {
-    if (!_snapshot) {
-        ImGui::BeginDisabled();
-    }
+    ImGui::BeginDisabled(!_snapshot);
     if (ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         _simController->clear();
         _simController->setCurrentTimestep(_snapshot->timestep);
         _simController->updateData(_snapshot->data);
     }
-    if (!_snapshot) {
-        ImGui::EndDisabled();
-    }
+    ImGui::EndDisabled();
 }
