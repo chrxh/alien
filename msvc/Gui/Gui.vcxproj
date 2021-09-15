@@ -159,11 +159,11 @@
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
     <ClInclude Include="..\..\source\Gui\OpenGLHelper.h" />
+    <ClInclude Include="..\..\source\Gui\SimulationParametersWindow.h" />
     <ClInclude Include="..\..\source\Gui\SimulationScrollbar.h" />
     <ClInclude Include="..\..\source\Gui\SimulationView.h" />
     <ClInclude Include="..\..\source\Gui\MainWindow.h" />
     <ClInclude Include="..\..\source\Gui\Shader.h" />
-    <ClInclude Include="..\..\source\Gui\Style.h" />
     <ClInclude Include="..\..\source\Gui\StyleRepository.h" />
     <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h" />
     <ClInclude Include="..\..\source\Gui\Viewport.h" />
@@ -179,6 +179,7 @@
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp" />
+    <ClCompile Include="..\..\source\Gui\SimulationParametersWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationScrollbar.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationView.cpp" />
     <ClCompile Include="..\..\source\Gui\main.cpp" />
