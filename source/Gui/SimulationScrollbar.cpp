@@ -7,7 +7,7 @@
 
 #include "EngineImpl/SimulationController.h"
 #include "Viewport.h"
-#include "Style.h"
+#include "StyleRepository.h"
 
 _SimulationScrollbar::_SimulationScrollbar(
     std::string const& id,

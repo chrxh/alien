@@ -24,6 +24,9 @@ using StyleRepository = boost::shared_ptr<_StyleRepository>;
 class _TemporalControlWindow;
 using TemporalControlWindow = boost::shared_ptr<_TemporalControlWindow>;
 
+class _SimulationParametersWindow;
+using SimulationParametersWindow = boost::shared_ptr<_SimulationParametersWindow>;
+
 struct GLFWwindow;
 struct ImFont;
 
