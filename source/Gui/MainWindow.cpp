@@ -106,7 +106,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 void _MainWindow::mainLoop(GLFWwindow* window)
 {
     bool show_demo_window = true;
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window) && !_onClose)
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -210,11 +210,16 @@ void _MainWindow::drawMenubar()
             if (ImGui::MenuItem("Open", "CTRL+O")) {
                 ifd::FileDialog::Instance().Open(
                     "SimulationOpenDialog",
-                    "Open a simulation",
+                    "Open simulation",
                     "Simulation file (*.sim){.sim},.*",
-                    true);
+                    false);
+            }
+            if (ImGui::MenuItem("Save", "CTRL+S")) {
+                ifd::FileDialog::Instance().Save(
+                    "SimulationSaveDialog", "Save simulation", "Simulation file (*.sim){.sim},.*");
             }
             if (ImGui::MenuItem("Close", "ALT+F4")) {
+                _onClose = true;
             }
             ImGui::EndMenu();
         }
@@ -285,11 +290,31 @@ void _MainWindow::processDialogs()
             auto deserializedData = serializer->deserializeSimulation(serializedData);
 
             _simController->newSimulation(
-                deserializedData.generalSettings.worldSize,
                 deserializedData.timestep,
+                deserializedData.generalSettings,
                 deserializedData.simulationParameters,
-                deserializedData.generalSettings.gpuConstants);
+                deserializedData.symbolMap);
             _simController->updateData(deserializedData.content);
+        }
+        ifd::FileDialog::Instance().Close();
+    }
+
+    if (ifd::FileDialog::Instance().IsDone("SimulationSaveDialog")) {
+        if (ifd::FileDialog::Instance().HasResult()) {
+            const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+            auto firstFilename = res.front();
+
+            DeserializedSimulation sim;
+            sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+            sim.generalSettings = _simController->getGeneralSettings();
+            sim.simulationParameters = _simController->getSimulationParameters();
+            sim.symbolMap = _simController->getSymbolMap();
+            sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+
+            Serializer serializer = boost::make_shared<_Serializer>();
+            auto serializedSim = serializer->serializeSimulation(sim);
+            serializer->saveSimulationDataToFile(firstFilename.string(), serializedSim);
+
         }
         ifd::FileDialog::Instance().Close();
     }

@@ -3,6 +3,8 @@
 #include <thread>
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/GeneralSettings.h"
+#include "EngineInterface/SymbolMap.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
@@ -14,10 +16,10 @@ public:
     ENGINEIMPL_EXPORT void initCuda();
 
     ENGINEIMPL_EXPORT void newSimulation(
-        IntVector2D size,
         int timestep,
+        GeneralSettings const& generalSettings,
         SimulationParameters const& parameters,
-        GpuConstants const& gpuConstants);
+        SymbolMap const& symbolMap);
     ENGINEIMPL_EXPORT void clear();
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
@@ -44,7 +46,10 @@ public:
     ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
+    ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
+    ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
+    ENGINEIMPL_EXPORT SymbolMap getSymbolMap() const;
 
     ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;
     ENGINEIMPL_EXPORT void setTpsRestriction(boost::optional<int> const& value);
@@ -52,7 +57,9 @@ public:
     ENGINEIMPL_EXPORT int getTps() const;
 
 private:
-    IntVector2D _worldSize;
+    GeneralSettings _generalSettings;
+    SimulationParameters _parameters;
+    SymbolMap _symbolMap;
 
     EngineWorker _worker;
     std::thread* _thread = nullptr;

@@ -29,4 +29,5 @@ private:
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
     StyleRepository _styleRepository;
+    bool _onClose = false;
 };
