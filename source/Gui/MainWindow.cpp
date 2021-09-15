@@ -60,7 +60,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
     _styleRepository = boost::make_shared<_StyleRepository>();
 
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+//    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     //ImGui::StyleColorsDark();
@@ -125,8 +125,8 @@ void _MainWindow::mainLoop(GLFWwindow* window)
             ImGui::ShowDemoWindow(&show_demo_window);
         {}
 
-        drawToolbar();
-        drawMenubar();
+        processToolbar();
+        processMenubar();
         processDialogs();
         processWindows();
         _simulationView->processControls();
@@ -203,40 +203,64 @@ auto _MainWindow::initGlfw() -> GlfwData
     return {window, mode, glsl_version};
 }
 
-void _MainWindow::drawMenubar()
+void _MainWindow::processMenubar()
 {
     if (ImGui::BeginMainMenuBar()) {
+/*
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.35f, 0.6f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.35f, 0.8f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.35f, 0.7f, 0.7f));
+*/
         if (ImGui::BeginMenu("Simulation")) {
             if (ImGui::MenuItem("Open", "CTRL+O")) {
-                ifd::FileDialog::Instance().Open(
-                    "SimulationOpenDialog",
-                    "Open simulation",
-                    "Simulation file (*.sim){.sim},.*",
-                    false);
+                onOpenSimulation();
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
-                ifd::FileDialog::Instance().Save(
-                    "SimulationSaveDialog", "Save simulation", "Simulation file (*.sim){.sim},.*");
+                onSaveSimulation();
             }
-            if (ImGui::MenuItem("Close", "ALT+F4")) {
+            ImGui::Separator();
+            ImGui::BeginDisabled(_simController->isSimulationRunning());
+            if (ImGui::MenuItem("Run", "CTRL+R")) {
+                onRunSimulation();
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(!_simController->isSimulationRunning());
+            if (ImGui::MenuItem("Pause", "CTRL+P")) {
+                onPauseSimulation();
+            }
+            ImGui::EndDisabled();
+            ImGui::Separator();
+            if (ImGui::MenuItem("Exit", "ALT+F4")) {
                 _onClose = true;
             }
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Edit")) {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+        if (ImGui::BeginMenu("Settings")) {
+            if (ImGui::MenuItem("Simulation parameters", "CTRL+S")) {
+                onSimulationParameters();
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
     }
+
+    //menu hotkeys
+    auto io = ImGui::GetIO();
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
+        onOpenSimulation();
+    }
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+        onSaveSimulation();
+    }
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+        onRunSimulation();
+    }
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
+        onPauseSimulation();
+    }
 }
 
-void _MainWindow::drawToolbar()
+void _MainWindow::processToolbar()
 {
 /*
     ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -265,17 +289,6 @@ void _MainWindow::drawToolbar()
 
 void _MainWindow::processDialogs()
 {
-    // Simple window
-/*
-    ImGui::Begin("Control Panel");
-    if (ImGui::Button("Open directory"))
-        ifd::FileDialog::Instance().Open("DirectoryOpenDialog", "Open a directory", "");
-    if (ImGui::Button("Save file"))
-        ifd::FileDialog::Instance().Save("ShaderSaveDialog", "Save a shader", "*.sprj {.sprj}");
-    ImGui::End();
-*/
-
-    // file dialogs
     if (ifd::FileDialog::Instance().IsDone("SimulationOpenDialog")) {
         if (ifd::FileDialog::Instance().HasResult()) {
             const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
@@ -318,25 +331,32 @@ void _MainWindow::processDialogs()
         }
         ifd::FileDialog::Instance().Close();
     }
-/*
-    if (ifd::FileDialog::Instance().IsDone("DirectoryOpenDialog")) {
-        if (ifd::FileDialog::Instance().HasResult()) {
-            std::string res = ifd::FileDialog::Instance().GetResult().u8string();
-            printf("DIRECTORY[%s]\n", res.c_str());
-        }
-        ifd::FileDialog::Instance().Close();
-    }
-    if (ifd::FileDialog::Instance().IsDone("ShaderSaveDialog")) {
-        if (ifd::FileDialog::Instance().HasResult()) {
-            std::string res = ifd::FileDialog::Instance().GetResult().u8string();
-            printf("SAVE[%s]\n", res.c_str());
-        }
-        ifd::FileDialog::Instance().Close();
-    }
-*/
 }
 
 void _MainWindow::processWindows()
 {
     _temporalControlWindow->process();
+}
+
+void _MainWindow::onOpenSimulation()
+{
+    ifd::FileDialog::Instance().Open(
+        "SimulationOpenDialog", "Open simulation", "Simulation file (*.sim){.sim},.*", false);
+}
+
+void _MainWindow::onSaveSimulation()
+{
+    ifd::FileDialog::Instance().Save("SimulationSaveDialog", "Save simulation", "Simulation file (*.sim){.sim},.*");
+}
+void _MainWindow::onRunSimulation()
+{
+    _simController->runSimulation();
+}
+void _MainWindow::onPauseSimulation()
+{
+    _simController->pauseSimulation();
+}
+
+void _MainWindow::onSimulationParameters()
+{
 }
