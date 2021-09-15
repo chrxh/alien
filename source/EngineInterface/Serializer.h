@@ -29,7 +29,7 @@ class _Serializer
 {
 public:
     ENGINEINTERFACE_EXPORT bool loadSimulationDataFromFile(string const& filename, SerializedSimulation& data);
-    ENGINEINTERFACE_EXPORT bool loadDataFromFile(std::string const& filename, std::string& data);
+    ENGINEINTERFACE_EXPORT bool saveSimulationDataToFile(string const& filename, SerializedSimulation& data);
 
     ENGINEINTERFACE_EXPORT SerializedSimulation serializeSimulation(DeserializedSimulation const& data);
     ENGINEINTERFACE_EXPORT DeserializedSimulation deserializeSimulation(SerializedSimulation const& data);
@@ -45,4 +45,8 @@ public:
 
     ENGINEINTERFACE_EXPORT string serializeGeneralSettings(GeneralSettings const& generalSettings) const;
     ENGINEINTERFACE_EXPORT GeneralSettings deserializeGeneralSettings(std::string const& data) const;
+
+private:
+    ENGINEINTERFACE_EXPORT bool loadDataFromFile(std::string const& filename, std::string& data);
+    ENGINEINTERFACE_EXPORT bool saveDataToFile(std::string const& filename, std::string const& data);
 };
