@@ -20,10 +20,17 @@ private:
     };
     GlfwData initGlfw();
 
-    void drawMenubar();
-    void drawToolbar();
+    void processMenubar();
+    void processToolbar();
     void processDialogs();
     void processWindows();
+
+    void onOpenSimulation();
+    void onSaveSimulation();
+    void onRunSimulation();
+    void onPauseSimulation();
+
+    void onSimulationParameters();
 
     SimulationController _simController;
     SimulationView _simulationView;
