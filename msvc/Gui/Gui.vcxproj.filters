@@ -87,9 +87,6 @@
     <ClInclude Include="..\..\source\Gui\Viewport.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\Style.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\Gui\StyleRepository.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -97,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SimulationParametersWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -153,6 +153,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SimulationParametersWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

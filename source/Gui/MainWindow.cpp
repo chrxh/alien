@@ -24,9 +24,9 @@
 #include "EngineImpl/SimulationController.h"
 
 #include "SimulationView.h"
-#include "Style.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
+#include "SimulationParametersWindow.h"
 
 namespace
 {
@@ -66,7 +66,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     //ImGui::StyleColorsDark();
 //    ImGui::StyleColorsLight();
 
-    // Setup Platform/Renderer backends
+    // Setup Platform/Renderer back-ends
     ImGui_ImplGlfw_InitForOpenGL(glfwData.window, true);
     ImGui_ImplOpenGL3_Init(glfwData.glsl_version);
 
@@ -80,6 +80,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         boost::make_shared<_SimulationView>(simController, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
     simulationViewPtr = _simulationView.get();
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
+    _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -206,7 +207,7 @@ auto _MainWindow::initGlfw() -> GlfwData
 void _MainWindow::processMenubar()
 {
     if (ImGui::BeginMainMenuBar()) {
-/*
+        /*
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.35f, 0.6f, 0.6f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.35f, 0.8f, 0.8f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.35f, 0.7f, 0.7f));
@@ -236,8 +237,8 @@ void _MainWindow::processMenubar()
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
-            if (ImGui::MenuItem("Simulation parameters", "CTRL+S")) {
-                onSimulationParameters();
+            if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
+                _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
             ImGui::EndMenu();
         }
@@ -331,6 +332,8 @@ void _MainWindow::processDialogs()
         }
         ifd::FileDialog::Instance().Close();
     }
+
+    _simulationParametersWindow->process();
 }
 
 void _MainWindow::processWindows()
@@ -355,8 +358,4 @@ void _MainWindow::onRunSimulation()
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
-}
-
-void _MainWindow::onSimulationParameters()
-{
 }

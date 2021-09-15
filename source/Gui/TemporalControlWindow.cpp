@@ -7,7 +7,6 @@
 #include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 
-#include "Style.h"
 #include "StyleRepository.h"
 #include "OpenGLHelper.h"
 
@@ -31,19 +30,14 @@ void _TemporalControlWindow::process()
     ImGui::Begin("Temporal control");
 
     processRunButton();
-
     ImGui::SameLine();
     processPauseButton();
-
     ImGui::SameLine();
     processStepBackwardButton();
-
     ImGui::SameLine();
     processStepForwardButton();
-
     ImGui::SameLine();
     processSnapshotButton();
-
     ImGui::SameLine();
     processRestoreButton();
 
@@ -54,13 +48,11 @@ void _TemporalControlWindow::process()
     ImGui::Spacing();
 
     processTpsInfo();
-
     processTotalTimestepsInfo();
 
     ImGui::Spacing();
     ImGui::Spacing();
     processTpsRestriction();
-
 
     ImGui::End();
 }
@@ -70,7 +62,7 @@ void _TemporalControlWindow::processTpsInfo()
     ImGui::Text("Time steps per second");
 
     ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, 0xff909090);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::Text(StringFormatter::format(_simController->getTps()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
@@ -81,7 +73,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
     ImGui::Text("Total time steps");
 
     ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, 0xff909090);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::Text(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
@@ -94,7 +86,9 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::SameLine();
     static int tpsRestriction = 30;
     ImGui::BeginDisabled(!slowDown);
+    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 30);
     ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS");
+    ImGui::PopStyleVar();
     ImGui::EndDisabled();
     if (slowDown) {
         _simController->setTpsRestriction(tpsRestriction);

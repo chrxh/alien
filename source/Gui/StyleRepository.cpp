@@ -13,11 +13,21 @@ _StyleRepository::_StyleRepository()
         == NULL) {
         throw std::runtime_error("Could not load font.");
     };
+    _mediumFont =
+        io.Fonts->AddFontFromFileTTF("d:\\temp\\alien-imgui\\external\\imgui\\misc\\fonts\\DroidSans.ttf", 24.0f);
+    if (_mediumFont == NULL) {
+        throw std::runtime_error("Could not load font.");
+    }
     _largeFont =
         io.Fonts->AddFontFromFileTTF("d:\\temp\\alien-imgui\\external\\imgui\\misc\\fonts\\DroidSans.ttf", 48.0f);
     if (_largeFont == NULL) {
         throw std::runtime_error("Could not load font.");
     }
+}
+
+ImFont* _StyleRepository::getMediumFont() const
+{
+    return _mediumFont;
 }
 
 ImFont* _StyleRepository::getLargeFont() const
