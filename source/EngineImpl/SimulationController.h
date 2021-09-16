@@ -47,6 +47,7 @@ public:
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
     ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
+    ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
     ENGINEIMPL_EXPORT SymbolMap getSymbolMap() const;

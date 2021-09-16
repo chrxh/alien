@@ -93,6 +93,13 @@ SimulationParameters _SimulationController::getSimulationParameters() const
     return _parameters;
 }
 
+void _SimulationController::setSimulationParameters_async(
+    SimulationParameters const& parameters)
+{
+    _parameters = parameters;
+    _worker.setSimulationParameters_async(parameters);
+}
+
 GeneralSettings _SimulationController::getGeneralSettings() const
 {
     return _generalSettings;

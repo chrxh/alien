@@ -44,7 +44,6 @@ private:
 
 namespace
 {
-    float constexpr TimestepSize = 1.0f;
     float constexpr ForceFactor = 1.0f;
 }
 
@@ -101,7 +100,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             data.cellMap.mapDisplacementCorrection(posDelta);
 
             auto distance = Math::length(posDelta);
-            if (distance >= cudaSimulationParameters.cellMaxDistance
+            if (distance >= cudaSimulationParameters.cellMaxCollisionDistance
                 /*|| distance <= cudaSimulationParameters.cellMinDistance*/) {
                 continue;
             }
@@ -134,7 +133,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
                 else {
                     auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 32;
+                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta)) / 32;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);
@@ -247,7 +246,8 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->absPos = cell->absPos + cell->vel * TimestepSize + cell->temp1 * TimestepSize * TimestepSize / 2;
+        cell->absPos = cell->absPos + cell->vel * cudaSimulationParameters.timestepSize
+            + cell->temp1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
         data.cellMap.mapPosCorrection(cell->absPos);
         cell->temp2 = cell->temp1;  //forces
         cell->temp1 = {0, 0};
@@ -259,7 +259,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             auto displacement = connectingCell->absPos - cell->absPos;
             data.cellMap.mapDisplacementCorrection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxDistance*2) {
+            if (actualDistance > cudaSimulationParameters.cellMaxCollisionDistance * 2) {
                 scheduleForDestruction = true;
             }
         }
@@ -280,7 +280,7 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data, i
         auto& cell = cells.at(index);
 
         auto acceleration = (cell->temp1 + cell->temp2) / 2;
-        cell->vel = cell->vel + acceleration * TimestepSize;
+        cell->vel = cell->vel + acceleration * cudaSimulationParameters.timestepSize;
     }
 }
 
@@ -311,7 +311,7 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->vel = cell->temp1 * 0.999f;
+        cell->vel = cell->temp1 * (1.0f - cudaSimulationParameters.friction);
     }
 }
 

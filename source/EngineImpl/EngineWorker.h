@@ -40,7 +40,6 @@ public:
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
 
-
     ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
@@ -55,6 +54,8 @@ public:
     ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
+    ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
+
     void runThreadLoop();
     void runSimulation();
     void pauseSimulation();
@@ -68,6 +69,12 @@ private:
     std::atomic<bool> _isSimulationRunning = false;
     std::atomic<bool> _isShutdown = false;
     std::atomic<bool> _requireAccess = false;
+
+    //async jobs
+    mutable std::mutex _mutexForAsyncJobs;
+    boost::optional<SimulationParameters> _updateSimulationParametersJob;
+
+    //time step measurements
     std::atomic<int> _tpsRestriction = 0;   //0 = no restriction
     std::atomic<int> _tps;
     boost::optional<std::chrono::steady_clock::time_point> _timepoint;
