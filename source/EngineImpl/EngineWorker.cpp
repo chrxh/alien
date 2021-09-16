@@ -2,11 +2,10 @@
 
 #include <chrono>
 
-#include "EngineGpuKernels/AccessTOs.cuh"
-#include "EngineInterface/ChangeDescriptions.h"
-
 #include "AccessDataTOCache.h"
 #include "DataConverter.h"
+#include "EngineGpuKernels/AccessTOs.cuh"
+#include "EngineInterface/ChangeDescriptions.h"
 
 namespace
 {
@@ -17,7 +16,8 @@ namespace
             std::condition_variable& conditionForAccess,
             std::condition_variable& conditionForWorkerLoop,
             std::atomic<bool>& accessFlag,
-            std::atomic<bool> const& isSimulationRunning)
+            std::atomic<bool> const& isSimulationRunning,
+            boost::optional<std::chrono::milliseconds> const& maxDuration = boost::none)
             : _accessFlag(accessFlag)
             , _conditionForWorkerLoop(conditionForWorkerLoop)
         {
@@ -27,7 +27,12 @@ namespace
             std::mutex mutex;
             accessFlag.store(true);
             std::unique_lock<std::mutex> uniqueLock(mutex);
-            conditionForAccess.wait(uniqueLock);
+            if (maxDuration) {
+                std::cv_status status = conditionForAccess.wait_for(uniqueLock, *maxDuration);
+                _isTimeout = std::cv_status::timeout == status;
+            } else {
+                conditionForAccess.wait(uniqueLock);
+            }
             conditionForWorkerLoop.notify_all();
         }
 
@@ -37,9 +42,13 @@ namespace
             _conditionForWorkerLoop.notify_all();
         }
 
+        bool isTimeout() const { return _isTimeout; }
+
     private:
         std::atomic<bool>& _accessFlag;
         std::condition_variable& _conditionForWorkerLoop;
+
+        bool _isTimeout = false;
     };
 }
 
@@ -75,20 +84,26 @@ void EngineWorker::registerImageResource(GLuint image)
 }
 
 void EngineWorker::getVectorImage(
-    RealVector2D const& rectUpperLeft, 
-    RealVector2D const& rectLowerRight, 
-    IntVector2D const& imageSize, 
+    RealVector2D const& rectUpperLeft,
+    RealVector2D const& rectLowerRight,
+    IntVector2D const& imageSize,
     double zoom)
 {
     CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+        _conditionForAccess,
+        _conditionForWorkerLoop,
+        _requireAccess,
+        _isSimulationRunning,
+        std::chrono::milliseconds(30));
 
-    _cudaSimulation->getVectorImage(
-        {rectUpperLeft.x, rectUpperLeft.y},
-        {rectLowerRight.x, rectLowerRight.y},
-        _cudaResource,
-        {imageSize.x, imageSize.y},
-        zoom);
+    if (!access.isTimeout()) {
+        _cudaSimulation->getVectorImage(
+            {rectUpperLeft.x, rectUpperLeft.y},
+            {rectLowerRight.x, rectLowerRight.y},
+            _cudaResource,
+            {imageSize.x, imageSize.y},
+            zoom);
+    }
 }
 
 DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
@@ -105,8 +120,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
 
 void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
     DataAccessTO dataTO = _dataTOCache->getDataTO();
     _cudaSimulation->getSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
@@ -121,8 +135,7 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 
 void EngineWorker::calcSingleTimestep()
 {
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
     _cudaSimulation->calcCudaTimestep();
 }
@@ -169,13 +182,22 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
     _cudaSimulation->setCurrentTimestep(value);
 }
 
+void EngineWorker::setSimulationParameters_async(SimulationParameters const& parameters)
+{
+    {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+        _updateSimulationParametersJob = parameters;
+    }
+    _conditionForWorkerLoop.notify_all();
+}
+
 void EngineWorker::runThreadLoop()
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
     boost::optional<std::chrono::steady_clock::time_point> startTimestepTime;
     while (true) {
         if (!_isSimulationRunning.load()) {
-            
+
             //sleep...
             _tps.store(0);
             _conditionForWorkerLoop.wait(uniqueLock);
@@ -198,7 +220,7 @@ void EngineWorker::runThreadLoop()
                                          .count();
 
                     _conditionForAccess.notify_all();
-//                    std::this_thread::sleep_for(std::chrono::microseconds(1));
+                    //                    std::this_thread::sleep_for(std::chrono::microseconds(1));
                 } while (actualDuration < desiredDuration || _requireAccess.load());
             }
 
@@ -222,6 +244,12 @@ void EngineWorker::runThreadLoop()
             startTimestepTime = std::chrono::steady_clock::now();
             _cudaSimulation->calcCudaTimestep();
             ++_timestepsSinceTimepoint;
+        }
+
+        std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
+        if (_updateSimulationParametersJob) {
+            _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
+            _updateSimulationParametersJob = boost::none;
         }
     }
 }
