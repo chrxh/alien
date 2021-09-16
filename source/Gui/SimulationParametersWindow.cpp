@@ -2,24 +2,48 @@
 
 #include "imgui.h"
 
+#include "EngineImpl/SimulationController.h"
+
 #include "StyleRepository.h"
 
-_SimulationParametersWindow::_SimulationParametersWindow(StyleRepository const& styleRepository)
+_SimulationParametersWindow::_SimulationParametersWindow(
+    StyleRepository const& styleRepository,
+    SimulationController const& simController)
     : _styleRepository(styleRepository)
+    , _simController(simController)
 {}
 
 void _SimulationParametersWindow::process()
 {
     if (_on) {
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
+        auto simParameters = _simController->getSimulationParameters();
+        auto origSimParameters = simParameters;
         ImGui::Begin("Simulation parameters", &_on, windowFlags);
-        createGroup("General physics");
-        static float friction = 0.5f;
-        createFloatItem("Friction", friction);
+
         createGroup("Numerics");
-        static float timestepSize = 0.5f;
-        createFloatItem("Time step size", timestepSize);
+        createFloatItem("Time step size", simParameters.timestepSize, 0, 1.0f);
+
+        createGroup("General physics");
+        createFloatItem("Friction", simParameters.friction, 0, 1.0f, true, "%.4f");
+        createFloatItem("Radiation strength", simParameters.radiationFactor, 0, 0.01f, true, "%.5f");
+        createFloatItem("Maximum velocity", simParameters.cellMaxVel, 0, 6.0f);
+        createFloatItem("Maximum force", simParameters.cellMaxForce, 0, 3.0f);
+        createFloatItem("Minimum energy", simParameters.cellMinEnergy, 0, 100.0f);
+        createFloatItem("Minimum distance", simParameters.cellMinDistance, 0, 1.0f);
+
+        createGroup("Collision and binding");
+        createFloatItem("Maximum collision distance", simParameters.cellMaxCollisionDistance, 0, 3.0f);
+        createFloatItem("Maximum binding distance", simParameters.cellMaxBindingDistance, 0, 5.0f);
+        createFloatItem("Binding force strength", simParameters.bindingForce, 0, 4.0f);
+        createFloatItem("Binding creation force", simParameters.cellFusionVelocity, 0, 1.0f);
+        createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, 0, 6);
+
         ImGui::End();
+
+        if (simParameters != origSimParameters) {
+            _simController->setSimulationParameters_async(simParameters);
+        }
     }
 }
 
@@ -42,11 +66,31 @@ void _SimulationParametersWindow::createGroup(std::string const& name)
     ImGui::Spacing();
 }
 
-void _SimulationParametersWindow::createFloatItem(std::string const& name, float& value)
+void _SimulationParametersWindow::createFloatItem(
+    std::string const& name,
+    float& value,
+    float min,
+    float max,
+    bool logarithmic,
+    std::string const& format)
 { 
     ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 30);
-    ImGui::SliderFloat(name.c_str(), &value, 0.0f, 1.0f);
+    ImGui::SetNextItemWidth(200.0f);
+    ImGui::SliderFloat(name.c_str(), &value, min, max, format.c_str(), logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
     ImGui::PopStyleVar();
+
+    helpMarker("This is a more typical looking tree with selectable nodes.\n"
+               "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
+    ImGui::Spacing();
+}
+
+void _SimulationParametersWindow::createIntItem(std::string const& name, int& value, int min, int max)
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 30);
+    ImGui::SetNextItemWidth(200.0f);
+    ImGui::SliderInt(name.c_str(), &value, min, max);
+    ImGui::PopStyleVar();
+
     helpMarker("This is a more typical looking tree with selectable nodes.\n"
                "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
     ImGui::Spacing();

@@ -14,7 +14,7 @@ boost::property_tree::ptree Parser::encode(SimulationParameters const& parameter
 {
     boost::property_tree::ptree tree;
     tree.add("cell.min distance", toString(parameters.cellMinDistance));
-    tree.add("cell.max distance", toString(parameters.cellMaxDistance));
+    tree.add("cell.max distance", toString(parameters.cellMaxCollisionDistance));
     tree.add("cell.max force", toString(parameters.cellMaxForce));
     tree.add("cell.max force decay probability", toString(parameters.cellMaxForceDecayProb));
     tree.add("cell.min token usages", toString(parameters.cellMinTokenUsages));
@@ -76,7 +76,7 @@ SimulationParameters Parser::decodeSimulationParameters(boost::property_tree::pt
 
     SimulationParameters result;
     result.cellMinDistance = tree.get<float>("cell.min distance");
-    result.cellMaxDistance = tree.get<float>("cell.max distance");
+    result.cellMaxCollisionDistance = tree.get<float>("cell.max distance");
     result.cellMaxForce = tree.get<float>("cell.max force");
     result.cellMaxForceDecayProb = tree.get<float>("cell.max force decay probability");
     result.cellMinTokenUsages = tree.get<int>("cell.min token usages");

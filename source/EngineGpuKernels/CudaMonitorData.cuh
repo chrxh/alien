@@ -33,7 +33,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_internalEnergy);
     }
 
-    __host__ MonitorData getMonitorData(int timeStep)
+    __host__ MonitorData getMonitorData(uint64_t timeStep)
     {
         MonitorData result;
         checkCudaErrors(cudaMemcpy(&result.numCells, _numCells, sizeof(int), cudaMemcpyDeviceToHost));

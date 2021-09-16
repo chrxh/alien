@@ -41,7 +41,7 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
 
     if (sourceCell->tryLock()) {
         if (distance > cudaSimulationParameters.cellMinDistance
-            && distance < cudaSimulationParameters.cellMaxDistance) {
+            && distance < cudaSimulationParameters.cellMaxCollisionDistance) {
 
             connection.distance = distance;
 
