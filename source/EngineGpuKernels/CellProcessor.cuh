@@ -42,11 +42,6 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-namespace
-{
-    float constexpr ForceFactor = 1.0f;
-}
-
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
@@ -160,7 +155,7 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
         auto& cell = cells.at(index);
 
         auto force = cell->temp1;
-        if (Math::length(force) > cudaSimulationParameters.cellMaxForce * ForceFactor) {
+        if (Math::length(force) > cudaSimulationParameters.cellMaxForce * cudaSimulationParameters.bindingForce) {
             if(data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDelConnections(data, cell);
             }
@@ -196,7 +191,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation / 2 * ForceFactor;
+            force = force + Math::normalized(displacement) * deviation / 2 * cudaSimulationParameters.bindingForce;
 
             if (cell->numConnections > 1) {
                 auto angle = Math::angleOfVector(displacement);
@@ -204,7 +199,8 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
                 auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                 auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * ForceFactor;
+                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000
+                    * cudaSimulationParameters.bindingForce;
 
                 auto force1 = Math::normalized(displacement) * angleDeviation;
                 Math::rotateQuarterClockwise(force1);
