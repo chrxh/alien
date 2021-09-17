@@ -7,6 +7,7 @@ struct SimulationParameters
     float bindingForce = 1.0f;            //
     float cellMaxVel = 2.0f;              //
     float cellMaxBindingDistance = 2.6f;  //
+    float tokenMutationRate = 0.0005f;     //
 
     float cellMinDistance = 0.3f;           //
     float cellMaxCollisionDistance = 1.3f;  //
@@ -24,9 +25,9 @@ struct SimulationParameters
     float cellFusionVelocity = 0.4f;  //
 
     float cellFunctionWeaponStrength = 0.1f;
-    float cellFunctionWeaponEnergyCost = 0.2f;
+    float cellFunctionWeaponEnergyCost = 0.2f;  //
     float cellFunctionWeaponGeometryDeviationExponent = 0;
-    float cellFunctionWeaponInhomogeneousColorFactor = 1.0f;
+    float cellFunctionWeaponInhomogeneousColorFactor = 1.0f;    //
     int cellFunctionComputerMaxInstructions = 15;
     int cellFunctionComputerCellMemorySize = 8;
     float cellFunctionConstructorOffspringCellEnergy = 100.0f;

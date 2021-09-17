@@ -19,6 +19,7 @@ void _SimulationParametersWindow::process()
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
         auto simParameters = _simController->getSimulationParameters();
         auto origSimParameters = simParameters;
+
         ImGui::Begin("Simulation parameters", &_on, windowFlags);
 
         createGroup("Numerics");
@@ -38,6 +39,14 @@ void _SimulationParametersWindow::process()
         createFloatItem("Binding force strength", simParameters.bindingForce, 0, 4.0f);
         createFloatItem("Binding creation force", simParameters.cellFusionVelocity, 0, 1.0f);
         createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, 0, 6);
+
+        createGroup("Cell functions");
+        createFloatItem("Mutation rate", simParameters.tokenMutationRate, 0, 0.005f, false, "%.5f");
+        createFloatItem("Weapon energy cost", simParameters.cellFunctionWeaponEnergyCost, 0, 4.0f);
+        auto weaponColorPenalty = 1.0f - simParameters.cellFunctionWeaponInhomogeneousColorFactor;
+        createFloatItem("Weapon color penalty", weaponColorPenalty, 0, 1.0f);
+        simParameters.cellFunctionWeaponInhomogeneousColorFactor = 1.0f - weaponColorPenalty;
+        createFloatItem("Weapon geometric penalty", simParameters.cellFunctionWeaponGeometryDeviationExponent, 0, 5.0f);
 
         ImGui::End();
 
