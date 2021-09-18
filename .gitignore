@@ -582,7 +582,6 @@ temp/
 stable/
 *computation.dat
 external/boost*
-external/imgui*
 source/tests/testdata/comparison/computation.dat
 *autosave*
 
