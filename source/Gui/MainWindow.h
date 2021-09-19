@@ -34,6 +34,8 @@ private:
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
+    MonitorWindow _monitorWindow;
+
     StyleRepository _styleRepository;
 
     bool _onClose = false;

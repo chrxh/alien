@@ -115,6 +115,11 @@ SymbolMap _SimulationController::getSymbolMap() const
     return _symbolMap;
 }
 
+MonitorData _SimulationController::getMonitorData() const
+{
+    return _worker.getMonitorData();
+}
+
 boost::optional<int> _SimulationController::getTpsRestriction() const
 {
     auto result = _worker.getTpsRestriction();

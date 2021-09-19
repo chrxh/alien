@@ -51,6 +51,7 @@ public:
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
     ENGINEIMPL_EXPORT SymbolMap getSymbolMap() const;
+    ENGINEIMPL_EXPORT MonitorData getMonitorData() const;
 
     ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;
     ENGINEIMPL_EXPORT void setTpsRestriction(boost::optional<int> const& value);

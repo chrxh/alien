@@ -114,7 +114,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\external\ImPlot;$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -132,7 +132,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\external\ImPlot;$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -156,8 +156,11 @@
     <ClInclude Include="..\..\external\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\external\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\external\ImPlot\implot.h" />
+    <ClInclude Include="..\..\external\ImPlot\implot_internal.h" />
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
+    <ClInclude Include="..\..\source\Gui\MonitorWindow.h" />
     <ClInclude Include="..\..\source\Gui\OpenGLHelper.h" />
     <ClInclude Include="..\..\source\Gui\SimulationParametersWindow.h" />
     <ClInclude Include="..\..\source\Gui\SimulationScrollbar.h" />
@@ -178,6 +181,10 @@
     <ClCompile Include="..\..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\external\ImPlot\implot.cpp" />
+    <ClCompile Include="..\..\external\ImPlot\implot_demo.cpp" />
+    <ClCompile Include="..\..\external\ImPlot\implot_items.cpp" />
+    <ClCompile Include="..\..\source\Gui\MonitorWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationParametersWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationScrollbar.cpp" />

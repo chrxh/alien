@@ -15,44 +15,45 @@ _SimulationParametersWindow::_SimulationParametersWindow(
 
 void _SimulationParametersWindow::process()
 {
-    if (_on) {
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
-        auto simParameters = _simController->getSimulationParameters();
-        auto origSimParameters = simParameters;
+    if (!_on) {
+        return;
+    }
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
+    auto simParameters = _simController->getSimulationParameters();
+    auto origSimParameters = simParameters;
 
-        ImGui::Begin("Simulation parameters", &_on, windowFlags);
+    ImGui::Begin("Simulation parameters", &_on, windowFlags);
 
-        createGroup("Numerics");
-        createFloatItem("Time step size", simParameters.timestepSize, 0, 1.0f);
+    createGroup("Numerics");
+    createFloatItem("Time step size", simParameters.timestepSize, 0, 1.0f);
 
-        createGroup("General physics");
-        createFloatItem("Friction", simParameters.friction, 0, 1.0f, true, "%.4f");
-        createFloatItem("Radiation strength", simParameters.radiationFactor, 0, 0.01f, true, "%.5f");
-        createFloatItem("Maximum velocity", simParameters.cellMaxVel, 0, 6.0f);
-        createFloatItem("Maximum force", simParameters.cellMaxForce, 0, 3.0f);
-        createFloatItem("Minimum energy", simParameters.cellMinEnergy, 0, 100.0f);
-        createFloatItem("Minimum distance", simParameters.cellMinDistance, 0, 1.0f);
+    createGroup("General physics");
+    createFloatItem("Friction", simParameters.friction, 0, 1.0f, true, "%.4f");
+    createFloatItem("Radiation strength", simParameters.radiationFactor, 0, 0.01f, true, "%.5f");
+    createFloatItem("Maximum velocity", simParameters.cellMaxVel, 0, 6.0f);
+    createFloatItem("Maximum force", simParameters.cellMaxForce, 0, 3.0f);
+    createFloatItem("Minimum energy", simParameters.cellMinEnergy, 0, 100.0f);
+    createFloatItem("Minimum distance", simParameters.cellMinDistance, 0, 1.0f);
 
-        createGroup("Collision and binding");
-        createFloatItem("Maximum collision distance", simParameters.cellMaxCollisionDistance, 0, 3.0f);
-        createFloatItem("Maximum binding distance", simParameters.cellMaxBindingDistance, 0, 5.0f);
-        createFloatItem("Binding force strength", simParameters.bindingForce, 0, 4.0f);
-        createFloatItem("Binding creation force", simParameters.cellFusionVelocity, 0, 1.0f);
-        createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, 0, 6);
+    createGroup("Collision and binding");
+    createFloatItem("Maximum collision distance", simParameters.cellMaxCollisionDistance, 0, 3.0f);
+    createFloatItem("Maximum binding distance", simParameters.cellMaxBindingDistance, 0, 5.0f);
+    createFloatItem("Binding force strength", simParameters.bindingForce, 0, 4.0f);
+    createFloatItem("Binding creation force", simParameters.cellFusionVelocity, 0, 1.0f);
+    createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, 0, 6);
 
-        createGroup("Cell functions");
-        createFloatItem("Mutation rate", simParameters.tokenMutationRate, 0, 0.005f, false, "%.5f");
-        createFloatItem("Weapon energy cost", simParameters.cellFunctionWeaponEnergyCost, 0, 4.0f);
-        auto weaponColorPenalty = 1.0f - simParameters.cellFunctionWeaponInhomogeneousColorFactor;
-        createFloatItem("Weapon color penalty", weaponColorPenalty, 0, 1.0f);
-        simParameters.cellFunctionWeaponInhomogeneousColorFactor = 1.0f - weaponColorPenalty;
-        createFloatItem("Weapon geometric penalty", simParameters.cellFunctionWeaponGeometryDeviationExponent, 0, 5.0f);
+    createGroup("Cell functions");
+    createFloatItem("Mutation rate", simParameters.tokenMutationRate, 0, 0.005f, false, "%.5f");
+    createFloatItem("Weapon energy cost", simParameters.cellFunctionWeaponEnergyCost, 0, 4.0f);
+    auto weaponColorPenalty = 1.0f - simParameters.cellFunctionWeaponInhomogeneousColorFactor;
+    createFloatItem("Weapon color penalty", weaponColorPenalty, 0, 1.0f);
+    simParameters.cellFunctionWeaponInhomogeneousColorFactor = 1.0f - weaponColorPenalty;
+    createFloatItem("Weapon geometric penalty", simParameters.cellFunctionWeaponGeometryDeviationExponent, 0, 5.0f);
 
-        ImGui::End();
+    ImGui::End();
 
-        if (simParameters != origSimParameters) {
-            _simController->setSimulationParameters_async(simParameters);
-        }
+    if (simParameters != origSimParameters) {
+        _simController->setSimulationParameters_async(simParameters);
     }
 }
 

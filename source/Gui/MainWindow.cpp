@@ -18,6 +18,7 @@
 #endif
 
 #include "ImFileDialog.h"
+#include "implot.h"
 
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/ChangeDescriptions.h"
@@ -27,6 +28,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "SimulationParametersWindow.h"
+#include "MonitorWindow.h"
 
 namespace
 {
@@ -56,6 +58,8 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
                          // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO();
 
     _styleRepository = boost::make_shared<_StyleRepository>();
@@ -76,11 +80,13 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         return nullptr;
     }
 
+
     _simulationView =
         boost::make_shared<_SimulationView>(simController, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
     simulationViewPtr = _simulationView.get();
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
+    _monitorWindow = boost::make_shared<_MonitorWindow>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -149,6 +155,8 @@ void _MainWindow::shutdown(GLFWwindow* window)
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
@@ -333,12 +341,13 @@ void _MainWindow::processDialogs()
         ifd::FileDialog::Instance().Close();
     }
 
-    _simulationParametersWindow->process();
 }
 
 void _MainWindow::processWindows()
 {
     _temporalControlWindow->process();
+    _simulationParametersWindow->process();
+    _monitorWindow->process();
 }
 
 void _MainWindow::onOpenSimulation()

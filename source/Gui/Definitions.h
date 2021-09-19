@@ -27,6 +27,9 @@ using TemporalControlWindow = boost::shared_ptr<_TemporalControlWindow>;
 class _SimulationParametersWindow;
 using SimulationParametersWindow = boost::shared_ptr<_SimulationParametersWindow>;
 
+class _MonitorWindow;
+using MonitorWindow = boost::shared_ptr<_MonitorWindow>;
+
 struct GLFWwindow;
 struct ImFont;
 
