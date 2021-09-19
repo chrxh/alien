@@ -16,10 +16,13 @@ private:
 
     SimulationController _simController;
 
-    int _offset = 0;
-    std::vector<float> _timestepsHistory;
+    bool _on = true;
+    bool _live = true;
+
+    float _timepoint = 0.0f;
+    float _history = 10.0f;
+    std::vector<float> _timepointsHistory;
     std::vector<float> _numCellsHistory;
     std::vector<float> _numParticlesHistory;
     std::vector<float> _numTokensHistory;
-    bool _on = true;
 };
