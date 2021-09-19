@@ -22,6 +22,7 @@ void _SimulationParametersWindow::process()
     auto simParameters = _simController->getSimulationParameters();
     auto origSimParameters = simParameters;
 
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::Begin("Simulation parameters", &_on, windowFlags);
 
     createGroup("Numerics");
@@ -84,10 +85,8 @@ void _SimulationParametersWindow::createFloatItem(
     bool logarithmic,
     std::string const& format)
 { 
-    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 30);
     ImGui::SetNextItemWidth(200.0f);
     ImGui::SliderFloat(name.c_str(), &value, min, max, format.c_str(), logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    ImGui::PopStyleVar();
 
     helpMarker("This is a more typical looking tree with selectable nodes.\n"
                "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
@@ -96,10 +95,8 @@ void _SimulationParametersWindow::createFloatItem(
 
 void _SimulationParametersWindow::createIntItem(std::string const& name, int& value, int min, int max)
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 30);
     ImGui::SetNextItemWidth(200.0f);
     ImGui::SliderInt(name.c_str(), &value, min, max);
-    ImGui::PopStyleVar();
 
     helpMarker("This is a more typical looking tree with selectable nodes.\n"
                "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");

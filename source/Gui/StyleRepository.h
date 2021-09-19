@@ -11,6 +11,7 @@ namespace Const
     int64_t const TextDecentColor = 0xff909090;
     int64_t const TextInfoColor = 0xff30b0b0;
     float const WindowAlpha = 0.8f;
+    float const SliderBarWidth = 40.0f;
 }
 
 class _StyleRepository

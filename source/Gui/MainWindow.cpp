@@ -132,11 +132,13 @@ void _MainWindow::mainLoop(GLFWwindow* window)
             ImGui::ShowDemoWindow(&show_demo_window);
         {}
 
+        ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
         processToolbar();
         processMenubar();
         processDialogs();
         processWindows();
         _simulationView->processControls();
+        ImGui::PopStyleVar();
 
         // render content
         ImGui::Render();
