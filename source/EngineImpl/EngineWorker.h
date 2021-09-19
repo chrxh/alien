@@ -13,6 +13,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuConstants.h"
+#include "EngineInterface/MonitorData.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -39,6 +40,7 @@ public:
         double zoom);
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    ENGINEIMPL_EXPORT MonitorData getMonitorData() const;
 
     ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
 
@@ -62,6 +64,11 @@ public:
     bool isSimulationRunning() const;
 
 private:
+    void updateMonitorDataIntern();
+
+    CudaSimulation _cudaSimulation;
+
+    //sync
     mutable std::mutex _mutexForLoop;
     std::condition_variable _conditionForWorkerLoop;
     std::condition_variable _conditionForAccess;
@@ -80,12 +87,20 @@ private:
     boost::optional<std::chrono::steady_clock::time_point> _timepoint;
     int _timestepsSinceTimepoint = 0;
   
-    CudaSimulation _cudaSimulation;
-    void* _cudaResource;     //for rendering
-
+    //settings
     IntVector2D _worldSize;
     SimulationParameters _parameters;
     GpuConstants _gpuConstants;
 
+    //monitor data
+    boost::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
+    std::atomic<uint64_t> _timeStep = 0;
+    std::atomic<int> _numCells = 0;
+    std::atomic<int> _numParticles = 0;
+    std::atomic<int> _numTokens = 0;
+    std::atomic<double> _totalInternalEnergy = 0.0;
+
+    //internals
+    void* _cudaResource;
     AccessDataTOCache _dataTOCache;
 };

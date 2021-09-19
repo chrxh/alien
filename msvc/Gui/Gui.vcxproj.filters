@@ -31,6 +31,9 @@
     <Filter Include="external\stb">
       <UniqueIdentifier>{05c0e9ed-5ea2-47b3-9b33-4097ee35f288}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external\ImPlot">
+      <UniqueIdentifier>{8877bd0e-48e9-420e-8e4f-aa7a4e9d4fd5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\external\imgui\imconfig.h">
@@ -99,6 +102,15 @@
     <ClInclude Include="..\..\source\Gui\SimulationParametersWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MonitorWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\ImPlot\implot.h">
+      <Filter>external\ImPlot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\ImPlot\implot_internal.h">
+      <Filter>external\ImPlot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -157,6 +169,18 @@
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\SimulationParametersWindow.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MonitorWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImPlot\implot.cpp">
+      <Filter>external\ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImPlot\implot_demo.cpp">
+      <Filter>external\ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImPlot\implot_items.cpp">
+      <Filter>external\ImPlot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

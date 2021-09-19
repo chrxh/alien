@@ -2,13 +2,17 @@
 
 #include <chrono>
 
+#include "EngineInterface/ChangeDescriptions.h"
+#include "EngineGpuKernels/AccessTOs.cuh"
+
 #include "AccessDataTOCache.h"
 #include "DataConverter.h"
-#include "EngineGpuKernels/AccessTOs.cuh"
-#include "EngineInterface/ChangeDescriptions.h"
 
 namespace
 {
+    std::chrono::milliseconds const FrameTimeout(30);
+    std::chrono::milliseconds const MonitorUpdate(30);
+
     class CudaAccess
     {
     public:
@@ -89,12 +93,7 @@ void EngineWorker::getVectorImage(
     IntVector2D const& imageSize,
     double zoom)
 {
-    CudaAccess access(
-        _conditionForAccess,
-        _conditionForWorkerLoop,
-        _requireAccess,
-        _isSimulationRunning,
-        std::chrono::milliseconds(30));
+    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, FrameTimeout);
 
     if (!access.isTimeout()) {
         _cudaSimulation->getVectorImage(
@@ -118,6 +117,17 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     return converter.getDataDescription();
 }
 
+MonitorData EngineWorker::getMonitorData() const
+{
+    MonitorData result;
+    result.timeStep = _timeStep.load();
+    result.numCells = _numCells.load();
+    result.numParticles = _numParticles.load();
+    result.numTokens = _numTokens.load();
+    result.totalInternalEnergy = _totalInternalEnergy.load();
+    return result;
+}
+
 void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
     CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
@@ -131,6 +141,7 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
     _dataTOCache->releaseDataTO(dataTO);
 
     _cudaSimulation->setSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
+    updateMonitorDataIntern();
 }
 
 void EngineWorker::calcSingleTimestep()
@@ -138,6 +149,7 @@ void EngineWorker::calcSingleTimestep()
     CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
     _cudaSimulation->calcCudaTimestep();
+    updateMonitorDataIntern();
 }
 
 void EngineWorker::beginShutdown()
@@ -243,6 +255,7 @@ void EngineWorker::runThreadLoop()
 
             startTimestepTime = std::chrono::steady_clock::now();
             _cudaSimulation->calcCudaTimestep();
+            updateMonitorDataIntern();
             ++_timestepsSinceTimepoint;
         }
 
@@ -269,4 +282,20 @@ void EngineWorker::pauseSimulation()
 bool EngineWorker::isSimulationRunning() const
 {
     return _isSimulationRunning.load();
+}
+
+void EngineWorker::updateMonitorDataIntern()
+{
+    auto now = std::chrono::steady_clock::now();
+    if (!_lastMonitorUpdate || now - *_lastMonitorUpdate > MonitorUpdate) {
+
+        auto data = _cudaSimulation->getMonitorData();
+        _timeStep.store(data.timeStep);
+        _numCells.store(data.numCells);
+        _numParticles.store(data.numParticles);
+        _numTokens.store(data.numTokens);
+        _totalInternalEnergy.store(data.totalInternalEnergy);
+
+        _lastMonitorUpdate = now;
+    }
 }
