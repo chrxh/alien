@@ -34,7 +34,7 @@ void main()
         } else {
             result = vec3(texture(texture1, mirroredCoord).rgb);
         }
-        result = sqrt(result * 600.0) - 0.2;
+        result = sqrt(result * 500.0) - 0.2;
         if (motionEffect) {
             result = result * motionBlurFactor + texture(texture2, texCoord).rgb * (1 - motionBlurFactor);
         }

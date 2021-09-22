@@ -213,8 +213,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\source\Gui\Resources\texture.fs" />
-    <None Include="..\..\source\Gui\Resources\texture.vs" />
+    <None Include="..\..\source\Gui\Resources\shader.fs" />
+    <None Include="..\..\source\Gui\Resources\shader.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
