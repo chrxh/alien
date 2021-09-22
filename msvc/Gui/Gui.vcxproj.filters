@@ -190,10 +190,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\source\Gui\Resources\texture.fs">
+    <None Include="..\..\source\Gui\Resources\shader.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="..\..\source\Gui\Resources\texture.vs">
+    <None Include="..\..\source\Gui\Resources\shader.vs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
