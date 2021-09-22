@@ -28,7 +28,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "SimulationParametersWindow.h"
-#include "MonitorWindow.h"
+#include "StatisticsWindow.h"
 
 namespace
 {
@@ -86,7 +86,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     simulationViewPtr = _simulationView.get();
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
-    _monitorWindow = boost::make_shared<_MonitorWindow>(_simController);
+    _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -252,6 +252,12 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Tools")) {
+            if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
+                _statisticsWindow->setOn(!_statisticsWindow->isOn());
+            }
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
 
@@ -307,10 +313,11 @@ void _MainWindow::processDialogs()
 
             _simController->closeSimulation();
 
+            reset();
+
             Serializer serializer = boost::make_shared<_Serializer>();
             SerializedSimulation serializedData;
             serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
-
             auto deserializedData = serializer->deserializeSimulation(serializedData);
 
             _simController->newSimulation(
@@ -349,7 +356,7 @@ void _MainWindow::processWindows()
 {
     _temporalControlWindow->process();
     _simulationParametersWindow->process();
-    _monitorWindow->process();
+    _statisticsWindow->process();
 }
 
 void _MainWindow::onOpenSimulation()
@@ -362,11 +369,18 @@ void _MainWindow::onSaveSimulation()
 {
     ifd::FileDialog::Instance().Save("SimulationSaveDialog", "Save simulation", "Simulation file (*.sim){.sim},.*");
 }
+
 void _MainWindow::onRunSimulation()
 {
     _simController->runSimulation();
 }
+
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
+}
+
+void _MainWindow::reset()
+{
+    _statisticsWindow->reset();
 }

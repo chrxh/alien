@@ -30,11 +30,13 @@ private:
     void onRunSimulation();
     void onPauseSimulation();
 
+    void reset();
+
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
-    MonitorWindow _monitorWindow;
+    StatisticsWindow _statisticsWindow;
 
     StyleRepository _styleRepository;
 

@@ -81,8 +81,8 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 
 void _TemporalControlWindow::processTpsRestriction()
 {
-    static int slowDown = 0;
-    ImGui::CheckboxFlags("Slow down", &slowDown, ImGuiSliderFlags_AlwaysClamp);
+    static bool slowDown = 0;
+    ImGui::Checkbox("Slow down", &slowDown);
     ImGui::SameLine();
     static int tpsRestriction = 30;
     ImGui::BeginDisabled(!slowDown);

@@ -161,8 +161,8 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
             }
         }
         cell->vel = cell->vel + force;
-        if (Math::length(cell->vel) > 2) {
-            cell->vel = Math::normalized(cell->vel) * 2;
+        if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVel) {
+            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVel;
         }
         cell->temp1 = {0, 0};
     }
