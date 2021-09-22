@@ -29,6 +29,7 @@
 #include "TemporalControlWindow.h"
 #include "SimulationParametersWindow.h"
 #include "StatisticsWindow.h"
+#include "ModeWindow.h"
 
 namespace
 {
@@ -80,13 +81,13 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
         return nullptr;
     }
 
-
     _simulationView =
         boost::make_shared<_SimulationView>(simController, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
     simulationViewPtr = _simulationView.get();
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
+    _modeWindow = boost::make_shared<_ModeWindow>();
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -357,6 +358,7 @@ void _MainWindow::processWindows()
     _temporalControlWindow->process();
     _simulationParametersWindow->process();
     _statisticsWindow->process();
+    _modeWindow->process();
 }
 
 void _MainWindow::onOpenSimulation()

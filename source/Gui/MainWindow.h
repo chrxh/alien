@@ -37,6 +37,7 @@ private:
     TemporalControlWindow _temporalControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
+    ModeWindow _modeWindow;
 
     StyleRepository _styleRepository;
 
