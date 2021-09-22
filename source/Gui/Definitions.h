@@ -30,6 +30,9 @@ using SimulationParametersWindow = boost::shared_ptr<_SimulationParametersWindow
 class _StatisticsWindow;
 using StatisticsWindow = boost::shared_ptr<_StatisticsWindow>;
 
+class _ModeWindow;
+using ModeWindow = boost::shared_ptr<_ModeWindow>;
+
 struct GLFWwindow;
 struct ImFont;
 

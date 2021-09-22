@@ -111,6 +111,9 @@
     <ClInclude Include="..\..\external\ImPlot\implot_internal.h">
       <Filter>external\ImPlot</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ModeWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -181,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="..\..\external\ImPlot\implot_items.cpp">
       <Filter>external\ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ModeWindow.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
