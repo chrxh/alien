@@ -24,12 +24,14 @@
 #include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 
+#include "ModeWindow.h"
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
+#include "SpatialControlWindow.h"
 #include "SimulationParametersWindow.h"
 #include "StatisticsWindow.h"
-#include "ModeWindow.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -82,10 +84,17 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     }
 
     _modeWindow = boost::make_shared<_ModeWindow>();
-    _simulationView = boost::make_shared<_SimulationView>(
-        simController, _modeWindow, IntVector2D{glfwData.mode->width, glfwData.mode->height}, 4.0f);
+
+    auto worldSize = simController->getWorldSize();
+    _viewport = boost::make_shared<_Viewport>();
+    _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
+    _viewport->setZoomFactor(4.0f);
+    _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
+
+    _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
+    _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
 
@@ -247,6 +256,15 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Window")) {
+            if (ImGui::MenuItem("Temporal control", "", _temporalControlWindow->isOn())) {
+                _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
+            }
+            if (ImGui::MenuItem("Spatial control", "", _spatialControlWindow->isOn())) {
+                _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
+            }
+            ImGui::EndMenu();
+        }
         if (ImGui::BeginMenu("Settings")) {
             if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
@@ -356,6 +374,7 @@ void _MainWindow::processWindows()
 {
     _modeWindow->process();
     _temporalControlWindow->process();
+    _spatialControlWindow->process();
     _simulationParametersWindow->process();
     _statisticsWindow->process();
 }
