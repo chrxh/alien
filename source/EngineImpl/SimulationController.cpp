@@ -100,6 +100,15 @@ void _SimulationController::setSimulationParameters_async(
     _worker.setSimulationParameters_async(parameters);
 }
 
+void _SimulationController::applyForce_async(
+    RealVector2D const& start,
+    RealVector2D const& end,
+    RealVector2D const& force,
+    float radius)
+{
+    _worker.applyForce_async(start, end, force, radius);
+}
+
 GeneralSettings _SimulationController::getGeneralSettings() const
 {
     return _generalSettings;

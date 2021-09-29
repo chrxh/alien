@@ -48,6 +48,10 @@ public:
 
     ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
+
+    ENGINEIMPL_EXPORT void
+    applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
+
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
     ENGINEIMPL_EXPORT SymbolMap getSymbolMap() const;
