@@ -5,6 +5,7 @@
 #include "EngineInterface/ChangeDescriptions.h"
 
 #include "MainWindow.h"
+#include "Resources.h"
 
 int main(int, char**)
 {
@@ -18,7 +19,7 @@ int main(int, char**)
 
         Serializer serializer = boost::make_shared<_Serializer>();
         SerializedSimulation serializedData;
-        serializer->loadSimulationDataFromFile("d:\\temp\\simulations\\evolution.sim", serializedData);
+        serializer->loadSimulationDataFromFile(Const::AutosaveFile, serializedData);
         auto deserializedData = serializer->deserializeSimulation(serializedData);
 
         simController->newSimulation(
@@ -29,7 +30,7 @@ int main(int, char**)
 
         simController->updateData(deserializedData.content);
 
-//        simController->runSimulation();
+        //        simController->runSimulation();
 
         auto glfwWindow = mainWindow->init(simController);
         if (!glfwWindow) {

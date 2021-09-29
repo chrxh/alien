@@ -7,9 +7,13 @@
 class _SimulationView
 {
 public:
-    _SimulationView(SimulationController const& simController, IntVector2D const& viewportSize, float zoomFactor);
+    _SimulationView(
+        SimulationController const& simController,
+        ModeWindow const& modeWindow,
+        IntVector2D const& viewportSize,
+        float zoomFactor);
     void resize(IntVector2D const& viewportSize);
-    void leftMouseButtonHold(IntVector2D const& viewPos);
+    void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
     void rightMouseButtonHold(IntVector2D const& viewPos);
     void middleMouseButtonPressed(IntVector2D const& viewPos);
     void middleMouseButtonHold(IntVector2D const& viewPos);
@@ -26,6 +30,7 @@ private:
     Viewport _viewport;
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
+    ModeWindow _modeWindow;
 
     //shader data
     unsigned int _vao, _vbo, _ebo;

@@ -203,6 +203,19 @@ void EngineWorker::setSimulationParameters_async(SimulationParameters const& par
     _conditionForWorkerLoop.notify_all();
 }
 
+void EngineWorker::applyForce_async(
+    RealVector2D const& start,
+    RealVector2D const& end,
+    RealVector2D const& force,
+    float radius)
+{
+    {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+        _applyForceJobs.emplace_back(ApplyForceJob{start, end, force, radius});
+    }
+    _conditionForWorkerLoop.notify_all();
+}
+
 void EngineWorker::runThreadLoop()
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
@@ -263,6 +276,17 @@ void EngineWorker::runThreadLoop()
         if (_updateSimulationParametersJob) {
             _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
             _updateSimulationParametersJob = boost::none;
+        }
+        if (!_applyForceJobs.empty()) {
+            for (auto const& applyForceJob : _applyForceJobs) {
+                _cudaSimulation->applyForce(
+                    {{applyForceJob.start.x, applyForceJob.start.y},
+                     {applyForceJob.end.x, applyForceJob.end.y},
+                     {applyForceJob.force.x, applyForceJob.force.y},
+                     applyForceJob.radius,
+                     false});
+            }
+            _applyForceJobs.clear();
         }
     }
 }

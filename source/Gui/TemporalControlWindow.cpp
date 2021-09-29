@@ -9,6 +9,7 @@
 
 #include "StyleRepository.h"
 #include "OpenGLHelper.h"
+#include "Resources.h"
 
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationController const& simController,
@@ -16,12 +17,12 @@ _TemporalControlWindow::_TemporalControlWindow(
     : _simController(simController)
     , _styleRepository(styleRepository)
 {
-    _runTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\run.png");
-    _pauseTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\pause.png");
-    _stepBackwardTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\step backward.png");
-    _stepForwardTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\step forward.png");
-    _snapshotTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\snapshot.png");
-    _restoreTexture = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\restore.png");
+    _runTexture = OpenGLHelper::loadTexture(Const::RunFilename);
+    _pauseTexture = OpenGLHelper::loadTexture(Const::PauseFilename);
+    _stepBackwardTexture = OpenGLHelper::loadTexture(Const::StepBackwardFilename);
+    _stepForwardTexture = OpenGLHelper::loadTexture(Const::StepForwardFilename);
+    _snapshotTexture = OpenGLHelper::loadTexture(Const::SnapshotFilename);
+    _restoreTexture = OpenGLHelper::loadTexture(Const::RestoreFilname);
 }
 
 void _TemporalControlWindow::process()

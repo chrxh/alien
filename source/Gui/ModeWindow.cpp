@@ -3,13 +3,14 @@
 #include "imgui.h"
 
 #include "OpenGLHelper.h"
+#include "Resources.h"
 
 _ModeWindow::_ModeWindow()
 {
-    _navigationOn = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\navigation on.png");
-    _navigationOff = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\navigation off.png");
-    _actionOn = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\action on.png");
-    _actionOff = OpenGLHelper::loadTexture("d:\\temp\\alien-imgui\\source\\Gui\\Resources\\action off.png");
+    _navigationOn = OpenGLHelper::loadTexture(Const::NavigationOnFilename);
+    _navigationOff = OpenGLHelper::loadTexture(Const::NavigationOffFilename);
+    _actionOn = OpenGLHelper::loadTexture(Const::ActionOnFilename);
+    _actionOff = OpenGLHelper::loadTexture(Const::ActionOffFilename);
 }
 
 void _ModeWindow::process()
@@ -47,4 +48,9 @@ void _ModeWindow::process()
 */
 
     ImGui::End();
+}
+
+auto _ModeWindow::getMode() const -> Mode
+{
+    return _mode;
 }

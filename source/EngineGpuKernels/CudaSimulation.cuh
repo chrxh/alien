@@ -50,6 +50,7 @@ public:
         float2 startPos;
         float2 endPos;
         float2 force;
+        float radius;
         bool onlyRotation;
     };
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);

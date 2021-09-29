@@ -8,9 +8,12 @@
 #include "Shader.h"
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
+#include "Resources.h"
+#include "ModeWindow.h"
 
 _SimulationView::_SimulationView(
     SimulationController const& simController,
+    ModeWindow const& modeWindow,
     IntVector2D const& viewportSize,
     float zoomFactor)
 {
@@ -19,11 +22,10 @@ _SimulationView::_SimulationView(
     _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
     _viewport->setZoomFactor(zoomFactor);
     _viewport->setViewSize(viewportSize);
+    _modeWindow = modeWindow;
 
     _simController = simController;
-    _shader = boost::make_shared<_Shader>(
-        "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\shader.vs",
-        "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\shader.fs");
+    _shader = boost::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
     _scrollbarX = boost::make_shared<_SimulationScrollbar>(
         "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController, _viewport);
@@ -110,14 +112,23 @@ void _SimulationView::resize(IntVector2D const& size)
     _viewport->setViewSize(size);
 }
 
-void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos)
+void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
-    _viewport->zoom(viewPos, 1.05f);
+    if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
+        _viewport->zoom(viewPos, 1.05f);
+    } else {
+        auto start = _viewport->mapViewToWorldPosition({toFloat(prevViewPos.x), toFloat(prevViewPos.y)});
+        auto end = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+        auto zoom = _viewport->getZoomFactor();
+        _simController->applyForce_async(start, end, (end - start) / 1000, 20.0f / zoom);
+    }
 }
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
-    _viewport->zoom(viewPos, 1.0f/1.05f);
+    if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
+        _viewport->zoom(viewPos, 1.0f / 1.05f);
+    }
 }
 
 void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
@@ -139,10 +150,12 @@ void _SimulationView::processEvents()
 {
     if (!ImGui::GetIO().WantCaptureMouse) {
         auto mousePos = ImGui::GetMousePos();
+        auto dragDelta = ImGui::GetMouseDragDelta();
         IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
+        IntVector2D prevMousePosInt{toInt(mousePos.x - dragDelta.x), toInt(mousePos.y - dragDelta.y)};
 
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            leftMouseButtonHold(mousePosInt);
+            leftMouseButtonHold(mousePosInt, prevMousePosInt);
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             rightMouseButtonHold(mousePosInt);
