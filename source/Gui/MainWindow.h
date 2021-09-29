@@ -35,9 +35,11 @@ private:
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
+    SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
     ModeWindow _modeWindow;
+    Viewport _viewport;
 
     StyleRepository _styleRepository;
 
