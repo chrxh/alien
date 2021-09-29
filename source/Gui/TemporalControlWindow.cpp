@@ -27,8 +27,12 @@ _TemporalControlWindow::_TemporalControlWindow(
 
 void _TemporalControlWindow::process()
 {
+    if (!_on) {
+        return;
+    }
+
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
-    ImGui::Begin("Temporal control");
+    ImGui::Begin("Temporal control", &_on);
 
     processRunButton();
     ImGui::SameLine();
@@ -58,12 +62,22 @@ void _TemporalControlWindow::process()
     ImGui::End();
 }
 
+bool _TemporalControlWindow::isOn() const
+{
+    return _on;
+}
+
+void _TemporalControlWindow::setOn(bool value)
+{
+    _on = value;
+}
+
 void _TemporalControlWindow::processTpsInfo()
 {
     ImGui::Text("Time steps per second");
 
     ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
     ImGui::Text(StringFormatter::format(_simController->getTps()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
@@ -74,7 +88,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
     ImGui::Text("Total time steps");
 
     ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor/*0xffa07050*/);
     ImGui::Text(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();

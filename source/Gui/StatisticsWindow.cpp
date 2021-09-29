@@ -65,7 +65,7 @@ void _StatisticsWindow::process()
     }
 
     ImGui::End();
-    ImPlot::ShowDemoWindow();
+//    ImPlot::ShowDemoWindow();
 }
 
 bool _StatisticsWindow::isOn() const

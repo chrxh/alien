@@ -8,9 +8,14 @@
 class _TemporalControlWindow
 {
 public:
-    _TemporalControlWindow(SimulationController const& simController, StyleRepository const& styleRepository);
+    _TemporalControlWindow(
+        SimulationController const& simController,
+        StyleRepository const& styleRepository);
 
     void process();
+
+    bool isOn() const;
+    void setOn(bool value);
 
 private:
     void processTpsInfo();
@@ -42,4 +47,5 @@ private:
     boost::optional<Snapshot> _snapshot;
 
     std::vector<Snapshot> _history;
+    bool _on = true;
 };

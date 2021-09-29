@@ -7,11 +7,7 @@
 class _SimulationView
 {
 public:
-    _SimulationView(
-        SimulationController const& simController,
-        ModeWindow const& modeWindow,
-        IntVector2D const& viewportSize,
-        float zoomFactor);
+    _SimulationView(SimulationController const& simController, ModeWindow const& modeWindow, Viewport const& viewport);
     void resize(IntVector2D const& viewportSize);
     void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
     void rightMouseButtonHold(IntVector2D const& viewPos);

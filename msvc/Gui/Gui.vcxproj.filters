@@ -117,6 +117,9 @@
     <ClInclude Include="..\..\source\Gui\Resources.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SpatialControlWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -189,6 +192,9 @@
       <Filter>external\ImPlot</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

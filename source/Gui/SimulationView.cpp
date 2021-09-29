@@ -14,14 +14,9 @@
 _SimulationView::_SimulationView(
     SimulationController const& simController,
     ModeWindow const& modeWindow,
-    IntVector2D const& viewportSize,
-    float zoomFactor)
+    Viewport const& viewport)
+    : _viewport(viewport)
 {
-    auto worldSize = simController->getWorldSize();
-    _viewport = boost::make_shared<_Viewport>();
-    _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
-    _viewport->setZoomFactor(zoomFactor);
-    _viewport->setViewSize(viewportSize);
     _modeWindow = modeWindow;
 
     _simController = simController;
@@ -69,7 +64,7 @@ _SimulationView::_SimulationView(
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    resize(viewportSize);
+    resize(_viewport->getViewSize());
 
     _shader->use();
     _shader->setInt("texture1", 0);
