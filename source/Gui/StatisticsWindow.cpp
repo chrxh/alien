@@ -65,7 +65,7 @@ void _StatisticsWindow::process()
     }
 
     ImGui::End();
-//    ImPlot::ShowDemoWindow();
+    ImPlot::ShowDemoWindow();
 }
 
 bool _StatisticsWindow::isOn() const
@@ -99,7 +99,8 @@ void _StatisticsWindow::processLiveStatistics()
         0,
         flags,
         flags);
-    float labelPosY = _liveStatistics.numCellsHistory.back() > _liveStatistics.numParticlesHistory.back() ? -10.0f : 10.0f;
+    float labelPosY =
+        _liveStatistics.numCellsHistory.back() > _liveStatistics.numParticlesHistory.back() ? -10.0f : 10.0f;
 
     ImPlot::PlotLine("Cells", _liveStatistics.timepointsHistory.data(), _liveStatistics.numCellsHistory.data(), toInt(_liveStatistics.numCellsHistory.size()));
     ImPlot::AnnotateClamped(

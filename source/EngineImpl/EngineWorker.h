@@ -57,6 +57,9 @@ public:
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
+    ENGINEIMPL_EXPORT void
+    applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
+
 
     void runThreadLoop();
     void runSimulation();
@@ -80,6 +83,14 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     boost::optional<SimulationParameters> _updateSimulationParametersJob;
+    struct ApplyForceJob
+    {
+        RealVector2D start;
+        RealVector2D end;
+        RealVector2D force;
+        float radius;
+    };
+    std::vector<ApplyForceJob> _applyForceJobs;
 
     //time step measurements
     std::atomic<int> _tpsRestriction = 0;   //0 = no restriction

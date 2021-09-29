@@ -312,7 +312,8 @@ void _CudaSimulation::deselectData()
 
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
-    CudaApplyForceData cudaApplyData{applyData.startPos, applyData.endPos, applyData.force, applyData.onlyRotation};
+    CudaApplyForceData cudaApplyData{
+        applyData.startPos, applyData.endPos, applyData.force, applyData.radius, applyData.onlyRotation};
     GPU_FUNCTION(cudaApplyForce, cudaApplyData, *_cudaSimulationData);
 }
 

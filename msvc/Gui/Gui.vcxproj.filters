@@ -114,6 +114,9 @@
     <ClInclude Include="..\..\source\Gui\ModeWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Resources.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
