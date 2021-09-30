@@ -110,7 +110,7 @@ void _SimulationView::resize(IntVector2D const& size)
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
-        _viewport->zoom(viewPos, 1.05f);
+        _viewport->zoom(viewPos, _viewport->getZoomSensitivity());
     } else {
         auto start = _viewport->mapViewToWorldPosition({toFloat(prevViewPos.x), toFloat(prevViewPos.y)});
         auto end = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
@@ -122,7 +122,7 @@ void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
-        _viewport->zoom(viewPos, 1.0f / 1.05f);
+        _viewport->zoom(viewPos, 1.0f / _viewport->getZoomSensitivity());
     }
 }
 

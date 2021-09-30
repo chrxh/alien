@@ -19,9 +19,16 @@ public:
     void setOn(bool value);
 
 private:
+    void processZoomInButton();
+    void processZoomOutButton();
+    void processZoomSensitivitySlider();
+
     SimulationController _simController;
     Viewport _viewport;
     StyleRepository _styleRepository;
+
+    TextureData _zoomInTexture;
+    TextureData _zoomOutTexture;
 
     bool _on = true;
 };
