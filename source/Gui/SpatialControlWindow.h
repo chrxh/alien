@@ -21,7 +21,12 @@ public:
 private:
     void processZoomInButton();
     void processZoomOutButton();
+    void processResizeButton();
     void processZoomSensitivitySlider();
+
+    void processResizeDialog();
+
+    void onResizing();
 
     SimulationController _simController;
     Viewport _viewport;
@@ -29,6 +34,11 @@ private:
 
     TextureData _zoomInTexture;
     TextureData _zoomOutTexture;
+    TextureData _resizeTexture;
 
     bool _on = true;
+    bool _showResizeDialog = false;
+    bool _scaleContent = false;
+    int _width = 0;
+    int _height = 0;
 };
