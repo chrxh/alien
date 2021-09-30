@@ -4,6 +4,7 @@
 
 #include "Base/StringFormatter.h"
 #include "EngineInterface/ChangeDescriptions.h"
+#include "EngineInterface/DescriptionHelper.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -129,18 +130,20 @@ void _SpatialControlWindow::processZoomSensitivitySlider()
     ImGui::Text("Zoom sensitivity");
 
     float sensitivity = _viewport->getZoomSensitivity();
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     if (ImGui::SliderFloat("", &sensitivity, 1.0f, 1.15f, "")) {
         _viewport->setZoomSensitivity(sensitivity);
     }
+    ImGui::PopItemWidth();
 }
 
 void _SpatialControlWindow::processResizeDialog()
 {
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
     if (_showResizeDialog) {
         ImGui::OpenPopup("Resize world");
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("Resize world", NULL, 0)) {
             if (ImGui::BeginTable(
                     "##", 2, ImGuiTableFlags_SizingStretchProp)) {
@@ -151,7 +154,9 @@ void _SpatialControlWindow::processResizeDialog()
                 ImGui::Text("Width");
 
                 ImGui::TableSetColumnIndex(1);
+                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
                 ImGui::InputInt("##width", &_width);
+                ImGui::PopItemWidth();
 
                 //height
                 ImGui::TableNextRow();
@@ -159,7 +164,9 @@ void _SpatialControlWindow::processResizeDialog()
                 ImGui::Text("Height");
 
                 ImGui::TableSetColumnIndex(1);
+                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
                 ImGui::InputInt("##height", &_height);
+                ImGui::PopItemWidth();
 
                 ImGui::EndTable();
             }
@@ -199,6 +206,7 @@ void _SpatialControlWindow::onResizing()
 
     _simController->closeSimulation();
 
+    auto origWorldSize = generalSettings.worldSize;
     generalSettings.worldSize = {_width, _height};
     _simController->newSimulation(
         timestep,
@@ -206,7 +214,8 @@ void _SpatialControlWindow::onResizing()
         simulationParameters,
         symbolMap);
 
-    if (!_scaleContent) {
-        _simController->updateData(content);
+    if (_scaleContent) {
+        DescriptionHelper::duplicate(content, origWorldSize, generalSettings.worldSize);
     }
+    _simController->updateData(content);
 }

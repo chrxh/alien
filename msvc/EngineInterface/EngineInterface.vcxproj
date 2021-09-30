@@ -148,6 +148,7 @@
     <ClInclude Include="..\..\source\EngineInterface\ChangeDescriptions.h" />
     <ClInclude Include="..\..\source\EngineInterface\Colors.h" />
     <ClInclude Include="..\..\source\EngineInterface\Definitions.h" />
+    <ClInclude Include="..\..\source\EngineInterface\DescriptionHelper.h" />
     <ClInclude Include="..\..\source\EngineInterface\Descriptions.h" />
     <ClInclude Include="..\..\source\EngineInterface\DllExport.h" />
     <ClInclude Include="..\..\source\EngineInterface\ElementaryTypes.h" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\EngineInterface\ChangeDescriptions.cpp" />
+    <ClCompile Include="..\..\source\EngineInterface\DescriptionHelper.cpp" />
     <ClCompile Include="..\..\source\EngineInterface\Descriptions.cpp" />
     <ClCompile Include="..\..\source\EngineInterface\Serializer.cpp" />
     <ClCompile Include="..\..\source\EngineInterface\Parser.cpp" />
