@@ -16,7 +16,7 @@ _ModeWindow::_ModeWindow()
 void _ModeWindow::process()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x /*+ viewport->Size.x - 200*/ + 00, viewport->Pos.y /*+ viewport->Size.y - 100*/+ 20));
+    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x /*+ viewport->Size.x - 200*/ + 00, viewport->Pos.y + viewport->Size.y - 100));
     ImGui::SetNextWindowSize(ImVec2(130, 70));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
