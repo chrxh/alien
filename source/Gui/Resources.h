@@ -41,4 +41,7 @@ namespace Const
     auto const StepForwardFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\step forward.png";
     auto const SnapshotFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\snapshot.png";
     auto const RestoreFilname = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\restore.png";
+
+    auto const ZoomInFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\zoom in.png";
+    auto const ZoomOutFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\zoom out.png";
 }

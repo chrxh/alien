@@ -17,6 +17,8 @@ public:
     void setViewSize(IntVector2D const& viewSize);
 
     void zoom(IntVector2D const& viewPos, float factor);
+    float getZoomSensitivity() const;
+    void setZoomSensitivity(float value);
 
     void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
@@ -24,6 +26,7 @@ public:
 
 private:
     float _zoomFactor = 1.0f;
+    float _zoomSensitivity = 1.05f;
     RealVector2D _worldCenter;
     IntVector2D _viewSize;
 };

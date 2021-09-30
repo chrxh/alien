@@ -37,6 +37,16 @@ void _Viewport::zoom(IntVector2D const& viewPos, float factor)
     centerTo(worldPos, viewPos);
 }
 
+float _Viewport::getZoomSensitivity() const
+{
+    return _zoomSensitivity;
+}
+
+void _Viewport::setZoomSensitivity(float value)
+{
+    _zoomSensitivity = value;
+}
+
 void _Viewport::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
 {
     RealVector2D deltaViewPos{

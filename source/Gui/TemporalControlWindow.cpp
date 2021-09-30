@@ -101,13 +101,14 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::SameLine();
     static int tpsRestriction = 30;
     ImGui::BeginDisabled(!slowDown);
-    ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS");
-    ImGui::EndDisabled();
-    if (slowDown) {
-        _simController->setTpsRestriction(tpsRestriction);
-    } else {
-        _simController->setTpsRestriction(boost::none);
+    if (ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS")) {
+        if (slowDown) {
+            _simController->setTpsRestriction(tpsRestriction);
+        } else {
+            _simController->setTpsRestriction(boost::none);
+        }
     }
+    ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processRunButton()
