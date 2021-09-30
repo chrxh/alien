@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "Base/StringFormatter.h"
+#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -19,6 +20,7 @@ _SpatialControlWindow::_SpatialControlWindow(
 {
     _zoomInTexture = OpenGLHelper::loadTexture(Const::ZoomInFilename);
     _zoomOutTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
+    _resizeTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
 }
 
 void _SpatialControlWindow::process()
@@ -33,6 +35,8 @@ void _SpatialControlWindow::process()
     processZoomInButton();
     ImGui::SameLine();
     processZoomOutButton();
+    ImGui::SameLine();
+    processResizeButton();
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -41,7 +45,7 @@ void _SpatialControlWindow::process()
     ImGui::Spacing();
 
     if (ImGui::BeginTable(
-            "##table1", 3, ImGuiTableFlags_SizingFixedFit /*ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/)) {
+            "##table1", 2, ImGuiTableFlags_SizingStretchProp /*ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/)) {
 
         //world size
         ImGui::TableNextRow();
@@ -82,6 +86,8 @@ void _SpatialControlWindow::process()
     processZoomSensitivitySlider();
 
     ImGui::End();
+
+    processResizeDialog();
 }
 
 bool _SpatialControlWindow::isOn() const
@@ -108,6 +114,16 @@ void _SpatialControlWindow::processZoomOutButton()
     }
 }
 
+void _SpatialControlWindow::processResizeButton()
+{
+    if (ImGui::ImageButton((void*)(intptr_t)_resizeTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        _showResizeDialog = true;
+        auto worldSize = _simController->getWorldSize();
+        _width = worldSize.x;
+        _height = worldSize.y;
+    }
+}
+
 void _SpatialControlWindow::processZoomSensitivitySlider()
 {
     ImGui::Text("Zoom sensitivity");
@@ -115,5 +131,82 @@ void _SpatialControlWindow::processZoomSensitivitySlider()
     float sensitivity = _viewport->getZoomSensitivity();
     if (ImGui::SliderFloat("", &sensitivity, 1.0f, 1.15f, "")) {
         _viewport->setZoomSensitivity(sensitivity);
+    }
+}
+
+void _SpatialControlWindow::processResizeDialog()
+{
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (_showResizeDialog) {
+        ImGui::OpenPopup("Resize world");
+        if (ImGui::BeginPopupModal("Resize world", NULL, 0)) {
+            if (ImGui::BeginTable(
+                    "##", 2, ImGuiTableFlags_SizingStretchProp)) {
+
+                //width
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Width");
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::InputInt("##width", &_width);
+
+                //height
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("Height");
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::InputInt("##height", &_height);
+
+                ImGui::EndTable();
+            }
+            ImGui::Checkbox("Scale content", &_scaleContent);
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Spacing();
+
+            if (ImGui::Button("OK")) {
+                ImGui::CloseCurrentPopup();
+                _showResizeDialog = false;
+                onResizing();
+            }
+            ImGui::SetItemDefaultFocus();
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel")) {
+                ImGui::CloseCurrentPopup();
+                _showResizeDialog = false;
+            }
+
+            ImGui::EndPopup();
+        }
+    }
+}
+
+void _SpatialControlWindow::onResizing()
+{
+    auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+    auto generalSettings = _simController->getGeneralSettings();
+    auto simulationParameters = _simController->getSimulationParameters();
+    auto symbolMap = _simController->getSymbolMap();
+    auto content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+
+    _simController->closeSimulation();
+
+    generalSettings.worldSize = {_width, _height};
+    _simController->newSimulation(
+        timestep,
+        generalSettings,
+        simulationParameters,
+        symbolMap);
+
+    if (!_scaleContent) {
+        _simController->updateData(content);
     }
 }
