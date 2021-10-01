@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Base/Tracker.h"
+
 #include "Descriptions.h"
 
-struct ENGINEINTERFACE_EXPORT ConnectionChangeDescription
+struct ConnectionChangeDescription
 {
     uint64_t cellId;
     float distance;
@@ -23,12 +25,12 @@ struct ENGINEINTERFACE_EXPORT ConnectionChangeDescription
     bool operator!=(ConnectionChangeDescription const& other) const { return !(*this == other); }
 };
 
-struct ENGINEINTERFACE_EXPORT CellChangeDescription
+struct CellChangeDescription
 {
 	uint64_t id = 0;
 
-	ValueTracker<QVector2D> pos;
-    ValueTracker<QVector2D> vel;
+	ValueTracker<RealVector2D> pos;
+    ValueTracker<RealVector2D> vel;
     ValueTracker<double> energy;
 	ValueTracker<int> maxConnections;
     ValueTracker<list<ConnectionChangeDescription>> connectingCells;
@@ -39,13 +41,13 @@ struct ENGINEINTERFACE_EXPORT CellChangeDescription
 	ValueTracker<vector<TokenDescription>> tokens;
     ValueTracker<int> tokenUsages;
 
-	CellChangeDescription() = default;
-	CellChangeDescription(CellDescription const& desc);
-	CellChangeDescription(CellDescription const& before, CellDescription const& after);
+	ENGINEINTERFACE_EXPORT CellChangeDescription() = default;
+    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription const& desc);
+    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription const& before, CellDescription const& after);
 
-	bool isEmpty() const;
+	ENGINEINTERFACE_EXPORT bool isEmpty() const;
 	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	CellChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
+	CellChangeDescription& setPos(RealVector2D const& value) { pos = value; return *this; }
 	CellChangeDescription& setEnergy(double value) { energy = value; return *this; }
 	CellChangeDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
     CellChangeDescription& setConnectingCells(list<ConnectionChangeDescription> const& value)
@@ -60,34 +62,36 @@ struct ENGINEINTERFACE_EXPORT CellChangeDescription
     CellChangeDescription& setTokenUsages(int value) { tokenUsages = value; return *this; }
 };
 
-struct ENGINEINTERFACE_EXPORT ParticleChangeDescription
+struct ParticleChangeDescription
 {
 	uint64_t id = 0;
 
-	ValueTracker<QVector2D> pos;
-	ValueTracker<QVector2D> vel;
+	ValueTracker<RealVector2D> pos;
+	ValueTracker<RealVector2D> vel;
 	ValueTracker<double> energy;
 	ValueTracker<ParticleMetadata> metadata;
 
-	ParticleChangeDescription() = default;
-	ParticleChangeDescription(ParticleDescription const& desc);
-	ParticleChangeDescription(ParticleDescription const& before, ParticleDescription const& after);
+	ENGINEINTERFACE_EXPORT ParticleChangeDescription() = default;
+    ENGINEINTERFACE_EXPORT ParticleChangeDescription(ParticleDescription const& desc);
+    ENGINEINTERFACE_EXPORT ParticleChangeDescription(
+        ParticleDescription const& before,
+        ParticleDescription const& after);
 
-	bool isEmpty() const;
+	ENGINEINTERFACE_EXPORT bool isEmpty() const;
 	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	ParticleChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
-	ParticleChangeDescription& setVel(QVector2D const& value) { vel = value; return *this; }
+	ParticleChangeDescription& setPos(RealVector2D const& value) { pos = value; return *this; }
+	ParticleChangeDescription& setVel(RealVector2D const& value) { vel = value; return *this; }
 	ParticleChangeDescription& setEnergy(double value) { energy = value; return *this; }
 };
 
-struct ENGINEINTERFACE_EXPORT DataChangeDescription
+struct DataChangeDescription
 {
     vector<StateTracker<CellChangeDescription>> cells;
     vector<StateTracker<ParticleChangeDescription>> particles;
 
-	DataChangeDescription() = default;
-	DataChangeDescription(DataDescription const& desc);
-	DataChangeDescription(DataDescription const& dataBefore, DataDescription const& dataAfter);
+	ENGINEINTERFACE_EXPORT DataChangeDescription() = default;
+    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription const& desc);
+    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription const& dataBefore, DataDescription const& dataAfter);
 
 	DataChangeDescription& addNewCell(CellChangeDescription const& value)
 	{

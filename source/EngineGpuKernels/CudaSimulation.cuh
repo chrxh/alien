@@ -1,69 +1,76 @@
 #pragma once
 
+#include <cstdint>
+#include <atomic>
+
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
 #endif
 #include <GL/gl.h>
 
-#include "CudaConstants.h"
+#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/GpuConstants.h"
+
 #include "Definitions.cuh"
 #include "DllExport.h"
-#include "EngineInterface/ExecutionParameters.h"
-#include "EngineInterface/MonitorData.h"
 
-class ENGINEGPUKERNELS_EXPORT CudaSimulation
+class _CudaSimulation
 {
 public:
-    CudaSimulation(
+    ENGINEGPUKERNELS_EXPORT static void initCuda();
+
+    ENGINEGPUKERNELS_EXPORT _CudaSimulation(
         int2 const& worldSize,
         int timestep,
         SimulationParameters const& parameters,
-        CudaConstants const& cudaConstants);
-    ~CudaSimulation();
+        GpuConstants const& cudaConstants);
+    ENGINEGPUKERNELS_EXPORT ~_CudaSimulation();
 
-    void* registerImageResource(GLuint image);
+    ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
 
-    void calcCudaTimestep();
+    ENGINEGPUKERNELS_EXPORT void calcCudaTimestep();
 
-    void getVectorImage(
+    ENGINEGPUKERNELS_EXPORT void getVectorImage(
         float2 const& rectUpperLeft,
         float2 const& rectLowerRight,
-        void* const& resource,
+        void* cudaResource,
         int2 const& imageSize,
         double zoom);
-    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    void setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    ENGINEGPUKERNELS_EXPORT void
+    getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    ENGINEGPUKERNELS_EXPORT void
+    setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
-    void selectData(int2 const& pos);
-    void deselectData();
+    ENGINEGPUKERNELS_EXPORT void selectData(int2 const& pos);
+    ENGINEGPUKERNELS_EXPORT void deselectData();
 
     struct ApplyForceData
     {
         float2 startPos;
         float2 endPos;
         float2 force;
+        float radius;
         bool onlyRotation;
     };
-    void applyForce(ApplyForceData const& applyData);
-    void moveSelection(float2 const& displacement);
+    ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
+    ENGINEGPUKERNELS_EXPORT void moveSelection(float2 const& displacement);
 
-    CudaConstants getCudaConstants() const;
-    MonitorData getMonitorData();
-    int getTimestep() const;
-    void setTimestep(int timestep);
+    ENGINEGPUKERNELS_EXPORT GpuConstants getGpuConstants() const;
+    ENGINEGPUKERNELS_EXPORT MonitorData getMonitorData();
+    ENGINEGPUKERNELS_EXPORT uint64_t getCurrentTimestep() const;
+    ENGINEGPUKERNELS_EXPORT void setCurrentTimestep(uint64_t timestep);
 
-    void setSimulationParameters(SimulationParameters const& parameters);
-    void setExecutionParameters(ExecutionParameters const& parameters);
+    ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
 
-    void clear();
-
-private:
-    void setCudaConstants(CudaConstants const& cudaConstants);
-    void DEBUG_printNumEntries();
+    ENGINEGPUKERNELS_EXPORT void clear();
 
 private:
-    CudaConstants _cudaConstants;
+    void setGpuConstants(GpuConstants const& cudaConstants);
+
+private:
+    std::atomic<uint64_t> _currentTimestep;
+    GpuConstants _gpuConstants;
     SimulationData* _cudaSimulationData;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;

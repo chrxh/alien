@@ -1,19 +1,31 @@
 #pragma once
+
+#include "Base/Definitions.h"
+
 #include "Definitions.h"
 #include "Metadata.h"
+#include "DllExport.h"
 
 struct CellFeatureDescription
 {
-	QByteArray volatileData;
-	QByteArray constData;
+	std::string volatileData;
+    std::string constData;
 
     Enums::CellFunction::Type getType() const
     {
         return static_cast<Enums::CellFunction::Type>(static_cast<unsigned char>(_type) % Enums::CellFunction::_COUNTER);
     }
 	CellFeatureDescription& setType(Enums::CellFunction::Type value) { _type = value; return *this; }
-	CellFeatureDescription& setVolatileData(QByteArray const &value) { volatileData = value; return *this; }
-	CellFeatureDescription& setConstData(QByteArray const &value) { constData = value; return *this; }
+    CellFeatureDescription& setVolatileData(std::string const& value)
+    {
+        volatileData = value;
+        return *this;
+    }
+    CellFeatureDescription& setConstData(std::string const& value)
+    {
+        constData = value;
+        return *this;
+    }
 	bool operator==(CellFeatureDescription const& other) const {
 		return _type == other._type
 			&& volatileData == other.volatileData
@@ -26,18 +38,26 @@ private:
 };
 
 
-struct ENGINEINTERFACE_EXPORT TokenDescription
+struct TokenDescription
 {
-	boost::optional<double> energy;
-	boost::optional<QByteArray> data;
+    boost::optional<double> energy;
+    boost::optional<std::string> data;
 
-	TokenDescription& setEnergy(double value) { energy = value; return *this; }
-	TokenDescription& setData(QByteArray const &value) { data = value; return *this; }
+	TokenDescription& setEnergy(double value)
+    {
+        energy = value;
+        return *this;
+    }
+    TokenDescription& setData(std::string const& value)
+    {
+        data = value;
+        return *this;
+    }
 	bool operator==(TokenDescription const& other) const;
 	bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
-struct ENGINEINTERFACE_EXPORT ConnectionDescription
+struct ConnectionDescription
 {
     uint64_t cellId;
     float distance = 0;
@@ -45,12 +65,12 @@ struct ENGINEINTERFACE_EXPORT ConnectionDescription
 };
 
 
-struct ENGINEINTERFACE_EXPORT CellDescription
+struct CellDescription
 {
 	uint64_t id = 0;
 
-	boost::optional<QVector2D> pos;
-    boost::optional<QVector2D> vel;
+	boost::optional<RealVector2D> pos;
+    boost::optional<RealVector2D> vel;
     boost::optional<double> energy;
 	boost::optional<int> maxConnections;
     boost::optional<list<ConnectionDescription>> connections;
@@ -61,40 +81,88 @@ struct ENGINEINTERFACE_EXPORT CellDescription
 	boost::optional<vector<TokenDescription>> tokens;
     boost::optional<int> tokenUsages;
 
-	CellDescription() = default;
-	CellDescription(CellChangeDescription const& change);
-	CellDescription& setId(uint64_t value) { id = value; return *this; }
-	CellDescription& setPos(QVector2D const& value) { pos = value; return *this; }
-	CellDescription& setVel(QVector2D const& value) { vel = value; return *this; }
-	CellDescription& setEnergy(double value) { energy = value; return *this; }
-	CellDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
+	ENGINEINTERFACE_EXPORT CellDescription() = default;
+    ENGINEINTERFACE_EXPORT CellDescription(CellChangeDescription const& change);
+    CellDescription& setId(uint64_t value)
+    {
+        id = value;
+        return *this;
+    }
+    CellDescription& setPos(RealVector2D const& value)
+    {
+        pos = value;
+        return *this;
+    }
+    CellDescription& setVel(RealVector2D const& value)
+    {
+        vel = value;
+        return *this;
+    }
+    CellDescription& setEnergy(double value)
+    {
+        energy = value;
+        return *this;
+    }
+    CellDescription& setMaxConnections(int value)
+    {
+        maxConnections = value;
+        return *this;
+    }
     CellDescription& setConnectingCells(list<ConnectionDescription> const& value)
     {
         connections = value;
         return *this;
     }
-	CellDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
-	CellDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
-	CellDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
-	CellDescription& setCellFeature(CellFeatureDescription const& value) { cellFeature = value; return *this; }
-	CellDescription& setTokens(vector<TokenDescription> const& value) { tokens = value; return *this; }
-	CellDescription& addToken(TokenDescription const& value);
-	CellDescription& addToken(uint index, TokenDescription const& value);
-	CellDescription& delToken(uint index);
-    CellDescription& setTokenUsages(int value) { tokenUsages = value; return *this; }
-    bool isConnectedTo(uint64_t id) const;
+    CellDescription& setFlagTokenBlocked(bool value)
+    {
+        tokenBlocked = value;
+        return *this;
+    }
+    CellDescription& setTokenBranchNumber(int value)
+    {
+        tokenBranchNumber = value;
+        return *this;
+    }
+    CellDescription& setMetadata(CellMetadata const& value)
+    {
+        metadata = value;
+        return *this;
+    }
+    CellDescription& setCellFeature(CellFeatureDescription const& value)
+    {
+        cellFeature = value;
+        return *this;
+    }
+    CellDescription& setTokens(vector<TokenDescription> const& value)
+    {
+        tokens = value;
+        return *this;
+    }
+    ENGINEINTERFACE_EXPORT CellDescription& addToken(TokenDescription const& value);
+    ENGINEINTERFACE_EXPORT CellDescription& addToken(int index, TokenDescription const& value);
+    ENGINEINTERFACE_EXPORT CellDescription& delToken(int index);
+    CellDescription& setTokenUsages(int value)
+    {
+        tokenUsages = value;
+        return *this;
+    }
+    ENGINEINTERFACE_EXPORT bool isConnectedTo(uint64_t id) const;
 };
 
-struct ENGINEINTERFACE_EXPORT ClusterDescription
+struct ClusterDescription
 {
 	uint64_t id = 0;
 
 	boost::optional<vector<CellDescription>> cells;
 
-	ClusterDescription() = default;
+	ENGINEINTERFACE_EXPORT ClusterDescription() = default;
     
-    ClusterDescription& setId(uint64_t value) { id = value; return *this; }
-	ClusterDescription& addCells(list<CellDescription> const& value)
+    ClusterDescription& setId(uint64_t value)
+    {
+        id = value;
+        return *this;
+    }
+    ClusterDescription& addCells(list<CellDescription> const& value)
 	{
 		if (cells) {
 			cells->insert(cells->end(), value.begin(), value.end());
@@ -104,46 +172,66 @@ struct ENGINEINTERFACE_EXPORT ClusterDescription
 		}
 		return *this;
 	}
-	ClusterDescription& addCell(CellDescription const& value)
+    ClusterDescription& addCell(CellDescription const& value)
 	{
 		addCells({ value });
 		return *this;
 	}
 
-    ClusterDescription&
+    ENGINEINTERFACE_EXPORT ClusterDescription&
     addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
 
-	QVector2D getClusterPosFromCells() const;
+	ENGINEINTERFACE_EXPORT RealVector2D getClusterPosFromCells() const;
 
 private:
     CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
 };
 
-struct ENGINEINTERFACE_EXPORT ParticleDescription
+struct ParticleDescription
 {
 	uint64_t id = 0;
 
-	boost::optional<QVector2D> pos;
-	boost::optional<QVector2D> vel;
+	boost::optional<RealVector2D> pos;
+	boost::optional<RealVector2D> vel;
 	boost::optional<double> energy;
 	boost::optional<ParticleMetadata> metadata;
 
-	ParticleDescription() = default;
-	ParticleDescription(ParticleChangeDescription const& change);
-	ParticleDescription& setId(uint64_t value) { id = value; return *this; }
-	ParticleDescription& setPos(QVector2D const& value) { pos = value; return *this; }
-	ParticleDescription& setVel(QVector2D const& value) { vel = value; return *this; }
-	ParticleDescription& setEnergy(double value) { energy = value; return *this; }
-    ParticleDescription& setMetadata(ParticleMetadata const& value) { metadata = value; return *this; }
+	ENGINEINTERFACE_EXPORT ParticleDescription() = default;
+    ENGINEINTERFACE_EXPORT ParticleDescription(ParticleChangeDescription const& change);
+    ParticleDescription& setId(uint64_t value)
+    {
+        id = value;
+        return *this;
+    }
+    ParticleDescription& setPos(RealVector2D const& value)
+    {
+        pos = value;
+        return *this;
+    }
+    ParticleDescription& setVel(RealVector2D const& value)
+    {
+        vel = value;
+        return *this;
+    }
+    ParticleDescription& setEnergy(double value)
+    {
+        energy = value;
+        return *this;
+    }
+    ParticleDescription& setMetadata(ParticleMetadata const& value)
+    {
+        metadata = value;
+        return *this;
+    }
 };
 
-struct ENGINEINTERFACE_EXPORT DataDescription
+struct DataDescription
 {
 	boost::optional<vector<ClusterDescription>> clusters;
 	boost::optional<vector<ParticleDescription>> particles;
 
-    DataDescription() = default;
-	DataDescription& addClusters(list<ClusterDescription> const& value)
+    ENGINEINTERFACE_EXPORT DataDescription() = default;
+    DataDescription& addClusters(list<ClusterDescription> const& value)
 	{
 		if (clusters) {
 			clusters->insert(clusters->end(), value.begin(), value.end());
@@ -153,7 +241,7 @@ struct ENGINEINTERFACE_EXPORT DataDescription
 		}
 		return *this;
 	}
-	DataDescription& addCluster(ClusterDescription const& value)
+    DataDescription& addCluster(ClusterDescription const& value)
 	{
 		addClusters({ value });
 		return *this;
@@ -188,8 +276,8 @@ struct ENGINEINTERFACE_EXPORT DataDescription
 		}
 		return true;
 	}
-	QVector2D calcCenter() const;
-	void shift(QVector2D const& delta);
+	RealVector2D calcCenter() const;
+	void shift(RealVector2D const& delta);
 };
 
 struct ResolveDescription
@@ -248,11 +336,11 @@ struct DescriptionNavigator
 };
 
 //DEPRECATED
-struct ENGINEINTERFACE_EXPORT DEPRECATED_CellDescription
+struct DEPRECATED_CellDescription
 {
     uint64_t id = 0;
 
-    boost::optional<QVector2D> pos;
+    boost::optional<RealVector2D> pos;
     boost::optional<double> energy;
     boost::optional<int> maxConnections;
     boost::optional<list<uint64_t>> connections;
@@ -262,24 +350,4 @@ struct ENGINEINTERFACE_EXPORT DEPRECATED_CellDescription
     boost::optional<CellFeatureDescription> cellFeature;
     boost::optional<vector<TokenDescription>> tokens;
     boost::optional<int> tokenUsages;
-};
-
-struct ENGINEINTERFACE_EXPORT DEPRECATED_ClusterDescription
-{
-    uint64_t id = 0;
-
-    boost::optional<QVector2D> pos;
-    boost::optional<QVector2D> vel;
-    boost::optional<double> angle;
-    boost::optional<double> angularVel;
-    boost::optional<ClusterMetadata> metadata;
-    boost::optional<vector<DEPRECATED_CellDescription>> cells;
-};
-
-struct ENGINEINTERFACE_EXPORT DEPRECATED_DataDescription
-{
-    boost::optional<vector<DEPRECATED_ClusterDescription>> clusters;
-    boost::optional<vector<ParticleDescription>> particles;
-
-    DataDescription getConverted() const;
 };

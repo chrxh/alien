@@ -24,6 +24,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token* token, Simulati
     auto& tokenMem = token->memory;
     auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::INPUT]) % Enums::PropIn::_COUNTER;
 
+/*
     if (Enums::PropIn::DO_NOTHING == command) {
         tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
         return;
@@ -62,6 +63,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token* token, Simulati
     factory.createParticle(energyCost, particlePos, particleVel, {cell->metadata.color});
 
     token->energy -= energyCost;
+*/
     tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
 }
 

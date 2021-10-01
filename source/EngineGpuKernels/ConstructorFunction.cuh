@@ -81,7 +81,7 @@ private:
         float energy,
         bool duplicateMemory);
 
-    __inline__ __device__ static void mutateToken(Token* token, SimulationData& data);
+//    __inline__ __device__ static void mutateToken(Token* token, SimulationData& data);
 };
 
 /************************************************************************/
@@ -90,7 +90,7 @@ private:
 __inline__ __device__ void
 ConstructorFunction::processing(Token* token, SimulationData& data)
 {
-    mutateToken(token, data);
+//    mutateToken(token, data);
 
     ConstructionData constructionData;
     readConstructionData(token, constructionData);
@@ -523,13 +523,18 @@ __inline__ __device__ Token* ConstructorFunction::constructToken(
     return result;
 }
 
+/*
 __inline__ __device__ void ConstructorFunction::mutateToken(Token* token, SimulationData& data)
 {
     if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorTokenDataMutationProb) {
         auto index = data.numberGen.random(255) % cudaSimulationParameters.tokenMemorySize;
         token->memory[index] = data.numberGen.random(255);
     }
+    if (data.numberGen.random() < 0.01) {
+        token->memory[Enums::Constr::IN_CELL_METADATA] = data.numberGen.random(255);
+    }
 }
+*/
 
 
 /*

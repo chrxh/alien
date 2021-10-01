@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineInterface/GpuConstants.h"
+
 #include "Base.cuh"
 #include "Definitions.cuh"
 #include "Entities.cuh"
@@ -27,18 +29,18 @@ struct SimulationData
     int numPixels;
     unsigned int* imageData;
 
-    void init(int2 const& universeSize, CudaConstants const& cudaConstants, int timestep_)
+    void init(int2 const& universeSize, GpuConstants const& gpuConstants, int timestep_)
     {
         size = universeSize;
         timestep = timestep_;
 
-        entities.init(cudaConstants);
-        entitiesForCleanup.init(cudaConstants);
+        entities.init(gpuConstants);
+        entitiesForCleanup.init(gpuConstants);
         cellFunctionData.init(universeSize);
-        cellMap.init(size, cudaConstants.MAX_CELLPOINTERS);
-        particleMap.init(size, cudaConstants.MAX_PARTICLEPOINTERS);
+        cellMap.init(size, gpuConstants.MAX_CELLPOINTERS);
+        particleMap.init(size, gpuConstants.MAX_PARTICLEPOINTERS);
 
-        int upperBoundDynamicMemory = sizeof(Operation) * cudaConstants.MAX_CELLPOINTERS + 1000;
+        int upperBoundDynamicMemory = sizeof(Operation) * gpuConstants.MAX_CELLPOINTERS + 1000;
         dynamicMemory.init(upperBoundDynamicMemory);
         numberGen.init(40312357);
 
@@ -62,7 +64,9 @@ struct SimulationData
         cellFunctionData.free();
         cellMap.free();
         particleMap.free();
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         numberGen.free();
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         dynamicMemory.free();
 
         CudaMemoryManager::getInstance().freeMemory(imageData);
