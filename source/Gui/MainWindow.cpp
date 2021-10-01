@@ -93,10 +93,10 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
 
     _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
-    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository);
+    _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
+    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
     _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
-    _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -143,7 +143,6 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         {}
 
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-        processToolbar();
         processMenubar();
         processDialogs();
         processWindows();
@@ -294,33 +293,6 @@ void _MainWindow::processMenubar()
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
         onPauseSimulation();
     }
-}
-
-void _MainWindow::processToolbar()
-{
-/*
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + 19));
-    ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 50));
-
-    ImGuiWindowFlags windowFlags = 0
-        | ImGuiWindowFlags_NoTitleBar
-        | ImGuiWindowFlags_NoResize
-        | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoScrollbar
-        | ImGuiWindowFlags_NoSavedSettings
-        ;
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-    ImGui::Begin("TOOLBAR", NULL, windowFlags);
-    ImGui::PopStyleVar();
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-    ImGui::SameLine();
-    ImGui::Button("Zoom in", ImVec2(0, 37));
-    ImGui::SameLine();
-    ImGui::Button("Zoom out", ImVec2(0, 37));
-
-    ImGui::End();
-*/
 }
 
 void _MainWindow::processDialogs()

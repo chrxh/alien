@@ -11,6 +11,12 @@
 #include "Resources.h"
 #include "ModeWindow.h"
 
+namespace
+{
+    auto const MotionBlurStandard = 0.8f;
+    auto const MotionBlurZooming = 0.5f;
+}
+
 _SimulationView::_SimulationView(
     SimulationController const& simController,
     ModeWindow const& modeWindow,
@@ -68,10 +74,10 @@ _SimulationView::_SimulationView(
 
     _shader->use();
     _shader->setInt("texture1", 0);
-    _shader->setInt("texture2", 0);
+    _shader->setInt("texture2", 1);
     _shader->setBool("glowEffect", true);
     _shader->setBool("motionEffect", true);
-    _shader->setFloat("motionBlurFactor", 0.6f);
+    _shader->setFloat("motionBlurFactor", MotionBlurStandard);
 }
 
 void _SimulationView::resize(IntVector2D const& size)
@@ -107,6 +113,11 @@ void _SimulationView::resize(IntVector2D const& size)
     _viewport->setViewSize(size);
 }
 
+void _SimulationView::leftMouseButtonPressed()
+{
+    _shader->setFloat("motionBlurFactor", MotionBlurZooming);
+}
+
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
@@ -115,8 +126,18 @@ void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2
         auto start = _viewport->mapViewToWorldPosition({toFloat(prevViewPos.x), toFloat(prevViewPos.y)});
         auto end = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
         auto zoom = _viewport->getZoomFactor();
-        _simController->applyForce_async(start, end, (end - start) / 1000, 20.0f / zoom);
+        _simController->applyForce_async(start, end, (end - start) / 30, 20.0f / zoom);
     }
+}
+
+void _SimulationView::leftMouseButtonReleased()
+{
+    _shader->setFloat("motionBlurFactor", MotionBlurStandard);
+}
+
+void _SimulationView::rightMouseButtonPressed()
+{
+    _shader->setFloat("motionBlurFactor", MotionBlurZooming);
 }
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
@@ -124,6 +145,11 @@ void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
     if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
         _viewport->zoom(viewPos, 1.0f / _viewport->getZoomSensitivity());
     }
+}
+
+void _SimulationView::rightMouseButtonReleased()
+{
+    _shader->setFloat("motionBlurFactor", MotionBlurStandard);
 }
 
 void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
@@ -145,16 +171,29 @@ void _SimulationView::processEvents()
 {
     if (!ImGui::GetIO().WantCaptureMouse) {
         auto mousePos = ImGui::GetMousePos();
-        auto dragDelta = ImGui::GetMouseDragDelta();
         IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
-        IntVector2D prevMousePosInt{toInt(mousePos.x - dragDelta.x), toInt(mousePos.y - dragDelta.y)};
+        IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
 
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            leftMouseButtonPressed();
+        }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             leftMouseButtonHold(mousePosInt, prevMousePosInt);
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            leftMouseButtonReleased();
+        }
+
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+            rightMouseButtonPressed();
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             rightMouseButtonHold(mousePosInt);
         }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+            rightMouseButtonReleased();
+        }
+
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
             middleMouseButtonPressed(mousePosInt);
         }
@@ -164,6 +203,7 @@ void _SimulationView::processEvents()
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
             middleMouseButtonReleased();
         }
+        _prevMousePosInt = mousePosInt;
     }
 }
 
@@ -183,6 +223,8 @@ void _SimulationView::processContent()
     glBindVertexArray(_vao);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _textureId);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
