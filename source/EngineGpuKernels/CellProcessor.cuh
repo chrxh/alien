@@ -128,7 +128,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
                 else {
                     auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta)) / 32;
+                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta)) / 12 /*32*/;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);
@@ -140,6 +140,31 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
+/*
+            if (!alreadyConnected) {
+                auto velDelta = cell->vel - otherCell->vel;
+                auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+
+                if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
+                    auto force = Math::normalized(posDelta)
+                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
+                    atomicAdd(&cell->temp1.x, force.x);
+                    atomicAdd(&cell->temp1.y, force.y);
+                } else {
+                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * Math::lengthSquared(posDelta));
+                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
+                    atomicAdd(&cell->temp1.x, force1.x);
+                    atomicAdd(&cell->temp1.y, force1.y);
+                    atomicAdd(&otherCell->temp1.x, force2.x);
+                    atomicAdd(&otherCell->temp1.y, force2.y);
+                }
+
+                if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
+                    && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
+                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                }
+            }
+*/
         }
     }
 }

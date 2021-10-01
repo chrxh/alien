@@ -100,11 +100,14 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
         auto& cell = token->cell;
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
-            if (Enums::CellFunction::SCANNER == cellFunctionType) {
-                ScannerFunction::processing(token, data);
-            }
-            if (Enums::CellFunction::WEAPON == cellFunctionType) {
-                WeaponFunction::processing(token, data);
+            if (cell->tryLock()) {
+                if (Enums::CellFunction::SCANNER == cellFunctionType) {
+                    ScannerFunction::processing(token, data);
+                }
+                if (Enums::CellFunction::WEAPON == cellFunctionType) {
+                    WeaponFunction::processing(token, data);
+                }
+                cell->releaseLock();
             }
         }
     }
