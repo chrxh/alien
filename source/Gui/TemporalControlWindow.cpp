@@ -10,12 +10,15 @@
 #include "StyleRepository.h"
 #include "OpenGLHelper.h"
 #include "Resources.h"
+#include "StatisticsWindow.h"
 
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationController const& simController,
-    StyleRepository const& styleRepository)
+    StyleRepository const& styleRepository,
+    StatisticsWindow const& statisticsWindow)
     : _simController(simController)
     , _styleRepository(styleRepository)
+    , _statisticsWindow(statisticsWindow)
 {
     _runTexture = OpenGLHelper::loadTexture(Const::RunFilename);
     _pauseTexture = OpenGLHelper::loadTexture(Const::PauseFilename);
@@ -96,18 +99,16 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 
 void _TemporalControlWindow::processTpsRestriction()
 {
-    static bool slowDown = 0;
-    ImGui::Checkbox("Slow down", &slowDown);
+    ImGui::Checkbox("Slow down", &_slowDown);
     ImGui::SameLine();
     static int tpsRestriction = 30;
-    ImGui::BeginDisabled(!slowDown);
+    ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    if (ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS")) {
-        if (slowDown) {
-            _simController->setTpsRestriction(tpsRestriction);
-        } else {
-            _simController->setTpsRestriction(boost::none);
-        }
+    ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS");
+    if (_slowDown) {
+        _simController->setTpsRestriction(tpsRestriction);
+    } else {
+        _simController->setTpsRestriction(boost::none);
     }
     ImGui::PopItemWidth();
     ImGui::EndDisabled();
@@ -175,6 +176,7 @@ void _TemporalControlWindow::processRestoreButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     if (ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+        _statisticsWindow->reset();
         _simController->clear();
         _simController->setCurrentTimestep(_snapshot->timestep);
         _simController->updateData(_snapshot->data);

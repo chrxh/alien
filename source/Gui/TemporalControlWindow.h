@@ -10,7 +10,8 @@ class _TemporalControlWindow
 public:
     _TemporalControlWindow(
         SimulationController const& simController,
-        StyleRepository const& styleRepository);
+        StyleRepository const& styleRepository,
+        StatisticsWindow const& statisticsWindow);
 
     void process();
 
@@ -31,6 +32,7 @@ private:
 
     SimulationController _simController; 
     StyleRepository _styleRepository;
+    StatisticsWindow _statisticsWindow;
 
     TextureData _runTexture;
     TextureData _pauseTexture;
@@ -48,4 +50,6 @@ private:
 
     std::vector<Snapshot> _history;
     bool _on = true;
+
+    bool _slowDown = false;
 };
