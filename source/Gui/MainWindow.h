@@ -21,7 +21,6 @@ private:
     GlfwData initGlfw();
 
     void processMenubar();
-    void processToolbar();
     void processDialogs();
     void processWindows();
 
