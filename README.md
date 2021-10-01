@@ -81,7 +81,15 @@ The following third-party libaries are necessary and should be installed:
 - [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) (needs to be installed in external/boost_1_75_0)
 - [OpenSSL version 1.1.1j](https://slproweb.com/products/Win32OpenSSL.html) (not mandatory, it is only used for retrieving the latest version number and bug reporting feature)
 
+## Future
+Currently, version 3 is under development. The progress can be followed on the feature branch `features/version3`. Among other things the following fundamental updates are planned:
+- Switch from a rigid body to a particle engine
+- A more intuitive user interface created with `Dear ImGui` instead of `Qt`
+- Simulation parameters will be simplified and can be adjusted during simulation using sliders
+- Various model extensions (e.g. muscle cells).
+- Live diagrams for statistics
+
+You can get a first impression of the particle engine in a [preview video](https://www.youtube.com/watch?v=DygVMA4sybo).
+
 ## License
 alien is licensed under the [GPLv3](LICENSE).
-
-![GitHub contributors](https://img.shields.io/github/contributors/chrxh/alien)
