@@ -484,7 +484,6 @@ __global__ void deselectParticles(Array<Particle*> particles)
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-
 __global__ void cudaGetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {

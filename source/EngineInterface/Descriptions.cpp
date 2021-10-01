@@ -2,20 +2,19 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include <QMatrix4x4>
+#include "Base/Math.h"
+#include "Base/Physics.h"
 
 #include "ChangeDescriptions.h"
-#include "Physics.h"
 
 
 bool TokenDescription::operator==(TokenDescription const& other) const {
-	return energy == other.energy
-		&& data == other.data;
+    return energy == other.energy && data == other.data;
 }
 
 namespace
 {
-    boost::optional<list<ConnectionDescription>> convert(
+    boost::optional<std::list<ConnectionDescription>> convert(
         boost::optional<std::list<ConnectionChangeDescription>> const& connections)
     {
         if (!connections) {
@@ -37,7 +36,7 @@ namespace
 CellDescription::CellDescription(CellChangeDescription const & change)
 {
 	id = change.id;
-	pos = static_cast<boost::optional<QVector2D>>(change.pos);
+	pos = static_cast<boost::optional<RealVector2D>>(change.pos);
 	energy = static_cast<boost::optional<double>>(change.energy);
 	maxConnections = static_cast<boost::optional<int>>(change.maxConnections);
     connections =
@@ -59,7 +58,7 @@ CellDescription& CellDescription::addToken(TokenDescription const& value)
 	return *this;
 }
 
-CellDescription& CellDescription::addToken(uint index, TokenDescription const& value)
+CellDescription& CellDescription::addToken(int index, TokenDescription const& value)
 {
 	if (!tokens) {
 		tokens = vector<TokenDescription>();
@@ -68,7 +67,7 @@ CellDescription& CellDescription::addToken(uint index, TokenDescription const& v
 	return *this;
 }
 
-CellDescription& CellDescription::delToken(uint index)
+CellDescription& CellDescription::delToken(int index)
 {
 	CHECK(tokens);
 	tokens->erase(tokens->begin() + index);
@@ -98,7 +97,7 @@ ClusterDescription& ClusterDescription::addConnection(
         }
         CHECK(cell.connections->size() < *cell.maxConnections);
 
-        auto newAngle = Physics::angleOfVector(*otherCell.pos - *cell.pos);
+        auto newAngle = Math::angleOfVector(*otherCell.pos - *cell.pos);
         if (cell.id == 281474976710658 && otherCell.id == 281474976710660 && cell.connections
             && cell.connections->size() == 2) {
             int dummy = 0;
@@ -111,26 +110,26 @@ ClusterDescription& ClusterDescription::addConnection(
         if (cell.connections->empty()) {
             ConnectionDescription newConnection;
             newConnection.cellId = otherCell.id;
-            newConnection.distance = (*otherCell.pos - *cell.pos).length();
-            newConnection.angleFromPrevious = 360.0f;
+            newConnection.distance = toFloat(Math::length(*otherCell.pos - *cell.pos));
+            newConnection.angleFromPrevious = 360.0;
             cell.connections->emplace_back(newConnection);
             return;
         }
         if (1 == cell.connections->size()) {
             ConnectionDescription newConnection;
             newConnection.cellId = otherCell.id;
-            newConnection.distance = (*otherCell.pos - *cell.pos).length();
+            newConnection.distance = toFloat(Math::length(*otherCell.pos - *cell.pos));
 
             auto connectedCell = getCellRef(cell.connections->front().cellId, cache);
             auto connectedCellDelta = *connectedCell.pos - *cell.pos;
-            auto prevAngle = Physics::angleOfVector(connectedCellDelta);
+            auto prevAngle = Math::angleOfVector(connectedCellDelta);
             auto angleDiff = newAngle - prevAngle;
             if (angleDiff >= 0) {
-                newConnection.angleFromPrevious = angleDiff;
-                cell.connections->begin()->angleFromPrevious = 360.0f - angleDiff;
+                newConnection.angleFromPrevious = toFloat(angleDiff);
+                cell.connections->begin()->angleFromPrevious = 360.0f - toFloat(angleDiff);
             } else {
-                newConnection.angleFromPrevious = 360.0f + angleDiff;
-                cell.connections->begin()->angleFromPrevious = -angleDiff;
+                newConnection.angleFromPrevious = 360.0f + toFloat(angleDiff);
+                cell.connections->begin()->angleFromPrevious = toFloat(-angleDiff);
             }
             cell.connections->emplace_back(newConnection);
             return;
@@ -138,7 +137,7 @@ ClusterDescription& ClusterDescription::addConnection(
 
         auto firstConnectedCell = getCellRef(cell.connections->front().cellId, cache);
         auto firstConnectedCellDelta = *firstConnectedCell.pos - *cell.pos;
-        auto angle = Physics::angleOfVector(firstConnectedCellDelta);
+        auto angle = Math::angleOfVector(firstConnectedCellDelta);
         auto connectionIt = ++cell.connections->begin();
         while (true) {
             auto nextAngle = angle + connectionIt->angleFromPrevious;
@@ -160,7 +159,7 @@ ClusterDescription& ClusterDescription::addConnection(
 
         ConnectionDescription newConnection;
         newConnection.cellId = otherCell.id;
-        newConnection.distance = (*otherCell.pos - *cell.pos).length();
+        newConnection.distance = toFloat(Math::length(*otherCell.pos - *cell.pos));
 
         auto angleDiff1 = newAngle - angle;
         if (angleDiff1 < 0) {
@@ -169,13 +168,13 @@ ClusterDescription& ClusterDescription::addConnection(
         auto angleDiff2 = connectionIt->angleFromPrevious;
 
         auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
-        newConnection.angleFromPrevious = angleDiff2 * factor;
+        newConnection.angleFromPrevious = toFloat(angleDiff2 * factor);
         connectionIt = cell.connections->insert(connectionIt, newConnection);
         ++connectionIt;
         if (connectionIt == cell.connections->end()) {
             connectionIt = cell.connections->begin();
         }
-        connectionIt->angleFromPrevious = angleDiff2 * (1 - factor);
+        connectionIt->angleFromPrevious = toFloat(angleDiff2 * (1 - factor));
     };
 
     addConnection(cell1, cell2);
@@ -184,9 +183,9 @@ ClusterDescription& ClusterDescription::addConnection(
     return *this;
 }
 
-QVector2D ClusterDescription::getClusterPosFromCells() const
+RealVector2D ClusterDescription::getClusterPosFromCells() const
 {
-	QVector2D result;
+	RealVector2D result;
 	if (cells) {
 		for (CellDescription const& cell : *cells) {
 			result += *cell.pos;
@@ -215,15 +214,15 @@ CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::uno
 ParticleDescription::ParticleDescription(ParticleChangeDescription const & change)
 {
 	id = change.id;
-	pos = static_cast<boost::optional<QVector2D>>(change.pos);
-	vel = static_cast<boost::optional<QVector2D>>(change.vel);
+	pos = static_cast<boost::optional<RealVector2D>>(change.pos);
+	vel = static_cast<boost::optional<RealVector2D>>(change.vel);
 	energy = static_cast<boost::optional<double>>(change.energy);
 	metadata = static_cast<boost::optional<ParticleMetadata>>(change.metadata);
 }
 
-QVector2D DataDescription::calcCenter() const
+RealVector2D DataDescription::calcCenter() const
 {
-	QVector2D result;
+	RealVector2D result;
 	int numEntities = 0;
 	if (clusters) {
 		for (auto const& cluster : *clusters) {
@@ -245,7 +244,7 @@ QVector2D DataDescription::calcCenter() const
 	return result;
 }
 
-void DataDescription::shift(QVector2D const & delta)
+void DataDescription::shift(RealVector2D const & delta)
 {
 	if (clusters) {
 		for (auto & cluster : *clusters) {
@@ -261,78 +260,4 @@ void DataDescription::shift(QVector2D const & delta)
 			*particle.pos += delta;
 		}
 	}
-}
-
-DataDescription DEPRECATED_DataDescription::getConverted() const
-{
-    DataDescription result;
-    result.particles = particles;
-
-    //TODO #SoftBody
-    //complete cell velocities, connection distances and angles
-    if (clusters) {
-        vector<ClusterDescription> newClusters;
-        newClusters.reserve(clusters->size());
-
-        for (auto& cluster : *clusters) {
-            ClusterDescription newCluster;
-            newCluster.id = cluster.id;
-
-            std::unordered_map<uint64_t, int> cellIndexById;
-            for (auto const& [index, cell] : *cluster.cells | boost::adaptors::indexed(0)) {
-                cellIndexById.insert_or_assign(cell.id, index);
-            }
-            vector<CellDescription> newCells;
-            newCells.reserve(cluster.cells->size());
-            for (auto& cell : *cluster.cells) {
-                auto newCell = CellDescription().setId(cell.id);
-                newCell.pos = cell.pos;
-                newCell.energy = cell.energy;
-                newCell.maxConnections = cell.maxConnections;
-                newCell.tokenBlocked = cell.tokenBlocked;
-                newCell.tokenBranchNumber = cell.tokenBranchNumber;
-                newCell.metadata = cell.metadata;
-                newCell.cellFeature = cell.cellFeature;
-                newCell.tokens = cell.tokens;
-                newCell.tokenUsages = cell.tokenUsages;
-                newCell.vel = Physics::tangentialVelocity(
-                    *cell.pos - *cluster.pos, Physics::Velocities{*cluster.vel, *cluster.angularVel});
-                auto cellConnections = cell.connections;
-                if (cellConnections && !cellConnections->empty()) {
-                    cellConnections->sort([&](uint64_t const& left, uint64_t const& right) {
-                        auto const& cell1 = cluster.cells->at(cellIndexById.at(left));
-                        auto const& cell2 = cluster.cells->at(cellIndexById.at(right));
-                        auto angle1 = Physics::angleOfVector(*cell1.pos - *cell.pos);
-                        auto angle2 = Physics::angleOfVector(*cell2.pos - *cell.pos);
-                        return angle1 < angle2;
-                    });
-
-                    list<ConnectionDescription> newConnections;
-                    auto lastCell = cluster.cells->at(cellIndexById.at(cellConnections->back()));
-                    float prevAngle = Physics::angleOfVector(*lastCell.pos - *cell.pos);
-                    for (auto& connectedCellId : *cellConnections) {
-                        auto const& connectingCellDesc = cluster.cells->at(cellIndexById.at(connectedCellId));
-
-                        ConnectionDescription newConnection;
-                        newConnection.cellId = connectedCellId;
-                        newConnection.distance = (*connectingCellDesc.pos - *cell.pos).length();
-                        auto angle = Physics::angleOfVector(*connectingCellDesc.pos - *cell.pos);
-                        newConnection.angleFromPrevious = angle - prevAngle;
-                        if (newConnection.angleFromPrevious < 0) {
-                            newConnection.angleFromPrevious += 360.0f;
-                        }
-                        prevAngle = angle;
-                        newConnections.emplace_back(newConnection);
-                    }
-                    newCell.connections = newConnections;
-                }
-                newCells.emplace_back(newCell);
-            }
-            newCluster.cells = newCells;
-            newClusters.emplace_back(newCluster);
-        }
-        result.clusters = newClusters;
-    }
-
-    return result;
 }

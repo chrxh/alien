@@ -55,6 +55,6 @@ __global__ void cudaGetCudaMonitorData(SimulationData data, CudaMonitorData moni
     monitorData.setNumParticles(data.entities.particlePointers.getNumEntries());
     monitorData.setNumTokens(data.entities.tokenPointers.getNumEntries());
 
-    KERNEL_CALL(getEnergyForMonitorData, data, monitorData);
+//    KERNEL_CALL(getEnergyForMonitorData, data, monitorData);
 }
 

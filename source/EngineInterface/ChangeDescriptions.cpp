@@ -42,8 +42,8 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
 {
 	id = after.id;
-	pos = ValueTracker<QVector2D>(before.pos, after.pos);
-    vel = ValueTracker<QVector2D>(before.vel, after.vel);
+	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
+    vel = ValueTracker<RealVector2D>(before.vel, after.vel);
     energy = ValueTracker<double>(before.energy, after.energy);
 	maxConnections = ValueTracker<int>(before.maxConnections, after.maxConnections);
     connectingCells =
@@ -74,8 +74,8 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & before, ParticleDescription const & after)
 {
 	id = after.id;
-	pos = ValueTracker<QVector2D>(before.pos, after.pos);
-	vel = ValueTracker<QVector2D>(before.vel, after.vel);
+	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
+	vel = ValueTracker<RealVector2D>(before.vel, after.vel);
 	energy = ValueTracker<double>(before.energy, after.energy);
 	metadata = ValueTracker<ParticleMetadata>(before.metadata, after.metadata);
 }

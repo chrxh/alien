@@ -30,12 +30,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
 
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(
-        otherCells,
-        18,
-        numOtherCells,
-        cell->absPos,
-        1.6f);
+    data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.6f);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
 
@@ -57,13 +52,33 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
 
                 auto homogene = isHomogene(cell);
                 auto otherHomogene = isHomogene(otherCell);
-                if (!homogene && otherHomogene) {
+                if (!homogene /* && otherHomogene*/) {
                     energyToTransfer =
                         energyToTransfer * cudaSimulationParameters.cellFunctionWeaponInhomogeneousColorFactor;
                 }
-                if (homogene && otherHomogene && cell->metadata.color != otherCell->metadata.color) {
+                auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
+                    color1 = color1 % 7;
+                    color2 = color2 % 7;
+                    if (color1 == color2 + 1 || (color1 == 0 && color2 == 6)) {
+                        return true;
+                    }
+                    return false;
+                };
+                if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
                     energyToTransfer =
                         energyToTransfer * cudaSimulationParameters.cellFunctionWeaponInhomogeneousColorFactor;
+                }
+                if (otherCell->numConnections > cell->numConnections + 1) {
+                    energyToTransfer = 0;
+                }
+                if (otherCell->numConnections == cell->numConnections + 1) {
+                    energyToTransfer *= 0.2f;
+                }
+                if (otherCell->numConnections == cell->numConnections - 1) {
+                    energyToTransfer *= 2.0f;
+                }
+                if (otherCell->numConnections < cell->numConnections - 1) {
+                    energyToTransfer *= 4.0f;
                 }
                 if (otherCell->energy > energyToTransfer) {
                     otherCell->energy -= energyToTransfer;
@@ -86,8 +101,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
         data.cellMap.mapPosCorrection(particlePos);
 
         particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-        auto const radiationEnergy =
-            min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
+        auto const radiationEnergy = min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
         cell->energy -= radiationEnergy;
         EntityFactory factory;
         factory.init(&data);
@@ -99,11 +113,15 @@ __inline__ __device__ bool WeaponFunction::isHomogene(Cell* cell)
 {
     int color = cell->metadata.color;
     for (int i = 0; i < cell->numConnections; ++i) {
-
-        //TODO tryLock
         auto otherCell = cell->connections[i].cell;
-        if (color != otherCell->metadata.color) {
+        if ((color % 7) != (otherCell->metadata.color % 7)) {
             return false;
+        }
+        for (int j = 0; j < otherCell->numConnections; ++j) {
+            auto otherOtherCell = otherCell->connections[j].cell;
+            if ((color % 7) != (otherOtherCell->metadata.color % 7)) {
+                return false;
+            }
         }
     }
     return true;

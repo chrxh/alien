@@ -1,12 +1,10 @@
 #pragma once
 
-#include <QtCore/qglobal.h>
-
 #if defined(_WIN32) && !defined(ALIEN_STATIC)
 #ifdef ENGINEINTERFACE_LIB
-# define ENGINEINTERFACE_EXPORT Q_DECL_EXPORT
+# define ENGINEINTERFACE_EXPORT __declspec(dllexport)
 #else
-# define ENGINEINTERFACE_EXPORT Q_DECL_IMPORT
+# define ENGINEINTERFACE_EXPORT __declspec(dllimport)
 #endif
 #else
 # define ENGINEINTERFACE_EXPORT

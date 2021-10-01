@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="glad">
+      <UniqueIdentifier>{c67e7597-5425-4314-be12-4e04be1c8795}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{514a28e9-a764-4119-96d3-ed99904671b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{3b35d393-be41-4059-8479-13118ed593b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ImFileDialog">
+      <UniqueIdentifier>{1865c2e8-ecb9-4eca-9e40-3347c5bdde59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ImGui">
+      <UniqueIdentifier>{c9f31f55-2385-439d-8deb-39fc7c86aa19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\stb">
+      <UniqueIdentifier>{05c0e9ed-5ea2-47b3-9b33-4097ee35f288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ImPlot">
+      <UniqueIdentifier>{8877bd0e-48e9-420e-8e4f-aa7a4e9d4fd5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\external\imgui\imconfig.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imgui.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imgui_internal.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imstb_rectpack.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imstb_textedit.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imstb_truetype.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\backends\imgui_impl_glfw.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>external\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\MainWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\glad\include\glad\glad.h">
+      <Filter>glad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SimulationView.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Shader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\ImFileDialog\ImFileDialog.h">
+      <Filter>external\ImFileDialog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\stb\stb_image.h">
+      <Filter>external\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SimulationScrollbar.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Viewport.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\StyleRepository.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\OpenGLHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SimulationParametersWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\StatisticsWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\ImPlot\implot.h">
+      <Filter>external\ImPlot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\ImPlot\implot_internal.h">
+      <Filter>external\ImPlot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ModeWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\Resources.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\SpatialControlWindow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\external\imgui\imgui.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_demo.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_draw.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_tables.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>external\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\MainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\glad\src\glad.c">
+      <Filter>glad</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SimulationView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImFileDialog\ImFileDialog.cpp">
+      <Filter>external\ImFileDialog</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SimulationScrollbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Viewport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\StyleRepository.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SimulationParametersWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\StatisticsWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImPlot\implot.cpp">
+      <Filter>external\ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImPlot\implot_demo.cpp">
+      <Filter>external\ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\ImPlot\implot_items.cpp">
+      <Filter>external\ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ModeWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\source\Gui\Resources\shader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="..\..\source\Gui\Resources\shader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -109,7 +109,7 @@ __inline__ __device__ void ClusterProcessor::processingCollisionPrepare_block()
 
                  //TODO use posDelta
                  if (_data->cellMap.mapDistance(cell->absPos, otherCell->absPos)    
-                     >= cudaSimulationParameters.cellMaxDistance) {
+                     >= cudaSimulationParameters.cellMaxCollisionDistance) {
                      continue;
                  }
 
