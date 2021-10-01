@@ -214,6 +214,7 @@ void _SpatialControlWindow::onResizing()
         simulationParameters,
         symbolMap);
 
+    DescriptionHelper::correctConnections(content, generalSettings.worldSize);
     if (_scaleContent) {
         DescriptionHelper::duplicate(content, origWorldSize, generalSettings.worldSize);
     }

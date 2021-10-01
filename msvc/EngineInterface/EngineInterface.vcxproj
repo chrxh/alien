@@ -159,6 +159,7 @@
     <ClInclude Include="..\..\source\EngineInterface\Serializer.h" />
     <ClInclude Include="..\..\source\EngineInterface\SimulationParameters.h" />
     <ClInclude Include="..\..\source\EngineInterface\Parser.h" />
+    <ClInclude Include="..\..\source\EngineInterface\SpaceCalculator.h" />
     <ClInclude Include="..\..\source\EngineInterface\SymbolMap.h" />
     <ClInclude Include="..\..\source\EngineInterface\ZoomLevels.h" />
   </ItemGroup>
@@ -173,6 +174,7 @@
     <ClCompile Include="..\..\source\EngineInterface\Descriptions.cpp" />
     <ClCompile Include="..\..\source\EngineInterface\Serializer.cpp" />
     <ClCompile Include="..\..\source\EngineInterface\Parser.cpp" />
+    <ClCompile Include="..\..\source\EngineInterface\SpaceCalculator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
