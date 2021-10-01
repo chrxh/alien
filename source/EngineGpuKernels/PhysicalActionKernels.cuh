@@ -18,13 +18,9 @@ struct CudaApplyForceData
     float2 startPos;
     float2 endPos;
     float2 force;
+    float radius;
     bool onlyRotation;
 };
-
-namespace
-{
-    __device__ auto const actionRadius = 20.0f;
-}
 
 __global__ void applyForceToCells(CudaApplyForceData applyData, int2 universeSize, Array<Cell*> cells)
 {
@@ -35,8 +31,8 @@ __global__ void applyForceToCells(CudaApplyForceData applyData, int2 universeSiz
         auto const& cell = cells.at(index);
         auto const& pos = cell->absPos;
         auto distanceToSegment =
-            Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
-        if (distanceToSegment < actionRadius) {
+            Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
+        if (distanceToSegment < applyData.radius) {
             auto weightedForce = applyData.force;
             //*(actionRadius - distanceToSegment) / actionRadius;
             cell->vel = cell->vel + weightedForce;
@@ -52,9 +48,10 @@ __global__ void applyForceToParticles(CudaApplyForceData applyData, int2 univers
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto const& pos = particle->absPos;
-        auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, actionRadius);
-        if (distanceToSegment < actionRadius) {
-            auto weightedForce = applyData.force * (actionRadius - distanceToSegment) / actionRadius;
+        auto distanceToSegment =
+            Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
+        if (distanceToSegment < applyData.radius) {
+            auto weightedForce = applyData.force;//*(actionRadius - distanceToSegment) / actionRadius;
             particle->vel = particle->vel + weightedForce;
         }
     }

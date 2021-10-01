@@ -42,12 +42,6 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-namespace
-{
-    float constexpr TimestepSize = 1.0f;
-    float constexpr ForceFactor = 1.0f;
-}
-
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
@@ -101,7 +95,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             data.cellMap.mapDisplacementCorrection(posDelta);
 
             auto distance = Math::length(posDelta);
-            if (distance >= cudaSimulationParameters.cellMaxDistance
+            if (distance >= cudaSimulationParameters.cellMaxCollisionDistance
                 /*|| distance <= cudaSimulationParameters.cellMinDistance*/) {
                 continue;
             }
@@ -134,7 +128,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
                 else {
                     auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 32;
+                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta)) / 12 /*32*/;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);
@@ -146,6 +140,31 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
+/*
+            if (!alreadyConnected) {
+                auto velDelta = cell->vel - otherCell->vel;
+                auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+
+                if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
+                    auto force = Math::normalized(posDelta)
+                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
+                    atomicAdd(&cell->temp1.x, force.x);
+                    atomicAdd(&cell->temp1.y, force.y);
+                } else {
+                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * Math::lengthSquared(posDelta));
+                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
+                    atomicAdd(&cell->temp1.x, force1.x);
+                    atomicAdd(&cell->temp1.y, force1.y);
+                    atomicAdd(&otherCell->temp1.x, force2.x);
+                    atomicAdd(&otherCell->temp1.y, force2.y);
+                }
+
+                if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
+                    && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
+                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                }
+            }
+*/
         }
     }
 }
@@ -161,14 +180,14 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
         auto& cell = cells.at(index);
 
         auto force = cell->temp1;
-        if (Math::length(force) > cudaSimulationParameters.cellMaxForce * ForceFactor) {
+        if (Math::length(force) > cudaSimulationParameters.cellMaxForce * cudaSimulationParameters.bindingForce) {
             if(data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDelConnections(data, cell);
             }
         }
         cell->vel = cell->vel + force;
-        if (Math::length(cell->vel) > 2) {
-            cell->vel = Math::normalized(cell->vel) * 2;
+        if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVel) {
+            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVel;
         }
         cell->temp1 = {0, 0};
     }
@@ -197,7 +216,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation / 2 * ForceFactor;
+            force = force + Math::normalized(displacement) * deviation / 2 * cudaSimulationParameters.bindingForce;
 
             if (cell->numConnections > 1) {
                 auto angle = Math::angleOfVector(displacement);
@@ -205,7 +224,8 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
                 auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                 auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * ForceFactor;
+                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000
+                    * cudaSimulationParameters.bindingForce;
 
                 auto force1 = Math::normalized(displacement) * angleDeviation;
                 Math::rotateQuarterClockwise(force1);
@@ -247,7 +267,8 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->absPos = cell->absPos + cell->vel * TimestepSize + cell->temp1 * TimestepSize * TimestepSize / 2;
+        cell->absPos = cell->absPos + cell->vel * cudaSimulationParameters.timestepSize
+            + cell->temp1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
         data.cellMap.mapPosCorrection(cell->absPos);
         cell->temp2 = cell->temp1;  //forces
         cell->temp1 = {0, 0};
@@ -259,7 +280,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             auto displacement = connectingCell->absPos - cell->absPos;
             data.cellMap.mapDisplacementCorrection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxDistance*2) {
+            if (actualDistance > cudaSimulationParameters.cellMaxCollisionDistance * 2) {
                 scheduleForDestruction = true;
             }
         }
@@ -280,7 +301,7 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data, i
         auto& cell = cells.at(index);
 
         auto acceleration = (cell->temp1 + cell->temp2) / 2;
-        cell->vel = cell->vel + acceleration * TimestepSize;
+        cell->vel = cell->vel + acceleration * cudaSimulationParameters.timestepSize;
     }
 }
 
@@ -311,7 +332,7 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->vel = cell->temp1 * 0.99f;
+        cell->vel = cell->temp1 * (1.0f - cudaSimulationParameters.friction);
     }
 }
 
