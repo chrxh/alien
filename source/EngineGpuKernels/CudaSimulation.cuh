@@ -67,6 +67,7 @@ public:
 
 private:
     void setGpuConstants(GpuConstants const& cudaConstants);
+    void resizeIfNecessary(int additionalCells, int additionalParticles, int additionalTokens);
 
 private:
     std::atomic<uint64_t> _currentTimestep;

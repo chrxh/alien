@@ -227,7 +227,7 @@ __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rec
     auto const& cells = data.entities.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    auto const firstCell = data.entities.cells.getArrayForDevice();
+    auto const firstCell = data.entities.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -312,7 +312,7 @@ __global__ void resolveConnections(int2 rectUpperLeft, int2 rectLowerRight, Simu
 {
     auto const partition =
         calcPartition(*accessTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    auto const firstCell = data.entities.cells.getArrayForDevice();
+    auto const firstCell = data.entities.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cellTO = accessTO.cells[index];
@@ -381,7 +381,7 @@ __global__ void filterCells(int2 rectUpperLeft, int2 rectLowerRight, Array<Cell*
 __device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerRight,
     Array<Particle*> particles, int particleIndex)
 {
-    auto& particle = particles.getArrayForDevice()[particleIndex];
+    auto& particle = particles.getArray()[particleIndex];
     if (isContainedInRect(rectUpperLeft, rectLowerRight, particle->absPos)) {
         particle = nullptr;
     }
@@ -502,6 +502,9 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
 {
     KERNEL_CALL_1_1(filterCells, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
+    data.entities.cells.getNewSubarray(*access.numCells);
+    data.entities.particles.getNewSubarray(*access.numParticles);
+    data.entities.tokens.getNewSubarray(*access.numTokens);
     KERNEL_CALL(
         createDataFromTO,
         data,
