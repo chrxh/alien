@@ -13,11 +13,11 @@
 #include "Base/Exceptions.h"
 #include "EngineInterface/SimulationParameters.h"
 
+#include "Base/LoggingService.h"
+#include "Base/ServiceLocator.h"
 #include "AccessKernels.cuh"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
-#include "Base/LoggingService.h"
-#include "Base/ServiceLocator.h"
 #include "CleanupKernels.cuh"
 #include "ConstantMemory.cuh"
 #include "CudaMemoryManager.cuh"
@@ -29,7 +29,6 @@
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernels.cuh"
-
 
 #define GPU_FUNCTION(func, ...) \
     func<<<1, 1>>>(__VA_ARGS__); \
@@ -120,7 +119,7 @@ _CudaSimulation::_CudaSimulation(
 {
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
-    CudaMemoryManager::getInstance().reset();
+//    CudaMemoryManager::getInstance().reset();
 
     setSimulationParameters(parameters);
     setGpuConstants(gpuConstants);
@@ -133,7 +132,7 @@ _CudaSimulation::_CudaSimulation(
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
-    auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+//    auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
     _cudaSimulationData->init(worldSize, gpuConstants, timestep);
     _cudaMonitorData->init();
@@ -149,12 +148,14 @@ _CudaSimulation::_CudaSimulation(
     CudaMemoryManager::getInstance().acquireMemory<char>(
         gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE, _cudaAccessTO->stringBytes);
 
-    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+//    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
+/*
     std::stringstream stream;
     stream << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << " MB GPU memory acquired";
 
     loggingService->logMessage(Priority::Important, stream.str());
+*/
 }
 
 _CudaSimulation::~_CudaSimulation()
@@ -203,6 +204,7 @@ void* _CudaSimulation::registerImageResource(GLuint image)
 void _CudaSimulation::calcCudaTimestep()
 {
     GPU_FUNCTION(cudaCalcSimulationTimestep, *_cudaSimulationData);
+    resizeIfNecessary(0, 0, 0);
     ++_cudaSimulationData->timestep;
     ++_currentTimestep;
 }
@@ -276,6 +278,8 @@ void _CudaSimulation::setSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
+    resizeIfNecessary(*dataTO.numCells, *dataTO.numParticles, *dataTO.numTokens);
+
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
@@ -361,4 +365,16 @@ void _CudaSimulation::setGpuConstants(GpuConstants const& gpuConstants_)
 
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuConstants), 0, cudaMemcpyHostToDevice));
+}
+
+void _CudaSimulation::resizeIfNecessary(int additionalCells, int additionalParticles, int additionalTokens)
+{
+    if (_cudaSimulationData->shouldResize(additionalCells, additionalParticles,additionalTokens)) {
+        _cudaSimulationData->resizeTarget(additionalCells, additionalParticles, additionalTokens);
+        if (!_cudaSimulationData->isEmpty()) {
+            GPU_FUNCTION(copyEntities, *_cudaSimulationData);
+        }
+        _cudaSimulationData->resizeSource();
+        _cudaSimulationData->swap();
+    }
 }

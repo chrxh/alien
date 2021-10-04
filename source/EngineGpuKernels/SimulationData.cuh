@@ -57,6 +57,58 @@ struct SimulationData
         numPixels = newSize.x * newSize.y;
     }
 
+    bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
+    {
+        auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
+        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 10);
+
+        return entities.cells.shouldResize(cellAndParticleArraySizeInc)
+            || entities.cellPointers.shouldResize(cellAndParticleArraySizeInc * 10)
+            || entities.particles.shouldResize(cellAndParticleArraySizeInc)
+            || entities.particlePointers.shouldResize(cellAndParticleArraySizeInc * 10)
+            || entities.tokens.shouldResize(tokenArraySizeInc)
+            || entities.tokenPointers.shouldResize(tokenArraySizeInc * 10);
+    }
+
+    void resizeTarget(int additionalCells, int additionalParticles, int additionalTokens)
+    {
+        auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
+        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 10);
+
+        resizeTargetIntern(entities.cells, entitiesForCleanup.cells, cellAndParticleArraySizeInc);
+        resizeTargetIntern(entities.cellPointers, entitiesForCleanup.cellPointers, cellAndParticleArraySizeInc * 10);
+        resizeTargetIntern(entities.particles, entitiesForCleanup.particles, cellAndParticleArraySizeInc);
+        resizeTargetIntern(entities.particlePointers, entitiesForCleanup.particlePointers, cellAndParticleArraySizeInc * 10);
+        resizeTargetIntern(entities.tokens, entitiesForCleanup.tokens, tokenArraySizeInc);
+        resizeTargetIntern(entities.tokenPointers, entitiesForCleanup.tokenPointers, tokenArraySizeInc * 10);
+    }
+
+    bool isEmpty()
+    {
+        return 0 == entities.cells.getNumEntries_host() && 0 == entities.particles.getNumEntries_host()
+            && 0 == entities.tokens.getNumEntries_host();
+    }
+
+    void resizeSource()
+    {
+        entities.cells.resize(entitiesForCleanup.cells.getSize_host());
+        entities.cellPointers.resize(entitiesForCleanup.cellPointers.getSize_host());
+        entities.particles.resize(entitiesForCleanup.particles.getSize_host());
+        entities.particlePointers.resize(entitiesForCleanup.particlePointers.getSize_host());
+        entities.tokens.resize(entitiesForCleanup.tokens.getSize_host());
+        entities.tokenPointers.resize(entitiesForCleanup.tokenPointers.getSize_host());
+    }
+
+    void swap()
+    {
+        entities.cells.swapContent_host(entitiesForCleanup.cells);
+        entities.cellPointers.swapContent_host(entitiesForCleanup.cellPointers);
+        entities.particles.swapContent_host(entitiesForCleanup.particles);
+        entities.particlePointers.swapContent_host(entitiesForCleanup.particlePointers);
+        entities.tokens.swapContent_host(entitiesForCleanup.tokens);
+        entities.tokenPointers.swapContent_host(entitiesForCleanup.tokenPointers);
+    }
+
     void free()
     {
         entities.free();
@@ -71,6 +123,16 @@ struct SimulationData
 
         CudaMemoryManager::getInstance().freeMemory(imageData);
         CudaMemoryManager::getInstance().freeMemory(numOperations);
+    }
+
+private:
+    template <typename Entity>
+    void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, int additionalEntities)
+    {
+        if (sourceArray.shouldResize(additionalEntities)) {
+            auto newSize = (sourceArray.getNumEntries_host() + additionalEntities) * 2;
+            targetArray.resize(newSize);
+        }
     }
 };
 

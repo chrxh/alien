@@ -91,58 +91,71 @@ void _StatisticsWindow::processLiveStatistics()
         std::max(maxCells, maxParticles) * 1.5,
         ImGuiCond_Always);
     static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
-    ImPlot::BeginPlot(
-        "",
-        NULL,
-        NULL,
-        ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f),
-        0,
-        flags,
-        flags);
-    float labelPosY =
-        _liveStatistics.numCellsHistory.back() > _liveStatistics.numParticlesHistory.back() ? -10.0f : 10.0f;
+    if (ImPlot::BeginPlot(
+            "",
+            NULL,
+            NULL,
+            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f),
+            0,
+            flags,
+            flags)) {
+        float labelPosY =
+            _liveStatistics.numCellsHistory.back() > _liveStatistics.numParticlesHistory.back() ? -10.0f : 10.0f;
 
-    ImPlot::PlotLine("Cells", _liveStatistics.timepointsHistory.data(), _liveStatistics.numCellsHistory.data(), toInt(_liveStatistics.numCellsHistory.size()));
-    ImPlot::AnnotateClamped(
-        _liveStatistics.timepointsHistory.back(),
-        _liveStatistics.numCellsHistory.back(),
-        ImVec2(-10.0f, labelPosY),
-        ImPlot::GetLastItemColor(),
-        std::to_string(toInt(_liveStatistics.numCellsHistory.back())).c_str());
+        ImPlot::PlotLine(
+            "Cells",
+            _liveStatistics.timepointsHistory.data(),
+            _liveStatistics.numCellsHistory.data(),
+            toInt(_liveStatistics.numCellsHistory.size()));
+        ImPlot::AnnotateClamped(
+            _liveStatistics.timepointsHistory.back(),
+            _liveStatistics.numCellsHistory.back(),
+            ImVec2(-10.0f, labelPosY),
+            ImPlot::GetLastItemColor(),
+            std::to_string(toInt(_liveStatistics.numCellsHistory.back())).c_str());
 
-    ImPlot::PlotLine(
-        "Energy particles", _liveStatistics.timepointsHistory.data(), _liveStatistics.numParticlesHistory.data(), toInt(_liveStatistics.numParticlesHistory.size()));
-    ImPlot::AnnotateClamped(
-        _liveStatistics.timepointsHistory.back(),
-        _liveStatistics.numParticlesHistory.back(),
-        ImVec2(-10.0f, -labelPosY),
-        ImPlot::GetLastItemColor(),
-        std::to_string(toInt(_liveStatistics.numParticlesHistory.back())).c_str());
+        ImPlot::PlotLine(
+            "Energy particles",
+            _liveStatistics.timepointsHistory.data(),
+            _liveStatistics.numParticlesHistory.data(),
+            toInt(_liveStatistics.numParticlesHistory.size()));
+        ImPlot::AnnotateClamped(
+            _liveStatistics.timepointsHistory.back(),
+            _liveStatistics.numParticlesHistory.back(),
+            ImVec2(-10.0f, -labelPosY),
+            ImPlot::GetLastItemColor(),
+            std::to_string(toInt(_liveStatistics.numParticlesHistory.back())).c_str());
 
-    ImPlot::EndPlot();
+        ImPlot::EndPlot();
+    }
 
     ImPlot::SetNextPlotLimits(
         _liveStatistics.timepointsHistory.back() - _liveStatistics.history, _liveStatistics.timepointsHistory.back(), 0, maxTokens * 1.5, ImGuiCond_Always);
-    ImPlot::BeginPlot(
-        "##Tokens",
-        NULL,
-        NULL,
-        ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
-        0,
-        flags,
-        flags);
+    if (ImPlot::BeginPlot(
+            "##Tokens",
+            NULL,
+            NULL,
+            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
+            0,
+            flags,
+            flags)) {
 
-    ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(2));
-    ImPlot::PlotLine("Tokens", _liveStatistics.timepointsHistory.data(), _liveStatistics.numTokensHistory.data(), toInt(_liveStatistics.numTokensHistory.size()));
-    ImPlot::AnnotateClamped(
-        _liveStatistics.timepointsHistory.back(),
-        _liveStatistics.numTokensHistory.back(),
-        ImVec2(-10, 10),
-        ImPlot::GetLastItemColor(),
-        std::to_string(toInt(_liveStatistics.numTokensHistory.back())).c_str());
-    ImPlot::PopStyleColor();
+        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(2));
+        ImPlot::PlotLine(
+            "Tokens",
+            _liveStatistics.timepointsHistory.data(),
+            _liveStatistics.numTokensHistory.data(),
+            toInt(_liveStatistics.numTokensHistory.size()));
+        ImPlot::AnnotateClamped(
+            _liveStatistics.timepointsHistory.back(),
+            _liveStatistics.numTokensHistory.back(),
+            ImVec2(-10, 10),
+            ImPlot::GetLastItemColor(),
+            std::to_string(toInt(_liveStatistics.numTokensHistory.back())).c_str());
+        ImPlot::PopStyleColor();
 
-    ImPlot::EndPlot();
+        ImPlot::EndPlot();
+    }
 }
 
 void _StatisticsWindow::processLongtermStatistics()
@@ -158,42 +171,44 @@ void _StatisticsWindow::processLongtermStatistics()
         std::max(maxCells, maxParticles) * 1.5,
         ImGuiCond_Always);
     static ImPlotAxisFlags flags = 0;
-    ImPlot::BeginPlot(
-        "",
-        NULL,
-        NULL,
-        ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f),
-        0,
-        flags,
-        flags);
-    float labelPosY =
-        _longtermStatistics.numCellsHistory.back() > _longtermStatistics.numParticlesHistory.back() ? -10.0f : 10.0f;
+    if (ImPlot::BeginPlot(
+            "",
+            NULL,
+            NULL,
+            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f),
+            0,
+            flags,
+            flags)) {
+        float labelPosY = _longtermStatistics.numCellsHistory.back() > _longtermStatistics.numParticlesHistory.back()
+            ? -10.0f
+            : 10.0f;
 
-    ImPlot::PlotLine(
-        "Cells",
-        _longtermStatistics.timestepHistory.data(),
-        _longtermStatistics.numCellsHistory.data(),
-        toInt(_longtermStatistics.numCellsHistory.size()));
-    ImPlot::AnnotateClamped(
-        _longtermStatistics.timestepHistory.back(),
-        _longtermStatistics.numCellsHistory.back(),
-        ImVec2(-10.0f, labelPosY),
-        ImPlot::GetLastItemColor(),
-        std::to_string(toInt(_longtermStatistics.numCellsHistory.back())).c_str());
+        ImPlot::PlotLine(
+            "Cells",
+            _longtermStatistics.timestepHistory.data(),
+            _longtermStatistics.numCellsHistory.data(),
+            toInt(_longtermStatistics.numCellsHistory.size()));
+        ImPlot::AnnotateClamped(
+            _longtermStatistics.timestepHistory.back(),
+            _longtermStatistics.numCellsHistory.back(),
+            ImVec2(-10.0f, labelPosY),
+            ImPlot::GetLastItemColor(),
+            std::to_string(toInt(_longtermStatistics.numCellsHistory.back())).c_str());
 
-    ImPlot::PlotLine(
-        "Energy particles",
-        _longtermStatistics.timestepHistory.data(),
-        _longtermStatistics.numParticlesHistory.data(),
-        toInt(_longtermStatistics.numParticlesHistory.size()));
-    ImPlot::AnnotateClamped(
-        _longtermStatistics.timestepHistory.back(),
-        _longtermStatistics.numParticlesHistory.back(),
-        ImVec2(-10.0f, -labelPosY),
-        ImPlot::GetLastItemColor(),
-        std::to_string(toInt(_longtermStatistics.numParticlesHistory.back())).c_str());
+        ImPlot::PlotLine(
+            "Energy particles",
+            _longtermStatistics.timestepHistory.data(),
+            _longtermStatistics.numParticlesHistory.data(),
+            toInt(_longtermStatistics.numParticlesHistory.size()));
+        ImPlot::AnnotateClamped(
+            _longtermStatistics.timestepHistory.back(),
+            _longtermStatistics.numParticlesHistory.back(),
+            ImVec2(-10.0f, -labelPosY),
+            ImPlot::GetLastItemColor(),
+            std::to_string(toInt(_longtermStatistics.numParticlesHistory.back())).c_str());
 
-    ImPlot::EndPlot();
+        ImPlot::EndPlot();
+    }
 
     ImPlot::SetNextPlotLimits(
         _longtermStatistics.timestepHistory.front(),
@@ -201,30 +216,31 @@ void _StatisticsWindow::processLongtermStatistics()
         0,
         maxTokens * 1.5,
         ImGuiCond_Always);
-    ImPlot::BeginPlot(
-        "##Tokens",
-        NULL,
-        NULL,
-        ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
-        0,
-        flags,
-        flags);
+    if (ImPlot::BeginPlot(
+            "##Tokens",
+            NULL,
+            NULL,
+            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
+            0,
+            flags,
+            flags)) {
 
-    ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(2));
-    ImPlot::PlotLine(
-        "Tokens",
-        _longtermStatistics.timestepHistory.data(),
-        _longtermStatistics.numTokensHistory.data(),
-        toInt(_longtermStatistics.numTokensHistory.size()));
-    ImPlot::AnnotateClamped(
-        _longtermStatistics.timestepHistory.back(),
-        _longtermStatistics.numTokensHistory.back(),
-        ImVec2(-10, 10),
-        ImPlot::GetLastItemColor(),
-        std::to_string(toInt(_longtermStatistics.numTokensHistory.back())).c_str());
-    ImPlot::PopStyleColor();
+        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(2));
+        ImPlot::PlotLine(
+            "Tokens",
+            _longtermStatistics.timestepHistory.data(),
+            _longtermStatistics.numTokensHistory.data(),
+            toInt(_longtermStatistics.numTokensHistory.size()));
+        ImPlot::AnnotateClamped(
+            _longtermStatistics.timestepHistory.back(),
+            _longtermStatistics.numTokensHistory.back(),
+            ImVec2(-10, 10),
+            ImPlot::GetLastItemColor(),
+            std::to_string(toInt(_longtermStatistics.numTokensHistory.back())).c_str());
+        ImPlot::PopStyleColor();
 
-    ImPlot::EndPlot();
+        ImPlot::EndPlot();
+    }
 }
 
 void _StatisticsWindow::updateData()

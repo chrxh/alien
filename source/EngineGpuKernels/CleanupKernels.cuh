@@ -7,10 +7,6 @@
 #include "Cell.cuh"
 #include "Token.cuh"
 
-namespace {
-    __device__ const float FillLevelFactor = 2.0f / 3.0f;
-}
-
 template<typename Entity>
 __global__ void cleanupEntities(Array<Entity> entityArray, Array<Entity> newEntityArray)
 {
@@ -49,16 +45,16 @@ __global__ void cleanupEntities(Array<Entity> entityArray, Array<Entity> newEnti
     __syncthreads();
 }
 
-__global__ void cleanupParticles(SimulationData data)
+__global__ void
+cleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles)
 {
     //assumes that particlePointers are already cleaned up
-    auto& particlePointers = data.entities.particlePointers;
     PartitionData pointerBlock = calcPartition(particlePointers.getNumEntries(),
         threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     int numParticlesToCopy = pointerBlock.numElements();
     if (numParticlesToCopy > 0) {
-        auto newParticles = data.entitiesForCleanup.particles.getNewSubarray(numParticlesToCopy);
+        auto newParticles = particles.getNewSubarray(numParticlesToCopy);
 
         int newParticleIndex = 0;
         for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
@@ -72,16 +68,15 @@ __global__ void cleanupParticles(SimulationData data)
     }
 }
 
-__global__ void cleanupCellsStep1(SimulationData data)
+__global__ void cleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
 {
     //assumes that cellPointers are already cleaned up
-    auto& cellPointers = data.entities.cellPointers;
     PartitionData pointerBlock =
         calcPartition(cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     int numCellsToCopy = pointerBlock.numElements();
     if (numCellsToCopy > 0) {
-        auto newCells = data.entitiesForCleanup.cells.getNewSubarray(numCellsToCopy);
+        auto newCells = cells.getNewSubarray(numCellsToCopy);
 
         int newCellIndex = 0;
         for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
@@ -89,7 +84,7 @@ __global__ void cleanupCellsStep1(SimulationData data)
             auto& newCell = newCells[newCellIndex];
             newCell = *cellPointer;
 
-            cellPointer->tag = &newCell - data.entitiesForCleanup.cells.getArrayForDevice();    //save index of new cell in old cell
+            cellPointer->tag = &newCell - cells.getArray();    //save index of new cell in old cell
             cellPointer = &newCell;
 
             ++newCellIndex;
@@ -97,9 +92,8 @@ __global__ void cleanupCellsStep1(SimulationData data)
     }
 }
 
-__global__ void cleanupCellsStep2(SimulationData data)
+__global__ void cleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells)
 {
-    auto& cells = data.entitiesForCleanup.cells;
     {
         auto partition =
             calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -113,12 +107,11 @@ __global__ void cleanupCellsStep2(SimulationData data)
         }
     }
     {
-        auto& tokens  = data.entities.tokenPointers;
         auto partition =
-            calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+            calcPartition(tokenPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (auto& token = tokens.at(index)) {
+            if (auto& token = tokenPointers.at(index)) {
                 token->cell = &cells.at(token->cell->tag);
                 token->sourceCell = &cells.at(token->sourceCell->tag);
             }
@@ -224,27 +217,27 @@ __global__ void cleanupAfterSimulation(SimulationData data)
     KERNEL_CALL(cleanupEntities<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 
-    if (data.entities.particles.getNumEntries() > gpuConstants.MAX_PARTICLES * FillLevelFactor) {
+    if (data.entities.particles.getNumEntries() > data.entities.particles.getSize() * Const::ArrayFillLevelFactor) {
         data.entitiesForCleanup.particles.reset();
-        KERNEL_CALL(cleanupParticles, data);
+        KERNEL_CALL(cleanupParticles, data.entities.particlePointers, data.entitiesForCleanup.particles);
         data.entities.particles.swapContent(data.entitiesForCleanup.particles);
     }
 
-    if (data.entities.cells.getNumEntries() > gpuConstants.MAX_CELLS * FillLevelFactor) {
+    if (data.entities.cells.getNumEntries() > data.entities.cells.getSize() * Const::ArrayFillLevelFactor) {
         data.entitiesForCleanup.cells.reset();
-        KERNEL_CALL(cleanupCellsStep1, data);
-        KERNEL_CALL(cleanupCellsStep2, data);
+        KERNEL_CALL(cleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
+        KERNEL_CALL(cleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
         data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     }
         
-    if (data.entities.tokens.getNumEntries() > gpuConstants.MAX_TOKENS * FillLevelFactor) {
+    if (data.entities.tokens.getNumEntries() > data.entities.tokens.getSize() * Const::ArrayFillLevelFactor) {
         data.entitiesForCleanup.tokens.reset();
         KERNEL_CALL(cleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
         data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
     }
 
     /*
-        if (data.entities.strings.getNumBytes() > cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE * FillLevelFactor) {
+        if (data.entities.strings.getNumBytes() > cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE * Const::FillLevelFactor) {
             data.entitiesForCleanup.strings.reset();
             KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
             data.entities.strings.swapContent(data.entitiesForCleanup.strings);
@@ -268,12 +261,12 @@ __global__ void cleanupAfterDataManipulation(SimulationData data)
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 
     data.entitiesForCleanup.particles.reset();
-    KERNEL_CALL(cleanupParticles, data);
+    KERNEL_CALL(cleanupParticles, data.entities.particlePointers, data.entitiesForCleanup.particles);
     data.entities.particles.swapContent(data.entitiesForCleanup.particles);
 
     data.entitiesForCleanup.cells.reset();
-    KERNEL_CALL(cleanupCellsStep1, data);
-    KERNEL_CALL(cleanupCellsStep2, data);
+    KERNEL_CALL(cleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
+    KERNEL_CALL(cleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
     data.entities.cells.swapContent(data.entitiesForCleanup.cells);
 
     data.entitiesForCleanup.tokens.reset();
@@ -285,4 +278,26 @@ __global__ void cleanupAfterDataManipulation(SimulationData data)
     KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
     data.entities.strings.swapContent(data.entitiesForCleanup.strings);
 */
+}
+
+__global__ void copyEntities(SimulationData data)
+{
+    data.entitiesForCleanup.particlePointers.reset();
+    KERNEL_CALL(cleanupEntities<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
+
+    data.entitiesForCleanup.cellPointers.reset();
+    KERNEL_CALL(cleanupEntities<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
+
+    data.entitiesForCleanup.tokenPointers.reset();
+    KERNEL_CALL(cleanupEntities<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
+
+    data.entitiesForCleanup.particles.reset();
+    KERNEL_CALL(cleanupParticles, data.entitiesForCleanup.particlePointers, data.entitiesForCleanup.particles);
+
+    data.entitiesForCleanup.cells.reset();
+    KERNEL_CALL(cleanupCellsStep1, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.cells);
+    KERNEL_CALL(cleanupCellsStep2, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.cells);
+
+    data.entitiesForCleanup.tokens.reset();
+    KERNEL_CALL(cleanupTokens, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.tokens);
 }

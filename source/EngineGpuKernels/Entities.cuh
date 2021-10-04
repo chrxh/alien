@@ -18,12 +18,20 @@ struct Entities
 
     void init(GpuConstants const& gpuConstants)
     {
+        cellPointers.init();
+        cells.init();
+        tokenPointers.init();
+        tokens.init();
+        particles.init();
+        particlePointers.init();
+/*
         cellPointers.init(gpuConstants.MAX_CELLPOINTERS);
         cells.init(gpuConstants.MAX_CELLS);
         tokenPointers.init(gpuConstants.MAX_TOKENPOINTERS);
         tokens.init(gpuConstants.MAX_TOKENS);
         particles.init(gpuConstants.MAX_PARTICLES);
         particlePointers.init(gpuConstants.MAX_PARTICLEPOINTERS);
+*/
         strings.init(gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE);
     }
 
