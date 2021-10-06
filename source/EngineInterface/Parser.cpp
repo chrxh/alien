@@ -137,7 +137,6 @@ boost::property_tree::ptree Parser::encode(GeneralSettings const& parameters)
     tree.add("worldSize.x", toString(parameters.worldSize.x));
     tree.add("worldSize.y", toString(parameters.worldSize.y));
 
-    tree.add("cudaSettings.metadataDynamicMemorySize", toString(parameters.gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE));
     tree.add("cudaSettings.numBlocks", toString(parameters.gpuConstants.NUM_BLOCKS));
     tree.add("cudaSettings.numThreadsPerBlock", toString(parameters.gpuConstants.NUM_THREADS_PER_BLOCK));
     return tree;
@@ -149,7 +148,6 @@ GeneralSettings Parser::decodeGeneralSettings(boost::property_tree::ptree const&
     result.worldSize.x = tree.get<int>("worldSize.x");
     result.worldSize.y = tree.get<int>("worldSize.y");
 
-    result.gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE = tree.get<int>("cudaSettings.metadataDynamicMemorySize");
     result.gpuConstants.NUM_BLOCKS = tree.get<int>("cudaSettings.numBlocks");
     result.gpuConstants.NUM_THREADS_PER_BLOCK = tree.get<int>("cudaSettings.numThreadsPerBlock");
 

@@ -62,7 +62,7 @@ DataAccessTO _AccessDataTOCache::getNewDataTO()
         result.cells = new CellAccessTO[_arraySizes->cellArraySize];
         result.particles = new ParticleAccessTO[_arraySizes->particleArraySize];
         result.tokens = new TokenAccessTO[_arraySizes->tokenArraySize];
-        result.stringBytes = new char[_gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE];
+        result.stringBytes = new char[Const::MetadataMemorySize];
         return result;
     } catch (std::bad_alloc const&) {
         throw BugReportException("There is not sufficient CPU memory available.");

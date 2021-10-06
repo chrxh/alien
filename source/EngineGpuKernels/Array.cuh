@@ -55,11 +55,12 @@ public:
         T* data = nullptr;
         checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
 
-        if (getSize_host() > 0) {
-            CudaMemoryManager::getInstance().freeMemory(data);
+        auto size = getSize_host();
+        if (size > 0) {
+            CudaMemoryManager::getInstance().freeMemory(size, data);
         }
-        CudaMemoryManager::getInstance().freeMemory(_data);
-        CudaMemoryManager::getInstance().freeMemory(_numEntries);
+        CudaMemoryManager::getInstance().freeMemory(1, _data);
+        CudaMemoryManager::getInstance().freeMemory(1, _numEntries);
     }
 
     __device__ __inline__ T* getArray() const { return *_data; }
@@ -158,7 +159,7 @@ public:
         if (size > 0) {
             T* data;
             checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(data);
+            CudaMemoryManager::getInstance().freeMemory(size, data);
         }
         T* newData;
         CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
