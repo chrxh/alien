@@ -57,6 +57,14 @@ public:
     ENGINEGPUKERNELS_EXPORT void moveSelection(float2 const& displacement);
 
     ENGINEGPUKERNELS_EXPORT GpuConstants getGpuConstants() const;
+    struct ArraySizes
+    {
+        int cellArraySize;
+        int particleArraySize;
+        int tokenArraySize;
+    };
+    ENGINEGPUKERNELS_EXPORT ArraySizes getArraySizes() const;
+
     ENGINEGPUKERNELS_EXPORT MonitorData getMonitorData();
     ENGINEGPUKERNELS_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEGPUKERNELS_EXPORT void setCurrentTimestep(uint64_t timestep);
@@ -65,9 +73,11 @@ public:
 
     ENGINEGPUKERNELS_EXPORT void clear();
 
+    ENGINEGPUKERNELS_EXPORT void
+    resizeArraysIfNecessary(ArraySizes const& additionals);
+
 private:
     void setGpuConstants(GpuConstants const& cudaConstants);
-    void resizeIfNecessary(int additionalCells, int additionalParticles, int additionalTokens);
 
 private:
     std::atomic<uint64_t> _currentTimestep;

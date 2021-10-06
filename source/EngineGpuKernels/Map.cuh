@@ -65,41 +65,22 @@ template <typename T>
 class BasicMap : public MapInfo
 {
 public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries)
-    {
-        MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<T>(size.x * size.y, _map);
-        _mapEntries.init(maxEntries);
-
-        std::vector<T> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T) * size.x * size.y, cudaMemcpyHostToDevice));
-    }
-
-    __device__ __inline__ void reset() { _mapEntries.reset(); }
-
-    __host__ __inline__ void free()
-    {
-        CudaMemoryManager::getInstance().freeMemory(_map);
-        _mapEntries.free();
-    }
-
-protected:
-    T* _map;
-    Array<int> _mapEntries;
 };
 
 class CellMap : public MapInfo
 {
 public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries)
+    __host__ __inline__ void init(int2 const& size)
     {
         MapInfo::init(size);
         CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y * 2, _map);
-        _mapEntries.init(maxEntries);
+        _mapEntries.init();
 
         std::vector<Cell*> hostMap(size.x * size.y * 2, 0);
         checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y * 2, cudaMemcpyHostToDevice));
     }
+
+    __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
 
     __device__ __inline__ void reset() { _mapEntries.reset(); }
 
@@ -209,9 +190,29 @@ private:
     Array<int> _mapEntries;
 };
 
-class ParticleMap : public BasicMap<Particle*>
+class ParticleMap : public MapInfo
 {
 public:
+    __host__ __inline__ void init(int2 const& size)
+    {
+        MapInfo::init(size);
+        CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, _map);
+        _mapEntries.init();
+
+        std::vector<Particle*> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Particle*) * size.x * size.y, cudaMemcpyHostToDevice));
+    }
+
+    __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
+
+    __device__ __inline__ void reset() { _mapEntries.reset(); }
+
+    __host__ __inline__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_map);
+        _mapEntries.free();
+    }
+
     __device__ __inline__ void set_block(int numEntities, Particle** entities)
     {
         if (0 == numEntities) {
@@ -253,4 +254,8 @@ public:
             _map[mapEntry] = nullptr;
         }
     }
+
+private:
+    Particle** _map;
+    Array<int> _mapEntries;
 };

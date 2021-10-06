@@ -109,7 +109,9 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
 {
     CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
-    DataAccessTO dataTO = _dataTOCache->getDataTO();
+    auto arraySizes = _cudaSimulation->getArraySizes();
+    DataAccessTO dataTO =
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     _cudaSimulation->getSimulationData(
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
@@ -132,7 +134,27 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
     CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
 
-    DataAccessTO dataTO = _dataTOCache->getDataTO();
+    int numCells = 0;
+    int numParticles = 0;
+    int numTokens = 0;
+    for (auto const& cell : dataToUpdate.cells) {
+        if (cell.isAdded()) {
+            ++numCells;
+            if (cell->tokens.getOptionalValue()) {
+                numTokens += toInt(cell->tokens.getValue().size());
+            }
+        }
+    }
+    for (auto const& particle : dataToUpdate.particles) {
+        if (particle.isAdded()) {
+            ++numParticles;
+        }
+    }
+    _cudaSimulation->resizeArraysIfNecessary({numCells, numParticles, numTokens});
+
+    auto arraySizes = _cudaSimulation->getArraySizes();
+    DataAccessTO dataTO =
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     _cudaSimulation->getSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
 
     DataConverter converter(dataTO, _parameters, _gpuConstants);

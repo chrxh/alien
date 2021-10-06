@@ -32,7 +32,8 @@ struct Entities
         particles.init(gpuConstants.MAX_PARTICLES);
         particlePointers.init(gpuConstants.MAX_PARTICLEPOINTERS);
 */
-        strings.init(gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE);
+        strings.init();
+        strings.resize(gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE);
     }
 
     void free()
