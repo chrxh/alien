@@ -14,8 +14,20 @@ _AccessDataTOCache::~_AccessDataTOCache()
     }
 }
 
-DataAccessTO _AccessDataTOCache::getDataTO()
+DataAccessTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
 {
+    if (!_arraySizes || * _arraySizes != arraySizes) {
+        for (DataAccessTO const& dataTO : _freeDataTOs) {
+            deleteDataTO(dataTO);
+        }
+        for (DataAccessTO const& dataTO : _usedDataTOs) {
+            deleteDataTO(dataTO);
+        }
+        _freeDataTOs.clear();
+        _usedDataTOs.clear();
+        _arraySizes = arraySizes;
+    }
+
     DataAccessTO result;
     if (!_freeDataTOs.empty()) {
         result = *_freeDataTOs.begin();
@@ -47,9 +59,9 @@ DataAccessTO _AccessDataTOCache::getNewDataTO()
         result.numParticles = new int;
         result.numTokens = new int;
         result.numStringBytes = new int;
-        result.cells = new CellAccessTO[_gpuConstants.MAX_CELLS];
-        result.particles = new ParticleAccessTO[_gpuConstants.MAX_PARTICLES];
-        result.tokens = new TokenAccessTO[_gpuConstants.MAX_TOKENS];
+        result.cells = new CellAccessTO[_arraySizes->cellArraySize];
+        result.particles = new ParticleAccessTO[_arraySizes->particleArraySize];
+        result.tokens = new TokenAccessTO[_arraySizes->tokenArraySize];
         result.stringBytes = new char[_gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE];
         return result;
     } catch (std::bad_alloc const&) {

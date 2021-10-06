@@ -55,7 +55,9 @@ public:
         T* data = nullptr;
         checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
 
-        CudaMemoryManager::getInstance().freeMemory(data);
+        if (getSize_host() > 0) {
+            CudaMemoryManager::getInstance().freeMemory(data);
+        }
         CudaMemoryManager::getInstance().freeMemory(_data);
         CudaMemoryManager::getInstance().freeMemory(_numEntries);
     }
@@ -115,7 +117,7 @@ public:
 
     __device__ __inline__ T* getNewSubarray(int size)
     {
-        int oldIndex = atomicAdd(_numEntries, size);
+        int oldIndex = atomicAdd(_numEntries, static_cast<int>(size));
         if (oldIndex + size - 1 >= *_size) {
             atomicAdd(_numEntries, -size);
             printf("Not enough fixed memory!\n");
@@ -146,25 +148,6 @@ public:
         return getNumEntries_host() + arraySizeInc > getSize_host() * Const::ArrayFillLevelFactor;
     }
 
-/*
-    __host__ __inline__ void resize(int arraySizeInc, int& origSize, int& newSize) const
-    {
-        origSize = getSize_host();
-        auto numEntries = getNumEntries_host();
-
-        if (origSize > 0) {
-            T* data;
-            checkCudaErrors(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(data);
-        }
-        newSize = (numEntries + arraySizeInc) * 2;
-        T* newData;
-        CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
-        checkCudaErrors(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemcpy(_size, &newSize, sizeof(int), cudaMemcpyHostToDevice));
-    }
-
-*/
     __host__ __inline__ void resize(int newSize) const
     {
         auto size = getSize_host();

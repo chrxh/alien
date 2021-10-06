@@ -137,9 +137,6 @@ boost::property_tree::ptree Parser::encode(GeneralSettings const& parameters)
     tree.add("worldSize.x", toString(parameters.worldSize.x));
     tree.add("worldSize.y", toString(parameters.worldSize.y));
 
-    tree.add("cudaSettings.maxCells", toString(parameters.gpuConstants.MAX_CELLS));
-    tree.add("cudaSettings.maxParticles", toString(parameters.gpuConstants.MAX_PARTICLES));
-    tree.add("cudaSettings.maxTokens", toString(parameters.gpuConstants.MAX_TOKENS));
     tree.add("cudaSettings.metadataDynamicMemorySize", toString(parameters.gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE));
     tree.add("cudaSettings.numBlocks", toString(parameters.gpuConstants.NUM_BLOCKS));
     tree.add("cudaSettings.numThreadsPerBlock", toString(parameters.gpuConstants.NUM_THREADS_PER_BLOCK));
@@ -152,15 +149,9 @@ GeneralSettings Parser::decodeGeneralSettings(boost::property_tree::ptree const&
     result.worldSize.x = tree.get<int>("worldSize.x");
     result.worldSize.y = tree.get<int>("worldSize.y");
 
-    result.gpuConstants.MAX_CELLS = tree.get<int>("cudaSettings.maxCells");
-    result.gpuConstants.MAX_PARTICLES = tree.get<int>("cudaSettings.maxParticles");
-    result.gpuConstants.MAX_TOKENS = tree.get<int>("cudaSettings.maxTokens");
     result.gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE = tree.get<int>("cudaSettings.metadataDynamicMemorySize");
     result.gpuConstants.NUM_BLOCKS = tree.get<int>("cudaSettings.numBlocks");
     result.gpuConstants.NUM_THREADS_PER_BLOCK = tree.get<int>("cudaSettings.numThreadsPerBlock");
 
-    result.gpuConstants.MAX_CELLPOINTERS = result.gpuConstants.MAX_CELLS * 10;
-    result.gpuConstants.MAX_PARTICLEPOINTERS = result.gpuConstants.MAX_PARTICLES * 10;
-    result.gpuConstants.MAX_TOKENPOINTERS = result.gpuConstants.MAX_TOKENS * 10;
     return result;
 }
