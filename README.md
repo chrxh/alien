@@ -84,9 +84,9 @@ The following third-party libaries are necessary and should be installed:
 ## Future
 Currently, version 3 is under development. The progress can be followed on the feature branch `features/version3`. Among other things the following fundamental updates are planned:
 - Switch from a rigid body to a particle engine
-- A more intuitive user interface created with `Dear ImGui` instead of `Qt`
-- Simulation parameters will be simplified and can be adjusted during simulation using sliders
-- Various model extensions (e.g. muscle cells).
+- A more intuitive user interface created with `Dear ImGui`
+- Most CUDA specific settings will be determined automatically
+- Model extensions (e.g. muscle cells).
 - Live diagrams for statistics
 
 You can get a first impression of the particle engine in a [preview video](https://www.youtube.com/watch?v=DygVMA4sybo).
