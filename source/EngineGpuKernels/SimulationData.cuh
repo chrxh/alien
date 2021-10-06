@@ -29,13 +29,13 @@ struct SimulationData
     int numPixels;
     unsigned int* imageData;
 
-    void init(int2 const& universeSize, GpuConstants const& gpuConstants, int timestep_)
+    void init(int2 const& universeSize, int newTimestep)
     {
         size = universeSize;
-        timestep = timestep_;
+        timestep = newTimestep;
 
-        entities.init(gpuConstants);
-        entitiesForCleanup.init(gpuConstants);
+        entities.init();
+        entitiesForCleanup.init();
         cellFunctionData.init(universeSize);
         cellMap.init(size);
         particleMap.init(size);
@@ -50,7 +50,7 @@ struct SimulationData
 
     void resizeImage(int2 const& newSize)
     {
-        CudaMemoryManager::getInstance().freeMemory(imageData);
+        CudaMemoryManager::getInstance().freeMemory(numPixels * 2, imageData);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(
             max(newSize.x * newSize.y, size.x * size.y)*2, imageData);
         numPixels = newSize.x * newSize.y;
@@ -127,8 +127,8 @@ struct SimulationData
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         dynamicMemory.free();
 
-        CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().freeMemory(numOperations);
+        CudaMemoryManager::getInstance().freeMemory(numPixels * 2, imageData);
+        CudaMemoryManager::getInstance().freeMemory(1, numOperations);
     }
 
 private:

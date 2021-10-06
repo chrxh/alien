@@ -32,7 +32,7 @@ public:
         if (_size > 0) {
             unsigned char* data = nullptr;
             checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(data);
+            CudaMemoryManager::getInstance().freeMemory(getNumBytes_host(), data);
         }
 
         _size = size;
@@ -47,10 +47,10 @@ public:
         if (_size > 0) {
             unsigned char* data = nullptr;
             checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(data);
+            CudaMemoryManager::getInstance().freeMemory(getNumBytes_host(), data);
         }
-        CudaMemoryManager::getInstance().freeMemory(_data);
-        CudaMemoryManager::getInstance().freeMemory(_bytesOccupied);
+        CudaMemoryManager::getInstance().freeMemory(1, _data);
+        CudaMemoryManager::getInstance().freeMemory(1, _bytesOccupied);
     }
 
     template<typename T>
@@ -71,6 +71,11 @@ public:
     }
 
     __device__ __inline__ int getNumBytes() { return *_bytesOccupied; }
+    __host__ __inline__ int getNumBytes_host() {
+        int result;
+        checkCudaErrors(cudaMemcpy(&result, _bytesOccupied, sizeof(int), cudaMemcpyDeviceToHost));
+        return result;
+    }
 
     __device__ __inline__ void reset() { *_bytesOccupied = 0; }
 
