@@ -37,11 +37,10 @@ struct SimulationData
         entities.init(gpuConstants);
         entitiesForCleanup.init(gpuConstants);
         cellFunctionData.init(universeSize);
-        cellMap.init(size, gpuConstants.MAX_CELLPOINTERS);
-        particleMap.init(size, gpuConstants.MAX_PARTICLEPOINTERS);
+        cellMap.init(size);
+        particleMap.init(size);
 
-        int upperBoundDynamicMemory = sizeof(Operation) * gpuConstants.MAX_CELLPOINTERS + 1000;
-        dynamicMemory.init(upperBoundDynamicMemory);
+        dynamicMemory.init();
         numberGen.init(40312357);
 
         numPixels = size.x * size.y;
@@ -97,6 +96,13 @@ struct SimulationData
         entities.particlePointers.resize(entitiesForCleanup.particlePointers.getSize_host());
         entities.tokens.resize(entitiesForCleanup.tokens.getSize_host());
         entities.tokenPointers.resize(entitiesForCleanup.tokenPointers.getSize_host());
+
+        auto cellArraySize = entities.cells.getSize_host();
+        cellMap.resize(cellArraySize);
+        particleMap.resize(cellArraySize);
+
+        int upperBoundDynamicMemory = sizeof(Operation) * (cellArraySize + 1000);
+        dynamicMemory.resize(upperBoundDynamicMemory);
     }
 
     void swap()

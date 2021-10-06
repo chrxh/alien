@@ -332,9 +332,6 @@ CellDescription DataConverter::createCellDescription(int cellIndex) const
 void DataConverter::addParticle(ParticleDescription const & particleDesc)
 {
     auto particleIndex = (*_dataTO.numParticles)++;
-    if (particleIndex >= _gpuConstants.MAX_PARTICLES) {
-        throw BugReportException("Array size for particles is chosen too small.");
-    }
 
 	ParticleAccessTO& particleTO = _dataTO.particles[particleIndex];
 	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
@@ -522,9 +519,6 @@ void DataConverter::addCell(
     unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
 	int cellIndex = (*_dataTO.numCells)++;
-    if (cellIndex >= _gpuConstants.MAX_CELLS) {
-        throw BugReportException("Array size for cells is chosen too small.");
-    }
 	CellAccessTO& cellTO = _dataTO.cells[cellIndex];
     cellTO.id = cellDesc.id == 0 ? NumberGenerator::getInstance().getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos->x, cellDesc.pos->y };
