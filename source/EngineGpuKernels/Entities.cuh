@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineInterface/GpuConstants.h"
+
 #include "Base.cuh"
 #include "Definitions.cuh"
 #include "DynamicMemory.cuh"
@@ -16,7 +18,7 @@ struct Entities
 
     DynamicMemory strings;
 
-    void init(GpuConstants const& gpuConstants)
+    void init()
     {
         cellPointers.init();
         cells.init();
@@ -24,16 +26,8 @@ struct Entities
         tokens.init();
         particles.init();
         particlePointers.init();
-/*
-        cellPointers.init(gpuConstants.MAX_CELLPOINTERS);
-        cells.init(gpuConstants.MAX_CELLS);
-        tokenPointers.init(gpuConstants.MAX_TOKENPOINTERS);
-        tokens.init(gpuConstants.MAX_TOKENS);
-        particles.init(gpuConstants.MAX_PARTICLES);
-        particlePointers.init(gpuConstants.MAX_PARTICLEPOINTERS);
-*/
         strings.init();
-        strings.resize(gpuConstants.METADATA_DYNAMIC_MEMORY_SIZE);
+        strings.resize(Const::MetadataMemorySize);
     }
 
     void free()

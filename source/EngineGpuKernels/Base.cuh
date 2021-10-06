@@ -84,9 +84,9 @@ public:
 
     void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_currentIndex);
-        CudaMemoryManager::getInstance().freeMemory(_array);
-        CudaMemoryManager::getInstance().freeMemory(_currentId);
+        CudaMemoryManager::getInstance().freeMemory(1, _currentIndex);
+        CudaMemoryManager::getInstance().freeMemory(_size, _array);
+        CudaMemoryManager::getInstance().freeMemory(1, _currentId);
     }
 
 private:
