@@ -38,6 +38,7 @@ private:
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
     ModeWindow _modeWindow;
+    GpuSettingsWindow _gpuSettingsWindow;
     Viewport _viewport;
 
     StyleRepository _styleRepository;

@@ -342,6 +342,14 @@ GpuConstants _CudaSimulation::getGpuConstants() const
     return _gpuConstants;
 }
 
+void _CudaSimulation::setGpuConstants(GpuConstants const& gpuConstants_)
+{
+    _gpuConstants = gpuConstants_;
+
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuConstants), 0, cudaMemcpyHostToDevice));
+}
+
 auto _CudaSimulation::getArraySizes() const -> ArraySizes
 {
     return {
@@ -376,14 +384,6 @@ void _CudaSimulation::setSimulationParameters(SimulationParameters const& parame
 void _CudaSimulation::clear()
 {
     GPU_FUNCTION(cudaClearData, *_cudaSimulationData);
-}
-
-void _CudaSimulation::setGpuConstants(GpuConstants const& gpuConstants_)
-{
-    _gpuConstants = gpuConstants_;
-
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuConstants), 0, cudaMemcpyHostToDevice));
 }
 
 void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)

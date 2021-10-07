@@ -160,6 +160,7 @@
     <ClInclude Include="..\..\external\ImPlot\implot_internal.h" />
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
+    <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
     <ClInclude Include="..\..\source\Gui\Resources.h" />
     <ClInclude Include="..\..\source\Gui\SpatialControlWindow.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="..\..\source\Gui\StyleRepository.h" />
     <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h" />
     <ClInclude Include="..\..\source\Gui\Viewport.h" />
+    <ClInclude Include="..\..\source\Gui\Widgets.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\glad\src\glad.c" />
@@ -187,6 +189,7 @@
     <ClCompile Include="..\..\external\ImPlot\implot.cpp" />
     <ClCompile Include="..\..\external\ImPlot\implot_demo.cpp" />
     <ClCompile Include="..\..\external\ImPlot\implot_items.cpp" />
+    <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StatisticsWindow.cpp" />
@@ -200,6 +203,7 @@
     <ClCompile Include="..\..\source\Gui\StyleRepository.cpp" />
     <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\Viewport.cpp" />
+    <ClCompile Include="..\..\source\Gui\Widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.vcxproj">

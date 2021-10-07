@@ -16,7 +16,7 @@ void _SimulationController::newSimulation(
     _generalSettings = generalSettings;
     _parameters = parameters;
     _symbolMap = symbolMap;
-    _worker.newSimulation(generalSettings.worldSize, timestep, parameters, generalSettings.gpuConstants);
+    _worker.newSimulation(generalSettings.worldSize, timestep, parameters, _gpuSettings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 }
@@ -98,6 +98,17 @@ void _SimulationController::setSimulationParameters_async(
 {
     _parameters = parameters;
     _worker.setSimulationParameters_async(parameters);
+}
+
+GpuConstants _SimulationController::getGpuSettings() const
+{
+    return _gpuSettings;
+}
+
+void _SimulationController::setGpuSettings_async(GpuConstants const& gpuSettings)
+{
+    _gpuSettings = gpuSettings;
+    _worker.setGpuSettings_async(gpuSettings);
 }
 
 void _SimulationController::applyForce_async(

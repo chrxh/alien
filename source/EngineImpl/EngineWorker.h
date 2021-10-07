@@ -57,9 +57,10 @@ public:
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
+    ENGINEIMPL_EXPORT void setGpuSettings_async(GpuConstants const& gpuSettings);
+
     ENGINEIMPL_EXPORT void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
-
 
     void runThreadLoop();
     void runSimulation();
@@ -68,6 +69,7 @@ public:
 
 private:
     void updateMonitorDataIntern();
+    void processJobs();
 
     CudaSimulation _cudaSimulation;
 
@@ -83,6 +85,8 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     boost::optional<SimulationParameters> _updateSimulationParametersJob;
+    boost::optional<GpuConstants> _updateGpuSettingsJob;
+
     struct ApplyForceJob
     {
         RealVector2D start;

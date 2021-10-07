@@ -36,6 +36,9 @@ using StatisticsWindow = boost::shared_ptr<_StatisticsWindow>;
 class _ModeWindow;
 using ModeWindow = boost::shared_ptr<_ModeWindow>;
 
+class _GpuSettingsWindow;
+using GpuSettingsWindow = boost::shared_ptr<_GpuSettingsWindow>;
+
 struct GLFWwindow;
 struct ImFont;
 
