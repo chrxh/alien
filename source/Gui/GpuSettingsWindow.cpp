@@ -60,24 +60,22 @@ void _GpuSettingsWindow::process()
         ImGui::Spacing();
         ImGui::Spacing();
 
-        //total threads
-        gpuSettings.NUM_BLOCKS = std::max(gpuSettings.NUM_BLOCKS, 1);
-        gpuSettings.NUM_THREADS_PER_BLOCK = std::max(gpuSettings.NUM_THREADS_PER_BLOCK, 1);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-        int totalThreads = gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK;
-        char text[100] = "test";
-        strcpy_s(text, StringFormatter::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
-        ImGui::InputText("##", text, IM_ARRAYSIZE(text), ImGuiInputTextFlags_ReadOnly);
-        ImGui::PopItemWidth();
-
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("Total threads");
-
         ImGui::EndTable();
     }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    gpuSettings.NUM_BLOCKS = std::max(gpuSettings.NUM_BLOCKS, 1);
+    gpuSettings.NUM_THREADS_PER_BLOCK = std::max(gpuSettings.NUM_THREADS_PER_BLOCK, 1);
+
+    ImGui::Text("Total threads");
+    ImGui::PushFont(_styleRepository->getLargeFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    ImGui::Text(StringFormatter::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
 
     ImGui::End();
 
