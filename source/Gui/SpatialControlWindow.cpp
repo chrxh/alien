@@ -45,44 +45,28 @@ void _SpatialControlWindow::process()
     ImGui::Spacing();
     ImGui::Spacing();
 
-    if (ImGui::BeginTable(
-            "##", 2, ImGuiTableFlags_SizingStretchProp /*ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/)) {
+    ImGui::Text("World size");
+    ImGui::PushFont(_styleRepository->getLargeFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    auto worldSize = _simController->getWorldSize();
+    ImGui::Text((StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
 
-        //world size
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text("World size");
+    ImGui::Text("Zoom factor");
+    ImGui::PushFont(_styleRepository->getLargeFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    ImGui::Text(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
 
-        ImGui::TableSetColumnIndex(1);
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        auto worldSize = _simController->getWorldSize();
-        ImGui::Text((StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
-        ImGui::PopStyleColor();
-
-        //zoom factor
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Zoom factor");
-
-        ImGui::TableSetColumnIndex(1);
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::Text(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
-        ImGui::PopStyleColor();
-
-        //view center position
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Center position");
-
-        ImGui::TableSetColumnIndex(1);
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        auto centerPos = _viewport->getCenterInWorldPos();
-        ImGui::Text(
-            (StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
-        ImGui::PopStyleColor();
-
-        ImGui::EndTable();
-    }
+    ImGui::Text("Center position");
+    ImGui::PushFont(_styleRepository->getLargeFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    auto centerPos = _viewport->getCenterInWorldPos();
+    ImGui::Text((StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
 
     processZoomSensitivitySlider();
 
