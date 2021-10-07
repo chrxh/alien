@@ -81,7 +81,7 @@ void _TemporalControlWindow::processTpsInfo()
 
     ImGui::PushFont(_styleRepository->getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
-    ImGui::Text(StringFormatter::format(_simController->getTps()).c_str());
+    ImGui::Text(StringFormatter::format(_simController->getTps(), 1).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }

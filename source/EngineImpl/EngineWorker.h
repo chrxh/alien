@@ -52,7 +52,7 @@ public:
     ENGINEIMPL_EXPORT int getTpsRestriction() const;
     ENGINEIMPL_EXPORT void setTpsRestriction(int value);
 
-    ENGINEIMPL_EXPORT int getTps() const;
+    ENGINEIMPL_EXPORT float getTps() const;
     ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
@@ -98,7 +98,7 @@ private:
 
     //time step measurements
     std::atomic<int> _tpsRestriction = 0;   //0 = no restriction
-    std::atomic<int> _tps;
+    std::atomic<float> _tps;
     boost::optional<std::chrono::steady_clock::time_point> _timepoint;
     int _timestepsSinceTimepoint = 0;
   

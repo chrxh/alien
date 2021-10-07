@@ -63,7 +63,7 @@ public:
     ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;
     ENGINEIMPL_EXPORT void setTpsRestriction(boost::optional<int> const& value);
 
-    ENGINEIMPL_EXPORT int getTps() const;
+    ENGINEIMPL_EXPORT float getTps() const;
 
 private:
     GeneralSettings _generalSettings;

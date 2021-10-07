@@ -200,7 +200,7 @@ void EngineWorker::setTpsRestriction(int value)
     _tpsRestriction.store(value);
 }
 
-int EngineWorker::getTps() const
+float EngineWorker::getTps() const
 {
     return _tps.load();
 }
@@ -289,9 +289,9 @@ void EngineWorker::runThreadLoop()
                 if (duration > 199) {
                     _timepoint = timepoint;
                     if (duration < 350) {
-                        _tps.store(_timestepsSinceTimepoint * 5 * 200 / duration);
+                        _tps.store(toFloat(_timestepsSinceTimepoint) * 5 * 200 / duration);
                     } else {
-                        _tps.store(1000 / duration);
+                        _tps.store(1000.0f / duration);
                     }
                     _timestepsSinceTimepoint = 0;
                 }
