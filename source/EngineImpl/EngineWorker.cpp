@@ -225,6 +225,15 @@ void EngineWorker::setSimulationParameters_async(SimulationParameters const& par
     _conditionForWorkerLoop.notify_all();
 }
 
+void EngineWorker::setGpuSettings_async(GpuConstants const& gpuSettings)
+{
+    {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+        _updateGpuSettingsJob = gpuSettings;
+    }
+    _conditionForWorkerLoop.notify_all();
+}
+
 void EngineWorker::applyForce_async(
     RealVector2D const& start,
     RealVector2D const& end,
@@ -293,23 +302,7 @@ void EngineWorker::runThreadLoop()
             updateMonitorDataIntern();
             ++_timestepsSinceTimepoint;
         }
-
-        std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
-        if (_updateSimulationParametersJob) {
-            _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
-            _updateSimulationParametersJob = boost::none;
-        }
-        if (!_applyForceJobs.empty()) {
-            for (auto const& applyForceJob : _applyForceJobs) {
-                _cudaSimulation->applyForce(
-                    {{applyForceJob.start.x, applyForceJob.start.y},
-                     {applyForceJob.end.x, applyForceJob.end.y},
-                     {applyForceJob.force.x, applyForceJob.force.y},
-                     applyForceJob.radius,
-                     false});
-            }
-            _applyForceJobs.clear();
-        }
+        processJobs();
     }
 }
 
@@ -343,5 +336,29 @@ void EngineWorker::updateMonitorDataIntern()
         _totalInternalEnergy.store(data.totalInternalEnergy);
 
         _lastMonitorUpdate = now;
+    }
+}
+
+void EngineWorker::processJobs()
+{
+    std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
+    if (_updateSimulationParametersJob) {
+        _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
+        _updateSimulationParametersJob = boost::none;
+    }
+    if (_updateGpuSettingsJob) {
+        _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
+        _updateGpuSettingsJob = boost::none;
+    }
+    if (!_applyForceJobs.empty()) {
+        for (auto const& applyForceJob : _applyForceJobs) {
+            _cudaSimulation->applyForce(
+                {{applyForceJob.start.x, applyForceJob.start.y},
+                 {applyForceJob.end.x, applyForceJob.end.y},
+                 {applyForceJob.force.x, applyForceJob.force.y},
+                 applyForceJob.radius,
+                 false});
+        }
+        _applyForceJobs.clear();
     }
 }

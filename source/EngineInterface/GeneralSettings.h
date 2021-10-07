@@ -9,5 +9,4 @@
 struct GeneralSettings
 {
     IntVector2D worldSize;
-    GpuConstants gpuConstants;
 };

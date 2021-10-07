@@ -46,7 +46,7 @@ void _SpatialControlWindow::process()
     ImGui::Spacing();
 
     if (ImGui::BeginTable(
-            "##table1", 2, ImGuiTableFlags_SizingStretchProp /*ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/)) {
+            "##", 2, ImGuiTableFlags_SizingStretchProp /*ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg*/)) {
 
         //world size
         ImGui::TableNextRow();
@@ -145,28 +145,28 @@ void _SpatialControlWindow::processResizeDialog()
         ImGui::OpenPopup("Resize world");
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("Resize world", NULL, 0)) {
-            if (ImGui::BeginTable(
-                    "##", 2, ImGuiTableFlags_SizingStretchProp)) {
+            if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
 
                 //width
                 ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::Text("Width");
 
-                ImGui::TableSetColumnIndex(1);
+                ImGui::TableSetColumnIndex(0);
                 ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
                 ImGui::InputInt("##width", &_width);
                 ImGui::PopItemWidth();
 
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("Width");
+
                 //height
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::Text("Height");
-
-                ImGui::TableSetColumnIndex(1);
                 ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
                 ImGui::InputInt("##height", &_height);
                 ImGui::PopItemWidth();
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("Height");
 
                 ImGui::EndTable();
             }
