@@ -267,11 +267,11 @@ void _MainWindow::processMenubar()
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
-            if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
-                _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
-            }
             if (ImGui::MenuItem("GPU settings", "", _gpuSettingsWindow->isOn())) {
                 _gpuSettingsWindow->setOn(!_gpuSettingsWindow->isOn());
+            }
+            if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
+                _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
             ImGui::EndMenu();
         }

@@ -151,7 +151,7 @@ void _SimulationController::setTpsRestriction(boost::optional<int> const& value)
     _worker.setTpsRestriction(value ? *value : 0);
 }
 
-int _SimulationController::getTps() const
+float _SimulationController::getTps() const
 {
     return _worker.getTps();
 }
