@@ -31,6 +31,7 @@
 #include "SpatialControlWindow.h"
 #include "SimulationParametersWindow.h"
 #include "StatisticsWindow.h"
+#include "GpuSettingsWindow.h"
 #include "Viewport.h"
 
 namespace
@@ -97,6 +98,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
     _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
+    _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -268,6 +270,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
+            if (ImGui::MenuItem("GPU settings", "", _gpuSettingsWindow->isOn())) {
+                _gpuSettingsWindow->setOn(!_gpuSettingsWindow->isOn());
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools")) {
@@ -349,6 +354,7 @@ void _MainWindow::processWindows()
     _spatialControlWindow->process();
     _simulationParametersWindow->process();
     _statisticsWindow->process();
+    _gpuSettingsWindow->process();
 }
 
 void _MainWindow::onOpenSimulation()

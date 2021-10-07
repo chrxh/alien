@@ -23,7 +23,6 @@ private:
         bool logarithmic = false,
         std::string const& format = "%.3f");
     void createIntItem(std::string const& name, int& value, int min, int max);
-    void helpMarker(std::string const& text);
 
     StyleRepository _styleRepository;
     SimulationController _simController;

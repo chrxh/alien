@@ -57,6 +57,8 @@ public:
     ENGINEGPUKERNELS_EXPORT void moveSelection(float2 const& displacement);
 
     ENGINEGPUKERNELS_EXPORT GpuConstants getGpuConstants() const;
+    ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuConstants const& cudaConstants);
+
     struct ArraySizes
     {
         int cellArraySize;
@@ -75,9 +77,6 @@ public:
 
     ENGINEGPUKERNELS_EXPORT void
     resizeArraysIfNecessary(ArraySizes const& additionals);
-
-private:
-    void setGpuConstants(GpuConstants const& cudaConstants);
 
 private:
     std::atomic<uint64_t> _currentTimestep;
