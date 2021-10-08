@@ -58,6 +58,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\SensorFunction.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationData.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationKernels.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SimulationResult.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Swap.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Token.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\TokenProcessor.cuh" />

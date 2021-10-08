@@ -135,7 +135,7 @@ SymbolMap _SimulationController::getSymbolMap() const
     return _symbolMap;
 }
 
-MonitorData _SimulationController::getMonitorData() const
+OverallStatistics _SimulationController::getStatistics() const
 {
     return _worker.getMonitorData();
 }

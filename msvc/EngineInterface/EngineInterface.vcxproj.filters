@@ -21,7 +21,7 @@
     <ClInclude Include="..\..\source\EngineInterface\ElementaryTypes.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\EngineInterface\MonitorData.h">
+    <ClInclude Include="..\..\source\EngineInterface\OverallStatistics.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineInterface\SimulationParameters.h">

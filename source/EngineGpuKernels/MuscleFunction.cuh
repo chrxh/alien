@@ -10,7 +10,7 @@
 class MuscleFunction
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data);
+    __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
 
 private:
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
@@ -20,7 +20,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void MuscleFunction::processing(Token* token, SimulationData& data)
+__inline__ __device__ void MuscleFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
 {
     auto const& sourceCell = token->sourceCell;
     auto const& cell = token->cell;
@@ -65,6 +65,7 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
     }
 
     tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::SUCCESS;
+    result.incMuscleActivity();
 }
 
 __inline__ __device__ int MuscleFunction::getConnectionIndex(Cell* cell, Cell* otherCell)

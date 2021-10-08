@@ -13,7 +13,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuConstants.h"
-#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/OverallStatistics.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -40,7 +40,7 @@ public:
         double zoom);
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    ENGINEIMPL_EXPORT MonitorData getMonitorData() const;
+    ENGINEIMPL_EXPORT OverallStatistics getMonitorData() const;
 
     ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
 
@@ -114,6 +114,10 @@ private:
     std::atomic<int> _numParticles = 0;
     std::atomic<int> _numTokens = 0;
     std::atomic<double> _totalInternalEnergy = 0.0;
+    std::atomic<int> _numCreatedCells = 0;
+    std::atomic<int> _numSuccessfulAttacks = 0;
+    std::atomic<int> _numFailedAttacks = 0;
+    std::atomic<int> _numMuscleActivities = 0;
 
     //internals
     void* _cudaResource;

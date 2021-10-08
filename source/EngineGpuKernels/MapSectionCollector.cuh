@@ -25,32 +25,28 @@ public:
         _clusterListBySectionIndex.free();
 */
     }
+/*
 
     __device__ __inline__ void reset_system()
     {
-/*
         auto const partition = calcPartition(
             _numSections.x * _numSections.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             _clusterListBySectionIndex.at(index).init();
         }
-*/
     }
 
     __device__ __inline__ void insert(Cluster* cluster, DynamicMemory* dynamicMemory)
     {
-/*
         auto const section = getSection(cluster->pos);
 
         auto& clusterList = _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
         clusterList.pushBack(cluster, dynamicMemory);
-*/
     }
 
     __device__ __inline__ void getClusters_block(float2 const& pos, float radius, MapInfo const& map, 
         DynamicMemory* dynamicMemory, List<Cluster*>& result)
     {
-/*
         __shared__ int2 sectionCenter;
         __shared__ int sectionLength;
         if (0 == threadIdx.x) {
@@ -85,8 +81,8 @@ public:
                 __syncthreads();
             }
         }
-*/
     }
+*/
 
 private:
     __device__ __inline__ int2 getSection(float2 const& pos)

@@ -26,3 +26,5 @@ struct GeneralSettings;
 
 class _Serializer;
 using Serializer = boost::shared_ptr<_Serializer>;
+
+struct OverallStatistics;
