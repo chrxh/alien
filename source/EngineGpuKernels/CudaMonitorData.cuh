@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/OverallStatistics.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -33,6 +33,14 @@ public:
         CudaMemoryManager::getInstance().freeMemory(1, _internalEnergy);
     }
 
+    struct MonitorData
+    {
+        uint64_t timeStep = 0;
+        int numCells = 0;
+        int numParticles = 0;
+        int numTokens = 0;
+        double totalInternalEnergy = 0.0;
+    };
     __host__ MonitorData getMonitorData(uint64_t timeStep)
     {
         MonitorData result;

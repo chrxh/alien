@@ -22,8 +22,9 @@ public:
         SimulationData& data,
         int numTokenPointers);  //prerequisite: clearTag, need numTokenPointers because it might be changed
 
-    __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data);
-    __inline__ __device__ void executeModifyingCellFunctions(SimulationData& data, int numTokenPointers);
+    __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ void
+    executeModifyingCellFunctions(SimulationData& data, SimulationResult& result, int numTokenPointers);
 };
 
 /************************************************************************/
@@ -89,7 +90,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
     }
 }
 
-__inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(SimulationData& data)
+__inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result)
 {
     auto& tokens = data.entities.tokenPointers;
     auto partition =
@@ -105,7 +106,7 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
                     ScannerFunction::processing(token, data);
                 }
                 if (Enums::CellFunction::WEAPON == cellFunctionType) {
-                    WeaponFunction::processing(token, data);
+                    WeaponFunction::processing(token, data, result);
                 }
                 cell->releaseLock();
             }
@@ -113,7 +114,8 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
     }
 }
 
-__inline__ __device__ void TokenProcessor::executeModifyingCellFunctions(SimulationData& data, int numTokenPointers)
+__inline__ __device__ void
+TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationResult& result, int numTokenPointers)
 {
     auto& tokens = data.entities.tokenPointers;
     auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -136,13 +138,13 @@ __inline__ __device__ void TokenProcessor::executeModifyingCellFunctions(Simulat
                         CellComputerFunction::processing(token);
                     }
                     if (Enums::CellFunction::CONSTRUCTOR == cellFunctionType) {
-                        ConstructorFunction::processing(token, data);
+                        ConstructorFunction::processing(token, data, result);
                     }
                     if (Enums::CellFunction::PROPULSION == cellFunctionType) {
                         PropulsionFunction::processing(token, data);
                     }
                     if (Enums::CellFunction::MUSCLE == cellFunctionType) {
-                        MuscleFunction::processing(token, data);
+                        MuscleFunction::processing(token, data, result);
                     }
 
                     //                    success = true;

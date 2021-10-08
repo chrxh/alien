@@ -57,27 +57,6 @@ __global__ void applyForceToParticles(CudaApplyForceData applyData, int2 univers
     }
 }
 
-__global__ void moveSelectedClusters(float2 displacement, Array<Cluster*> clusters)
-{
-/*
-    auto const clusterBlock =
-        calcPartition(clusters.getNumEntries(), blockIdx.x, gridDim.x);
-
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-
-        auto const& cluster = clusters.at(clusterIndex);
-        if (cluster->isSelected()) {
-            auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-            for (auto cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-                auto const& cell = cluster->cellPointers[cellIndex];
-                cell->absPos = cell->absPos + displacement;
-            }
-        }
-        __syncthreads();
-    }
-*/
-}
-
 __global__ void moveSelectedParticles(float2 displacement, Array<Particle*> particles)
 {
     auto const particleBlock =

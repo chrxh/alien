@@ -13,6 +13,7 @@
 #include "CleanupKernels.cuh"
 #include "Operation.cuh"
 #include "DebugKernels.cuh"
+#include "SimulationResult.cuh"
 
 __global__ void processingStep1(SimulationData data)
 {
@@ -58,13 +59,13 @@ __global__ void processingStep5(SimulationData data)
     cellProcessor.calcPositions(data);
 }
 
-__global__ void processingStep6(SimulationData data)
+__global__ void processingStep6(SimulationData data, SimulationResult result)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcForces(data);
 
     TokenProcessor tokenProcessor;
-    tokenProcessor.executeReadonlyCellFunctions(data);
+    tokenProcessor.executeReadonlyCellFunctions(data, result);
 }
 
 __global__ void processingStep7(SimulationData data, int numCellPointers)
@@ -73,10 +74,10 @@ __global__ void processingStep7(SimulationData data, int numCellPointers)
     cellProcessor.calcVelocities(data, numCellPointers);
 }
 
-__global__ void processingStep8(SimulationData data, int numTokenPointers)
+__global__ void processingStep8(SimulationData data, SimulationResult result, int numTokenPointers)
 {
     TokenProcessor tokenProcessor;
-    tokenProcessor.executeModifyingCellFunctions(data, numTokenPointers);
+    tokenProcessor.executeModifyingCellFunctions(data, result, numTokenPointers);
 }
 
 __global__ void processingStep9(SimulationData data)
@@ -109,11 +110,12 @@ __global__ void processingStep12(SimulationData data, int numParticlePointers)
 /* Main      															*/
 /************************************************************************/
 
-__global__ void cudaCalcSimulationTimestep(SimulationData data)
+__global__ void cudaCalcSimulationTimestep(SimulationData data, SimulationResult result)
 {
     data.cellMap.reset();
     data.particleMap.reset();
     data.dynamicMemory.reset();
+    result.resetStatistics();
 
     *data.numOperations = 0; 
     data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
@@ -123,14 +125,16 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data)
     KERNEL_CALL(processingStep3, data);
     KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep5, data);
-    KERNEL_CALL(processingStep6, data);
+    KERNEL_CALL(processingStep6, data, result);
     KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
-    KERNEL_CALL(processingStep8, data, data.entities.tokenPointers.getNumEntries());
+    KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
     KERNEL_CALL(processingStep9, data);
     KERNEL_CALL(processingStep10, data);
     KERNEL_CALL(processingStep11, data);
     KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
 
     KERNEL_CALL_1_1(cleanupAfterSimulation, data);
+
+    result.setArrayResizeNeeded(data.shouldResize());
 }
 

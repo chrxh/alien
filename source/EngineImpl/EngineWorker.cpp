@@ -119,14 +119,18 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     return converter.getDataDescription();
 }
 
-MonitorData EngineWorker::getMonitorData() const
+OverallStatistics EngineWorker::getMonitorData() const
 {
-    MonitorData result;
+    OverallStatistics result;
     result.timeStep = _timeStep.load();
     result.numCells = _numCells.load();
     result.numParticles = _numParticles.load();
     result.numTokens = _numTokens.load();
     result.totalInternalEnergy = _totalInternalEnergy.load();
+    result.numCreatedCells = _numCreatedCells.load();
+    result.numSuccessfulAttacks = _numSuccessfulAttacks.load();
+    result.numFailedAttacks = _numFailedAttacks.load();
+    result.numMuscleActivities = _numMuscleActivities.load();
     return result;
 }
 
@@ -334,6 +338,10 @@ void EngineWorker::updateMonitorDataIntern()
         _numParticles.store(data.numParticles);
         _numTokens.store(data.numTokens);
         _totalInternalEnergy.store(data.totalInternalEnergy);
+        _numCreatedCells.store(data.numCreatedCells);
+        _numSuccessfulAttacks.store(data.numSuccessfulAttacks);
+        _numFailedAttacks.store(data.numFailedAttacks);
+        _numMuscleActivities.store(data.numMuscleActivities);
 
         _lastMonitorUpdate = now;
     }

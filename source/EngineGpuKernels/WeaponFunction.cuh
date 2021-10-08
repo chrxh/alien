@@ -9,7 +9,7 @@
 class WeaponFunction
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data);
+    __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
 
 private:
     __inline__ __device__ static bool isHomogene(Cell* cell);
@@ -22,7 +22,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void WeaponFunction::processing(Token* token, SimulationData& data)
+__inline__ __device__ void WeaponFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
 {
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
@@ -85,10 +85,14 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     token->energy += energyToTransfer / 2;
                     cell->energy += energyToTransfer / 2;
                     token->memory[Enums::Weapon::OUTPUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
+                    result.incSuccessfulAttack();
                 }
             }
             otherCell->releaseLock();
         }
+    }
+    if (Enums::WeaponOut::NO_TARGET == token->memory[Enums::Weapon::OUTPUT]) {
+        result.incFailedAttack();
     }
     if (cudaSimulationParameters.cellFunctionWeaponEnergyCost > 0) {
         auto const cellEnergy = cell->energy;

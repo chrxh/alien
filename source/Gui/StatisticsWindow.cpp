@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "implot.h"
 
+#include "EngineInterface/OverallStatistics.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 
@@ -51,13 +52,13 @@ void _StatisticsWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::Begin("Statistics", &_on, windowFlags);
 
-    ImGui::Checkbox("Live", &_live);
+    ImGui::Checkbox("Real-time", &_live);
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
     ImGui::SliderFloat("", &_liveStatistics.history, 1, MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
-    
+
     if (_live) {
         processLiveStatistics();
     } else {
@@ -84,77 +85,76 @@ void _StatisticsWindow::processLiveStatistics()
     auto maxParticles = getMax(_liveStatistics.numParticlesHistory);
     auto maxTokens = getMax(_liveStatistics.numTokensHistory);
 
-    ImPlot::SetNextPlotLimits(
-        _liveStatistics.timepointsHistory.back() - _liveStatistics.history,
-        _liveStatistics.timepointsHistory.back(),
-        0,
-        std::max(maxCells, maxParticles) * 1.5,
-        ImGuiCond_Always);
-    static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
-    if (ImPlot::BeginPlot(
-            "",
-            NULL,
-            NULL,
-            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f),
-            0,
-            flags,
-            flags)) {
-        float labelPosY =
-            _liveStatistics.numCellsHistory.back() > _liveStatistics.numParticlesHistory.back() ? -10.0f : 10.0f;
+    ImGui::Spacing();
+    if (ImGui::BeginTable(
+            "##",
+            2,
+            /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg
+                | ImGuiTableFlags_BordersOuter,
+            ImVec2(- 1, 0))) {
+        ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+        ImGui::TableSetupColumn("##");
+        ImGui::TableHeadersRow();
+        ImPlot::PushColormap(ImPlotColormap_Plasma);
 
-        ImPlot::PlotLine(
-            "Cells",
-            _liveStatistics.timepointsHistory.data(),
-            _liveStatistics.numCellsHistory.data(),
-            toInt(_liveStatistics.numCellsHistory.size()));
-        ImPlot::AnnotateClamped(
-            _liveStatistics.timepointsHistory.back(),
-            _liveStatistics.numCellsHistory.back(),
-            ImVec2(-10.0f, labelPosY),
-            ImPlot::GetLastItemColor(),
-            std::to_string(toInt(_liveStatistics.numCellsHistory.back())).c_str());
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Cells", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(0, _liveStatistics.numCellsHistory);
 
-        ImPlot::PlotLine(
-            "Energy particles",
-            _liveStatistics.timepointsHistory.data(),
-            _liveStatistics.numParticlesHistory.data(),
-            toInt(_liveStatistics.numParticlesHistory.size()));
-        ImPlot::AnnotateClamped(
-            _liveStatistics.timepointsHistory.back(),
-            _liveStatistics.numParticlesHistory.back(),
-            ImVec2(-10.0f, -labelPosY),
-            ImPlot::GetLastItemColor(),
-            std::to_string(toInt(_liveStatistics.numParticlesHistory.back())).c_str());
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Particles", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(1, _liveStatistics.numParticlesHistory);
 
-        ImPlot::EndPlot();
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Tokens", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(2, _liveStatistics.numTokensHistory);
+        ImPlot::PopColormap();
+        ImGui::EndTable();
     }
 
-    ImPlot::SetNextPlotLimits(
-        _liveStatistics.timepointsHistory.back() - _liveStatistics.history, _liveStatistics.timepointsHistory.back(), 0, maxTokens * 1.5, ImGuiCond_Always);
-    if (ImPlot::BeginPlot(
-            "##Tokens",
-            NULL,
-            NULL,
-            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
-            0,
-            flags,
-            flags)) {
+    ImGui::Spacing();
+    if (ImGui::BeginTable(
+            "##",
+            2,
+            /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
+            ImVec2(-1, 0))) {
+        ImGui::TableSetupColumn("Processes", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+        ImGui::TableSetupColumn("##");
+        ImGui::TableHeadersRow();
+        ImPlot::PushColormap(ImPlotColormap_Plasma);
 
-        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(2));
-        ImPlot::PlotLine(
-            "Tokens",
-            _liveStatistics.timepointsHistory.data(),
-            _liveStatistics.numTokensHistory.data(),
-            toInt(_liveStatistics.numTokensHistory.size()));
-        ImPlot::AnnotateClamped(
-            _liveStatistics.timepointsHistory.back(),
-            _liveStatistics.numTokensHistory.back(),
-            ImVec2(-10, 10),
-            ImPlot::GetLastItemColor(),
-            std::to_string(toInt(_liveStatistics.numTokensHistory.back())).c_str());
-        ImPlot::PopStyleColor();
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Created cells", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(3, _liveStatistics.numCreatedCellsHistory);
 
-        ImPlot::EndPlot();
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Successful attacks", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(4, _liveStatistics.numSuccessfulAttacksHistory);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Failed attacks", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(5, _liveStatistics.numFailedAttacksHistory);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Muscle activities", 0);
+        ImGui::TableSetColumnIndex(1);
+        processPlot(6, _liveStatistics.numMuscleActivitiesHistory);
+
+        ImPlot::PopColormap();
+        ImGui::EndTable();
     }
 }
 
@@ -164,109 +164,210 @@ void _StatisticsWindow::processLongtermStatistics()
     auto maxParticles = getMax(_longtermStatistics.numParticlesHistory);
     auto maxTokens = getMax(_longtermStatistics.numTokensHistory);
 
-    ImPlot::SetNextPlotLimits(
-        _longtermStatistics.timestepHistory.front(),
-        _longtermStatistics.timestepHistory.back(),
-        0,
-        std::max(maxCells, maxParticles) * 1.5,
-        ImGuiCond_Always);
-    static ImPlotAxisFlags flags = 0;
-    if (ImPlot::BeginPlot(
-            "",
-            NULL,
-            NULL,
-            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.5f),
+    static float rratios[] = {1, 1};
+    static float cratios[] = {1, 1};
+    if (ImPlot::BeginSubplots("##", 2, 1, ImVec2(-1, -1), ImPlotSubplotFlags_LinkCols, rratios, cratios)) {
+        ImPlot::FitNextPlotAxes(true, true);
+/*
+        ImPlot::SetNextPlotLimits(
+            _longtermStatistics.timestepHistory.front(),
+            _longtermStatistics.timestepHistory.back(),
             0,
-            flags,
-            flags)) {
-        float labelPosY = _longtermStatistics.numCellsHistory.back() > _longtermStatistics.numParticlesHistory.back()
-            ? -10.0f
-            : 10.0f;
+            std::max(maxCells, maxParticles) * 1.5,
+            ImGuiCond_Appearing);
+*/
+        static ImPlotAxisFlags flags = 0;
+        if (ImPlot::BeginPlot(
+                "##Entities",
+                "time step",
+                NULL,
+                ImGui::GetContentRegionAvail(),
+                //            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y / 2),
+                0,
+                flags,
+                flags)) {
+            float labelPosY =
+                _longtermStatistics.numCellsHistory.back() > _longtermStatistics.numParticlesHistory.back() ? -10.0f
+                                                                                                            : 10.0f;
 
-        ImPlot::PlotLine(
-            "Cells",
-            _longtermStatistics.timestepHistory.data(),
-            _longtermStatistics.numCellsHistory.data(),
-            toInt(_longtermStatistics.numCellsHistory.size()));
-        ImPlot::AnnotateClamped(
+            ImPlot::PlotLine(
+                "Cells",
+                _longtermStatistics.timestepHistory.data(),
+                _longtermStatistics.numCellsHistory.data(),
+                toInt(_longtermStatistics.numCellsHistory.size()));
+            ImPlot::AnnotateClamped(
+                _longtermStatistics.timestepHistory.back(),
+                _longtermStatistics.numCellsHistory.back(),
+                ImVec2(-10.0f, labelPosY),
+                ImPlot::GetLastItemColor(),
+                std::to_string(toInt(_longtermStatistics.numCellsHistory.back())).c_str());
+
+            ImPlot::PlotLine(
+                "Energy particles",
+                _longtermStatistics.timestepHistory.data(),
+                _longtermStatistics.numParticlesHistory.data(),
+                toInt(_longtermStatistics.numParticlesHistory.size()));
+            ImPlot::AnnotateClamped(
+                _longtermStatistics.timestepHistory.back(),
+                _longtermStatistics.numParticlesHistory.back(),
+                ImVec2(-10.0f, -labelPosY),
+                ImPlot::GetLastItemColor(),
+                std::to_string(toInt(_longtermStatistics.numParticlesHistory.back())).c_str());
+
+            ImPlot::PlotLine(
+                "Tokens",
+                _longtermStatistics.timestepHistory.data(),
+                _longtermStatistics.numTokensHistory.data(),
+                toInt(_longtermStatistics.numTokensHistory.size()));
+            ImPlot::AnnotateClamped(
+                _longtermStatistics.timestepHistory.back(),
+                _longtermStatistics.numTokensHistory.back(),
+                ImVec2(-10, 10),
+                ImPlot::GetLastItemColor(),
+                std::to_string(toInt(_longtermStatistics.numTokensHistory.back())).c_str());
+
+            ImPlot::EndPlot();
+        }
+
+//        ImPlot::FitNextPlotAxes(true, true);
+/*
+        ImPlot::SetNextPlotLimits(
+            _longtermStatistics.timestepHistory.front(),
             _longtermStatistics.timestepHistory.back(),
-            _longtermStatistics.numCellsHistory.back(),
-            ImVec2(-10.0f, labelPosY),
-            ImPlot::GetLastItemColor(),
-            std::to_string(toInt(_longtermStatistics.numCellsHistory.back())).c_str());
+            0,
+            maxTokens * 1.5,
+            ImGuiCond_Appearing);
+*/
+        if (ImPlot::BeginPlot(
+                "##Tokens",
+                "time step",
+                NULL,
+                ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
+                0,
+                flags,
+                flags)) {
 
-        ImPlot::PlotLine(
-            "Energy particles",
-            _longtermStatistics.timestepHistory.data(),
-            _longtermStatistics.numParticlesHistory.data(),
-            toInt(_longtermStatistics.numParticlesHistory.size()));
-        ImPlot::AnnotateClamped(
-            _longtermStatistics.timestepHistory.back(),
-            _longtermStatistics.numParticlesHistory.back(),
-            ImVec2(-10.0f, -labelPosY),
-            ImPlot::GetLastItemColor(),
-            std::to_string(toInt(_longtermStatistics.numParticlesHistory.back())).c_str());
+            ImPlot::PlotLine(
+                "Tokens",
+                _longtermStatistics.timestepHistory.data(),
+                _longtermStatistics.numTokensHistory.data(),
+                toInt(_longtermStatistics.numTokensHistory.size()));
+            ImPlot::AnnotateClamped(
+                _longtermStatistics.timestepHistory.back(),
+                _longtermStatistics.numTokensHistory.back(),
+                ImVec2(-10, 10),
+                ImPlot::GetLastItemColor(),
+                std::to_string(toInt(_longtermStatistics.numTokensHistory.back())).c_str());
 
-        ImPlot::EndPlot();
+            ImPlot::PlotLine(
+                "Created cells",
+                _longtermStatistics.timestepHistory.data(),
+                _longtermStatistics.numCreatedCellsHistory.data(),
+                toInt(_longtermStatistics.numCreatedCellsHistory.size()));
+            ImPlot::AnnotateClamped(
+                _longtermStatistics.timestepHistory.back(),
+                _longtermStatistics.numCreatedCellsHistory.back(),
+                ImVec2(-10, 10),
+                ImPlot::GetLastItemColor(),
+                std::to_string(toInt(_longtermStatistics.numCreatedCellsHistory.back())).c_str());
+
+            ImPlot::EndPlot();
+        }
+
+        ImPlot::EndSubplots();
     }
+}
 
+void _StatisticsWindow::processPlot(int row, std::vector<float> const& valueHistory)
+{
+    auto maxValue = getMax(valueHistory);
+    
+    ImGui::PushID(row);
+    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(
-        _longtermStatistics.timestepHistory.front(),
-        _longtermStatistics.timestepHistory.back(),
+        _liveStatistics.timepointsHistory.back() - _liveStatistics.history,
+        _liveStatistics.timepointsHistory.back(),
         0,
-        maxTokens * 1.5,
+        maxValue * 1.5,
         ImGuiCond_Always);
-    if (ImPlot::BeginPlot(
-            "##Tokens",
-            NULL,
-            NULL,
-            ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y),
-            0,
-            flags,
-            flags)) {
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, 80), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(row));
 
-        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(2));
         ImPlot::PlotLine(
-            "Tokens",
-            _longtermStatistics.timestepHistory.data(),
-            _longtermStatistics.numTokensHistory.data(),
-            toInt(_longtermStatistics.numTokensHistory.size()));
+            "##",
+            _liveStatistics.timepointsHistory.data(),
+            valueHistory.data(),
+            toInt(valueHistory.size()));
+
+        ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+        ImPlot::PlotShaded(
+            "##",
+            _liveStatistics.timepointsHistory.data(),
+            valueHistory.data(),
+            toInt(valueHistory.size()));
         ImPlot::AnnotateClamped(
-            _longtermStatistics.timestepHistory.back(),
-            _longtermStatistics.numTokensHistory.back(),
-            ImVec2(-10, 10),
+            _liveStatistics.timepointsHistory.back(),
+            valueHistory.back(),
+            ImVec2(-10.0f, 10.0f),
             ImPlot::GetLastItemColor(),
-            std::to_string(toInt(_longtermStatistics.numTokensHistory.back())).c_str());
+            std::to_string(toInt(valueHistory.back())).c_str());
+
+        ImPlot::PopStyleVar();
         ImPlot::PopStyleColor();
-
         ImPlot::EndPlot();
     }
+    ImPlot::PopStyleVar();
+    ImGui::PopID();
 }
 
 void _StatisticsWindow::updateData()
 {
-    auto monitorData = _simController->getMonitorData();
+    auto newStatistics = _simController->getStatistics();
+    _liveStatistics.add(newStatistics);
 
-    //live statistics
-    if (!_liveStatistics.timepointsHistory.empty() && _liveStatistics.timepointsHistory.back() - _liveStatistics.timepointsHistory.front() > (MaxLiveHistory + 1.0f)) {
-        _liveStatistics.timepointsHistory.erase(_liveStatistics.timepointsHistory.begin());
-        _liveStatistics.numCellsHistory.erase(_liveStatistics.numCellsHistory.begin());
-        _liveStatistics.numParticlesHistory.erase(_liveStatistics.numParticlesHistory.begin());
-        _liveStatistics.numTokensHistory.erase(_liveStatistics.numTokensHistory.begin());
+    _longtermStatistics.add(newStatistics);
+}
+
+void _StatisticsWindow::LiveStatistics::truncate()
+{
+    if (!timepointsHistory.empty()
+        && timepointsHistory.back() - timepointsHistory.front() > (MaxLiveHistory + 1.0f)) {
+        timepointsHistory.erase(timepointsHistory.begin());
+        numCellsHistory.erase(numCellsHistory.begin());
+        numParticlesHistory.erase(numParticlesHistory.begin());
+        numTokensHistory.erase(numTokensHistory.begin());
+        numCreatedCellsHistory.erase(numCreatedCellsHistory.begin());
+        numFailedAttacksHistory.erase(numFailedAttacksHistory.begin());
+        numMuscleActivitiesHistory.erase(numMuscleActivitiesHistory.begin());
     }
+}
 
-    _liveStatistics.timepoint += ImGui::GetIO().DeltaTime;
-    _liveStatistics.timepointsHistory.emplace_back(_liveStatistics.timepoint);
-    _liveStatistics.numCellsHistory.emplace_back(toFloat(monitorData.numCells));
-    _liveStatistics.numParticlesHistory.emplace_back(toFloat(monitorData.numParticles));
-    _liveStatistics.numTokensHistory.emplace_back(toFloat(monitorData.numTokens));
+void _StatisticsWindow::LiveStatistics::add(OverallStatistics const& newStatistics)
+{
+    truncate();
 
-    //long-term statistics
-    if (_longtermStatistics.timestepHistory.empty()
-        || monitorData.timeStep - _longtermStatistics.timestepHistory.back() > LongtermTimestepDelta) {
-        _longtermStatistics.timestepHistory.emplace_back(toFloat(monitorData.timeStep));
-        _longtermStatistics.numCellsHistory.emplace_back(toFloat(monitorData.numCells));
-        _longtermStatistics.numParticlesHistory.emplace_back(toFloat(monitorData.numParticles));
-        _longtermStatistics.numTokensHistory.emplace_back(toFloat(monitorData.numTokens));
+    timepoint += ImGui::GetIO().DeltaTime;
+    timepointsHistory.emplace_back(timepoint);
+    numCellsHistory.emplace_back(toFloat(newStatistics.numCells));
+    numParticlesHistory.emplace_back(toFloat(newStatistics.numParticles));
+    numTokensHistory.emplace_back(toFloat(newStatistics.numTokens));
+    numCreatedCellsHistory.emplace_back(toFloat(newStatistics.numCreatedCells));
+    numSuccessfulAttacksHistory.emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
+    numFailedAttacksHistory.emplace_back(toFloat(newStatistics.numFailedAttacks));
+    numMuscleActivitiesHistory.emplace_back(toFloat(newStatistics.numMuscleActivities));
+}
+
+void _StatisticsWindow::LongtermStatistics::add(OverallStatistics const& newStatistics)
+{
+    if (timestepHistory.empty()
+        || newStatistics.timeStep - timestepHistory.back() > LongtermTimestepDelta) {
+        timestepHistory.emplace_back(toFloat(newStatistics.timeStep));
+        numCellsHistory.emplace_back(toFloat(newStatistics.numCells));
+        numParticlesHistory.emplace_back(toFloat(newStatistics.numParticles));
+        numTokensHistory.emplace_back(toFloat(newStatistics.numTokens));
+        numCreatedCellsHistory.emplace_back(toFloat(newStatistics.numCreatedCells));
+        numSuccessfullAttacksHistory.emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
+        numFailedAttacksHistory.emplace_back(toFloat(newStatistics.numFailedAttacks));
+        numMuscleActivitiesHistory.emplace_back(toFloat(newStatistics.numMuscleActivities));
     }
 }

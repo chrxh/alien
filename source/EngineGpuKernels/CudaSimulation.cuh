@@ -9,7 +9,7 @@
 #endif
 #include <GL/gl.h>
 
-#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/GpuConstants.h"
 
 #include "Definitions.cuh"
@@ -67,7 +67,7 @@ public:
     };
     ENGINEGPUKERNELS_EXPORT ArraySizes getArraySizes() const;
 
-    ENGINEGPUKERNELS_EXPORT MonitorData getMonitorData();
+    ENGINEGPUKERNELS_EXPORT OverallStatistics getMonitorData();
     ENGINEGPUKERNELS_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEGPUKERNELS_EXPORT void setCurrentTimestep(uint64_t timestep);
 
@@ -75,13 +75,14 @@ public:
 
     ENGINEGPUKERNELS_EXPORT void clear();
 
-    ENGINEGPUKERNELS_EXPORT void
-    resizeArraysIfNecessary(ArraySizes const& additionals);
+    ENGINEGPUKERNELS_EXPORT void resizeArraysIfNecessary(ArraySizes const& additionals);
 
 private:
+    void resizeArrays(ArraySizes const& additionals);
+
     std::atomic<uint64_t> _currentTimestep;
-    GpuConstants _gpuConstants;
     SimulationData* _cudaSimulationData;
+    SimulationResult* _cudaSimulationResult;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
 };

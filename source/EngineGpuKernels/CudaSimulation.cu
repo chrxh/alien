@@ -30,6 +30,7 @@
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernels.cuh"
+#include "SimulationResult.cuh"
 
 #define GPU_FUNCTION(func, ...) \
     func<<<1, 1>>>(__VA_ARGS__); \
@@ -130,6 +131,7 @@ _CudaSimulation::_CudaSimulation(
     loggingService->logMessage(Priority::Important, "acquire GPU memory");
 
     _cudaSimulationData = new SimulationData();
+    _cudaSimulationResult = new SimulationResult();
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
@@ -137,6 +139,7 @@ _CudaSimulation::_CudaSimulation(
 
     _cudaSimulationData->init(worldSize, timestep);
     _cudaMonitorData->init();
+    _cudaSimulationResult->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
@@ -144,7 +147,7 @@ _CudaSimulation::_CudaSimulation(
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
     CudaMemoryManager::getInstance().acquireMemory<char>(Const::MetadataMemorySize, _cudaAccessTO->stringBytes);
 
-//    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+    //    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
 /*
     std::stringstream stream;
@@ -156,43 +159,32 @@ _CudaSimulation::_CudaSimulation(
 
 _CudaSimulation::~_CudaSimulation()
 {
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     _cudaSimulationData->free();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     _cudaMonitorData->free();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    _cudaSimulationResult->free();
 
     if (_cudaAccessTO->cells) {
         int numCells;
         checkCudaErrors(cudaMemcpy(&numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
         CudaMemoryManager::getInstance().freeMemory(numCells, _cudaAccessTO->cells);
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     }
     if (_cudaAccessTO->particles) {
         int numParticles;
         checkCudaErrors(cudaMemcpy(&numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
         CudaMemoryManager::getInstance().freeMemory(numParticles, _cudaAccessTO->particles);
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     }
     if (_cudaAccessTO->tokens) {
         int numTokens;
         checkCudaErrors(cudaMemcpy(&numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
         CudaMemoryManager::getInstance().freeMemory(numTokens, _cudaAccessTO->tokens);
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     }
     int numStringBytes;
     checkCudaErrors(cudaMemcpy(&numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
     CudaMemoryManager::getInstance().freeMemory(numStringBytes, _cudaAccessTO->stringBytes);
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-
     CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numCells);
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numParticles);
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numTokens);
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numStringBytes);
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "GPU memory released");
@@ -214,10 +206,13 @@ void* _CudaSimulation::registerImageResource(GLuint image)
 
 void _CudaSimulation::calcCudaTimestep()
 {
-    GPU_FUNCTION(cudaCalcSimulationTimestep, *_cudaSimulationData);
+    GPU_FUNCTION(cudaCalcSimulationTimestep, *_cudaSimulationData, *_cudaSimulationResult);
     if (_currentTimestep % 10 == 0) {
-        resizeArraysIfNecessary({0, 0, 0});
+        if (_cudaSimulationResult->isArrayResizeNeeded()) {
+            resizeArrays({0, 0, 0});
+        }
     }
+
     ++_cudaSimulationData->timestep;
     ++_currentTimestep;
 }
@@ -337,15 +332,8 @@ void _CudaSimulation::moveSelection(float2 const& displacement)
     GPU_FUNCTION(cudaMoveSelection, displacement, *_cudaSimulationData);
 }
 
-GpuConstants _CudaSimulation::getGpuConstants() const
-{
-    return _gpuConstants;
-}
-
 void _CudaSimulation::setGpuConstants(GpuConstants const& gpuConstants_)
 {
-    _gpuConstants = gpuConstants_;
-
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuConstants), 0, cudaMemcpyHostToDevice));
 }
@@ -358,10 +346,25 @@ auto _CudaSimulation::getArraySizes() const -> ArraySizes
         _cudaSimulationData->entities.tokens.getSize_host()};
 }
 
-MonitorData _CudaSimulation::getMonitorData()
+OverallStatistics _CudaSimulation::getMonitorData()
 {
     GPU_FUNCTION(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
-    return _cudaMonitorData->getMonitorData(getCurrentTimestep());
+    
+    OverallStatistics result;
+
+    auto monitorData = _cudaMonitorData->getMonitorData(getCurrentTimestep());
+    result.timeStep = monitorData.timeStep;
+    result.numCells = monitorData.numCells;
+    result.numParticles = monitorData.numParticles;
+    result.numTokens = monitorData.numTokens;
+    result.totalInternalEnergy = monitorData.totalInternalEnergy;
+
+    auto processStatistics = _cudaSimulationResult->getStatistics();
+    result.numCreatedCells = processStatistics.createdCells;
+    result.numSuccessfulAttacks = processStatistics.sucessfulAttacks;
+    result.numFailedAttacks = processStatistics.failedAttacks;
+    result.numMuscleActivities = processStatistics.muscleActivities;
+    return result;
 }
 
 uint64_t _CudaSimulation::getCurrentTimestep() const
@@ -390,38 +393,39 @@ void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
 {
     if (_cudaSimulationData->shouldResize(
             additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize)) {
-        _cudaSimulationData->resizeTarget(
-            additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
-        if (!_cudaSimulationData->isEmpty()) {
-            GPU_FUNCTION(copyEntities, *_cudaSimulationData);
-        }
-        _cudaSimulationData->resizeSource();
-        _cudaSimulationData->swap();
-
-        if (_cudaAccessTO->cells) {
-            int numCells;
-            checkCudaErrors(cudaMemcpy(&numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(numCells, _cudaAccessTO->cells);
-            CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-        }
-        if (_cudaAccessTO->particles) {
-            int numParticles;
-            checkCudaErrors(
-                cudaMemcpy(&numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(numParticles, _cudaAccessTO->particles);
-            CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-        }
-        if (_cudaAccessTO->tokens) {
-            int numTokens;
-            checkCudaErrors(cudaMemcpy(&numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(numTokens, _cudaAccessTO->tokens);
-            CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-        }
-
-        auto cellArraySize = _cudaSimulationData->entities.cells.getSize_host();
-        auto tokenArraySize = _cudaSimulationData->entities.tokens.getSize_host();
-        CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
-        CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
-        CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
+        resizeArrays(additionals);
     }
+}
+
+void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
+{
+    _cudaSimulationData->resizeTarget(
+        additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
+    if (!_cudaSimulationData->isEmpty()) {
+        GPU_FUNCTION(copyEntities, *_cudaSimulationData);
+    }
+    _cudaSimulationData->resizeSource();
+    _cudaSimulationData->swap();
+
+    if (_cudaAccessTO->cells) {
+        int numCells;
+        checkCudaErrors(cudaMemcpy(&numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
+        CudaMemoryManager::getInstance().freeMemory(numCells, _cudaAccessTO->cells);
+    }
+    if (_cudaAccessTO->particles) {
+        int numParticles;
+        checkCudaErrors(cudaMemcpy(&numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
+        CudaMemoryManager::getInstance().freeMemory(numParticles, _cudaAccessTO->particles);
+    }
+    if (_cudaAccessTO->tokens) {
+        int numTokens;
+        checkCudaErrors(cudaMemcpy(&numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
+        CudaMemoryManager::getInstance().freeMemory(numTokens, _cudaAccessTO->tokens);
+    }
+
+    auto cellArraySize = _cudaSimulationData->entities.cells.getSize_host();
+    auto tokenArraySize = _cudaSimulationData->entities.tokens.getSize_host();
+    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
 }

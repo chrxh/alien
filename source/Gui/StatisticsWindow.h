@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineInterface/Definitions.h"
 #include "EngineImpl/Definitions.h"
 
 #include "Definitions.h"
@@ -18,6 +19,7 @@ public:
 private:
     void processLiveStatistics();
     void processLongtermStatistics();
+    void processPlot(int row, std::vector<float> const& valueHistory);
 
     void updateData();
 
@@ -34,6 +36,13 @@ private:
         std::vector<float> numCellsHistory;
         std::vector<float> numParticlesHistory;
         std::vector<float> numTokensHistory;
+        std::vector<float> numCreatedCellsHistory;
+        std::vector<float> numSuccessfulAttacksHistory;
+        std::vector<float> numFailedAttacksHistory;
+        std::vector<float> numMuscleActivitiesHistory;
+
+        void truncate();
+        void add(OverallStatistics const& statistics);
     };
     LiveStatistics _liveStatistics;
 
@@ -43,6 +52,12 @@ private:
         std::vector<float> numCellsHistory;
         std::vector<float> numParticlesHistory;
         std::vector<float> numTokensHistory;
+        std::vector<float> numCreatedCellsHistory;
+        std::vector<float> numSuccessfullAttacksHistory;
+        std::vector<float> numFailedAttacksHistory;
+        std::vector<float> numMuscleActivitiesHistory;
+
+        void add(OverallStatistics const& statistics);
     };
     LongtermStatistics _longtermStatistics;
 };
