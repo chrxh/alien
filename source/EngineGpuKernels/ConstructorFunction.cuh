@@ -5,11 +5,12 @@
 #include "Math.cuh"
 #include "QuantityConverter.cuh"
 #include "CellConnectionProcessor.cuh"
+#include "SimulationResult.cuh"
 
 class ConstructorFunction
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data);
+    __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
 
 private:
     struct ConstructionData
@@ -32,9 +33,16 @@ private:
 
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Token* token);
     __inline__ __device__ static void startNewConstruction(
-        Token* token, SimulationData& data, ConstructionData& constructionData);
-    __inline__ __device__ static void
-    continueConstruction(Token* token, SimulationData& data, ConstructionData const& constructionData, Cell* firstConstructedCell);
+        Token* token,
+        SimulationData& data,
+        SimulationResult& result,
+        ConstructionData& constructionData);
+    __inline__ __device__ static void continueConstruction(
+        Token* token,
+        SimulationData& data,
+        SimulationResult& result,
+        ConstructionData const& constructionData,
+        Cell* firstConstructedCell);
 
     __inline__ __device__ static void constructCell(
         SimulationData& data,
@@ -87,10 +95,9 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void
-ConstructorFunction::processing(Token* token, SimulationData& data)
+__inline__ __device__ void ConstructorFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
 {
-//    mutateToken(token, data);
+    //    mutateToken(token, data);
 
     ConstructionData constructionData;
     readConstructionData(token, constructionData);
@@ -108,10 +115,10 @@ ConstructorFunction::processing(Token* token, SimulationData& data)
             return;
         }
 
-        continueConstruction(token, data, constructionData, firstCellOfConstructionSite);
+        continueConstruction(token, data, result, constructionData, firstCellOfConstructionSite);
         firstCellOfConstructionSite->releaseLock();
     } else {
-        startNewConstruction(token, data, constructionData);
+        startNewConstruction(token, data, result, constructionData);
     }
 }
 
@@ -169,8 +176,11 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
     return result;
 }
 
-__inline__ __device__ void
-ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, ConstructionData& constructionData)
+__inline__ __device__ void ConstructorFunction::startNewConstruction(
+    Token* token,
+    SimulationData& data,
+    SimulationResult& result,
+    ConstructionData& constructionData)
 {
     auto const& cell = token->cell;
     auto const adaptMaxConnections = isAdaptMaxConnections(constructionData);
@@ -227,11 +237,13 @@ ConstructorFunction::startNewConstruction(Token* token, SimulationData& data, Co
 
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
     token->memory[Enums::Constr::INOUT_ANGLE] = 0;
+    result.incCreatedCell();
 }
 
 __inline__ __device__ void ConstructorFunction::continueConstruction(
     Token* token,
     SimulationData& data,
+    SimulationResult& result,
     ConstructionData const& constructionData,
     Cell* firstConstructedCell)
 {
@@ -375,6 +387,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     newCell->releaseLock();
 
     token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
+    result.incCreatedCell();
 }
 
 __inline__ __device__ void ConstructorFunction::constructCell(

@@ -61,12 +61,19 @@ struct SimulationData
         auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
         auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 10);
 
-        return entities.cells.shouldResize(cellAndParticleArraySizeInc)
-            || entities.cellPointers.shouldResize(cellAndParticleArraySizeInc * 10)
-            || entities.particles.shouldResize(cellAndParticleArraySizeInc)
-            || entities.particlePointers.shouldResize(cellAndParticleArraySizeInc * 10)
-            || entities.tokens.shouldResize(tokenArraySizeInc)
-            || entities.tokenPointers.shouldResize(tokenArraySizeInc * 10);
+        return entities.cells.shouldResize_host(cellAndParticleArraySizeInc)
+            || entities.cellPointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
+            || entities.particles.shouldResize_host(cellAndParticleArraySizeInc)
+            || entities.particlePointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
+            || entities.tokens.shouldResize_host(tokenArraySizeInc)
+            || entities.tokenPointers.shouldResize_host(tokenArraySizeInc * 10);
+    }
+
+    __device__ bool shouldResize()
+    {
+        return entities.cells.shouldResize(0) || entities.cellPointers.shouldResize(0)
+            || entities.particles.shouldResize(0) || entities.particlePointers.shouldResize(0)
+            || entities.tokens.shouldResize(0) || entities.tokenPointers.shouldResize(0);
     }
 
     void resizeTarget(int additionalCells, int additionalParticles, int additionalTokens)
@@ -135,7 +142,7 @@ private:
     template <typename Entity>
     void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, int additionalEntities)
     {
-        if (sourceArray.shouldResize(additionalEntities)) {
+        if (sourceArray.shouldResize_host(additionalEntities)) {
             auto newSize = (sourceArray.getNumEntries_host() + additionalEntities) * 2;
             targetArray.resize(newSize);
         }

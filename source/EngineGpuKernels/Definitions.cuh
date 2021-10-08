@@ -1,12 +1,12 @@
 #pragma once
 
 struct Cell;
-struct Cluster;
 struct Token;
 struct Particle;
 struct Entities;
 
 struct SimulationData;
+struct SimulationResult;
 struct CellAccessTO;
 struct ClusterAccessTO;
 struct DataAccessTO;

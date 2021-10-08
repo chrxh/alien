@@ -143,8 +143,11 @@ public:
 
     __device__ __inline__ int decNumEntriesAndReturnOrigSize() { return atomicSub(_numEntries, 1); }
 
-    //returns new size
-    __host__ __inline__ bool shouldResize(int arraySizeInc) const
+    __device__ __inline__ bool shouldResize(int arraySizeInc) const
+    {
+        return getNumEntries() + arraySizeInc > getSize() * Const::ArrayFillLevelFactor;
+    }
+    __host__ __inline__ bool shouldResize_host(int arraySizeInc) const
     {
         return getNumEntries_host() + arraySizeInc > getSize_host() * Const::ArrayFillLevelFactor;
     }
