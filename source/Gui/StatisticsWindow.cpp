@@ -56,6 +56,7 @@ void _StatisticsWindow::process()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::SliderFloat("", &_liveStatistics.history, 1, MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
@@ -101,19 +102,19 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Cells", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(0, _liveStatistics.numCellsHistory);
+        processLivePlot(0, _liveStatistics.numCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Particles", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(1, _liveStatistics.numParticlesHistory);
+        processLivePlot(1, _liveStatistics.numParticlesHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Tokens", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(2, _liveStatistics.numTokensHistory);
+        processLivePlot(2, _liveStatistics.numTokensHistory);
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
@@ -133,25 +134,25 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Created cells", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(3, _liveStatistics.numCreatedCellsHistory);
+        processLivePlot(3, _liveStatistics.numCreatedCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Successful attacks", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(4, _liveStatistics.numSuccessfulAttacksHistory);
+        processLivePlot(4, _liveStatistics.numSuccessfulAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Failed attacks", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(5, _liveStatistics.numFailedAttacksHistory);
+        processLivePlot(5, _liveStatistics.numFailedAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Muscle activities", 0);
         ImGui::TableSetColumnIndex(1);
-        processPlot(6, _liveStatistics.numMuscleActivitiesHistory);
+        processLivePlot(6, _liveStatistics.numMuscleActivitiesHistory);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -278,7 +279,7 @@ void _StatisticsWindow::processLongtermStatistics()
     }
 }
 
-void _StatisticsWindow::processPlot(int row, std::vector<float> const& valueHistory)
+void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& valueHistory)
 {
     auto maxValue = getMax(valueHistory);
     

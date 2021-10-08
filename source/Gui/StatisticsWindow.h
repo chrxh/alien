@@ -19,7 +19,7 @@ public:
 private:
     void processLiveStatistics();
     void processLongtermStatistics();
-    void processPlot(int row, std::vector<float> const& valueHistory);
+    void processLivePlot(int row, std::vector<float> const& valueHistory);
 
     void updateData();
 
