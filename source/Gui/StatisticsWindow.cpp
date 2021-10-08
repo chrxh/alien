@@ -338,6 +338,7 @@ void _StatisticsWindow::LiveStatistics::truncate()
         numParticlesHistory.erase(numParticlesHistory.begin());
         numTokensHistory.erase(numTokensHistory.begin());
         numCreatedCellsHistory.erase(numCreatedCellsHistory.begin());
+        numSuccessfulAttacksHistory.erase(numSuccessfulAttacksHistory.begin());
         numFailedAttacksHistory.erase(numFailedAttacksHistory.begin());
         numMuscleActivitiesHistory.erase(numMuscleActivitiesHistory.begin());
     }
