@@ -84,7 +84,8 @@ struct SimulationParameters
             && tokenMemorySize == other.tokenMemorySize && tokenMinEnergy == other.tokenMinEnergy
             && radiationExponent == other.radiationExponent && radiationFactor == other.radiationFactor
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
-            && radiationVelocityPerturbation == other.radiationVelocityPerturbation;
+            && radiationVelocityPerturbation == other.radiationVelocityPerturbation
+            && tokenMutationRate == other.tokenMutationRate;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
