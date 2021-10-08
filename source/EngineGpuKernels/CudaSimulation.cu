@@ -140,6 +140,7 @@ _CudaSimulation::_CudaSimulation(
     _cudaSimulationData->init(worldSize, timestep);
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
+    resizeArrays({100000, 100000, 10000});
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);

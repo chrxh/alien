@@ -21,7 +21,7 @@ _SpatialControlWindow::_SpatialControlWindow(
 {
     _zoomInTexture = OpenGLHelper::loadTexture(Const::ZoomInFilename);
     _zoomOutTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
-    _resizeTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
+    _resizeTexture = OpenGLHelper::loadTexture(Const::ResizeFilename);
 }
 
 void _SpatialControlWindow::process()
