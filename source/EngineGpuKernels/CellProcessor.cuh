@@ -128,7 +128,8 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
                 else {
                     auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta)) / 12 /*32*/;
+                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta))
+                        * cudaSimulationParameters.repulsionStrength /*12, 32*/;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);

@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "implot.h"
 
+#include "Base/StringFormatter.h"
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
@@ -67,7 +68,7 @@ void _StatisticsWindow::process()
     }
 
     ImGui::End();
-    ImPlot::ShowDemoWindow();
+//    ImPlot::ShowDemoWindow();
 }
 
 bool _StatisticsWindow::isOn() const
@@ -261,7 +262,7 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
             valueHistory.back(),
             ImVec2(-10.0f, 10.0f),
             ImPlot::GetLastItemColor(),
-            std::to_string(toInt(valueHistory.back())).c_str());
+            StringFormatter::format(toInt(valueHistory.back())).c_str());
 
         ImPlot::PopStyleVar();
         ImPlot::PopStyleColor();
@@ -296,7 +297,7 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
             valueHistory.back(),
             ImVec2(-10.0f, 10.0f),
             ImPlot::GetLastItemColor(),
-            std::to_string(toInt(valueHistory.back())).c_str());
+            StringFormatter::format(toInt(valueHistory.back())).c_str());
 
         ImPlot::PopStyleVar();
         ImPlot::PopStyleColor();
