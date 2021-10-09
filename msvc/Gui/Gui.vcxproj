@@ -162,6 +162,7 @@
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
     <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
+    <ClInclude Include="..\..\source\Gui\NewSimulationDialog.h" />
     <ClInclude Include="..\..\source\Gui\Resources.h" />
     <ClInclude Include="..\..\source\Gui\SpatialControlWindow.h" />
     <ClInclude Include="..\..\source\Gui\StatisticsWindow.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="..\..\external\ImPlot\implot_items.cpp" />
     <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />
+    <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StatisticsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp" />
