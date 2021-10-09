@@ -8,6 +8,7 @@ struct SimulationParameters
     float cellMaxVel = 2.0f;              //
     float cellMaxBindingDistance = 2.6f;  //
     float tokenMutationRate = 0.0005f;     //
+    float repulsionStrength = 0.08f;        //
 
     float cellMinDistance = 0.3f;           //
     float cellMaxCollisionDistance = 1.3f;  //
@@ -85,7 +86,7 @@ struct SimulationParameters
             && radiationExponent == other.radiationExponent && radiationFactor == other.radiationFactor
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-            && tokenMutationRate == other.tokenMutationRate;
+            && tokenMutationRate == other.tokenMutationRate && repulsionStrength == other.repulsionStrength;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

@@ -139,10 +139,11 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+/*
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
         {}
+*/
 
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
         processMenubar();
@@ -322,6 +323,10 @@ void _MainWindow::processDialogs()
                 deserializedData.simulationParameters,
                 deserializedData.symbolMap);
             _simController->updateData(deserializedData.content);
+            _viewport->setCenterInWorldPos(
+                {toFloat(deserializedData.generalSettings.worldSize.x) / 2,
+                 toFloat(deserializedData.generalSettings.worldSize.y) / 2});
+            _viewport->setZoomFactor(4.0f);
         }
         ifd::FileDialog::Instance().Close();
     }
