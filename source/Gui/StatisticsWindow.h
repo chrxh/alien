@@ -20,6 +20,7 @@ private:
     void processLiveStatistics();
     void processLongtermStatistics();
     void processLivePlot(int row, std::vector<float> const& valueHistory);
+    void processLongtermPlot(int row, std::vector<float> const& valueHistory);
 
     void updateData();
 
@@ -53,7 +54,7 @@ private:
         std::vector<float> numParticlesHistory;
         std::vector<float> numTokensHistory;
         std::vector<float> numCreatedCellsHistory;
-        std::vector<float> numSuccessfullAttacksHistory;
+        std::vector<float> numSuccessfulAttacksHistory;
         std::vector<float> numFailedAttacksHistory;
         std::vector<float> numMuscleActivitiesHistory;
 
