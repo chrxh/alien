@@ -13,6 +13,7 @@ namespace
 boost::property_tree::ptree Parser::encode(SimulationParameters const& parameters)
 {
     boost::property_tree::ptree tree;
+    tree.add("cell.repulsion strength", toString(parameters.repulsionStrength));
     tree.add("cell.min distance", toString(parameters.cellMinDistance));
     tree.add("cell.max distance", toString(parameters.cellMaxCollisionDistance));
     tree.add("cell.max force", toString(parameters.cellMaxForce));
@@ -75,6 +76,7 @@ SimulationParameters Parser::decodeSimulationParameters(boost::property_tree::pt
     auto defaultParameters = SimulationParameters();
 
     SimulationParameters result;
+    result.repulsionStrength = tree.get<float>("cell.repulsion strength", defaultParameters.repulsionStrength);
     result.cellMinDistance = tree.get<float>("cell.min distance");
     result.cellMaxCollisionDistance = tree.get<float>("cell.max distance");
     result.cellMaxForce = tree.get<float>("cell.max force");
