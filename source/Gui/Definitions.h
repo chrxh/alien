@@ -39,6 +39,9 @@ using ModeWindow = boost::shared_ptr<_ModeWindow>;
 class _GpuSettingsWindow;
 using GpuSettingsWindow = boost::shared_ptr<_GpuSettingsWindow>;
 
+class _NewSimulationDialog;
+using NewSimulationDialog = boost::shared_ptr<_NewSimulationDialog>;
+
 struct GLFWwindow;
 struct ImFont;
 

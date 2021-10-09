@@ -40,6 +40,7 @@ private:
     ModeWindow _modeWindow;
     GpuSettingsWindow _gpuSettingsWindow;
     Viewport _viewport;
+    NewSimulationDialog _newSimulationDialog;
 
     StyleRepository _styleRepository;
 

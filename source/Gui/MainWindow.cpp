@@ -33,6 +33,7 @@
 #include "StatisticsWindow.h"
 #include "GpuSettingsWindow.h"
 #include "Viewport.h"
+#include "NewSimulationDialog.h"
 
 namespace
 {
@@ -59,7 +60,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     if (!glfwData.window) {
         return nullptr;
     }
-                         // Setup Dear ImGui context
+    // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImPlot::CreateContext();
@@ -99,6 +100,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
+    _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -235,6 +237,9 @@ void _MainWindow::processMenubar()
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.35f, 0.7f, 0.7f));
 */
         if (ImGui::BeginMenu("Simulation")) {
+            if (ImGui::MenuItem("New", "CTRL+N")) {
+                _newSimulationDialog->show();
+            }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
                 onOpenSimulation();
             }
@@ -350,6 +355,7 @@ void _MainWindow::processDialogs()
         }
         ifd::FileDialog::Instance().Close();
     }
+    _newSimulationDialog->process();
 }
 
 void _MainWindow::processWindows()
