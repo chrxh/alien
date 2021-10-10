@@ -22,27 +22,30 @@ namespace Const
     auto const SnapshotFilename = "snapshot.png";
     auto const RestoreFilname = "restore.png";
 */
+    std::string const BasePath = "d:\\temp\\alien\\source\\Gui\\Resources\\";
 
-    auto const SimulationFragmentShader = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\shader.fs";
-    auto const SimulationVertexShader = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\shader.vs";
+    auto const SimulationFragmentShader = BasePath + "shader.fs";
+    auto const SimulationVertexShader = BasePath + "shader.vs";
 
     auto const AutosaveFile = "d:\\temp\\simulations\\evolution.sim";
 
-    auto const FontFilename = "d:\\temp\\alien-imgui\\external\\imgui\\misc\\fonts\\DroidSans.ttf";
+    auto const FontFilename = "d:\\temp\\alien\\external\\imgui\\misc\\fonts\\DroidSans.ttf";
 
-    auto const NavigationOnFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\navigation on.png";
-    auto const NavigationOffFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\navigation off.png";
-    auto const ActionOnFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\action on.png";
-    auto const ActionOffFilename = "d:\\temp\\alien-imgui\\source\\Gui\\Resources\\action off.png";
+    auto const NavigationOnFilename = BasePath + "navigation on.png";
+    auto const NavigationOffFilename = BasePath + "navigation off.png";
+    auto const ActionOnFilename = BasePath + "action on.png";
+    auto const ActionOffFilename = BasePath + "action off.png";
 
-    auto const RunFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\run.png";
-    auto const PauseFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\pause.png";
-    auto const StepBackwardFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\step backward.png";
-    auto const StepForwardFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\step forward.png";
-    auto const SnapshotFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\snapshot.png";
-    auto const RestoreFilname = "d:\\temp\\alien\\source\\Gui\\Resources\\restore.png";
+    auto const RunFilename = BasePath + "run.png";
+    auto const PauseFilename = BasePath + "pause.png";
+    auto const StepBackwardFilename = BasePath + "step backward.png";
+    auto const StepForwardFilename = BasePath + "step forward.png";
+    auto const SnapshotFilename = BasePath + "snapshot.png";
+    auto const RestoreFilname = BasePath + "restore.png";
 
-    auto const ZoomInFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\zoom in.png";
-    auto const ZoomOutFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\zoom out.png";
-    auto const ResizeFilename = "d:\\temp\\alien\\source\\Gui\\Resources\\resize.png";
+    auto const ZoomInFilename = BasePath + "zoom in.png";
+    auto const ZoomOutFilename = BasePath + "zoom out.png";
+    auto const ResizeFilename = BasePath + "resize.png";
+
+    auto const LogoFilename = BasePath + "logo.png";
 }

@@ -30,7 +30,7 @@ void _SpatialControlWindow::process()
         return;
     }
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Spatial control", &_on);
 
     processZoomInButton();

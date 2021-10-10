@@ -34,6 +34,7 @@
 #include "GpuSettingsWindow.h"
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
+#include "StartupWindow.h"
 
 namespace
 {
@@ -101,6 +102,8 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
+    _startupWindow = boost::make_shared<_StartupWindow>(
+        _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -148,10 +151,16 @@ void _MainWindow::mainLoop(GLFWwindow* window)
 */
 
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-        processMenubar();
-        processDialogs();
-        processWindows();
-        _simulationView->processControls();
+        if (_startupWindow->getState() != _StartupWindow::State::Unintialized
+            && _startupWindow->getState() != _StartupWindow::State::RequestLoading) {
+            processMenubar();
+            processDialogs();
+            processWindows();
+            _simulationView->processControls();
+        }
+        if (_startupWindow->getState() != _StartupWindow::State::Finished) {
+            _startupWindow->process();
+        }
         ImGui::PopStyleVar();
 
         // render content
@@ -159,11 +168,20 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        _simulationView->processContent();
+        if (_startupWindow->getState() != _StartupWindow::State::Unintialized) {
+            _simulationView->processContent();
+        } else {
+            glClearColor(0, 0, 0.2f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
+
+        if (_startupWindow->getState() == _StartupWindow::State::Unintialized) {
+            _startupWindow->activate();
+        }
     }
 }
 
@@ -360,11 +378,11 @@ void _MainWindow::processDialogs()
 
 void _MainWindow::processWindows()
 {
-    _modeWindow->process();
     _temporalControlWindow->process();
     _spatialControlWindow->process();
-    _simulationParametersWindow->process();
+    _modeWindow->process();
     _statisticsWindow->process();
+    _simulationParametersWindow->process();
     _gpuSettingsWindow->process();
 }
 
