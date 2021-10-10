@@ -26,7 +26,7 @@ private:
 
     SimulationController _simController;
 
-    bool _on = true;
+    bool _on = false;
     bool _live = true;
 
     struct LiveStatistics

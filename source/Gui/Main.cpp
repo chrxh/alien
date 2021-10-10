@@ -17,7 +17,9 @@ int main(int, char**)
     try {
         simController->initCuda();
 
+/*
         Serializer serializer = boost::make_shared<_Serializer>();
+
         SerializedSimulation serializedData;
         serializer->loadSimulationDataFromFile(Const::AutosaveFile, serializedData);
         auto deserializedData = serializer->deserializeSimulation(serializedData);
@@ -29,6 +31,7 @@ int main(int, char**)
             SymbolMap());
 
         simController->updateData(deserializedData.content);
+*/
 
         //        simController->runSimulation();
 

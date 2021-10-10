@@ -34,7 +34,7 @@ void _TemporalControlWindow::process()
         return;
     }
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Temporal control", &_on);
 
     processRunButton();
@@ -104,7 +104,7 @@ void _TemporalControlWindow::processTpsRestriction()
     static int tpsRestriction = 30;
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::SliderInt("", &tpsRestriction, 1, 200, "%d TPS");
+    ImGui::SliderInt("", &tpsRestriction, 1, 400, "%d TPS", ImGuiSliderFlags_Logarithmic);
     if (_slowDown) {
         _simController->setTpsRestriction(tpsRestriction);
     } else {

@@ -36,7 +36,7 @@ private:
     TextureData _zoomOutTexture;
     TextureData _resizeTexture;
 
-    bool _on = true;
+    bool _on = false;
     bool _showResizeDialog = false;
     bool _scaleContent = false;
     int _width = 0;
