@@ -13,7 +13,14 @@ namespace
 boost::property_tree::ptree Parser::encode(SimulationParameters const& parameters)
 {
     boost::property_tree::ptree tree;
-    tree.add("cell.repulsion strength", toString(parameters.repulsionStrength));
+    tree.add("time step size", toString(parameters.timestepSize));
+    tree.add("friction", toString(parameters.friction));
+    tree.add("cell.binding force", toString(parameters.cellBindingForce));
+    tree.add("cell.max velocity", toString(parameters.cellMaxVel));
+    tree.add("cell.max binding distance", toString(parameters.cellMaxBindingDistance));
+    tree.add("cell.repulsion strength", toString(parameters.cellRepulsionStrength));
+    tree.add("token.mutation rate", toString(parameters.tokenMutationRate));
+
     tree.add("cell.min distance", toString(parameters.cellMinDistance));
     tree.add("cell.max distance", toString(parameters.cellMaxCollisionDistance));
     tree.add("cell.max force", toString(parameters.cellMaxForce));
@@ -76,7 +83,14 @@ SimulationParameters Parser::decodeSimulationParameters(boost::property_tree::pt
     auto defaultParameters = SimulationParameters();
 
     SimulationParameters result;
-    result.repulsionStrength = tree.get<float>("cell.repulsion strength", defaultParameters.repulsionStrength);
+    result.timestepSize = tree.get<float>("time step size", defaultParameters.timestepSize);
+    result.friction = tree.get<float>("friction", defaultParameters.friction);
+    result.cellBindingForce = tree.get<float>("cell.binding force", defaultParameters.cellBindingForce);
+    result.cellMaxVel= tree.get<float>("cell.max velocity", defaultParameters.cellMaxVel);
+    result.cellMaxBindingDistance = tree.get<float>("cell.max binding distance", defaultParameters.cellMaxBindingDistance);
+    result.cellRepulsionStrength = tree.get<float>("cell.repulsion strength", defaultParameters.cellRepulsionStrength);
+    result.tokenMutationRate = tree.get<float>("token mutation rate", defaultParameters.tokenMutationRate);
+
     result.cellMinDistance = tree.get<float>("cell.min distance");
     result.cellMaxCollisionDistance = tree.get<float>("cell.max distance");
     result.cellMaxForce = tree.get<float>("cell.max force");

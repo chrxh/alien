@@ -151,8 +151,8 @@ void _MainWindow::mainLoop(GLFWwindow* window)
 */
 
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-        if (_startupWindow->getState() != _StartupWindow::State::Unintialized
-            && _startupWindow->getState() != _StartupWindow::State::RequestLoading) {
+        if (_startupWindow->getState() == _StartupWindow::State::LoadingControls
+            || _startupWindow->getState() == _StartupWindow::State::Finished) {
             processMenubar();
             processDialogs();
             processWindows();
@@ -171,7 +171,7 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         if (_startupWindow->getState() != _StartupWindow::State::Unintialized) {
             _simulationView->processContent();
         } else {
-            glClearColor(0, 0, 0.2f, 1.0f);
+            glClearColor(0, 0, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
         }
 
