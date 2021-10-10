@@ -165,6 +165,7 @@
     <ClInclude Include="..\..\source\Gui\NewSimulationDialog.h" />
     <ClInclude Include="..\..\source\Gui\Resources.h" />
     <ClInclude Include="..\..\source\Gui\SpatialControlWindow.h" />
+    <ClInclude Include="..\..\source\Gui\StartupWindow.h" />
     <ClInclude Include="..\..\source\Gui\StatisticsWindow.h" />
     <ClInclude Include="..\..\source\Gui\OpenGLHelper.h" />
     <ClInclude Include="..\..\source\Gui\SimulationParametersWindow.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp" />
+    <ClCompile Include="..\..\source\Gui\StartupWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StatisticsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\OpenGLHelper.cpp" />
     <ClCompile Include="..\..\source\Gui\SimulationParametersWindow.cpp" />

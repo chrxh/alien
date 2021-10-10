@@ -41,6 +41,7 @@ private:
     GpuSettingsWindow _gpuSettingsWindow;
     Viewport _viewport;
     NewSimulationDialog _newSimulationDialog;
+    StartupWindow _startupWindow;
 
     StyleRepository _styleRepository;
 

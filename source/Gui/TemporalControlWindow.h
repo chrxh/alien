@@ -49,7 +49,7 @@ private:
     boost::optional<Snapshot> _snapshot;
 
     std::vector<Snapshot> _history;
-    bool _on = true;
+    bool _on = false;
 
     bool _slowDown = false;
 };

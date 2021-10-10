@@ -38,15 +38,6 @@ void _ModeWindow::process()
     }
 
     ImGui::PopStyleColor(3);
-
-    /*
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-    ImGui::PopStyleVar();
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3.0f);
-    ImGui::SameLine();
-    ImGui::Button("Zoom in", ImVec2(0, 37));
-*/
-
     ImGui::End();
 }
 
