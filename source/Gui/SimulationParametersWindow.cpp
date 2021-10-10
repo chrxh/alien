@@ -38,10 +38,10 @@ void _SimulationParametersWindow::process()
     createFloatItem("Minimum distance", simParameters.cellMinDistance, 0, 1.0f);
 
     createGroup("Collision and binding");
-    createFloatItem("Repulsion strength", simParameters.repulsionStrength, 0, 0.3f);
+    createFloatItem("Repulsion strength", simParameters.cellRepulsionStrength, 0, 0.3f);
     createFloatItem("Maximum collision distance", simParameters.cellMaxCollisionDistance, 0, 3.0f);
     createFloatItem("Maximum binding distance", simParameters.cellMaxBindingDistance, 0, 5.0f);
-    createFloatItem("Binding force strength", simParameters.bindingForce, 0, 4.0f);
+    createFloatItem("Binding force strength", simParameters.cellBindingForce, 0, 4.0f);
     createFloatItem("Binding creation force", simParameters.cellFusionVelocity, 0, 1.0f);
     createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, 0, 6);
 

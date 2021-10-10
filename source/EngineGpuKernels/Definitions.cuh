@@ -6,7 +6,7 @@ struct Particle;
 struct Entities;
 
 struct SimulationData;
-struct SimulationResult;
+class SimulationResult;
 struct CellAccessTO;
 struct ClusterAccessTO;
 struct DataAccessTO;

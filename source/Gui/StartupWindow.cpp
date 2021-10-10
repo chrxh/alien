@@ -15,7 +15,8 @@
 
 namespace
 {
-    auto const FadeInOutDuration = 1000ll;
+    auto const FadeOutDuration = 2000ll;
+    auto const FadeInDuration = 500ll;
 }
 
 _StartupWindow::_StartupWindow(
@@ -68,8 +69,8 @@ void _StartupWindow::process()
         auto now = std::chrono::steady_clock::now();
         auto millisecSinceActivation =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastActivationTimepoint).count();
-        millisecSinceActivation = std::min(FadeInOutDuration, millisecSinceActivation);
-        auto alphaFactor = 1.0f - toFloat(millisecSinceActivation) / FadeInOutDuration;
+        millisecSinceActivation = std::min(FadeOutDuration, millisecSinceActivation);
+        auto alphaFactor = 1.0f - toFloat(millisecSinceActivation) / FadeOutDuration;
 
         ImGui::GetStyle().Alpha = alphaFactor;
         processWindow();
@@ -88,9 +89,9 @@ void _StartupWindow::process()
         auto now = std::chrono::steady_clock::now();
         auto millisecSinceActivation =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastActivationTimepoint).count()
-            - FadeInOutDuration;
-        millisecSinceActivation = std::min(FadeInOutDuration, millisecSinceActivation);
-        auto alphaFactor = toFloat(millisecSinceActivation) / FadeInOutDuration;
+            - FadeOutDuration;
+        millisecSinceActivation = std::min(FadeInDuration, millisecSinceActivation);
+        auto alphaFactor = toFloat(millisecSinceActivation) / FadeInDuration;
         ImGui::GetStyle().Alpha = alphaFactor;
         if (alphaFactor == 1.0f) {
             _state = State::Finished;
@@ -115,11 +116,11 @@ void _StartupWindow::activate()
 void _StartupWindow::processWindow()
 {
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(700 * 3 / 2, 344 * 3 / 2));
+    ImGui::SetNextWindowSize(ImVec2(1220, 620));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
     ImGui::Begin("##startup", NULL, windowFlags);
-    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(700 * 3 / 2, 324 * 3 / 2));
+    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(1200, 600));
     ImGui::End();
 }
