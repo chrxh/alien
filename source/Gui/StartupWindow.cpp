@@ -15,7 +15,7 @@
 
 namespace
 {
-    auto const FadeOutDuration = 2000ll;
+    auto const FadeOutDuration = 1500ll;
     auto const FadeInDuration = 500ll;
 }
 
@@ -77,7 +77,6 @@ void _StartupWindow::process()
 
         if (alphaFactor == 0.0f) {
             _state = State::LoadingControls;
-//            ImGui::GetStyle().Alpha = 1.0f;
             _temporalControlWindow->setOn(true);
             _spatialControlWindow->setOn(true);
             _statisticsWindow->setOn(true);
@@ -116,11 +115,11 @@ void _StartupWindow::activate()
 void _StartupWindow::processWindow()
 {
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(1220, 620));
+    ImGui::SetNextWindowSize(ImVec2(1212, 776));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
     ImGui::Begin("##startup", NULL, windowFlags);
-    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(1200, 600));
+    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(1182, 746));
     ImGui::End();
 }
