@@ -44,6 +44,8 @@ private:
     NewSimulationDialog _newSimulationDialog;
     StartupWindow _startupWindow;
     FlowFieldWindow _flowFieldWindow;
+    AboutDialog _aboutDialog;
+    ColorizeDialog _colorizeDialog;
 
     StyleRepository _styleRepository;
 

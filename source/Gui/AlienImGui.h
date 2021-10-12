@@ -9,4 +9,5 @@ public:
     static bool BeginMenuButton(std::string const& text, bool& toggle,
                                 std::string const& popup);  //return toggle
     static void EndMenuButton();
+    static bool ShutdownButton();
 };
