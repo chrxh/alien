@@ -59,7 +59,7 @@ struct SimulationData
     bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
     {
         auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
-        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 10);
+        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 2);
 
         return entities.cells.shouldResize_host(cellAndParticleArraySizeInc)
             || entities.cellPointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
@@ -79,7 +79,7 @@ struct SimulationData
     void resizeTarget(int additionalCells, int additionalParticles, int additionalTokens)
     {
         auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
-        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 10);
+        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 2);
 
         resizeTargetIntern(entities.cells, entitiesForCleanup.cells, cellAndParticleArraySizeInc);
         resizeTargetIntern(entities.cellPointers, entitiesForCleanup.cellPointers, cellAndParticleArraySizeInc * 10);

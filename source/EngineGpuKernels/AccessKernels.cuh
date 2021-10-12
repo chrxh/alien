@@ -337,9 +337,6 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
 {
     KERNEL_CALL_1_1(filterCells, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
-    data.entities.cells.getNewSubarray(*access.numCells);
-    data.entities.particles.getNewSubarray(*access.numParticles);
-    data.entities.tokens.getNewSubarray(*access.numTokens);
     KERNEL_CALL(
         createDataFromTO,
         data,

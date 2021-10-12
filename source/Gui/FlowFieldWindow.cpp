@@ -94,7 +94,7 @@ void _FlowFieldWindow::process()
 
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
                     ImGui::SliderFloat(
-                        "##strength", &radialFlowData.strength, 0.0, 0.1, "%.3f", ImGuiSliderFlags_Logarithmic);
+                        "##strength", &radialFlowData.strength, 0.0, 0.1f, "%.3f", ImGuiSliderFlags_Logarithmic);
 
 /*
                     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
@@ -129,7 +129,7 @@ void _FlowFieldWindow::process()
             }
         }
         _activeTabs = activeTabs;
-        flowFieldSettings.numCenters = _activeTabs.size();
+        flowFieldSettings.numCenters = toInt(_activeTabs.size());
 
         ImGui::EndTabBar();
     }

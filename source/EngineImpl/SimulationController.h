@@ -5,6 +5,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/GeneralSettings.h"
 #include "EngineInterface/SymbolMap.h"
+#include "EngineInterface/Settings.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
@@ -60,6 +61,7 @@ public:
 
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
+    ENGINEIMPL_EXPORT Settings getSettings() const;
     ENGINEIMPL_EXPORT SymbolMap getSymbolMap() const;
     ENGINEIMPL_EXPORT OverallStatistics getStatistics() const;
 
