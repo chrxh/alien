@@ -10,7 +10,7 @@ struct RadialFlowCenterData
 {
     float posX = 0;
     float posY = 0;
-    float radius = 100.0f;
+    float radius = 200.0f;
     float strength = 0.01f;
     Orientation orientation = Orientation::Clockwise;
 

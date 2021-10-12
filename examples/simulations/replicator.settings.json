@@ -1,14 +1,14 @@
 {
     "general": {
-        "time step": "6703",
+        "time step": "0",
         "world size": {
-            "x": "5000",
-            "y": "1500"
+            "x": "1000",
+            "y": "500"
         }
     },
     "simulation parameters": {
         "time step size": "1.000000",
-        "friction": "0.000000",
+        "friction": "0.001000",
         "cell": {
             "binding force": "1.000000",
             "max velocity": "2.000000",
@@ -16,16 +16,16 @@
             "repulsion strength": "0.080000",
             "min distance": "0.300000",
             "max distance": "1.300000",
-            "max force": "0.800000",
+            "max force": "2.800000",
             "max force decay probability": "0.200000",
             "min token usages": "40000",
-            "token usage decay probability": "0.000001",
+            "token usage decay probability": "0.000002",
             "max bonds": "6",
             "max token": "3",
             "max token branch number": "6",
             "min energy": "50.000000",
             "transformation probability": "0.200000",
-            "fusion velocity": "0.400000",
+            "fusion velocity": "0.300000",
             "function": {
                 "computer": {
                     "max instructions": "15",
@@ -40,19 +40,19 @@
                 "constructor": {
                     "offspring": {
                         "cell energy": "100.000000",
-                        "cell distance": "1.000000",
+                        "cell distance": "1.600000",
                         "token energy": "60.000000",
                         "token suppress memory copy": "false"
                     },
                     "mutation probability": {
-                        "token data": "0.002000",
-                        "cell data": "0.002000",
-                        "cell property": "0.002000",
-                        "cell structure": "0.002000"
+                        "token data": "0.100000",
+                        "cell data": "0.000000",
+                        "cell property": "0.000000",
+                        "cell structure": "0.000000"
                     }
                 },
                 "sensor": {
-                    "range": "150.000000"
+                    "range": "50.000000"
                 },
                 "communicator": {
                     "range": "50.000000"
@@ -67,7 +67,7 @@
         "radiation": {
             "exponent": "1.000000",
             "factor": "0.000200",
-            "probability": "0.020000",
+            "probability": "0.000000",
             "velocity multiplier": "1.000000",
             "velocity perturbation": "0.500000"
         }
@@ -77,8 +77,8 @@
         "num centers": "1",
         "center0": {
             "position": {
-                "x": "2500.000000",
-                "y": "750.000000"
+                "x": "500.000000",
+                "y": "250.000000"
             },
             "radius": "100.000000",
             "strength": "0.010000"

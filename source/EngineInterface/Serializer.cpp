@@ -123,92 +123,7 @@ namespace boost {
     }
 }
 
-bool _Serializer::loadSimulationDataFromFile(string const& filename, SerializedSimulation& data)
-{
-    std::regex fileEndingExpr("\\.\\w+$");
-    if (!std::regex_search(filename, fileEndingExpr)) {
-        return false;
-    }
-    auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
-    auto parametersFilename = std::regex_replace(filename, fileEndingExpr, ".parameters.json");
-    auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
-
-    if (!loadDataFromFile(filename, data.content)) {
-        return false;
-    }
-    if (!loadDataFromFile(settingsFilename, data.generalSettings)) {
-        return false;
-    }
-    if (!loadDataFromFile(parametersFilename, data.simulationParameters)) {
-        return false;
-    }
-    if (!loadDataFromFile(symbolsFilename, data.symbolMap)) {
-        return false;
-    }
-
-    return true;
-}
-
-bool _Serializer::saveSimulationDataToFile(string const& filename, SerializedSimulation& data)
-{
-    std::regex fileEndingExpr("\\.\\w+$");
-    if (!std::regex_search(filename, fileEndingExpr)) {
-        return false;
-    }
-    auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
-    auto parametersFilename = std::regex_replace(filename, fileEndingExpr, ".parameters.json");
-    auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
-
-    if (!saveDataToFile(filename, data.content)) {
-        return false;
-    }
-    if (!saveDataToFile(settingsFilename, data.generalSettings)) {
-        return false;
-    }
-    if (!saveDataToFile(parametersFilename, data.simulationParameters)) {
-        return false;
-    }
-    if (!saveDataToFile(symbolsFilename, data.symbolMap)) {
-        return false;
-    }
-
-    return true;
-}
-
-SerializedSimulation _Serializer::serializeSimulation(DeserializedSimulation const& data)
-{
-    ostringstream stream;
-    boost::archive::binary_oarchive archive(stream);
-
-    uint32_t typeId;
-    archive << data.content << typeId << data.timestep;
-
-    return {
-        serializeGeneralSettings(data.generalSettings),
-        serializeSimulationParameters(data.simulationParameters),
-        serializeSymbolMap(data.symbolMap),
-        stream.str()};
-}
-
-DeserializedSimulation _Serializer::deserializeSimulation(SerializedSimulation const& data)
-{
-    istringstream stream(data.content);
-    boost::archive::binary_iarchive ia(stream);
-
-    DataDescription content;
-    uint32_t timestep, typeId;
-    ia >> content >> typeId >> timestep;
-
-    return {
-        timestep,
-        deserializeGeneralSettings(data.generalSettings),
-        deserializeSimulationParameters(data.simulationParameters),
-        deserializeSymbolMap(data.symbolMap),
-        content};
-}
-
-
-bool _Serializer::loadSimulationDataFromFile2(string const& filename, SerializedSimulation2& data)
+bool _Serializer::loadSimulationDataFromFile2(string const& filename, SerializedSimulation& data)
 {
     std::regex fileEndingExpr("\\.\\w+$");
     if (!std::regex_search(filename, fileEndingExpr)) {
@@ -220,7 +135,7 @@ bool _Serializer::loadSimulationDataFromFile2(string const& filename, Serialized
     if (!loadDataFromFile(filename, data.content)) {
         return false;
     }
-    if (!loadDataFromFile(settingsFilename, data.settings)) {
+    if (!loadDataFromFile(settingsFilename, data.timestepAndSettings)) {
         return false;
     }
     if (!loadDataFromFile(symbolsFilename, data.symbolMap)) {
@@ -230,7 +145,7 @@ bool _Serializer::loadSimulationDataFromFile2(string const& filename, Serialized
     return true;
 }
 
-bool _Serializer::saveSimulationDataToFile2(string const& filename, SerializedSimulation2& data)
+bool _Serializer::saveSimulationDataToFile2(string const& filename, SerializedSimulation& data)
 {
     std::regex fileEndingExpr("\\.\\w+$");
     if (!std::regex_search(filename, fileEndingExpr)) {
@@ -242,7 +157,7 @@ bool _Serializer::saveSimulationDataToFile2(string const& filename, SerializedSi
     if (!saveDataToFile(filename, data.content)) {
         return false;
     }
-    if (!saveDataToFile(settingsFilename, data.settings)) {
+    if (!saveDataToFile(settingsFilename, data.timestepAndSettings)) {
         return false;
     }
     if (!saveDataToFile(symbolsFilename, data.symbolMap)) {
@@ -252,7 +167,7 @@ bool _Serializer::saveSimulationDataToFile2(string const& filename, SerializedSi
     return true;
 }
 
-SerializedSimulation2 _Serializer::serializeSimulation2(DeserializedSimulation2 const& data)
+SerializedSimulation _Serializer::serializeSimulation2(DeserializedSimulation const& data)
 {
     return {
         serializeTimestepAndSettings(data.timestep, data.settings),
@@ -260,9 +175,9 @@ SerializedSimulation2 _Serializer::serializeSimulation2(DeserializedSimulation2 
         serializeDataDescription(data.content)};
 }
 
-DeserializedSimulation2 _Serializer::deserializeSimulation2(SerializedSimulation2 const& data)
+DeserializedSimulation _Serializer::deserializeSimulation2(SerializedSimulation const& data)
 {
-    auto [timestep, settings] = deserializeTimestepAndSettings(data.settings);
+    auto [timestep, settings] = deserializeTimestepAndSettings(data.timestepAndSettings);
     return {timestep, settings, deserializeSymbolMap(data.symbolMap), deserializeDataDescription(data.content)};
 }
 
@@ -289,38 +204,6 @@ SymbolMap _Serializer::deserializeSymbolMap(string const& data)
         result.emplace(key.data(), value.data());
     }
     return result;
-}
-
-string _Serializer::serializeSimulationParameters(SimulationParameters const& parameters) const
-{
-    std::stringstream ss;
-    boost::property_tree::json_parser::write_json(ss, Parser::encode(parameters));
-    return ss.str();
-}
-
-SimulationParameters _Serializer::deserializeSimulationParameters(string const& data)
-{
-    std::stringstream ss;
-    ss << data;
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(ss, tree);
-    return Parser::decodeSimulationParameters(tree);
-}
-
-string _Serializer::serializeGeneralSettings(GeneralSettings const& generalSettings) const
-{
-    std::stringstream ss;
-    boost::property_tree::json_parser::write_json(ss, Parser::encode(generalSettings));
-    return ss.str();
-}
-
-GeneralSettings _Serializer::deserializeGeneralSettings(std::string const& data) const
-{
-    std::stringstream ss;
-    ss << data;
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(ss, tree);
-    return Parser::decodeGeneralSettings(tree);
 }
 
 string _Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings) const

@@ -113,19 +113,15 @@ void _CudaSimulation::initCuda()
     CudaInitializer::init();
 }
 
-_CudaSimulation::_CudaSimulation(
-    int2 const& worldSize,
-    int timestep,
-    SimulationParameters const& parameters,
-    GpuSettings const& gpuConstants)
+_CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings)
 {
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
 //    CudaMemoryManager::getInstance().reset();
 
-    setSimulationParameters(parameters);
-    setGpuConstants(gpuConstants);
-    setFlowFieldSettings(FlowFieldSettings());
+    setSimulationParameters(settings.simulationParameters);
+    setGpuConstants(gpuSettings);
+    setFlowFieldSettings(settings.flowFieldSettings);
     _currentTimestep.store(timestep);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
@@ -138,7 +134,7 @@ _CudaSimulation::_CudaSimulation(
 
 //    auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
 
-    _cudaSimulationData->init(worldSize, timestep);
+    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
     resizeArrays({100000, 100000, 10000});

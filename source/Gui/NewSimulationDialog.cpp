@@ -90,18 +90,16 @@ void _NewSimulationDialog::onNewSimulation()
 
     _statisticsWindow->reset();
 
-    auto simulationParameters = _simController->getSimulationParameters();
     auto symbolMap = _simController->getSymbolMap();
-    GeneralSettings generalSettings;
-    generalSettings.worldSize = {_width, _height};
 
-    _simController->newSimulation(
-        0,
-        generalSettings,
-        simulationParameters,
-        symbolMap);
-    _viewport->setCenterInWorldPos(
-        {toFloat(generalSettings.worldSize.x) / 2,
-         toFloat(generalSettings.worldSize.y) / 2});
+    Settings settings;
+    settings.generalSettings.worldSizeX = _width;
+    settings.generalSettings.worldSizeY = _height;
+    settings.simulationParameters = _simController->getSimulationParameters();
+    settings.flowFieldSettings.radialFlowCenters[0].posX = toFloat(_width) / 2;
+    settings.flowFieldSettings.radialFlowCenters[0].posY = toFloat(_height) / 2;
+
+    _simController->newSimulation(0, settings, symbolMap);
+    _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     _viewport->setZoomFactor(4.0f);
 }
