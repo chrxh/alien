@@ -16,11 +16,7 @@ public:
 
     ENGINEIMPL_EXPORT void initCuda();
 
-    ENGINEIMPL_EXPORT void newSimulation(
-        int timestep,
-        GeneralSettings const& generalSettings,
-        SimulationParameters const& parameters,
-        SymbolMap const& symbolMap);
+    ENGINEIMPL_EXPORT void newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap);
     ENGINEIMPL_EXPORT void clear();
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
@@ -71,10 +67,8 @@ public:
     ENGINEIMPL_EXPORT float getTps() const;
 
 private:
-    GeneralSettings _generalSettings;
+    Settings _settings;
     GpuSettings _gpuSettings; 
-    SimulationParameters _parameters;
-    FlowFieldSettings _flowFieldSettings;
     SymbolMap _symbolMap;
 
     EngineWorker _worker;

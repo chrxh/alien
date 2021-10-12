@@ -27,7 +27,7 @@ namespace Const
     auto const SimulationFragmentShader = BasePath + "shader.fs";
     auto const SimulationVertexShader = BasePath + "shader.vs";
 
-    auto const AutosaveFile = "d:\\temp\\simulations\\evolution.sim";
+    auto const AutosaveFile = BasePath + "autosave.sim";
 
     auto const FontFilename = "d:\\temp\\alien\\external\\imgui\\misc\\fonts\\DroidSans.ttf";
 

@@ -7,20 +7,12 @@ void _SimulationController::initCuda()
     _worker.initCuda();
 }
 
-void _SimulationController::newSimulation(
-    int timestep,
-    GeneralSettings const& generalSettings,
-    SimulationParameters const& parameters,
-    SymbolMap const& symbolMap)
+void _SimulationController::newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap)
 {
-    _generalSettings = generalSettings;
-    _parameters = parameters;
+    _settings = settings;
     _symbolMap = symbolMap;
-    _worker.newSimulation(generalSettings.worldSize, timestep, parameters, _gpuSettings);
+    _worker.newSimulation(timestep, settings, _gpuSettings);
     
-    _flowFieldSettings.radialFlowCenters[0].posX = toFloat(generalSettings.worldSize.x) / 2;
-    _flowFieldSettings.radialFlowCenters[0].posY = toFloat(generalSettings.worldSize.y) / 2;
-
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 }
 
@@ -93,13 +85,13 @@ void _SimulationController::setCurrentTimestep(uint64_t value)
 
 SimulationParameters _SimulationController::getSimulationParameters() const
 {
-    return _parameters;
+    return _settings.simulationParameters;
 }
 
 void _SimulationController::setSimulationParameters_async(
     SimulationParameters const& parameters)
 {
-    _parameters = parameters;
+    _settings.simulationParameters = parameters;
     _worker.setSimulationParameters_async(parameters);
 }
 
@@ -116,12 +108,12 @@ void _SimulationController::setGpuSettings_async(GpuSettings const& gpuSettings)
 
 FlowFieldSettings _SimulationController::getFlowFieldSettings() const
 {
-    return _flowFieldSettings;
+    return _settings.flowFieldSettings;
 }
 
 void _SimulationController::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
 {
-    _flowFieldSettings = flowFieldSettings;
+    _settings.flowFieldSettings = flowFieldSettings;
     _worker.setFlowFieldSettings_async(flowFieldSettings);
 }
 
@@ -136,17 +128,17 @@ void _SimulationController::applyForce_async(
 
 GeneralSettings _SimulationController::getGeneralSettings() const
 {
-    return _generalSettings;
+    return _settings.generalSettings;
 }
 
 IntVector2D _SimulationController::getWorldSize() const
 {
-    return _generalSettings.worldSize;
+    return {_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 }
 
 Settings _SimulationController::getSettings() const
 {
-    return {_generalSettings, _parameters, _flowFieldSettings};
+    return _settings;
 }
 
 SymbolMap _SimulationController::getSymbolMap() const

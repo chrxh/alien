@@ -1,16 +1,95 @@
 {
-    "worldSize": {
-        "x": "5000",
-        "y": "1500"
+    "general": {
+        "time step": "6703",
+        "world size": {
+            "x": "5000",
+            "y": "1500"
+        }
     },
-    "cudaSettings": {
-        "dynamicMemorySize": "100000000",
-        "maxCells": "900000",
-        "maxClusters": "350000",
-        "maxParticles": "900000",
-        "maxTokens": "250000",
-        "metadataDynamicMemorySize": "100000000",
-        "numBlocks": "2048",
-        "numThreadsPerBlock": "8"
+    "simulation parameters": {
+        "time step size": "1.000000",
+        "friction": "0.000000",
+        "cell": {
+            "binding force": "1.000000",
+            "max velocity": "2.000000",
+            "max binding distance": "2.600000",
+            "repulsion strength": "0.080000",
+            "min distance": "0.300000",
+            "max distance": "1.300000",
+            "max force": "0.800000",
+            "max force decay probability": "0.200000",
+            "min token usages": "40000",
+            "token usage decay probability": "0.000001",
+            "max bonds": "6",
+            "max token": "3",
+            "max token branch number": "6",
+            "min energy": "50.000000",
+            "transformation probability": "0.200000",
+            "fusion velocity": "0.400000",
+            "function": {
+                "computer": {
+                    "max instructions": "15",
+                    "memory size": "8"
+                },
+                "weapon": {
+                    "strength": "0.100000",
+                    "energy cost": "0.000000",
+                    "geometry deviation exponent": "0.000000",
+                    "inhomogeneous color factor": "1.000000"
+                },
+                "constructor": {
+                    "offspring": {
+                        "cell energy": "100.000000",
+                        "cell distance": "1.000000",
+                        "token energy": "60.000000",
+                        "token suppress memory copy": "false"
+                    },
+                    "mutation probability": {
+                        "token data": "0.002000",
+                        "cell data": "0.002000",
+                        "cell property": "0.002000",
+                        "cell structure": "0.002000"
+                    }
+                },
+                "sensor": {
+                    "range": "150.000000"
+                },
+                "communicator": {
+                    "range": "50.000000"
+                }
+            }
+        },
+        "token": {
+            "mutation rate": "0.000500",
+            "memory size": "256",
+            "min energy": "3.000000"
+        },
+        "radiation": {
+            "exponent": "1.000000",
+            "factor": "0.000200",
+            "probability": "0.020000",
+            "velocity multiplier": "1.000000",
+            "velocity perturbation": "0.500000"
+        }
+    },
+    "flow field": {
+        "active": "false",
+        "num centers": "1",
+        "center0": {
+            "position": {
+                "x": "2500.000000",
+                "y": "750.000000"
+            },
+            "radius": "100.000000",
+            "strength": "0.010000"
+        },
+        "center1": {
+            "position": {
+                "x": "0.000000",
+                "y": "0.000000"
+            },
+            "radius": "100.000000",
+            "strength": "0.010000"
+        }
     }
 }

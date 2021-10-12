@@ -61,17 +61,12 @@ void EngineWorker::initCuda()
     _CudaSimulation::initCuda();
 }
 
-void EngineWorker::newSimulation(
-    IntVector2D size,
-    int timestep,
-    SimulationParameters const& parameters,
-    GpuSettings const& gpuConstants)
+void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings)
 {
-    _worldSize = size;
-    _parameters = parameters;
-    _gpuConstants = gpuConstants;
-    _dataTOCache = boost::make_shared<_AccessDataTOCache>(gpuConstants);
-    _cudaSimulation = boost::make_shared<_CudaSimulation>(int2{size.x, size.y}, timestep, parameters, gpuConstants);
+    _settings = settings;
+    _gpuConstants = gpuSettings;
+    _dataTOCache = boost::make_shared<_AccessDataTOCache>(gpuSettings);
+    _cudaSimulation = boost::make_shared<_CudaSimulation>(timestep, settings, gpuSettings);
 }
 
 void EngineWorker::clear()
@@ -115,7 +110,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     _cudaSimulation->getSimulationData(
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
-    DataConverter converter(dataTO, _parameters, _gpuConstants);
+    DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
     return converter.getDataDescription();
 }
 
@@ -159,14 +154,15 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
     auto arraySizes = _cudaSimulation->getArraySizes();
     DataAccessTO dataTO =
         _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
-    _cudaSimulation->getSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
+    int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
+    _cudaSimulation->getSimulationData({0, 0}, worldSize, dataTO);
 
-    DataConverter converter(dataTO, _parameters, _gpuConstants);
+    DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
     converter.updateData(dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 
-    _cudaSimulation->setSimulationData({0, 0}, int2{_worldSize.x, _worldSize.y}, dataTO);
+    _cudaSimulation->setSimulationData({0, 0}, worldSize, dataTO);
     updateMonitorDataIntern();
 }
 

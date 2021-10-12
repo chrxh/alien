@@ -44,19 +44,14 @@ void _StartupWindow::process()
     if (_state == State::RequestLoading) {
         Serializer serializer = boost::make_shared<_Serializer>();
         SerializedSimulation serializedData;
-        serializer->loadSimulationDataFromFile(Const::AutosaveFile, serializedData);
-        auto deserializedData = serializer->deserializeSimulation(serializedData);
+        serializer->loadSimulationDataFromFile2(Const::AutosaveFile, serializedData);
+        auto deserializedData = serializer->deserializeSimulation2(serializedData);
 
-        _simController->newSimulation(
-            deserializedData.timestep,
-            deserializedData.generalSettings,
-            deserializedData.simulationParameters,
-            SymbolMap());
+        _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
         _simController->updateData(deserializedData.content);
-
         _viewport->setCenterInWorldPos(
-            {toFloat(deserializedData.generalSettings.worldSize.x) / 2,
-             toFloat(deserializedData.generalSettings.worldSize.y) / 2});
+            {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
+             toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
         _viewport->setZoomFactor(4.0f);
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();

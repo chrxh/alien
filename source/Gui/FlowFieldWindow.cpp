@@ -23,16 +23,16 @@ void _FlowFieldWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::Begin("Flow field", &_on, ImGuiWindowFlags_None);
 
-    ImGui::Checkbox("Activate", &flowFieldSettings.active);
+    ImGui::Checkbox("##", &flowFieldSettings.active);
     ImGui::SameLine();
     
     const char* flowTypes[] = {"Radial flow"};
     int currentFlowTypes = 0;
-    ImGui::BeginDisabled(!flowFieldSettings.active);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::Combo("##", &currentFlowTypes, flowTypes, IM_ARRAYSIZE(flowTypes));
     ImGui::PopItemWidth();
 
+    ImGui::BeginDisabled(!flowFieldSettings.active);
     if (ImGui::BeginTabBar(
             "##Flow",
             ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {

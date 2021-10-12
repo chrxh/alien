@@ -88,7 +88,6 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     }
 
     _modeWindow = boost::make_shared<_ModeWindow>();
-
     auto worldSize = simController->getWorldSize();
     _viewport = boost::make_shared<_Viewport>();
     _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
@@ -342,18 +341,15 @@ void _MainWindow::processDialogs()
 
             Serializer serializer = boost::make_shared<_Serializer>();
             SerializedSimulation serializedData;
-            serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
-            auto deserializedData = serializer->deserializeSimulation(serializedData);
+            serializer->loadSimulationDataFromFile2(firstFilename.string(), serializedData);
+            auto deserializedData = serializer->deserializeSimulation2(serializedData);
 
             _simController->newSimulation(
-                deserializedData.timestep,
-                deserializedData.generalSettings,
-                deserializedData.simulationParameters,
-                deserializedData.symbolMap);
+                deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
             _simController->updateData(deserializedData.content);
             _viewport->setCenterInWorldPos(
-                {toFloat(deserializedData.generalSettings.worldSize.x) / 2,
-                 toFloat(deserializedData.generalSettings.worldSize.y) / 2});
+                {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
+                 toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
             _viewport->setZoomFactor(4.0f);
         }
         ifd::FileDialog::Instance().Close();
@@ -364,7 +360,7 @@ void _MainWindow::processDialogs()
             const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
             auto firstFilename = res.front();
 
-            DeserializedSimulation2 sim;
+            DeserializedSimulation sim;
             sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
             sim.settings = _simController->getSettings();
             sim.symbolMap = _simController->getSymbolMap();

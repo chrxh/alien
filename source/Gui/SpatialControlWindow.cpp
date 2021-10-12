@@ -185,24 +185,21 @@ void _SpatialControlWindow::processResizeDialog()
 void _SpatialControlWindow::onResizing()
 {
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    auto generalSettings = _simController->getGeneralSettings();
-    auto simulationParameters = _simController->getSimulationParameters();
+    auto settings = _simController->getSettings();
     auto symbolMap = _simController->getSymbolMap();
     auto content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
 
     _simController->closeSimulation();
 
-    auto origWorldSize = generalSettings.worldSize;
-    generalSettings.worldSize = {_width, _height};
-    _simController->newSimulation(
-        timestep,
-        generalSettings,
-        simulationParameters,
-        symbolMap);
+    IntVector2D origWorldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
+    settings.generalSettings.worldSizeX = _width;
+    settings.generalSettings.worldSizeY = _height;
+    
+    _simController->newSimulation(timestep, settings, symbolMap);
 
-    DescriptionHelper::correctConnections(content, generalSettings.worldSize);
+    DescriptionHelper::correctConnections(content, {_width, _height});
     if (_scaleContent) {
-        DescriptionHelper::duplicate(content, origWorldSize, generalSettings.worldSize);
+        DescriptionHelper::duplicate(content, origWorldSize, {_width, _height});
     }
     _simController->updateData(content);
 }

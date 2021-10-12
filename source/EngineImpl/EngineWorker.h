@@ -15,6 +15,7 @@
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/FlowFieldSettings.h"
+#include "EngineInterface/Settings.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -25,11 +26,7 @@ class EngineWorker
 public:
     ENGINEIMPL_EXPORT void initCuda();
 
-    ENGINEIMPL_EXPORT void newSimulation(
-        IntVector2D worldSize,
-        int timestep,
-        SimulationParameters const& parameters,
-        GpuSettings const& gpuConstants);
+    ENGINEIMPL_EXPORT void newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
     ENGINEIMPL_EXPORT void clear();
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
@@ -106,8 +103,7 @@ private:
     int _timestepsSinceTimepoint = 0;
   
     //settings
-    IntVector2D _worldSize;
-    SimulationParameters _parameters;
+    Settings _settings;
     GpuSettings _gpuConstants;
 
     //monitor data
