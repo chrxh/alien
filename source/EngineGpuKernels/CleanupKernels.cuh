@@ -199,7 +199,7 @@ __global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory s
 /* Main                                                                 */
 /************************************************************************/
 
-__global__ void cleanupAfterSimulation(SimulationData data)
+__global__ void cleanupAfterSimulationKernel(SimulationData data)
 {
     KERNEL_CALL(cleanupCellMap, data);  //should be called before cleanupClusters and cleanupCells due to freezing
     KERNEL_CALL(cleanupParticleMap, data);
@@ -245,7 +245,7 @@ __global__ void cleanupAfterSimulation(SimulationData data)
 */
 }
 
-__global__ void cleanupAfterDataManipulation(SimulationData data)
+__global__ void cleanupAfterDataManipulationKernel(SimulationData data)
 {
     data.entitiesForCleanup.particlePointers.reset();
     KERNEL_CALL(
@@ -280,7 +280,7 @@ __global__ void cleanupAfterDataManipulation(SimulationData data)
 */
 }
 
-__global__ void copyEntities(SimulationData data)
+__global__ void copyEntitiesKernel(SimulationData data)
 {
     data.entitiesForCleanup.particlePointers.reset();
     KERNEL_CALL(cleanupEntities<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);

@@ -20,7 +20,7 @@ struct DataChangeDescription;
 struct CellChangeDescription;
 struct ParticleChangeDescription;
 
-struct GpuConstants;
+struct GpuSettings;
 
 struct GeneralSettings;
 

@@ -12,7 +12,7 @@
 
 #include "Base/Exceptions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/GpuConstants.h"
+#include "EngineInterface/GpuSettings.h"
 
 #include "Base/LoggingService.h"
 #include "Base/ServiceLocator.h"
@@ -117,7 +117,7 @@ _CudaSimulation::_CudaSimulation(
     int2 const& worldSize,
     int timestep,
     SimulationParameters const& parameters,
-    GpuConstants const& gpuConstants)
+    GpuSettings const& gpuConstants)
 {
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
@@ -125,6 +125,7 @@ _CudaSimulation::_CudaSimulation(
 
     setSimulationParameters(parameters);
     setGpuConstants(gpuConstants);
+    setFlowFieldSettings(FlowFieldSettings());
     _currentTimestep.store(timestep);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
@@ -207,7 +208,7 @@ void* _CudaSimulation::registerImageResource(GLuint image)
 
 void _CudaSimulation::calcCudaTimestep()
 {
-    GPU_FUNCTION(cudaCalcSimulationTimestep, *_cudaSimulationData, *_cudaSimulationResult);
+    GPU_FUNCTION(calcSimulationTimestepKernel, *_cudaSimulationData, *_cudaSimulationResult);
     if (_currentTimestep % 10 == 0) {
         if (_cudaSimulationResult->isArrayResizeNeeded()) {
             resizeArrays({0, 0, 0});
@@ -333,10 +334,10 @@ void _CudaSimulation::moveSelection(float2 const& displacement)
     GPU_FUNCTION(cudaMoveSelection, displacement, *_cudaSimulationData);
 }
 
-void _CudaSimulation::setGpuConstants(GpuConstants const& gpuConstants_)
+void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants_)
 {
     CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuConstants), 0, cudaMemcpyHostToDevice));
+        cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
 }
 
 auto _CudaSimulation::getArraySizes() const -> ArraySizes
@@ -385,6 +386,13 @@ void _CudaSimulation::setSimulationParameters(SimulationParameters const& parame
         cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
+void _CudaSimulation::setFlowFieldSettings(FlowFieldSettings const& settings)
+{
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaFlowFieldSettings, &settings, sizeof(FlowFieldSettings), 0, cudaMemcpyHostToDevice));
+}
+
+
 void _CudaSimulation::clear()
 {
     GPU_FUNCTION(cudaClearData, *_cudaSimulationData);
@@ -403,7 +411,7 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeTarget(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        GPU_FUNCTION(copyEntities, *_cudaSimulationData);
+        GPU_FUNCTION(copyEntitiesKernel, *_cudaSimulationData);
     }
     _cudaSimulationData->resizeSource();
     _cudaSimulationData->swap();

@@ -11,7 +11,7 @@ struct CellAccessTO;
 struct ClusterAccessTO;
 struct DataAccessTO;
 struct SimulationParameters;
-struct GpuConstants;
+struct GpuSettings;
 class CudaMonitorData;
 
 #define FP_PRECISION 0.00001

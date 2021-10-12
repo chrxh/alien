@@ -152,8 +152,9 @@
     <ClInclude Include="..\..\source\EngineInterface\Descriptions.h" />
     <ClInclude Include="..\..\source\EngineInterface\DllExport.h" />
     <ClInclude Include="..\..\source\EngineInterface\ElementaryTypes.h" />
+    <ClInclude Include="..\..\source\EngineInterface\FlowFieldSettings.h" />
     <ClInclude Include="..\..\source\EngineInterface\GeneralSettings.h" />
-    <ClInclude Include="..\..\source\EngineInterface\GpuConstants.h" />
+    <ClInclude Include="..\..\source\EngineInterface\GpuSettings.h" />
     <ClInclude Include="..\..\source\EngineInterface\Metadata.h" />
     <ClInclude Include="..\..\source\EngineInterface\OverallStatistics.h" />
     <ClInclude Include="..\..\source\EngineInterface\Serializer.h" />

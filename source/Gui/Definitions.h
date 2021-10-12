@@ -45,6 +45,9 @@ using NewSimulationDialog = boost::shared_ptr<_NewSimulationDialog>;
 class _StartupWindow;
 using StartupWindow = boost::shared_ptr<_StartupWindow>;
 
+class _FlowFieldWindow;
+using FlowFieldWindow = boost::shared_ptr<_FlowFieldWindow>;
+
 struct GLFWwindow;
 struct ImFont;
 

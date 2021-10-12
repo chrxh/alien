@@ -42,6 +42,7 @@ private:
     Viewport _viewport;
     NewSimulationDialog _newSimulationDialog;
     StartupWindow _startupWindow;
+    FlowFieldWindow _flowFieldWindow;
 
     StyleRepository _styleRepository;
 

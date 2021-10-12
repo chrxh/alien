@@ -17,6 +17,9 @@ void _SimulationController::newSimulation(
     _parameters = parameters;
     _symbolMap = symbolMap;
     _worker.newSimulation(generalSettings.worldSize, timestep, parameters, _gpuSettings);
+    
+    _flowFieldSettings.radialFlowCenters[0].posX = toFloat(generalSettings.worldSize.x) / 2;
+    _flowFieldSettings.radialFlowCenters[0].posY = toFloat(generalSettings.worldSize.y) / 2;
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 }
@@ -100,15 +103,26 @@ void _SimulationController::setSimulationParameters_async(
     _worker.setSimulationParameters_async(parameters);
 }
 
-GpuConstants _SimulationController::getGpuSettings() const
+GpuSettings _SimulationController::getGpuSettings() const
 {
     return _gpuSettings;
 }
 
-void _SimulationController::setGpuSettings_async(GpuConstants const& gpuSettings)
+void _SimulationController::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
     _gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);
+}
+
+FlowFieldSettings _SimulationController::getFlowFieldSettings() const
+{
+    return _flowFieldSettings;
+}
+
+void _SimulationController::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
+{
+    _flowFieldSettings = flowFieldSettings;
+    _worker.setFlowFieldSettings_async(flowFieldSettings);
 }
 
 void _SimulationController::applyForce_async(

@@ -10,7 +10,8 @@
 #include <GL/gl.h>
 
 #include "EngineInterface/OverallStatistics.h"
-#include "EngineInterface/GpuConstants.h"
+#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/FlowFieldSettings.h"
 
 #include "Definitions.cuh"
 #include "DllExport.h"
@@ -24,7 +25,7 @@ public:
         int2 const& worldSize,
         int timestep,
         SimulationParameters const& parameters,
-        GpuConstants const& cudaConstants);
+        GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT ~_CudaSimulation();
 
     ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
@@ -56,8 +57,9 @@ public:
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
     ENGINEGPUKERNELS_EXPORT void moveSelection(float2 const& displacement);
 
-    ENGINEGPUKERNELS_EXPORT GpuConstants getGpuConstants() const;
-    ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuConstants const& cudaConstants);
+    ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
+    ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
+    ENGINEGPUKERNELS_EXPORT void setFlowFieldSettings(FlowFieldSettings const& settings);
 
     struct ArraySizes
     {
@@ -70,8 +72,6 @@ public:
     ENGINEGPUKERNELS_EXPORT OverallStatistics getMonitorData();
     ENGINEGPUKERNELS_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEGPUKERNELS_EXPORT void setCurrentTimestep(uint64_t timestep);
-
-    ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
 
     ENGINEGPUKERNELS_EXPORT void clear();
 

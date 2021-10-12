@@ -12,7 +12,7 @@ public:
     DataConverter(
         DataAccessTO& dataTO,
         SimulationParameters const& parameters,
-        GpuConstants const& gpuConstants);
+        GpuSettings const& gpuConstants);
 
 	void updateData(DataChangeDescription const& data);
 
@@ -50,7 +50,7 @@ private:
 private:
 	DataAccessTO& _dataTO;
 	SimulationParameters _parameters;
-    GpuConstants _gpuConstants;
+    GpuSettings _gpuConstants;
 
 	std::unordered_set<uint64_t> _cellIdsToDelete;
 	std::unordered_set<uint64_t> _particleIdsToDelete;

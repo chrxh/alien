@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\EnergyGuidance.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Entities.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\EntityFactory.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\FlowFieldKernel.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\HashMap.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\HashSet.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\List.cuh" />

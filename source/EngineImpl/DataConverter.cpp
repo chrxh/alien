@@ -12,7 +12,7 @@
 DataConverter::DataConverter(
     DataAccessTO& dataTO,
     SimulationParameters const& parameters,
-    GpuConstants const& gpuConstants)
+    GpuSettings const& gpuConstants)
     : _dataTO(dataTO)
     , _parameters(parameters)
     , _gpuConstants(gpuConstants)
