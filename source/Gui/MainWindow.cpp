@@ -38,6 +38,8 @@
 #include "StartupWindow.h"
 #include "FlowFieldWindow.h"
 #include "AlienImGui.h"
+#include "AboutDialog.h"
+#include "ColorizeDialog.h"
 
 namespace
 {
@@ -107,6 +109,8 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _startupWindow = boost::make_shared<_StartupWindow>(
         _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);
     _flowFieldWindow = boost::make_shared<_FlowFieldWindow>(_simController);
+    _aboutDialog = boost::make_shared<_AboutDialog>();
+    _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -252,18 +256,10 @@ auto _MainWindow::initGlfw() -> GlfwData
 void _MainWindow::processMenubar()
 {
     if (ImGui::BeginMainMenuBar()) {
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.f, 0.6f, 0.6f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.f, 0.7f, 0.7f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.f, 0.8f, 0.8f));
-        if (ImGui::Button(ICON_FA_POWER_OFF)) {
+        if (AlienImGui::ShutdownButton()) {
             _showExitDialog = true;
         }
-        ImGui::PopStyleColor(3);
-        ImGui::PopStyleVar(2);
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_GLOBE "  Simulation ", _simulationMenuToggled, "Simulation")) {
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
             if (ImGui::MenuItem("New", "CTRL+N")) { 
                 _newSimulationDialog->show();
                 _simulationMenuToggled = false;
@@ -317,9 +313,17 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
+            if (ImGui::MenuItem("Colorize", "")) {
+                _colorizeDialog->show();
+                _helpMenuToggled = false;
+            }
             AlienImGui::EndMenuButton();
         }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING"  Help ", _helpMenuToggled, "Help")) {
+            if (ImGui::MenuItem("About", "")) {
+                _aboutDialog->show();
+                _helpMenuToggled = false;
+            }
             AlienImGui::EndMenuButton();
         }
         ImGui::EndMainMenuBar();
@@ -387,6 +391,8 @@ void _MainWindow::processDialogs()
         ifd::FileDialog::Instance().Close();
     }
     _newSimulationDialog->process();
+    _aboutDialog->process();
+    _colorizeDialog->process();
     processExitDialog();
 }
 
@@ -442,13 +448,12 @@ void _MainWindow::processExitDialog()
                 ImGui::CloseCurrentPopup();
                 _onClose = true;
             }
-            ImGui::SetItemDefaultFocus();
-
             ImGui::SameLine();
             if (ImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();
                 _showExitDialog = false;
             }
+            ImGui::SetItemDefaultFocus();
 
             ImGui::EndPopup();
         }

@@ -48,6 +48,12 @@ using StartupWindow = boost::shared_ptr<_StartupWindow>;
 class _FlowFieldWindow;
 using FlowFieldWindow = boost::shared_ptr<_FlowFieldWindow>;
 
+class _AboutDialog;
+using AboutDialog = boost::shared_ptr<_AboutDialog>;
+
+class _ColorizeDialog;
+using ColorizeDialog = boost::shared_ptr<_ColorizeDialog>;
+
 struct GLFWwindow;
 struct ImFont;
 
