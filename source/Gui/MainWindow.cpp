@@ -302,12 +302,12 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Tools")) {
             if (ImGui::MenuItem("Flow field", "", _flowFieldWindow->isOn())) {
                 _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
             }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Tools")) {
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -364,16 +364,15 @@ void _MainWindow::processDialogs()
             const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
             auto firstFilename = res.front();
 
-            DeserializedSimulation sim;
+            DeserializedSimulation2 sim;
             sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-            sim.generalSettings = _simController->getGeneralSettings();
-            sim.simulationParameters = _simController->getSimulationParameters();
+            sim.settings = _simController->getSettings();
             sim.symbolMap = _simController->getSymbolMap();
             sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
 
             Serializer serializer = boost::make_shared<_Serializer>();
-            auto serializedSim = serializer->serializeSimulation(sim);
-            serializer->saveSimulationDataToFile(firstFilename.string(), serializedSim);
+            auto serializedSim = serializer->serializeSimulation2(sim);
+            serializer->saveSimulationDataToFile2(firstFilename.string(), serializedSim);
 
         }
         ifd::FileDialog::Instance().Close();

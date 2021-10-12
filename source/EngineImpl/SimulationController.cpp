@@ -144,6 +144,11 @@ IntVector2D _SimulationController::getWorldSize() const
     return _generalSettings.worldSize;
 }
 
+Settings _SimulationController::getSettings() const
+{
+    return {_generalSettings, _parameters, _flowFieldSettings};
+}
+
 SymbolMap _SimulationController::getSymbolMap() const
 {
     return _symbolMap;
