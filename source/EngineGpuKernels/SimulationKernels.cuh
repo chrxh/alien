@@ -14,6 +14,7 @@
 #include "Operation.cuh"
 #include "DebugKernels.cuh"
 #include "SimulationResult.cuh"
+#include "FlowFieldKernel.cuh"
 
 __global__ void processingStep1(SimulationData data)
 {
@@ -110,7 +111,7 @@ __global__ void processingStep12(SimulationData data, int numParticlePointers)
 /* Main      															*/
 /************************************************************************/
 
-__global__ void cudaCalcSimulationTimestep(SimulationData data, SimulationResult result)
+__global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
     data.cellMap.reset();
     data.particleMap.reset();
@@ -120,6 +121,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data, SimulationResult
     *data.numOperations = 0; 
     data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
 
+    KERNEL_CALL_1_1(applyFlowFieldSettingsKernel, data);
     KERNEL_CALL(processingStep1, data);
     KERNEL_CALL(processingStep2, data);
     KERNEL_CALL(processingStep3, data);
@@ -133,7 +135,7 @@ __global__ void cudaCalcSimulationTimestep(SimulationData data, SimulationResult
     KERNEL_CALL(processingStep11, data);
     KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
 
-    KERNEL_CALL_1_1(cleanupAfterSimulation, data);
+    KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
 
     result.setArrayResizeNeeded(data.shouldResize());
 }

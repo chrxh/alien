@@ -160,6 +160,7 @@
     <ClInclude Include="..\..\external\ImPlot\implot_internal.h" />
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
+    <ClInclude Include="..\..\source\Gui\FlowFieldWindow.h" />
     <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
     <ClInclude Include="..\..\source\Gui\NewSimulationDialog.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="..\..\external\ImPlot\implot.cpp" />
     <ClCompile Include="..\..\external\ImPlot\implot_demo.cpp" />
     <ClCompile Include="..\..\external\ImPlot\implot_items.cpp" />
+    <ClCompile Include="..\..\source\Gui\FlowFieldWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp" />

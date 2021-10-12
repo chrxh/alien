@@ -23,6 +23,7 @@ public:
     __inline__ __device__ static void normalize(float2& vec);
     __inline__ __device__ static float2 normalized(float2 vec);
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
+    __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
     __inline__ __host__ __device__ static float length(float2 const& v);
     __inline__ __host__ __device__ static float length(int2 const& v);
     __inline__ __host__ __device__ static float lengthSquared(float2 const& v);
@@ -173,6 +174,11 @@ __device__ __inline__ float2 Math::normalized(float2 vec)
 __device__ __inline__ float Math::dot(float2 const &p, float2 const &q)
 {
     return p.x*q.x + p.y*q.y;
+}
+
+__inline__ __device__ float2 Math::crossProdProjected(float3 const& p, float3 const& q)
+{
+    return {p.y * q.z - p.z * q.y, p.z * q.x - p.x * q.z};
 }
 
 __host__ __device__ __inline__ float Math::length(float2 const & v)

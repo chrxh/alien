@@ -347,7 +347,7 @@ __global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
         data.entities.particles.getNewSubarray(*access.numParticles),
         data.entities.cells.getNewSubarray(*access.numCells),
         data.entities.tokens.getNewSubarray(*access.numTokens));
-    KERNEL_CALL_1_1(cleanupAfterDataManipulation, data);
+    KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
 }
 
 __global__ void cudaClearData(SimulationData data)

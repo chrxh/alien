@@ -65,7 +65,7 @@ void EngineWorker::newSimulation(
     IntVector2D size,
     int timestep,
     SimulationParameters const& parameters,
-    GpuConstants const& gpuConstants)
+    GpuSettings const& gpuConstants)
 {
     _worldSize = size;
     _parameters = parameters;
@@ -229,11 +229,20 @@ void EngineWorker::setSimulationParameters_async(SimulationParameters const& par
     _conditionForWorkerLoop.notify_all();
 }
 
-void EngineWorker::setGpuSettings_async(GpuConstants const& gpuSettings)
+void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
     {
         std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
         _updateGpuSettingsJob = gpuSettings;
+    }
+    _conditionForWorkerLoop.notify_all();
+}
+
+void EngineWorker::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
+{
+    {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+        _flowFieldSettings = flowFieldSettings;
     }
     _conditionForWorkerLoop.notify_all();
 }
@@ -357,6 +366,10 @@ void EngineWorker::processJobs()
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
         _updateGpuSettingsJob = boost::none;
+    }
+    if (_flowFieldSettings) {
+        _cudaSimulation->setFlowFieldSettings(*_flowFieldSettings);
+        _flowFieldSettings = boost::none;
     }
     if (!_applyForceJobs.empty()) {
         for (auto const& applyForceJob : _applyForceJobs) {

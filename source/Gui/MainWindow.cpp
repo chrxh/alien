@@ -35,6 +35,7 @@
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "StartupWindow.h"
+#include "FlowFieldWindow.h"
 
 namespace
 {
@@ -104,6 +105,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
     _startupWindow = boost::make_shared<_StartupWindow>(
         _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);
+    _flowFieldWindow = boost::make_shared<_FlowFieldWindow>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -288,6 +290,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Spatial control", "", _spatialControlWindow->isOn())) {
                 _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
             }
+            if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
+                _statisticsWindow->setOn(!_statisticsWindow->isOn());
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
@@ -300,8 +305,8 @@ void _MainWindow::processMenubar()
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools")) {
-            if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
-                _statisticsWindow->setOn(!_statisticsWindow->isOn());
+            if (ImGui::MenuItem("Flow field", "", _flowFieldWindow->isOn())) {
+                _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
             }
             ImGui::EndMenu();
         }
@@ -384,6 +389,7 @@ void _MainWindow::processWindows()
     _statisticsWindow->process();
     _simulationParametersWindow->process();
     _gpuSettingsWindow->process();
+    _flowFieldWindow->process();
 }
 
 void _MainWindow::onOpenSimulation()

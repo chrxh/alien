@@ -49,8 +49,11 @@ public:
     ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
 
-    ENGINEIMPL_EXPORT GpuConstants getGpuSettings() const;
-    ENGINEIMPL_EXPORT void setGpuSettings_async(GpuConstants const& gpuSettings);
+    ENGINEIMPL_EXPORT GpuSettings getGpuSettings() const;
+    ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);
+
+    ENGINEIMPL_EXPORT FlowFieldSettings getFlowFieldSettings() const;
+    ENGINEIMPL_EXPORT void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
     ENGINEIMPL_EXPORT void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
@@ -67,8 +70,9 @@ public:
 
 private:
     GeneralSettings _generalSettings;
-    GpuConstants _gpuSettings; 
+    GpuSettings _gpuSettings; 
     SimulationParameters _parameters;
+    FlowFieldSettings _flowFieldSettings;
     SymbolMap _symbolMap;
 
     EngineWorker _worker;
