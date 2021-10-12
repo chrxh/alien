@@ -23,6 +23,7 @@ struct ParticleChangeDescription;
 struct GpuSettings;
 
 struct GeneralSettings;
+struct Settings;
 
 class _Serializer;
 using Serializer = boost::shared_ptr<_Serializer>;
