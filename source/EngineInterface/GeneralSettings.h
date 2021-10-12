@@ -2,7 +2,7 @@
 
 #include "Base/Definitions.h"
 
-#include "EngineInterface/GpuConstants.h"
+#include "EngineInterface/GpuSettings.h"
 
 #include "Definitions.h"
 

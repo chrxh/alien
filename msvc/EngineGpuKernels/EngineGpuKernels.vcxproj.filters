@@ -70,6 +70,7 @@
       <Filter>Kernels</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationResult.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\FlowFieldKernel.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Kernels">

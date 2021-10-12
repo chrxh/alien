@@ -57,7 +57,7 @@
     <ClInclude Include="..\..\source\EngineInterface\Parser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\EngineInterface\GpuConstants.h">
+    <ClInclude Include="..\..\source\EngineInterface\GpuSettings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineInterface\DescriptionHelper.h">
@@ -65,6 +65,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\EngineInterface\SpaceCalculator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineInterface\FlowFieldSettings.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -183,7 +183,7 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
         auto force = cell->temp1;
         if (Math::length(force) > cudaSimulationParameters.cellMaxForce * cudaSimulationParameters.cellBindingForce) {
             if(data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                CellConnectionProcessor::scheduleDelConnections(data, cell);
+                CellConnectionProcessor::scheduleDelConnections(data, cell); 
             }
         }
         cell->vel = cell->vel + force;

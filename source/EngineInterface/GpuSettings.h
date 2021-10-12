@@ -2,17 +2,17 @@
 
 #include "DllExport.h"
 
-struct GpuConstants
+struct GpuSettings
 {
     int NUM_THREADS_PER_BLOCK = 64;
     int NUM_BLOCKS = 1024;
 
-    bool operator==(GpuConstants const& other) const
+    bool operator==(GpuSettings const& other) const
     {
         return NUM_THREADS_PER_BLOCK == other.NUM_THREADS_PER_BLOCK && NUM_BLOCKS == other.NUM_BLOCKS;
     }
 
-    bool operator!=(GpuConstants const& other) const { return !operator==(other); }
+    bool operator!=(GpuSettings const& other) const { return !operator==(other); }
 };
 
 namespace Const

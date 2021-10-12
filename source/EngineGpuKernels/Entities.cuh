@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/GpuConstants.h"
+#include "EngineInterface/GpuSettings.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"

@@ -53,7 +53,7 @@ void _StatisticsWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Statistics", &_on, windowFlags);
 
-    ImGui::Checkbox("Real-time", &_live);
+    ImGui::Checkbox("Real time", &_live);
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
@@ -103,7 +103,7 @@ void _StatisticsWindow::processLiveStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Particles", 0);
+        ImGui::Text("Energy particles", 0);
         ImGui::TableSetColumnIndex(1);
         processLivePlot(1, _liveStatistics.numParticlesHistory);
 
@@ -177,7 +177,7 @@ void _StatisticsWindow::processLongtermStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Particles", 0);
+        ImGui::Text("Energy particles", 0);
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(1, _longtermStatistics.numParticlesHistory);
 

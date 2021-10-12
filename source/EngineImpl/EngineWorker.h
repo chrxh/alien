@@ -12,8 +12,9 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/GpuConstants.h"
+#include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/OverallStatistics.h"
+#include "EngineInterface/FlowFieldSettings.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -28,7 +29,7 @@ public:
         IntVector2D worldSize,
         int timestep,
         SimulationParameters const& parameters,
-        GpuConstants const& gpuConstants);
+        GpuSettings const& gpuConstants);
     ENGINEIMPL_EXPORT void clear();
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
@@ -57,7 +58,8 @@ public:
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
-    ENGINEIMPL_EXPORT void setGpuSettings_async(GpuConstants const& gpuSettings);
+    ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);
+    ENGINEIMPL_EXPORT void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
     ENGINEIMPL_EXPORT void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
@@ -85,7 +87,8 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     boost::optional<SimulationParameters> _updateSimulationParametersJob;
-    boost::optional<GpuConstants> _updateGpuSettingsJob;
+    boost::optional<GpuSettings> _updateGpuSettingsJob;
+    boost::optional<FlowFieldSettings> _flowFieldSettings;
 
     struct ApplyForceJob
     {
@@ -105,7 +108,7 @@ private:
     //settings
     IntVector2D _worldSize;
     SimulationParameters _parameters;
-    GpuConstants _gpuConstants;
+    GpuSettings _gpuConstants;
 
     //monitor data
     boost::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
