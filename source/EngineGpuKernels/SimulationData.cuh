@@ -11,7 +11,7 @@
 struct SimulationData
 {
     int2 size;
-    int timestep;
+    uint64_t timestep;
 
     CellMap cellMap;
     ParticleMap particleMap;
@@ -29,7 +29,7 @@ struct SimulationData
     int numPixels;
     unsigned int* imageData;
 
-    void init(int2 const& universeSize, int newTimestep)
+    void init(int2 const& universeSize, uint64_t newTimestep)
     {
         size = universeSize;
         timestep = newTimestep;
@@ -59,7 +59,7 @@ struct SimulationData
     bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
     {
         auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
-        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 2);
+        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 3);
 
         return entities.cells.shouldResize_host(cellAndParticleArraySizeInc)
             || entities.cellPointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
@@ -79,7 +79,7 @@ struct SimulationData
     void resizeTarget(int additionalCells, int additionalParticles, int additionalTokens)
     {
         auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
-        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 2);
+        auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 3);
 
         resizeTargetIntern(entities.cells, entitiesForCleanup.cells, cellAndParticleArraySizeInc);
         resizeTargetIntern(entities.cellPointers, entitiesForCleanup.cellPointers, cellAndParticleArraySizeInc * 10);

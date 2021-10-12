@@ -12,6 +12,7 @@
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/FlowFieldSettings.h"
+#include "EngineInterface/Settings.h"
 
 #include "Definitions.cuh"
 #include "DllExport.h"
@@ -21,11 +22,8 @@ class _CudaSimulation
 public:
     ENGINEGPUKERNELS_EXPORT static void initCuda();
 
-    ENGINEGPUKERNELS_EXPORT _CudaSimulation(
-        int2 const& worldSize,
-        int timestep,
-        SimulationParameters const& parameters,
-        GpuSettings const& cudaConstants);
+    ENGINEGPUKERNELS_EXPORT
+    _CudaSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
     ENGINEGPUKERNELS_EXPORT ~_CudaSimulation();
 
     ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
