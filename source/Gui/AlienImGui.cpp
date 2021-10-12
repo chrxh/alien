@@ -2,6 +2,8 @@
 
 #include "imgui.h"
 
+#include "IconFontCppHeaders/IconsFontAwesome5.h"
+
 #include "StyleRepository.h"
 
 void AlienImGui::HelpMarker(std::string const& text)
@@ -25,11 +27,6 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
     const auto active = toggle;
     if (active) {
-/*
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0.6f, 0.6f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0, 0.8f, 0.8f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0, 0.7f, 0.7f));
-*/
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButtonActive);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButtonHovered);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::MenuButtonHovered);
@@ -85,4 +82,18 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
 void AlienImGui::EndMenuButton()
 {
     ImGui::End();
+}
+
+bool AlienImGui::ShutdownButton()
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ShutdownButton);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ShutdownButtonHovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ShutdownButtonActive);
+    auto result = ImGui::Button(ICON_FA_POWER_OFF);
+    ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar(2);
+
+    return result;
 }

@@ -135,6 +135,12 @@
     <ClInclude Include="..\..\source\Gui\FlowFieldWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\Gui\AboutDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\ColorizeDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -225,6 +231,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\FlowFieldWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\AboutDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\ColorizeDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

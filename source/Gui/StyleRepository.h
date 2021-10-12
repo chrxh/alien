@@ -14,8 +14,13 @@ namespace Const
     int64_t const TextInfoColor = 0xff30b0b0;
 
     ImColor const MenuButton = ImColor::HSV(0.6f, 0.3f, 0.35f);
+    ImColor const MenuButtonHovered = ImColor::HSV(0.6f, 1.0f, 1.0f);
     ImColor const MenuButtonActive = ImColor::HSV(0.6f, 0.6f, 0.6f);
-    ImColor const MenuButtonHovered = ImColor::HSV(0.6f, 0.8f, 0.8f);
+
+    ImColor const ShutdownButton = ImColor::HSV(0.f, 0.6f, 0.6f);
+    ImColor const ShutdownButtonHovered = ImColor::HSV(0.f, 1.0f, 1.0f);
+    ImColor const ShutdownButtonActive = ImColor::HSV(0.f, 1.0f, 1.0f);
+
     float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 40.0f;
 }
