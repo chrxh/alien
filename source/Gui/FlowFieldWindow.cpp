@@ -20,6 +20,8 @@ void _FlowFieldWindow::process()
     auto flowFieldSettings = _simController->getFlowFieldSettings();
     auto origFlowFieldSettings = flowFieldSettings;
 
+    auto worldSize = _simController->getWorldSize();
+
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
     ImGui::Begin("Flow field", &_on, ImGuiWindowFlags_None);
 
@@ -61,9 +63,9 @@ void _FlowFieldWindow::process()
                     ImGui::TableNextRow();
 
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::InputFloat("##posX", &radialFlowData.posX, 0.1f, 1.0f, "%.1f");
-                    ImGui::PopItemWidth();
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                    ImGui::SliderFloat(
+                        "##posX", &radialFlowData.posX, 0.0, toFloat(worldSize.x), "%.0f", ImGuiSliderFlags_None);
 
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Position X");
@@ -71,9 +73,9 @@ void _FlowFieldWindow::process()
                     //pos y
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::InputFloat("##posY", &radialFlowData.posY, 0.1f, 1.0f, "%.1f");
-                    ImGui::PopItemWidth();
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                    ImGui::SliderFloat(
+                        "##posY", &radialFlowData.posY, 0.0, toFloat(worldSize.y), "%.0f", ImGuiSliderFlags_None);
 
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Position Y");
@@ -81,9 +83,14 @@ void _FlowFieldWindow::process()
                     //radius
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
-                    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::InputFloat("##radius", &radialFlowData.radius, 0.1f, 1.0f, "%.1f");
-                    ImGui::PopItemWidth();
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                    ImGui::SliderFloat(
+                        "##radius",
+                        &radialFlowData.radius,
+                        0.0,
+                        std::min(toFloat(worldSize.x), toFloat(worldSize.y)),
+                        "%.0f",
+                        ImGuiSliderFlags_None);
 
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Radius");
@@ -94,13 +101,7 @@ void _FlowFieldWindow::process()
 
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
                     ImGui::SliderFloat(
-                        "##strength", &radialFlowData.strength, 0.0, 0.1f, "%.3f", ImGuiSliderFlags_Logarithmic);
-
-/*
-                    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::InputFloat("##strength", &radialFlowData.strength, 0.1f, 1.0f, "%.1f");
-                    ImGui::PopItemWidth();
-*/
+                        "##strength", &radialFlowData.strength, 0.0, 0.5f, "%.3f", ImGuiSliderFlags_Logarithmic);
 
                     ImGui::TableSetColumnIndex(1);
                     ImGui::Text("Strength");
