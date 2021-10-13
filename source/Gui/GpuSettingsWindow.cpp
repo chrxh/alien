@@ -3,7 +3,7 @@
 #include "Base/StringFormatter.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
-#include "Widgets.h"
+#include "AlienImGui.h"
 
 #include "imgui.h"
 
@@ -39,7 +39,7 @@ void _GpuSettingsWindow::process()
         ImGui::TableSetColumnIndex(1);
         ImGui::Text("Blocks");
         ImGui::SameLine();
-        Widgets::processHelpMarker("This is a more typical looking tree with selectable nodes.\n"
+        AlienImGui::HelpMarker("This is a more typical looking tree with selectable nodes.\n"
                                    "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
 
         //threads per block
@@ -52,7 +52,7 @@ void _GpuSettingsWindow::process()
         ImGui::TableSetColumnIndex(1);
         ImGui::Text("Threads per Block");
         ImGui::SameLine();
-        Widgets::processHelpMarker("This is a more typical looking tree with selectable nodes.\n"
+        AlienImGui::HelpMarker("This is a more typical looking tree with selectable nodes.\n"
                                    "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
 
         ImGui::TableNextRow();

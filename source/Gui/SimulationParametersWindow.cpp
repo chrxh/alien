@@ -4,7 +4,7 @@
 
 #include "EngineImpl/SimulationController.h"
 
-#include "Widgets.h"
+#include "AlienImGui.h"
 #include "StyleRepository.h"
 
 _SimulationParametersWindow::_SimulationParametersWindow(
@@ -90,7 +90,7 @@ void _SimulationParametersWindow::createFloatItem(
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x/2);
     ImGui::SliderFloat(name.c_str(), &value, min, max, format.c_str(), logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
 
-    Widgets::processHelpMarker("This is a more typical looking tree with selectable nodes.\n"
+    AlienImGui::HelpMarker("This is a more typical looking tree with selectable nodes.\n"
                "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
     ImGui::Spacing();
 }
@@ -100,7 +100,7 @@ void _SimulationParametersWindow::createIntItem(std::string const& name, int& va
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x/2);
     ImGui::SliderInt(name.c_str(), &value, min, max);
 
-    Widgets::processHelpMarker("This is a more typical looking tree with selectable nodes.\n"
+    AlienImGui::HelpMarker("This is a more typical looking tree with selectable nodes.\n"
                "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
     ImGui::Spacing();
 }
