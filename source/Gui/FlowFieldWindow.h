@@ -17,5 +17,4 @@ private:
     SimulationController _simController;
 
     bool _on = false;
-    std::vector<int> _activeTabs;
 };

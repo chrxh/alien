@@ -8,7 +8,6 @@
 
 _FlowFieldWindow::_FlowFieldWindow(SimulationController const& simController)
     : _simController(simController)
-    , _activeTabs{0}
 {
 }
 
@@ -19,6 +18,11 @@ void _FlowFieldWindow::process()
     }
     auto flowFieldSettings = _simController->getFlowFieldSettings();
     auto origFlowFieldSettings = flowFieldSettings;
+
+    std::vector<int> activeTabs;
+    for (int i = 0; i < flowFieldSettings.numCenters; ++i) {
+        activeTabs.emplace_back(i);
+    }
 
     auto worldSize = _simController->getWorldSize();
 
@@ -39,22 +43,22 @@ void _FlowFieldWindow::process()
             "##Flow",
             ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-        if (_activeTabs.size() < 2) {
+        if (activeTabs.size() < 2) {
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 int i = 0;
-                for (; i < _activeTabs.size(); ++i) {
-                    _activeTabs[i] = i;
+                for (; i < activeTabs.size(); ++i) {
+                    activeTabs[i] = i;
                 }
-                _activeTabs.emplace_back(i);
+                activeTabs.emplace_back(i);
             }
         }
 
-        std::vector<int> activeTabs;
-        for (auto const& tab : _activeTabs) {
+        std::vector<int> activeTabsNew;
+        for (auto const& tab : activeTabs) {
             RadialFlowCenterData& radialFlowData = flowFieldSettings.radialFlowCenters[tab];
             bool open = true;
             char name[16];
-            bool* openPtr = _activeTabs.size() == 1 ? NULL : &open;
+            bool* openPtr = activeTabs.size() == 1 ? NULL : &open;
             snprintf(name, IM_ARRAYSIZE(name), "Center %01d", tab + 1);
             if (ImGui::BeginTabItem(name, openPtr, ImGuiTabItemFlags_None)) {
                 if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
@@ -126,11 +130,11 @@ void _FlowFieldWindow::process()
             }
 
             if (open) {
-                activeTabs.emplace_back(toInt(activeTabs.size()));
+                activeTabsNew.emplace_back(toInt(activeTabs.size()));
             }
         }
-        _activeTabs = activeTabs;
-        flowFieldSettings.numCenters = toInt(_activeTabs.size());
+        activeTabs = activeTabsNew;
+        flowFieldSettings.numCenters = toInt(activeTabs.size());
 
         ImGui::EndTabBar();
     }

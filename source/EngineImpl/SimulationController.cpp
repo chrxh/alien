@@ -12,7 +12,7 @@ void _SimulationController::newSimulation(uint64_t timestep, Settings const& set
     _settings = settings;
     _symbolMap = symbolMap;
     _worker.newSimulation(timestep, settings, _gpuSettings);
-    
+
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 }
 
