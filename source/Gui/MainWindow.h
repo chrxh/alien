@@ -29,6 +29,7 @@ private:
     void onRunSimulation();
     void onPauseSimulation();
 
+    void processExitDialog();
     void reset();
 
     SimulationController _simController;
@@ -47,4 +48,10 @@ private:
     StyleRepository _styleRepository;
 
     bool _onClose = false;
+    bool _simulationMenuToggled = false;
+    bool _windowMenuToggled = false;
+    bool _settingsMenuToggled = false;
+    bool _toolsMenuToggled = false;
+    bool _helpMenuToggled = false;
+    bool _showExitDialog = false;
 };

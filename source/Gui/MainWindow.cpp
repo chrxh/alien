@@ -19,6 +19,7 @@
 
 #include "ImFileDialog.h"
 #include "implot.h"
+#include "IconFontCppHeaders/IconsFontAwesome5.h"
 
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/ChangeDescriptions.h"
@@ -36,6 +37,7 @@
 #include "NewSimulationDialog.h"
 #include "StartupWindow.h"
 #include "FlowFieldWindow.h"
+#include "AlienImGui.h"
 
 namespace
 {
@@ -250,20 +252,29 @@ auto _MainWindow::initGlfw() -> GlfwData
 void _MainWindow::processMenubar()
 {
     if (ImGui::BeginMainMenuBar()) {
-        /*
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.35f, 0.6f, 0.6f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.35f, 0.8f, 0.8f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.35f, 0.7f, 0.7f));
-*/
-        if (ImGui::BeginMenu("Simulation")) {
-            if (ImGui::MenuItem("New", "CTRL+N")) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.f, 0.6f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.f, 0.7f, 0.7f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.f, 0.8f, 0.8f));
+        if (ImGui::Button(ICON_FA_POWER_OFF)) {
+            _showExitDialog = true;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopStyleVar(2);
+
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_GLOBE "  Simulation ", _simulationMenuToggled, "Simulation")) {
+            if (ImGui::MenuItem("New", "CTRL+N")) { 
                 _newSimulationDialog->show();
+                _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
                 onOpenSimulation();
+                _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
                 onSaveSimulation();
+                _simulationMenuToggled = false;
             }
             ImGui::Separator();
             ImGui::BeginDisabled(_simController->isSimulationRunning());
@@ -276,13 +287,10 @@ void _MainWindow::processMenubar()
                 onPauseSimulation();
             }
             ImGui::EndDisabled();
-            ImGui::Separator();
-            if (ImGui::MenuItem("Exit", "ALT+F4")) {
-                _onClose = true;
-            }
-            ImGui::EndMenu();
+            AlienImGui::EndMenuButton();
         }
-        if (ImGui::BeginMenu("Window")) {
+
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Window ", _windowMenuToggled, "Window")) {
             if (ImGui::MenuItem("Temporal control", "", _temporalControlWindow->isOn())) {
                 _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
             }
@@ -292,9 +300,10 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
                 _statisticsWindow->setOn(!_statisticsWindow->isOn());
             }
-            ImGui::EndMenu();
+            AlienImGui::EndMenuButton();
         }
-        if (ImGui::BeginMenu("Settings")) {
+
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
             if (ImGui::MenuItem("GPU settings", "", _gpuSettingsWindow->isOn())) {
                 _gpuSettingsWindow->setOn(!_gpuSettingsWindow->isOn());
             }
@@ -304,10 +313,14 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Flow field", "", _flowFieldWindow->isOn())) {
                 _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
             }
-            ImGui::EndMenu();
+            AlienImGui::EndMenuButton();
         }
-        if (ImGui::BeginMenu("Tools")) {
-            ImGui::EndMenu();
+
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
+            AlienImGui::EndMenuButton();
+        }
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING"  Help ", _helpMenuToggled, "Help")) {
+            AlienImGui::EndMenuButton();
         }
         ImGui::EndMainMenuBar();
     }
@@ -374,6 +387,7 @@ void _MainWindow::processDialogs()
         ifd::FileDialog::Instance().Close();
     }
     _newSimulationDialog->process();
+    processExitDialog();
 }
 
 void _MainWindow::processWindows()
@@ -406,6 +420,39 @@ void _MainWindow::onRunSimulation()
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
+}
+
+void _MainWindow::processExitDialog()
+{
+     if (_showExitDialog) {
+        auto name = "Exit";
+        ImGui::OpenPopup(name);
+
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal(name, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Do you really want to terminate the program?");
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Spacing();
+
+            if (ImGui::Button("OK")) {
+                ImGui::CloseCurrentPopup();
+                _onClose = true;
+            }
+            ImGui::SetItemDefaultFocus();
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel")) {
+                ImGui::CloseCurrentPopup();
+                _showExitDialog = false;
+            }
+
+            ImGui::EndPopup();
+        }
+    }
 }
 
 void _MainWindow::reset()

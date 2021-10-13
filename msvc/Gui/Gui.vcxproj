@@ -114,7 +114,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\external\ImPlot;$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\external;$(SolutionDir)\..\external\ImPlot;$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -132,7 +132,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\external\ImPlot;$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\external;$(SolutionDir)\..\external\ImPlot;$(SolutionDir)\..\external\ImFileDialog;$(SolutionDir)\..\external\stb;$(SolutionDir)\..\external\glad\include;$(SolutionDir)\..\external\boost_1_75_0;$(SolutionDir)\..\source;$(SolutionDir)\..\external\imgui;$(SolutionDir)\..\external\imgui\backends;$(SolutionDir)\..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -177,7 +177,7 @@
     <ClInclude Include="..\..\source\Gui\StyleRepository.h" />
     <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h" />
     <ClInclude Include="..\..\source\Gui\Viewport.h" />
-    <ClInclude Include="..\..\source\Gui\Widgets.h" />
+    <ClInclude Include="..\..\source\Gui\AlienImGui.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\glad\src\glad.c" />
@@ -209,7 +209,7 @@
     <ClCompile Include="..\..\source\Gui\StyleRepository.cpp" />
     <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\Viewport.cpp" />
-    <ClCompile Include="..\..\source\Gui\Widgets.cpp" />
+    <ClCompile Include="..\..\source\Gui\AlienImGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Base\Base.vcxproj">
