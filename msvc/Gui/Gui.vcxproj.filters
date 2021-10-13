@@ -123,7 +123,7 @@
     <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\Widgets.h">
+    <ClInclude Include="..\..\source\Gui\AlienImGui.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\NewSimulationDialog.h">
@@ -215,7 +215,7 @@
     <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Widgets.cpp">
+    <ClCompile Include="..\..\source\Gui\AlienImGui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp">

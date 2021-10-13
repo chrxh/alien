@@ -3,17 +3,27 @@
 #include <stdexcept>
 
 #include "imgui.h"
+#include "misc/freetype/imgui_freetype.h"
+#include "IconFontCppHeaders/FontAwesomeSolid.h"
+#include "IconFontCppHeaders/IconsFontAwesome5.h"
+
 #include "Resources.h"
 
 _StyleRepository::_StyleRepository()
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    io = ImGui::GetIO();
     if (io.Fonts->AddFontFromFileTTF(Const::FontFilename, 16.0f)
         == NULL) {
         throw std::runtime_error("Could not load font.");
     };
+    ImFontConfig configMerge;
+    configMerge.MergeMode = true;
+    configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
+    static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+    io.Fonts->AddFontFromMemoryCompressedTTF(
+        FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f, &configMerge, rangesIcons);
+
     _mediumFont = io.Fonts->AddFontFromFileTTF(Const::FontFilename, 24.0f);
     if (_mediumFont == NULL) {
         throw std::runtime_error("Could not load font.");
@@ -32,4 +42,9 @@ ImFont* _StyleRepository::getMediumFont() const
 ImFont* _StyleRepository::getLargeFont() const
 {
     return _largeFont;
+}
+
+ImFont* _StyleRepository::getTestFont() const
+{
+    return _testFont;
 }
