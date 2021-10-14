@@ -13,7 +13,7 @@ _StyleRepository::_StyleRepository()
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    if (io.Fonts->AddFontFromFileTTF(Const::FontFilename, 16.0f)
+    if (io.Fonts->AddFontFromFileTTF(Const::StandardFontFilename, 16.0f)
         == NULL) {
         throw std::runtime_error("Could not load font.");
     };
@@ -24,12 +24,16 @@ _StyleRepository::_StyleRepository()
     io.Fonts->AddFontFromMemoryCompressedTTF(
         FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f, &configMerge, rangesIcons);
 
-    _mediumFont = io.Fonts->AddFontFromFileTTF(Const::FontFilename, 24.0f);
+    _mediumFont = io.Fonts->AddFontFromFileTTF(Const::StandardFontFilename, 24.0f);
     if (_mediumFont == NULL) {
         throw std::runtime_error("Could not load font.");
     }
-    _largeFont = io.Fonts->AddFontFromFileTTF(Const::FontFilename, 48.0f);
+    _largeFont = io.Fonts->AddFontFromFileTTF(Const::StandardFontFilename, 48.0f);
     if (_largeFont == NULL) {
+        throw std::runtime_error("Could not load font.");
+    }
+    _monospaceFont = io.Fonts->AddFontFromFileTTF(Const::MonospaceFontFilename, 14.0f);
+    if (_monospaceFont == NULL) {
         throw std::runtime_error("Could not load font.");
     }
 }
@@ -44,7 +48,7 @@ ImFont* _StyleRepository::getLargeFont() const
     return _largeFont;
 }
 
-ImFont* _StyleRepository::getTestFont() const
+ImFont* _StyleRepository::getMonospaceFont() const
 {
-    return _testFont;
+    return _monospaceFont;
 }

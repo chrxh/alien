@@ -54,6 +54,13 @@ using AboutDialog = boost::shared_ptr<_AboutDialog>;
 class _ColorizeDialog;
 using ColorizeDialog = boost::shared_ptr<_ColorizeDialog>;
 
+class _LogWindow;
+using LogWindow = boost::shared_ptr<_LogWindow>;
+
+class _GuiLogger;
+using GuiLogger = boost::shared_ptr<_GuiLogger>;
+
+
 struct GLFWwindow;
 struct ImFont;
 

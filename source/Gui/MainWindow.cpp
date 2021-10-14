@@ -40,6 +40,8 @@
 #include "AlienImGui.h"
 #include "AboutDialog.h"
 #include "ColorizeDialog.h"
+#include "LogWindow.h"
+#include "GuiLogger.h"
 
 namespace
 {
@@ -60,6 +62,8 @@ namespace
 
 GLFWwindow* _MainWindow::init(SimulationController const& simController)
 {
+    _guiLogger = boost::make_shared<_GuiLogger>();
+
     _simController = simController;
     
     auto glfwData = initGlfw();
@@ -111,6 +115,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _flowFieldWindow = boost::make_shared<_FlowFieldWindow>(_simController);
     _aboutDialog = boost::make_shared<_AboutDialog>();
     _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
+    _logWindow = boost::make_shared<_LogWindow>(_styleRepository, _guiLogger);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -152,6 +157,7 @@ void _MainWindow::mainLoop(GLFWwindow* window)
 */
 
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 7);
         if (_startupWindow->getState() == _StartupWindow::State::LoadingControls
             || _startupWindow->getState() == _StartupWindow::State::Finished) {
             processMenubar();
@@ -162,7 +168,7 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         if (_startupWindow->getState() != _StartupWindow::State::Finished) {
             _startupWindow->process();
         }
-        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(2);
 
         // render content
         ImGui::Render();
@@ -290,6 +296,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
                 _statisticsWindow->setOn(!_statisticsWindow->isOn());
             }
+            if (ImGui::MenuItem("Log", "", _logWindow->isOn())) {
+                _logWindow->setOn(!_logWindow->isOn());
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -399,6 +408,7 @@ void _MainWindow::processWindows()
     _simulationParametersWindow->process();
     _gpuSettingsWindow->process();
     _flowFieldWindow->process();
+    _logWindow->process();
 }
 
 void _MainWindow::onOpenSimulation()

@@ -32,6 +32,7 @@ private:
     void processExitDialog();
     void reset();
 
+    GuiLogger _guiLogger;
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
@@ -41,9 +42,10 @@ private:
     ModeWindow _modeWindow;
     GpuSettingsWindow _gpuSettingsWindow;
     Viewport _viewport;
-    NewSimulationDialog _newSimulationDialog;
     StartupWindow _startupWindow;
     FlowFieldWindow _flowFieldWindow;
+    LogWindow _logWindow;
+    NewSimulationDialog _newSimulationDialog;
     AboutDialog _aboutDialog;
     ColorizeDialog _colorizeDialog;
 
