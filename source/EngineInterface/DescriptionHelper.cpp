@@ -71,6 +71,18 @@ void DescriptionHelper::correctConnections(DataDescription& data, IntVector2D co
     }
 }
 
+void DescriptionHelper::colorize(DataDescription& data, std::vector<int> const& colorCodes)
+{
+    if (data.clusters) {
+        for (auto& cluster : *data.clusters) {
+            auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
+            for (auto& cell : *cluster.cells) {
+                cell.metadata->color = color;
+            }
+        }
+    }
+}
+
 void DescriptionHelper::makeValid(ClusterDescription& cluster)
 {
     auto& numberGen = NumberGenerator::getInstance();

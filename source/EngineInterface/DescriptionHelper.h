@@ -12,6 +12,8 @@ public:
     ENGINEINTERFACE_EXPORT static void
     correctConnections(DataDescription& data, IntVector2D const& worldSize);
 
+    ENGINEINTERFACE_EXPORT static void colorize(DataDescription& data, std::vector<int> const& colorCodes);
+
 private:
     static void makeValid(ClusterDescription& cluster);
 };
