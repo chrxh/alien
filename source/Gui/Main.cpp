@@ -11,12 +11,10 @@ int main(int, char**)
 {
     BaseServices baseServices;
 
-    MainWindow mainWindow = boost::make_shared<_MainWindow>();
-    SimulationController simController = boost::make_shared<_SimulationController>();
 
     try {
-        simController->initCuda();
-
+        MainWindow mainWindow = boost::make_shared<_MainWindow>();
+        SimulationController simController = boost::make_shared<_SimulationController>();
 /*
         Serializer serializer = boost::make_shared<_Serializer>();
 
@@ -39,6 +37,7 @@ int main(int, char**)
         if (!glfwWindow) {
             return 1;
         }
+        simController->initCuda();
 
         mainWindow->mainLoop(glfwWindow);
 

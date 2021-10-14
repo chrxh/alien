@@ -146,10 +146,10 @@ std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
     settings.simulationParameters.cellFunctionWeaponStrength = tree.get<float>("simulation parameters.cell.function.weapon.strength");
     settings.simulationParameters.cellFunctionWeaponEnergyCost = tree.get<float>("simulation parameters.cell.function.weapon.energy cost");
     settings.simulationParameters.cellFunctionWeaponGeometryDeviationExponent = tree.get<float>(
-        "cell.function.weapon.geometry deviation exponent",
+        "simulation parameters.cell.function.weapon.geometry deviation exponent",
         settings.simulationParameters.cellFunctionWeaponGeometryDeviationExponent);
     settings.simulationParameters.cellFunctionWeaponInhomogeneousColorFactor = tree.get<float>(
-        "cell.function.weapon.inhomogeneous color factor",
+        "simulation parameters.cell.function.weapon.inhomogeneous color factor",
         settings.simulationParameters.cellFunctionWeaponInhomogeneousColorFactor);
     settings.simulationParameters.cellFunctionConstructorOffspringCellEnergy =
         tree.get<float>("simulation parameters.cell.function.constructor.offspring.cell energy");
