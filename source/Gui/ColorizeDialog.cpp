@@ -4,6 +4,10 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/ChangeDescriptions.h"
+#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/DescriptionHelper.h"
+#include "EngineImpl/SimulationController.h"
 
 _ColorizeDialog::_ColorizeDialog(SimulationController const& simController)
     : _simController(simController)
@@ -19,21 +23,21 @@ void _ColorizeDialog::process()
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(name, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-        ImGui::Text("Choose color(s):");
+        ImGui::Text("Select color(s):");
 
-        checkbox("##color1", Const::IndividualCellColor1, _checkColor1);
+        checkbox("##color1", Const::IndividualCellColor1, _checkColors[0]);
         ImGui::SameLine();
-        checkbox("##color2", Const::IndividualCellColor2, _checkColor2);
+        checkbox("##color2", Const::IndividualCellColor2, _checkColors[1]);
         ImGui::SameLine();
-        checkbox("##color3", Const::IndividualCellColor3, _checkColor3);
+        checkbox("##color3", Const::IndividualCellColor3, _checkColors[2]);
         ImGui::SameLine();
-        checkbox("##color4", Const::IndividualCellColor4, _checkColor4);
+        checkbox("##color4", Const::IndividualCellColor4, _checkColors[3]);
         ImGui::SameLine();
-        checkbox("##color5", Const::IndividualCellColor5, _checkColor5);
+        checkbox("##color5", Const::IndividualCellColor5, _checkColors[4]);
         ImGui::SameLine();
-        checkbox("##color6", Const::IndividualCellColor6, _checkColor6);
+        checkbox("##color6", Const::IndividualCellColor6, _checkColors[5]);
         ImGui::SameLine();
-        checkbox("##color7", Const::IndividualCellColor7, _checkColor7);
+        checkbox("##color7", Const::IndividualCellColor7, _checkColors[6]);
 
         ImGui::Spacing();
         ImGui::Spacing();
@@ -41,8 +45,10 @@ void _ColorizeDialog::process()
         ImGui::Spacing();
         ImGui::Spacing();
 
-        bool anySelected = _checkColor1 || _checkColor2 || _checkColor3 || _checkColor4 || _checkColor5 || _checkColor6
-            || _checkColor7;
+        bool anySelected = false;
+        for (bool checkColor : _checkColors) {
+            anySelected |= checkColor;
+        }
         ImGui::BeginDisabled(!anySelected);
         if (ImGui::Button("OK")) {
             onColorize();
@@ -85,5 +91,22 @@ void _ColorizeDialog::checkbox(std::string id, uint64_t cellColor, bool& check)
     ImGui::PopStyleColor(4);
 }
 
-void _ColorizeDialog::onColorize() {
+void _ColorizeDialog::onColorize()
+{
+    auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+    auto settings = _simController->getSettings();
+    auto symbolMap = _simController->getSymbolMap();
+    auto content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+
+    std::vector<int> colorCodes;
+    for (int i = 0; i < 7; ++i) {
+        if(_checkColors[i]) {
+            colorCodes.emplace_back(i);
+        }
+    }
+    DescriptionHelper::colorize(content, colorCodes);
+
+    _simController->closeSimulation();
+    _simController->newSimulation(timestep, settings, symbolMap);
+    _simController->updateData(content);
 }
