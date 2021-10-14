@@ -88,7 +88,7 @@ namespace
                 CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
 
                 std::stringstream stream;
-                stream << "device " << deviceNumber << ": " << prop.name << " has compute capability " << prop.major
+                stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major
                        << "." << prop.minor;
                 loggingService->logMessage(Priority::Important, stream.str());
 
@@ -125,19 +125,16 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
     _currentTimestep.store(timestep);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "acquire GPU memory");
+    loggingService->logMessage(Priority::Important, "initialize simulation");
 
     _cudaSimulationData = new SimulationData();
     _cudaSimulationResult = new SimulationResult();
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
-//    auto const memorySizeBefore = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
-
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
-    resizeArrays({100000, 100000, 10000});
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
@@ -145,14 +142,7 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
     CudaMemoryManager::getInstance().acquireMemory<char>(Const::MetadataMemorySize, _cudaAccessTO->stringBytes);
 
-    //    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
-
-/*
-    std::stringstream stream;
-    stream << (memorySizeAfter - memorySizeBefore) / (1024 * 1024) << " MB GPU memory acquired";
-
-    loggingService->logMessage(Priority::Important, stream.str());
-*/
+    resizeArrays({100000, 100000, 10000});
 }
 
 _CudaSimulation::~_CudaSimulation()
@@ -185,7 +175,7 @@ _CudaSimulation::~_CudaSimulation()
     CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numStringBytes);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "GPU memory released");
+    loggingService->logMessage(Priority::Important, "close simulation");
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
@@ -404,6 +394,9 @@ void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
 
 void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
 {
+    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
+    loggingService->logMessage(Priority::Important, "resize arrays");
+
     _cudaSimulationData->resizeTarget(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
@@ -433,4 +426,11 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
+
+    loggingService->logMessage(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
+    loggingService->logMessage(Priority::Unimportant, "particle array size: " + std::to_string(cellArraySize));
+    loggingService->logMessage(Priority::Unimportant, "token array size: " + std::to_string(tokenArraySize));
+
+    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+    loggingService->logMessage(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
 }
