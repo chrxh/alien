@@ -309,7 +309,7 @@ void _MainWindow::processMenubar()
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
             if (ImGui::MenuItem("Colorize", "")) {
                 _colorizeDialog->show();
-                _helpMenuToggled = false;
+                _toolsMenuToggled = false;
             }
             AlienImGui::EndMenuButton();
         }
