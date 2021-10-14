@@ -27,13 +27,13 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
     const auto active = toggle;
     if (active) {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButtonActive);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButtonHovered);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::MenuButtonHovered);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButtonActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButtonHoveredColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::MenuButtonHoveredColor);
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButton);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButton);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::MenuButton);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::MenuButtonColor);
     }
 
     auto pos = ImGui::GetCursorPos();
@@ -88,9 +88,9 @@ bool AlienImGui::ShutdownButton()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ShutdownButton);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ShutdownButtonHovered);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ShutdownButtonActive);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ShutdownButtonColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ShutdownButtonHoveredColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ShutdownButtonActiveColor);
     auto result = ImGui::Button(ICON_FA_POWER_OFF);
     ImGui::PopStyleColor(3);
     ImGui::PopStyleVar(2);
