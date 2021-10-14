@@ -29,7 +29,8 @@ namespace Const
 
     auto const AutosaveFile = BasePath + "autosave.sim";
 
-    auto const FontFilename = "d:\\temp\\alien\\external\\imgui\\misc\\fonts\\DroidSans.ttf";
+    auto const StandardFontFilename = "d:\\temp\\alien\\external\\imgui\\misc\\fonts\\DroidSans.ttf";
+    auto const MonospaceFontFilename = "d:\\temp\\alien\\external\\imgui\\misc\\fonts\\Cousine-Regular.ttf";
 
     auto const NavigationOnFilename = BasePath + "navigation on.png";
     auto const NavigationOffFilename = BasePath + "navigation off.png";
