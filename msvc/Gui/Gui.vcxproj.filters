@@ -144,7 +144,7 @@
     <ClInclude Include="..\..\source\Gui\LogWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\GuiLogger.h">
+    <ClInclude Include="..\..\source\Gui\SimpleLogger.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -248,7 +248,7 @@
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\GuiLogger.cpp">
+    <ClCompile Include="..\..\source\Gui\SimpleLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,9 +5,9 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 #include "StyleRepository.h"
-#include "GuiLogger.h"
+#include "SimpleLogger.h"
 
-_LogWindow::_LogWindow(StyleRepository const& styleRepository, GuiLogger const& logger)
+_LogWindow::_LogWindow(StyleRepository const& styleRepository, SimpleLogger const& logger)
     : _styleRepository(styleRepository)
     , _logger(logger)
 {}
