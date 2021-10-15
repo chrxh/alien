@@ -4,10 +4,10 @@ namespace Const
 {
     std::string const BasePath = "d:\\temp\\alien\\source\\Gui\\Resources\\";
 
+    auto const AutosaveFile = BasePath + "autosave.sim";
+
     auto const SimulationFragmentShader = BasePath + "shader.fs";
     auto const SimulationVertexShader = BasePath + "shader.vs";
-
-    auto const AutosaveFile = BasePath + "autosave.sim";
 
     auto const NavigationOnFilename = BasePath + "navigation on.png";
     auto const NavigationOffFilename = BasePath + "navigation off.png";

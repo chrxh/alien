@@ -66,7 +66,6 @@ namespace
         {
             auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
             int result = 0;
-
             int numberOfDevices;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
             if (numberOfDevices < 1) {
