@@ -222,7 +222,7 @@ void _CudaSimulation::getVectorImage(
         _cudaSimulationData->resizeImage(imageSize);
     }
     GPU_FUNCTION(
-        drawImage,
+        drawImageKernel,
         rectUpperLeft,
         rectLowerRight,
         imageSize,
