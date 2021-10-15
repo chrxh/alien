@@ -7,7 +7,7 @@ namespace Const
     std::string const BasePath = "d:\\temp\\alien\\source\\Gui\\Resources\\";
 
     auto const AutosaveFile = BasePath + "autosave.sim";
-    auto const LogFilename = BasePath + "log.sim";
+    auto const LogFilename = BasePath + "log.txt";
 
     auto const SimulationFragmentShader = BasePath + "shader.fs";
     auto const SimulationVertexShader = BasePath + "shader.vs";
