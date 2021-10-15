@@ -67,7 +67,6 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController, SimpleL
     
     auto glfwData = initGlfw();
 
-    // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImPlot::CreateContext();
