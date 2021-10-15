@@ -25,12 +25,6 @@ namespace
             : _accessFlag(accessFlag)
             , _conditionForWorkerLoop(conditionForWorkerLoop)
         {
-            {
-                std::unique_lock<std::mutex> uniqueLock(exceptionData.mutex);
-                if (exceptionData.exceptionOccurred) {
-                    throw std::runtime_error(exceptionData.message);
-                }
-            }
             if (!isSimulationRunning.load()) {
                 return;
             }
@@ -40,8 +34,13 @@ namespace
             if (maxDuration) {
                 std::cv_status status = conditionForAccess.wait_for(uniqueLock, *maxDuration);
                 _isTimeout = std::cv_status::timeout == status;
+                checkForException(exceptionData);
             } else {
-                conditionForAccess.wait(uniqueLock);
+                std::cv_status status = conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000));
+                if (std::cv_status::timeout == status) {
+                    checkForException(exceptionData);
+                    throw std::runtime_error("GPU Timeout");
+                }
             }
             conditionForWorkerLoop.notify_all();
         }
@@ -55,6 +54,14 @@ namespace
         bool isTimeout() const { return _isTimeout; }
 
     private:
+        void checkForException(ExceptionData const& exceptionData)
+        {
+            std::unique_lock<std::mutex> uniqueLock(exceptionData.mutex);
+            if (exceptionData.exceptionOccurred) {
+                throw std::runtime_error(exceptionData.message);
+            }
+        }
+
         std::atomic<bool>& _accessFlag;
         std::condition_variable& _conditionForWorkerLoop;
 
