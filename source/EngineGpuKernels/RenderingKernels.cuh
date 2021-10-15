@@ -306,17 +306,30 @@ __global__ void drawParticles(
     }
 }
 
+__device__ void drawFlowCenters(unsigned int* targetImage, float2 const& rectUpperLeft, int2 imageSize, float zoom)
+{
+    if (cudaFlowFieldSettings.active) {
+        for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
+            auto const& radialFlowData = cudaFlowFieldSettings.radialFlowCenters[i];
+            int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
+            int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
+            auto drawX = screenPosX;
+            auto drawY = screenPosY;
+            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                int index = drawX + drawY * imageSize.x;
+                targetImage[index * 2] = 0;
+                targetImage[index * 2 + 1] = 0xfffff;
+            }
+        }
+    }
+}
 
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
 
-__global__ void drawImage(
-    float2 rectUpperLeft,
-    float2 rectLowerRight,
-    int2 imageSize,
-    float zoom,
-    SimulationData data)
+__global__ void
+drawImageKernel(float2 rectUpperLeft, float2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
 {
     unsigned int* targetImage = data.imageData;
 
@@ -328,14 +341,7 @@ __global__ void drawImage(
     KERNEL_CALL(drawBackground, targetImage, imageSize, outsideRectUpperLeft, outsideRectLowerRight);
 
     KERNEL_CALL(
-        drawCells,
-        data.size,
-        rectUpperLeft,
-        rectLowerRight,
-        data.entities.cellPointers,
-        targetImage,
-        imageSize,
-        zoom);
+        drawCells, data.size, rectUpperLeft, rectLowerRight, data.entities.cellPointers, targetImage, imageSize, zoom);
 
     KERNEL_CALL(
         drawTokens, data.size, rectUpperLeft, rectLowerRight, data.entities.tokenPointers, targetImage, imageSize, zoom);
@@ -349,5 +355,8 @@ __global__ void drawImage(
         targetImage,
         imageSize,
         zoom);
+
+    drawFlowCenters(targetImage, rectUpperLeft, imageSize, zoom);
 }
+
 
