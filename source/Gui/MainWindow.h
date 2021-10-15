@@ -7,7 +7,7 @@ struct GLFWvidmode;
 class _MainWindow
 {
 public:
-    GLFWwindow* init(SimulationController const& simController);
+    GLFWwindow* init(SimulationController const& simController, SimpleLogger _simpleLogger);
     void mainLoop(GLFWwindow* window);
     void shutdown(GLFWwindow* window);
 
@@ -32,7 +32,7 @@ private:
     void processExitDialog();
     void reset();
 
-    GuiLogger _guiLogger;
+    SimpleLogger _logger;
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;

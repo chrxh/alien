@@ -57,8 +57,8 @@ using ColorizeDialog = boost::shared_ptr<_ColorizeDialog>;
 class _LogWindow;
 using LogWindow = boost::shared_ptr<_LogWindow>;
 
-class _GuiLogger;
-using GuiLogger = boost::shared_ptr<_GuiLogger>;
+class _SimpleLogger;
+using SimpleLogger = boost::shared_ptr<_SimpleLogger>;
 
 
 struct GLFWwindow;

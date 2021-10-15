@@ -41,13 +41,13 @@
 #include "AboutDialog.h"
 #include "ColorizeDialog.h"
 #include "LogWindow.h"
-#include "GuiLogger.h"
+#include "SimpleLogger.h"
 
 namespace
 {
     void glfwErrorCallback(int error, const char* description)
     {
-        std::cerr << "Glfw Error " << error << ": " << description << std::endl;
+        throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
     }
 
     _SimulationView* simulationViewPtr;
@@ -60,16 +60,13 @@ namespace
     }
 }
 
-GLFWwindow* _MainWindow::init(SimulationController const& simController)
+GLFWwindow* _MainWindow::init(SimulationController const& simController, SimpleLogger logger)
 {
-    _guiLogger = boost::make_shared<_GuiLogger>();
-
+    _logger = logger;
     _simController = simController;
     
     auto glfwData = initGlfw();
-    if (!glfwData.window) {
-        return nullptr;
-    }
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -89,10 +86,8 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     ImGui_ImplGlfw_InitForOpenGL(glfwData.window, true);
     ImGui_ImplOpenGL3_Init(glfwData.glsl_version);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return nullptr;
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        throw std::runtime_error("Failed to initialize GLAD");
     }
 
     _modeWindow = boost::make_shared<_ModeWindow>();
@@ -115,7 +110,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController)
     _flowFieldWindow = boost::make_shared<_FlowFieldWindow>(_simController);
     _aboutDialog = boost::make_shared<_AboutDialog>();
     _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
-    _logWindow = boost::make_shared<_LogWindow>(_styleRepository, _guiLogger);
+    _logWindow = boost::make_shared<_LogWindow>(_styleRepository, _logger);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -211,7 +206,7 @@ auto _MainWindow::initGlfw() -> GlfwData
     glfwSetErrorCallback(glfwErrorCallback);
 
     if (!glfwInit()) {
-        return {nullptr, nullptr, nullptr};
+        throw std::runtime_error("Failed to initialize Glfw.");
     }
 
     // Decide GL+GLSL versions
@@ -244,7 +239,7 @@ auto _MainWindow::initGlfw() -> GlfwData
 
     GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "alien", primaryMonitor, NULL);
     if (window == NULL) {
-        return {nullptr, nullptr, nullptr};
+        throw std::runtime_error("Failed to create window.");
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);

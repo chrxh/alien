@@ -1,21 +1,21 @@
-#include "GuiLogger.h"
+#include "SimpleLogger.h"
 
 #include "Base/ServiceLocator.h"
 #include "Base/LoggingService.h"
 
-_GuiLogger::_GuiLogger()
+_SimpleLogger::_SimpleLogger()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->registerCallBack(this);
 }
 
-_GuiLogger::~_GuiLogger()
+_SimpleLogger::~_SimpleLogger()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->unregisterCallBack(this);
 }
 
-std::vector<std::string> const& _GuiLogger::getMessages(Priority minPriority) const
+std::vector<std::string> const& _SimpleLogger::getMessages(Priority minPriority) const
 {
     if (Priority::Important == minPriority) {
         return _importantLogMessages;
@@ -23,7 +23,7 @@ std::vector<std::string> const& _GuiLogger::getMessages(Priority minPriority) co
     return _allLogMessages;
 }
 
-void _GuiLogger::newLogMessage(Priority priority, std::string const& message)
+void _SimpleLogger::newLogMessage(Priority priority, std::string const& message)
 {
     _allLogMessages.emplace_back(message);
     if (Priority::Important == priority) {
