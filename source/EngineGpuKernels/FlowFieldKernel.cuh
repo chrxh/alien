@@ -4,36 +4,6 @@
 #include "Map.cuh"
 #include "SimulationData.cuh"
 
-/*
-class RadialForceField
-{
-public:
-    __device__ float2 getVelocity(float2 const& pos, MapInfo const& mapInfo)
-    {
-        auto baseValue = getHeight(pos, mapInfo);
-        auto downValue = getHeight(pos + float2{0, 1}, mapInfo);
-        auto rightValue = getHeight(pos + float2{1, 0}, mapInfo);
-        auto result = Math::crossProdProjected({0, 1, downValue - baseValue}, {1, 0, rightValue - baseValue});
-//        Math::normalize(result);
-        Math::rotateQuarterClockwise(result);
-        return result;
-    }
-
-private:
-    __device__ float getHeight(float2 const& pos, MapInfo const& mapInfo)
-    {
-        auto dist1 = mapInfo.mapDistance(pos, float2{600, 600});
-        if (dist1 > 1000) {
-            dist1 = 1000;
-        }
-        auto dist2 = mapInfo.mapDistance(pos, float2{1800, 1800});
-        if (dist2 > 1000) {
-            dist2 = 1000;
-        }
-        return -sqrtf(dist1) - sqrtf(dist2);
-    }
-};
-*/
 __device__ float getHeight(float2 const& pos, MapInfo const& mapInfo)
 {
     float result = 0;
@@ -57,7 +27,7 @@ __device__ float2 calcVelocity(float2 const& pos, MapInfo const& mapInfo)
     auto baseValue = getHeight(pos, mapInfo);
     auto downValue = getHeight(pos + float2{0, 1}, mapInfo);
     auto rightValue = getHeight(pos + float2{1, 0}, mapInfo);
-    auto result = Math::crossProdProjected({0, 1, downValue - baseValue}, {1, 0, rightValue - baseValue});
+    float2 result{rightValue - baseValue, downValue - baseValue};
     Math::rotateQuarterClockwise(result);
     return result;
 }
