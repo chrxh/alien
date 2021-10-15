@@ -21,6 +21,13 @@
 #include "Definitions.h"
 #include "DllExport.h"
 
+struct ExceptionData
+{
+    mutable std::mutex mutex;
+    bool exceptionOccurred = false;
+    std::string message;
+};
+
 class EngineWorker
 {
 public:
@@ -80,6 +87,7 @@ private:
     std::atomic<bool> _isSimulationRunning = false;
     std::atomic<bool> _isShutdown = false;
     std::atomic<bool> _requireAccess = false;
+    ExceptionData _exceptionData;
 
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
