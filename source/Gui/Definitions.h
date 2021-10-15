@@ -60,6 +60,8 @@ using LogWindow = boost::shared_ptr<_LogWindow>;
 class _SimpleLogger;
 using SimpleLogger = boost::shared_ptr<_SimpleLogger>;
 
+class _FileLogger;
+using FileLogger = boost::shared_ptr<_FileLogger>;
 
 struct GLFWwindow;
 struct ImFont;

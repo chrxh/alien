@@ -2,9 +2,8 @@
 
 #include <chrono>
 
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
-
+#include "EngineInterface/ChangeDescriptions.h"
 #include "AccessDataTOCache.h"
 #include "DataConverter.h"
 
@@ -21,10 +20,17 @@ namespace
             std::condition_variable& conditionForWorkerLoop,
             std::atomic<bool>& accessFlag,
             std::atomic<bool> const& isSimulationRunning,
+            ExceptionData const& exceptionData,
             boost::optional<std::chrono::milliseconds> const& maxDuration = boost::none)
             : _accessFlag(accessFlag)
             , _conditionForWorkerLoop(conditionForWorkerLoop)
         {
+            {
+                std::unique_lock<std::mutex> uniqueLock(exceptionData.mutex);
+                if (exceptionData.exceptionOccurred) {
+                    throw std::runtime_error(exceptionData.message);
+                }
+            }
             if (!isSimulationRunning.load()) {
                 return;
             }
@@ -71,13 +77,15 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, Gp
 
 void EngineWorker::clear()
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
     return _cudaSimulation->clear();
 }
 
 void EngineWorker::registerImageResource(GLuint image)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
     _cudaResource = _cudaSimulation->registerImageResource(image);
 }
@@ -88,7 +96,13 @@ void EngineWorker::getVectorImage(
     IntVector2D const& imageSize,
     double zoom)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, FrameTimeout);
+    CudaAccess access(
+        _conditionForAccess,
+        _conditionForWorkerLoop,
+        _requireAccess,
+        _isSimulationRunning,
+        _exceptionData,
+        FrameTimeout);
 
     if (!access.isTimeout()) {
         _cudaSimulation->getVectorImage(
@@ -102,7 +116,8 @@ void EngineWorker::getVectorImage(
 
 DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
     auto arraySizes = _cudaSimulation->getArraySizes();
     DataAccessTO dataTO =
@@ -131,7 +146,8 @@ OverallStatistics EngineWorker::getMonitorData() const
 
 void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
     int numCells = 0;
     int numParticles = 0;
@@ -168,7 +184,8 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 
 void EngineWorker::calcSingleTimestep()
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
     _cudaSimulation->calcCudaTimestep();
     updateMonitorDataIntern();
@@ -212,7 +229,8 @@ uint64_t EngineWorker::getCurrentTimestep() const
 
 void EngineWorker::setCurrentTimestep(uint64_t value)
 {
-    CudaAccess access(_conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning);
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
     _cudaSimulation->setCurrentTimestep(value);
 }
 
@@ -258,60 +276,66 @@ void EngineWorker::applyForce_async(
 
 void EngineWorker::runThreadLoop()
 {
-    std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
-    boost::optional<std::chrono::steady_clock::time_point> startTimestepTime;
-    while (true) {
-        if (!_isSimulationRunning.load()) {
+    try {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
+        boost::optional<std::chrono::steady_clock::time_point> startTimestepTime;
+        while (true) {
+            if (!_isSimulationRunning.load()) {
 
-            //sleep...
-            _tps.store(0);
-            _conditionForWorkerLoop.wait(uniqueLock);
-        }
-        if (_isShutdown.load()) {
-            return;
-        }
-        while (_requireAccess.load()) {
-            _conditionForAccess.notify_all();
-        }
-
-        if (_isSimulationRunning.load()) {
-            if (startTimestepTime && _tpsRestriction.load() > 0) {
-                long long int actualDuration, desiredDuration;
-                do {
-                    auto tpsRestriction = _tpsRestriction.load();
-                    desiredDuration = (0 != tpsRestriction) ? 1000000 / tpsRestriction : 0;
-                    actualDuration = std::chrono::duration_cast<std::chrono::microseconds>(
-                                         std::chrono::steady_clock::now() - *startTimestepTime)
-                                         .count();
-
-                    _conditionForAccess.notify_all();
-                    //                    std::this_thread::sleep_for(std::chrono::microseconds(1));
-                } while (actualDuration < desiredDuration || _requireAccess.load());
+                //sleep...
+                _tps.store(0);
+                _conditionForWorkerLoop.wait(uniqueLock);
+            }
+            if (_isShutdown.load()) {
+                return;
+            }
+            while (_requireAccess.load()) {
+                _conditionForAccess.notify_all();
             }
 
-            auto timepoint = std::chrono::steady_clock::now();
-            if (!_timepoint) {
-                _timepoint = timepoint;
-            } else {
-                int duration = static_cast<int>(
-                    std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_timepoint).count());
-                if (duration > 199) {
-                    _timepoint = timepoint;
-                    if (duration < 350) {
-                        _tps.store(toFloat(_timestepsSinceTimepoint) * 5 * 200 / duration);
-                    } else {
-                        _tps.store(1000.0f / duration);
-                    }
-                    _timestepsSinceTimepoint = 0;
+            if (_isSimulationRunning.load()) {
+                if (startTimestepTime && _tpsRestriction.load() > 0) {
+                    long long int actualDuration, desiredDuration;
+                    do {
+                        auto tpsRestriction = _tpsRestriction.load();
+                        desiredDuration = (0 != tpsRestriction) ? 1000000 / tpsRestriction : 0;
+                        actualDuration = std::chrono::duration_cast<std::chrono::microseconds>(
+                                             std::chrono::steady_clock::now() - *startTimestepTime)
+                                             .count();
+
+                        _conditionForAccess.notify_all();
+                        //                    std::this_thread::sleep_for(std::chrono::microseconds(1));
+                    } while (actualDuration < desiredDuration || _requireAccess.load());
                 }
-            }
 
-            startTimestepTime = std::chrono::steady_clock::now();
-            _cudaSimulation->calcCudaTimestep();
-            updateMonitorDataIntern();
-            ++_timestepsSinceTimepoint;
+                auto timepoint = std::chrono::steady_clock::now();
+                if (!_timepoint) {
+                    _timepoint = timepoint;
+                } else {
+                    int duration = static_cast<int>(
+                        std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_timepoint).count());
+                    if (duration > 199) {
+                        _timepoint = timepoint;
+                        if (duration < 350) {
+                            _tps.store(toFloat(_timestepsSinceTimepoint) * 5 * 200 / duration);
+                        } else {
+                            _tps.store(1000.0f / duration);
+                        }
+                        _timestepsSinceTimepoint = 0;
+                    }
+                }
+
+                startTimestepTime = std::chrono::steady_clock::now();
+                _cudaSimulation->calcCudaTimestep();
+                updateMonitorDataIntern();
+                ++_timestepsSinceTimepoint;
+            }
+            processJobs();
         }
-        processJobs();
+    } catch (std::exception const& e) {
+        std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
+        _exceptionData.exceptionOccurred = true;
+        _exceptionData.message = e.what();
     }
 }
 

@@ -2,6 +2,8 @@
 
 #include "imgui.h"
 
+#include "Resources.h"
+
 _AboutDialog::_AboutDialog() {}
 
 void _AboutDialog::process()
@@ -13,7 +15,9 @@ void _AboutDialog::process()
     ImGui::OpenPopup(name);
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(name, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Artificial Life Environment, version 3 preview\n\nis an open source project initiated by\nChristian Heinemann.");
+        ImGui::Text(("Artificial Life Environment, version " + Const::ProgramVersion
+                     + "\n\nis an open source project initiated by\nChristian Heinemann.")
+                        .c_str());
 
         ImGui::Spacing();
         ImGui::Spacing();

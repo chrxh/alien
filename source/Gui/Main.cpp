@@ -11,11 +11,13 @@
 #include "MainWindow.h"
 #include "Resources.h"
 #include "SimpleLogger.h"
+#include "FileLogger.h"
 
 int main(int, char**)
 {
     BaseServices baseServices;
     SimpleLogger logger = boost::make_shared<_SimpleLogger>();
+    FileLogger fileLogger = boost::make_shared<_FileLogger>();
 
     try {
         MainWindow mainWindow = boost::make_shared<_MainWindow>();
@@ -30,12 +32,14 @@ int main(int, char**)
         simController->closeSimulation();
     } catch (std::exception const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-        loggingService->logMessage(Priority::Important, std::string("The following exception occurred: ") + e.what());
-        for (auto const& message : logger->getMessages(Priority::Important)) {
-            std::cerr << message << std::endl;
-        }
-
-        std::cerr << std::endl << std::endl << "See log.txt for more detailed information." << std::endl;
+        auto message = std::string("The following exception occurred: ")
+            + e.what();
+        loggingService->logMessage(Priority::Important, message);
+        std::cerr << message
+                  << std::endl
+                  << std::endl
+                  << "See log.txt for more detailed information."
+                  << std::endl;
     }
     return 0;
 }
