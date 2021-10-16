@@ -97,3 +97,83 @@ bool AlienImGui::ShutdownButton()
 
     return result;
 }
+
+void AlienImGui::ColorButtonWithPicker(
+    std::string const& text,
+    uint32_t& color,
+    uint32_t& backupColor,
+    uint32_t (&savedPalette)[32],
+    RealVector2D const& size)
+{
+    ImVec4 imGuiColor = ImColor(color);
+    ImVec4 imGuiBackupColor = ImColor(backupColor);
+    ImVec4 imGuiSavedPalette[32];
+    for (int i = 0; i < IM_ARRAYSIZE(imGuiSavedPalette); ++i) {
+        imGuiSavedPalette[i] = ImColor(savedPalette[i]);
+    }
+
+    bool openColorPicker = ImGui::ColorButton(
+        text.c_str(), imGuiColor, ImGuiColorEditFlags_NoBorder, ImVec2(ImGui::GetContentRegionAvail().x / 2, 0));
+    if (openColorPicker) {
+        ImGui::OpenPopup("colorpicker");
+        imGuiBackupColor = imGuiColor;
+    }
+    if (ImGui::BeginPopup("colorpicker")) {
+        ImGui::Text("Please choose a color");
+        ImGui::Separator();
+        ImGui::ColorPicker4(
+            "##picker", (float*)&imGuiColor, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();  // Lock X position
+        ImGui::Text("Current");
+        ImGui::ColorButton(
+            "##current",
+            imGuiColor,
+            ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf,
+            ImVec2(60, 40));
+        ImGui::Text("Previous");
+        if (ImGui::ColorButton(
+                "##previous",
+                imGuiBackupColor,
+                ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf,
+                ImVec2(60, 40))) {
+            imGuiColor = imGuiBackupColor;
+        }
+        ImGui::Separator();
+        ImGui::Text("Palette");
+        for (int n = 0; n < IM_ARRAYSIZE(imGuiSavedPalette); n++) {
+            ImGui::PushID(n);
+            if ((n % 8) != 0)
+                ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
+
+            ImGuiColorEditFlags paletteButtonFlags =
+                ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
+            if (ImGui::ColorButton("##palette", imGuiSavedPalette[n], paletteButtonFlags, ImVec2(20, 20)))
+                imGuiColor = ImVec4(
+                    imGuiSavedPalette[n].x,
+                    imGuiSavedPalette[n].y,
+                    imGuiSavedPalette[n].z,
+                    imGuiColor.w);  // Preserve alpha!
+
+            // Allow user to drop colors into each palette entry. Note that ColorButton() is already a
+            // drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
+            if (ImGui::BeginDragDropTarget()) {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
+                    memcpy((float*)&imGuiSavedPalette[n], payload->Data, sizeof(float) * 3);
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
+                    memcpy((float*)&imGuiSavedPalette[n], payload->Data, sizeof(float) * 4);
+                ImGui::EndDragDropTarget();
+            }
+
+            ImGui::PopID();
+        }
+        ImGui::EndGroup();
+        ImGui::EndPopup();
+    }
+    color = static_cast<ImU32>(ImColor(imGuiColor));
+    backupColor = static_cast<ImU32>(ImColor(imGuiBackupColor));
+    for (int i = 0; i < 32; ++i) {
+        savedPalette[i] = static_cast<ImU32>(ImColor(imGuiSavedPalette[i]));
+    }
+}

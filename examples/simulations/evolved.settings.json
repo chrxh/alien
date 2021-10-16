@@ -35,7 +35,7 @@
                     "strength": "0.100000",
                     "energy cost": "0.900000",
                     "geometry deviation exponent": "1.000000",
-                    "inhomogeneous color factor": "1.000000"
+                    "color penalty": "0.000000"
                 },
                 "constructor": {
                     "offspring": {

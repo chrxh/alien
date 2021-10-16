@@ -50,8 +50,8 @@ boost::property_tree::ptree Parser::encode(uint64_t timestep, Settings const& se
         "simulation parameters.cell.function.weapon.geometry deviation exponent",
         toString(settings.simulationParameters.cellFunctionWeaponGeometryDeviationExponent));
     tree.add(
-        "simulation parameters.cell.function.weapon.inhomogeneous color factor",
-        toString(settings.simulationParameters.cellFunctionWeaponInhomogeneousColorFactor));
+        "simulation parameters.cell.function.weapon.color penalty",
+        toString(settings.simulationParameters.cellFunctionWeaponColorPenalty));
     tree.add(
         "simulation parameters.cell.function.constructor.offspring.cell energy",
         toString(settings.simulationParameters.cellFunctionConstructorOffspringCellEnergy));
@@ -148,9 +148,9 @@ std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
     settings.simulationParameters.cellFunctionWeaponGeometryDeviationExponent = tree.get<float>(
         "simulation parameters.cell.function.weapon.geometry deviation exponent",
         settings.simulationParameters.cellFunctionWeaponGeometryDeviationExponent);
-    settings.simulationParameters.cellFunctionWeaponInhomogeneousColorFactor = tree.get<float>(
-        "simulation parameters.cell.function.weapon.inhomogeneous color factor",
-        settings.simulationParameters.cellFunctionWeaponInhomogeneousColorFactor);
+    settings.simulationParameters.cellFunctionWeaponColorPenalty = tree.get<float>(
+        "simulation parameters.cell.function.weapon.color penalty",
+        settings.simulationParameters.cellFunctionWeaponColorPenalty);
     settings.simulationParameters.cellFunctionConstructorOffspringCellEnergy =
         tree.get<float>("simulation parameters.cell.function.constructor.offspring.cell energy");
     settings.simulationParameters.cellFunctionConstructorOffspringCellDistance =

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/SimulationParametersSpots.h"
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
@@ -14,6 +16,12 @@ public:
     void setOn(bool value);
 
 private:
+    SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
+
+    void processBase(SimulationParameters& simParameters);
+    void processSpot(SimulationParametersSpot& spot);
+    
+
     void createGroup(std::string const& name);
     void createFloatItem(
         std::string const& name,
@@ -21,11 +29,19 @@ private:
         float min,
         float max,
         bool logarithmic = false,
-        std::string const& format = "%.3f");
-    void createIntItem(std::string const& name, int& value, int min, int max);
+        std::string const& format = "%.3f",
+        boost::optional<std::string> help = boost::none);
+    void createIntItem(
+        std::string const& name,
+        int& value,
+        int min,
+        int max,
+        boost::optional<std::string> help = boost::none);
 
     StyleRepository _styleRepository;
     SimulationController _simController;
 
     bool _on = false;
+    uint32_t _savedPalette[32] = {};
+    uint32_t _backupColor;
 };

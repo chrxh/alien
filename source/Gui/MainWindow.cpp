@@ -151,7 +151,7 @@ void _MainWindow::mainLoop(GLFWwindow* window)
 */
 
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 7);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
         if (_startupWindow->getState() == _StartupWindow::State::LoadingControls
             || _startupWindow->getState() == _StartupWindow::State::Finished) {
             processMenubar();
@@ -259,11 +259,11 @@ void _MainWindow::processMenubar()
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
-                onOpenSimulation();
+                onPrepareOpenSimulation();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
-                onSaveSimulation();
+                onPrepareSaveSimulation();
                 _simulationMenuToggled = false;
             }
             ImGui::Separator();
@@ -308,6 +308,15 @@ void _MainWindow::processMenubar()
             }
             AlienImGui::EndMenuButton();
         }
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
+            if (ImGui::MenuItem("Render UI", "", _flowFieldWindow->isOn())) {
+                _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
+            }
+            if (ImGui::MenuItem("Render Simulation", "", _flowFieldWindow->isOn())) {
+                _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
+            }
+            AlienImGui::EndMenuButton();
+        }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
             if (ImGui::MenuItem("Colorize", "")) {
@@ -329,10 +338,10 @@ void _MainWindow::processMenubar()
     //menu hotkeys
     auto io = ImGui::GetIO();
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-        onOpenSimulation();
+        onPrepareOpenSimulation();
     }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-        onSaveSimulation();
+        onPrepareSaveSimulation();
     }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
         onRunSimulation();
@@ -345,47 +354,11 @@ void _MainWindow::processMenubar()
 void _MainWindow::processDialogs()
 {
     if (ifd::FileDialog::Instance().IsDone("SimulationOpenDialog")) {
-        if (ifd::FileDialog::Instance().HasResult()) {
-            const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-            auto firstFilename = res.front();
-
-            _simController->closeSimulation();
-
-            reset();
-
-            Serializer serializer = boost::make_shared<_Serializer>();
-            SerializedSimulation serializedData;
-            serializer->loadSimulationDataFromFile2(firstFilename.string(), serializedData);
-            auto deserializedData = serializer->deserializeSimulation2(serializedData);
-
-            _simController->newSimulation(
-                deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
-            _simController->updateData(deserializedData.content);
-            _viewport->setCenterInWorldPos(
-                {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
-                 toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-            _viewport->setZoomFactor(4.0f);
-        }
-        ifd::FileDialog::Instance().Close();
+        processOpenSimulationDialog();
     }
 
     if (ifd::FileDialog::Instance().IsDone("SimulationSaveDialog")) {
-        if (ifd::FileDialog::Instance().HasResult()) {
-            const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-            auto firstFilename = res.front();
-
-            DeserializedSimulation sim;
-            sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-            sim.settings = _simController->getSettings();
-            sim.symbolMap = _simController->getSymbolMap();
-            sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
-
-            Serializer serializer = boost::make_shared<_Serializer>();
-            auto serializedSim = serializer->serializeSimulation2(sim);
-            serializer->saveSimulationDataToFile2(firstFilename.string(), serializedSim);
-
-        }
-        ifd::FileDialog::Instance().Close();
+        processSaveSimulationDialog();
     }
     _newSimulationDialog->process();
     _aboutDialog->process();
@@ -405,13 +378,57 @@ void _MainWindow::processWindows()
     _logWindow->process();
 }
 
-void _MainWindow::onOpenSimulation()
+void _MainWindow::processOpenSimulationDialog()
+{
+    if (ifd::FileDialog::Instance().HasResult()) {
+        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+        auto firstFilename = res.front();
+
+        _simController->closeSimulation();
+
+        reset();
+
+        Serializer serializer = boost::make_shared<_Serializer>();
+        SerializedSimulation serializedData;
+        serializer->loadSimulationDataFromFile2(firstFilename.string(), serializedData);
+        auto deserializedData = serializer->deserializeSimulation2(serializedData);
+
+        _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
+        _simController->updateData(deserializedData.content);
+        _viewport->setCenterInWorldPos(
+            {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
+             toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
+        _viewport->setZoomFactor(4.0f);
+    }
+    ifd::FileDialog::Instance().Close();
+}
+
+void _MainWindow::processSaveSimulationDialog()
+{
+    if (ifd::FileDialog::Instance().HasResult()) {
+        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+        auto firstFilename = res.front();
+
+        DeserializedSimulation sim;
+        sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+        sim.settings = _simController->getSettings();
+        sim.symbolMap = _simController->getSymbolMap();
+        sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+
+        Serializer serializer = boost::make_shared<_Serializer>();
+        auto serializedSim = serializer->serializeSimulation2(sim);
+        serializer->saveSimulationDataToFile2(firstFilename.string(), serializedSim);
+    }
+    ifd::FileDialog::Instance().Close();
+}
+
+void _MainWindow::onPrepareOpenSimulation()
 {
     ifd::FileDialog::Instance().Open(
         "SimulationOpenDialog", "Open simulation", "Simulation file (*.sim){.sim},.*", false);
 }
 
-void _MainWindow::onSaveSimulation()
+void _MainWindow::onPrepareSaveSimulation()
 {
     ifd::FileDialog::Instance().Save("SimulationSaveDialog", "Save simulation", "Simulation file (*.sim){.sim},.*");
 }

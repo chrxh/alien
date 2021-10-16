@@ -161,6 +161,7 @@
     <ClInclude Include="..\..\source\EngineInterface\Settings.h" />
     <ClInclude Include="..\..\source\EngineInterface\SimulationParameters.h" />
     <ClInclude Include="..\..\source\EngineInterface\Parser.h" />
+    <ClInclude Include="..\..\source\EngineInterface\SimulationParametersSpots.h" />
     <ClInclude Include="..\..\source\EngineInterface\SpaceCalculator.h" />
     <ClInclude Include="..\..\source\EngineInterface\SymbolMap.h" />
     <ClInclude Include="..\..\source\EngineInterface\ZoomLevels.h" />
