@@ -3,7 +3,6 @@
 #include <thread>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/GeneralSettings.h"
 #include "EngineInterface/SymbolMap.h"
 #include "EngineInterface/Settings.h"
 #include "EngineWorker.h"
@@ -45,6 +44,9 @@ public:
 
     ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
+
+    ENGINEIMPL_EXPORT SimulationParametersSpots getSimulationParametersSpots() const;
+    ENGINEIMPL_EXPORT void setSimulationParametersSpots_async(SimulationParametersSpots const& value);
 
     ENGINEIMPL_EXPORT GpuSettings getGpuSettings() const;
     ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);

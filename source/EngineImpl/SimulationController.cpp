@@ -95,6 +95,17 @@ void _SimulationController::setSimulationParameters_async(
     _worker.setSimulationParameters_async(parameters);
 }
 
+SimulationParametersSpots _SimulationController::getSimulationParametersSpots() const
+{
+    return _settings.simulationParametersSpots;
+}
+
+void _SimulationController::setSimulationParametersSpots_async(SimulationParametersSpots const& value)
+{
+    _settings.simulationParametersSpots = value;
+    _worker.setSimulationParametersSpots_async(value);
+}
+
 GpuSettings _SimulationController::getGpuSettings() const
 {
     return _gpuSettings;

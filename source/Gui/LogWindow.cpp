@@ -21,25 +21,21 @@ void _LogWindow::process()
     if (ImGui::Begin("Log", &_on)) {
         ImGui::Checkbox("Verbose", &_verbose);
 
-/*
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Separator();
-*/ 
         ImGui::Spacing();
         ImGui::Spacing();
 
-        ImGui::BeginChild("##", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
-        ImGui::PushFont(_styleRepository->getMonospaceFont());
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
+        if (ImGui::BeginChild("##", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+            ImGui::PushFont(_styleRepository->getMonospaceFont());
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
 
-        for (auto const& logMessage :
-             _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important) | boost::adaptors::reversed) {
-            ImGui::Text(logMessage.c_str());
+            for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important)
+                     | boost::adaptors::reversed) {
+                ImGui::Text(logMessage.c_str());
+            }
+            ImGui::PopStyleColor();
+            ImGui::PopFont();
+            ImGui::EndChild();
         }
-        ImGui::PopStyleColor();
-        ImGui::PopFont();
-        ImGui::EndChild();
 
         ImGui::End();
     }

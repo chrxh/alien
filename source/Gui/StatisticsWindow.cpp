@@ -57,9 +57,13 @@ void _StatisticsWindow::process()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 102);
     ImGui::SliderFloat("", &_liveStatistics.history, 1, MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(100);
+    ImGui::Button("Export to CSV");
 
     if (_live) {
         processLiveStatistics();
