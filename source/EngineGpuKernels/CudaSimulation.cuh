@@ -10,8 +10,6 @@
 #include <GL/gl.h>
 
 #include "EngineInterface/OverallStatistics.h"
-#include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/Settings.h"
 
 #include "Definitions.cuh"
@@ -57,6 +55,7 @@ public:
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
+    ENGINEGPUKERNELS_EXPORT void setSimulationParametersSpots(SimulationParametersSpots const& spots);
     ENGINEGPUKERNELS_EXPORT void setFlowFieldSettings(FlowFieldSettings const& settings);
 
     struct ArraySizes

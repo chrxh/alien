@@ -57,8 +57,8 @@ namespace
         void checkForException(ExceptionData const& exceptionData)
         {
             std::unique_lock<std::mutex> uniqueLock(exceptionData.mutex);
-            if (exceptionData.exceptionOccurred) {
-                throw std::runtime_error(exceptionData.message);
+            if (exceptionData.errorMessage) {
+                throw std::runtime_error(*exceptionData.errorMessage);
             }
         }
 
@@ -250,6 +250,15 @@ void EngineWorker::setSimulationParameters_async(SimulationParameters const& par
     _conditionForWorkerLoop.notify_all();
 }
 
+void EngineWorker::setSimulationParametersSpots_async(SimulationParametersSpots const& spots)
+{
+    {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+        _updateSimulationParametersSpotsJob = spots;
+    }
+    _conditionForWorkerLoop.notify_all();
+}
+
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
     {
@@ -341,8 +350,7 @@ void EngineWorker::runThreadLoop()
         }
     } catch (std::exception const& e) {
         std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
-        _exceptionData.exceptionOccurred = true;
-        _exceptionData.message = e.what();
+        _exceptionData.errorMessage = e.what();
     }
 }
 
@@ -389,6 +397,10 @@ void EngineWorker::processJobs()
     if (_updateSimulationParametersJob) {
         _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
         _updateSimulationParametersJob = boost::none;
+    }
+    if (_updateSimulationParametersSpotsJob) {
+        _cudaSimulation->setSimulationParametersSpots(*_updateSimulationParametersSpotsJob);
+        _updateSimulationParametersSpotsJob = boost::none;
     }
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);

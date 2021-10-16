@@ -24,8 +24,11 @@ private:
     void processDialogs();
     void processWindows();
 
-    void onOpenSimulation();
-    void onSaveSimulation();
+    void processOpenSimulationDialog();
+    void processSaveSimulationDialog();
+
+    void onPrepareOpenSimulation();
+    void onPrepareSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
 
@@ -55,6 +58,7 @@ private:
     bool _simulationMenuToggled = false;
     bool _windowMenuToggled = false;
     bool _settingsMenuToggled = false;
+    bool _viewMenuToggled = false;
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
     bool _showExitDialog = false;

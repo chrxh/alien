@@ -24,8 +24,7 @@
 struct ExceptionData
 {
     mutable std::mutex mutex;
-    bool exceptionOccurred = false;
-    std::string message;
+    boost::optional<std::string> errorMessage;
 };
 
 class EngineWorker
@@ -62,6 +61,7 @@ public:
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
+    ENGINEIMPL_EXPORT void setSimulationParametersSpots_async(SimulationParametersSpots const& spots);
     ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);
     ENGINEIMPL_EXPORT void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
@@ -92,6 +92,7 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     boost::optional<SimulationParameters> _updateSimulationParametersJob;
+    boost::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
     boost::optional<GpuSettings> _updateGpuSettingsJob;
     boost::optional<FlowFieldSettings> _flowFieldSettings;
 

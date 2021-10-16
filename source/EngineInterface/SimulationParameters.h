@@ -28,7 +28,7 @@ struct SimulationParameters
     float cellFunctionWeaponStrength = 0.1f;
     float cellFunctionWeaponEnergyCost = 0.2f;  //
     float cellFunctionWeaponGeometryDeviationExponent = 0;
-    float cellFunctionWeaponInhomogeneousColorFactor = 1.0f;    //
+    float cellFunctionWeaponColorPenalty = 0.0f;    //
     int cellFunctionComputerMaxInstructions = 15;
     int cellFunctionComputerCellMemorySize = 8;
     float cellFunctionConstructorOffspringCellEnergy = 100.0f;
@@ -67,7 +67,7 @@ struct SimulationParameters
             && cellFunctionWeaponStrength == other.cellFunctionWeaponStrength
             && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
             && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
-            && cellFunctionWeaponInhomogeneousColorFactor == other.cellFunctionWeaponInhomogeneousColorFactor
+            && cellFunctionWeaponColorPenalty == other.cellFunctionWeaponColorPenalty
             && cellFunctionComputerMaxInstructions == other.cellFunctionComputerMaxInstructions
             && cellFunctionComputerCellMemorySize == other.cellFunctionComputerCellMemorySize
             && cellFunctionConstructorOffspringCellEnergy == other.cellFunctionConstructorOffspringCellEnergy

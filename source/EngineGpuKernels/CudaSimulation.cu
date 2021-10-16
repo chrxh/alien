@@ -119,6 +119,7 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
 //    CudaMemoryManager::getInstance().reset();
 
     setSimulationParameters(settings.simulationParameters);
+    setSimulationParametersSpots(settings.simulationParametersSpots);
     setGpuConstants(gpuSettings);
     setFlowFieldSettings(settings.flowFieldSettings);
     _currentTimestep.store(timestep);
@@ -369,6 +370,12 @@ void _CudaSimulation::setSimulationParameters(SimulationParameters const& parame
 {
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+}
+
+void _CudaSimulation::setSimulationParametersSpots(SimulationParametersSpots const& spots)
+{
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
+        cudaSimulationParametersSpots, &spots, sizeof(SimulationParametersSpots), 0, cudaMemcpyHostToDevice));
 }
 
 void _CudaSimulation::setFlowFieldSettings(FlowFieldSettings const& settings)

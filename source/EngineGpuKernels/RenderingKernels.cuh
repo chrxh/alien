@@ -12,19 +12,112 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-__global__ void drawBackground(unsigned int* imageData, int2 size, int2 outsideRectUpperLeft, int2 outsideRectLowerRight)
+__device__ __inline__ void drawPixel(unsigned int* imageData, unsigned int index, float3 const& color)
 {
-    auto const block = calcPartition(size.x * size.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    unsigned int greenRed = toInt(color.y * 225.0f) << 16 | toInt(color.x * 225.0f);
+    unsigned int blue = toInt(color.z * 225.0f);
+
+    imageData[2 * index] = greenRed;
+    imageData[2 * index + 1] = blue;
+}
+
+__device__ __inline__ void drawAddingPixel(unsigned int* imageData, unsigned int index, float3 const& colorToAdd)
+{
+    unsigned int greenRed = toInt(colorToAdd.y * 255.0f) << 16 | toInt(colorToAdd.x * 255.0f);
+    unsigned int blue = toInt(colorToAdd.z * 255.0f);
+
+    atomicAdd(&imageData[2 * index], greenRed);
+    atomicAdd(&imageData[2 * index + 1], blue);
+}
+
+__device__ float3 colorToFloat3(unsigned int value)
+{
+    return float3{toFloat(value & 0xff) / 255, toFloat((value >> 8) & 0xff) / 255, toFloat((value >> 16) & 0xff) / 255};
+}
+
+__device__ float3 mix(float3 const& a, float3 const& b, float factor)
+{
+    return float3{
+        a.x * factor + b.x * (1 - factor), a.y * factor + b.y * (1 - factor), a.z * factor + b.z * (1 - factor)};
+}
+
+__device__ float3 mix(float3 const& a, float3 const& b, float3 const& c, float factor1, float factor2)
+{
+    float weight1 = factor1 * factor2;
+    float weight2 = 1 - factor1;
+    float weight3 = 1 - factor2;
+    float sum = weight1 + weight2 + weight3;
+    weight1 /= sum;
+    weight2 /= sum;
+    weight3 /= sum;
+    return float3{
+        a.x * weight1 + b.x * weight2 + c.x * weight3,
+        a.y * weight1 + b.y * weight2 + c.y * weight3,
+        a.z * weight1 + b.z * weight2 + c.z * weight3};
+}
+
+__global__ void drawBackground(
+    unsigned int* imageData,
+    int2 imageSize,
+    int2 worldSize,
+    float zoom,
+    float2 rectUpperLeft,
+    float2 rectLowerRight)
+{
+    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
+    int2 outsideRectLowerRight{
+        imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0),
+        imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
+
+    MapInfo map;
+    map.init(worldSize);
+    auto spaceColor = colorToFloat3(Const::SpaceColor);
+    auto spotColor1 = colorToFloat3(cudaSimulationParametersSpots.spots[0].color);
+    auto spotColor2 = colorToFloat3(cudaSimulationParametersSpots.spots[1].color);
+
+    auto const block = calcPartition(imageSize.x * imageSize.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
-        auto x = index % size.x;
-        auto y = index / size.x;
+        auto x = index % imageSize.x;
+        auto y = index / imageSize.x;
         if (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x
             || y >= outsideRectLowerRight.y) {
             imageData[2 * index] = 0;
             imageData[2 * index + 1] = 0;
         } else {
-            imageData[2 * index] = 0;
-            imageData[2 * index + 1] = (Const::SpaceColor >> 16) & 0xff;
+            if (0 == cudaSimulationParametersSpots.numSpots) {
+                drawPixel(imageData, index, spaceColor);
+            }
+            if (1 == cudaSimulationParametersSpots.numSpots) {
+                float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
+                auto distance = map.mapDistance(
+                    worldPos,
+                    {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
+                auto const& coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
+                auto const& fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
+                auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
+                auto resultingColor = mix(spaceColor, spotColor1, factor);
+                drawPixel(imageData, index, resultingColor);
+            }
+            if (2 == cudaSimulationParametersSpots.numSpots) {
+                float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
+                auto distance1 = map.mapDistance(
+                    worldPos,
+                    {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
+                auto distance2 = map.mapDistance(
+                    worldPos,
+                    {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
+
+                auto const& coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
+                auto const& fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
+                auto factor1 = distance1 < coreRadius1 ? 0.0f : min(1.0f, (distance1 - coreRadius1) / fadeoutRadius1);
+                auto const& coreRadius2 = cudaSimulationParametersSpots.spots[1].coreRadius;
+                auto const& fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
+                auto factor2 = distance2 < coreRadius2 ? 0.0f : min(1.0f, (distance2 - coreRadius2) / fadeoutRadius2);
+
+                auto resultingColor = mix(spaceColor, spotColor1, spotColor2, factor1, factor2);
+                drawPixel(imageData, index, resultingColor);
+            }
+
         }
     }
 }
@@ -145,15 +238,6 @@ __device__ __inline__ float3 calcColor(Token* token, bool selected)
     return selected ? float3{1.0f, 1.0f, 1.0f} : float3{0.75f, 0.75f, 0.75f};
 }
 
-__device__ __inline__ void addingColor(unsigned int* imageData, unsigned int index, float3 const& colorToAdd)
-{
-    unsigned int greenRed = toInt(colorToAdd.y * 255.0f) << 16 | toInt(colorToAdd.x * 255.0f);
-    unsigned int blue = toInt(colorToAdd.z * 255.0f);
-
-    atomicAdd(&imageData[2 * index], greenRed);
-    atomicAdd(&imageData[2 * index + 1], blue);
-}
-
 __device__ __inline__ void
 drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
 {
@@ -164,16 +248,16 @@ drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float
         unsigned int index = intPos.x + intPos.y * imageSize.x;
 
         float3 colorToAdd1 = colorToAdd * (1.0f - posFrac.x) * (1.0f - posFrac.y);
-        addingColor(imageData, index, colorToAdd1);
+        drawAddingPixel(imageData, index, colorToAdd1);
 
         float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
-        addingColor(imageData, index, colorToAdd2);
+        drawAddingPixel(imageData, index, colorToAdd2);
 
         float3 colorToAdd3 = colorToAdd * (1.0f - posFrac.x) * posFrac.y;
-        addingColor(imageData, index + imageSize.x, colorToAdd3);
+        drawAddingPixel(imageData, index + imageSize.x, colorToAdd3);
 
         float3 colorToAdd4 = colorToAdd * posFrac.x * posFrac.y;
-        addingColor(imageData, index + imageSize.x + 1, colorToAdd4);
+        drawAddingPixel(imageData, index + imageSize.x + 1, colorToAdd4);
     }
 }
 
@@ -333,12 +417,7 @@ drawImageKernel(float2 rectUpperLeft, float2 rectLowerRight, int2 imageSize, flo
 {
     unsigned int* targetImage = data.imageData;
 
-    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
-    int2 outsideRectLowerRight{
-        imageSize.x - max(toInt((rectLowerRight.x - data.size.x) * zoom), 0),
-        imageSize.y - max(toInt((rectLowerRight.y - data.size.y) * zoom), 0)};
-
-    KERNEL_CALL(drawBackground, targetImage, imageSize, outsideRectUpperLeft, outsideRectLowerRight);
+    KERNEL_CALL(drawBackground, targetImage, imageSize, data.size, zoom, rectUpperLeft, rectLowerRight);
 
     KERNEL_CALL(
         drawCells, data.size, rectUpperLeft, rectLowerRight, data.entities.cellPointers, targetImage, imageSize, zoom);

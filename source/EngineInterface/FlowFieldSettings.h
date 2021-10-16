@@ -19,7 +19,6 @@ struct RadialFlowCenterData
         return posX == other.posX && posY == other.posY && radius == other.radius && strength == other.strength
             && orientation == other.orientation;
     }
-
     bool operator!=(RadialFlowCenterData const& other) const { return !operator==(other); }
 };
 
@@ -34,6 +33,5 @@ struct FlowFieldSettings
     {
         return active == other.active && numCenters == other.numCenters && radialFlowCenters == other.radialFlowCenters;
     }
-
     bool operator!=(FlowFieldSettings const& other) const { return !operator==(other); }
 };
