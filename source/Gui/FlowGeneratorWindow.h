@@ -3,10 +3,10 @@
 #include "Definitions.h"
 #include "EngineImpl/Definitions.h"
 
-class _FlowFieldWindow
+class _FlowGeneratorWindow
 {
 public:
-    _FlowFieldWindow(SimulationController const& simController);
+    _FlowGeneratorWindow(SimulationController const& simController);
 
     void process();
 

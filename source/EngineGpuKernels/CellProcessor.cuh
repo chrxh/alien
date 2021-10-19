@@ -9,6 +9,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
+#include "SpotCalculator.cuh"
 
 class CellProcessor
 {
@@ -137,7 +138,9 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
 
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
-                    && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
+                    && Math::length(velDelta)
+                        >= SpotCalculator::calc(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
+                    && isApproaching) {
                     CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
@@ -181,7 +184,8 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
         auto& cell = cells.at(index);
 
         auto force = cell->temp1;
-        if (Math::length(force) > cudaSimulationParameters.cellMaxForce * cudaSimulationParameters.cellBindingForce) {
+        if (Math::length(force)
+            > SpotCalculator::calc(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
             if(data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDelConnections(data, cell); 
             }
@@ -208,6 +212,8 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
         float2 force{0, 0};
         float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->absPos - cell->absPos;
         data.cellMap.mapDisplacementCorrection(prevDisplacement);
+        auto cellBindingForce = SpotCalculator::calc(
+            &SimulationParametersSpotValues::cellBindingForce, data, cell->absPos);
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
 
@@ -217,7 +223,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation / 2 * cudaSimulationParameters.cellBindingForce;
+            force = force + Math::normalized(displacement) * deviation / 2 * cellBindingForce;
 
             if (cell->numConnections > 1) {
                 auto angle = Math::angleOfVector(displacement);
@@ -225,8 +231,8 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
                 auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                 auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000
-                    * cudaSimulationParameters.cellBindingForce;
+                auto angleDeviation =
+                    abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellBindingForce;
 
                 auto force1 = Math::normalized(displacement) * angleDeviation;
                 Math::rotateQuarterClockwise(force1);
@@ -333,7 +339,8 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->vel = cell->temp1 * (1.0f - cudaSimulationParameters.friction);
+        auto friction = SpotCalculator::calc(&SimulationParametersSpotValues::friction, data, cell->absPos);
+        cell->vel = cell->temp1 * (1.0f - friction);
     }
 }
 
@@ -345,32 +352,34 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cudaSimulationParameters.radiationFactor > 0
-            && data.numberGen.random() < cudaSimulationParameters.radiationProb) {
+        if (data.numberGen.random() < cudaSimulationParameters.radiationProb) {
+            auto radiationFactor =
+                SpotCalculator::calc(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
+            if (radiationFactor > 0) {
 
-            auto& pos = cell->absPos;
-            float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
-                + float2{
-                    (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                    (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-            float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
-            data.cellMap.mapPosCorrection(particlePos);
+                auto& pos = cell->absPos;
+                float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+                    + float2{
+                        (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                        (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+                float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+                data.cellMap.mapPosCorrection(particlePos);
 
-            auto cellEnergy = cell->energy;
-            particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-            float radiationEnergy =
-                powf(cellEnergy, cudaSimulationParameters.radiationExponent) * cudaSimulationParameters.radiationFactor;
-            radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
-            radiationEnergy = 2 * radiationEnergy * data.numberGen.random();
-            if (cellEnergy > 1) {
-                if (radiationEnergy > cellEnergy - 1) {
-                    radiationEnergy = cellEnergy - 1;
+                auto cellEnergy = cell->energy;
+                particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
+                float radiationEnergy = powf(cellEnergy, cudaSimulationParameters.radiationExponent) * radiationFactor;
+                radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
+                radiationEnergy = 2 * radiationEnergy * data.numberGen.random();
+                if (cellEnergy > 1) {
+                    if (radiationEnergy > cellEnergy - 1) {
+                        radiationEnergy = cellEnergy - 1;
+                    }
+                    cell->energy -= radiationEnergy;
+
+                    EntityFactory factory;
+                    factory.init(&data);
+                    factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
                 }
-                cell->energy -= radiationEnergy;
-
-                EntityFactory factory;
-                factory.init(&data);
-                factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
             }
         }
     }
@@ -393,7 +402,8 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             }
         }
 
-        if (cell->energy < cudaSimulationParameters.cellMinEnergy || destroyDueToTokenUsage) {
+        auto cellMinEnergy = SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+        if (cell->energy < cellMinEnergy || destroyDueToTokenUsage) {
             if (cell->numConnections > 0) {
                 CellConnectionProcessor::scheduleDelConnections(data, cell);
             } else {

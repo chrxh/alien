@@ -128,7 +128,7 @@
     <ClInclude Include="..\..\source\Gui\StartupWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\FlowFieldWindow.h">
+    <ClInclude Include="..\..\source\Gui\FlowGeneratorWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\AboutDialog.h">
@@ -235,7 +235,7 @@
     <ClCompile Include="..\..\source\Gui\StartupWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\FlowFieldWindow.cpp">
+    <ClCompile Include="..\..\source\Gui\FlowGeneratorWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\AboutDialog.cpp">

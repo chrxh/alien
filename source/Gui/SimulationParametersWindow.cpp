@@ -104,6 +104,8 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
     spot.coreRadius = maxRadius / 3;
     spot.fadeoutRadius = maxRadius / 3;
     spot.color = _savedPalette[(2 + index) * 8];
+
+    spot.values = simParameters.spotValues;
     return spot;
 }
 
@@ -114,38 +116,39 @@ void _SimulationParametersWindow::processBase(SimulationParameters& simParameter
         createFloatItem("Time step size", simParameters.timestepSize, 0, 1.0f);
 
         createGroup("General physics");
-        createFloatItem("Friction", simParameters.friction, 0, 1.0f, true, "%.4f");
-        createFloatItem("Radiation strength", simParameters.radiationFactor, 0, 0.01f, true, "%.5f");
+        createFloatItem("Friction", simParameters.spotValues.friction, 0, 1.0f, true, "%.4f");
+        createFloatItem("Radiation strength", simParameters.spotValues.radiationFactor, 0, 0.01f, true, "%.5f");
         createFloatItem("Maximum velocity", simParameters.cellMaxVel, 0, 6.0f);
-        createFloatItem("Maximum force", simParameters.cellMaxForce, 0, 3.0f);
-        createFloatItem("Minimum energy", simParameters.cellMinEnergy, 0, 100.0f);
+        createFloatItem("Maximum force", simParameters.spotValues.cellMaxForce, 0, 3.0f);
+        createFloatItem("Minimum energy", simParameters.spotValues.cellMinEnergy, 0, 100.0f);
         createFloatItem("Minimum distance", simParameters.cellMinDistance, 0, 1.0f);
 
         createGroup("Collision and binding");
         createFloatItem("Repulsion strength", simParameters.cellRepulsionStrength, 0, 0.3f);
         createFloatItem("Maximum collision distance", simParameters.cellMaxCollisionDistance, 0, 3.0f);
         createFloatItem("Maximum binding distance", simParameters.cellMaxBindingDistance, 0, 5.0f);
-        createFloatItem("Binding force strength", simParameters.cellBindingForce, 0, 4.0f);
-        createFloatItem("Binding creation force", simParameters.cellFusionVelocity, 0, 1.0f);
+        createFloatItem("Binding force strength", simParameters.spotValues.cellBindingForce, 0, 4.0f);
+        createFloatItem("Binding creation force", simParameters.spotValues.cellFusionVelocity, 0, 1.0f);
         createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, 0, 6);
 
         createGroup("Cell functions");
-        createFloatItem("Mutation rate", simParameters.tokenMutationRate, 0, 0.005f, false, "%.5f");
-        createFloatItem("Weapon energy cost", simParameters.cellFunctionWeaponEnergyCost, 0, 4.0f);
-        createFloatItem("Weapon color penalty", simParameters.cellFunctionWeaponColorPenalty, 0, 1.0f);
-        createFloatItem("Weapon geometric penalty", simParameters.cellFunctionWeaponGeometryDeviationExponent, 0, 5.0f);
+        createFloatItem("Mutation rate", simParameters.spotValues.tokenMutationRate, 0, 0.005f, false, "%.5f");
+        createFloatItem("Weapon energy cost", simParameters.spotValues.cellFunctionWeaponEnergyCost, 0, 4.0f);
+        createFloatItem("Weapon color penalty", simParameters.spotValues.cellFunctionWeaponColorPenalty, 0, 1.0f);
+        createFloatItem(
+            "Weapon geometric penalty", simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent, 0, 5.0f);
         ImGui::EndChild();
     }
 }
 
-void _SimulationParametersWindow::processSpot(SimulationParametersSpot& simParametersSpot)
+void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simController->getWorldSize();
 
         createGroup("Location and meta data");
 
-        auto& color = simParametersSpot.color;
+        auto& color = spot.color;
         AlienImGui::ColorButtonWithPicker(
             "##", color, _backupColor, _savedPalette, RealVector2D(ImGui::GetContentRegionAvail().x / 2, 0));
 
@@ -153,10 +156,26 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& simParam
         ImGui::Text("Background color");
 
         auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-        createFloatItem(" Position X", simParametersSpot.posX, 0, toFloat(worldSize.x), false, "%.1f");
-        createFloatItem(" Position Y", simParametersSpot.posY, 0, toFloat(worldSize.y), false, "%.1f");
-        createFloatItem(" Core radius", simParametersSpot.coreRadius, 0, maxRadius, false, "%.1f");
-        createFloatItem(" Fade-out radius", simParametersSpot.fadeoutRadius, 0, maxRadius, false, "%.1f");
+        createFloatItem(" Position X", spot.posX, 0, toFloat(worldSize.x), false, "%.1f");
+        createFloatItem(" Position Y", spot.posY, 0, toFloat(worldSize.y), false, "%.1f");
+        createFloatItem(" Core radius", spot.coreRadius, 0, maxRadius, false, "%.1f");
+        createFloatItem(" Fade-out radius", spot.fadeoutRadius, 0, maxRadius, false, "%.1f");
+
+        createGroup("General physics");
+        createFloatItem("Friction", spot.values.friction, 0, 1.0f, true, "%.4f");
+        createFloatItem("Radiation strength", spot.values.radiationFactor, 0, 0.01f, true, "%.5f");
+        createFloatItem("Maximum force", spot.values.cellMaxForce, 0, 3.0f);
+        createFloatItem("Minimum energy", spot.values.cellMinEnergy, 0, 100.0f);
+
+        createGroup("Collision and binding");
+        createFloatItem("Binding force strength", spot.values.cellBindingForce, 0, 4.0f);
+        createFloatItem("Binding creation force", spot.values.cellFusionVelocity, 0, 1.0f);
+
+        createGroup("Cell functions");
+        createFloatItem("Mutation rate", spot.values.tokenMutationRate, 0, 0.005f, false, "%.5f");
+        createFloatItem("Weapon energy cost", spot.values.cellFunctionWeaponEnergyCost, 0, 4.0f);
+        createFloatItem("Weapon color penalty", spot.values.cellFunctionWeaponColorPenalty, 0, 1.0f);
+        createFloatItem("Weapon geometric penalty", spot.values.cellFunctionWeaponGeometryDeviationExponent, 0, 5.0f);
 
         ImGui::EndChild();
     }

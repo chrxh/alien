@@ -46,7 +46,7 @@ private:
     GpuSettingsWindow _gpuSettingsWindow;
     Viewport _viewport;
     StartupWindow _startupWindow;
-    FlowFieldWindow _flowFieldWindow;
+    FlowGeneratorWindow _flowGeneratorWindow;
     LogWindow _logWindow;
     NewSimulationDialog _newSimulationDialog;
     AboutDialog _aboutDialog;
