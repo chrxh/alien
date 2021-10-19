@@ -38,7 +38,10 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
             if (!isConnectedConnected(cell, otherCell)) {
                 auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
 
-                if (abs(cudaSimulationParameters.cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
+                auto cellFunctionWeaponGeometryDeviationExponent = SpotCalculator::calc(
+                    &SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
+
+                if (abs(cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
                     auto d = otherCell->absPos - cell->absPos;
                     auto angle1 = calcOpenAngle(cell, d);
                     auto angle2 = calcOpenAngle(otherCell, d * (-1));
@@ -46,15 +49,17 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                         1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
 
                     energyToTransfer = energyToTransfer
-                        * powf(max(0.0f, min(1.0f, deviation)),
-                               cudaSimulationParameters.cellFunctionWeaponGeometryDeviationExponent);
+                        * powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
                 }
+
+                auto cellFunctionWeaponColorPenalty = SpotCalculator::calc(
+                    &SimulationParametersSpotValues::cellFunctionWeaponColorPenalty, data, cell->absPos);
 
                 auto homogene = isHomogene(cell);
                 auto otherHomogene = isHomogene(otherCell);
                 if (!homogene /* && otherHomogene*/) {
                     energyToTransfer =
-                        energyToTransfer * (1.0f - cudaSimulationParameters.cellFunctionWeaponColorPenalty);
+                        energyToTransfer * (1.0f - cellFunctionWeaponColorPenalty);
                 }
                 auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
                     color1 = color1 % 7;
@@ -65,8 +70,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     return false;
                 };
                 if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
-                    energyToTransfer =
-                        energyToTransfer * (1.0f - cudaSimulationParameters.cellFunctionWeaponColorPenalty);
+                    energyToTransfer = energyToTransfer * (1.0f - cellFunctionWeaponColorPenalty);
                 }
                 if (otherCell->numConnections > cell->numConnections + 1) {
                     energyToTransfer = 0;
@@ -94,7 +98,9 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
     if (Enums::WeaponOut::NO_TARGET == token->memory[Enums::Weapon::OUTPUT]) {
         result.incFailedAttack();
     }
-    if (cudaSimulationParameters.cellFunctionWeaponEnergyCost > 0) {
+    auto cellFunctionWeaponEnergyCost =
+        SpotCalculator::calc(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
+    if (cellFunctionWeaponEnergyCost > 0) {
         auto const cellEnergy = cell->energy;
         auto& pos = cell->absPos;
         float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
@@ -105,7 +111,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
         data.cellMap.mapPosCorrection(particlePos);
 
         particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-        auto const radiationEnergy = min(cellEnergy, cudaSimulationParameters.cellFunctionWeaponEnergyCost);
+        auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
         cell->energy -= radiationEnergy;
         EntityFactory factory;
         factory.init(&data);
