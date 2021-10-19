@@ -1,18 +1,18 @@
 #pragma once
 
+#include "SimulationParametersSpotValues.h"
+
 struct SimulationParameters
 {
+    SimulationParametersSpotValues spotValues;
+
     float timestepSize = 1.0f;            //
-    float friction = 0.001f;              //
-    float cellBindingForce = 1.0f;            //
     float cellMaxVel = 2.0f;              //
     float cellMaxBindingDistance = 2.6f;  //
     float cellRepulsionStrength = 0.08f;        //
-    float tokenMutationRate = 0.0005f;     //
 
     float cellMinDistance = 0.3f;           //
     float cellMaxCollisionDistance = 1.3f;  //
-    float cellMaxForce = 0.8f;              //
     float cellMaxForceDecayProb = 0.2f;
     int cellMinTokenUsages = 40000;
     float cellTokenUsageDecayProb = 0.000001f;
@@ -21,14 +21,9 @@ struct SimulationParameters
     int cellMaxTokenBranchNumber = 6;
     int cellCreationMaxConnection = 4;
     int cellCreationTokenAccessNumber = 0;
-    float cellMinEnergy = 50.0f;  //
     float cellTransformationProb = 0.2f;
-    float cellFusionVelocity = 0.4f;  //
 
     float cellFunctionWeaponStrength = 0.1f;
-    float cellFunctionWeaponEnergyCost = 0.2f;  //
-    float cellFunctionWeaponGeometryDeviationExponent = 0;
-    float cellFunctionWeaponColorPenalty = 0.0f;    //
     int cellFunctionComputerMaxInstructions = 15;
     int cellFunctionComputerCellMemorySize = 8;
     float cellFunctionConstructorOffspringCellEnergy = 100.0f;
@@ -46,28 +41,22 @@ struct SimulationParameters
     float tokenMinEnergy = 3.0f;
 
     float radiationExponent = 1;
-    float radiationFactor = 0.0002f;    //
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
 
     bool operator==(SimulationParameters const& other) const
     {
-        return timestepSize == other.timestepSize && friction == other.friction && cellBindingForce == other.cellBindingForce
-            && cellMaxVel == other.cellMaxVel && cellMaxBindingDistance == other.cellMaxBindingDistance
-            && cellMinDistance == other.cellMinDistance && cellMaxCollisionDistance == other.cellMaxCollisionDistance
-            && cellMaxForce == other.cellMaxForce && cellMaxForceDecayProb == other.cellMaxForceDecayProb
-            && cellMinTokenUsages == other.cellMinTokenUsages
+        return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVel == other.cellMaxVel
+            && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
+            && cellMaxCollisionDistance == other.cellMaxCollisionDistance
+            && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellMinTokenUsages == other.cellMinTokenUsages
             && cellTokenUsageDecayProb == other.cellTokenUsageDecayProb && cellMaxBonds == other.cellMaxBonds
             && cellMaxToken == other.cellMaxToken && cellMaxTokenBranchNumber == other.cellMaxTokenBranchNumber
             && cellCreationMaxConnection == other.cellCreationMaxConnection
             && cellCreationTokenAccessNumber == other.cellCreationTokenAccessNumber
-            && cellMinEnergy == other.cellMinEnergy && cellTransformationProb == other.cellTransformationProb
-            && cellFusionVelocity == other.cellFusionVelocity
+            && cellTransformationProb == other.cellTransformationProb
             && cellFunctionWeaponStrength == other.cellFunctionWeaponStrength
-            && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
-            && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
-            && cellFunctionWeaponColorPenalty == other.cellFunctionWeaponColorPenalty
             && cellFunctionComputerMaxInstructions == other.cellFunctionComputerMaxInstructions
             && cellFunctionComputerCellMemorySize == other.cellFunctionComputerCellMemorySize
             && cellFunctionConstructorOffspringCellEnergy == other.cellFunctionConstructorOffspringCellEnergy
@@ -83,10 +72,10 @@ struct SimulationParameters
             && cellFunctionSensorRange == other.cellFunctionSensorRange
             && cellFunctionCommunicatorRange == other.cellFunctionCommunicatorRange
             && tokenMemorySize == other.tokenMemorySize && tokenMinEnergy == other.tokenMinEnergy
-            && radiationExponent == other.radiationExponent && radiationFactor == other.radiationFactor
-            && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
+            && radiationExponent == other.radiationExponent && radiationProb == other.radiationProb
+            && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-            && tokenMutationRate == other.tokenMutationRate && cellRepulsionStrength == other.cellRepulsionStrength;
+            && cellRepulsionStrength == other.cellRepulsionStrength;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

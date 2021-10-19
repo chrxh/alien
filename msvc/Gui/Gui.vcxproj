@@ -163,7 +163,7 @@
     <ClInclude Include="..\..\source\Gui\ColorizeDialog.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
     <ClInclude Include="..\..\source\Gui\FileLogger.h" />
-    <ClInclude Include="..\..\source\Gui\FlowFieldWindow.h" />
+    <ClInclude Include="..\..\source\Gui\FlowGeneratorWindow.h" />
     <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h" />
     <ClInclude Include="..\..\source\Gui\SimpleLogger.h" />
     <ClInclude Include="..\..\source\Gui\LogWindow.h" />
@@ -200,7 +200,7 @@
     <ClCompile Include="..\..\source\Gui\AboutDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\ColorizeDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\FileLogger.cpp" />
-    <ClCompile Include="..\..\source\Gui\FlowFieldWindow.cpp" />
+    <ClCompile Include="..\..\source\Gui\FlowGeneratorWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\SimpleLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp" />

@@ -47,6 +47,12 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
 
         if (token->energy >= cudaSimulationParameters.tokenMinEnergy) {
             auto tokenBranchNumber = token->getTokenBranchNumber();
+
+            auto cellMinEnergy =
+                SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+            auto tokenMutationRate =
+                SpotCalculator::calc(&SimulationParametersSpotValues::tokenMutationRate, data, cell->absPos);
+
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
                 if (((tokenBranchNumber + 1 - connectedCell->branchNumber)
@@ -69,12 +75,13 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data, int nu
                     token->cell = connectedCell;
                     ++numMovedTokens;
 
-                    if (data.numberGen.random() < cudaSimulationParameters.tokenMutationRate) {
+                    
+                    if (data.numberGen.random() < tokenMutationRate) {
                         token->memory[data.numberGen.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen.random(255);
                     }
                 } else {
                     auto origEnergy = atomicAdd(&connectedCell->energy, -token->energy); 
-                    if (origEnergy > cudaSimulationParameters.cellMinEnergy + token->energy) {
+                    if (origEnergy > cellMinEnergy + token->energy) {
                         factory.duplicateToken(connectedCell, token);
                         ++numMovedTokens;
                     } else {
@@ -133,7 +140,7 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
 */
                 if (cell->tryLock()) {
 
-                    EnergyGuidance::processing(token);
+                    EnergyGuidance::processing(data, token);
                     if (Enums::CellFunction::COMPUTER == cellFunctionType) {
                         CellComputerFunction::processing(token);
                     }

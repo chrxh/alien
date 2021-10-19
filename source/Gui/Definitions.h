@@ -45,8 +45,8 @@ using NewSimulationDialog = boost::shared_ptr<_NewSimulationDialog>;
 class _StartupWindow;
 using StartupWindow = boost::shared_ptr<_StartupWindow>;
 
-class _FlowFieldWindow;
-using FlowFieldWindow = boost::shared_ptr<_FlowFieldWindow>;
+class _FlowGeneratorWindow;
+using FlowGeneratorWindow = boost::shared_ptr<_FlowGeneratorWindow>;
 
 class _AboutDialog;
 using AboutDialog = boost::shared_ptr<_AboutDialog>;

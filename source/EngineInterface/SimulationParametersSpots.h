@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "SimulationParametersSpotValues.h"
+
 struct SimulationParametersSpot
 {
     uint32_t color = 0;
@@ -10,7 +12,13 @@ struct SimulationParametersSpot
     float coreRadius = 0;
     float fadeoutRadius = 0;
 
-    bool operator==(SimulationParametersSpot const& other) const { return color == other.color; }
+    SimulationParametersSpotValues values;
+
+    bool operator==(SimulationParametersSpot const& other) const
+    {
+        return color == other.color && posX == other.posX && posY == other.posY && coreRadius == other.coreRadius
+            && fadeoutRadius == other.fadeoutRadius && values == other.values;
+    }
 };
 
 struct SimulationParametersSpots

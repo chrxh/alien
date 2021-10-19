@@ -36,7 +36,7 @@
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "StartupWindow.h"
-#include "FlowFieldWindow.h"
+#include "FlowGeneratorWindow.h"
 #include "AlienImGui.h"
 #include "AboutDialog.h"
 #include "ColorizeDialog.h"
@@ -106,7 +106,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController, SimpleL
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
     _startupWindow = boost::make_shared<_StartupWindow>(
         _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);
-    _flowFieldWindow = boost::make_shared<_FlowFieldWindow>(_simController);
+    _flowGeneratorWindow = boost::make_shared<_FlowGeneratorWindow>(_simController);
     _aboutDialog = boost::make_shared<_AboutDialog>();
     _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
     _logWindow = boost::make_shared<_LogWindow>(_styleRepository, _logger);
@@ -303,17 +303,17 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            if (ImGui::MenuItem("Flow field", "", _flowFieldWindow->isOn())) {
-                _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
+            if (ImGui::MenuItem("Flow generator", "", _flowGeneratorWindow->isOn())) {
+                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
             }
             AlienImGui::EndMenuButton();
         }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
-            if (ImGui::MenuItem("Render UI", "", _flowFieldWindow->isOn())) {
-                _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
+            if (ImGui::MenuItem("Render UI", "", _flowGeneratorWindow->isOn())) {
+                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
             }
-            if (ImGui::MenuItem("Render Simulation", "", _flowFieldWindow->isOn())) {
-                _flowFieldWindow->setOn(!_flowFieldWindow->isOn());
+            if (ImGui::MenuItem("Render Simulation", "", _flowGeneratorWindow->isOn())) {
+                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
             }
             AlienImGui::EndMenuButton();
         }
@@ -374,7 +374,7 @@ void _MainWindow::processWindows()
     _statisticsWindow->process();
     _simulationParametersWindow->process();
     _gpuSettingsWindow->process();
-    _flowFieldWindow->process();
+    _flowGeneratorWindow->process();
     _logWindow->process();
 }
 

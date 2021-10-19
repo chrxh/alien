@@ -12,7 +12,6 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\CellConnectionProcessor.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\CellFunctionData.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\CellProcessor.cuh" />
-    <ClInclude Include="..\..\source\EngineGpuKernels\ClusterProcessor.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\CommunicatorFunction.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\ConstantMemory.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\ConstructorFunction.cuh" />
@@ -71,6 +70,7 @@
     </ClInclude>
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationResult.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\FlowFieldKernel.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SpotCalculator.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Kernels">

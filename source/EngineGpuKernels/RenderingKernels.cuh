@@ -92,8 +92,8 @@ __global__ void drawBackground(
                 auto distance = map.mapDistance(
                     worldPos,
                     {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-                auto const& coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
-                auto const& fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
+                auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
+                auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
                 auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
                 auto resultingColor = mix(spaceColor, spotColor1, factor);
                 drawPixel(imageData, index, resultingColor);
@@ -107,11 +107,11 @@ __global__ void drawBackground(
                     worldPos,
                     {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
 
-                auto const& coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
-                auto const& fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
+                auto coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
+                auto fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
                 auto factor1 = distance1 < coreRadius1 ? 0.0f : min(1.0f, (distance1 - coreRadius1) / fadeoutRadius1);
-                auto const& coreRadius2 = cudaSimulationParametersSpots.spots[1].coreRadius;
-                auto const& fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
+                auto coreRadius2 = cudaSimulationParametersSpots.spots[1].coreRadius;
+                auto fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
                 auto factor2 = distance2 < coreRadius2 ? 0.0f : min(1.0f, (distance2 - coreRadius2) / fadeoutRadius2);
 
                 auto resultingColor = mix(spaceColor, spotColor1, spotColor2, factor1, factor2);

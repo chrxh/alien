@@ -1,4 +1,4 @@
-#include "FlowFieldWindow.h"
+#include "FlowGeneratorWindow.h"
 
 #include "imgui.h"
 
@@ -6,12 +6,12 @@
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 
-_FlowFieldWindow::_FlowFieldWindow(SimulationController const& simController)
+_FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
     : _simController(simController)
 {
 }
 
-void _FlowFieldWindow::process()
+void _FlowGeneratorWindow::process()
 {
     if (!_on) {
         return;
@@ -139,12 +139,12 @@ void _FlowFieldWindow::process()
     }
 }
 
-bool _FlowFieldWindow::isOn() const
+bool _FlowGeneratorWindow::isOn() const
 {
     return _on;
 }
 
-void _FlowFieldWindow::setOn(bool value)
+void _FlowGeneratorWindow::setOn(bool value)
 {
     _on = value;
 }
