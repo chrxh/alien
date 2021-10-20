@@ -9,8 +9,8 @@ struct SimulationParametersSpot
     uint32_t color = 0;
     float posX = 0;
     float posY = 0;
-    float coreRadius = 0;
-    float fadeoutRadius = 0;
+    float coreRadius = 100.0f;
+    float fadeoutRadius = 100.0f;
 
     SimulationParametersSpotValues values;
 
