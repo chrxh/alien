@@ -6,171 +6,208 @@
 
 namespace
 {
-    std::string toString(int value) { return std::to_string(value); }
-    std::string toString(uint64_t value) { return std::to_string(value); }
-    std::string toString(float value) { return std::to_string(value); }
-    std::string toString(bool value) { return value ? "true" : "false"; }
+    template<typename T>
+    std::string toString(T value) { return std::to_string(value); }
+
+    template <>
+    std::string toString<bool>(bool value)
+    {
+        return value ? "true" : "false";
+    }
 }
 
-boost::property_tree::ptree Parser::encode(uint64_t timestep, Settings const& settings)
+boost::property_tree::ptree Parser::encode(uint64_t timestep, Settings settings)
 {
     boost::property_tree::ptree tree;
-
-    //general
-    tree.add("general.time step", toString(timestep));
-    tree.add("general.world size.x", toString(settings.generalSettings.worldSizeX));
-    tree.add("general.world size.y", toString(settings.generalSettings.worldSizeY));
-
-    //simulation parameters
-    tree.add("simulation parameters.time step size", toString(settings.simulationParameters.timestepSize));
-    tree.add("simulation parameters.friction", toString(settings.simulationParameters.spotValues.friction));
-    tree.add(
-        "simulation parameters.cell.binding force",
-        toString(settings.simulationParameters.spotValues.cellBindingForce));
-    tree.add("simulation parameters.cell.max velocity", toString(settings.simulationParameters.cellMaxVel));
-    tree.add("simulation parameters.cell.max binding distance", toString(settings.simulationParameters.cellMaxBindingDistance));
-    tree.add("simulation parameters.cell.repulsion strength", toString(settings.simulationParameters.cellRepulsionStrength));
-    tree.add(
-        "simulation parameters.token.mutation rate",
-        toString(settings.simulationParameters.spotValues.tokenMutationRate));
-
-    tree.add("simulation parameters.cell.min distance", toString(settings.simulationParameters.cellMinDistance));
-    tree.add("simulation parameters.cell.max distance", toString(settings.simulationParameters.cellMaxCollisionDistance));
-    tree.add("simulation parameters.cell.max force", toString(settings.simulationParameters.spotValues.cellMaxForce));
-    tree.add("simulation parameters.cell.max force decay probability", toString(settings.simulationParameters.cellMaxForceDecayProb));
-    tree.add("simulation parameters.cell.min token usages", toString(settings.simulationParameters.cellMinTokenUsages));
-    tree.add("simulation parameters.cell.token usage decay probability", toString(settings.simulationParameters.cellTokenUsageDecayProb));
-    tree.add("simulation parameters.cell.max bonds", toString(settings.simulationParameters.cellMaxBonds));
-    tree.add("simulation parameters.cell.max token", toString(settings.simulationParameters.cellMaxToken));
-    tree.add("simulation parameters.cell.max token branch number", toString(settings.simulationParameters.cellMaxTokenBranchNumber));
-    tree.add("simulation parameters.cell.min energy", toString(settings.simulationParameters.spotValues.cellMinEnergy));
-    tree.add("simulation parameters.cell.transformation probability", toString(settings.simulationParameters.cellTransformationProb));
-    tree.add(
-        "simulation parameters.cell.fusion velocity",
-        toString(settings.simulationParameters.spotValues.cellFusionVelocity));
-    tree.add("simulation parameters.cell.function.computer.max instructions", toString(settings.simulationParameters.cellFunctionComputerMaxInstructions));
-    tree.add("simulation parameters.cell.function.computer.memory size", toString(settings.simulationParameters.cellFunctionComputerCellMemorySize));
-    tree.add("simulation parameters.cell.function.weapon.strength", toString(settings.simulationParameters.cellFunctionWeaponStrength));
-    tree.add(
-        "simulation parameters.cell.function.weapon.energy cost",
-        toString(settings.simulationParameters.spotValues.cellFunctionWeaponEnergyCost));
-    tree.add(
-        "simulation parameters.cell.function.weapon.geometry deviation exponent",
-        toString(settings.simulationParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent));
-    tree.add(
-        "simulation parameters.cell.function.weapon.color penalty",
-        toString(settings.simulationParameters.spotValues.cellFunctionWeaponColorPenalty));
-    tree.add(
-        "simulation parameters.cell.function.constructor.offspring.cell energy",
-        toString(settings.simulationParameters.cellFunctionConstructorOffspringCellEnergy));
-    tree.add(
-        "simulation parameters.cell.function.constructor.offspring.cell distance",
-        toString(settings.simulationParameters.cellFunctionConstructorOffspringCellDistance));
-    tree.add(
-        "simulation parameters.cell.function.constructor.offspring.token energy",
-        toString(settings.simulationParameters.cellFunctionConstructorOffspringTokenEnergy));
-    tree.add(
-        "simulation parameters.cell.function.constructor.offspring.token suppress memory copy",
-        toString(settings.simulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy));
-    tree.add(
-        "simulation parameters.cell.function.constructor.mutation probability.token data",
-        toString(settings.simulationParameters.cellFunctionConstructorTokenDataMutationProb));
-    tree.add(
-        "simulation parameters.cell.function.constructor.mutation probability.cell data",
-        toString(settings.simulationParameters.cellFunctionConstructorCellDataMutationProb));
-    tree.add(
-        "simulation parameters.cell.function.constructor.mutation probability.cell property",
-        toString(settings.simulationParameters.cellFunctionConstructorCellPropertyMutationProb));
-    tree.add(
-        "simulation parameters.cell.function.constructor.mutation probability.cell structure",
-        toString(settings.simulationParameters.cellFunctionConstructorCellStructureMutationProb));
-    tree.add("simulation parameters.cell.function.sensor.range", toString(settings.simulationParameters.cellFunctionSensorRange));
-    tree.add("simulation parameters.cell.function.communicator.range", toString(settings.simulationParameters.cellFunctionCommunicatorRange));
-    tree.add("simulation parameters.token.memory size", toString(settings.simulationParameters.tokenMemorySize));
-    tree.add("simulation parameters.token.min energy", toString(settings.simulationParameters.tokenMinEnergy));
-    tree.add("simulation parameters.radiation.exponent", toString(settings.simulationParameters.radiationExponent));
-    tree.add(
-        "simulation parameters.radiation.factor", toString(settings.simulationParameters.spotValues.radiationFactor));
-    tree.add("simulation parameters.radiation.probability", toString(settings.simulationParameters.radiationProb));
-    tree.add("simulation parameters.radiation.velocity multiplier", toString(settings.simulationParameters.radiationVelocityMultiplier));
-    tree.add("simulation parameters.radiation.velocity perturbation", toString(settings.simulationParameters.radiationVelocityPerturbation));
-
-    //flow field settings
-    tree.add("flow field.active", toString(settings.flowFieldSettings.active));
-    tree.add("flow field.num centers", toString(settings.flowFieldSettings.numCenters));
-    for (int i = 0; i < 2; ++i) {
-        RadialFlowCenterData const& radialData = settings.flowFieldSettings.radialFlowCenters[i];
-        std::string node = "flow field.center" + toString(i) + ".";
-        tree.add(node + "position.x", toString(radialData.posX));
-        tree.add(node + "position.y", toString(radialData.posY));
-        tree.add(node + "radius", toString(radialData.radius));
-        tree.add(node + "strength", toString(radialData.strength));
-    }
-
+    encodeDecode(tree, timestep, settings, Task::Encode);
     return tree;
 }
 
 std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
-    boost::property_tree::ptree const& tree)
+    boost::property_tree::ptree tree)
 {
-    uint64_t timestep = 0;
+    uint64_t timestep;
     Settings settings;
+    encodeDecode(tree, timestep, settings, Task::Decode);
+    return std::make_pair(timestep, settings);
+}
 
-    //general
-    timestep = tree.get<uint64_t>("general.time step", timestep);
-    settings.generalSettings.worldSizeX =
-        tree.get<int>("general.world size.x");
-    settings.generalSettings.worldSizeY =
-        tree.get<int>("general.world size.y");
+void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, Task task)
+{
+    Settings defaultSettings;
+
+    //general settings
+    encodeDecode(tree, timestep, uint64_t(0), "general.time step", task);
+    encodeDecode(
+        tree,
+        settings.generalSettings.worldSizeX,
+        defaultSettings.generalSettings.worldSizeX,
+        "general.world size.x",
+        task);
+    encodeDecode(
+        tree,
+        settings.generalSettings.worldSizeY,
+        defaultSettings.generalSettings.worldSizeY,
+        "general.world size.y",
+        task);
 
     //simulation parameters
-    settings.simulationParameters.timestepSize =
-        tree.get<float>("simulation parameters.time step size", settings.simulationParameters.timestepSize);
-    settings.simulationParameters.spotValues.friction =
-        tree.get<float>("simulation parameters.friction", settings.simulationParameters.spotValues.friction);
-    settings.simulationParameters.spotValues.cellBindingForce = tree.get<float>(
-        "simulation parameters.cell.binding force", settings.simulationParameters.spotValues.cellBindingForce);
-    settings.simulationParameters.cellMaxVel =
-        tree.get<float>("simulation parameters.cell.max velocity", settings.simulationParameters.cellMaxVel);
-    settings.simulationParameters.cellMaxBindingDistance =
-        tree.get<float>("simulation parameters.cell.max binding distance", settings.simulationParameters.cellMaxBindingDistance);
-    settings.simulationParameters.cellRepulsionStrength =
-        tree.get<float>("simulation parameters.cell.repulsion strength", settings.simulationParameters.cellRepulsionStrength);
-    settings.simulationParameters.spotValues.tokenMutationRate = tree.get<float>(
-        "simulation parameters.token mutation rate", settings.simulationParameters.spotValues.tokenMutationRate);
+    auto& simPar = settings.simulationParameters;
+    auto& defaultPar = defaultSettings.simulationParameters;
+    encodeDecode(tree, simPar.timestepSize, defaultPar.timestepSize, "simulation parameters.time step size", task);
+    encodeDecode(
+        tree, simPar.spotValues.friction, defaultPar.spotValues.friction, "simulation parameters.friction", task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellBindingForce,
+        defaultPar.spotValues.cellBindingForce,
+        "simulation parameters.cell.binding force",
+        task);
+    encodeDecode(tree, simPar.cellMaxVel, defaultPar.cellMaxVel, "simulation parameters.cell.max velocity", task);
+    encodeDecode(
+        tree,
+        simPar.cellMaxBindingDistance,
+        defaultPar.cellMaxBindingDistance,
+        "simulation parameters.cell.max binding distance",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellRepulsionStrength,
+        defaultPar.cellRepulsionStrength,
+        "simulation parameters.cell.repulsion strength",
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.tokenMutationRate,
+        defaultPar.spotValues.tokenMutationRate,
+        "simulation parameters.token.mutation rate",
+        task);
 
-    settings.simulationParameters.cellMinDistance = tree.get<float>("simulation parameters.cell.min distance");
-    settings.simulationParameters.cellMaxCollisionDistance = tree.get<float>("simulation parameters.cell.max distance");
-    settings.simulationParameters.spotValues.cellMaxForce = tree.get<float>("simulation parameters.cell.max force");
-    settings.simulationParameters.cellMaxForceDecayProb = tree.get<float>("simulation parameters.cell.max force decay probability");
-    settings.simulationParameters.cellMinTokenUsages = tree.get<int>("simulation parameters.cell.min token usages");
-    settings.simulationParameters.cellTokenUsageDecayProb = tree.get<float>("simulation parameters.cell.token usage decay probability");
-    settings.simulationParameters.cellMaxBonds = tree.get<int>("simulation parameters.cell.max bonds");
-    settings.simulationParameters.cellMaxToken = tree.get<int>("simulation parameters.cell.max token");
-    settings.simulationParameters.cellMaxTokenBranchNumber = tree.get<int>("simulation parameters.cell.max token branch number");
-    settings.simulationParameters.spotValues.cellMinEnergy = tree.get<float>("simulation parameters.cell.min energy");
-    settings.simulationParameters.cellTransformationProb = tree.get<float>("simulation parameters.cell.transformation probability");
-    settings.simulationParameters.spotValues.cellFusionVelocity =
-        tree.get<float>("simulation parameters.cell.fusion velocity");
-    settings.simulationParameters.cellFunctionComputerMaxInstructions = tree.get<int>("simulation parameters.cell.function.computer.max instructions");
-    settings.simulationParameters.cellFunctionComputerCellMemorySize = tree.get<int>("simulation parameters.cell.function.computer.memory size");
-    settings.simulationParameters.cellFunctionWeaponStrength = tree.get<float>("simulation parameters.cell.function.weapon.strength");
-    settings.simulationParameters.spotValues.cellFunctionWeaponEnergyCost =
-        tree.get<float>("simulation parameters.cell.function.weapon.energy cost");
-    settings.simulationParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent = tree.get<float>(
+    encodeDecode(
+        tree, simPar.cellMinDistance, defaultPar.cellMinDistance, "simulation parameters.cell.min distance", task);
+    encodeDecode(
+        tree,
+        simPar.cellMaxCollisionDistance,
+        defaultPar.cellMaxCollisionDistance,
+        "simulation parameters.cell.max distance",
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellMaxForce,
+        defaultPar.spotValues.cellMaxForce,
+        "simulation parameters.cell.max force",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellMaxForceDecayProb,
+        defaultPar.cellMaxForceDecayProb,
+        "simulation parameters.cell.max force decay probability",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellMinTokenUsages,
+        defaultPar.cellMinTokenUsages,
+        "simulation parameters.cell.min token usages",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellTokenUsageDecayProb,
+        defaultPar.cellTokenUsageDecayProb,
+        "simulation parameters.cell.token usage decay probability",
+        task);
+    encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", task);
+    encodeDecode(tree, simPar.cellMaxToken, defaultPar.cellMaxToken, "simulation parameters.cell.max token", task);
+    encodeDecode(
+        tree,
+        simPar.cellMaxTokenBranchNumber,
+        defaultPar.cellMaxTokenBranchNumber,
+        "simulation parameters.cell.max token branch number",
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellMinEnergy,
+        defaultPar.spotValues.cellMinEnergy,
+        "simulation parameters.cell.min energy",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellTransformationProb,
+        defaultPar.cellTransformationProb,
+        "simulation parameters.cell.transformation probability",
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellFusionVelocity,
+        defaultPar.spotValues.cellFusionVelocity,
+        "simulation parameters.cell.fusion velocity",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionComputerMaxInstructions,
+        defaultPar.cellFunctionComputerMaxInstructions,
+        "simulation parameters.cell.function.computer.max instructions",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionComputerCellMemorySize,
+        defaultPar.cellFunctionComputerCellMemorySize,
+        "simulation parameters.cell.function.computer.memory size",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionWeaponStrength,
+        defaultPar.cellFunctionWeaponStrength,
+        "simulation parameters.cell.function.weapon.strength",
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionWeaponEnergyCost,
+        defaultPar.spotValues.cellFunctionWeaponEnergyCost,
+        "simulation parameters.cell.function.weapon.energy cost",
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionWeaponGeometryDeviationExponent,
+        defaultPar.spotValues.cellFunctionWeaponGeometryDeviationExponent,
         "simulation parameters.cell.function.weapon.geometry deviation exponent",
-        settings.simulationParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent);
-    settings.simulationParameters.spotValues.cellFunctionWeaponColorPenalty = tree.get<float>(
+        task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionWeaponColorPenalty,
+        defaultPar.spotValues.cellFunctionWeaponColorPenalty,
         "simulation parameters.cell.function.weapon.color penalty",
-        settings.simulationParameters.spotValues.cellFunctionWeaponColorPenalty);
-    settings.simulationParameters.cellFunctionConstructorOffspringCellEnergy =
-        tree.get<float>("simulation parameters.cell.function.constructor.offspring.cell energy");
-    settings.simulationParameters.cellFunctionConstructorOffspringCellDistance =
-        tree.get<float>("simulation parameters.cell.function.constructor.offspring.cell distance");
-    settings.simulationParameters.cellFunctionConstructorOffspringTokenEnergy =
-        tree.get<float>("simulation parameters.cell.function.constructor.offspring.token energy");
-    settings.simulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy =
-        tree.get<bool>("simulation parameters.cell.function.constructor.offspring.token suppress memory copy", false);
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorOffspringCellEnergy,
+        defaultPar.cellFunctionConstructorOffspringCellEnergy,
+        "simulation parameters.cell.function.constructor.offspring.cell energy",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorOffspringCellDistance,
+        defaultPar.cellFunctionConstructorOffspringCellDistance,
+        "simulation parameters.cell.function.constructor.offspring.cell distance",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorOffspringTokenEnergy,
+        defaultPar.cellFunctionConstructorOffspringTokenEnergy,
+        "simulation parameters.cell.function.constructor.offspring.token energy",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorOffspringTokenSuppressMemoryCopy,
+        defaultPar.cellFunctionConstructorOffspringTokenSuppressMemoryCopy,
+        "simulation parameters.cell.function.constructor.offspring.token suppress memory copy",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorTokenDataMutationProb,
+        defaultPar.cellFunctionConstructorTokenDataMutationProb,
+        "simulation parameters.cell.function.constructor.offspring.token suppress memory copy",
+        task);
+    /*
     settings.simulationParameters.cellFunctionConstructorTokenDataMutationProb =
         tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.token data");
     settings.simulationParameters.cellFunctionConstructorCellDataMutationProb =
@@ -179,29 +216,130 @@ std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
         tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.cell property");
     settings.simulationParameters.cellFunctionConstructorCellStructureMutationProb =
         tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.cell structure");
-    settings.simulationParameters.cellFunctionSensorRange = tree.get<float>("simulation parameters.cell.function.sensor.range");
-    settings.simulationParameters.cellFunctionCommunicatorRange = tree.get<float>("simulation parameters.cell.function.communicator.range");
-    settings.simulationParameters.tokenMemorySize = tree.get<int>("simulation parameters.token.memory size");
-    settings.simulationParameters.tokenMinEnergy = tree.get<float>("simulation parameters.token.min energy");
-    settings.simulationParameters.radiationExponent = tree.get<float>("simulation parameters.radiation.exponent");
-    settings.simulationParameters.spotValues.radiationFactor =
-        tree.get<float>("simulation parameters.radiation.factor");
-    settings.simulationParameters.radiationProb = tree.get<float>("simulation parameters.radiation.probability");
-    settings.simulationParameters.radiationVelocityMultiplier = tree.get<float>("simulation parameters.radiation.velocity multiplier");
-    settings.simulationParameters.radiationVelocityPerturbation = tree.get<float>("simulation parameters.radiation.velocity perturbation");
+*/
+    encodeDecode(
+        tree,
+        simPar.cellFunctionSensorRange,
+        defaultPar.cellFunctionSensorRange,
+        "simulation parameters.cell.function.sensor.range",
+        task);
+    encodeDecode(
+        tree,
+        simPar.cellFunctionCommunicatorRange,
+        defaultPar.cellFunctionCommunicatorRange,
+        "simulation parameters.cell.function.communicator.range",
+        task);
+    encodeDecode(
+        tree, simPar.tokenMemorySize, defaultPar.tokenMemorySize, "simulation parameters.token.memory size", task);
+    encodeDecode(
+        tree, simPar.tokenMinEnergy, defaultPar.tokenMinEnergy, "simulation parameters.token.min energy", task);
+    encodeDecode(
+        tree, simPar.radiationExponent, defaultPar.radiationExponent, "simulation parameters.radiation.exponent", task);
+    encodeDecode(
+        tree,
+        simPar.spotValues.radiationFactor,
+        defaultPar.spotValues.radiationFactor,
+        "simulation parameters.radiation.factor",
+        task);
+    encodeDecode(
+        tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", task);
+    encodeDecode(
+        tree,
+        simPar.radiationVelocityMultiplier,
+        defaultPar.radiationVelocityMultiplier,
+        "simulation parameters.radiation.velocity multiplier",
+        task);
+    encodeDecode(
+        tree,
+        simPar.radiationVelocityPerturbation,
+        defaultPar.radiationVelocityPerturbation,
+        "simulation parameters.radiation.velocity perturbation",
+        task);
 
-    //flow field settings
-    settings.flowFieldSettings.active = tree.get<bool>("flow field.active");
-    settings.flowFieldSettings.numCenters = tree.get<int>("flow field.num centers");
-    for (int i = 0; i < 2; ++i) {
-        RadialFlowCenterData& radialData = settings.flowFieldSettings.radialFlowCenters[i];
-        std::string node = "flow field.center" + toString(i) + ".";
+    //spots
+    auto& spots = settings.simulationParametersSpots;
+    auto& defaultSpots = defaultSettings.simulationParametersSpots;
+    encodeDecode(tree, spots.numSpots, defaultSpots.numSpots, "simulation parameters.spots.num spots", task);
+    for (int index = 0; index <= 1; ++index) {
+        std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
+        auto& spot = spots.spots[index];
+        auto& defaultSpot = defaultSpots.spots[index];
+        encodeDecode(tree, spot.color, defaultSpot.color, base + "color", task);
+        encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", task);
+        encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", task);
+        encodeDecode(tree, spot.coreRadius, defaultSpot.coreRadius, base + "core radius", task);
+        encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", task);
+        encodeDecode(tree, spot.values.friction, defaultSpot.values.friction, base + "friction", task);
+        encodeDecode(
+            tree, spot.values.radiationFactor, defaultSpot.values.radiationFactor, base + "radiation.factor", task);
+        encodeDecode(tree, spot.values.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", task);
+        encodeDecode(tree, spot.values.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", task);
 
-        radialData.posX = tree.get<float>(node + "position.x");
-        radialData.posY = tree.get<float>(node + "position.y");
-        radialData.radius = tree.get<float>(node + "radius");
-        radialData.strength = tree.get<float>(node + "strength");
+        encodeDecode(
+            tree, spot.values.cellBindingForce, defaultSpot.values.cellBindingForce, base + "cell.binding force", task);
+        encodeDecode(
+            tree,
+            spot.values.cellFusionVelocity,
+            defaultSpot.values.cellFusionVelocity,
+            base + "cell.fusion velocity",
+            task);
+        encodeDecode(
+            tree,
+            spot.values.tokenMutationRate,
+            defaultSpot.values.tokenMutationRate,
+            base + "token.mutation rate",
+            task);
+        encodeDecode(
+            tree,
+            spot.values.cellFunctionWeaponEnergyCost,
+            defaultSpot.values.cellFunctionWeaponEnergyCost,
+            base + "cell.function.weapon.energy cost",
+            task);
+        encodeDecode(
+            tree,
+            spot.values.cellFunctionWeaponColorPenalty,
+            defaultSpot.values.cellFunctionWeaponColorPenalty,
+            base + "cell.function.weapon.color penalty",
+            task);
+        encodeDecode(
+            tree,
+            spot.values.cellFunctionWeaponGeometryDeviationExponent,
+            defaultSpot.values.cellFunctionWeaponGeometryDeviationExponent,
+            base + "cell.function.weapon.geometry deviation exponent",
+            task);
     }
 
-    return std::make_pair(timestep, settings);
+    //flow field settings
+    encodeDecode(
+        tree, settings.flowFieldSettings.active, defaultSettings.flowFieldSettings.active, "flow field.active", task);
+    encodeDecode(
+        tree,
+        settings.flowFieldSettings.numCenters,
+        defaultSettings.flowFieldSettings.numCenters,
+        "flow field.num centers",
+        task);
+    for (int i = 0; i < 2; ++i) {
+        std::string node = "flow field.center" + toString(i) + ".";
+        auto& radialData = settings.flowFieldSettings.radialFlowCenters[i];
+        auto& defaultRadialData = defaultSettings.flowFieldSettings.radialFlowCenters[i];
+        encodeDecode(tree, radialData.posX, defaultRadialData.posX, node + "pos.x", task);
+        encodeDecode(tree, radialData.posY, defaultRadialData.posY, node + "pos.y", task);
+        encodeDecode(tree, radialData.radius, defaultRadialData.radius, node + "radius", task);
+        encodeDecode(tree, radialData.strength, defaultRadialData.strength, node + "strength", task);
+    }
+}
+
+template <typename T>
+void Parser::encodeDecode(
+    boost::property_tree::ptree& tree,
+    T& parameter,
+    T const& defaultValue,
+    std::string const& node,
+    Task task)
+{
+    if (Task::Encode == task) {
+        tree.add(node, toString(parameter));
+    } else {
+        parameter = tree.get<T>(node, defaultValue);
+    }
 }
