@@ -6,7 +6,7 @@ enum class Orientation
     CounterClockwise,
 };
 
-struct RadialFlowCenterData
+struct FlowCenter
 {
     float posX = 0;
     float posY = 0;
@@ -14,12 +14,12 @@ struct RadialFlowCenterData
     float strength = 0.01f;
     Orientation orientation = Orientation::Clockwise;
 
-    bool operator==(RadialFlowCenterData const& other) const
+    bool operator==(FlowCenter const& other) const
     {
         return posX == other.posX && posY == other.posY && radius == other.radius && strength == other.strength
             && orientation == other.orientation;
     }
-    bool operator!=(RadialFlowCenterData const& other) const { return !operator==(other); }
+    bool operator!=(FlowCenter const& other) const { return !operator==(other); }
 };
 
 struct FlowFieldSettings
@@ -27,11 +27,11 @@ struct FlowFieldSettings
     bool active = false;
 
     int numCenters = 1; //only 2 centers supported
-    RadialFlowCenterData radialFlowCenters[2];
+    FlowCenter centers[2];
 
     bool operator==(FlowFieldSettings const& other) const
     {
-        return active == other.active && numCenters == other.numCenters && radialFlowCenters == other.radialFlowCenters;
+        return active == other.active && numCenters == other.numCenters && centers == other.centers;
     }
     bool operator!=(FlowFieldSettings const& other) const { return !operator==(other); }
 };

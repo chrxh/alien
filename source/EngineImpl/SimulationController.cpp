@@ -138,6 +138,16 @@ FlowFieldSettings _SimulationController::getFlowFieldSettings() const
     return _settings.flowFieldSettings;
 }
 
+FlowFieldSettings _SimulationController::getOriginalFlowFieldSettings() const
+{
+    return _origSettings.flowFieldSettings;
+}
+
+void _SimulationController::setOriginalFlowFieldCenter(FlowCenter const& value, int index)
+{
+    _origSettings.flowFieldSettings.centers[index] = value;
+}
+
 void _SimulationController::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
 {
     _settings.flowFieldSettings = flowFieldSettings;

@@ -20,25 +20,8 @@ private:
 
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
-    
 
     void createGroup(std::string const& name);
-    void createFloatItem(
-        std::string const& name,
-        float& value,
-        float defaultValue,
-        float min,
-        float max,
-        bool logarithmic = false,
-        std::string const& format = "%.3f",
-        boost::optional<std::string> help = boost::none);
-    void createIntItem(
-        std::string const& name,
-        int& value,
-        int defaultValue,
-        int min,
-        int max,
-        boost::optional<std::string> help = boost::none);
 
     StyleRepository _styleRepository;
     SimulationController _simController;

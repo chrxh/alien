@@ -8,7 +8,7 @@ __device__ float getHeight(float2 const& pos, MapInfo const& mapInfo)
 {
     float result = 0;
     for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
-        auto& radialFlow = cudaFlowFieldSettings.radialFlowCenters[i];
+        auto& radialFlow = cudaFlowFieldSettings.centers[i];
         auto dist = mapInfo.mapDistance(pos, float2{radialFlow.posX, radialFlow.posY});
         if (dist > radialFlow.radius) {
             dist = radialFlow.radius;

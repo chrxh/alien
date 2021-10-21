@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Definitions.h"
 #include "EngineImpl/Definitions.h"
+#include "EngineInterface/FlowFieldSettings.h"
+#include "Definitions.h"
 
 class _FlowGeneratorWindow
 {
@@ -14,6 +15,8 @@ public:
     void setOn(bool value);
 
 private:
+    FlowCenter createFlowCenter();
+
     SimulationController _simController;
 
     bool _on = false;

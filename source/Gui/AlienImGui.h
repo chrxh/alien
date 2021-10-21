@@ -7,6 +7,23 @@ class AlienImGui
 {
 public:
     static void HelpMarker(std::string const& text);
+    static void SliderFloat(
+        std::string const& name,
+        float& value,
+        float defaultValue,
+        float min,
+        float max,
+        bool logarithmic = false,
+        std::string const& format = "%.3f",
+        boost::optional<std::string> tooltip = boost::none);
+    static void SliderInt(
+        std::string const& name,
+        int& value,
+        int defaultValue,
+        int min,
+        int max,
+        boost::optional<std::string> tooltip = boost::none);
+    static void Combo(std::string const& name, int& value, int defaultValue, std::vector<std::string> const& values);
     static bool BeginMenuButton(std::string const& text, bool& toggle,
                                 std::string const& popup);  //return toggle
     static void EndMenuButton();
