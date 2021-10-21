@@ -55,6 +55,8 @@ public:
     ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);
 
     ENGINEIMPL_EXPORT FlowFieldSettings getFlowFieldSettings() const;
+    ENGINEIMPL_EXPORT FlowFieldSettings getOriginalFlowFieldSettings() const;
+    ENGINEIMPL_EXPORT void setOriginalFlowFieldCenter(FlowCenter const& value, int index);
     ENGINEIMPL_EXPORT void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
     ENGINEIMPL_EXPORT void

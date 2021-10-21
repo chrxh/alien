@@ -394,7 +394,7 @@ __device__ void drawFlowCenters(unsigned int* targetImage, float2 const& rectUpp
 {
     if (cudaFlowFieldSettings.active) {
         for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
-            auto const& radialFlowData = cudaFlowFieldSettings.radialFlowCenters[i];
+            auto const& radialFlowData = cudaFlowFieldSettings.centers[i];
             int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
             int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
             auto drawX = screenPosX;

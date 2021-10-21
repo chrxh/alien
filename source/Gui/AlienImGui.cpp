@@ -21,6 +21,77 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
+void AlienImGui::SliderFloat(
+    std::string const& name,
+    float& value,
+    float defaultValue,
+    float min,
+    float max,
+    bool logarithmic,
+    std::string const& format,
+    boost::optional<std::string> tooltip)
+{
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 2);
+    ImGui::SliderFloat(
+        ("##" + name).c_str(), &value, min, max, format.c_str(), logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(value == defaultValue);
+    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
+        value = defaultValue;
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::Text(name.c_str());
+    if (tooltip) {
+        AlienImGui::HelpMarker(tooltip->c_str());
+    }
+}
+
+void AlienImGui::SliderInt(
+    std::string const& name,
+    int& value,
+    int defaultValue,
+    int min,
+    int max,
+    boost::optional<std::string> tooltip)
+{
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 2);
+    ImGui::SliderInt(("##" + name).c_str(), &value, min, max);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(value == defaultValue);
+    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
+        value = defaultValue;
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::Text(name.c_str());
+
+    if (tooltip) {
+        AlienImGui::HelpMarker(tooltip->c_str());
+    }
+}
+
+void AlienImGui::Combo(std::string const& name, int& value, int defaultValue, std::vector<std::string> const& values)
+{
+    const char* items[10] = {};
+    for(int i = 0; i < values.size(); ++i) {
+        items[i] = values[i].c_str();
+    }
+
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2);
+    ImGui::Combo("##", &value, items, toInt(values.size()));
+    ImGui::PopItemWidth();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(value == defaultValue);
+    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
+        value = defaultValue;
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::Text(name.c_str());
+}
+
 bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);

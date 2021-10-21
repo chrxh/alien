@@ -5,6 +5,7 @@
 #include "Base/Definitions.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
+#include "AlienImGui.h"
 
 _FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
     : _simController(simController)
@@ -17,7 +18,8 @@ void _FlowGeneratorWindow::process()
         return;
     }
     auto flowFieldSettings = _simController->getFlowFieldSettings();
-    auto origFlowFieldSettings = flowFieldSettings;
+    auto origFlowFieldSettings = _simController->getOriginalFlowFieldSettings();
+    auto lastFlowFieldSettings = flowFieldSettings;
 
     auto worldSize = _simController->getWorldSize();
 
@@ -40,90 +42,49 @@ void _FlowGeneratorWindow::process()
 
         if (flowFieldSettings.numCenters < 2) {
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                flowFieldSettings.radialFlowCenters[flowFieldSettings.numCenters] =
-                    flowFieldSettings.radialFlowCenters[flowFieldSettings.numCenters - 1];
+                auto index = flowFieldSettings.numCenters;
+                flowFieldSettings.centers[index] = createFlowCenter();
+                _simController->setOriginalFlowFieldCenter(flowFieldSettings.centers[index], index);
                 ++flowFieldSettings.numCenters;
             }
         }
 
         for (int tab = 0; tab < flowFieldSettings.numCenters; ++tab) {
-            RadialFlowCenterData& radialFlowData = flowFieldSettings.radialFlowCenters[tab];
+            FlowCenter& flowCenter = flowFieldSettings.centers[tab];
+            FlowCenter& origFlowCenter = origFlowFieldSettings.centers[tab];
             bool open = true;
             char name[16];
             bool* openPtr = flowFieldSettings.numCenters == 1 ? NULL : &open;
             snprintf(name, IM_ARRAYSIZE(name), "Center %01d", tab + 1);
             if (ImGui::BeginTabItem(name, openPtr, ImGuiTabItemFlags_None)) {
-                if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
 
-                    //pos x
-                    ImGui::TableNextRow();
+                AlienImGui::SliderFloat(
+                    "Position X", flowCenter.posX, origFlowCenter.posX, 0.0, toFloat(worldSize.x), false, "%.0f");
+                AlienImGui::SliderFloat(
+                    "Position Y", flowCenter.posY, origFlowCenter.posY, 0.0, toFloat(worldSize.y), false, "%.0f");
+                AlienImGui::SliderFloat(
+                    "Radius",
+                    flowCenter.radius,
+                    origFlowCenter.radius,
+                    0.0,
+                    std::min(toFloat(worldSize.x), toFloat(worldSize.y)),
+                    false,
+                    "%.0f");
+                AlienImGui::SliderFloat(
+                    "Strength", flowCenter.strength, origFlowCenter.strength, 0.0, 0.5f, false, "%.3f");
 
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::SliderFloat(
-                        "##posX", &radialFlowData.posX, 0.0, toFloat(worldSize.x), "%.0f", ImGuiSliderFlags_None);
-
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("Position X");
-
-                    //pos y
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::SliderFloat(
-                        "##posY", &radialFlowData.posY, 0.0, toFloat(worldSize.y), "%.0f", ImGuiSliderFlags_None);
-
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("Position Y");
-
-                    //radius
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::SliderFloat(
-                        "##radius",
-                        &radialFlowData.radius,
-                        0.0,
-                        std::min(toFloat(worldSize.x), toFloat(worldSize.y)),
-                        "%.0f",
-                        ImGuiSliderFlags_None);
-
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("Radius");
-
-                    //strength
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::SliderFloat(
-                        "##strength", &radialFlowData.strength, 0.0, 0.5f, "%.3f", ImGuiSliderFlags_Logarithmic);
-
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("Strength");
-
-                    //orientation
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    const char* orientations[] = {"Clockwise", "Counter clockwise"};
-                    int currentOrientations = radialFlowData.orientation == Orientation::Clockwise ? 0 : 1;
-                    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                    ImGui::Combo("##", &currentOrientations, orientations, IM_ARRAYSIZE(orientations));
-                    radialFlowData.orientation =
-                        currentOrientations == 0 ? Orientation::Clockwise : Orientation::CounterClockwise;
-                    ImGui::PopItemWidth();
-
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("Orientation");
-
-                    ImGui::EndTable();
-                }
+                std::vector<std::string> orientations = {"Clockwise", "Counter clockwise"};
+                int currentOrientation = flowCenter.orientation == Orientation::Clockwise ? 0 : 1;
+                int origCurrentOrientation = origFlowCenter.orientation == Orientation::Clockwise ? 0 : 1;
+                AlienImGui::Combo("Orientation", currentOrientation, origCurrentOrientation, orientations);
+                flowCenter.orientation =
+                    currentOrientation == 0 ? Orientation::Clockwise : Orientation::CounterClockwise;
                 ImGui::EndTabItem();
             }
-
             if (!open) {
                 for (int i = tab; i < flowFieldSettings.numCenters - 1; ++i) {
-                    flowFieldSettings.radialFlowCenters[i] = flowFieldSettings.radialFlowCenters[i + 1];
+                    flowFieldSettings.centers[i] = flowFieldSettings.centers[i + 1];
+                    _simController->setOriginalFlowFieldCenter(flowFieldSettings.centers[i], i);
                 }
                 --flowFieldSettings.numCenters;
             }
@@ -134,7 +95,7 @@ void _FlowGeneratorWindow::process()
     ImGui::EndDisabled();
     ImGui::End();
 
-    if (flowFieldSettings != origFlowFieldSettings) {
+    if (flowFieldSettings != lastFlowFieldSettings) {
         _simController->setFlowFieldSettings_async(flowFieldSettings);
     }
 }
@@ -147,4 +108,16 @@ bool _FlowGeneratorWindow::isOn() const
 void _FlowGeneratorWindow::setOn(bool value)
 {
     _on = value;
+}
+
+FlowCenter _FlowGeneratorWindow::createFlowCenter()
+{
+    FlowCenter result;
+    auto worldSize = _simController->getWorldSize();
+    result.posX = toFloat(worldSize.x / 2);
+    result.posY = toFloat(worldSize.y / 2);
+    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
+    result.radius = maxRadius / 3;
+
+    return result;
 }
