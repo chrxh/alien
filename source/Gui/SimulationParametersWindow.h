@@ -18,14 +18,15 @@ public:
 private:
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
 
-    void processBase(SimulationParameters& simParameters);
-    void processSpot(SimulationParametersSpot& spot);
+    void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
+    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
     
 
     void createGroup(std::string const& name);
     void createFloatItem(
         std::string const& name,
         float& value,
+        float defaultValue,
         float min,
         float max,
         bool logarithmic = false,
@@ -34,6 +35,7 @@ private:
     void createIntItem(
         std::string const& name,
         int& value,
+        int defaultValue,
         int min,
         int max,
         boost::optional<std::string> help = boost::none);

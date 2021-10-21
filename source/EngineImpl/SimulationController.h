@@ -43,9 +43,12 @@ public:
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
     ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
+    ENGINEIMPL_EXPORT SimulationParameters getOriginalSimulationParameters() const;
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
 
     ENGINEIMPL_EXPORT SimulationParametersSpots getSimulationParametersSpots() const;
+    ENGINEIMPL_EXPORT SimulationParametersSpots getOriginalSimulationParametersSpots() const;
+    ENGINEIMPL_EXPORT void setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index);
     ENGINEIMPL_EXPORT void setSimulationParametersSpots_async(SimulationParametersSpots const& value);
 
     ENGINEIMPL_EXPORT GpuSettings getGpuSettings() const;
@@ -69,6 +72,7 @@ public:
     ENGINEIMPL_EXPORT float getTps() const;
 
 private:
+    Settings _origSettings;
     Settings _settings;
     GpuSettings _gpuSettings; 
     SymbolMap _symbolMap;

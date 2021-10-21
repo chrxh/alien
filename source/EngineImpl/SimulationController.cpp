@@ -10,6 +10,7 @@ void _SimulationController::initCuda()
 void _SimulationController::newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap)
 {
     _settings = settings;
+    _origSettings = _settings;
     _symbolMap = symbolMap;
     _worker.newSimulation(timestep, settings, _gpuSettings);
 
@@ -88,6 +89,11 @@ SimulationParameters _SimulationController::getSimulationParameters() const
     return _settings.simulationParameters;
 }
 
+SimulationParameters _SimulationController::getOriginalSimulationParameters() const
+{
+    return _origSettings.simulationParameters;
+}
+
 void _SimulationController::setSimulationParameters_async(
     SimulationParameters const& parameters)
 {
@@ -98,6 +104,16 @@ void _SimulationController::setSimulationParameters_async(
 SimulationParametersSpots _SimulationController::getSimulationParametersSpots() const
 {
     return _settings.simulationParametersSpots;
+}
+
+SimulationParametersSpots _SimulationController::getOriginalSimulationParametersSpots() const
+{
+    return _origSettings.simulationParametersSpots;
+}
+
+void _SimulationController::setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index)
+{
+    _origSettings.simulationParametersSpots.spots[index] = value;
 }
 
 void _SimulationController::setSimulationParametersSpots_async(SimulationParametersSpots const& value)
