@@ -123,7 +123,7 @@ namespace boost {
     }
 }
 
-bool _Serializer::loadSimulationDataFromFile2(string const& filename, SerializedSimulation& data)
+bool _Serializer::loadSimulationDataFromFile(string const& filename, SerializedSimulation& data)
 {
     std::regex fileEndingExpr("\\.\\w+$");
     if (!std::regex_search(filename, fileEndingExpr)) {
@@ -145,7 +145,7 @@ bool _Serializer::loadSimulationDataFromFile2(string const& filename, Serialized
     return true;
 }
 
-bool _Serializer::saveSimulationDataToFile2(string const& filename, SerializedSimulation& data)
+bool _Serializer::saveSimulationDataToFile(string const& filename, SerializedSimulation& data)
 {
     std::regex fileEndingExpr("\\.\\w+$");
     if (!std::regex_search(filename, fileEndingExpr)) {
@@ -167,7 +167,7 @@ bool _Serializer::saveSimulationDataToFile2(string const& filename, SerializedSi
     return true;
 }
 
-SerializedSimulation _Serializer::serializeSimulation2(DeserializedSimulation const& data)
+SerializedSimulation _Serializer::serializeSimulation(DeserializedSimulation const& data)
 {
     return {
         serializeTimestepAndSettings(data.timestep, data.settings),
@@ -175,7 +175,7 @@ SerializedSimulation _Serializer::serializeSimulation2(DeserializedSimulation co
         serializeDataDescription(data.content)};
 }
 
-DeserializedSimulation _Serializer::deserializeSimulation2(SerializedSimulation const& data)
+DeserializedSimulation _Serializer::deserializeSimulation(SerializedSimulation const& data)
 {
     auto [timestep, settings] = deserializeTimestepAndSettings(data.timestepAndSettings);
     return {timestep, settings, deserializeSymbolMap(data.symbolMap), deserializeDataDescription(data.content)};
