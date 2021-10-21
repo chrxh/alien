@@ -44,8 +44,8 @@ void _StartupWindow::process()
     if (_state == State::RequestLoading) {
         Serializer serializer = boost::make_shared<_Serializer>();
         SerializedSimulation serializedData;
-        serializer->loadSimulationDataFromFile2(Const::AutosaveFile, serializedData);
-        auto deserializedData = serializer->deserializeSimulation2(serializedData);
+        serializer->loadSimulationDataFromFile(Const::AutosaveFile, serializedData);
+        auto deserializedData = serializer->deserializeSimulation(serializedData);
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
         _simController->updateData(deserializedData.content);

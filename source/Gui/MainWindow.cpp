@@ -390,8 +390,8 @@ void _MainWindow::processOpenSimulationDialog()
 
         Serializer serializer = boost::make_shared<_Serializer>();
         SerializedSimulation serializedData;
-        serializer->loadSimulationDataFromFile2(firstFilename.string(), serializedData);
-        auto deserializedData = serializer->deserializeSimulation2(serializedData);
+        serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
+        auto deserializedData = serializer->deserializeSimulation(serializedData);
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
         _simController->updateData(deserializedData.content);
@@ -416,8 +416,8 @@ void _MainWindow::processSaveSimulationDialog()
         sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
 
         Serializer serializer = boost::make_shared<_Serializer>();
-        auto serializedSim = serializer->serializeSimulation2(sim);
-        serializer->saveSimulationDataToFile2(firstFilename.string(), serializedSim);
+        auto serializedSim = serializer->serializeSimulation(sim);
+        serializer->saveSimulationDataToFile(firstFilename.string(), serializedSim);
     }
     ifd::FileDialog::Instance().Close();
 }

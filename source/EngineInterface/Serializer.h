@@ -27,11 +27,11 @@ struct DeserializedSimulation
 class _Serializer
 {
 public:
-    ENGINEINTERFACE_EXPORT bool loadSimulationDataFromFile2(string const& filename, SerializedSimulation& data);
-    ENGINEINTERFACE_EXPORT bool saveSimulationDataToFile2(string const& filename, SerializedSimulation& data);
+    ENGINEINTERFACE_EXPORT bool loadSimulationDataFromFile(string const& filename, SerializedSimulation& data);
+    ENGINEINTERFACE_EXPORT bool saveSimulationDataToFile(string const& filename, SerializedSimulation& data);
 
-    ENGINEINTERFACE_EXPORT SerializedSimulation serializeSimulation2(DeserializedSimulation const& data);
-    ENGINEINTERFACE_EXPORT DeserializedSimulation deserializeSimulation2(SerializedSimulation const& data);
+    ENGINEINTERFACE_EXPORT SerializedSimulation serializeSimulation(DeserializedSimulation const& data);
+    ENGINEINTERFACE_EXPORT DeserializedSimulation deserializeSimulation(SerializedSimulation const& data);
 
 private:
 	ENGINEINTERFACE_EXPORT string serializeSymbolMap(SymbolMap const symbols) const;
