@@ -320,8 +320,8 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         task);
     for (int i = 0; i < 2; ++i) {
         std::string node = "flow field.center" + toString(i) + ".";
-        auto& radialData = settings.flowFieldSettings.radialFlowCenters[i];
-        auto& defaultRadialData = defaultSettings.flowFieldSettings.radialFlowCenters[i];
+        auto& radialData = settings.flowFieldSettings.centers[i];
+        auto& defaultRadialData = defaultSettings.flowFieldSettings.centers[i];
         encodeDecode(tree, radialData.posX, defaultRadialData.posX, node + "pos.x", task);
         encodeDecode(tree, radialData.posY, defaultRadialData.posY, node + "pos.y", task);
         encodeDecode(tree, radialData.radius, defaultRadialData.radius, node + "radius", task);

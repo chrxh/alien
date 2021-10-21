@@ -122,96 +122,165 @@ void _SimulationParametersWindow::processBase(
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         createGroup("Numerics");
-        createFloatItem("Time step size", simParameters.timestepSize, origSimParameters.timestepSize, 0, 1.0f);
+        AlienImGui::SliderFloat(
+            "Time step size",
+            simParameters.timestepSize,
+            origSimParameters.timestepSize,
+            0,
+            1.0f,
+            false,
+            "%.3f",
+            std::string("Time duration calculated in a single step."));
 
         createGroup("General physics");
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Friction",
             simParameters.spotValues.friction,
             origSimParameters.spotValues.friction,
             0,
             1.0f,
             true,
-            "%.4f");
-        createFloatItem(
+            "%.4f",
+            std::string("Specifies how much the movements are slowed down per time step."));
+        AlienImGui::SliderFloat(
             "Radiation strength",
             simParameters.spotValues.radiationFactor,
             origSimParameters.spotValues.radiationFactor,
             0,
             0.01f,
             true,
-            "%.5f");
-        createFloatItem("Maximum velocity", simParameters.cellMaxVel, origSimParameters.cellMaxVel, 0, 6.0f);
-        createFloatItem(
-            "Maximum force", simParameters.spotValues.cellMaxForce, origSimParameters.spotValues.cellMaxForce, 0, 3.0f);
-        createFloatItem(
+            "%.5f",
+            std::string("Indicates how energetic the emitted particles of cells are."));
+        AlienImGui::SliderFloat(
+            "Maximum velocity",
+            simParameters.cellMaxVel,
+            origSimParameters.cellMaxVel,
+            0,
+            6.0f,
+            false,
+            "%.3f",
+            std::string("Maximum velocity that a cell can reach."));
+        AlienImGui::SliderFloat(
+            "Maximum force",
+            simParameters.spotValues.cellMaxForce,
+            origSimParameters.spotValues.cellMaxForce,
+            0,
+            3.0f,
+            false,
+            "%.3f",
+            std::string("Maximum force that can be applied to a cell without causing it to disintegrate."));
+        AlienImGui::SliderFloat(
             "Minimum energy",
             simParameters.spotValues.cellMinEnergy,
             origSimParameters.spotValues.cellMinEnergy,
             0,
-            100.0f);
-        createFloatItem("Minimum distance", simParameters.cellMinDistance, origSimParameters.cellMinDistance, 0, 1.0f);
+            100.0f,
+            false,
+            "%.3f",
+            std::string("Minimum energy a cell needs to exist."));
+        AlienImGui::SliderFloat(
+            "Minimum distance",
+            simParameters.cellMinDistance,
+            origSimParameters.cellMinDistance,
+            0,
+            1.0f,
+            false,
+            "%.3f",
+            std::string("Minimum distance between two cells without them annihilating each other."));
 
         createGroup("Collision and binding");
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Repulsion strength",
             simParameters.cellRepulsionStrength,
             origSimParameters.cellRepulsionStrength,
             0,
-            0.3f);
-        createFloatItem(
+            0.3f,
+            false,
+            "%.3f",
+            std::string("The strength of the repulsive forces, between two cells that do not connect."));
+        AlienImGui::SliderFloat(
             "Maximum collision distance",
             simParameters.cellMaxCollisionDistance,
             origSimParameters.cellMaxCollisionDistance,
             0,
-            3.0f);
-        createFloatItem(
+            3.0f,
+            false,
+            "%.3f",
+            std::string("Maximum distance up to which a collision of two cells is possible."));
+        AlienImGui::SliderFloat(
             "Maximum binding distance",
             simParameters.cellMaxBindingDistance,
             origSimParameters.cellMaxBindingDistance,
             0,
-            5.0f);
-        createFloatItem(
+            5.0f,
+            false,
+            "%.3f",
+            std::string("Maximum distance up to which a connection of two cells is possible."));
+        AlienImGui::SliderFloat(
             "Binding force strength",
             simParameters.spotValues.cellBindingForce,
             origSimParameters.spotValues.cellBindingForce,
             0,
-            4.0f);
-        createFloatItem(
+            4.0f,
+            false,
+            "%.3f",
+            std::string("Strength of the force that holds two connected cells together."));
+        AlienImGui::SliderFloat(
             "Binding creation force",
             simParameters.spotValues.cellFusionVelocity,
             origSimParameters.spotValues.cellFusionVelocity,
             0,
-            1.0f);
-        createIntItem("Maximum cell bonds", simParameters.cellMaxBonds, origSimParameters.cellMaxBonds, 0, 6);
+            1.0f,
+            false,
+            "%.3f",
+            std::string("Minimum collision velocity of two cells so that a connection can be established."));
+        AlienImGui::SliderInt(
+            "Maximum cell bonds",
+            simParameters.cellMaxBonds,
+            origSimParameters.cellMaxBonds,
+            0,
+            6,
+            std::string("Maximum number of connections a cell can establish with others."));
 
         createGroup("Cell functions");
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Mutation rate",
             simParameters.spotValues.tokenMutationRate,
             origSimParameters.spotValues.tokenMutationRate,
             0,
             0.005f,
             false,
-            "%.5f");
-        createFloatItem(
+            "%.5f",
+            std::string("Probability that a byte in the token memory is changed per time step."));
+        AlienImGui::SliderFloat(
             "Weapon energy cost",
             simParameters.spotValues.cellFunctionWeaponEnergyCost,
             origSimParameters.spotValues.cellFunctionWeaponEnergyCost,
             0,
-            4.0f);
-        createFloatItem(
+            4.0f,
+            false,
+            "%.3f",
+            std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles."));
+        AlienImGui::SliderFloat(
             "Weapon color penalty",
             simParameters.spotValues.cellFunctionWeaponColorPenalty,
             origSimParameters.spotValues.cellFunctionWeaponColorPenalty,
             0,
-            1.0f);
-        createFloatItem(
+            1.0f,
+            false,
+            "%.3f",
+            std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell "
+                        "does not match the adjacent color."));
+        AlienImGui::SliderFloat(
             "Weapon geometric penalty",
             simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent,
             origSimParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent,
             0,
-            5.0f);
+            5.0f,
+            false,
+            "%.3f",
+            std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
+                        "geometry of the attacked cell does not match the attacking cell."));
         ImGui::EndChild();
     }
 }
@@ -231,26 +300,26 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         ImGui::Text("Background color");
 
         auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-        createFloatItem(" Position X", spot.posX, origSpot.posX, 0, toFloat(worldSize.x), false, "%.1f");
-        createFloatItem(" Position Y", spot.posY, origSpot.posY, 0, toFloat(worldSize.y), false, "%.1f");
-        createFloatItem(" Core radius", spot.coreRadius, origSpot.coreRadius, 0, maxRadius, false, "%.1f");
-        createFloatItem(" Fade-out radius", spot.fadeoutRadius, origSpot.fadeoutRadius, 0, maxRadius, false, "%.1f");
+        AlienImGui::SliderFloat(" Position X", spot.posX, origSpot.posX, 0, toFloat(worldSize.x), false, "%.1f");
+        AlienImGui::SliderFloat(" Position Y", spot.posY, origSpot.posY, 0, toFloat(worldSize.y), false, "%.1f");
+        AlienImGui::SliderFloat(" Core radius", spot.coreRadius, origSpot.coreRadius, 0, maxRadius, false, "%.1f");
+        AlienImGui::SliderFloat(" Fade-out radius", spot.fadeoutRadius, origSpot.fadeoutRadius, 0, maxRadius, false, "%.1f");
 
         createGroup("General physics");
-        createFloatItem("Friction", spot.values.friction, origSpot.values.friction, 0, 1.0f, true, "%.4f");
-        createFloatItem(
+        AlienImGui::SliderFloat("Friction", spot.values.friction, origSpot.values.friction, 0, 1.0f, true, "%.4f");
+        AlienImGui::SliderFloat(
             "Radiation strength", spot.values.radiationFactor, origSpot.values.radiationFactor, 0, 0.01f, true, "%.5f");
-        createFloatItem("Maximum force", spot.values.cellMaxForce, origSpot.values.cellMaxForce, 0, 3.0f);
-        createFloatItem("Minimum energy", spot.values.cellMinEnergy, origSpot.values.cellMinEnergy, 0, 100.0f);
+        AlienImGui::SliderFloat("Maximum force", spot.values.cellMaxForce, origSpot.values.cellMaxForce, 0, 3.0f);
+        AlienImGui::SliderFloat("Minimum energy", spot.values.cellMinEnergy, origSpot.values.cellMinEnergy, 0, 100.0f);
 
         createGroup("Collision and binding");
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Binding force strength", spot.values.cellBindingForce, origSpot.values.cellBindingForce, 0, 4.0f);
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Binding creation force", spot.values.cellFusionVelocity, origSpot.values.cellFusionVelocity, 0, 1.0f);
 
         createGroup("Cell functions");
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Mutation rate",
             spot.values.tokenMutationRate,
             origSpot.values.tokenMutationRate,
@@ -258,19 +327,19 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             0.005f,
             false,
             "%.5f");
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Weapon energy cost",
             spot.values.cellFunctionWeaponEnergyCost,
             origSpot.values.cellFunctionWeaponEnergyCost,
             0,
             4.0f);
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Weapon color penalty",
             spot.values.cellFunctionWeaponColorPenalty,
             origSpot.values.cellFunctionWeaponColorPenalty,
             0,
             1.0f);
-        createFloatItem(
+        AlienImGui::SliderFloat(
             "Weapon geometric penalty",
             spot.values.cellFunctionWeaponGeometryDeviationExponent,
             origSpot.values.cellFunctionWeaponGeometryDeviationExponent,
@@ -290,51 +359,3 @@ void _SimulationParametersWindow::createGroup(std::string const& name)
     ImGui::Spacing();
 }
 
-void _SimulationParametersWindow::createFloatItem(
-    std::string const& name,
-    float& value,
-    float defaultValue,
-    float min,
-    float max,
-    bool logarithmic,
-    std::string const& format,
-    boost::optional<std::string> help)
-{ 
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x/2);
-    ImGui::SliderFloat(("##" + name).c_str(), &value, min, max, format.c_str(), logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    ImGui::SameLine();
-    ImGui::BeginDisabled(value == defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
-        value = defaultValue;
-    }
-    ImGui::EndDisabled();
-    ImGui::SameLine();
-    ImGui::Text(name.c_str());
-    if (help) {
-        AlienImGui::HelpMarker(help->c_str());
-    }
-}
-
-void _SimulationParametersWindow::createIntItem(
-    std::string const& name,
-    int& value,
-    int defaultValue,
-    int min,
-    int max,
-    boost::optional<std::string> help)
-{
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x/2);
-    ImGui::SliderInt(("##" + name).c_str(), &value, min, max);
-    ImGui::SameLine();
-    ImGui::BeginDisabled(value == defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
-        value = defaultValue;
-    }
-    ImGui::EndDisabled();
-    ImGui::SameLine();
-    ImGui::Text(name.c_str());
-
-    if (help) {
-        AlienImGui::HelpMarker(help->c_str());
-    }
-}

@@ -96,8 +96,8 @@ void _NewSimulationDialog::onNewSimulation()
     settings.generalSettings.worldSizeX = _width;
     settings.generalSettings.worldSizeY = _height;
     settings.simulationParameters = _simController->getSimulationParameters();
-    settings.flowFieldSettings.radialFlowCenters[0].posX = toFloat(_width) / 2;
-    settings.flowFieldSettings.radialFlowCenters[0].posY = toFloat(_height) / 2;
+    settings.flowFieldSettings.centers[0].posX = toFloat(_width) / 2;
+    settings.flowFieldSettings.centers[0].posY = toFloat(_height) / 2;
 
     _simController->newSimulation(0, settings, symbolMap);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
