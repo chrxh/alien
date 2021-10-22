@@ -23,12 +23,12 @@ int main(int, char**)
         MainWindow mainWindow = boost::make_shared<_MainWindow>();
         SimulationController simController = boost::make_shared<_SimulationController>();
 
-        auto glfwWindow = mainWindow->init(simController, logger);
+        mainWindow->init(simController, logger);
         simController->initCuda();
 
-        mainWindow->mainLoop(glfwWindow);
+        mainWindow->mainLoop();
 
-        mainWindow->shutdown(glfwWindow);
+        mainWindow->shutdown();
         simController->closeSimulation();
     } catch (std::exception const& e) {
         auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();

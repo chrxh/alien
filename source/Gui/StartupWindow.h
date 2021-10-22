@@ -23,7 +23,7 @@ public:
         RequestLoading,
         LoadingSimulation,
         LoadingControls,
-        Finished
+        FinishedLoading
     };
     State getState();
 

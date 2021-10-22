@@ -37,7 +37,7 @@ void _SimulationParametersWindow::process()
     auto origSimParametersSpots = _simController->getOriginalSimulationParametersSpots();
     auto lastSimParametersSpots = simParametersSpots;
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Simulation parameters", &_on, windowFlags);
 
     if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {

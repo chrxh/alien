@@ -181,6 +181,7 @@
     <ClInclude Include="..\..\source\Gui\Shader.h" />
     <ClInclude Include="..\..\source\Gui\StyleRepository.h" />
     <ClInclude Include="..\..\source\Gui\TemporalControlWindow.h" />
+    <ClInclude Include="..\..\source\Gui\UiController.h" />
     <ClInclude Include="..\..\source\Gui\Viewport.h" />
     <ClInclude Include="..\..\source\Gui\AlienImGui.h" />
   </ItemGroup>
@@ -218,6 +219,7 @@
     <ClCompile Include="..\..\source\Gui\Shader.cpp" />
     <ClCompile Include="..\..\source\Gui\StyleRepository.cpp" />
     <ClCompile Include="..\..\source\Gui\TemporalControlWindow.cpp" />
+    <ClCompile Include="..\..\source\Gui\UiController.cpp" />
     <ClCompile Include="..\..\source\Gui\Viewport.cpp" />
     <ClCompile Include="..\..\source\Gui\AlienImGui.cpp" />
   </ItemGroup>

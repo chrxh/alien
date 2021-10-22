@@ -23,7 +23,7 @@ void _GpuSettingsWindow::process()
     auto gpuSettings = _simController->getGpuSettings();
     auto origGpuSettings = gpuSettings;
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("GPU settings", &_on, windowFlags);
 
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {

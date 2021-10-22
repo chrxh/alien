@@ -7,9 +7,9 @@ struct GLFWvidmode;
 class _MainWindow
 {
 public:
-    GLFWwindow* init(SimulationController const& simController, SimpleLogger _simpleLogger);
-    void mainLoop(GLFWwindow* window);
-    void shutdown(GLFWwindow* window);
+    void init(SimulationController const& simController, SimpleLogger _simpleLogger);
+    void mainLoop();
+    void shutdown();
 
 private:
     struct GlfwData
@@ -19,6 +19,14 @@ private:
         char const* glsl_version;
     };
     GlfwData initGlfw();
+
+    void processUninitialized();
+    void processRequestLoading();
+    void processLoadingSimulation();
+    void processLoadingControls();
+    void processFinishedLoading();
+
+    void renderSimulation();
 
     void processMenubar();
     void processDialogs();
@@ -35,6 +43,7 @@ private:
     void processExitDialog();
     void reset();
 
+    GLFWwindow* _window;
     SimpleLogger _logger;
     SimulationController _simController;
     SimulationView _simulationView;
@@ -51,6 +60,7 @@ private:
     NewSimulationDialog _newSimulationDialog;
     AboutDialog _aboutDialog;
     ColorizeDialog _colorizeDialog;
+    UiController _uiController; 
 
     StyleRepository _styleRepository;
 

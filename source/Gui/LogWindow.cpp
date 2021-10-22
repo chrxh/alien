@@ -17,7 +17,7 @@ void _LogWindow::process()
     if (!_on) {
         return;
     }
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Log", &_on)) {
         ImGui::Checkbox("Verbose", &_verbose);
 

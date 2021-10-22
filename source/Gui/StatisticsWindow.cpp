@@ -239,6 +239,10 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
     auto maxValue = getMax(valueHistory);
     
     ImGui::PushID(row);
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
+
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(
         _liveStatistics.timepointsHistory.back() - _liveStatistics.history,
@@ -247,32 +251,33 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
         maxValue * 1.5,
         ImGuiCond_Always);
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, 80), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(row));
+        auto color = ImPlot::GetColormapColor(row);
+        color.w *= ImGui::GetStyle().Alpha;
 
+        if (ImGui::GetStyle().Alpha == 1.0f) {
+            ImPlot::AnnotateClamped(
+                _liveStatistics.timepointsHistory.back(),
+                valueHistory.back(),
+                ImVec2(-10.0f, 10.0f),
+                color,
+                StringFormatter::format(toInt(valueHistory.back())).c_str());
+        }
+
+        ImPlot::PushStyleColor(ImPlotCol_Line, color);
         ImPlot::PlotLine(
-            "##",
-            _liveStatistics.timepointsHistory.data(),
-            valueHistory.data(),
-            toInt(valueHistory.size()));
+            "##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
 
-        ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+        ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f * ImGui::GetStyle().Alpha);
         ImPlot::PlotShaded(
-            "##",
-            _liveStatistics.timepointsHistory.data(),
-            valueHistory.data(),
-            toInt(valueHistory.size()));
-        ImPlot::AnnotateClamped(
-            _liveStatistics.timepointsHistory.back(),
-            valueHistory.back(),
-            ImVec2(-10.0f, 10.0f),
-            ImPlot::GetLastItemColor(),
-            StringFormatter::format(toInt(valueHistory.back())).c_str());
-
+            "##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
         ImPlot::PopStyleVar();
+
         ImPlot::PopStyleColor();
+
         ImPlot::EndPlot();
     }
     ImPlot::PopStyleVar();
+    ImPlot::PopStyleColor(3);
     ImGui::PopID();
 }
 

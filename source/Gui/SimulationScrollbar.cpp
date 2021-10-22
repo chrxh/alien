@@ -31,7 +31,7 @@ void _SimulationScrollbar::process(RealRect const& rect)
 
     ImGui::SetNextWindowPos(ImVec2(rect.topLeft.x, rect.topLeft.y));
     ImGui::SetNextWindowSize(ImVec2(size.x, size.y));
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha);
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::Begin(_id.c_str(), NULL, windowFlags);
 
