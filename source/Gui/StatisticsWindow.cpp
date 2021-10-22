@@ -97,7 +97,7 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthFixed, 125.0f);
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
-        ImPlot::PushColormap(ImPlotColormap_Plasma);
+        ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -129,7 +129,7 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetupColumn("Processes", ImGuiTableColumnFlags_WidthFixed, 125.0f);
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
-        ImPlot::PushColormap(ImPlotColormap_Plasma);
+        ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -171,7 +171,7 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthFixed, 125.0f);
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
-        ImPlot::PushColormap(ImPlotColormap_Plasma);
+        ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -203,7 +203,7 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetupColumn("Processes", ImGuiTableColumnFlags_WidthFixed, 125.0f);
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
-        ImPlot::PushColormap(ImPlotColormap_Plasma);
+        ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -251,8 +251,7 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
         maxValue * 1.5,
         ImGuiCond_Always);
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, 80), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row);
-        color.w *= ImGui::GetStyle().Alpha;
+        auto color = ImPlot::GetColormapColor(row + 2);
 
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
@@ -286,6 +285,9 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
     auto maxValue = getMax(valueHistory);
 
     ImGui::PushID(row);
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(
         _longtermStatistics.timestepHistory.front(),
@@ -294,25 +296,28 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
         maxValue * 1.5,
         ImGuiCond_Always);  
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, 80), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        ImPlot::PushStyleColor(ImPlotCol_Line, ImPlot::GetColormapColor(row));
+        auto color = ImPlot::GetColormapColor(row + 2);
+        if (ImGui::GetStyle().Alpha == 1.0f) {
+            ImPlot::AnnotateClamped(
+                _longtermStatistics.timestepHistory.back(),
+                valueHistory.back(),
+                ImVec2(-10.0f, 10.0f),
+                ImPlot::GetLastItemColor(),
+                StringFormatter::format(toInt(valueHistory.back())).c_str());
+        }
+        ImPlot::PushStyleColor(ImPlotCol_Line, color);
         ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
         ImPlot::PlotLine(
             "##", _longtermStatistics.timestepHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
         ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
         ImPlot::PlotShaded(
             "##", _longtermStatistics.timestepHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
-        ImPlot::AnnotateClamped(
-            _longtermStatistics.timestepHistory.back(),
-            valueHistory.back(),
-            ImVec2(-10.0f, 10.0f),
-            ImPlot::GetLastItemColor(),
-            StringFormatter::format(toInt(valueHistory.back())).c_str());
-
         ImPlot::PopStyleVar();
         ImPlot::PopStyleColor();
         ImPlot::EndPlot();
     }
     ImPlot::PopStyleVar();
+    ImPlot::PopStyleColor(3);
     ImGui::PopID();
 }
 
