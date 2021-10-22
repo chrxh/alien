@@ -72,4 +72,5 @@ private:
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
     bool _showExitDialog = false;
+    bool _renderSimulation = true;
 };
