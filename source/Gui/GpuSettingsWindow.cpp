@@ -21,47 +21,20 @@ void _GpuSettingsWindow::process()
     }
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
     auto gpuSettings = _simController->getGpuSettings();
-    auto origGpuSettings = gpuSettings;
+    auto origGpuSettings = _simController->getOriginalGpuSettings();
+    auto lastGpuSettings = gpuSettings;
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("GPU settings", &_on, windowFlags);
 
-    if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
+    AlienImGui::InputInt(
+        "Blocks", gpuSettings.NUM_BLOCKS, origGpuSettings.NUM_BLOCKS, std::string("Number of GPU thread blocks."));
 
-        //blocks
-        ImGui::TableNextRow();
-
-        ImGui::TableSetColumnIndex(0);
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-        ImGui::InputInt("##width", &gpuSettings.NUM_BLOCKS);
-        ImGui::PopItemWidth();
-
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("Blocks");
-        ImGui::SameLine();
-        AlienImGui::HelpMarker("This is a more typical looking tree with selectable nodes.\n"
-                                   "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
-
-        //threads per block
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-        ImGui::InputInt("##height", &gpuSettings.NUM_THREADS_PER_BLOCK);
-        ImGui::PopItemWidth();
-
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("Threads per Block");
-        ImGui::SameLine();
-        AlienImGui::HelpMarker("This is a more typical looking tree with selectable nodes.\n"
-                                   "Click to select, CTRL+Click to toggle, click on arrows or double-click to open.");
-
-        ImGui::TableNextRow();
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Spacing();
-
-        ImGui::EndTable();
-    }
+    AlienImGui::InputInt(
+        "Threads per Block",
+        gpuSettings.NUM_THREADS_PER_BLOCK,
+        origGpuSettings.NUM_THREADS_PER_BLOCK,
+        std::string("Number of GPU threads per blocks."));
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -79,7 +52,7 @@ void _GpuSettingsWindow::process()
 
     ImGui::End();
 
-    if (gpuSettings != origGpuSettings) {
+    if (gpuSettings != lastGpuSettings) {
         _simController->setGpuSettings_async(gpuSettings);
     }
 }
