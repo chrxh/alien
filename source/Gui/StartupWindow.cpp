@@ -88,11 +88,11 @@ void _StartupWindow::process()
         auto alphaFactor = toFloat(millisecSinceActivation) / FadeInDuration;
         ImGui::GetStyle().Alpha = alphaFactor;
         if (alphaFactor == 1.0f) {
-            _state = State::Finished;
+            _state = State::FinishedLoading;
         }
     }
 
-    if (_state == State::Finished) {
+    if (_state == State::FinishedLoading) {
         return;
     }
 }

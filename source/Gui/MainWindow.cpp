@@ -42,6 +42,7 @@
 #include "ColorizeDialog.h"
 #include "LogWindow.h"
 #include "SimpleLogger.h"
+#include "UiController.h"
 
 namespace
 {
@@ -60,7 +61,7 @@ namespace
     }
 }
 
-GLFWwindow* _MainWindow::init(SimulationController const& simController, SimpleLogger logger)
+void _MainWindow::init(SimulationController const& simController, SimpleLogger logger)
 {
     _logger = logger;
     _simController = simController;
@@ -95,6 +96,7 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController, SimpleL
     _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
     _viewport->setZoomFactor(4.0f);
     _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
+    _uiController = boost::make_shared<_UiController>();
 
     _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
@@ -130,13 +132,14 @@ GLFWwindow* _MainWindow::init(SimulationController const& simController, SimpleL
         GLuint texID = (GLuint)((uintptr_t)tex);
         glDeleteTextures(1, &texID);
     };
-    return glfwData.window;
+
+    _window = glfwData.window;
 }
 
-void _MainWindow::mainLoop(GLFWwindow* window)
+void _MainWindow::mainLoop()
 {
     bool show_demo_window = true;
-    while (!glfwWindowShouldClose(window) && !_onClose)
+    while (!glfwWindowShouldClose(_window) && !_onClose)
     {
         glfwPollEvents();
 
@@ -150,43 +153,29 @@ void _MainWindow::mainLoop(GLFWwindow* window)
         {}
 */
 
-        ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
-        if (_startupWindow->getState() == _StartupWindow::State::LoadingControls
-            || _startupWindow->getState() == _StartupWindow::State::Finished) {
-            processMenubar();
-            processDialogs();
-            processWindows();
-            _simulationView->processControls();
-        }
-        if (_startupWindow->getState() != _StartupWindow::State::Finished) {
-            _startupWindow->process();
-        }
-        ImGui::PopStyleVar(2);
-
-        // render content
-        ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
-        if (_startupWindow->getState() != _StartupWindow::State::Unintialized) {
-            _simulationView->processContent();
-        } else {
-            glClearColor(0, 0, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(window);
-
-        if (_startupWindow->getState() == _StartupWindow::State::Unintialized) {
-            _startupWindow->activate();
+        switch (_startupWindow->getState()) {
+        case _StartupWindow::State::Unintialized:
+            processUninitialized();
+            break;
+        case _StartupWindow::State::RequestLoading:
+            processRequestLoading();
+            break;
+        case _StartupWindow::State::LoadingSimulation:
+            processLoadingSimulation();
+            break;
+        case _StartupWindow::State::LoadingControls:
+            processLoadingControls();
+            break;
+        case _StartupWindow::State::FinishedLoading:
+            processFinishedLoading();
+            break;
+        default:
+            THROW_NOT_IMPLEMENTED();
         }
     }
 }
 
-void _MainWindow::shutdown(GLFWwindow* window)
+void _MainWindow::shutdown()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -194,7 +183,7 @@ void _MainWindow::shutdown(GLFWwindow* window)
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(_window);
     glfwTerminate();
 
     _simulationView.reset();
@@ -245,6 +234,83 @@ auto _MainWindow::initGlfw() -> GlfwData
     glfwSwapInterval(1);  // Enable vsync
 
     return {window, mode, glsl_version};
+}
+
+void _MainWindow::processUninitialized()
+{
+    _startupWindow->process();
+
+    // render content
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(0, 0, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(_window);
+
+    _startupWindow->activate();
+}
+
+void _MainWindow::processRequestLoading()
+{
+    _startupWindow->process();
+    renderSimulation();
+}
+
+void _MainWindow::processLoadingSimulation()
+{
+    _startupWindow->process();
+    renderSimulation();
+}
+
+void _MainWindow::processLoadingControls()
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
+
+    processMenubar();
+    processDialogs();
+    processWindows();
+    _uiController->process();
+    _simulationView->processControls();
+    _startupWindow->process();
+
+    ImGui::PopStyleVar(2);
+
+    renderSimulation();
+}
+
+void _MainWindow::processFinishedLoading()
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
+
+    processMenubar();
+    processDialogs();
+    processWindows();
+    _uiController->process();
+    _simulationView->processControls();
+
+    ImGui::PopStyleVar(2);
+
+    renderSimulation();
+}
+
+void _MainWindow::renderSimulation()
+{
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    _simulationView->processContent();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(_window);
 }
 
 void _MainWindow::processMenubar()
@@ -309,8 +375,8 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
-            if (ImGui::MenuItem("Render UI", "", _flowGeneratorWindow->isOn())) {
-                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+            if (ImGui::MenuItem("Render UI", "U", _uiController->isOn())) {
+                _uiController->setOn(!_uiController->isOn());
             }
             if (ImGui::MenuItem("Render Simulation", "", _flowGeneratorWindow->isOn())) {
                 _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
@@ -348,6 +414,9 @@ void _MainWindow::processMenubar()
     }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
         onPauseSimulation();
+    }
+    if (ImGui::IsKeyPressed(GLFW_KEY_U)) {
+        _uiController->setOn(!_uiController->isOn());
     }
 }
 
