@@ -63,6 +63,9 @@ using SimpleLogger = boost::shared_ptr<_SimpleLogger>;
 class _FileLogger;
 using FileLogger = boost::shared_ptr<_FileLogger>;
 
+class _UiController;
+using UiController = boost::shared_ptr<_UiController>;
+
 struct GLFWwindow;
 struct ImFont;
 
