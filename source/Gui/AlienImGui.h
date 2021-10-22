@@ -23,6 +23,11 @@ public:
         int min,
         int max,
         boost::optional<std::string> tooltip = boost::none);
+    static void InputInt(
+        std::string const& name,
+        int& value,
+        int defaultValue,
+        boost::optional<std::string> tooltip = boost::none);
     static void Combo(std::string const& name, int& value, int defaultValue, std::vector<std::string> const& values);
     static bool BeginMenuButton(std::string const& text, bool& toggle,
                                 std::string const& popup);  //return toggle
