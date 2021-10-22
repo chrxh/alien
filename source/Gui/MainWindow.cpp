@@ -306,7 +306,12 @@ void _MainWindow::renderSimulation()
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    _simulationView->processContent();
+    if (_renderSimulation) {
+        _simulationView->processContent();
+    } else {
+        glClearColor(0, 0, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -375,11 +380,11 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
-            if (ImGui::MenuItem("Render UI", "U", _uiController->isOn())) {
+            if (ImGui::MenuItem("Render UI", "ALT+U", _uiController->isOn())) {
                 _uiController->setOn(!_uiController->isOn());
             }
-            if (ImGui::MenuItem("Render Simulation", "", _flowGeneratorWindow->isOn())) {
-                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+            if (ImGui::MenuItem("Render Simulation", "ALT+S", _renderSimulation)) {
+                _renderSimulation = !_renderSimulation;
             }
             AlienImGui::EndMenuButton();
         }
@@ -415,8 +420,11 @@ void _MainWindow::processMenubar()
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
         onPauseSimulation();
     }
-    if (ImGui::IsKeyPressed(GLFW_KEY_U)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_U)) {
         _uiController->setOn(!_uiController->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+        _renderSimulation = !_renderSimulation;
     }
 }
 
