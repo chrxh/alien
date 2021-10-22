@@ -37,7 +37,7 @@ void _SimulationScrollbar::process(RealRect const& rect)
 
     ImColor sliderColor = doesMouseCursorIntersectSliderBar(rect) ? ImColor(Const::SimulationSliderColor_Active)
                                                                   : ImColor(Const::SimulationSliderColor_Base);
-
+    sliderColor.Value.w *= ImGui::GetStyle().Alpha;
     ImGui::GetWindowDrawList()->AddRectFilled(
         ImVec2(rect.topLeft.x + sliderbarRect.topLeft.x, rect.topLeft.y + sliderbarRect.topLeft.y),
         ImVec2(rect.topLeft.x + sliderbarRect.bottomRight.x, rect.topLeft.y + sliderbarRect.bottomRight.y),

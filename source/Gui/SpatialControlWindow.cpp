@@ -45,30 +45,35 @@ void _SpatialControlWindow::process()
     ImGui::Spacing();
     ImGui::Spacing();
 
-    ImGui::Text("World size");
-    ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    auto worldSize = _simController->getWorldSize();
-    ImGui::Text((StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-    ImGui::Text("Zoom factor");
-    ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::Text(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+        ImGui::Text("World size");
+        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+        auto worldSize = _simController->getWorldSize();
+        ImGui::Text((StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
 
-    ImGui::Text("Center position");
-    ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    auto centerPos = _viewport->getCenterInWorldPos();
-    ImGui::Text((StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+        ImGui::Text("Zoom factor");
+        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+        ImGui::Text(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
 
-    processZoomSensitivitySlider();
+        ImGui::Text("Center position");
+        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+        auto centerPos = _viewport->getCenterInWorldPos();
+        ImGui::Text((StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
+
+        processZoomSensitivitySlider();
+
+        ImGui::EndChild();
+    }
 
     ImGui::End();
 

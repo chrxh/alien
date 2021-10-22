@@ -55,12 +55,15 @@ void _TemporalControlWindow::process()
     ImGui::Spacing();
     ImGui::Spacing();
 
-    processTpsInfo();
-    processTotalTimestepsInfo();
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        processTpsInfo();
+        processTotalTimestepsInfo();
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-    processTpsRestriction();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        processTpsRestriction();
+        ImGui::EndChild();
+    }
 
     ImGui::End();
 }
