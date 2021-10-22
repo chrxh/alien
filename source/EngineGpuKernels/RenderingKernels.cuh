@@ -310,7 +310,7 @@ __global__ void drawCells(
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
             auto color = calcColor(cell, false /*isSelected*/);
-            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, false);
+            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
 
             if (zoom > 1 - FP_PRECISION) {
                 color = color * min((zoom - 1.0f) / 3, 1.0f);

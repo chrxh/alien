@@ -71,6 +71,28 @@ void AlienImGui::SliderInt(
     }
 }
 
+void AlienImGui::InputInt(
+    std::string const& name,
+    int& value,
+    int defaultValue,
+    boost::optional<std::string> tooltip)
+{
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 2);
+    ImGui::InputInt(("##" + name).c_str(), &value);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(value == defaultValue);
+    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
+        value = defaultValue;
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::Text(name.c_str());
+
+    if (tooltip) {
+        AlienImGui::HelpMarker(tooltip->c_str());
+    }
+}
+
 void AlienImGui::Combo(std::string const& name, int& value, int defaultValue, std::vector<std::string> const& values)
 {
     const char* items[10] = {};

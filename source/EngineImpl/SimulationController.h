@@ -52,6 +52,7 @@ public:
     ENGINEIMPL_EXPORT void setSimulationParametersSpots_async(SimulationParametersSpots const& value);
 
     ENGINEIMPL_EXPORT GpuSettings getGpuSettings() const;
+    ENGINEIMPL_EXPORT GpuSettings getOriginalGpuSettings() const;
     ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);
 
     ENGINEIMPL_EXPORT FlowFieldSettings getFlowFieldSettings() const;
@@ -77,6 +78,7 @@ private:
     Settings _origSettings;
     Settings _settings;
     GpuSettings _gpuSettings; 
+    GpuSettings _origGpuSettings;
     SymbolMap _symbolMap;
 
     EngineWorker _worker;
