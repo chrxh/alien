@@ -7,19 +7,21 @@
 
 struct GlobalSettingsImpl;
 
-class _GlobalSettings
+class GlobalSettings
 {
 public:
-    _GlobalSettings();
-    ~_GlobalSettings();
+    static GlobalSettings& getInstance();
 
-    _GlobalSettings(_GlobalSettings const&) = delete;
-    void operator=(_GlobalSettings const&) = delete;
+    GlobalSettings(GlobalSettings const&) = delete;
+    void operator=(GlobalSettings const&) = delete;
 
     GpuSettings getGpuSettings();
     void setGpuSettings(GpuSettings gpuSettings);
 
 private:
+    GlobalSettings();
+    ~GlobalSettings();
+
     void encodeDecodeGpuSettings(GpuSettings& gpuSettings, Parser::Task task);
 
     GlobalSettingsImpl* _impl;

@@ -209,7 +209,6 @@
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp" />
-    <ClCompile Include="..\..\source\Gui\Source.cpp" />
     <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StartupWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StatisticsWindow.cpp" />

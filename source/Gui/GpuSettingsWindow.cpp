@@ -11,20 +11,18 @@
 
 _GpuSettingsWindow::_GpuSettingsWindow(
     StyleRepository const& styleRepository,
-    SimulationController const& simController,
-    GlobalSettings const& globalSettings)
+    SimulationController const& simController)
     : _styleRepository(styleRepository)
     , _simController(simController)
-    , _globalSettings(globalSettings)
 {
-    auto gpuSettings = _globalSettings->getGpuSettings();
+    auto gpuSettings = GlobalSettings::getInstance().getGpuSettings();
     _simController->setGpuSettings_async(gpuSettings);
 }
 
 _GpuSettingsWindow::~_GpuSettingsWindow()
 {
     auto gpuSettings = _simController->getGpuSettings();
-    _globalSettings->setGpuSettings(gpuSettings);
+    GlobalSettings::getInstance().setGpuSettings(gpuSettings);
 }
 
 void _GpuSettingsWindow::process()

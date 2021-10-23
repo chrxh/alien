@@ -12,7 +12,41 @@ struct GlobalSettingsImpl
     boost::property_tree::ptree _tree;
 };
 
-_GlobalSettings::_GlobalSettings()
+
+GlobalSettings& GlobalSettings::getInstance()
+{
+    static GlobalSettings instance;
+    return instance;
+}
+
+GpuSettings GlobalSettings::getGpuSettings()
+{
+    GpuSettings result;
+    encodeDecodeGpuSettings(result, Parser::Task::Decode);
+    return result;
+}
+
+void GlobalSettings::setGpuSettings(GpuSettings gpuSettings)
+{
+    encodeDecodeGpuSettings(gpuSettings, Parser::Task::Encode);
+}
+
+void GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, Parser::Task task)
+{
+    GpuSettings defaultSettings;
+    Parser::encodeDecode(
+        _impl->_tree,
+        gpuSettings.NUM_BLOCKS,
+        defaultSettings.NUM_BLOCKS, "GPU settings.num blocks", task);
+    Parser::encodeDecode(
+        _impl->_tree,
+        gpuSettings.NUM_THREADS_PER_BLOCK,
+        defaultSettings.NUM_THREADS_PER_BLOCK,
+        "GPU settings.num threads per block",
+        task);
+}
+
+GlobalSettings::GlobalSettings()
 {
     try {
         _impl = new GlobalSettingsImpl;
@@ -31,7 +65,7 @@ _GlobalSettings::_GlobalSettings()
     }
 }
 
-_GlobalSettings::~_GlobalSettings()
+GlobalSettings::~GlobalSettings()
 {
     try {
         std::stringstream ss;
@@ -48,31 +82,4 @@ _GlobalSettings::~_GlobalSettings()
     }
 
     delete _impl;
-}
-
-GpuSettings _GlobalSettings::getGpuSettings()
-{
-    GpuSettings result;
-    encodeDecodeGpuSettings(result, Parser::Task::Decode);
-    return result;
-}
-
-void _GlobalSettings::setGpuSettings(GpuSettings gpuSettings)
-{
-    encodeDecodeGpuSettings(gpuSettings, Parser::Task::Encode);
-}
-
-void _GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, Parser::Task task)
-{
-    GpuSettings defaultSettings;
-    Parser::encodeDecode(
-        _impl->_tree,
-        gpuSettings.NUM_BLOCKS,
-        defaultSettings.NUM_BLOCKS, "GPU settings.num blocks", task);
-    Parser::encodeDecode(
-        _impl->_tree,
-        gpuSettings.NUM_THREADS_PER_BLOCK,
-        defaultSettings.NUM_THREADS_PER_BLOCK,
-        "GPU settings.num threads per block",
-        task);
 }
