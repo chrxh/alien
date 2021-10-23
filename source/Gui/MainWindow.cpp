@@ -43,6 +43,7 @@
 #include "LogWindow.h"
 #include "SimpleLogger.h"
 #include "UiController.h"
+#include "GlobalSettings.h"
 
 namespace
 {
@@ -61,7 +62,7 @@ namespace
     }
 }
 
-void _MainWindow::init(SimulationController const& simController, SimpleLogger logger)
+_MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger const& logger)
 {
     _logger = logger;
     _simController = simController;
@@ -98,13 +99,14 @@ void _MainWindow::init(SimulationController const& simController, SimpleLogger l
     _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
     _uiController = boost::make_shared<_UiController>();
 
+    _globalSettings = boost::make_shared<_GlobalSettings>();
     _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
     _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
-    _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
+    _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController, _globalSettings);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
     _startupWindow = boost::make_shared<_StartupWindow>(
         _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);

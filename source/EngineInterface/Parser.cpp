@@ -4,18 +4,6 @@
 #include "GeneralSettings.h"
 #include "Settings.h"
 
-namespace
-{
-    template<typename T>
-    std::string toString(T value) { return std::to_string(value); }
-
-    template <>
-    std::string toString<bool>(bool value)
-    {
-        return value ? "true" : "false";
-    }
-}
-
 boost::property_tree::ptree Parser::encode(uint64_t timestep, Settings settings)
 {
     boost::property_tree::ptree tree;
@@ -319,27 +307,12 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         "flow field.num centers",
         task);
     for (int i = 0; i < 2; ++i) {
-        std::string node = "flow field.center" + toString(i) + ".";
+        std::string node = "flow field.center" + std::to_string(i) + ".";
         auto& radialData = settings.flowFieldSettings.centers[i];
         auto& defaultRadialData = defaultSettings.flowFieldSettings.centers[i];
         encodeDecode(tree, radialData.posX, defaultRadialData.posX, node + "pos.x", task);
         encodeDecode(tree, radialData.posY, defaultRadialData.posY, node + "pos.y", task);
         encodeDecode(tree, radialData.radius, defaultRadialData.radius, node + "radius", task);
         encodeDecode(tree, radialData.strength, defaultRadialData.strength, node + "strength", task);
-    }
-}
-
-template <typename T>
-void Parser::encodeDecode(
-    boost::property_tree::ptree& tree,
-    T& parameter,
-    T const& defaultValue,
-    std::string const& node,
-    Task task)
-{
-    if (Task::Encode == task) {
-        tree.add(node, toString(parameter));
-    } else {
-        parameter = tree.get<T>(node, defaultValue);
     }
 }

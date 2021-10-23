@@ -9,9 +9,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="glad">
-      <UniqueIdentifier>{c67e7597-5425-4314-be12-4e04be1c8795}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files">
       <UniqueIdentifier>{514a28e9-a764-4119-96d3-ed99904671b7}</UniqueIdentifier>
     </Filter>
@@ -29,6 +26,9 @@
     </Filter>
     <Filter Include="external\ImPlot">
       <UniqueIdentifier>{8877bd0e-48e9-420e-8e4f-aa7a4e9d4fd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\glad">
+      <UniqueIdentifier>{c67e7597-5425-4314-be12-4e04be1c8795}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,7 +63,7 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\external\glad\include\glad\glad.h">
-      <Filter>glad</Filter>
+      <Filter>external\glad</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\Definitions.h">
       <Filter>Source Files</Filter>
@@ -146,7 +146,12 @@
     <ClInclude Include="..\..\source\Gui\FileLogger.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\UiController.h" />
+    <ClInclude Include="..\..\source\Gui\UiController.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\GlobalSettings.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\imgui\imgui.cpp">
@@ -177,7 +182,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\glad\src\glad.c">
-      <Filter>glad</Filter>
+      <Filter>external\glad</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\SimulationView.cpp">
       <Filter>Source Files</Filter>
@@ -255,6 +260,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\UiController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\GlobalSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

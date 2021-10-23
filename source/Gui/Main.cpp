@@ -20,10 +20,9 @@ int main(int, char**)
     FileLogger fileLogger = boost::make_shared<_FileLogger>();
 
     try {
-        MainWindow mainWindow = boost::make_shared<_MainWindow>();
         SimulationController simController = boost::make_shared<_SimulationController>();
+        MainWindow mainWindow = boost::make_shared<_MainWindow>(simController, logger);
 
-        mainWindow->init(simController, logger);
         simController->initCuda();
 
         mainWindow->mainLoop();

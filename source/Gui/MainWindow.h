@@ -7,7 +7,7 @@ struct GLFWvidmode;
 class _MainWindow
 {
 public:
-    void init(SimulationController const& simController, SimpleLogger _simpleLogger);
+    _MainWindow(SimulationController const& simController, SimpleLogger const& logger);
     void mainLoop();
     void shutdown();
 
@@ -45,6 +45,8 @@ private:
 
     GLFWwindow* _window;
     SimpleLogger _logger;
+
+    GlobalSettings _globalSettings;
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;

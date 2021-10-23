@@ -165,6 +165,7 @@
     <ClInclude Include="..\..\source\Gui\FileLogger.h" />
     <ClInclude Include="..\..\source\Gui\FlowGeneratorWindow.h" />
     <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h" />
+    <ClInclude Include="..\..\source\Gui\GlobalSettings.h" />
     <ClInclude Include="..\..\source\Gui\SimpleLogger.h" />
     <ClInclude Include="..\..\source\Gui\LogWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
@@ -203,10 +204,12 @@
     <ClCompile Include="..\..\source\Gui\FileLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\FlowGeneratorWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp" />
+    <ClCompile Include="..\..\source\Gui\GlobalSettings.cpp" />
     <ClCompile Include="..\..\source\Gui\SimpleLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\NewSimulationDialog.cpp" />
+    <ClCompile Include="..\..\source\Gui\Source.cpp" />
     <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StartupWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\StatisticsWindow.cpp" />
