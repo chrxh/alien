@@ -262,9 +262,6 @@
     <ClCompile Include="..\..\source\Gui\UiController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\Source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source\Gui\GlobalSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
