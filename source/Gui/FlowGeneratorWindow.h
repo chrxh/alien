@@ -8,6 +8,7 @@ class _FlowGeneratorWindow
 {
 public:
     _FlowGeneratorWindow(SimulationController const& simController);
+    ~_FlowGeneratorWindow();
 
     void process();
 

@@ -8,6 +8,7 @@
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
+#include "GlobalSettings.h"
 
 _SimulationParametersWindow::_SimulationParametersWindow(
     StyleRepository const& styleRepository,
@@ -21,6 +22,12 @@ _SimulationParametersWindow::_SimulationParametersWindow(
         color.w = 1.0f; //alpha
         _savedPalette[n] = static_cast<ImU32>(ImColor(color));
     }
+    _on = GlobalSettings::getInstance().getBoolState("window.simulation parameters.active", false);
+}
+
+_SimulationParametersWindow::~_SimulationParametersWindow()
+{
+    GlobalSettings::getInstance().setBoolState("window.simulation parameters.active", _on);
 }
 
 void _SimulationParametersWindow::process()

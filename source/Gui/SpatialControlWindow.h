@@ -12,6 +12,7 @@ public:
         SimulationController const& simController,
         Viewport const& viewport,
         StyleRepository const& styleRepository);
+    ~_SpatialControlWindow();
 
     void process();
 

@@ -6,7 +6,7 @@
 
 namespace
 {
-    constexpr auto FadeInOutDuration = 2000ll;
+    constexpr auto FadeInOutDuration = 1000ll;
 }
 
 bool _UiController::isOn() const

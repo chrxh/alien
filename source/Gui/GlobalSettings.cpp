@@ -31,6 +31,18 @@ void GlobalSettings::setGpuSettings(GpuSettings gpuSettings)
     encodeDecodeGpuSettings(gpuSettings, Parser::Task::Encode);
 }
 
+bool GlobalSettings::getBoolState(std::string const& name, bool defaultValue)
+{
+    bool result;
+    Parser::encodeDecode(_impl->_tree, result, defaultValue, name, Parser::Task::Decode);
+    return result;
+}
+
+void GlobalSettings::setBoolState(std::string const& name, bool value)
+{
+    Parser::encodeDecode(_impl->_tree, value, false, name, Parser::Task::Encode);
+}
+
 void GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, Parser::Task task)
 {
     GpuSettings defaultSettings;

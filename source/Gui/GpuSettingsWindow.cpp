@@ -17,12 +17,14 @@ _GpuSettingsWindow::_GpuSettingsWindow(
 {
     auto gpuSettings = GlobalSettings::getInstance().getGpuSettings();
     _simController->setGpuSettings_async(gpuSettings);
+    _on = GlobalSettings::getInstance().getBoolState("window.GPU settings.active", false);
 }
 
 _GpuSettingsWindow::~_GpuSettingsWindow()
 {
     auto gpuSettings = _simController->getGpuSettings();
     GlobalSettings::getInstance().setGpuSettings(gpuSettings);
+    GlobalSettings::getInstance().setBoolState("window.GPU settings.active", _on);
 }
 
 void _GpuSettingsWindow::process()

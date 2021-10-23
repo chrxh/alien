@@ -369,6 +369,9 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
+            if (ImGui::MenuItem("Auto save", "", _autosaveToggled)) {
+                _autosaveToggled = !_autosaveToggled;
+            }
             if (ImGui::MenuItem("GPU settings", "", _gpuSettingsWindow->isOn())) {
                 _gpuSettingsWindow->setOn(!_gpuSettingsWindow->isOn());
             }
