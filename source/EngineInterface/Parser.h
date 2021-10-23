@@ -12,20 +12,41 @@ public:
     ENGINEINTERFACE_EXPORT static std::pair<uint64_t, Settings> decodeTimestepAndSettings(
         boost::property_tree::ptree tree);
 
-private:
     enum class Task
     {
         Encode,
         Decode
     };
-    ENGINEINTERFACE_EXPORT static void
-    encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, Task task);
-
-    template<typename T>
-    ENGINEINTERFACE_EXPORT static void encodeDecode(
+    template <typename T>
+    static void encodeDecode(
         boost::property_tree::ptree& tree,
         T& parameter,
         T const& defaultValue,
         std::string const& node,
         Task task);
+
+private:
+    static void encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, Task task);
 };
+
+/**
+ * Implementations
+ */
+template <typename T>
+void Parser::encodeDecode(
+    boost::property_tree::ptree& tree,
+    T& parameter,
+    T const& defaultValue,
+    std::string const& node,
+    Task task)
+{
+    if (Task::Encode == task) {
+        if constexpr (std::is_same<T, bool>::value) {
+            tree.add(node, parameter ? "true" : "false");
+        } else {
+            tree.add(node, std::to_string(parameter));
+        }
+    } else {
+        parameter = tree.get<T>(node, defaultValue);
+    }
+}
