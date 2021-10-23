@@ -11,6 +11,7 @@
 #include "OpenGLHelper.h"
 #include "Resources.h"
 #include "StatisticsWindow.h"
+#include "GlobalSettings.h"
 
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationController const& simController,
@@ -26,6 +27,13 @@ _TemporalControlWindow::_TemporalControlWindow(
     _stepForwardTexture = OpenGLHelper::loadTexture(Const::StepForwardFilename);
     _snapshotTexture = OpenGLHelper::loadTexture(Const::SnapshotFilename);
     _restoreTexture = OpenGLHelper::loadTexture(Const::RestoreFilname);
+
+    _on = GlobalSettings::getInstance().getBoolState("window.temporal control.active", true);
+}
+
+_TemporalControlWindow::~_TemporalControlWindow()
+{
+    GlobalSettings::getInstance().setBoolState("window.temporal control.active", _on);
 }
 
 void _TemporalControlWindow::process()

@@ -9,6 +9,7 @@ class _StatisticsWindow
 {
 public:
     _StatisticsWindow(SimulationController const& simController);
+    ~_StatisticsWindow();
 
     void reset();
     void process();

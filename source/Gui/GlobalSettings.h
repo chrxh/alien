@@ -18,6 +18,9 @@ public:
     GpuSettings getGpuSettings();
     void setGpuSettings(GpuSettings gpuSettings);
 
+    bool getBoolState(std::string const& name, bool defaultValue);
+    void setBoolState(std::string const& name, bool value);
+
 private:
     GlobalSettings();
     ~GlobalSettings();

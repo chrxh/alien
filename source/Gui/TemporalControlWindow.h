@@ -12,6 +12,7 @@ public:
         SimulationController const& simController,
         StyleRepository const& styleRepository,
         StatisticsWindow const& statisticsWindow);
+    ~_TemporalControlWindow();
 
     void process();
 

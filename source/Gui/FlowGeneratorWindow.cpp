@@ -6,10 +6,17 @@
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
+#include "GlobalSettings.h"
 
 _FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
     : _simController(simController)
 {
+    _on = GlobalSettings::getInstance().getBoolState("window.flow generator.active", false);
+}
+
+_FlowGeneratorWindow::~_FlowGeneratorWindow()
+{
+    GlobalSettings::getInstance().setBoolState("window.flow generator.active", _on);
 }
 
 void _FlowGeneratorWindow::process()
