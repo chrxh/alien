@@ -66,6 +66,9 @@ using FileLogger = boost::shared_ptr<_FileLogger>;
 class _UiController;
 using UiController = boost::shared_ptr<_UiController>;
 
+class _GlobalSettings;
+using GlobalSettings = boost::shared_ptr<_GlobalSettings>;
+
 struct GLFWwindow;
 struct ImFont;
 

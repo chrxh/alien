@@ -1,18 +1,31 @@
 #include "GpuSettingsWindow.h"
 
+#include "imgui.h"
+
 #include "Base/StringFormatter.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
+#include "GlobalSettings.h"
 
-#include "imgui.h"
 
 _GpuSettingsWindow::_GpuSettingsWindow(
     StyleRepository const& styleRepository,
-    SimulationController const& simController)
+    SimulationController const& simController,
+    GlobalSettings const& globalSettings)
     : _styleRepository(styleRepository)
     , _simController(simController)
-{}
+    , _globalSettings(globalSettings)
+{
+    auto gpuSettings = _globalSettings->getGpuSettings();
+    _simController->setGpuSettings_async(gpuSettings);
+}
+
+_GpuSettingsWindow::~_GpuSettingsWindow()
+{
+    auto gpuSettings = _simController->getGpuSettings();
+    _globalSettings->setGpuSettings(gpuSettings);
+}
 
 void _GpuSettingsWindow::process()
 {

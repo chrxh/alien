@@ -33,7 +33,6 @@ public:
 
     ImFont* getMediumFont() const;
     ImFont* getLargeFont() const;
-
     ImFont* getMonospaceFont() const;
 
 private:

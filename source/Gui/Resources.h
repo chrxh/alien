@@ -8,6 +8,7 @@ namespace Const
 
     auto const AutosaveFile = BasePath + "autosave.sim";
     auto const LogFilename = BasePath + "log.txt";
+    auto const SettingsFilename = BasePath + "settings.json";
 
     auto const SimulationFragmentShader = BasePath + "shader.fs";
     auto const SimulationVertexShader = BasePath + "shader.vs";
