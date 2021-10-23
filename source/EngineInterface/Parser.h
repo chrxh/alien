@@ -42,9 +42,9 @@ void Parser::encodeDecode(
 {
     if (Task::Encode == task) {
         if constexpr (std::is_same<T, bool>::value) {
-            tree.add(node, parameter ? "true" : "false");
+            tree.put(node, parameter ? "true" : "false");
         } else {
-            tree.add(node, std::to_string(parameter));
+            tree.put(node, std::to_string(parameter));
         }
     } else {
         parameter = tree.get<T>(node, defaultValue);

@@ -8,8 +8,7 @@ class _GpuSettingsWindow
 public:
     _GpuSettingsWindow(
         StyleRepository const& styleRepository,
-        SimulationController const& simController,
-        GlobalSettings const& globalSettings);
+        SimulationController const& simController);
 
     ~_GpuSettingsWindow();
 
@@ -21,7 +20,6 @@ public:
 private:
     StyleRepository _styleRepository;
     SimulationController _simController;
-    GlobalSettings _globalSettings;
 
     bool _on = false;
 };

@@ -99,14 +99,13 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
     _uiController = boost::make_shared<_UiController>();
 
-    _globalSettings = boost::make_shared<_GlobalSettings>();
     _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
     _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
-    _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController, _globalSettings);
+    _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
     _startupWindow = boost::make_shared<_StartupWindow>(
         _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);

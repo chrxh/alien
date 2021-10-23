@@ -46,7 +46,6 @@ private:
     GLFWwindow* _window;
     SimpleLogger _logger;
 
-    GlobalSettings _globalSettings;
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
