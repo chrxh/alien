@@ -9,6 +9,7 @@ class _SimulationParametersWindow
 {
 public:
     _SimulationParametersWindow(StyleRepository const& styleRepository, SimulationController const& simController);
+    ~_SimulationParametersWindow();
 
     void process();
 

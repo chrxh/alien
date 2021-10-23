@@ -6,11 +6,21 @@
 
 #include "StyleRepository.h"
 #include "SimpleLogger.h"
+#include "GlobalSettings.h"
 
 _LogWindow::_LogWindow(StyleRepository const& styleRepository, SimpleLogger const& logger)
     : _styleRepository(styleRepository)
     , _logger(logger)
-{}
+{
+    _on = GlobalSettings::getInstance().getBoolState("window.log.active", false);
+    _verbose = GlobalSettings::getInstance().getBoolState("window.log.verbose", false);
+}
+
+_LogWindow::~_LogWindow()
+{
+    GlobalSettings::getInstance().setBoolState("window.log.active", _on);
+    GlobalSettings::getInstance().setBoolState("window.log.verbose", _verbose);
+}
 
 void _LogWindow::process()
 {

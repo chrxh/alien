@@ -7,6 +7,7 @@
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
+#include "GlobalSettings.h"
 
 namespace
 {
@@ -18,6 +19,12 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     : _simController(simController)
 {
     ImPlot::GetStyle().AntiAliasedLines = true;
+    _on = GlobalSettings::getInstance().getBoolState("window.statistics.active", true);
+}
+
+_StatisticsWindow::~_StatisticsWindow()
+{
+    GlobalSettings::getInstance().setBoolState("window.statistics.active", _on);
 }
 
 namespace

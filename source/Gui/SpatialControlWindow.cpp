@@ -10,6 +10,7 @@
 #include "Viewport.h"
 #include "OpenGLHelper.h"
 #include "Resources.h"
+#include "GlobalSettings.h"
 
 _SpatialControlWindow::_SpatialControlWindow(
     SimulationController const& simController,
@@ -22,6 +23,12 @@ _SpatialControlWindow::_SpatialControlWindow(
     _zoomInTexture = OpenGLHelper::loadTexture(Const::ZoomInFilename);
     _zoomOutTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
     _resizeTexture = OpenGLHelper::loadTexture(Const::ResizeFilename);
+    _on = GlobalSettings::getInstance().getBoolState("window.spatial control.active", true);
+}
+
+_SpatialControlWindow::~_SpatialControlWindow()
+{
+    GlobalSettings::getInstance().setBoolState("window.spatial control.active", _on);
 }
 
 void _SpatialControlWindow::process()

@@ -6,6 +6,7 @@ class _LogWindow
 {
 public:
     _LogWindow(StyleRepository const& styleRepository, SimpleLogger const& logger);
+    ~_LogWindow();
 
     void process();
 
