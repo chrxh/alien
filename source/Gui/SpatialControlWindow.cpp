@@ -23,12 +23,12 @@ _SpatialControlWindow::_SpatialControlWindow(
     _zoomInTexture = OpenGLHelper::loadTexture(Const::ZoomInFilename);
     _zoomOutTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
     _resizeTexture = OpenGLHelper::loadTexture(Const::ResizeFilename);
-    _on = GlobalSettings::getInstance().getBoolState("window.spatial control.active", true);
+    _on = GlobalSettings::getInstance().getBoolState("windows.spatial control.active", true);
 }
 
 _SpatialControlWindow::~_SpatialControlWindow()
 {
-    GlobalSettings::getInstance().setBoolState("window.spatial control.active", _on);
+    GlobalSettings::getInstance().setBoolState("windows.spatial control.active", _on);
 }
 
 void _SpatialControlWindow::process()

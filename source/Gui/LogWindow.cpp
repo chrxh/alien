@@ -12,14 +12,14 @@ _LogWindow::_LogWindow(StyleRepository const& styleRepository, SimpleLogger cons
     : _styleRepository(styleRepository)
     , _logger(logger)
 {
-    _on = GlobalSettings::getInstance().getBoolState("window.log.active", false);
-    _verbose = GlobalSettings::getInstance().getBoolState("window.log.verbose", false);
+    _on = GlobalSettings::getInstance().getBoolState("windows.log.active", false);
+    _verbose = GlobalSettings::getInstance().getBoolState("windows.log.verbose", false);
 }
 
 _LogWindow::~_LogWindow()
 {
-    GlobalSettings::getInstance().setBoolState("window.log.active", _on);
-    GlobalSettings::getInstance().setBoolState("window.log.verbose", _verbose);
+    GlobalSettings::getInstance().setBoolState("windows.log.active", _on);
+    GlobalSettings::getInstance().setBoolState("windows.log.verbose", _verbose);
 }
 
 void _LogWindow::process()
