@@ -19,12 +19,12 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     : _simController(simController)
 {
     ImPlot::GetStyle().AntiAliasedLines = true;
-    _on = GlobalSettings::getInstance().getBoolState("window.statistics.active", true);
+    _on = GlobalSettings::getInstance().getBoolState("windows.statistics.active", true);
 }
 
 _StatisticsWindow::~_StatisticsWindow()
 {
-    GlobalSettings::getInstance().setBoolState("window.statistics.active", _on);
+    GlobalSettings::getInstance().setBoolState("windows.statistics.active", _on);
 }
 
 namespace
@@ -64,13 +64,12 @@ void _StatisticsWindow::process()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 102);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60);
     ImGui::SliderFloat("", &_liveStatistics.history, 1, MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(100);
-    ImGui::Button("Export to CSV");
+    ImGui::Button("Export");
 
     if (_live) {
         processLiveStatistics();
