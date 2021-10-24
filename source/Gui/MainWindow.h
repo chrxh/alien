@@ -62,6 +62,7 @@ private:
     AboutDialog _aboutDialog;
     ColorizeDialog _colorizeDialog;
     UiController _uiController; 
+    AutosaveController _autosaveController; 
 
     StyleRepository _styleRepository;
 
@@ -74,5 +75,4 @@ private:
     bool _helpMenuToggled = false;
     bool _showExitDialog = false;
     bool _renderSimulation = true;
-    bool _autosaveToggled = false;
 };

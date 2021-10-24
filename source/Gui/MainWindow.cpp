@@ -44,6 +44,7 @@
 #include "SimpleLogger.h"
 #include "UiController.h"
 #include "GlobalSettings.h"
+#include "AutosaveController.h"
 
 namespace
 {
@@ -98,6 +99,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _viewport->setZoomFactor(4.0f);
     _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
     _uiController = boost::make_shared<_UiController>();
+    _autosaveController = boost::make_shared<_AutosaveController>(simController);
 
     _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
@@ -178,6 +180,8 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
+    _autosaveController->shutdown();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
@@ -369,8 +373,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
-            if (ImGui::MenuItem("Auto save", "", _autosaveToggled)) {
-                _autosaveToggled = !_autosaveToggled;
+            if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
+                _autosaveController->setOn(!_autosaveController->isOn());
             }
             if (ImGui::MenuItem("GPU settings", "", _gpuSettingsWindow->isOn())) {
                 _gpuSettingsWindow->setOn(!_gpuSettingsWindow->isOn());

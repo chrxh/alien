@@ -11,12 +11,12 @@
 _FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
     : _simController(simController)
 {
-    _on = GlobalSettings::getInstance().getBoolState("window.flow generator.active", false);
+    _on = GlobalSettings::getInstance().getBoolState("windows.flow generator.active", false);
 }
 
 _FlowGeneratorWindow::~_FlowGeneratorWindow()
 {
-    GlobalSettings::getInstance().setBoolState("window.flow generator.active", _on);
+    GlobalSettings::getInstance().setBoolState("windows.flow generator.active", _on);
 }
 
 void _FlowGeneratorWindow::process()
