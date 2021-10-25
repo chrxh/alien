@@ -23,7 +23,33 @@ void _GettingStartedWindow::process()
         return;
     }
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    if (ImGui::Begin("Getting started", &_on, ImGuiWindowFlags_None)) {
+    if (ImGui::Begin("Getting started", &_on)) {
+        ImGui::PushFont(_styleRepository->getMediumFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.4f, 0.4f, 0.8f));
+        ImGui::Text("What is Artificial Life Environment (ALiEn)?");
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        if (ImGui::BeginChild(
+                "##", ImVec2(0, ImGui::GetContentRegionAvail().y - 30), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
+            ImGui::Text("ALiEn is an artificial life simulation program based on a specialized physics and rendering "
+                        "engine with "
+                        "extensive world building features. It is a high performance simulation tool in the sense that "
+                        "it not only uses OpenGL "
+                        "for rendering, but also employs the CUDA api to run simulations on thousands of GPU threads.");
+            ImGui::PopTextWrapPos();
+
+            ImGui::EndChild();
+        }
+        ImGui::Checkbox("Show after startup", &_showAfterStartup);
+
         ImGui::End();
     }
 }
