@@ -315,11 +315,32 @@ __global__ void deselectParticles(Array<Particle*> particles)
     }
 }
 
+__global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO accessTO)
+{
+    {
+        auto const partition =
+            calcPartition(*accessTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& cell = accessTO.cells[index];
+            numberGen.adaptMaxId(cell.id);
+        }
+    }
+    {
+        auto const partition =
+            calcPartition(*accessTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& particle = accessTO.particles[index];
+            numberGen.adaptMaxId(particle.id);
+        }
+    }
+}
 
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-__global__ void cudaGetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
+__global__ void getSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     *access.numCells = 0;
@@ -332,9 +353,10 @@ __global__ void cudaGetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRi
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
 }
 
-__global__ void cudaSetSimulationAccessData(int2 rectUpperLeft, int2 rectLowerRight,
+__global__ void setSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
+    KERNEL_CALL(adaptNumberGenerator, data.numberGen, access);
     KERNEL_CALL_1_1(filterCells, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
     KERNEL_CALL(
