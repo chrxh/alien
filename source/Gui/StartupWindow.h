@@ -9,12 +9,7 @@
 class _StartupWindow
 {
 public:
-    _StartupWindow(
-        SimulationController const& simController,
-        Viewport const& viewport,
-        TemporalControlWindow const& temporalControlWindow,
-        SpatialControlWindow const& spatialControlWindow,
-        StatisticsWindow const& statisticsWindow);
+    _StartupWindow(SimulationController const& simController, Viewport const& viewport);
 
     void process();
     enum class State
@@ -34,9 +29,6 @@ private:
 
     SimulationController _simController;
     Viewport _viewport;
-    TemporalControlWindow _temporalControlWindow;
-    SpatialControlWindow _spatialControlWindow;
-    StatisticsWindow _statisticsWindow;
 
     State _state = State::Unintialized;
     TextureData _logo;

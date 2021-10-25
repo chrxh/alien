@@ -125,21 +125,25 @@ namespace boost {
 
 bool _Serializer::loadSimulationDataFromFile(string const& filename, SerializedSimulation& data)
 {
-    std::regex fileEndingExpr("\\.\\w+$");
-    if (!std::regex_search(filename, fileEndingExpr)) {
-        return false;
-    }
-    auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
-    auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
+    try {
+        std::regex fileEndingExpr("\\.\\w+$");
+        if (!std::regex_search(filename, fileEndingExpr)) {
+            return false;
+        }
+        auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
+        auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
 
-    if (!loadDataFromFile(filename, data.content)) {
-        return false;
-    }
-    if (!loadDataFromFile(settingsFilename, data.timestepAndSettings)) {
-        return false;
-    }
-    if (!loadDataFromFile(symbolsFilename, data.symbolMap)) {
-        return false;
+        if (!loadDataFromFile(filename, data.content)) {
+            return false;
+        }
+        if (!loadDataFromFile(settingsFilename, data.timestepAndSettings)) {
+            return false;
+        }
+        if (!loadDataFromFile(symbolsFilename, data.symbolMap)) {
+            return false;
+        }
+    } catch (std::exception const& e) {
+        throw std::exception(("An error occurred while loading the file " + filename + ": " + e.what()).c_str());
     }
 
     return true;
@@ -147,21 +151,26 @@ bool _Serializer::loadSimulationDataFromFile(string const& filename, SerializedS
 
 bool _Serializer::saveSimulationDataToFile(string const& filename, SerializedSimulation& data)
 {
-    std::regex fileEndingExpr("\\.\\w+$");
-    if (!std::regex_search(filename, fileEndingExpr)) {
-        return false;
-    }
-    auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
-    auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
+    try {
+        std::regex fileEndingExpr("\\.\\w+$");
+        if (!std::regex_search(filename, fileEndingExpr)) {
+            return false;
+        }
+        auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
+        auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
 
-    if (!saveDataToFile(filename, data.content)) {
-        return false;
-    }
-    if (!saveDataToFile(settingsFilename, data.timestepAndSettings)) {
-        return false;
-    }
-    if (!saveDataToFile(symbolsFilename, data.symbolMap)) {
-        return false;
+        if (!saveDataToFile(filename, data.content)) {
+            return false;
+        }
+        if (!saveDataToFile(settingsFilename, data.timestepAndSettings)) {
+            return false;
+        }
+        if (!saveDataToFile(symbolsFilename, data.symbolMap)) {
+            return false;
+        }
+    } catch (std::exception const& e) {
+        throw std::exception(
+            ("An error occurred while saving the file " + filename + ": " + e.what()).c_str());
     }
 
     return true;
@@ -169,16 +178,24 @@ bool _Serializer::saveSimulationDataToFile(string const& filename, SerializedSim
 
 SerializedSimulation _Serializer::serializeSimulation(DeserializedSimulation const& data)
 {
-    return {
-        serializeTimestepAndSettings(data.timestep, data.settings),
-        serializeSymbolMap(data.symbolMap),
-        serializeDataDescription(data.content)};
+    try {
+        return {
+            serializeTimestepAndSettings(data.timestep, data.settings),
+            serializeSymbolMap(data.symbolMap),
+            serializeDataDescription(data.content)};
+    } catch (std::exception const& e) {
+        throw std::exception((std::string("An error occurred while serializing simulation data: ") + e.what()).c_str());
+    }
 }
 
 DeserializedSimulation _Serializer::deserializeSimulation(SerializedSimulation const& data)
 {
-    auto [timestep, settings] = deserializeTimestepAndSettings(data.timestepAndSettings);
-    return {timestep, settings, deserializeSymbolMap(data.symbolMap), deserializeDataDescription(data.content)};
+    try {
+        auto [timestep, settings] = deserializeTimestepAndSettings(data.timestepAndSettings);
+        return {timestep, settings, deserializeSymbolMap(data.symbolMap), deserializeDataDescription(data.content)};
+    } catch (std::exception const& e) {
+        throw std::exception((std::string("An error occurred while deserializing simulation data: ") + e.what()).c_str());
+    }
 }
 
 string _Serializer::serializeSymbolMap(SymbolMap const symbols) const

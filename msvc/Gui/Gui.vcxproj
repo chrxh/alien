@@ -165,8 +165,11 @@
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
     <ClInclude Include="..\..\source\Gui\FileLogger.h" />
     <ClInclude Include="..\..\source\Gui\FlowGeneratorWindow.h" />
+    <ClInclude Include="..\..\source\Gui\GettingStartedWindow.h" />
     <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h" />
     <ClInclude Include="..\..\source\Gui\GlobalSettings.h" />
+    <ClInclude Include="..\..\source\Gui\OpenSimulationDialog.h" />
+    <ClInclude Include="..\..\source\Gui\SaveSimulationDialog.h" />
     <ClInclude Include="..\..\source\Gui\SimpleLogger.h" />
     <ClInclude Include="..\..\source\Gui\LogWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
@@ -205,8 +208,11 @@
     <ClCompile Include="..\..\source\Gui\ColorizeDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\FileLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\FlowGeneratorWindow.cpp" />
+    <ClCompile Include="..\..\source\Gui\GettingStartedWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\GlobalSettings.cpp" />
+    <ClCompile Include="..\..\source\Gui\OpenSimulationDialog.cpp" />
+    <ClCompile Include="..\..\source\Gui\SaveSimulationDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\SimpleLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />

@@ -9,9 +9,6 @@
 #include "OpenGLHelper.h"
 #include "Resources.h"
 #include "Viewport.h"
-#include "TemporalControlWindow.h"
-#include "SpatialControlWindow.h"
-#include "StatisticsWindow.h"
 
 namespace
 {
@@ -19,17 +16,9 @@ namespace
     auto const FadeInDuration = 500ll;
 }
 
-_StartupWindow::_StartupWindow(
-    SimulationController const& simController,
-    Viewport const& viewport,
-    TemporalControlWindow const& temporalControlWindow,
-    SpatialControlWindow const& spatialControlWindow,
-    StatisticsWindow const& statisticsWindow)
+_StartupWindow::_StartupWindow(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
     , _viewport(viewport)
-    , _temporalControlWindow(temporalControlWindow)
-    , _spatialControlWindow(spatialControlWindow)
-    , _statisticsWindow(statisticsWindow)
 {
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
 }
@@ -72,9 +61,6 @@ void _StartupWindow::process()
 
         if (alphaFactor == 0.0f) {
             _state = State::LoadingControls;
-            _temporalControlWindow->setOn(true);
-            _spatialControlWindow->setOn(true);
-            _statisticsWindow->setOn(true);
         }
         return;
     }

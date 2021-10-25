@@ -32,11 +32,6 @@ private:
     void processDialogs();
     void processWindows();
 
-    void processOpenSimulationDialog();
-    void processSaveSimulationDialog();
-
-    void onPrepareOpenSimulation();
-    void onPrepareSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
 
@@ -63,6 +58,9 @@ private:
     ColorizeDialog _colorizeDialog;
     UiController _uiController; 
     AutosaveController _autosaveController; 
+    GettingStartedWindow _gettingStartedWindow;
+    OpenSimulationDialog _openSimulationDialog; 
+    SaveSimulationDialog _saveSimulationDialog; 
 
     StyleRepository _styleRepository;
 

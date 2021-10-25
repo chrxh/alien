@@ -69,6 +69,15 @@ using UiController = boost::shared_ptr<_UiController>;
 class _AutosaveController;
 using AutosaveController = boost::shared_ptr<_AutosaveController>;
 
+class _GettingStartedWindow;
+using GettingStartedWindow = boost::shared_ptr<_GettingStartedWindow>;
+
+class _OpenSimulationDialog;
+using OpenSimulationDialog = boost::shared_ptr<_OpenSimulationDialog>;
+
+class _SaveSimulationDialog;
+using SaveSimulationDialog = boost::shared_ptr<_SaveSimulationDialog>;
+
 struct GLFWwindow;
 struct ImFont;
 

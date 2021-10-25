@@ -45,6 +45,9 @@
 #include "UiController.h"
 #include "GlobalSettings.h"
 #include "AutosaveController.h"
+#include "GettingStartedWindow.h"
+#include "OpenSimulationDialog.h"
+#include "SaveSimulationDialog.h"
 
 namespace
 {
@@ -109,12 +112,14 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
-    _startupWindow = boost::make_shared<_StartupWindow>(
-        _simController, _viewport, _temporalControlWindow, _spatialControlWindow, _statisticsWindow);
+    _startupWindow = boost::make_shared<_StartupWindow>(_simController, _viewport);
     _flowGeneratorWindow = boost::make_shared<_FlowGeneratorWindow>(_simController);
     _aboutDialog = boost::make_shared<_AboutDialog>();
     _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
     _logWindow = boost::make_shared<_LogWindow>(_styleRepository, _logger);
+    _gettingStartedWindow = boost::make_shared<_GettingStartedWindow>(_styleRepository);
+    _openSimulationDialog = boost::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
+    _saveSimulationDialog = boost::make_shared<_SaveSimulationDialog>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -296,7 +301,16 @@ void _MainWindow::processFinishedLoading()
 
     processMenubar();
     processDialogs();
+
+/*
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.55f, 0.4f, 0.3f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.55f, 0.4f, 0.5f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.55f, 0.4f, 0.7f));
+*/
     processWindows();
+/*
+    ImGui::PopStyleColor(3);
+*/
     _uiController->process();
     _simulationView->processControls();
 
@@ -335,11 +349,11 @@ void _MainWindow::processMenubar()
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
-                onPrepareOpenSimulation();
+                _openSimulationDialog->show();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
-                onPrepareSaveSimulation();
+                _saveSimulationDialog->show();
                 _simulationMenuToggled = false;
             }
             ImGui::Separator();
@@ -409,6 +423,9 @@ void _MainWindow::processMenubar()
                 _aboutDialog->show();
                 _helpMenuToggled = false;
             }
+            if (ImGui::MenuItem("Getting started", "", _gettingStartedWindow->isOn())) {
+                _gettingStartedWindow->setOn(!_gettingStartedWindow->isOn());
+            }
             AlienImGui::EndMenuButton();
         }
         ImGui::EndMainMenuBar();
@@ -417,10 +434,10 @@ void _MainWindow::processMenubar()
     //menu hotkeys
     auto io = ImGui::GetIO();
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-        onPrepareOpenSimulation();
+        _openSimulationDialog->show();
     }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-        onPrepareSaveSimulation();
+        _saveSimulationDialog->show();
     }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
         onRunSimulation();
@@ -438,13 +455,8 @@ void _MainWindow::processMenubar()
 
 void _MainWindow::processDialogs()
 {
-    if (ifd::FileDialog::Instance().IsDone("SimulationOpenDialog")) {
-        processOpenSimulationDialog();
-    }
-
-    if (ifd::FileDialog::Instance().IsDone("SimulationSaveDialog")) {
-        processSaveSimulationDialog();
-    }
+    _openSimulationDialog->process();
+    _saveSimulationDialog->process();
     _newSimulationDialog->process();
     _aboutDialog->process();
     _colorizeDialog->process();
@@ -461,61 +473,7 @@ void _MainWindow::processWindows()
     _gpuSettingsWindow->process();
     _flowGeneratorWindow->process();
     _logWindow->process();
-}
-
-void _MainWindow::processOpenSimulationDialog()
-{
-    if (ifd::FileDialog::Instance().HasResult()) {
-        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-        auto firstFilename = res.front();
-
-        _simController->closeSimulation();
-
-        reset();
-
-        Serializer serializer = boost::make_shared<_Serializer>();
-        SerializedSimulation serializedData;
-        serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
-        auto deserializedData = serializer->deserializeSimulation(serializedData);
-
-        _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
-        _simController->updateData(deserializedData.content);
-        _viewport->setCenterInWorldPos(
-            {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
-             toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(4.0f);
-    }
-    ifd::FileDialog::Instance().Close();
-}
-
-void _MainWindow::processSaveSimulationDialog()
-{
-    if (ifd::FileDialog::Instance().HasResult()) {
-        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-        auto firstFilename = res.front();
-
-        DeserializedSimulation sim;
-        sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-        sim.settings = _simController->getSettings();
-        sim.symbolMap = _simController->getSymbolMap();
-        sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
-
-        Serializer serializer = boost::make_shared<_Serializer>();
-        auto serializedSim = serializer->serializeSimulation(sim);
-        serializer->saveSimulationDataToFile(firstFilename.string(), serializedSim);
-    }
-    ifd::FileDialog::Instance().Close();
-}
-
-void _MainWindow::onPrepareOpenSimulation()
-{
-    ifd::FileDialog::Instance().Open(
-        "SimulationOpenDialog", "Open simulation", "Simulation file (*.sim){.sim},.*", false);
-}
-
-void _MainWindow::onPrepareSaveSimulation()
-{
-    ifd::FileDialog::Instance().Save("SimulationSaveDialog", "Save simulation", "Simulation file (*.sim){.sim},.*");
+    _gettingStartedWindow->process();
 }
 
 void _MainWindow::onRunSimulation()
