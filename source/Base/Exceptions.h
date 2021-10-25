@@ -1,6 +1,7 @@
 #pragma once
 
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 class BugReportException : public std::runtime_error
