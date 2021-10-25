@@ -82,6 +82,11 @@ public:
 
     __device__ __inline__ unsigned long long int createNewId_kernel() { return atomicAdd(_currentId, 1); }
 
+    __device__ __inline__ void adaptMaxId(unsigned long long int id)
+    {
+        atomicMax(_currentId, id + 1);
+    }
+
     void free()
     {
         CudaMemoryManager::getInstance().freeMemory(1, _currentIndex);
