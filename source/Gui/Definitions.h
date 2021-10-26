@@ -36,8 +36,8 @@ using StatisticsWindow = boost::shared_ptr<_StatisticsWindow>;
 class _ModeWindow;
 using ModeWindow = boost::shared_ptr<_ModeWindow>;
 
-class _GpuSettingsWindow;
-using GpuSettingsWindow = boost::shared_ptr<_GpuSettingsWindow>;
+class _GpuSettingsDialog;
+using GpuSettingsDialog = boost::shared_ptr<_GpuSettingsDialog>;
 
 class _NewSimulationDialog;
 using NewSimulationDialog = boost::shared_ptr<_NewSimulationDialog>;
@@ -78,6 +78,10 @@ using OpenSimulationDialog = boost::shared_ptr<_OpenSimulationDialog>;
 class _SaveSimulationDialog;
 using SaveSimulationDialog = boost::shared_ptr<_SaveSimulationDialog>;
 
+class _DisplaySettingsDialog;
+using DisplaySettingsDialog = boost::shared_ptr<_DisplaySettingsDialog>;
+
+struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;
 

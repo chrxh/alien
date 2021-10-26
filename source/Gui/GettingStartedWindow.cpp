@@ -4,6 +4,7 @@
 
 #include "GlobalSettings.h"
 #include "StyleRepository.h"
+#include "AlienImGui.h"
 
 _GettingStartedWindow::_GettingStartedWindow(StyleRepository const& styleRepository)
     : _styleRepository(styleRepository)
@@ -25,29 +26,47 @@ void _GettingStartedWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Getting started", &_on)) {
         ImGui::PushFont(_styleRepository->getMediumFont());
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.4f, 0.4f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
         ImGui::Text("What is Artificial Life Environment (ALiEn)?");
         ImGui::PopStyleColor();
         ImGui::PopFont();
-
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-        ImGui::Spacing();
+        AlienImGui::Separator();
 
         if (ImGui::BeginChild(
-                "##", ImVec2(0, ImGui::GetContentRegionAvail().y - 30), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+                "##", ImVec2(0, ImGui::GetContentRegionAvail().y - 50), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
+            ImGui::Text("Abstract");
+            ImGui::PopStyleColor();
+
             ImGui::Text("ALiEn is an artificial life simulation program based on a specialized physics and rendering "
-                        "engine with "
-                        "extensive world building features. It is a high performance simulation tool in the sense that "
-                        "it not only uses OpenGL "
-                        "for rendering, but also employs the CUDA api to run simulations on thousands of GPU threads.");
+                        "engine with extensive world building features. It is a high-performance simulation tool in "
+                        "the sense that it not only uses OpenGL for rendering, but also utilizes the CUDA API to run "
+                        "simulations on thousands of GPU threads.\n\n");
+
+            ImGui::Text(
+                "Each simulated body (named as cell clusters) consists of a network of connected particles (named as "
+                "building blocks or cells) can be enriched with higher-level functions, ranging from pure information "
+                "processing capabilities to physical equipment such as sensors, actuators, weapons, constructors, etc. "
+                "To orchestrate the execution, a token concept from graph theory is utilized. The bodies can be "
+                "thought of as small machines or agents operating in a common environment.");
+
+            AlienImGui::Separator();
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
+            ImGui::Text("First steps");
+            ImGui::PopStyleColor();
+
+            ImGui::Text("The easiest way to get to know the alien simulator is to load and run an existing simulation "
+                        "file.You find various demos in examples/simulations/* demonstrating capabilities of the "
+                        "engine ranging from physics examples, self-deploying structures, replicators to small "
+                        "ecosystems. To this end, go to Simulation -> Load and select a file. However, for starters, "
+                        "you can use the simple evolution example already loaded.");
+
             ImGui::PopTextWrapPos();
 
             ImGui::EndChild();
         }
+        AlienImGui::Separator();
         ImGui::Checkbox("Show after startup", &_showAfterStartup);
 
         ImGui::End();
@@ -65,7 +84,7 @@ void _GettingStartedWindow::setOn(bool value)
 }
 
 /*
-What is Articial Life Environment(ALiEn)
+What is Artificial Life Environment(ALiEn)
     ? ALiEn is an artificial life simulation program based on a specialized physics and rendering engine with extensive
       world building features.It is a high performance simulation tool in the sense that it not only uses OpenGL
       for rendering,

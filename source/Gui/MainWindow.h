@@ -3,7 +3,6 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
-struct GLFWvidmode;
 class _MainWindow
 {
 public:
@@ -48,7 +47,7 @@ private:
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
     ModeWindow _modeWindow;
-    GpuSettingsWindow _gpuSettingsWindow;
+    GpuSettingsDialog _gpuSettingsDialog;
     Viewport _viewport;
     StartupWindow _startupWindow;
     FlowGeneratorWindow _flowGeneratorWindow;
@@ -61,6 +60,7 @@ private:
     GettingStartedWindow _gettingStartedWindow;
     OpenSimulationDialog _openSimulationDialog; 
     SaveSimulationDialog _saveSimulationDialog; 
+    DisplaySettingsDialog _displaySettingsDialog;
 
     StyleRepository _styleRepository;
 
