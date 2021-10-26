@@ -1,25 +1,26 @@
 #pragma once
 
+#include "EngineInterface/GpuSettings.h"
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
-class _GpuSettingsWindow
+class _GpuSettingsDialog
 {
 public:
-    _GpuSettingsWindow(
+    _GpuSettingsDialog(
         StyleRepository const& styleRepository,
         SimulationController const& simController);
 
-    ~_GpuSettingsWindow();
+    ~_GpuSettingsDialog();
 
     void process();
 
-    bool isOn() const;
-    void setOn(bool value);
+    void show();
 
 private:
     StyleRepository _styleRepository;
     SimulationController _simController;
 
-    bool _on = false;
+    bool _show = false;
+    GpuSettings _gpuSettings;
 };

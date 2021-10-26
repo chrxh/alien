@@ -11,6 +11,7 @@
 #include "OpenGLHelper.h"
 #include "Resources.h"
 #include "GlobalSettings.h"
+#include "AlienImGui.h"
 
 _SpatialControlWindow::_SpatialControlWindow(
     SimulationController const& simController,
@@ -168,11 +169,7 @@ void _SpatialControlWindow::processResizeDialog()
             }
             ImGui::Checkbox("Scale content", &_scaleContent);
 
-            ImGui::Spacing();
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-            ImGui::Spacing();
+            AlienImGui::Separator();
 
             if (ImGui::Button("OK")) {
                 ImGui::CloseCurrentPopup();

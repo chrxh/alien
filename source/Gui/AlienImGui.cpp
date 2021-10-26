@@ -270,3 +270,12 @@ void AlienImGui::ColorButtonWithPicker(
         savedPalette[i] = static_cast<ImU32>(ImColor(imGuiSavedPalette[i]));
     }
 }
+
+void AlienImGui::Separator()
+{
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::Spacing();
+}
