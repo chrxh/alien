@@ -1,4 +1,4 @@
-#include "GpuSettingsWindow.h"
+#include "GpuSettingsDialog.h"
 
 #include "imgui.h"
 
@@ -9,7 +9,7 @@
 #include "GlobalSettings.h"
 
 
-_GpuSettingsWindow::_GpuSettingsWindow(
+_GpuSettingsDialog::_GpuSettingsDialog(
     StyleRepository const& styleRepository,
     SimulationController const& simController)
     : _styleRepository(styleRepository)
@@ -17,27 +17,25 @@ _GpuSettingsWindow::_GpuSettingsWindow(
 {
     auto gpuSettings = GlobalSettings::getInstance().getGpuSettings();
     _simController->setGpuSettings_async(gpuSettings);
-    _on = GlobalSettings::getInstance().getBoolState("windows.GPU settings.active", false);
 }
 
-_GpuSettingsWindow::~_GpuSettingsWindow()
+_GpuSettingsDialog::~_GpuSettingsDialog()
 {
     auto gpuSettings = _simController->getGpuSettings();
     GlobalSettings::getInstance().setGpuSettings(gpuSettings);
-    GlobalSettings::getInstance().setBoolState("windows.GPU settings.active", _on);
 }
 
-void _GpuSettingsWindow::process()
+void _GpuSettingsDialog::process()
 {
-    if (!_on) {
+    if (!_show) {
         return;
     }
     auto gpuSettings = _simController->getGpuSettings();
     auto origGpuSettings = _simController->getOriginalGpuSettings();
     auto lastGpuSettings = gpuSettings;
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    if (ImGui::Begin("GPU settings", &_on, ImGuiWindowFlags_None)) {
+    ImGui::OpenPopup("GPU settings");
+    if (ImGui::BeginPopupModal("GPU settings", NULL, ImGuiWindowFlags_None)) {
 
         AlienImGui::InputInt(
             "Blocks", gpuSettings.NUM_BLOCKS, origGpuSettings.NUM_BLOCKS, std::string("Number of GPU thread blocks."));
@@ -62,19 +60,30 @@ void _GpuSettingsWindow::process()
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
-        ImGui::End();
+        AlienImGui::Separator();
+
+        if (ImGui::Button("OK")) {
+            ImGui::CloseCurrentPopup();
+            _show = false;
+        }
+        ImGui::SetItemDefaultFocus();
+
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+            _show = false;
+            gpuSettings = _gpuSettings;
+        }
+
+        ImGui::EndPopup();
     }
     if (gpuSettings != lastGpuSettings) {
         _simController->setGpuSettings_async(gpuSettings);
     }
 }
 
-bool _GpuSettingsWindow::isOn() const
+void _GpuSettingsDialog::show()
 {
-    return _on;
-}
-
-void _GpuSettingsWindow::setOn(bool value)
-{
-    _on = value;
+    _show = true;
+    _gpuSettings = _simController->getGpuSettings();
 }

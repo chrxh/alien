@@ -32,7 +32,7 @@
 #include "SpatialControlWindow.h"
 #include "SimulationParametersWindow.h"
 #include "StatisticsWindow.h"
-#include "GpuSettingsWindow.h"
+#include "GpuSettingsDialog.h"
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "StartupWindow.h"
@@ -48,6 +48,7 @@
 #include "GettingStartedWindow.h"
 #include "OpenSimulationDialog.h"
 #include "SaveSimulationDialog.h"
+#include "DisplaySettingsDialog.h"
 
 namespace
 {
@@ -110,7 +111,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
     _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
-    _gpuSettingsWindow = boost::make_shared<_GpuSettingsWindow>(_styleRepository, _simController);
+    _gpuSettingsDialog = boost::make_shared<_GpuSettingsDialog>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
     _startupWindow = boost::make_shared<_StartupWindow>(_simController, _viewport);
     _flowGeneratorWindow = boost::make_shared<_FlowGeneratorWindow>(_simController);
@@ -120,6 +121,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _gettingStartedWindow = boost::make_shared<_GettingStartedWindow>(_styleRepository);
     _openSimulationDialog = boost::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
     _saveSimulationDialog = boost::make_shared<_SaveSimulationDialog>(_simController);
+    _displaySettingsDialog = boost::make_shared<_DisplaySettingsDialog>(glfwData.window);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -239,6 +241,8 @@ auto _MainWindow::initGlfw() -> GlfwData
     if (window == NULL) {
         throw std::runtime_error("Failed to create window.");
     }
+//    glfwSetWindowMonitor(window, primaryMonitor, 0, 0, 2560, 1440/*1920, 1080*/, 120);
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSwapInterval(1);  // Enable vsync
@@ -380,6 +384,12 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
                 _statisticsWindow->setOn(!_statisticsWindow->isOn());
             }
+            if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
+                _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
+            }
+            if (ImGui::MenuItem("Flow generator", "", _flowGeneratorWindow->isOn())) {
+                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+            }
             if (ImGui::MenuItem("Log", "", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
@@ -390,14 +400,18 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
                 _autosaveController->setOn(!_autosaveController->isOn());
             }
-            if (ImGui::MenuItem("GPU settings", "", _gpuSettingsWindow->isOn())) {
-                _gpuSettingsWindow->setOn(!_gpuSettingsWindow->isOn());
+            if (ImGui::MenuItem("GPU settings", "")) {
+                _gpuSettingsDialog->show();
             }
-            if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
-                _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
-            }
-            if (ImGui::MenuItem("Flow generator", "", _flowGeneratorWindow->isOn())) {
-                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+            if (ImGui::MenuItem("Display settings", "")) {
+                _displaySettingsDialog->show();
+                /*
+                if (ImGui::MenuItem("1920 x 1080", "")) {
+                    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+                    auto mode = glfwGetVideoMode(primaryMonitor);
+                    glfwSetWindowMonitor(_window, primaryMonitor, 0, 0, 2560, 1440 / *1920, 1080* /, mode->refreshRate);
+                }
+*/
             }
             AlienImGui::EndMenuButton();
         }
@@ -460,6 +474,8 @@ void _MainWindow::processDialogs()
     _newSimulationDialog->process();
     _aboutDialog->process();
     _colorizeDialog->process();
+    _gpuSettingsDialog->process();
+    _displaySettingsDialog->process(); 
     processExitDialog();
 }
 
@@ -470,7 +486,6 @@ void _MainWindow::processWindows()
     _modeWindow->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();
-    _gpuSettingsWindow->process();
     _flowGeneratorWindow->process();
     _logWindow->process();
     _gettingStartedWindow->process();

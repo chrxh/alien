@@ -116,7 +116,7 @@
     <ClInclude Include="..\..\source\Gui\SpatialControlWindow.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Gui\GpuSettingsWindow.h">
+    <ClInclude Include="..\..\source\Gui\GpuSettingsDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\AlienImGui.h">
@@ -162,6 +162,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Gui\SaveSimulationDialog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Gui\DisplaySettingsDialog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -241,7 +244,7 @@
     <ClCompile Include="..\..\source\Gui\SpatialControlWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\Gui\GpuSettingsWindow.cpp">
+    <ClCompile Include="..\..\source\Gui\GpuSettingsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\AlienImGui.cpp">
@@ -287,6 +290,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Gui\SaveSimulationDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Gui\DisplaySettingsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

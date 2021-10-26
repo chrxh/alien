@@ -22,6 +22,8 @@ namespace Const
     ImColor const ShutdownButtonActiveColor = ImColor::HSV(0.f, 1.0f, 1.0f);
     ImColor const LogMessageColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
+    ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
+
     float const WindowAlpha = 0.7f;
     float const SliderBarWidth = 40.0f;
 }
