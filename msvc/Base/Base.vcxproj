@@ -147,6 +147,7 @@
     <ClInclude Include="..\..\source\Base\Definitions.h" />
     <ClInclude Include="..\..\source\Base\DllExport.h" />
     <ClInclude Include="..\..\source\Base\Exceptions.h" />
+    <ClInclude Include="..\..\source\Base\JsonParser.h" />
     <ClInclude Include="..\..\source\Base\LoggingService.h" />
     <ClInclude Include="..\..\source\Base\LoggingServiceImpl.h" />
     <ClInclude Include="..\..\source\Base\Math.h" />

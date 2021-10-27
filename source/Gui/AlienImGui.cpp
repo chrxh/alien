@@ -95,7 +95,8 @@ void AlienImGui::InputInt(
 
 void AlienImGui::Combo(std::string const& name, int& value, int defaultValue, std::vector<std::string> const& values)
 {
-    const char* items[10] = {};
+    
+    const char** items = new const char*[values.size()];
     for(int i = 0; i < values.size(); ++i) {
         items[i] = values[i].c_str();
     }
@@ -112,6 +113,7 @@ void AlienImGui::Combo(std::string const& name, int& value, int defaultValue, st
     ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::Text(name.c_str());
+    delete[] items;
 }
 
 bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup)
