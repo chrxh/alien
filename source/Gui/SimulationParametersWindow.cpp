@@ -233,7 +233,8 @@ void _SimulationParametersWindow::processBase(
             4.0f,
             false,
             "%.3f",
-            std::string("Strength of the force that holds two connected cells together."));
+            std::string("Strength of the force that holds two connected cells together. For larger binding forces, the "
+                        "time step size should be selected smaller due to numerical instabilities."));
         AlienImGui::SliderFloat(
             "Binding creation force",
             simParameters.spotValues.cellFusionVelocity,
