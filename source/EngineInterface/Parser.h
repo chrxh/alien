@@ -2,6 +2,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include "Base/JsonParser.h"
+
 #include "Definitions.h"
 #include "DllExport.h"
 
@@ -12,41 +14,7 @@ public:
     ENGINEINTERFACE_EXPORT static std::pair<uint64_t, Settings> decodeTimestepAndSettings(
         boost::property_tree::ptree tree);
 
-    enum class Task
-    {
-        Encode,
-        Decode
-    };
-    template <typename T>
-    static void encodeDecode(
-        boost::property_tree::ptree& tree,
-        T& parameter,
-        T const& defaultValue,
-        std::string const& node,
-        Task task);
-
 private:
-    static void encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, Task task);
+    static void
+    encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask task);
 };
-
-/**
- * Implementations
- */
-template <typename T>
-void Parser::encodeDecode(
-    boost::property_tree::ptree& tree,
-    T& parameter,
-    T const& defaultValue,
-    std::string const& node,
-    Task task)
-{
-    if (Task::Encode == task) {
-        if constexpr (std::is_same<T, bool>::value) {
-            tree.put(node, parameter ? "true" : "false");
-        } else {
-            tree.put(node, std::to_string(parameter));
-        }
-    } else {
-        parameter = tree.get<T>(node, defaultValue);
-    }
-}

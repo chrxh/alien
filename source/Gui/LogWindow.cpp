@@ -29,12 +29,9 @@ void _LogWindow::process()
     }
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Log", &_on)) {
-        ImGui::Checkbox("Verbose", &_verbose);
 
-        ImGui::Spacing();
-        ImGui::Spacing();
-
-        if (ImGui::BeginChild("##", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        if (ImGui::BeginChild(
+                "##", ImVec2(0, ImGui::GetContentRegionAvail().y - 40), true, ImGuiWindowFlags_HorizontalScrollbar)) {
             ImGui::PushFont(_styleRepository->getMonospaceFont());
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
 
@@ -46,6 +43,9 @@ void _LogWindow::process()
             ImGui::PopFont();
             ImGui::EndChild();
         }
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Checkbox("Verbose", &_verbose);
 
         ImGui::End();
     }

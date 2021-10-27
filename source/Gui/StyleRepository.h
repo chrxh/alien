@@ -24,7 +24,7 @@ namespace Const
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
 
-    float const WindowAlpha = 0.7f;
+    float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 40.0f;
 }
 
