@@ -62,7 +62,7 @@ EntityFactory::createParticleFromTO(int targetIndex, ParticleAccessTO const& par
     Particle* particle = particleTargetArray + targetIndex;
     *particlePointer = particle;
     
-    particle->id = 0 == particleTO.id ? _data->numberGen.createNewId_kernel() : particleTO.id;
+    particle->id = _data->numberGen.createNewId_kernel();
     particle->absPos = particleTO.pos;
     _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
@@ -80,7 +80,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     Cell* cell = cellTargetArray + targetIndex;
     *cellPointer = cell;
 
-    cell->id = 0 == cellTO.id ? _data->numberGen.createNewId_kernel() : cellTO.id;
+    cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = cellTO.pos;
     _map.mapPosCorrection(cell->absPos);
     cell->vel = cellTO.vel;
