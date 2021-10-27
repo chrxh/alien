@@ -74,7 +74,7 @@ void _FlowGeneratorWindow::process()
                     flowCenter.radius,
                     origFlowCenter.radius,
                     0.0,
-                    std::min(toFloat(worldSize.x), toFloat(worldSize.y)),
+                    std::min(toFloat(worldSize.x), toFloat(worldSize.y)) / 2,
                     false,
                     "%.0f");
                 AlienImGui::SliderFloat(
