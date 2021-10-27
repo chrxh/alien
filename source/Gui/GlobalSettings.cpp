@@ -22,39 +22,51 @@ GlobalSettings& GlobalSettings::getInstance()
 GpuSettings GlobalSettings::getGpuSettings()
 {
     GpuSettings result;
-    encodeDecodeGpuSettings(result, Parser::Task::Decode);
+    encodeDecodeGpuSettings(result, ParserTask::Decode);
     return result;
 }
 
 void GlobalSettings::setGpuSettings(GpuSettings gpuSettings)
 {
-    encodeDecodeGpuSettings(gpuSettings, Parser::Task::Encode);
+    encodeDecodeGpuSettings(gpuSettings, ParserTask::Encode);
 }
 
 bool GlobalSettings::getBoolState(std::string const& name, bool defaultValue)
 {
     bool result;
-    Parser::encodeDecode(_impl->_tree, result, defaultValue, name, Parser::Task::Decode);
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, name, ParserTask::Decode);
     return result;
 }
 
 void GlobalSettings::setBoolState(std::string const& name, bool value)
 {
-    Parser::encodeDecode(_impl->_tree, value, false, name, Parser::Task::Encode);
+    JsonParser::encodeDecode(_impl->_tree, value, false, name, ParserTask::Encode);
 }
 
-void GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, Parser::Task task)
+int GlobalSettings::getIntState(std::string const& name, int defaultValue)
+{
+    int result;
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, name, ParserTask::Decode);
+    return result;
+}
+
+void GlobalSettings::setIntState(std::string const& name, int value)
+{
+    JsonParser::encodeDecode(_impl->_tree, value, 0, name, ParserTask::Encode);
+}
+
+void GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, ParserTask task)
 {
     GpuSettings defaultSettings;
-    Parser::encodeDecode(
+    JsonParser::encodeDecode(
         _impl->_tree,
         gpuSettings.NUM_BLOCKS,
-        defaultSettings.NUM_BLOCKS, "GPU settings.num blocks", task);
-    Parser::encodeDecode(
+        defaultSettings.NUM_BLOCKS, "settings.gpu.num blocks", task);
+    JsonParser::encodeDecode(
         _impl->_tree,
         gpuSettings.NUM_THREADS_PER_BLOCK,
         defaultSettings.NUM_THREADS_PER_BLOCK,
-        "GPU settings.num threads per block",
+        "settings.gpu.num threads per block",
         task);
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Base/JsonParser.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/Parser.h"
 
 #include "Definitions.h"
 
@@ -21,11 +21,14 @@ public:
     bool getBoolState(std::string const& name, bool defaultValue);
     void setBoolState(std::string const& name, bool value);
 
+    int getIntState(std::string const& name, int defaultValue);
+    void setIntState(std::string const& name, int value);
+
 private:
     GlobalSettings();
     ~GlobalSettings();
 
-    void encodeDecodeGpuSettings(GpuSettings& gpuSettings, Parser::Task task);
+    void encodeDecodeGpuSettings(GpuSettings& gpuSettings, ParserTask task);
 
     GlobalSettingsImpl* _impl;
 };
