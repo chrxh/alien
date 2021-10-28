@@ -78,7 +78,7 @@ void _FlowGeneratorWindow::process()
                     false,
                     "%.0f");
                 AlienImGui::SliderFloat(
-                    "Strength", flowCenter.strength, origFlowCenter.strength, 0.0, 0.5f, false, "%.3f");
+                    "Strength", flowCenter.strength, origFlowCenter.strength, 0.0, 0.5f, true, "%.4f");
 
                 std::vector<std::string> orientations = {"Clockwise", "Counter clockwise"};
                 int currentOrientation = flowCenter.orientation == Orientation::Clockwise ? 0 : 1;
