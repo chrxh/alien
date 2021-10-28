@@ -179,6 +179,7 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
         _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
     _cudaSimulation->getSimulationData({0, 0}, worldSize, dataTO);
+//    _cudaSimulation->getSimulationData({0, 0}, {0, 0}, dataTO);
 
     DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
     converter.updateData(dataToUpdate);
