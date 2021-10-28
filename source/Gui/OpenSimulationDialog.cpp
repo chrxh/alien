@@ -26,7 +26,6 @@ void _OpenSimulationDialog::process()
     if (ifd::FileDialog::Instance().HasResult()) {
         const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
         auto firstFilename = res.front();
-
         _simController->closeSimulation();
 
         _statisticsWindow->reset();
@@ -41,7 +40,16 @@ void _OpenSimulationDialog::process()
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(4.0f);
+        _viewport->setZoomFactor(1.0f);
+
+/*
+        Serializer serializer = boost::make_shared<_Serializer>();
+        SerializedSimulation serializedData;
+        serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
+        auto deserializedData = serializer->deserializeSimulation(serializedData);
+
+        _simController->updateData(deserializedData.content);
+*/
     }
     ifd::FileDialog::Instance().Close();
 }

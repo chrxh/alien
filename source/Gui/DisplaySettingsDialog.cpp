@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>
 #include "imgui.h"
 
 #include "Base/LoggingService.h"

@@ -357,6 +357,10 @@ __global__ void setSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLower
     SimulationData data, DataAccessTO access)
 {
     KERNEL_CALL(adaptNumberGenerator, data.numberGen, access);
+/*
+    KERNEL_CALL_1_1(filterCells, {0, 0}, {0, 0}, data.entities.cellPointers);
+    KERNEL_CALL(filterParticles, {0, 0}, {0, 0}, data.entities.particlePointers);
+*/
     KERNEL_CALL_1_1(filterCells, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
     KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
     KERNEL_CALL(
