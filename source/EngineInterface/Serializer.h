@@ -1,36 +1,48 @@
 #pragma once
 
-#include <QObject>
+#include "Base/Definitions.h"
 
 #include "Definitions.h"
+#include "SymbolMap.h"
+#include "Settings.h"
+#include "SimulationParameters.h"
+#include "GeneralSettings.h"
+#include "Descriptions.h"
 
-class ENGINEINTERFACE_EXPORT Serializer
-	: public QObject
+struct SerializedSimulation
 {
-	Q_OBJECT
+    std::string timestepAndSettings;
+    std::string symbolMap;
+    std::string content;
+};
 
+struct DeserializedSimulation
+{
+    uint64_t timestep;
+    Settings settings;
+    SymbolMap symbolMap;
+    DataDescription content;
+};
+
+class _Serializer
+{
 public:
-	Serializer(QObject* parent = nullptr) : QObject(parent) { }
-	virtual ~Serializer() = default;
+    ENGINEINTERFACE_EXPORT bool loadSimulationDataFromFile(string const& filename, SerializedSimulation& data);
+    ENGINEINTERFACE_EXPORT bool saveSimulationDataToFile(string const& filename, SerializedSimulation& data);
 
-	virtual void init(SimulationControllerBuildFunc const& controllerBuilder, SimulationAccessBuildFunc const& accessBuilder) = 0;
+    ENGINEINTERFACE_EXPORT SerializedSimulation serializeSimulation(DeserializedSimulation const& data);
+    ENGINEINTERFACE_EXPORT DeserializedSimulation deserializeSimulation(SerializedSimulation const& data);
 
-	struct Settings {
-		IntVector2D universeSize;
-		map<string, int> typeSpecificData;
-        bool duplicateContent;
-	};
-	virtual void serialize(SimulationController* simController, int typeId, boost::optional<Settings> newSettings = boost::none) = 0;
-	Q_SIGNAL void serializationFinished();
-    virtual SerializedSimulation const& retrieveSerializedSimulation() = 0;
-    virtual SimulationController* deserializeSimulation(SerializedSimulation const& data) = 0;
+private:
+	ENGINEINTERFACE_EXPORT string serializeSymbolMap(SymbolMap const symbols) const;
+    ENGINEINTERFACE_EXPORT SymbolMap deserializeSymbolMap(string const& data);
 
-	virtual string serializeDataDescription(DataDescription const& desc) const = 0;
-	virtual DataDescription deserializeDataDescription(string const& data) = 0;
+    ENGINEINTERFACE_EXPORT string serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings) const;
+    ENGINEINTERFACE_EXPORT std::pair<uint64_t, Settings> deserializeTimestepAndSettings(std::string const& data) const;
 
-	virtual string serializeSymbolTable(SymbolTable const* symbolTable) const = 0;
-	virtual SymbolTable* deserializeSymbolTable(string const& data) = 0;
+    ENGINEINTERFACE_EXPORT string serializeDataDescription(DataDescription const& desc) const;
+    ENGINEINTERFACE_EXPORT DataDescription deserializeDataDescription(string const& data);
 
-	virtual string serializeSimulationParameters(SimulationParameters const& parameters) const = 0;
-	virtual SimulationParameters deserializeSimulationParameters(string const& data) = 0;
+    ENGINEINTERFACE_EXPORT bool loadDataFromFile(std::string const& filename, std::string& data);
+    ENGINEINTERFACE_EXPORT bool saveDataToFile(std::string const& filename, std::string const& data);
 };

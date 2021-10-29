@@ -1,46 +1,31 @@
 #pragma once
 
-#include <QDialog>
-
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParameters.h"
-
+#include "EngineImpl/Definitions.h"
+#include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
 
-namespace Ui {
-	class NewSimulationDialog;
-}
-
-class SimulationParametersDialog;
-class SymbolTableDialog;
-class NewSimulationDialog : public QDialog
+class _NewSimulationDialog
 {
-	Q_OBJECT
-
 public:
-	NewSimulationDialog(SimulationParameters const& parameters, SymbolTable const* symbols, Serializer* serializer, QWidget* parent = nullptr);
-	virtual ~NewSimulationDialog();
+    _NewSimulationDialog(
+        SimulationController const& simController,
+        Viewport const& viewport,
+        StatisticsWindow const& statisticsWindow,
+        StyleRepository const& styleRepository);
 
-	boost::optional<SimulationConfig> getConfig() const;
-	boost::optional<double> getEnergy() const;
+    void process();
 
-private:
-	SymbolTable* getSymbolTable() const;
-	SimulationParameters const& getSimulationParameters() const;
-
-private:
-	Q_SLOT void simulationParametersButtonClicked();
-	Q_SLOT void symbolTableButtonClicked();
-	Q_SLOT void okClicked();
+    void show();
 
 private:
-	Ui::NewSimulationDialog *ui;
-	Serializer* _serializer = nullptr;
+    void onNewSimulation();
 
-	SimulationParameters _parameters;
-	SymbolTable* _symbolTable = nullptr;
+    SimulationController _simController;
+    Viewport _viewport;
+    StatisticsWindow _statisticsWindow;
+    StyleRepository _styleRepository;
 
-	IntVector2D _universeSizeForEngineGpu;
-	IntVector2D _gridSize;
+    bool _on = false;
+    int _width = 0;
+    int _height = 0;
 };
-

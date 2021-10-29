@@ -1,109 +1,105 @@
-#include <QMessageBox>
-
-#include "Gui/Settings.h"
-#include "Gui/StringHelper.h"
-#include "SimulationParametersDialog.h"
-#include "SymbolTableDialog.h"
-#include "SimulationConfig.h"
-
 #include "NewSimulationDialog.h"
-#include "ui_NewSimulationDialog.h"
 
-NewSimulationDialog::NewSimulationDialog(SimulationParameters const& parameters, SymbolTable const* symbols, Serializer* serializer, QWidget *parent)
-	: QDialog(parent)
-	, ui(new Ui::NewSimulationDialog)
-	, _parameters(parameters)
-	, _symbolTable(symbols->clone())
-	, _serializer(serializer)
+#include "imgui.h"
+
+#include "EngineImpl/SimulationController.h"
+#include "Viewport.h"
+#include "StatisticsWindow.h"
+
+_NewSimulationDialog::_NewSimulationDialog(
+    SimulationController const& simController,
+    Viewport const& viewport,
+    StatisticsWindow const& statisticsWindow,
+    StyleRepository const& styleRepository)
+    : _simController(simController)
+    , _viewport(viewport)
+    , _statisticsWindow(statisticsWindow)
+    , _styleRepository(styleRepository)
+{}
+
+void _NewSimulationDialog::process()
 {
-	_symbolTable->setParent(parent);
-	ui->setupUi(this);
-	
-	ui->energyEdit->setText(StringHelper::toString(
-		GuiSettings::getSettingsValue(Const::InitialEnergyKey, Const::InitialEnergyDefault)));
-
-    connect(ui->simulationParametersButton, &QPushButton::clicked, this, &NewSimulationDialog::simulationParametersButtonClicked);
-    connect(ui->symbolTableButton, &QPushButton::clicked, this, &NewSimulationDialog::symbolTableButtonClicked);
-	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewSimulationDialog::okClicked);
-}
-
-
-NewSimulationDialog::~NewSimulationDialog()
-{
-    delete ui;
-}
-
-boost::optional<SimulationConfig> NewSimulationDialog::getConfig() const
-{
-	auto config = boost::make_shared<_SimulationConfig>();
-    if (auto const value = ui->computationSettings->getUniverseSize()) {
-        config->universeSize = *value;
-    }
-    else {
-        return boost::none;
-    }
-	config->parameters = getSimulationParameters();
-	config->symbolTable = getSymbolTable();
-    if (auto const value = ui->computationSettings->getCudaConstants()) {
-        config->cudaConstants = *value;
-    }
-    else {
-        return boost::none;
-    }
-    return config;
-}
-
-boost::optional<double> NewSimulationDialog::getEnergy () const
-{
-    bool ok(true);
-	double energy = ui->energyEdit->text().toDouble(&ok);
-	if (!ok) {
-		return boost::none;
-	}
-    return energy;
-}
-
-SymbolTable* NewSimulationDialog::getSymbolTable() const
-{
-	return _symbolTable;
-}
-
-SimulationParameters const& NewSimulationDialog::getSimulationParameters() const
-{
-	return _parameters;
-}
-
-void NewSimulationDialog::simulationParametersButtonClicked ()
-{
-	SimulationParametersDialog d(getSimulationParameters(), _serializer, this);
-	if (d.exec()) {
-		_parameters = d.getSimulationParameters();
-	}
-}
-
-void NewSimulationDialog::symbolTableButtonClicked ()
-{
-	SymbolTableDialog d(_symbolTable->clone(), _serializer, this);
-	if (d.exec()) {
-		_symbolTable = d.getSymbolTable();
-	}
-}
-
-void NewSimulationDialog::okClicked()
-{
-	auto const config = getConfig();
-    auto const energy = getEnergy();
-
-    if (!config || !energy) {
-        QMessageBox msgBox(QMessageBox::Critical, "Invalid values", Const::ErrorInvalidValues);
-        msgBox.exec();
+    if (!_on) {
         return;
     }
+    ImGui::OpenPopup("New simulation");
+    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("New simulation", NULL, 0)) {
+        if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
 
-    ui->computationSettings->saveSettings();
-    GuiSettings::setSettingsValue(Const::InitialEnergyKey, *getEnergy());
-    accept();
+            //width
+            ImGui::TableNextRow();
+
+            ImGui::TableSetColumnIndex(0);
+            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::InputInt("##width", &_width);
+            ImGui::PopItemWidth();
+
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text("Width");
+
+            //height
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::InputInt("##height", &_height);
+            ImGui::PopItemWidth();
+
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text("Height");
+
+            ImGui::EndTable();
+        }
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        if (ImGui::Button("OK")) {
+            ImGui::CloseCurrentPopup();
+            onNewSimulation();
+            _on = false;
+        }
+        ImGui::SetItemDefaultFocus();
+
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+            _on = false;
+        }
+
+        ImGui::EndPopup();
+        _width = std::max(1, _width);
+        _height = std::max(1, _height);
+    }
 }
 
+void _NewSimulationDialog::show()
+{
+    _on = true;
+    auto worldSize = _simController->getWorldSize();
+    _width = worldSize.x;
+    _height = worldSize.y;
+}
 
+void _NewSimulationDialog::onNewSimulation()
+{
+    _simController->closeSimulation();
 
+    _statisticsWindow->reset();
+
+    auto symbolMap = _simController->getSymbolMap();
+
+    Settings settings;
+    settings.generalSettings.worldSizeX = _width;
+    settings.generalSettings.worldSizeY = _height;
+    settings.simulationParameters = _simController->getSimulationParameters();
+    settings.flowFieldSettings.centers[0].posX = toFloat(_width) / 2;
+    settings.flowFieldSettings.centers[0].posY = toFloat(_height) / 2;
+
+    _simController->newSimulation(0, settings, symbolMap);
+    _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
+    _viewport->setZoomFactor(4.0f);
+}

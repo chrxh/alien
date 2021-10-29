@@ -9,7 +9,6 @@
 #include "SimulationData.cuh"
 #include "Math.cuh"
 #include "Cell.cuh"
-#include "Cluster.cuh"
 
 
 class Physics
@@ -30,9 +29,6 @@ public:
     __inline__ __device__ static float rotationalKineticEnergy(float angularMass, float angularVel);
     __inline__ __device__ static void calcImpulseIncrement(float2 const& impulse, float2 relPos, float mass,
         float angularMass, float2& velInc, float& angularVelInc);
-
-private:
-    __device__ __inline__ static float2 calcOutwardVector(Cell* cellA, Cell* cellB, MapInfo const& map);
 };
 
 
@@ -57,7 +53,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Cell *cell, float2 outwar
 	for (int i = 0; i < cell->numConnections; ++i) {
 
 		//calculate h (angular distance from outward vector)
-		float2 u = cell->connections[i]->absPos - cell->absPos;
+		float2 u = cell->connections[i].cell->absPos - cell->absPos;
         Math::normalize(u);
 		float h = Math::dot(outward, u);
 		if (outward.x*u.y - outward.y*u.x < 0.0) {
@@ -65,12 +61,12 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Cell *cell, float2 outwar
 		}
 
 		if (!minCell || h < min_h) {
-			minCell = cell->connections[i];
+			minCell = cell->connections[i].cell;
 			minVector = u;
 			min_h = h;
 		}
 		if (!maxCell || h > max_h) {
-			maxCell = cell->connections[i];
+			maxCell = cell->connections[i].cell;
 			maxVector = u;
 			max_h = h;
 		}
@@ -184,27 +180,6 @@ __inline__ __device__ void Physics::calcImpulseIncrement(float2 const & impulse,
 __inline__ __device__ float Physics::kineticEnergy(float mass, float2 const& vel, float angularMass, float angularVel)
 {
     return linearKineticEnergy(mass, vel) + rotationalKineticEnergy(angularMass, angularVel);
-}
-
-__device__ __inline__ float2 Physics::calcOutwardVector(Cell* cellA, Cell* cellB, MapInfo const& map)
-{
-	Cluster* clusterA = cellA->cluster;
-	float2 posA = clusterA->pos;
-	float2 velA = clusterA->getVelocity();
-	float angVelA = clusterA->getAngularVelocity() * DEG_TO_RAD;
-
-	Cluster* clusterB = cellB->cluster;
-	float2 posB = clusterB->pos;
-	float2 velB = clusterB->getVelocity();
-	float angVelB = clusterB->getAngularVelocity() * DEG_TO_RAD;
-
-    float2 rAPp = cellB->absPos - posA;
-	map.mapDisplacementCorrection(rAPp);
-    Math::rotateQuarterCounterClockwise(rAPp);
-	float2 rBPp = cellB->absPos - posB;
-	map.mapDisplacementCorrection(rBPp);
-    Math::rotateQuarterCounterClockwise(rBPp);
-	return (velB - rBPp * angVelB) - (velA - rAPp * angVelA);
 }
 
 __inline__ __device__ float2 Physics::tangentialVelocity(float2 const& r, float2 const& vel, float angularVel)

@@ -1,43 +1,37 @@
 #pragma once
 
+#include "EngineInterface/GpuSettings.h"
+
 #include "Base.cuh"
 #include "Definitions.cuh"
 #include "DynamicMemory.cuh"
 
 struct Entities
 {
-    Array<Cluster*> clusterPointers;
-    Array<Cluster*> clusterFreezedPointers;
     Array<Cell*> cellPointers;
     Array<Token*> tokenPointers;
     Array<Particle*> particlePointers;
 
-    Array<Cluster> clusters;
     Array<Cell> cells;
     Array<Token> tokens;
     Array<Particle> particles;
 
     DynamicMemory strings;
 
-    void init(CudaConstants const& cudaConstants)
+    void init()
     {
-        clusterPointers.init(cudaConstants.MAX_CLUSTERPOINTERS);
-        clusterFreezedPointers.init(cudaConstants.MAX_CLUSTERPOINTERS);
-        clusters.init(cudaConstants.MAX_CLUSTERS);
-        cellPointers.init(cudaConstants.MAX_CELLPOINTERS);
-        cells.init(cudaConstants.MAX_CELLS);
-        tokenPointers.init(cudaConstants.MAX_TOKENPOINTERS);
-        tokens.init(cudaConstants.MAX_TOKENS);
-        particles.init(cudaConstants.MAX_PARTICLES);
-        particlePointers.init(cudaConstants.MAX_PARTICLEPOINTERS);
-        strings.init(cudaConstants.METADATA_DYNAMIC_MEMORY_SIZE);
+        cellPointers.init();
+        cells.init();
+        tokenPointers.init();
+        tokens.init();
+        particles.init();
+        particlePointers.init();
+        strings.init();
+        strings.resize(Const::MetadataMemorySize);
     }
 
     void free()
     {
-        clusterPointers.free();
-        clusterFreezedPointers.free();
-        clusters.free();
         cellPointers.free();
         cells.free();
         tokenPointers.free();
