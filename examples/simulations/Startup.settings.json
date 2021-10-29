@@ -1,6 +1,6 @@
 {
     "general": {
-        "time step": "105456300",
+        "time step": "0",
         "world size": {
             "x": "1000",
             "y": "1000"
