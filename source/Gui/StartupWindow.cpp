@@ -41,7 +41,7 @@ void _StartupWindow::process()
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(1.0f);
+        _viewport->setZoomFactor(2.0f);
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();
         _state = State::LoadingSimulation;
