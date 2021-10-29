@@ -19,7 +19,7 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     : _simController(simController)
 {
     ImPlot::GetStyle().AntiAliasedLines = true;
-    _on = GlobalSettings::getInstance().getBoolState("windows.statistics.active", true);
+    _on = GlobalSettings::getInstance().getBoolState("windows.statistics.active", false);
 }
 
 _StatisticsWindow::~_StatisticsWindow()
