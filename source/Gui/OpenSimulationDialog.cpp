@@ -40,7 +40,7 @@ void _OpenSimulationDialog::process()
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(1.0f);
+        _viewport->setZoomFactor(2.0f);
 
 /*
         Serializer serializer = boost::make_shared<_Serializer>();
