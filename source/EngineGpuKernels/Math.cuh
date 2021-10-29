@@ -15,12 +15,15 @@ public:
     __inline__ __device__ static void inverseRotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
     __inline__ __device__ static void angleCorrection(float& angle);
+    __inline__ __device__ static void angleCorrection(int& angle);
+    __inline__ __device__ static void rotateQuarterClockwise(float2& v);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);   //0 DEG corresponds to (0,-1)
     __inline__ __device__ static float2 unitVectorOfAngle(float angle);
     __inline__ __device__ static void normalize(float2& vec);
     __inline__ __device__ static float2 normalized(float2 vec);
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
+    __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
     __inline__ __host__ __device__ static float length(float2 const& v);
     __inline__ __host__ __device__ static float length(int2 const& v);
     __inline__ __host__ __device__ static float lengthSquared(float2 const& v);
@@ -29,10 +32,7 @@ public:
     __inline__ __device__ static float
     calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, int const& boundary = 0);
 
-
-private:
-    __inline__ __device__ static void angleCorrection(int &angle);
-
+    __inline__ __device__ static float alignAngle(float angle, int alignment);
 };
 
 __inline__ __device__ float2 operator+(float2 const& p, float2 const& q)
@@ -91,13 +91,22 @@ __inline__ __device__ float Math::angleOfVector(float2 const & v)
         return 0;
     }
 
-    float angleSin = asinf(-v.y / length(v)) * RAD_TO_DEG;
+    auto normalizedVy = -v.y / length(v);
+    normalizedVy = max(-1.0f, min(1.0f, normalizedVy));
+    float angleSin = asinf(normalizedVy) * RAD_TO_DEG;
     if (v.x >= 0.0f) {
         return 90.0f - angleSin;
     }
     else {
         return angleSin + 270.0f;
     }
+}
+
+__inline__ __device__ void Math::rotateQuarterClockwise(float2& v)
+{
+    float temp = v.x;
+    v.x = -v.y;
+    v.y = temp;
 }
 
 __device__ __inline__ void Math::rotateQuarterCounterClockwise(float2 &v)
@@ -167,6 +176,11 @@ __device__ __inline__ float Math::dot(float2 const &p, float2 const &q)
     return p.x*q.x + p.y*q.y;
 }
 
+__inline__ __device__ float2 Math::crossProdProjected(float3 const& p, float3 const& q)
+{
+    return {p.y * q.z - p.z * q.y, p.z * q.x - p.x * q.z};
+}
+
 __host__ __device__ __inline__ float Math::length(float2 const & v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
@@ -225,4 +239,15 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
     }
 
     return abs(signedDistanceFromLine);
+}
+
+__inline__ __device__ float Math::alignAngle(float angle, int alignment)
+{
+    if (0 == alignment) {
+        return angle;
+    }
+    float unitAngle = 360.0f / alignment;
+    float factor = angle / unitAngle + 0.5f;
+    factor = floorf(factor);
+    return factor * unitAngle;
 }

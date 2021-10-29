@@ -1,12 +1,36 @@
 #include "ChangeDescriptions.h"
 
+#include <boost/range/adaptors.hpp>
+
+
+namespace
+{
+    boost::optional<std::list<ConnectionChangeDescription>> convert(
+        boost::optional<list<ConnectionDescription>> const& connections)
+	{
+        if (!connections) {
+            return boost::none;
+        }
+        std::list<ConnectionChangeDescription> result;
+        for (auto const& connection : *connections) {
+            ConnectionChangeDescription connectionChange;
+            connectionChange.cellId = connection.cellId;
+            connectionChange.distance = connection.distance;
+            connectionChange.angleFromPrevious = connection.angleFromPrevious;
+            result.emplace_back(connectionChange);
+        }
+        return result;
+    }
+}
+
 CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 {
 	id = desc.id;
 	pos = desc.pos;
-	energy = desc.energy;
+    vel = desc.vel;
+    energy = desc.energy;
 	maxConnections = desc.maxConnections;
-	connectingCells = desc.connectingCells;
+    connectingCells = convert(desc.connections);
 	tokenBlocked = desc.tokenBlocked;
 	tokenBranchNumber = desc.tokenBranchNumber;
 	metadata = desc.metadata;
@@ -18,11 +42,13 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
 {
 	id = after.id;
-	pos = ValueTracker<QVector2D>(before.pos, after.pos);
-	energy = ValueTracker<double>(before.energy, after.energy);
+	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
+    vel = ValueTracker<RealVector2D>(before.vel, after.vel);
+    energy = ValueTracker<double>(before.energy, after.energy);
 	maxConnections = ValueTracker<int>(before.maxConnections, after.maxConnections);
-	connectingCells = ValueTracker<list<uint64_t>>(before.connectingCells, after.connectingCells);
-	tokenBlocked = ValueTracker<bool>(before.tokenBlocked, after.tokenBlocked);
+    connectingCells =
+        ValueTracker<list<ConnectionChangeDescription>>(convert(before.connections), convert(after.connections));
+    tokenBlocked = ValueTracker<bool>(before.tokenBlocked, after.tokenBlocked);
 	tokenBranchNumber = ValueTracker<int>(before.tokenBranchNumber, after.tokenBranchNumber);
 	metadata = ValueTracker<CellMetadata>(before.metadata, after.metadata);
 	cellFeatures = ValueTracker<CellFeatureDescription>(before.cellFeature, after.cellFeature);
@@ -32,85 +58,8 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
 
 bool CellChangeDescription::isEmpty() const
 {
-	return !pos
-		&& !energy
-		&& !maxConnections
-		&& !connectingCells
-		&& !tokenBlocked
-		&& !tokenBranchNumber
-		&& !metadata
-		&& !cellFeatures
-		&& !tokens
-		;
-}
-
-ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & desc)
-{
-	id = desc.id;
-	pos = desc.pos;
-	vel = desc.vel;
-	angle = desc.angle;
-	angularVel = desc.angularVel;
-	metadata = desc.metadata;
-	if (desc.cells) {
-		for (auto const& cell : *desc.cells) {
-			addNewCell(cell);
-		}
-	}
-}
-
-ClusterChangeDescription::ClusterChangeDescription(ClusterDescription const & before, ClusterDescription const & after)
-{
-	id = after.id;
-	pos = ValueTracker<QVector2D>(before.pos, after.pos);
-	vel = ValueTracker<QVector2D>(before.vel, after.vel);
-	angle = ValueTracker<double>(before.angle, after.angle);
-	angularVel = ValueTracker<double>(before.angularVel, after.angularVel);
-	metadata = ValueTracker<ClusterMetadata>(before.metadata, after.metadata);
-
-	if (before.cells && after.cells) {
-		unordered_map<uint64_t, int> cellAfterIndicesByIds;
-		for (int index = 0; index < after.cells->size(); ++index) {
-			cellAfterIndicesByIds.insert_or_assign(after.cells->at(index).id, index);
-		}
-
-		for (auto const& cellBefore : *before.cells) {
-			auto cellIdAfterIt = cellAfterIndicesByIds.find(cellBefore.id);
-			if (cellIdAfterIt == cellAfterIndicesByIds.end()) {
-				addDeletedCell(CellChangeDescription().setId(cellBefore.id).setPos(*cellBefore.pos));
-			}
-			else {
-				int cellAfterIndex = cellIdAfterIt->second;
-				auto const& cellAfter = after.cells->at(cellAfterIndex);
-				CellChangeDescription change(cellBefore, cellAfter);
-				if (!change.isEmpty()) {
-					addModifiedCell(change);
-				}
-				cellAfterIndicesByIds.erase(cellAfter.id);
-			}
-		}
-
-		for (auto const& cellAfterIndexById : cellAfterIndicesByIds) {
-			auto const& cellAfter = after.cells->at(cellAfterIndexById.second);
-			addNewCell(CellChangeDescription(cellAfter));
-		}
-	}
-	if (!before.cells && after.cells) {
-		for (auto const& cellAfter : *after.cells) {
-			addNewCell(CellChangeDescription(cellAfter));
-		}
-	}
-}
-
-bool ClusterChangeDescription::isEmpty() const
-{
-	return !pos
-		&& !vel
-		&& !angle
-		&& !angularVel
-		&& !metadata
-		&& cells.empty()
-		;
+    return !pos && !energy && !maxConnections && !connectingCells && !tokenBlocked && !tokenBranchNumber && !metadata
+        && !cellFeatures && !tokens;
 }
 
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & desc)
@@ -125,26 +74,24 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & before, ParticleDescription const & after)
 {
 	id = after.id;
-	pos = ValueTracker<QVector2D>(before.pos, after.pos);
-	vel = ValueTracker<QVector2D>(before.vel, after.vel);
+	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
+	vel = ValueTracker<RealVector2D>(before.vel, after.vel);
 	energy = ValueTracker<double>(before.energy, after.energy);
 	metadata = ValueTracker<ParticleMetadata>(before.metadata, after.metadata);
 }
 
 bool ParticleChangeDescription::isEmpty() const
 {
-	return !pos
-		&& !vel
-		&& !energy
-		&& !metadata
-		;
+    return !pos && !vel && !energy && !metadata;
 }
 
 DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 {
 	if (desc.clusters) {
 		for (auto const& cluster : *desc.clusters) {
-			addNewCluster(cluster);
+            for (auto const& [index, cell] : *cluster.cells | boost::adaptors::indexed(0)) {
+                addNewCell(cell);
+            }
 		}
 	}
 	if (desc.particles) {
@@ -157,35 +104,48 @@ DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
 	if (dataBefore.clusters && dataAfter.clusters) {
-		unordered_map<uint64_t, int> clusterAfterIndicesByIds;
-		for (int index = 0; index < dataAfter.clusters->size(); ++index) {
-			clusterAfterIndicesByIds.insert_or_assign(dataAfter.clusters->at(index).id, index);
+        std::vector<CellDescription> cellsBefore;
+        std::vector<CellDescription> cellsAfter;
+        for (auto const& cluster : *dataBefore.clusters) {
+            cellsBefore.insert(cellsBefore.begin(), cluster.cells->begin(), cluster.cells->end());
+        }
+        for (auto const& cluster : *dataAfter.clusters) {
+            cellsAfter.insert(cellsAfter.begin(), cluster.cells->begin(), cluster.cells->end());
+        }
+
+        unordered_map<uint64_t, int> cellsAfterIndicesByIds;
+        for (int index = 0; index < cellsAfter.size(); ++index) {
+            cellsAfterIndicesByIds.insert_or_assign(cellsAfter.at(index).id, index);
 		}
 
-		for (auto const& clusterBefore : *dataBefore.clusters) {
-			auto clusterIdAfterIt = clusterAfterIndicesByIds.find(clusterBefore.id);
-			if (clusterIdAfterIt == clusterAfterIndicesByIds.end()) {
-				addDeletedCluster(ClusterChangeDescription().setId(clusterBefore.id).setPos(*clusterBefore.pos));
+		for (auto const& cellBefore : cellsBefore) {
+            auto cellIdAfterIt = cellsAfterIndicesByIds.find(cellBefore.id);
+            if (cellIdAfterIt == cellsAfterIndicesByIds.end()) {
+                addDeletedCell(CellChangeDescription().setId(cellBefore.id).setPos(*cellBefore.pos));
 			}
 			else {
-				int clusterAfterIndex = clusterIdAfterIt->second;
-				auto const& clusterAfter = dataAfter.clusters->at(clusterAfterIndex);
-				ClusterChangeDescription change(clusterBefore, clusterAfter);
+				int cellAfterIndex = cellIdAfterIt->second;
+                auto const& cellAfter = cellsAfter.at(cellAfterIndex);
+				CellChangeDescription change(cellBefore, cellAfter);
 				if (!change.isEmpty()) {
-					addModifiedCluster(change);
+					addModifiedCell(change);
 				}
-				clusterAfterIndicesByIds.erase(clusterBefore.id);
+				cellsAfterIndicesByIds.erase(cellBefore.id);
 			}
 		}
 
-		for (auto const& clusterAfterIndexById : clusterAfterIndicesByIds) {
-			auto const& clusterAfter = dataAfter.clusters->at(clusterAfterIndexById.second);
-			addNewCluster(ClusterChangeDescription(clusterAfter));
+		for (auto const& cellAfterIndex : cellsAfterIndicesByIds | boost::adaptors::map_values) {
+            auto const& cellAfter = cellsAfter.at(cellAfterIndex);
+            CellChangeDescription change(cellAfter);
+            addNewCell(change);
 		}
 	}
 	if (!dataBefore.clusters && dataAfter.clusters) {
 		for (auto const& clusterAfter : *dataAfter.clusters) {
-			addNewCluster(ClusterChangeDescription(clusterAfter));
+            for (auto const& cellAfter : *clusterAfter.cells) {
+                CellChangeDescription change(cellAfter);
+                addNewCell(change);
+            }
 		}
 	}
 
@@ -222,5 +182,4 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 		}
 	}
 }
-
 

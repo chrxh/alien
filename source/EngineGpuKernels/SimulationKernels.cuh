@@ -7,161 +7,136 @@
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "ClusterProcessor.cuh"
+#include "CellProcessor.cuh"
 #include "ParticleProcessor.cuh"
 #include "TokenProcessor.cuh"
 #include "CleanupKernels.cuh"
-#include "FreezingKernels.cuh"
+#include "Operation.cuh"
+#include "DebugKernels.cuh"
+#include "SimulationResult.cuh"
+#include "FlowFieldKernel.cuh"
 
-/************************************************************************/
-/* Helpers for clusters													*/
-/************************************************************************/
-__global__ void clusterProcessingStep1(SimulationData data, int numClusters)
+__global__ void processingStep1(SimulationData data)
 {
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor.repair_block();
-        clusterProcessor.processingMovement_block();
-        clusterProcessor.updateMap_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.init(data);
+    cellProcessor.clearTag(data);
+    cellProcessor.updateMap(data);
+    cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
 }
 
-__global__ void clusterProcessingStep2(SimulationData data, int numClusters)
+__global__ void processingStep2(SimulationData data)
 {
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor.destroyCloseCell_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.collisions(data);
+
+    ParticleProcessor particleProcessor;
+    particleProcessor.updateMap(data);
 }
 
-__global__ void clusterProcessingStep3(SimulationData data, int numClusters)
+__global__ void processingStep3(SimulationData data)
 {
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor
-            .processingCollision_block();  //attention: can result a temporarily inconsistent state, will be resolved in step 4
-        clusterProcessor.processingRadiation_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.applyAndInitForces(data);
+    cellProcessor.clearTag(data);
+
+    ParticleProcessor particleProcessor;
+    particleProcessor.movement(data);
+    particleProcessor.collision(data);
 }
 
-__global__ void clusterProcessingStep4(SimulationData data, int numClusters)
+__global__ void processingStep4(SimulationData data, int numTokenPointers)
 {
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        ClusterProcessor clusterProcessor;
-        clusterProcessor.init_block(data, clusterIndex);
-        clusterProcessor.processingCellDeath_block();
-        clusterProcessor.processingDecomposition_block();
-        clusterProcessor.processingClusterCopy_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.calcForces(data);
+
+    TokenProcessor tokenProcessor;
+    tokenProcessor.movement(data, numTokenPointers);    //changes cell energy without lock
 }
 
-/************************************************************************/
-/* Helpers for tokens													*/
-/************************************************************************/
-__global__ void resetCellFunctionData(SimulationData data)
+__global__ void processingStep5(SimulationData data)
 {
-    data.cellFunctionData.mapSectionCollector.reset_system();
-}
-__global__ void tokenProcessingStep1(SimulationData data, int numClusters)
-{
-    auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.repair_block();
-        tokenProcessor.processingEnergyAveraging_block();
-        tokenProcessor.processingSpreading_block();
-        tokenProcessor.processingLightWeigthedFeatures_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.calcPositions(data);
 }
 
-__global__ void tokenProcessingStep2(SimulationData data, int numClusters)
+__global__ void processingStep6(SimulationData data, SimulationResult result)
 {
-    auto const clusterPartition = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterPartition.startIndex; clusterIndex <= clusterPartition.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.createCellFunctionData_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.calcForces(data);
+
+    TokenProcessor tokenProcessor;
+    tokenProcessor.executeReadonlyCellFunctions(data, result);
 }
 
-__global__ void tokenProcessingStep3(SimulationData data, int numClusters)
+__global__ void processingStep7(SimulationData data, int numCellPointers)
 {
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.processingConstructors_block();
-    }
+    CellProcessor cellProcessor;
+    cellProcessor.calcVelocities(data, numCellPointers);
 }
 
-__global__ void tokenProcessingStep4(SimulationData data, int numClusters)
+__global__ void processingStep8(SimulationData data, SimulationResult result, int numTokenPointers)
 {
-    PartitionData clusterBlock = calcPartition(numClusters, blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        TokenProcessor tokenProcessor;
-        tokenProcessor.init_block(data, clusterIndex);
-        tokenProcessor.processingCommunicatorsAnsSensors_block();
-    }
-}
-/************************************************************************/
-/* Helpers for particles												*/
-/************************************************************************/
-__global__ void particleProcessingStep1(SimulationData data)
-{
-	ParticleProcessor particleProcessor;
-    particleProcessor.init_system(data);
-    particleProcessor.repair_system();
-    particleProcessor.processingMovement_system();
-    particleProcessor.updateMap_system();
-    particleProcessor.processingTransformation_system();
+    TokenProcessor tokenProcessor;
+    tokenProcessor.executeModifyingCellFunctions(data, result, numTokenPointers);
 }
 
-__global__ void particleProcessingStep2(SimulationData data)
+__global__ void processingStep9(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.calcAveragedVelocities(data);
+}
+
+__global__ void processingStep10(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.applyAveragedVelocities(data);
+    cellProcessor.decay(data);
+}
+
+__global__ void processingStep11(SimulationData data)
+{
+    CellConnectionProcessor::processConnectionsOperations(data);
+} 
+
+__global__ void processingStep12(SimulationData data, int numParticlePointers)
 {
     ParticleProcessor particleProcessor;
-    particleProcessor.init_system(data);
-    particleProcessor.processingCollision_system();
-}
+    particleProcessor.transformation(data, numParticlePointers);
 
-__global__ void particleProcessingStep3(SimulationData data)
-{
-	ParticleProcessor particleProcessor;
-    particleProcessor.init_system(data);
-    particleProcessor.processingDataCopy_system();
+    CellConnectionProcessor::processDelCellOperations(data);
 }
 
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
 
-__global__ void cudaCalcSimulationTimestep(SimulationData data)
+__global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
     data.cellMap.reset();
     data.particleMap.reset();
     data.dynamicMemory.reset();
-    KERNEL_CALL(resetCellFunctionData, data);
-    KERNEL_CALL(clusterProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep1, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(tokenProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(clusterProcessingStep2, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(clusterProcessingStep3, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(clusterProcessingStep4, data, data.entities.clusterPointers.getNumEntries());
-    KERNEL_CALL(particleProcessingStep1, data);
-    KERNEL_CALL(particleProcessingStep2, data);
-    KERNEL_CALL(particleProcessingStep3, data);
+    result.resetStatistics();
 
-    KERNEL_CALL(freezeClustersIfAllowed, data);
+    *data.numOperations = 0; 
+    data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
 
-    KERNEL_CALL_1_1(cleanupAfterSimulation, data);
+    KERNEL_CALL_1_1(applyFlowFieldSettingsKernel, data);
+    KERNEL_CALL(processingStep1, data);
+    KERNEL_CALL(processingStep2, data);
+    KERNEL_CALL(processingStep3, data);
+    KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
+    KERNEL_CALL(processingStep5, data);
+    KERNEL_CALL(processingStep6, data, result);
+    KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
+    KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
+    KERNEL_CALL(processingStep9, data);
+    KERNEL_CALL(processingStep10, data);
+    KERNEL_CALL(processingStep11, data);
+    KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
+
+    KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
+
+    result.setArrayResizeNeeded(data.shouldResize());
 }
 

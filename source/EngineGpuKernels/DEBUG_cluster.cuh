@@ -12,7 +12,7 @@ public:
     __inline__ __device__ static void calcEnergy_block(Cluster* cluster, float& result)
     {
         if (0 == threadIdx.x) {
-            atomicAdd_block(&result, Physics::kineticEnergy(cluster->numCellPointers, cluster->getVelocity(), cluster->angularMass, cluster->getAngularVelocity()));
+//            atomicAdd_block(&result, Physics::kineticEnergy(cluster->numCellPointers, cluster->getVelocity(), cluster->angularMass, cluster->getAngularVelocity()));
         }
         auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
         for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
@@ -93,14 +93,14 @@ public:
             }
 
             for (int i = 0; i < cell->numConnections; ++i) {
-                auto const& connectingCell = cell->connections[i];
+                auto const& connectingCell = cell->connections[i].cell;
                 if (connectingCell->cluster != cluster) {
                     printf("connecting cell is from different cluster\n");
                     STOP(a, b)
                 }
                 bool found = false;
                 for (int j = 0; j < connectingCell->numConnections; ++j) {
-                    auto const& connectingConnectingCell = connectingCell->connections[j];
+                    auto const& connectingConnectingCell = connectingCell->connections[j].cell;
                     if (connectingConnectingCell == cell) {
                         found = true;
                     }
@@ -147,15 +147,15 @@ public:
     template<typename T>
     __inline__ __device__ static bool checkPointer(T* pointer, Array<T> array)
     {
-        if (array.getArrayForDevice() <= pointer && pointer < (array.getArrayForDevice() + array.getNumEntries())) {
+        if (array.getArray() <= pointer && pointer < (array.getArray() + array.getNumEntries())) {
             return true;
         }
         else {
             printf(
                 "boundary check failed. pointer %llu not in interval [%llu, %llu). Array size: %d\n",
                 (uintptr_t)(pointer),
-                (uintptr_t)(array.getArrayForDevice()),
-                (uintptr_t)(array.getArrayForDevice() + array.getNumEntries()),
+                (uintptr_t)(array.getArray()),
+                (uintptr_t)(array.getArray() + array.getNumEntries()),
                 array.getNumEntries());
             return false;
         }

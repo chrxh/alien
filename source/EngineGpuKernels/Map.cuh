@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Cluster.cuh"
+#include "Base.cuh"
+#include "Cell.cuh"
 #include "Particle.cuh"
+#include "Math.cuh"
 #include "cuda_runtime_api.h"
 
 class MapInfo
@@ -24,8 +26,8 @@ public:
 
     __inline__ __device__ void mapDisplacementCorrection(float2& disp) const
     {
-        disp.x = remainderf(disp.x, _size.x / 2);
-        disp.y = remainderf(disp.y, _size.y / 2);
+        disp.x = remainderf(disp.x, _size.x);
+        disp.y = remainderf(disp.y, _size.y);
     }
 
     __inline__ __device__ float mapDistance(float2 const& p, float2 const& q) const
@@ -63,77 +65,113 @@ template <typename T>
 class BasicMap : public MapInfo
 {
 public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries)
+};
+
+class CellMap : public MapInfo
+{
+public:
+    __host__ __inline__ void init(int2 const& size)
     {
         MapInfo::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<T>(size.x * size.y, _map);
-        _mapEntries.init(maxEntries);
+        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y * 2, _map);
+        _mapEntries.init();
 
-        std::vector<T> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(T) * size.x * size.y, cudaMemcpyHostToDevice));
+        std::vector<Cell*> hostMap(size.x * size.y * 2, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y * 2, cudaMemcpyHostToDevice));
     }
+
+    __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
 
     __device__ __inline__ void reset() { _mapEntries.reset(); }
 
     __host__ __inline__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_map);
+        CudaMemoryManager::getInstance().freeMemory(_size.x * _size.y * 2, _map);
         _mapEntries.free();
     }
 
-protected:
-    T* _map;
-    Array<int> _mapEntries;
-};
-
-class CellMap : public BasicMap<unsigned long long int>
-{
-public:
-    __host__ __inline__ void init(int2 const& size, int maxEntries, Cell** cellPointerArray)
-    {
-        _cellPointersArray = cellPointerArray;
-        BasicMap<unsigned long long int>::init(size, maxEntries);
-    }
-
-    __device__ __inline__ void set_block(int numEntities, Cell** cellsToSet)
+    __device__ __inline__ void set_block(int numEntities, Cell** entities)
     {
         if (0 == numEntities) {
             return;
         }
 
         __shared__ int* entrySubarray;
-        __shared__ unsigned long long int numEntriesBits;
         if (0 == threadIdx.x) {
             entrySubarray = _mapEntries.getNewSubarray(numEntities);
-            numEntriesBits = static_cast<unsigned long long int>(numEntities) << 32;
         }
         __syncthreads();
 
         auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& entity = cellsToSet[index];
+            auto const& entity = entities[index];
             int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
             mapPosCorrection(posInt);
-            auto mapEntry = posInt.x + posInt.y * _size.x;
-        
-            unsigned long long int value =  &entity - _cellPointersArray;
-            value |= numEntriesBits;
-            atomicMax(_map + mapEntry, value);
+            auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
+            auto old = reinterpret_cast<Cell*>(atomicCAS(
+                reinterpret_cast<unsigned long long int*>(&_map[mapEntry]),
+                reinterpret_cast<unsigned long long int>(nullptr),
+                reinterpret_cast<unsigned long long int>(entity)));
+            if (old != nullptr) {
+                atomicExch(&_map[mapEntry + 1], entity);
+            }
             entrySubarray[index] = mapEntry;
         }
         __syncthreads();
     }
 
-    __device__ __inline__ Cell* get(float2 const& pos) const
+    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos) const
     {
-        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-        mapPosCorrection(posInt);
-        auto mapEntry = posInt.x + posInt.y * _size.x;
-        auto cellIndex = _map[mapEntry];
-        if (0 == cellIndex) {
-            return nullptr;
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        numCells = 0;
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dy = -1; dy <= 1; ++dy) {
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                mapPosCorrection(scanPos);
+
+                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
+                if (cells[numCells] = _map[mapEntry]) {
+                    ++numCells;
+                    if (cells[numCells] = _map[mapEntry + 1]) {
+                        ++numCells;
+                    }
+                }
+            }
         }
-        return _cellPointersArray[cellIndex & 0xffffffff];
+    }
+
+    __device__ __inline__ void get(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        numCells = 0;
+        int radiusInt = ceilf(radius);
+        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                mapPosCorrection(scanPos);
+
+                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
+                auto cell1 = _map[mapEntry];
+                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
+                    cells[numCells] = cell1;
+                    ++numCells;
+
+                    auto cell2 = _map[mapEntry + 1];
+                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
+                        cells[numCells] = cell2;
+                        ++numCells;
+                    }
+                }
+            }
+        }
+    }
+
+    __device__ __inline__ Cell* getFirst(float2 const& pos) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        mapPosCorrection(posInt);
+        auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
+        return _map[mapEntry];
     }
 
     __device__ __inline__ void cleanup_system()
@@ -142,18 +180,39 @@ public:
             calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
-            _map[mapEntry] = 0;
+            _map[mapEntry] = nullptr;
+            _map[mapEntry + 1] = nullptr;
         }
     }
 
 private:
-    Cell** _cellPointersArray;
-
+    Cell** _map;
+    Array<int> _mapEntries;
 };
 
-class ParticleMap : public BasicMap<Particle*>
+class ParticleMap : public MapInfo
 {
 public:
+    __host__ __inline__ void init(int2 const& size)
+    {
+        MapInfo::init(size);
+        CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, _map);
+        _mapEntries.init();
+
+        std::vector<Particle*> hostMap(size.x * size.y, 0);
+        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Particle*) * size.x * size.y, cudaMemcpyHostToDevice));
+    }
+
+    __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
+
+    __device__ __inline__ void reset() { _mapEntries.reset(); }
+
+    __host__ __inline__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_size.x * _size.y, _map);
+        _mapEntries.free();
+    }
+
     __device__ __inline__ void set_block(int numEntities, Particle** entities)
     {
         if (0 == numEntities) {
@@ -195,4 +254,8 @@ public:
             _map[mapEntry] = nullptr;
         }
     }
+
+private:
+    Particle** _map;
+    Array<int> _mapEntries;
 };
