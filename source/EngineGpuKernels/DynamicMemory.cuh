@@ -18,26 +18,39 @@ public:
         : _size(0)
     {}
 
-    __host__ __inline__ void init(uint64_t size)
+    __host__ __inline__ void init()
     {
-        _size = size;
-        unsigned char* data = nullptr;
-        CudaMemoryManager::getInstance().acquireMemory<unsigned char>(size, data);
+        _size = 0;
         CudaMemoryManager::getInstance().acquireMemory<unsigned char*>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _bytesOccupied);
 
-        checkCudaErrors(cudaMemcpy(_data, &data, sizeof(unsigned char*), cudaMemcpyHostToDevice));
         checkCudaErrors(cudaMemset(_bytesOccupied, 0, sizeof(int)));
+    }
+
+    __host__ __inline__ void resize(uint64_t size)
+    {
+        if (_size > 0) {
+            unsigned char* data = nullptr;
+            checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
+            CudaMemoryManager::getInstance().freeMemory(getNumBytes_host(), data);
+        }
+
+        _size = size;
+        unsigned char* data = nullptr;
+        CudaMemoryManager::getInstance().acquireMemory<unsigned char>(size, data);
+        checkCudaErrors(cudaMemcpy(_data, &data, sizeof(unsigned char*), cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void free()
     {
-        unsigned char* data = nullptr;
-        checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
 
-        CudaMemoryManager::getInstance().freeMemory(data);
-        CudaMemoryManager::getInstance().freeMemory(_data);
-        CudaMemoryManager::getInstance().freeMemory(_bytesOccupied);
+        if (_size > 0) {
+            unsigned char* data = nullptr;
+            checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
+            CudaMemoryManager::getInstance().freeMemory(getNumBytes_host(), data);
+        }
+        CudaMemoryManager::getInstance().freeMemory(1, _data);
+        CudaMemoryManager::getInstance().freeMemory(1, _bytesOccupied);
     }
 
     template<typename T>
@@ -58,6 +71,11 @@ public:
     }
 
     __device__ __inline__ int getNumBytes() { return *_bytesOccupied; }
+    __host__ __inline__ int getNumBytes_host() {
+        int result;
+        checkCudaErrors(cudaMemcpy(&result, _bytesOccupied, sizeof(int), cudaMemcpyDeviceToHost));
+        return result;
+    }
 
     __device__ __inline__ void reset() { *_bytesOccupied = 0; }
 

@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="..\..\source\EngineGpuKernels\CudaSimulation.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\EngineGpuKernels\AccessTOs.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Array.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Base.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Cell.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CellComputerFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CellConnectionProcessor.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CellFunctionData.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CellProcessor.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CommunicatorFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\ConstantMemory.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\ConstructorFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CudaMemoryManager.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CudaMonitorData.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\CudaSimulation.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\DEBUG_cluster.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Definitions.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Definitions.h" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\DllExport.h" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\DynamicMemory.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\EnergyGuidance.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Entities.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\EntityFactory.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\HashMap.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\HashSet.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\List.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Macros.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Map.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\MapSectionCollector.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Math.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\MuscleFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Operation.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Particle.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\ParticleProcessor.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Physics.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\PropulsionFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\QuantityConverter.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\ScannerFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SensorFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SimulationData.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Swap.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\Token.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\TokenProcessor.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\WeaponFunction.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\AccessKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\CleanupKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\DebugKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\MonitorKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\PhysicalActionKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\RenderingKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\SimulationKernels.cuh">
+      <Filter>Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineGpuKernels\SimulationResult.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\FlowFieldKernel.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SpotCalculator.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Kernels">
+      <UniqueIdentifier>{be6bd85c-eb3f-43fe-9063-4fab27279005}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

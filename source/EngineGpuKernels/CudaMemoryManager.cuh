@@ -30,9 +30,10 @@ public:
     }
 
     template<typename T>
-    void freeMemory(T& memory)
+    void freeMemory(uint64_t arraySize, T& memory)
     {
         CHECK_FOR_CUDA_ERROR(cudaFree(memory));
+        _bytes -= sizeof(T) * arraySize;
     }
 
     uint64_t getSizeOfAcquiredMemory() const

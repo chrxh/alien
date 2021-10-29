@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Enums
 {
     struct Branching {
@@ -16,7 +18,7 @@ namespace Enums
             WEAPON,
             CONSTRUCTOR,
             SENSOR,
-            COMMUNICATOR,
+            MUSCLE,
             _COUNTER
         };
     };
@@ -87,6 +89,8 @@ namespace Enums
             OUTPUT = 5,
             INPUT = 6,
             IN_OPTION = 7,
+            IN_ANGLE_ALIGNMENT = 38,  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
+            IN_UNIFORM_DIST = 13,
             INOUT_ANGLE = 15,
             IN_DIST = 16,
             IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
@@ -99,20 +103,16 @@ namespace Enums
     struct ConstrOut {
         enum Type {
             SUCCESS,
-            SUCCESS_ROT,
             ERROR_NO_ENERGY,
-            ERROR_OBSTACLE,
             ERROR_CONNECTION,
-            ERROR_DIST,
-            ERROR_MAX_RADIUS
+            ERROR_LOCK,
+            ERROR_DIST
         };
     };
     struct ConstrIn {
         enum Type {
             DO_NOTHING,
-            SAFE,
-            UNSAFE,
-            BRUTEFORCE,
+            CONSTRUCT,
             _COUNTER
         };
     };
@@ -123,8 +123,16 @@ namespace Enums
             CREATE_DUP_TOKEN,
             FINISH_NO_SEP,
             FINISH_WITH_SEP,
-            FINISH_WITH_SEP_RED,
-            FINISH_WITH_TOKEN_SEP_RED,
+            FINISH_WITH_EMPTY_TOKEN_SEP,
+            FINISH_WITH_DUP_TOKEN_SEP,
+            _COUNTER
+        };
+    };
+
+    struct ConstrInUniformDist {
+        enum Type {
+            NO,
+            YES,
             _COUNTER
         };
     };
@@ -140,7 +148,6 @@ namespace Enums
     struct PropOut {
         enum Type {
             SUCCESS,
-            SUCCESS_DAMPING_FINISHED,
             ERROR_NO_ENERGY
         };
     };
@@ -148,10 +155,6 @@ namespace Enums
         enum Type {
             DO_NOTHING,
             BY_ANGLE,
-            FROM_CENTER,
-            TOWARD_CENTER,
-            ROTATION_CLOCKWISE,
-            ROTATION_COUNTERCLOCKWISE,
             DAMP_ROTATION,
             _COUNTER
         };
@@ -161,7 +164,6 @@ namespace Enums
         enum Type {
             OUTPUT = 5,
             INOUT_CELL_NUMBER = 12,
-            OUT_MASS = 13,
             OUT_ENERGY = 14,
             OUT_ANGLE = 15,
             OUT_DISTANCE = 16,
@@ -175,7 +177,6 @@ namespace Enums
     struct ScannerOut {
         enum Type {
             SUCCESS,
-            FINISHED,
             RESTART
         };
     };
@@ -211,14 +212,35 @@ namespace Enums
     struct Weapon {
         enum Type {
             OUTPUT = 5,
-            IN_MIN_MASS = 36,
-            IN_MAX_MASS = 37,
         };
     };
     struct WeaponOut {
         enum Type {
             NO_TARGET,
             STRIKE_SUCCESSFUL
+        };
+    };
+
+    struct Muscle {
+        enum Type {
+            OUTPUT = 5,
+            INPUT = 36,
+        };
+    };
+    struct MuscleOut {
+        enum Type {
+            SUCCESS,
+            LIMIT_REACHED
+        };
+    };
+    struct MuscleIn {
+        enum Type {
+            DO_NOTHING,
+            CONTRACT,
+            CONTRACT_RELAX,
+            EXPAND,
+            EXPAND_RELAX,
+            _COUNTER
         };
     };
 }

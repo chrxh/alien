@@ -6,8 +6,6 @@
 #include "Array.cuh"
 #include "List.cuh"
 
-#include "Cluster.cuh"
-
 class MapSectionCollector
 {
 public:
@@ -16,13 +14,18 @@ public:
     {
         _numSections = { universeSize.x / sectionSize, universeSize.y / sectionSize };
         _sectionSize = sectionSize;
+/*
         _clusterListBySectionIndex.init(_numSections.x *_numSections.y);
+*/
     }
 
     __host__ __inline__ void free()
     {
+/*
         _clusterListBySectionIndex.free();
+*/
     }
+/*
 
     __device__ __inline__ void reset_system()
     {
@@ -79,6 +82,7 @@ public:
             }
         }
     }
+*/
 
 private:
     __device__ __inline__ int2 getSection(float2 const& pos)
@@ -90,11 +94,13 @@ private:
 
     }
 
+/*
     __device__ __inline__ List<Cluster*> const& getClusters(int2 section)
     {
         correctSection(section);
         return _clusterListBySectionIndex.at(section.x + section.y * _numSections.x);
     }
+*/
 
     __device__ __inline__ void correctSection(int2& section)
     {
@@ -105,5 +111,5 @@ private:
 private:
     int2 _numSections;
     int _sectionSize;
-    Array<List<Cluster*>> _clusterListBySectionIndex;
+//    Array<List<Cluster*>> _clusterListBySectionIndex;
 };

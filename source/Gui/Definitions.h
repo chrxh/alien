@@ -1,106 +1,93 @@
 #pragma once
 
-#include <mutex>
+#include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
-#include "Base/Definitions.h"
-#include "EngineInterface/Definitions.h"
+class _MainWindow;
+using MainWindow = boost::shared_ptr<_MainWindow>;
 
-class QGraphicsItem;
-class QGraphicsView;
-class QGraphicsScene;
-class QTabWidget;
-class QTableWidgetItem;
-class QSignalMapper;
-class QAction;
-class QActionGroup;
-class QBuffer;
-class QLabel;
-class QGraphicsSimpleTextItem;
+class _SimulationView;
+using SimulationView= boost::shared_ptr<_SimulationView>;
 
-class CellItem;
-class ParticleItem;
-class CellConnectionItem;
-class ItemConfig;
-class MonitorView;
-class MetadataManager;
-class AbstractWorldController;
-class OpenGLWorldController;
-class OpenGLWorldScene;
-class ItemWorldController;
-class ItemManager;
-class DataRepository;
-class GeneralInfoController;
-class ViewportInterface;
-class ViewportController;
-class MarkerItem;
-class DataEditController;
-class DataEditContext;
-class ToolbarController;
-class ToolbarContext;
-class ToolbarView;
-class ActionModel;
-class DataEditModel;
-class DataEditView;
-class DataRepository;
-class ClusterEditTab;
-class CellEditTab;
-class MetadataEditTab;
-class CellComputerEditTab;
-class ParticleEditTab;
-class SelectionEditTab;
-class SymbolEditTab;
-class HexEditWidget;
-class TokenEditTabWidget;
-class TokenEditTab;
-class Notifier;
-class MainView;
-class MainModel;
-class MainController;
-class SnapshotController;
-class SimulationViewWidget;
-class ActionHolder;
-class ActionController;
-class MonitorController;
-class PixelImageSectionItem;
-class VectorImageSectionItem;
-class VectorViewport;
-class PixelViewport;
-class ItemViewport;
-class StartupController;
-class SimulationViewController;
-class ProgressBar;
+class _Shader;
+using Shader = boost::shared_ptr<_Shader>;
 
-struct MonitorData;
-using MonitorDataSP = boost::shared_ptr<MonitorData>;
+class _SimulationScrollbar;
+using SimulationScrollbar = boost::shared_ptr<_SimulationScrollbar>;
 
-enum class ActiveView {
-    OpenGLScene,
-    ItemScene
-};
-enum class Receiver { Simulation, VisualEditor, DataEditor, ActionController };
-enum class UpdateDescription { All, AllExceptToken, AllExceptSymbols };
-enum class NotifyScrollChanged { No, Yes };
+class _Viewport;
+using Viewport = boost::shared_ptr<_Viewport>;
 
-class _SimulationConfig;
-using SimulationConfig = boost::shared_ptr<_SimulationConfig>;
+class _StyleRepository;
+using StyleRepository = boost::shared_ptr<_StyleRepository>;
 
-class WebSimulationSelectionView;
-class WebSimulationSelectionController;
-class WebSimulationTableModel;
+class _TemporalControlWindow;
+using TemporalControlWindow = boost::shared_ptr<_TemporalControlWindow>;
 
-class WebSimulationController;
+class _SpatialControlWindow;
+using SpatialControlWindow = boost::shared_ptr<_SpatialControlWindow>;
 
-enum class ModelComputationType
+class _SimulationParametersWindow;
+using SimulationParametersWindow = boost::shared_ptr<_SimulationParametersWindow>;
+
+class _StatisticsWindow;
+using StatisticsWindow = boost::shared_ptr<_StatisticsWindow>;
+
+class _ModeWindow;
+using ModeWindow = boost::shared_ptr<_ModeWindow>;
+
+class _GpuSettingsDialog;
+using GpuSettingsDialog = boost::shared_ptr<_GpuSettingsDialog>;
+
+class _NewSimulationDialog;
+using NewSimulationDialog = boost::shared_ptr<_NewSimulationDialog>;
+
+class _StartupWindow;
+using StartupWindow = boost::shared_ptr<_StartupWindow>;
+
+class _FlowGeneratorWindow;
+using FlowGeneratorWindow = boost::shared_ptr<_FlowGeneratorWindow>;
+
+class _AboutDialog;
+using AboutDialog = boost::shared_ptr<_AboutDialog>;
+
+class _ColorizeDialog;
+using ColorizeDialog = boost::shared_ptr<_ColorizeDialog>;
+
+class _LogWindow;
+using LogWindow = boost::shared_ptr<_LogWindow>;
+
+class _SimpleLogger;
+using SimpleLogger = boost::shared_ptr<_SimpleLogger>;
+
+class _FileLogger;
+using FileLogger = boost::shared_ptr<_FileLogger>;
+
+class _UiController;
+using UiController = boost::shared_ptr<_UiController>;
+
+class _AutosaveController;
+using AutosaveController = boost::shared_ptr<_AutosaveController>;
+
+class _GettingStartedWindow;
+using GettingStartedWindow = boost::shared_ptr<_GettingStartedWindow>;
+
+class _OpenSimulationDialog;
+using OpenSimulationDialog = boost::shared_ptr<_OpenSimulationDialog>;
+
+class _SaveSimulationDialog;
+using SaveSimulationDialog = boost::shared_ptr<_SaveSimulationDialog>;
+
+class _DisplaySettingsDialog;
+using DisplaySettingsDialog = boost::shared_ptr<_DisplaySettingsDialog>;
+
+struct GLFWvidmode;
+struct GLFWwindow;
+struct ImFont;
+
+struct TextureData
 {
-	Gpu = 1
+    unsigned int textureId;
+    int width;
+    int height;
 };
-
-class DataAnalyzer;
-class Queue;
-class GettingStartedWindow;
-
-class LoggingView;
-class LoggingController;
-class GuiLogger;
-class BugReportView;
-class ZoomActionController;

@@ -3,27 +3,25 @@
 #include "Base/LoggingService.h"
 #include "Base/ServiceLocator.h"
 
-namespace
-{
-    auto const LogFilename = "log.txt";
-}
+#include "Definitions.h"
+#include "Resources.h"
 
-FileLogger::FileLogger()
+_FileLogger::_FileLogger()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->registerCallBack(this);
 
-    std::remove(LogFilename);
-    _outfile.open(LogFilename, std::ios_base::app);
+    std::remove(Const::LogFilename.c_str());
+    _outfile.open(Const::LogFilename, std::ios_base::app);
 }
 
-FileLogger::~FileLogger()
+_FileLogger::~_FileLogger()
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->unregisterCallBack(this);
 }
 
-void FileLogger::newLogMessage(Priority priority, std::string const& message)
+void _FileLogger::newLogMessage(Priority priority, std::string const& message)
 {
     _outfile << message << std::endl;
 }

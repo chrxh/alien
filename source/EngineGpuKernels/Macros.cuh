@@ -9,7 +9,7 @@
 #include "Base/Exceptions.h"
 
 #define KERNEL_CALL(func, ...)  \
-        func<<<cudaConstants.NUM_BLOCKS, cudaConstants.NUM_THREADS_PER_BLOCK >>>(__VA_ARGS__); \
+        func<<<gpuConstants.NUM_BLOCKS, gpuConstants.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__); \
         cudaDeviceSynchronize();
 
 #define KERNEL_CALL_1_1(func, ...)  \

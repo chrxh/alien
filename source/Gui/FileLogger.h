@@ -5,12 +5,12 @@
 #include "Base/LoggingService.h"
 #include "Definitions.h"
 
-class FileLogger : public LoggingCallBack
+class _FileLogger : public LoggingCallBack
 {
 
 public:
-    FileLogger();
-    virtual ~FileLogger();
+    _FileLogger();
+    virtual ~_FileLogger();
 
     void newLogMessage(Priority priority, std::string const& message) override;
 

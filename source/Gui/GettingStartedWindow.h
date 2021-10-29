@@ -1,25 +1,24 @@
 #pragma once
 
-#include <QMainWindow>
+#include "EngineImpl/Definitions.h"
 
-namespace Ui {
-    class GettingStartedWindow;
-}
+#include "Definitions.h"
 
-class GettingStartedWindow : public QMainWindow
+class _GettingStartedWindow
 {
-    Q_OBJECT
-
 public:
-    GettingStartedWindow(QWidget *parent = 0);
-    virtual ~GettingStartedWindow();
+    _GettingStartedWindow(StyleRepository const& styleRepository);
 
-    Q_SIGNAL void closed();
+    ~_GettingStartedWindow();
 
-protected:
-    bool event(QEvent* event);
+    void process();
+
+    bool isOn() const;
+    void setOn(bool value);
 
 private:
-    Ui::GettingStartedWindow *ui;
-};
+    StyleRepository _styleRepository;
 
+    bool _on = false;
+    bool _showAfterStartup = true;
+};

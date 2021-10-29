@@ -3,21 +3,32 @@
 #include "Definitions.h"
 
 class NumberGenerator
-	: public QObject
 {
-	Q_OBJECT
 public:
-	NumberGenerator(QObject* parent = nullptr) : QObject(parent) {}
-	virtual ~NumberGenerator() = default;
+    BASE_EXPORT static NumberGenerator& getInstance();
 
-	virtual void init(uint32_t arraySize = 1323781, uint16_t threadId = 0) = 0;
+	BASE_EXPORT uint32_t getRandomInt();
+    BASE_EXPORT uint32_t getRandomInt(uint32_t range);
+    BASE_EXPORT uint32_t getRandomInt(uint32_t min, uint32_t max);
+    BASE_EXPORT double getRandomReal();
+    BASE_EXPORT double getRandomReal(double min, double max);
 
-	virtual uint32_t getRandomInt() = 0;
-	virtual uint32_t getRandomInt(uint32_t range) = 0;
-    virtual uint32_t getRandomInt(uint32_t min, uint32_t max) = 0;
-	virtual double getRandomReal() = 0;
-    virtual double getRandomReal(double min, double max) = 0;
-	virtual QByteArray getRandomArray(int length) = 0;
+	BASE_EXPORT uint64_t getId();
 
-	virtual uint64_t getId() = 0;
+public:
+    NumberGenerator(NumberGenerator const&) = delete;
+    void operator=(NumberGenerator const&) = delete;
+
+	uint32_t getLargeRandomInt(uint32_t range);
+    uint32_t getNumberFromArray();
+
+private:
+    NumberGenerator();
+    ~NumberGenerator();
+
+	int _index = 0;
+	vector<uint32_t> _arrayOfRandomNumbers;
+	uint64_t _runningNumber = 0;
+	uint64_t _threadId = 0;
 };
+

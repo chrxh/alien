@@ -19,94 +19,39 @@ struct CellMetadata
     char* sourceCode;
 };
 
+struct CellConnection
+{
+    Cell* cell;
+    float distance;
+    float angleFromPrevious;
+};
+
 struct Cell
 {
     uint64_t id;
-    Cluster* cluster;
-    float2 relPos;
     float2 absPos;
     float2 vel;
+
     int branchNumber;
     bool tokenBlocked;
     int maxConnections;
     int numConnections;
-    Cell* connections[MAX_CELL_BONDS];
+    CellConnection connections[MAX_CELL_BONDS];
     unsigned char numStaticBytes;
     char staticData[MAX_CELL_STATIC_BYTES];
     unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int tokenUsages;
     CellMetadata metadata;
+    float energy;
+    int cellFunctionType;
 
-    //auxiliary data
+    //temporary data
     int locked;	//0 = unlocked, 1 = locked
-    int alive;  //0 = dead, 1 == alive
     int tag;
-
-    __inline__ __device__ void initProtectionCounter()
-    {
-        _protectionCounter = 0;
-    }
-                     
-    __inline__ __device__ void activateProtectionCounter_safe()
-    {
-        atomicExch(&_protectionCounter, 14);
-    }
-
-    __inline__ __device__ void decrementProtectionCounter()
-    {
-        if (_protectionCounter > 0) {
-            --_protectionCounter;
-        }
-    }
-
-    __inline__ __device__ int getProtectionCounter()
-    {
-        return _protectionCounter;
-    }
-
-    __inline__ __device__ int getProtectionCounter_safe()
-    {
-        return atomicAdd(&_protectionCounter, 0);
-    }
-
-    __inline__ __device__ Enums::CellFunction::Type getCellFunctionType() const
-    {
-        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned int>(_cellFunctionType)
-            % Enums::CellFunction::_COUNTER);
-    }
-
-    __inline__ __device__ void setCellFunctionType(int value)
-    {
-        _cellFunctionType = value;
-    }
-
-    __device__ __inline__ void setEnergy_safe(float value)
-    {
-        atomicExch(&_energy, value);
-    }
-
-    __device__ __inline__ void changeEnergy_safe(float changeValue)
-    {
-        atomicAdd(&_energy, changeValue);
-    }
-
-    __device__ __inline__ float getEnergy_safe()
-    {
-        return atomicAdd(&_energy, 0);
-    }
-
-    __device__ __inline__ float getEnergy() const
-    {
-        return _energy;
-    }
-
-    __device__ __inline__ void repair()
-    {
-        if (isnan(_energy) || _energy < 0.0) {
-            _energy = 0.01;
-        }
-    }
+    float2 temp1;
+    float2 temp2;
+    float2 temp3;
 
     __device__ __inline__ void getLock()
     {
@@ -115,31 +60,24 @@ struct Cell
 
     __device__ __inline__ bool tryLock()
     {
-        return 0 == atomicExch(&locked, 1);
+        auto result = 0 == atomicExch(&locked, 1);
+        if (result) {
+            __threadfence();
+        }
+        return result;
     }
 
     __device__ __inline__ void releaseLock()
     {
+        __threadfence();
         atomicExch(&locked, 0);
     }
 
-    __device__ __inline__ bool isFused()
+    __inline__ __device__ Enums::CellFunction::Type getCellFunctionType() const
     {
-        return _fused;
+        return static_cast<Enums::CellFunction::Type>(
+            static_cast<unsigned int>(cellFunctionType) % Enums::CellFunction::_COUNTER);
     }
-
-    __device__ __inline__ void setFused(bool value)
-    {
-        _fused = value;
-    }
-
-private:
-    int _cellFunctionType;
-    float _energy;
-    int _protectionCounter;
-
-    //auxiliary data
-    int _fused;
 };
 
 template<>

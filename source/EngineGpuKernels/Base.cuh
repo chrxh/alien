@@ -6,8 +6,9 @@
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
+#include "EngineInterface/GpuSettings.h"
+
 #include "Array.cuh"
-#include "CudaConstants.h"
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"
@@ -81,15 +82,16 @@ public:
 
     __device__ __inline__ unsigned long long int createNewId_kernel() { return atomicAdd(_currentId, 1); }
 
+    __device__ __inline__ void adaptMaxId(unsigned long long int id)
+    {
+        atomicMax(_currentId, id + 1);
+    }
+
     void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_currentIndex);
-        CudaMemoryManager::getInstance().freeMemory(_array);
-        CudaMemoryManager::getInstance().freeMemory(_currentId);
-
-        cudaFree(_currentId);
-        cudaFree(_currentIndex);
-        cudaFree(_array);
+        CudaMemoryManager::getInstance().freeMemory(1, _currentIndex);
+        CudaMemoryManager::getInstance().freeMemory(_size, _array);
+        CudaMemoryManager::getInstance().freeMemory(1, _currentId);
     }
 
 private:

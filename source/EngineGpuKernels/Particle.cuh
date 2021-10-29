@@ -13,42 +13,10 @@ struct Particle
     float2 absPos;
     float2 vel;
     ParticleMetadata metadata;
+    float energy;
 
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
-    int alive;  //0 = dead, 1 == alive
-
-    __device__ __inline__ float getEnergy_safe()
-    {
-        return atomicAdd(&_energy, 0);
-    }
-
-    __device__ __inline__ float getEnergy() const
-    {
-        return _energy;
-    }
-
-    __device__ __inline__ void setEnergy_safe(float value)
-    {
-        atomicExch(&_energy, value);
-    }
-
-    __device__ __inline__ void setEnergy(float value)
-    {
-        _energy = value;
-    }
-
-    __device__ __inline__ void changeEnergy(float changeValue)
-    {
-        atomicAdd(&_energy, changeValue);
-    }
-
-    __device__ __inline__ void repair()
-    {
-        if (isnan(_energy) || _energy < 0.0) {
-            _energy = 0.01;
-        }
-    }
 
     __device__ __inline__ bool isSelected()
     {
@@ -60,7 +28,19 @@ struct Particle
         _selected = value;
     }
 
+    __device__ __inline__ bool tryLock() {
+        auto result = 0 == atomicExch(&locked, 1);
+        if (result) {
+            __threadfence();
+        }
+        return result;
+    }
+
+    __device__ __inline__ void releaseLock() {
+        __threadfence();
+        atomicExch(&locked, 0);
+    }
+
 private:
-    float _energy;
     bool _selected;
 };

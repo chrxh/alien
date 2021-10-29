@@ -1,15 +1,39 @@
 #pragma once
 
+#include "Base/Tracker.h"
+
 #include "Descriptions.h"
 
-struct ENGINEINTERFACE_EXPORT CellChangeDescription
+struct ConnectionChangeDescription
+{
+    uint64_t cellId;
+    float distance;
+    float angleFromPrevious;
+    bool operator==(ConnectionChangeDescription const& other) const
+    {
+        if (cellId != other.cellId) {
+            return false;
+        }
+        if (distance != other.distance) {
+            return false;
+        }
+        if (angleFromPrevious != other.angleFromPrevious) {
+            return false;
+        }
+		return true;
+	}
+    bool operator!=(ConnectionChangeDescription const& other) const { return !(*this == other); }
+};
+
+struct CellChangeDescription
 {
 	uint64_t id = 0;
 
-	ValueTracker<QVector2D> pos;
-	ValueTracker<double> energy;
+	ValueTracker<RealVector2D> pos;
+    ValueTracker<RealVector2D> vel;
+    ValueTracker<double> energy;
 	ValueTracker<int> maxConnections;
-	ValueTracker<list<uint64_t>> connectingCells;
+    ValueTracker<list<ConnectionChangeDescription>> connectingCells;
 	ValueTracker<bool> tokenBlocked;
 	ValueTracker<int> tokenBranchNumber;
 	ValueTracker<CellMetadata> metadata;
@@ -17,16 +41,20 @@ struct ENGINEINTERFACE_EXPORT CellChangeDescription
 	ValueTracker<vector<TokenDescription>> tokens;
     ValueTracker<int> tokenUsages;
 
-	CellChangeDescription() = default;
-	CellChangeDescription(CellDescription const& desc);
-	CellChangeDescription(CellDescription const& before, CellDescription const& after);
+	ENGINEINTERFACE_EXPORT CellChangeDescription() = default;
+    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription const& desc);
+    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription const& before, CellDescription const& after);
 
-	bool isEmpty() const;
+	ENGINEINTERFACE_EXPORT bool isEmpty() const;
 	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	CellChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
+	CellChangeDescription& setPos(RealVector2D const& value) { pos = value; return *this; }
 	CellChangeDescription& setEnergy(double value) { energy = value; return *this; }
 	CellChangeDescription& setMaxConnections(int value) { maxConnections = value; return *this; }
-	CellChangeDescription& setConnectingCells(list<uint64_t> const& value) { connectingCells = value; return *this; }
+    CellChangeDescription& setConnectingCells(list<ConnectionChangeDescription> const& value)
+    {
+        connectingCells = value;
+        return *this;
+    }
 	CellChangeDescription& setFlagTokenBlocked(bool value) { tokenBlocked = value; return *this; }
 	CellChangeDescription& setTokenBranchNumber(int value) { tokenBranchNumber = value; return *this; }
 	CellChangeDescription& setMetadata(CellMetadata const& value) { metadata = value; return *this; }
@@ -34,107 +62,59 @@ struct ENGINEINTERFACE_EXPORT CellChangeDescription
     CellChangeDescription& setTokenUsages(int value) { tokenUsages = value; return *this; }
 };
 
-struct ENGINEINTERFACE_EXPORT ClusterChangeDescription
+struct ParticleChangeDescription
 {
 	uint64_t id = 0;
 
-	ValueTracker<QVector2D> pos;
-	ValueTracker<QVector2D> vel;
-	ValueTracker<double> angle;
-	ValueTracker<double> angularVel;
-	ValueTracker<ClusterMetadata> metadata;
-	vector<StateTracker<CellChangeDescription>> cells;
+	ValueTracker<RealVector2D> pos;
+	ValueTracker<RealVector2D> vel;
+	ValueTracker<double> energy;
+	ValueTracker<ParticleMetadata> metadata;
 
-	ClusterChangeDescription() = default;
-	ClusterChangeDescription(ClusterDescription const& desc);
-	ClusterChangeDescription(ClusterDescription const& before, ClusterDescription const& after);
+	ENGINEINTERFACE_EXPORT ParticleChangeDescription() = default;
+    ENGINEINTERFACE_EXPORT ParticleChangeDescription(ParticleDescription const& desc);
+    ENGINEINTERFACE_EXPORT ParticleChangeDescription(
+        ParticleDescription const& before,
+        ParticleDescription const& after);
 
-	bool isEmpty() const;
-	ClusterChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	ClusterChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
-	ClusterChangeDescription& setVel(QVector2D const& value) { vel = value; return *this; }
-	ClusterChangeDescription& setAngle(double value) { angle = value; return *this; }
-	ClusterChangeDescription& setAngularVel(double value) { angularVel = value; return *this; }
-	ClusterChangeDescription& addNewCell(CellChangeDescription const& value)
+	ENGINEINTERFACE_EXPORT bool isEmpty() const;
+	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
+	ParticleChangeDescription& setPos(RealVector2D const& value) { pos = value; return *this; }
+	ParticleChangeDescription& setVel(RealVector2D const& value) { vel = value; return *this; }
+	ParticleChangeDescription& setEnergy(double value) { energy = value; return *this; }
+};
+
+struct DataChangeDescription
+{
+    vector<StateTracker<CellChangeDescription>> cells;
+    vector<StateTracker<ParticleChangeDescription>> particles;
+
+	ENGINEINTERFACE_EXPORT DataChangeDescription() = default;
+    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription const& desc);
+    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription const& dataBefore, DataDescription const& dataAfter);
+
+	DataChangeDescription& addNewCell(CellChangeDescription const& value)
 	{
 		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Added));
 		return *this;
 	}
-	ClusterChangeDescription& addNewCells(list<CellChangeDescription> const& value)
+	DataChangeDescription& addModifiedCell(CellChangeDescription const& value)
 	{
-		for (auto const &cell : value) {
-			addNewCell(cell);
-		}
+        cells.emplace_back(
+            StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Modified));
 		return *this;
 	}
-	ClusterChangeDescription& addModifiedCell(CellChangeDescription const& value)
-	{
-		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Modified));
-		return *this;
-	}
-	ClusterChangeDescription& addModifiedCells(list<CellChangeDescription> const& value)
+    DataChangeDescription& addModifiedCell(list<CellChangeDescription> const& value)
 	{
 		for (auto const &cell : value) {
 			addModifiedCell(cell);
 		}
 		return *this;
 	}
-	ClusterChangeDescription& addDeletedCell(CellChangeDescription const& value)
+    DataChangeDescription& addDeletedCell(CellChangeDescription const& value)
 	{
-		cells.emplace_back(StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Deleted));
-		return *this;
-	}
-};
-
-struct ENGINEINTERFACE_EXPORT ParticleChangeDescription
-{
-	uint64_t id = 0;
-
-	ValueTracker<QVector2D> pos;
-	ValueTracker<QVector2D> vel;
-	ValueTracker<double> energy;
-	ValueTracker<ParticleMetadata> metadata;
-
-	ParticleChangeDescription() = default;
-	ParticleChangeDescription(ParticleDescription const& desc);
-	ParticleChangeDescription(ParticleDescription const& before, ParticleDescription const& after);
-
-	bool isEmpty() const;
-	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
-	ParticleChangeDescription& setPos(QVector2D const& value) { pos = value; return *this; }
-	ParticleChangeDescription& setVel(QVector2D const& value) { vel = value; return *this; }
-	ParticleChangeDescription& setEnergy(double value) { energy = value; return *this; }
-};
-
-struct ENGINEINTERFACE_EXPORT DataChangeDescription
-{
-	vector<StateTracker<ClusterChangeDescription>> clusters;
-	vector<StateTracker<ParticleChangeDescription>> particles;
-
-	DataChangeDescription() = default;
-	DataChangeDescription(DataDescription const& desc);
-	DataChangeDescription(DataDescription const& dataBefore, DataDescription const& dataAfter);
-
-	DataChangeDescription& addNewCluster(ClusterChangeDescription const& value)
-	{
-		clusters.emplace_back(StateTracker<ClusterChangeDescription>(value, StateTracker<ClusterChangeDescription>::State::Added));
-		return *this;
-	}
-	DataChangeDescription& addModifiedCluster(ClusterChangeDescription const& value)
-	{
-		clusters.emplace_back(StateTracker<ClusterChangeDescription>(value, StateTracker<ClusterChangeDescription>::State::Modified));
-		return *this;
-	}
-	DataChangeDescription& addModifiedClusters(list<ClusterChangeDescription> const& value)
-	{
-		for (auto const &cluster : value) {
-			addModifiedCluster(cluster);
-		}
-		return *this;
-	}
-	DataChangeDescription& addDeletedCluster(ClusterChangeDescription const& value)
-	{
-		clusters.emplace_back(StateTracker<ClusterChangeDescription>(value, StateTracker<ClusterChangeDescription>::State::Deleted));
+        cells.emplace_back(
+            StateTracker<CellChangeDescription>(value, StateTracker<CellChangeDescription>::State::Deleted));
 		return *this;
 	}
 	DataChangeDescription& addNewParticle(ParticleChangeDescription const& value)
@@ -154,12 +134,12 @@ struct ENGINEINTERFACE_EXPORT DataChangeDescription
 	}
 	void clear()
 	{
-		clusters.clear();
+		cells.clear();
 		particles.clear();
 	}
 	bool empty()
 	{
-		return clusters.empty() && particles.empty();
+		return cells.empty() && particles.empty();
 	}
 };
 
