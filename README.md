@@ -56,6 +56,7 @@ The following free libraries are already contained in the repository:
 - [Glad](https://glad.dav1d.de/)
 - [GLFW](https://www.glfw.org/)
 - [stb](https://github.com/nothings/stb)
+- [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
