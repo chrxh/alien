@@ -43,8 +43,8 @@ For some graphics cards of the GeForce 10 series there are reported issues that 
 
 ## How to build the sources in Windows
 Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
-1. Checkout source code and switch to the corresponding folder.
-2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation can be done in command prompt via `bootstrap` and then `.\b2`).
+1. Checkout source code.
+2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
 3. Open `./msvc/alien.sln` in Visual Studio.
 4. Select `Release` and `x64` as build configuration.
 5. Set the project named `Gui` as startup project (right click and `Set as Startup Project`).
