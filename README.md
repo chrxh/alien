@@ -58,7 +58,7 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 <img src="img/screenshot3.png" width=100%>
 </h1>
 
-#### Debris after heavy impact
+#### Explosion inside a large grid of robots
 <h1 align="center">
 <img src="img/screenshot5.png" width=100%>
 </h1>
