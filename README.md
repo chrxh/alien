@@ -41,6 +41,22 @@ An Nvidia graphics card with compute capability 6.0 or higher is needed. Please 
 
 For some graphics cards of the GeForce 10 series there are reported issues that are currently being investigated.
 
+## How to build the sources in Windows
+Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
+1. Checkout source code and switch to the corresponding folder.
+2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation can be done in command prompt via `bootstrap` and then `.\b2`).
+3. Open `./msvc/alien/alien.sln` in Visual Studio.
+4. Select `Release` and `x64` as build configuration.
+5. Click on `Start Without Debugging` (CTRL + F5).
+
+The following free libraries are already contained in the repository:
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
+- [ImPlot](https://github.com/epezent/implot)
+- [Glad](https://glad.dav1d.de/)
+- [GLFW](https://www.glfw.org/)
+- [stb](https://github.com/nothings/stb)
+
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
 
@@ -72,24 +88,6 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 <h1 align="center">
 <img src="img/screenshot5.png" width=100%>
 </h1>
-
-## How to build the sources
-To build alien you need Microsoft Visual Studio 2019. You find the solution file in msvc/alien/alien.sln.
-The following third-party libaries are necessary and should be installed:
-- [Qt 6.0.2](https://www.qt.io/download)
-- [CUDA 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive)
-- [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) (needs to be installed in external/boost_1_75_0)
-- [OpenSSL version 1.1.1j](https://slproweb.com/products/Win32OpenSSL.html) (not mandatory, it is only used for retrieving the latest version number and bug reporting feature)
-
-## Future
-Currently, version 3 is under development. The progress can be followed on the feature branch `features/version3`. Among other things the following fundamental updates are planned:
-- Switch from a rigid body to a particle engine
-- A more intuitive user interface created with `Dear ImGui`
-- Most CUDA specific settings will be determined automatically
-- Model extensions (e.g. muscle cells).
-- Live diagrams for statistics
-
-You can get a first impression of the particle engine in a [preview video](https://www.youtube.com/watch?v=DygVMA4sybo).
 
 ## License
 alien is licensed under the [GPLv3](LICENSE).
