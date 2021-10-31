@@ -68,11 +68,10 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 <img src="img/screenshot4.png" width=100%>
 </h1>
 
-#### Visual editor and scripting environment
+#### Visual editor and scripting environment (under development, screenshot is from previous version)
 <h1 align="center">
 <img src="img/screenshot5.png" width=100%>
 </h1>
-(under development, screenshot is from previous version)
 
 ## How to build the sources
 To build alien you need Microsoft Visual Studio 2019. You find the solution file in msvc/alien/alien.sln.
