@@ -49,7 +49,7 @@ Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.co
 4. Select `Release` and `x64` as build configuration.
 5. Click on `Start Without Debugging` (CTRL + F5).
 
-The following free libraries are (partially) contained in the repository:
+The following free libraries are (partially) contained in the repository and need not to be downloaded:
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [ImPlot](https://github.com/epezent/implot)
@@ -59,7 +59,9 @@ The following free libraries are (partially) contained in the repository:
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 
 ## Installer
-An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/downloads.html).
+For Windows, binaries for the current development state can be downloaded from the following link: [download link](https://alien-project.org/files/alien-version3-preview.zip).
+
+As in the previous version, there will be an installer in the future.
 
 ## Documentation
 Please visit [alien-project.org](https://alien-project.org/documentation.html) for a documentation of the program and the underlying model. A completely new documentation with many tutorials that guide the reader into the program in small portions is currently in construction.
