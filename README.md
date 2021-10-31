@@ -50,7 +50,7 @@ Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.co
 5. Set the project named `Gui` as startup project (right click and `Set as Startup Project`).
 6. Click on `Start Without Debugging` (CTRL + F5).
 
-The following free libraries are already contained in the repository:
+The following free libraries are (partially) contained in the repository:
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [ImPlot](https://github.com/epezent/implot)
