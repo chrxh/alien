@@ -60,9 +60,9 @@ The following free libraries are (partially) contained in the repository and nee
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 
 ## Installer
-Windows binaries for the current development state can be downloaded from the following link: [download](https://alien-project.org/files/alien-version3-preview.zip).
+Windows binaries for the current development state of this branch can be downloaded from the following link and will be updated regularly: [download](https://alien-project.org/files/alien-version3-preview.zip).
 
-As in the previous version, there will be an installer in the future.
+In the future, an installer will be provided, as in the latest stable version.
 
 ## Documentation
 Please visit [alien-project.org](https://alien-project.org/documentation.html) for a documentation of the program and the underlying model. It contains many brief tutorials that guide the reader into the program in small portions.
