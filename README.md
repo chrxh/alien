@@ -55,23 +55,24 @@ Please visit [alien-project.org](https://alien-project.org/documentation.html) f
 
 #### Evolving self-replicating machines in action
 <h1 align="center">
-<img src="img/screenshot3.png" width=100%>
+<img src="img/screenshot2.png" width=100%>
 </h1>
 
 #### Explosion inside a large grid of robots
 <h1 align="center">
-<img src="img/screenshot5.png" width=100%>
+<img src="img/screenshot3.png" width=100%>
 </h1>
 
-#### Graph structure of the bodies
+#### Statistics tools
 <h1 align="center">
-<img src="img/screenshot7.png" width=100%>
+<img src="img/screenshot4.png" width=100%>
 </h1>
 
 #### Visual editor and scripting environment
 <h1 align="center">
-<img src="img/screenshot8.png" width=100%>
+<img src="img/screenshot5.png" width=100%>
 </h1>
+(under development, screenshot is from previous version)
 
 ## How to build the sources
 To build alien you need Microsoft Visual Studio 2019. You find the solution file in msvc/alien/alien.sln.
