@@ -47,8 +47,7 @@ Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.co
 2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
 3. Open `./msvc/alien.sln` in Visual Studio.
 4. Select `Release` and `x64` as build configuration.
-5. Set the project named `Gui` as startup project (right click and `Set as Startup Project`).
-6. Click on `Start Without Debugging` (CTRL + F5).
+5. Click on `Start Without Debugging` (CTRL + F5).
 
 The following free libraries are (partially) contained in the repository:
 - [Dear ImGui](https://github.com/ocornut/imgui)
