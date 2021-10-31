@@ -64,7 +64,7 @@ Windows binaries for the current development state can be downloaded from the fo
 As in the previous version, there will be an installer in the future.
 
 ## Documentation
-Please visit [alien-project.org](https://alien-project.org/documentation.html) for a documentation of the program and the underlying model. A completely new documentation with many tutorials that guide the reader into the program in small portions is currently in construction.
+Please visit [alien-project.org](https://alien-project.org/documentation.html) for a documentation of the program and the underlying model. It contains many brief tutorials that guide the reader into the program in small portions.
 
 ## Screenshots
 #### Startup screen
