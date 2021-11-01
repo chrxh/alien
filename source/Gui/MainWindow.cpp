@@ -352,7 +352,7 @@ void _MainWindow::processMenubar()
             _showExitDialog = true;
         }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
-            if (ImGui::MenuItem("New", "CTRL+N")) { 
+            if (ImGui::MenuItem("New", "CTRL+N")) {
                 _newSimulationDialog->show();
                 _simulationMenuToggled = false;
             }
@@ -379,22 +379,22 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Window ", _windowMenuToggled, "Window")) {
-            if (ImGui::MenuItem("Temporal control", "", _temporalControlWindow->isOn())) {
+            if (ImGui::MenuItem("Temporal control", "ALT+Q", _temporalControlWindow->isOn())) {
                 _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
             }
-            if (ImGui::MenuItem("Spatial control", "", _spatialControlWindow->isOn())) {
+            if (ImGui::MenuItem("Spatial control", "ALT+W", _spatialControlWindow->isOn())) {
                 _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
             }
-            if (ImGui::MenuItem("Statistics", "", _statisticsWindow->isOn())) {
+            if (ImGui::MenuItem("Statistics", "ALT+E", _statisticsWindow->isOn())) {
                 _statisticsWindow->setOn(!_statisticsWindow->isOn());
             }
-            if (ImGui::MenuItem("Simulation parameters", "", _simulationParametersWindow->isOn())) {
+            if (ImGui::MenuItem("Simulation parameters", "ALT+R", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            if (ImGui::MenuItem("Flow generator", "", _flowGeneratorWindow->isOn())) {
+            if (ImGui::MenuItem("Flow generator", "ALT+T", _flowGeneratorWindow->isOn())) {
                 _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
             }
-            if (ImGui::MenuItem("Log", "", _logWindow->isOn())) {
+            if (ImGui::MenuItem("Log", "ALT+A", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
             AlienImGui::EndMenuButton();
@@ -404,18 +404,11 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
                 _autosaveController->setOn(!_autosaveController->isOn());
             }
-            if (ImGui::MenuItem("GPU settings", "")) {
+            if (ImGui::MenuItem("GPU settings", "ALT+C")) {
                 _gpuSettingsDialog->show();
             }
-            if (ImGui::MenuItem("Display settings", "")) {
+            if (ImGui::MenuItem("Display settings", "ALT+V")) {
                 _displaySettingsDialog->show();
-                /*
-                if (ImGui::MenuItem("1920 x 1080", "")) {
-                    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-                    auto mode = glfwGetVideoMode(primaryMonitor);
-                    glfwSetWindowMonitor(_window, primaryMonitor, 0, 0, 2560, 1440 / *1920, 1080* /, mode->refreshRate);
-                }
-*/
             }
             AlienImGui::EndMenuButton();
         }
@@ -423,20 +416,20 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Render UI", "ALT+U", _uiController->isOn())) {
                 _uiController->setOn(!_uiController->isOn());
             }
-            if (ImGui::MenuItem("Render Simulation", "ALT+S", _renderSimulation)) {
+            if (ImGui::MenuItem("Render Simulation", "ALT+I", _renderSimulation)) {
                 _renderSimulation = !_renderSimulation;
             }
             AlienImGui::EndMenuButton();
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
-            if (ImGui::MenuItem("Colorize", "")) {
+            if (ImGui::MenuItem("Colorize", "ALT+H")) {
                 _colorizeDialog->show();
                 _toolsMenuToggled = false;
             }
             AlienImGui::EndMenuButton();
         }
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING"  Help ", _helpMenuToggled, "Help")) {
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING "  Help ", _helpMenuToggled, "Help")) {
             if (ImGui::MenuItem("About", "")) {
                 _aboutDialog->show();
                 _helpMenuToggled = false;
@@ -463,11 +456,41 @@ void _MainWindow::processMenubar()
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
         onPauseSimulation();
     }
+
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q)) {
+        _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
+        _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
+        _statisticsWindow->setOn(!_statisticsWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+        _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
+        _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+        _logWindow->setOn(!_logWindow->isOn());
+    }
+
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
+        _gpuSettingsDialog->show();
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
+        _displaySettingsDialog->show();
+    }
+
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_U)) {
         _uiController->setOn(!_uiController->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_I)) {
         _renderSimulation = !_renderSimulation;
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
+        _colorizeDialog->show();
     }
 }
 
