@@ -27,10 +27,10 @@ public:
 
     __host__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(1, _numCells);
-        CudaMemoryManager::getInstance().freeMemory(1, _numTokens);
-        CudaMemoryManager::getInstance().freeMemory(1, _numParticles);
-        CudaMemoryManager::getInstance().freeMemory(1, _internalEnergy);
+        CudaMemoryManager::getInstance().freeMemory(_numCells);
+        CudaMemoryManager::getInstance().freeMemory(_numTokens);
+        CudaMemoryManager::getInstance().freeMemory(_numParticles);
+        CudaMemoryManager::getInstance().freeMemory(_internalEnergy);
     }
 
     struct MonitorData

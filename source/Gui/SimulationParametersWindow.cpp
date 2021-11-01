@@ -139,7 +139,7 @@ void _SimulationParametersWindow::processBase(
             1.0f,
             false,
             "%.3f",
-            std::string("Time duration calculated in a single step."));
+            std::string("Time duration calculated in a single step. Smaller values increase the accuracy of the simulation."));
 
         createGroup("General physics");
         AlienImGui::SliderFloat(
