@@ -233,6 +233,10 @@ auto _MainWindow::initGlfw() -> GlfwData
 #endif
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+/*
+    int count;
+    auto primaryMonitor = glfwGetMonitors(&count)[1];
+*/
     auto mode = glfwGetVideoMode(primaryMonitor);
     auto screenWidth = mode->width;
     auto screenHeight = mode->height;
