@@ -50,7 +50,7 @@ struct SimulationData
 
     void resizeImage(int2 const& newSize)
     {
-        CudaMemoryManager::getInstance().freeMemory(numPixels * 2, imageData);
+        CudaMemoryManager::getInstance().freeMemory(imageData);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(
             max(newSize.x * newSize.y, size.x * size.y)*2, imageData);
         numPixels = newSize.x * newSize.y;
@@ -129,13 +129,11 @@ struct SimulationData
         cellFunctionData.free();
         cellMap.free();
         particleMap.free();
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         numberGen.free();
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError());
         dynamicMemory.free();
 
-        CudaMemoryManager::getInstance().freeMemory(numPixels * 2, imageData);
-        CudaMemoryManager::getInstance().freeMemory(1, numOperations);
+        CudaMemoryManager::getInstance().freeMemory(imageData);
+        CudaMemoryManager::getInstance().freeMemory(numOperations);
     }
 
 private:

@@ -151,28 +151,14 @@ _CudaSimulation::~_CudaSimulation()
     _cudaMonitorData->free();
     _cudaSimulationResult->free();
 
-    if (_cudaAccessTO->cells) {
-        int numCells;
-        checkCudaErrors(cudaMemcpy(&numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-        CudaMemoryManager::getInstance().freeMemory(numCells, _cudaAccessTO->cells);
-    }
-    if (_cudaAccessTO->particles) {
-        int numParticles;
-        checkCudaErrors(cudaMemcpy(&numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-        CudaMemoryManager::getInstance().freeMemory(numParticles, _cudaAccessTO->particles);
-    }
-    if (_cudaAccessTO->tokens) {
-        int numTokens;
-        checkCudaErrors(cudaMemcpy(&numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
-        CudaMemoryManager::getInstance().freeMemory(numTokens, _cudaAccessTO->tokens);
-    }
-    int numStringBytes;
-    checkCudaErrors(cudaMemcpy(&numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
-    CudaMemoryManager::getInstance().freeMemory(numStringBytes, _cudaAccessTO->stringBytes);
-    CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numCells);
-    CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numTokens);
-    CudaMemoryManager::getInstance().freeMemory(1, _cudaAccessTO->numStringBytes);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numTokens);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "close simulation");
@@ -411,21 +397,9 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeSource();
     _cudaSimulationData->swap();
 
-    if (_cudaAccessTO->cells) {
-        int numCells;
-        checkCudaErrors(cudaMemcpy(&numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-        CudaMemoryManager::getInstance().freeMemory(numCells, _cudaAccessTO->cells);
-    }
-    if (_cudaAccessTO->particles) {
-        int numParticles;
-        checkCudaErrors(cudaMemcpy(&numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-        CudaMemoryManager::getInstance().freeMemory(numParticles, _cudaAccessTO->particles);
-    }
-    if (_cudaAccessTO->tokens) {
-        int numTokens;
-        checkCudaErrors(cudaMemcpy(&numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
-        CudaMemoryManager::getInstance().freeMemory(numTokens, _cudaAccessTO->tokens);
-    }
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
 
     auto cellArraySize = _cudaSimulationData->entities.cells.getSize_host();
     auto tokenArraySize = _cudaSimulationData->entities.tokens.getSize_host();

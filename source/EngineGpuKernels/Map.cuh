@@ -86,7 +86,7 @@ public:
 
     __host__ __inline__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_size.x * _size.y * 2, _map);
+        CudaMemoryManager::getInstance().freeMemory(_map);
         _mapEntries.free();
     }
 
@@ -209,7 +209,7 @@ public:
 
     __host__ __inline__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_size.x * _size.y, _map);
+        CudaMemoryManager::getInstance().freeMemory(_map);
         _mapEntries.free();
     }
 

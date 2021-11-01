@@ -12,8 +12,8 @@ public:
     }
 
     __host__ void free() {
-        CudaMemoryManager::getInstance().freeMemory(1, _statistics);
-        CudaMemoryManager::getInstance().freeMemory(1, _arrayResizingNeeded);
+        CudaMemoryManager::getInstance().freeMemory(_statistics);
+        CudaMemoryManager::getInstance().freeMemory(_arrayResizingNeeded);
     }
 
     __host__ bool isArrayResizeNeeded()

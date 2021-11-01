@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include <helper_cuda.h>
 
 #include "Base.cuh"
@@ -27,13 +29,18 @@ public:
     {
         CHECK_FOR_CUDA_ERROR(cudaMalloc(&result, sizeof(T)*arraySize));
         _bytes += sizeof(T)*arraySize;
+        _pointerToSizeMap.emplace(reinterpret_cast<void*>(result), arraySize);
     }
 
     template<typename T>
-    void freeMemory(uint64_t arraySize, T& memory)
+    void freeMemory(T*& memory)
     {
-        CHECK_FOR_CUDA_ERROR(cudaFree(memory));
-        _bytes -= sizeof(T) * arraySize;
+        auto findResult = _pointerToSizeMap.find(reinterpret_cast<void*>(memory));
+        if (findResult != _pointerToSizeMap.end()) {
+            CHECK_FOR_CUDA_ERROR(cudaFree(memory));
+            _bytes -= sizeof(T) * findResult->second;
+            _pointerToSizeMap.erase(findResult->first);
+        }
     }
 
     uint64_t getSizeOfAcquiredMemory() const
@@ -46,4 +53,5 @@ private:
     ~CudaMemoryManager() {}
 
     uint64_t _bytes = 0;
+    std::map<void*, uint64_t> _pointerToSizeMap;
 };
