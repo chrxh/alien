@@ -40,8 +40,6 @@ The development is driven by the desire to better understand the conditions for 
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
-For some graphics cards of the GeForce 10 series there are reported issues that are currently being investigated.
-
 ## How to build the sources in Windows
 Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
 1. Checkout source code.
