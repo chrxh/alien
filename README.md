@@ -11,8 +11,8 @@
 ### Physics and graphics engine
 - Realistic physical computations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
 - Real-time user interactions with running simulations
-- Simulation and rendering on GPU via CUDA and OpenGL
-- Post-processing filters such as glow and motion blur
+- Simulation runs entirely on GPU via CUDA
+- Rendering and post-processing via OpenGL using CUDA-OpenGL interoperability
 
 <img src="img/physics engine.gif" width=100%>
 
