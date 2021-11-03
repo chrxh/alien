@@ -18,7 +18,7 @@
 
 ### Artificial Life extensions
 - Programmable matter building blocks for simulating digital organisms and evolution
-- Information transportation layer between connected particles using tokens
+- Information and energy transportation layer between connected particles using tokens
 - Built-in graph editor and scripting environment for designing own machines 
 
 <img src="img/alife engine.gif" width=100%>
