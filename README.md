@@ -9,7 +9,7 @@
 
 ## Main features
 ### Physics and graphics engine
-- Realistic physical computations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
+- Particles to simulate soft bodies, heat dissipation, bondings, damages, shock waves, etc.
 - Real-time user interactions with running simulations
 - Simulation runs entirely on GPU via CUDA
 - Rendering and post-processing via OpenGL using CUDA-OpenGL interoperability
