@@ -9,7 +9,7 @@
 
 ## Main features
 ### Physics and graphics engine
-- Particles to simulate soft bodies, heat dissipation, bondings, damages, shock waves, etc.
+- Particles for simulating soft bodies, heat dissipation, bondings, damages, shock waves, etc.
 - Real-time user interactions with running simulations
 - Simulation runs entirely on GPU via CUDA
 - Rendering and post-processing via OpenGL using CUDA-OpenGL interoperability
@@ -17,7 +17,7 @@
 <img src="img/physics engine.gif" width=100%>
 
 ### Artificial Life extensions
-- Programmable matter building blocks for simulating digital organisms and evolution
+- Programmable matter building blocks for creating digital organisms and evolution
 - Information and energy transportation layer between connected particles using tokens
 - Built-in graph editor and scripting environment for designing own machines 
 
