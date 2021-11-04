@@ -17,7 +17,7 @@
 <img src="img/physics engine.gif" width=100%>
 
 ### Artificial Life extensions
-- Programmable matter building blocks for creating digital organisms and evolution
+- Programmable matter building blocks for creating digital organisms and simulating evolution
 - Information and energy transportation layer between connected particles using tokens
 - Built-in graph editor and scripting environment for designing own machines 
 
