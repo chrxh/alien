@@ -182,8 +182,8 @@ void _SimulationParametersWindow::processBase(
             "Minimum energy",
             simParameters.spotValues.cellMinEnergy,
             origSimParameters.spotValues.cellMinEnergy,
-            0,
-            100.0f,
+            10.0f,
+            200.0f,
             false,
             "%.3f",
             std::string("Minimum energy a cell needs to exist."));
@@ -243,7 +243,19 @@ void _SimulationParametersWindow::processBase(
             1.0f,
             false,
             "%.3f",
-            std::string("Minimum collision velocity of two cells so that a connection can be established."));
+            std::string("Minimum velocity of two colliding cells so that a connection can be established."));
+        AlienImGui::SliderFloat(
+            "Binding max energy",
+            simParameters.spotValues.cellMaxBindingEnergy,
+            origSimParameters.spotValues.cellMaxBindingEnergy,
+            50.0f,
+            1000000.0f,
+            true,
+            "%.3f",
+            std::string("Maximum energy of a cell at which they can maintain a connection."));
+        if (simParameters.spotValues.cellMaxBindingEnergy < simParameters.spotValues.cellMinEnergy + 10.0f) {
+            simParameters.spotValues.cellMaxBindingEnergy = simParameters.spotValues.cellMinEnergy + 10.0f;
+        }
         AlienImGui::SliderInt(
             "Maximum cell bonds",
             simParameters.cellMaxBonds,
@@ -327,6 +339,16 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             "Binding force strength", spot.values.cellBindingForce, origSpot.values.cellBindingForce, 0, 4.0f);
         AlienImGui::SliderFloat(
             "Binding creation force", spot.values.cellFusionVelocity, origSpot.values.cellFusionVelocity, 0, 1.0f);
+        AlienImGui::SliderFloat(
+            "Binding max energy",
+            spot.values.cellMaxBindingEnergy,
+            origSpot.values.cellMaxBindingEnergy,
+            50.0f,
+            1000000.0f,
+            true);
+        if (spot.values.cellMaxBindingEnergy < spot.values.cellMinEnergy + 10.0f) {
+            spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
+        }
 
         createGroup("Cell functions");
         AlienImGui::SliderFloat(
