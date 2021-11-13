@@ -18,9 +18,9 @@ public:
     __inline__ __device__ void clearTag(SimulationData& data);
     __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void collisions(SimulationData& data);    //prerequisite: clearTag
-    __inline__ __device__ void applyAndInitForces(SimulationData& data);    //prerequisite: tag from collisions
+    __inline__ __device__ void applyAndCheckForces(SimulationData& data);    //prerequisite: tag from collisions
     __inline__ __device__ void calcForces(SimulationData& data);
-    __inline__ __device__ void calcPositions(SimulationData& data);
+    __inline__ __device__ void calcPositionsAndCheckBindings(SimulationData& data);
     __inline__ __device__ void calcVelocities(SimulationData& data, int numCellPointers);
     __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
     __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
@@ -140,7 +140,8 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                     && Math::length(velDelta)
                         >= SpotCalculator::calc(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
-                    && isApproaching) {
+                    && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
+                    && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy) {
                     CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
@@ -173,7 +174,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& data)
+__inline__ __device__ void CellProcessor::applyAndCheckForces(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
     auto const partition =
@@ -187,9 +188,10 @@ __inline__ __device__ void CellProcessor::applyAndInitForces(SimulationData& dat
         if (Math::length(force)
             > SpotCalculator::calc(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
             if(data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                CellConnectionProcessor::scheduleDelConnections(data, cell); 
+                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
             }
         }
+
         cell->vel = cell->vel + force;
         if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVel) {
             cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVel;
@@ -264,7 +266,7 @@ __inline__ __device__ void CellProcessor::calcForces(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcPositionsAndCheckBindings(SimulationData& data)
 {
     _data = &data;
     auto& cells = data.entities.cellPointers;
@@ -287,7 +289,7 @@ __inline__ __device__ void CellProcessor::calcPositions(SimulationData& data)
             auto displacement = connectingCell->absPos - cell->absPos;
             data.cellMap.mapDisplacementCorrection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxCollisionDistance * 2) {
+            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
                 scheduleForDestruction = true;
             }
         }
@@ -403,12 +405,12 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMinEnergy = SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+        auto cellMaxBindingEnergy =
+            SpotCalculator::calc(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
         if (cell->energy < cellMinEnergy || destroyDueToTokenUsage) {
-            if (cell->numConnections > 0) {
-                CellConnectionProcessor::scheduleDelConnections(data, cell);
-            } else {
-                CellConnectionProcessor::scheduleDelCell(data, cell, index);
-            }
+            CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+        } else if (cell->energy > cellMaxBindingEnergy) {
+            CellConnectionProcessor::scheduleDelConnections(data, cell);
         }
     }
 }

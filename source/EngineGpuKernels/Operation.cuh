@@ -19,11 +19,18 @@ struct DelCellOperation
     int cellIndex;
 };
 
+struct DelCellAndConnectionOperations
+{
+    Cell* cell;
+    int cellIndex;
+};
+
 union OperationData
 {
     AddConnectionOperation addConnectionOperation;
     DelConnectionsOperation delConnectionsOperation;
     DelCellOperation delCellOperation;
+    DelCellAndConnectionOperations delCellAndConnectionOperation;
 };
 
 struct Operation
@@ -32,7 +39,8 @@ struct Operation
     {
         AddConnections,
         DelConnections,
-        DelCell
+        DelCell,
+        DelCellAndConnections,
     };
     Type type;
     OperationData data;

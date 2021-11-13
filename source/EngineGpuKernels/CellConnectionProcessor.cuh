@@ -12,6 +12,7 @@ public:
     __inline__ __device__ static void scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
     __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex);
+    __inline__ __device__ static void scheduleDelCellAndConnections(SimulationData& data, Cell* cell, int cellIndex);
 
     __inline__ __device__ static void processConnectionsOperations(SimulationData& data);
     __inline__ __device__ static void processDelCellOperations(SimulationData& data);
@@ -92,6 +93,20 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationDa
     }
 }
 
+__inline__ __device__ void
+CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cell* cell, int cellIndex)
+{
+    auto index = atomicAdd(data.numOperations, 1);
+    if (index < data.entities.cellPointers.getNumEntries()) {
+        Operation& operation = data.operations[index];
+        operation.type = Operation::Type::DelCellAndConnections;
+        operation.data.delCellAndConnectionOperation.cell = cell;
+        operation.data.delCellAndConnectionOperation.cellIndex = cellIndex;
+    } else {
+        atomicSub(data.numOperations, 1);
+    }
+}
+
 __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations(SimulationData& data)
 {
     auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -100,6 +115,13 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
         auto const& operation = data.operations[index];
         if (Operation::Type::DelConnections == operation.type) {
             delConnections(operation.data.delConnectionsOperation.cell);
+        }
+        if (Operation::Type::DelCellAndConnections == operation.type) {
+            delConnections(operation.data.delConnectionsOperation.cell);
+            scheduleDelCell(
+                data,
+                operation.data.delCellAndConnectionOperation.cell,
+                operation.data.delCellAndConnectionOperation.cellIndex);
         }
         if (Operation::Type::AddConnections == operation.type) {
             addConnections(

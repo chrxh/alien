@@ -37,7 +37,7 @@ __global__ void processingStep2(SimulationData data)
 __global__ void processingStep3(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.applyAndInitForces(data);
+    cellProcessor.applyAndCheckForces(data);
     cellProcessor.clearTag(data);
 
     ParticleProcessor particleProcessor;
@@ -57,7 +57,7 @@ __global__ void processingStep4(SimulationData data, int numTokenPointers)
 __global__ void processingStep5(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcPositions(data);
+    cellProcessor.calcPositionsAndCheckBindings(data);
 }
 
 __global__ void processingStep6(SimulationData data, SimulationResult result)
