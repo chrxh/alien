@@ -235,7 +235,7 @@ auto _MainWindow::initGlfw() -> GlfwData
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 /*
     int count;
-    auto primaryMonitor = glfwGetMonitors(&count)[1];
+    primaryMonitor = glfwGetMonitors(&count)[1];
 */
     auto mode = glfwGetVideoMode(primaryMonitor);
     auto screenWidth = mode->width;
@@ -378,23 +378,23 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
 
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Window ", _windowMenuToggled, "Window")) {
-            if (ImGui::MenuItem("Temporal control", "ALT+Q", _temporalControlWindow->isOn())) {
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuToggled, "Windows")) {
+            if (ImGui::MenuItem("Temporal control", "ALT+1", _temporalControlWindow->isOn())) {
                 _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
             }
-            if (ImGui::MenuItem("Spatial control", "ALT+W", _spatialControlWindow->isOn())) {
+            if (ImGui::MenuItem("Spatial control", "ALT+2", _spatialControlWindow->isOn())) {
                 _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
             }
-            if (ImGui::MenuItem("Statistics", "ALT+E", _statisticsWindow->isOn())) {
+            if (ImGui::MenuItem("Statistics", "ALT+3", _statisticsWindow->isOn())) {
                 _statisticsWindow->setOn(!_statisticsWindow->isOn());
             }
-            if (ImGui::MenuItem("Simulation parameters", "ALT+R", _simulationParametersWindow->isOn())) {
+            if (ImGui::MenuItem("Simulation parameters", "ALT+4", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            if (ImGui::MenuItem("Flow generator", "ALT+T", _flowGeneratorWindow->isOn())) {
+            if (ImGui::MenuItem("Flow generator", "ALT+5", _flowGeneratorWindow->isOn())) {
                 _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
             }
-            if (ImGui::MenuItem("Log", "ALT+A", _logWindow->isOn())) {
+            if (ImGui::MenuItem("Log", "ALT+6", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
             AlienImGui::EndMenuButton();
@@ -457,22 +457,22 @@ void _MainWindow::processMenubar()
         onPauseSimulation();
     }
 
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
         _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_2)) {
         _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_3)) {
         _statisticsWindow->setOn(!_statisticsWindow->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_4)) {
         _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
         _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
         _logWindow->setOn(!_logWindow->isOn());
     }
 
