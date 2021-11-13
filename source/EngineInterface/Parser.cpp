@@ -131,6 +131,12 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         ParserTask);
     JsonParser::encodeDecode(
         tree,
+        simPar.spotValues.cellMaxBindingEnergy,
+        simPar.spotValues.cellMaxBindingEnergy,
+        "simulation parameters.cell.max binding energy",
+        ParserTask);
+    JsonParser::encodeDecode(
+        tree,
         simPar.cellFunctionComputerMaxInstructions,
         defaultPar.cellFunctionComputerMaxInstructions,
         "simulation parameters.cell.function.computer.max instructions",
@@ -270,6 +276,12 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
             spot.values.cellFusionVelocity,
             defaultSpot.values.cellFusionVelocity,
             base + "cell.fusion velocity",
+            ParserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellMaxBindingEnergy,
+            defaultSpot.values.cellMaxBindingEnergy,
+            base + "cell.max binding energy",
             ParserTask);
         JsonParser::encodeDecode(
             tree,
