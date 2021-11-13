@@ -5,20 +5,20 @@
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
-<b>Artificial Life Environment (ALiEn)</b> is a simulation program based on a specialized 2D physics and rendering engine in CUDA. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment such as sensors, actuators, weapons, constructors, etc. To orchestrate the execution, a token concept from graph theory is utilized. The bodies can be thought of as small machines or agents operating in a common environment.
+<b>Artificial Life Environment (ALiEn)</b> is a simulation tool based on a specialized 2D physics and rendering engine in CUDA. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment such as sensors, actuators, weapons, constructors, etc. To orchestrate the execution, a token concept from graph theory is utilized. The bodies can be thought of as small machines or agents operating in a common environment.
 
 ## Main features
 ### Physics and graphics engine
-- Realistic physical computations of heat dissipation, collisions, bondings, damages, rotational forces, etc.
+- Particles for simulating soft body mechanics, heat dissipation, bondings, damages, shock waves, etc.
 - Real-time user interactions with running simulations
-- Simulation and rendering on GPU via CUDA and OpenGL
-- Post-processing filters such as glow and motion blur
+- Simulation runs entirely on GPU via CUDA
+- Rendering and post-processing via OpenGL using CUDA-OpenGL interoperability
 
 <img src="img/physics engine.gif" width=100%>
 
 ### Artificial Life extensions
-- Programmable matter building blocks for simulating digital organisms and evolution
-- Information transportation layer between connected particles using tokens
+- Programmable matter building blocks for creating digital organisms and studying evolution
+- Information and energy transportation layer between connected particles using tokens
 - Built-in graph editor and scripting environment for designing own machines 
 
 <img src="img/alife engine.gif" width=100%>
@@ -39,8 +39,6 @@ The development is driven by the desire to better understand the conditions for 
 
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
-
-For some graphics cards of the GeForce 10 series there are reported issues that are currently being investigated.
 
 ## How to build the sources in Windows
 Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
