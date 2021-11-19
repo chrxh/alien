@@ -190,6 +190,7 @@
     <ClInclude Include="..\..\source\Gui\UiController.h" />
     <ClInclude Include="..\..\source\Gui\Viewport.h" />
     <ClInclude Include="..\..\source\Gui\AlienImGui.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external\glad\src\glad.c" />
@@ -252,6 +253,12 @@
   <ItemGroup>
     <None Include="..\..\source\Gui\Resources\shader.fs" />
     <None Include="..\..\source\Gui\Resources\shader.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Gui.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="alien.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
