@@ -31,7 +31,7 @@ void _FlowGeneratorWindow::process()
     auto worldSize = _simController->getWorldSize();
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::Begin("Flow field", &_on, ImGuiWindowFlags_None);
+    ImGui::Begin("Flow generator", &_on, ImGuiWindowFlags_None);
 
     ImGui::Checkbox("##", &flowFieldSettings.active);
     ImGui::SameLine();

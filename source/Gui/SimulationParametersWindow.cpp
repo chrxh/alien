@@ -251,7 +251,7 @@ void _SimulationParametersWindow::processBase(
             50.0f,
             1000000.0f,
             true,
-            "%.3f",
+            "%.1f",
             std::string("Maximum energy of a cell at which they can maintain a connection."));
         if (simParameters.spotValues.cellMaxBindingEnergy < simParameters.spotValues.cellMinEnergy + 10.0f) {
             simParameters.spotValues.cellMaxBindingEnergy = simParameters.spotValues.cellMinEnergy + 10.0f;
@@ -345,7 +345,8 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             origSpot.values.cellMaxBindingEnergy,
             50.0f,
             1000000.0f,
-            true);
+            true,
+            "%.1f");
         if (spot.values.cellMaxBindingEnergy < spot.values.cellMinEnergy + 10.0f) {
             spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
         }
