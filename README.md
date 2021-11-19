@@ -64,6 +64,8 @@ Most of the free external libraries are already included in the repository, such
 A CMake script for cross-platform compilation will be provided in the future. At the moment, only Microsoft Visual Studio is used as a build system.
 
 ## Installer
+An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).
+
 Windows binaries for the current development state of this branch can be downloaded from the following link and will be updated regularly: [download](https://alien-project.org/files/alien-version3-preview.zip).
 
 In the future, an installer will be provided, as in the latest stable version.
