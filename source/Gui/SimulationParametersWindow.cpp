@@ -322,10 +322,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         ImGui::Text("Background color");
 
         auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-        AlienImGui::SliderFloat(" Position X", spot.posX, origSpot.posX, 0, toFloat(worldSize.x), false, "%.1f");
-        AlienImGui::SliderFloat(" Position Y", spot.posY, origSpot.posY, 0, toFloat(worldSize.y), false, "%.1f");
-        AlienImGui::SliderFloat(" Core radius", spot.coreRadius, origSpot.coreRadius, 0, maxRadius, false, "%.1f");
-        AlienImGui::SliderFloat(" Fade-out radius", spot.fadeoutRadius, origSpot.fadeoutRadius, 0, maxRadius, false, "%.1f");
+        AlienImGui::SliderFloat("Position X", spot.posX, origSpot.posX, 0, toFloat(worldSize.x), false, "%.1f");
+        AlienImGui::SliderFloat("Position Y", spot.posY, origSpot.posY, 0, toFloat(worldSize.y), false, "%.1f");
+        AlienImGui::SliderFloat("Core radius", spot.coreRadius, origSpot.coreRadius, 0, maxRadius, false, "%.1f");
+        AlienImGui::SliderFloat("Fade-out radius", spot.fadeoutRadius, origSpot.fadeoutRadius, 0, maxRadius, false, "%.1f");
 
         createGroup("General physics");
         AlienImGui::SliderFloat("Friction", spot.values.friction, origSpot.values.friction, 0, 1.0f, true, "%.4f");
