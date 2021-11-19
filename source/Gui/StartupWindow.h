@@ -32,5 +32,6 @@ private:
 
     State _state = State::Unintialized;
     TextureData _logo;
+    boost::optional<std::chrono::steady_clock::time_point> _startupTimepoint;
     boost::optional<std::chrono::steady_clock::time_point> _lastActivationTimepoint;
 };
