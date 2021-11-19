@@ -12,6 +12,7 @@
 
 namespace
 {
+    auto const LogoDuration = 1500ll;
     auto const FadeOutDuration = 1500ll;
     auto const FadeInDuration = 500ll;
 }
@@ -21,12 +22,19 @@ _StartupWindow::_StartupWindow(SimulationController const& simController, Viewpo
     , _viewport(viewport)
 {
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
+    _startupTimepoint = std::chrono::steady_clock::now();
 }
 
 void _StartupWindow::process()
 {
     if (_state == State::Unintialized) {
         processWindow();
+        auto now = std::chrono::steady_clock::now();
+        auto millisecSinceStartup =
+            std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
+        if (millisecSinceStartup > LogoDuration) {
+            activate();
+        }
         return;
     }
 

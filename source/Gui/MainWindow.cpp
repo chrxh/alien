@@ -269,8 +269,6 @@ void _MainWindow::processUninitialized()
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(_window);
-
-    _startupWindow->activate();
 }
 
 void _MainWindow::processRequestLoading()
