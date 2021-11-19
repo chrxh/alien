@@ -53,4 +53,5 @@ private:
     bool _on = false;
 
     bool _slowDown = false;
+    int _tpsRestriction = 30;
 };

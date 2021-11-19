@@ -112,12 +112,11 @@ void _TemporalControlWindow::processTpsRestriction()
 {
     ImGui::Checkbox("Slow down", &_slowDown);
     ImGui::SameLine();
-    static int tpsRestriction = 30;
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::SliderInt("", &tpsRestriction, 1, 400, "%d TPS", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderInt("", &_tpsRestriction, 1, 400, "%d TPS", ImGuiSliderFlags_Logarithmic);
     if (_slowDown) {
-        _simController->setTpsRestriction(tpsRestriction);
+        _simController->setTpsRestriction(_tpsRestriction);
     } else {
         _simController->setTpsRestriction(boost::none);
     }
