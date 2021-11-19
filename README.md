@@ -43,7 +43,7 @@ The development is driven by the desire to better understand the conditions for 
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 ## How to build the sources
-A CMake script for cross-platform compilation will be provided in the future. At this moment the source code can be compiled in Windows.
+A CMake script for cross-platform compilation will be provided in the future. At the moment, Microsoft Visual Studio is configured as a build system.
 
 Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
 1. Checkout source code.
