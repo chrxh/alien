@@ -6,6 +6,8 @@
 <img src="img/alien.png" width=100%>
 </h1>
 <b>Artificial Life Environment (ALiEn)</b> is a simulation tool based on a specialized 2D physics and rendering engine in CUDA. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment such as sensors, actuators, weapons, constructors, etc. To orchestrate the execution, a token concept from graph theory is utilized. The bodies can be thought of as small machines or agents operating in a common environment.
+<br/><br/>
+<b>Note: This branch contains ongoing work for the next major release. For the latest stable version, please visit the <a href="https://github.com/chrxh/alien/tree/master">master branch</a>.</b>
 
 ## Main features
 ### Physics and graphics engine
@@ -40,7 +42,8 @@ The development is driven by the desire to better understand the conditions for 
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
-## How to build the sources in Windows
+## How to build the sources
+### Windows
 Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
 1. Checkout source code.
 2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
@@ -48,7 +51,7 @@ Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.co
 4. Select `Release` and `x64` as build configuration.
 5. Click on `Start Without Debugging` (CTRL + F5).
 
-The following free libraries are (partially) contained in the repository and need not to be downloaded:
+Most of the free external libraries are already included in the repository, such as
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [ImPlot](https://github.com/epezent/implot)
@@ -56,6 +59,9 @@ The following free libraries are (partially) contained in the repository and nee
 - [GLFW](https://www.glfw.org/)
 - [stb](https://github.com/nothings/stb)
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+
+### Linux
+A CMake script for cross-platform compilation will be provided in the future. At the moment, only Microsoft Visual Studio is used as a build system.
 
 ## Installer
 Windows binaries for the current development state of this branch can be downloaded from the following link and will be updated regularly: [download](https://alien-project.org/files/alien-version3-preview.zip).
