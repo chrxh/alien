@@ -43,8 +43,7 @@ The development is driven by the desire to better understand the conditions for 
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 ## How to build the sources
-A CMake script for cross-platform compilation will be provided in the future. At the moment, Microsoft Visual Studio is configured as a build system.
-
+### Windows
 Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
 1. Checkout source code.
 2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
@@ -60,6 +59,9 @@ Most of the free external libraries are already included in the repository, such
 - [GLFW](https://www.glfw.org/)
 - [stb](https://github.com/nothings/stb)
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+
+### Linux
+A CMake script for cross-platform compilation will be provided in the future. At the moment, only Microsoft Visual Studio is used as a build system.
 
 ## Installer
 Windows binaries for the current development state of this branch can be downloaded from the following link and will be updated regularly: [download](https://alien-project.org/files/alien-version3-preview.zip).
