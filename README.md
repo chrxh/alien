@@ -44,7 +44,7 @@ An Nvidia graphics card with compute capability 6.0 or higher is needed. Please 
 
 ## How to build the sources
 ### Windows
-Prerequisites: [Visual Studio 2019 (or later)](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
+Prerequisites: [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
 1. Checkout source code.
 2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
 3. Open `./msvc/alien.sln` in Visual Studio.
