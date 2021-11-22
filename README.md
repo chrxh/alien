@@ -66,7 +66,7 @@ A CMake script for cross-platform compilation will be provided in the future. At
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).
 
-In the case that the program crashes for an unknown reason, please refer to the "Troubleshooting" section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
+In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
 ## Documentation
 Please visit [alien-project.org](https://alien-project.org/documentation.html) for a documentation of the program and the underlying model. It contains many brief tutorials that guide the reader into the program in small portions.
