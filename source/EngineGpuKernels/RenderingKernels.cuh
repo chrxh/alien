@@ -169,7 +169,7 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
     }
     }
 
-    float factor = min(300.0f, cell->energy) / 250.0f;
+    float factor = min(300.0f, cell->energy) / 220.0f;
     if (!selected) {
         factor *= 0.75f;
     }
@@ -309,7 +309,7 @@ __global__ void drawCells(
         map.mapPosCorrection(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-            auto color = calcColor(cell, false /*isSelected*/);
+            auto color = calcColor(cell, 0 != cell->selected);
             drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
 
             if (zoom > 1 - FP_PRECISION) {
@@ -384,7 +384,7 @@ __global__ void drawParticles(
 
         auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particle->absPos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
-            auto const color = calcColor(particle, particle->isSelected());
+            auto const color = calcColor(particle, 0 != particle->selected);
             drawCircle(imageData, imageSize, particleImagePos, color, zoom / 3);
         }
     }

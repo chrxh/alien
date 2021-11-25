@@ -63,6 +63,9 @@ public:
     ENGINEIMPL_EXPORT void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
+    ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
+    ENGINEIMPL_EXPORT void moveSelection(RealVector2D const& displacement);
+
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
     ENGINEIMPL_EXPORT Settings getSettings() const;

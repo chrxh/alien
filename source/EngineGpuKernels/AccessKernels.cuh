@@ -294,27 +294,6 @@ __global__ void createDataFromTO(
     }
 }
 
-__global__ void selectParticles(int2 pos, Array<Particle*> particles)
-{
-    auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
-        auto const& particle = particles.at(index);
-
-        if (Math::lengthSquared(particle->absPos - pos) < SELECTION_RADIUS) {
-            particle->setSelected(true);
-        }
-    }
-}
-
-__global__ void deselectParticles(Array<Particle*> particles)
-{
-    auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
-        auto const& particle = particles.at(index);
-        particle->setSelected(false);
-    }
-}
-
 __global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO accessTO)
 {
     {
@@ -381,20 +360,4 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.cells.reset();
     data.entities.tokens.reset();
     data.entities.particles.reset();
-}
-
-__global__ void cudaSelectData(int2 pos, SimulationData data)
-{
-/*
-    KERNEL_CALL(selectClusters, pos, data.entities.clusterPointers);
-*/
-    KERNEL_CALL(selectParticles, pos, data.entities.particlePointers);
-}
-
-__global__ void cudaDeselectData(SimulationData data)
-{
-/*
-    KERNEL_CALL(deselectClusters, data.entities.clusterPointers);
-*/
-    KERNEL_CALL(deselectParticles, data.entities.particlePointers);
 }

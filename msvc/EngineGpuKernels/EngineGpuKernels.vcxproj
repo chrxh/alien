@@ -49,7 +49,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\Operation.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Particle.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\ParticleProcessor.cuh" />
-    <ClInclude Include="..\..\source\EngineGpuKernels\PhysicalActionKernels.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\ActionKernels.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\Physics.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\PropulsionFunction.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\QuantityConverter.cuh" />

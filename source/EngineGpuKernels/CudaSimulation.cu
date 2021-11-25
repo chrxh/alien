@@ -26,7 +26,7 @@
 #include "Entities.cuh"
 #include "Map.cuh"
 #include "MonitorKernels.cuh"
-#include "PhysicalActionKernels.cuh"
+#include "ActionKernels.cuh"
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernels.cuh"
@@ -284,26 +284,19 @@ void _CudaSimulation::setSimulationData(
     GPU_FUNCTION(setSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 }
 
-void _CudaSimulation::selectData(int2 const& pos)
-{
-    GPU_FUNCTION(cudaSelectData, pos, *_cudaSimulationData);
-}
-
-void _CudaSimulation::deselectData()
-{
-    GPU_FUNCTION(cudaDeselectData, *_cudaSimulationData);
-}
-
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
-    CudaApplyForceData cudaApplyData{
-        applyData.startPos, applyData.endPos, applyData.force, applyData.radius, applyData.onlyRotation};
-    GPU_FUNCTION(cudaApplyForce, cudaApplyData, *_cudaSimulationData);
+    GPU_FUNCTION(cudaApplyForce, applyData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::moveSelection(float2 const& displacement)
+void _CudaSimulation::switchSelection(SwitchSelectionData const& switchData)
 {
-    GPU_FUNCTION(cudaMoveSelection, displacement, *_cudaSimulationData);
+    GPU_FUNCTION(cudaSwitchSelection, switchData, *_cudaSimulationData);
+}
+
+void _CudaSimulation::moveSelection(MoveSelectionData const& moveData)
+{
+    GPU_FUNCTION(cudaMoveSelection, moveData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants_)
