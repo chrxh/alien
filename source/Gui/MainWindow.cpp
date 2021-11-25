@@ -50,6 +50,7 @@
 #include "SaveSimulationDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
+#include "SelectionWindow.h"
 
 namespace
 {
@@ -105,7 +106,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _uiController = boost::make_shared<_UiController>();
     _autosaveController = boost::make_shared<_AutosaveController>(_simController);
 
-    _editorController = boost::make_shared<_EditorController>(_simController, _viewport);
+    _selectionWindow = boost::make_shared<_SelectionWindow>(_styleRepository);
+    _editorController = boost::make_shared<_EditorController>(_simController, _viewport, _selectionWindow);
     _modeWindow = boost::make_shared<_ModeWindow>(_editorController);
     _simulationView = boost::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
@@ -403,6 +405,15 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
 
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
+            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode());
+            if (ImGui::MenuItem("Selection", "ALT+E", _selectionWindow->isOn())) {
+                _selectionWindow->setOn(!_selectionWindow->isOn());
+            }
+            ImGui::EndDisabled();
+            AlienImGui::EndMenuButton();
+        }
+
         if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
             if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
                 _autosaveController->setOn(!_autosaveController->isOn());
@@ -477,6 +488,10 @@ void _MainWindow::processMenubar()
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
         _logWindow->setOn(!_logWindow->isOn());
+    }
+
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
+        _selectionWindow->setOn(!_selectionWindow->isOn());
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {

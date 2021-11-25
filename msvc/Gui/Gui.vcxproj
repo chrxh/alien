@@ -172,6 +172,7 @@
     <ClInclude Include="..\..\source\Gui\GlobalSettings.h" />
     <ClInclude Include="..\..\source\Gui\OpenSimulationDialog.h" />
     <ClInclude Include="..\..\source\Gui\SaveSimulationDialog.h" />
+    <ClInclude Include="..\..\source\Gui\SelectionWindow.h" />
     <ClInclude Include="..\..\source\Gui\SimpleLogger.h" />
     <ClInclude Include="..\..\source\Gui\LogWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="..\..\source\Gui\GlobalSettings.cpp" />
     <ClCompile Include="..\..\source\Gui\OpenSimulationDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\SaveSimulationDialog.cpp" />
+    <ClCompile Include="..\..\source\Gui\SelectionWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\SimpleLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />

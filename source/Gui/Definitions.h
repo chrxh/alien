@@ -84,6 +84,9 @@ using DisplaySettingsDialog = boost::shared_ptr<_DisplaySettingsDialog>;
 class _EditorController;
 using EditorController = boost::shared_ptr<_EditorController>;
 
+class _SelectionWindow;
+using SelectionWindow = boost::shared_ptr<_SelectionWindow>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

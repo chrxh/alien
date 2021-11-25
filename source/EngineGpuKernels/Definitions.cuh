@@ -7,6 +7,7 @@ struct Entities;
 
 struct SimulationData;
 class SimulationResult;
+class SelectionResult;
 struct CellAccessTO;
 struct ClusterAccessTO;
 struct DataAccessTO;
@@ -27,6 +28,19 @@ struct SwitchSelectionData
 {
     float2 pos;
     float radius;
+};
+
+struct SetSelectionData
+{
+    float2 startPos;
+    float2 endPos;
+};
+
+struct SelectedEntitites
+{
+    int numCells;
+    int numIndirectCells;
+    int numParticles;
 };
 
 struct MoveSelectionData
