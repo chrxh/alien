@@ -5,7 +5,9 @@
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
-<b>Artificial Life Environment (ALiEn)</b> is a simulation tool based on a specialized 2D physics and rendering engine in CUDA. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment such as sensors, actuators, weapons, constructors, etc. To orchestrate the execution, a token concept from graph theory is utilized. The bodies can be thought of as small machines or agents operating in a common environment.
+<b>Artificial Life Environment (ALiEn)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, actuators, weapons, constructors, etc.) whose execution are orchestrated by a signaling system. The bodies can be thought of as agents or digital organisms operating in a common environment.
+<br/>
+An important goal is to make the simulator user-friendly through a modern user interface and a playful approach. 
 <br/><br/>
 <b>Note: This branch contains ongoing work for the next major release. For the latest stable version, please visit the <a href="https://github.com/chrxh/alien/tree/master">master branch</a>.</b>
 
@@ -19,9 +21,9 @@
 <img src="img/physics engine.gif" width=100%>
 
 ### Artificial Life extensions
-- Programmable matter building blocks for creating digital organisms and studying evolution
+- Programmable particle actions for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles using tokens
-- Built-in graph editor and scripting environment for designing own machines 
+- Built-in graph editor and scripting environment for designing customized machines and environments
 
 <img src="img/alife engine.gif" width=100%>
 
