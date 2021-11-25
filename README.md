@@ -23,7 +23,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 ### Artificial Life extensions
 - Programmable particle actions for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles using tokens
-- Built-in graph editor and scripting environment for designing own machines 
+- Built-in graph editor and scripting environment for designing customized machines and environments
 
 <img src="img/alife engine.gif" width=100%>
 
