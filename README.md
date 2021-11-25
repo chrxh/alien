@@ -21,7 +21,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 <img src="img/physics engine.gif" width=100%>
 
 ### Artificial Life extensions
-- Programmable particle actions for creating digital organisms and studying evolution
+- Programmable particle actions for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles using tokens
 - Built-in graph editor and scripting environment for designing own machines 
 
