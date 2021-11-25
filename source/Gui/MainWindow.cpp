@@ -49,6 +49,7 @@
 #include "OpenSimulationDialog.h"
 #include "SaveSimulationDialog.h"
 #include "DisplaySettingsDialog.h"
+#include "EditorController.h"
 
 namespace
 {
@@ -96,20 +97,21 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    _modeWindow = boost::make_shared<_ModeWindow>();
-    auto worldSize = simController->getWorldSize();
+    auto worldSize = _simController->getWorldSize();
     _viewport = boost::make_shared<_Viewport>();
     _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
     _viewport->setZoomFactor(4.0f);
     _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
     _uiController = boost::make_shared<_UiController>();
-    _autosaveController = boost::make_shared<_AutosaveController>(simController);
+    _autosaveController = boost::make_shared<_AutosaveController>(_simController);
 
-    _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
+    _editorController = boost::make_shared<_EditorController>(_simController, _viewport);
+    _modeWindow = boost::make_shared<_ModeWindow>(_editorController);
+    _simulationView = boost::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
-    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
-    _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
+    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(_simController, _styleRepository, _statisticsWindow);
+    _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(_simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _gpuSettingsDialog = boost::make_shared<_GpuSettingsDialog>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
@@ -291,6 +293,8 @@ void _MainWindow::processLoadingControls()
     processMenubar();
     processDialogs();
     processWindows();
+    processControllers();
+
     _uiController->process();
     _simulationView->processControls();
     _startupWindow->process();
@@ -317,6 +321,7 @@ void _MainWindow::processFinishedLoading()
 /*
     ImGui::PopStyleColor(3);
 */
+    processControllers();
     _uiController->process();
     _simulationView->processControls();
 
@@ -514,6 +519,12 @@ void _MainWindow::processWindows()
     _flowGeneratorWindow->process();
     _logWindow->process();
     _gettingStartedWindow->process();
+}
+
+void _MainWindow::processControllers()
+{
+    _autosaveController->process();
+    _editorController->process();
 }
 
 void _MainWindow::onRunSimulation()
