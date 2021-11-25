@@ -169,6 +169,16 @@ void _SimulationController::applyForce_async(
     _worker.applyForce_async(start, end, force, radius);
 }
 
+void _SimulationController::switchSelection(RealVector2D const& pos, float radius)
+{
+    _worker.switchSelection(pos, radius);
+}
+
+void _SimulationController::moveSelection(RealVector2D const& displacement)
+{
+    _worker.moveSelection(displacement);
+}
+
 GeneralSettings _SimulationController::getGeneralSettings() const
 {
     return _settings.generalSettings;

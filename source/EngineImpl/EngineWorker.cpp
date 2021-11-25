@@ -291,6 +291,20 @@ void EngineWorker::applyForce_async(
     _conditionForWorkerLoop.notify_all();
 }
 
+void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->switchSelection(SwitchSelectionData{{pos.x, pos.y}, radius});
+}
+
+void EngineWorker::moveSelection(RealVector2D const& displacement)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->moveSelection(MoveSelectionData{{displacement.x, displacement.y}});
+}
+
 void EngineWorker::runThreadLoop()
 {
     try {
