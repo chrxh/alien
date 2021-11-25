@@ -8,7 +8,10 @@
 class _EditorController
 {
 public:
-    _EditorController(SimulationController const& simController, Viewport const& viewport);
+    _EditorController(
+        SimulationController const& simController,
+        Viewport const& viewport,
+        SelectionWindow const selectionWindow);
 
     bool isOn() const;
     void setOn(bool value);
@@ -16,17 +19,22 @@ public:
     void process();
 
 private:
-    void leftMouseButtonPressed(IntVector2D const& viewPos);
-    void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
+    void leftMouseButtonPressed(RealVector2D const& viewPos);
+    void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
     void leftMouseButtonReleased();
+
+    void rightMouseButtonPressed(RealVector2D const& viewPos);
+    void rightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
+    void rightMouseButtonReleased();
 
 private:
     SimulationController _simController;
     Viewport _viewport;
+    SelectionWindow _selectionWindow;
 
-    bool _on = true;
+    bool _on = false;
 
-    boost::optional<IntVector2D> _prevMousePosInt;
+    boost::optional<RealVector2D> _prevMousePosInt;
 
     struct SelectionRect
     {

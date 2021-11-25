@@ -69,7 +69,10 @@ public:
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
     ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
+    ENGINEIMPL_EXPORT void getSelection(int& numCells, int& numIndirectCells, int& numParticles);
+    ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     ENGINEIMPL_EXPORT void moveSelection(RealVector2D const& displacement);
+    ENGINEIMPL_EXPORT void removeSelection();
 
     void runThreadLoop();
     void runSimulation();

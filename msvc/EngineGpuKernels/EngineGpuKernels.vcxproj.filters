@@ -71,6 +71,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationResult.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\FlowFieldKernel.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SpotCalculator.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SelectionResult.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Kernels">

@@ -63,6 +63,7 @@ private:
     SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
     EditorController _editorController; 
+    SelectionWindow _selectionWindow;
 
     StyleRepository _styleRepository;
 
@@ -71,6 +72,7 @@ private:
     bool _windowMenuToggled = false;
     bool _settingsMenuToggled = false;
     bool _viewMenuToggled = false;
+    bool _editorMenuToggled = false;
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
     bool _showExitDialog = false;

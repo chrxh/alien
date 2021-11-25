@@ -298,11 +298,35 @@ void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
     _cudaSimulation->switchSelection(SwitchSelectionData{{pos.x, pos.y}, radius});
 }
 
+void EngineWorker::getSelection(int& numCells, int& numIndirectCells, int& numParticles)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    auto selectedEntitites = _cudaSimulation->getSelection();
+    numCells = selectedEntitites.numCells;
+    numIndirectCells = selectedEntitites.numIndirectCells;
+    numParticles = selectedEntitites.numParticles;
+}
+
+void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->setSelection(SetSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
+}
+
 void EngineWorker::moveSelection(RealVector2D const& displacement)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
     _cudaSimulation->moveSelection(MoveSelectionData{{displacement.x, displacement.y}});
+}
+
+void EngineWorker::removeSelection()
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->removeSelection();
 }
 
 void EngineWorker::runThreadLoop()

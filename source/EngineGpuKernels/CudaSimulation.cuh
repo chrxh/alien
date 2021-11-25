@@ -41,7 +41,10 @@ public:
 
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
     ENGINEGPUKERNELS_EXPORT void switchSelection(SwitchSelectionData const& switchData);
+    ENGINEGPUKERNELS_EXPORT void setSelection(SetSelectionData const& selectionData);
+    ENGINEGPUKERNELS_EXPORT SelectedEntitites getSelection();
     ENGINEGPUKERNELS_EXPORT void moveSelection(MoveSelectionData const& moveData);
+    ENGINEGPUKERNELS_EXPORT void removeSelection();
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
@@ -70,6 +73,7 @@ private:
     std::atomic<uint64_t> _currentTimestep;
     SimulationData* _cudaSimulationData;
     SimulationResult* _cudaSimulationResult;
+    SelectionResult* _cudaSelectionResult;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
 };

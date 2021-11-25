@@ -31,6 +31,7 @@
 #include "SimulationData.cuh"
 #include "SimulationKernels.cuh"
 #include "SimulationResult.cuh"
+#include "SelectionResult.cuh"
 
 #define GPU_FUNCTION(func, ...) \
     func<<<1, 1>>>(__VA_ARGS__); \
@@ -129,12 +130,14 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
 
     _cudaSimulationData = new SimulationData();
     _cudaSimulationResult = new SimulationResult();
+    _cudaSelectionResult = new SelectionResult();
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
+    _cudaSelectionResult->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
@@ -150,6 +153,7 @@ _CudaSimulation::~_CudaSimulation()
     _cudaSimulationData->free();
     _cudaMonitorData->free();
     _cudaSimulationResult->free();
+    _cudaSelectionResult->free();
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
@@ -294,9 +298,25 @@ void _CudaSimulation::switchSelection(SwitchSelectionData const& switchData)
     GPU_FUNCTION(cudaSwitchSelection, switchData, *_cudaSimulationData);
 }
 
+void _CudaSimulation::setSelection(SetSelectionData const& selectionData)
+{
+    GPU_FUNCTION(cudaSetSelection, selectionData, *_cudaSimulationData);
+}
+
+ SelectedEntitites _CudaSimulation::getSelection()
+{
+     GPU_FUNCTION(cudaGetSelection, *_cudaSimulationData, *_cudaSelectionResult);
+     return _cudaSelectionResult->getSelection();
+ }
+
 void _CudaSimulation::moveSelection(MoveSelectionData const& moveData)
 {
     GPU_FUNCTION(cudaMoveSelection, moveData, *_cudaSimulationData);
+}
+
+void _CudaSimulation::removeSelection()
+{
+    GPU_FUNCTION(cudaRemoveSelection, *_cudaSimulationData);
 }
 
 void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants_)
