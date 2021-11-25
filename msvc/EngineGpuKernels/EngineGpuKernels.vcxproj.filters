@@ -59,7 +59,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\MonitorKernels.cuh">
       <Filter>Kernels</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\EngineGpuKernels\PhysicalActionKernels.cuh">
+    <ClInclude Include="..\..\source\EngineGpuKernels\ActionKernels.cuh">
       <Filter>Kernels</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineGpuKernels\RenderingKernels.cuh">

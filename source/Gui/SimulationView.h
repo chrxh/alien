@@ -16,7 +16,7 @@ public:
 private:
     void processEvents();
 
-    void leftMouseButtonPressed();
+    void leftMouseButtonPressed(IntVector2D const& viewPos);
     void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
     void leftMouseButtonReleased();
 

@@ -39,19 +39,9 @@ public:
     ENGINEGPUKERNELS_EXPORT void
     setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
 
-    ENGINEGPUKERNELS_EXPORT void selectData(int2 const& pos);
-    ENGINEGPUKERNELS_EXPORT void deselectData();
-
-    struct ApplyForceData
-    {
-        float2 startPos;
-        float2 endPos;
-        float2 force;
-        float radius;
-        bool onlyRotation;
-    };
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
-    ENGINEGPUKERNELS_EXPORT void moveSelection(float2 const& displacement);
+    ENGINEGPUKERNELS_EXPORT void switchSelection(SwitchSelectionData const& switchData);
+    ENGINEGPUKERNELS_EXPORT void moveSelection(MoveSelectionData const& moveData);
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);

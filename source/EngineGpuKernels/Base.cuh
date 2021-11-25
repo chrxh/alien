@@ -163,6 +163,13 @@ __device__ __inline__ T* atomicExch(T** address, T* value)
         reinterpret_cast<unsigned long long int*>(address), reinterpret_cast<unsigned long long int>(value)));
 }
 
+template <typename T>
+__device__ __inline__ T atomicRead(T* const& address)
+{
+    return atomicAdd(address, 0);
+        
+}
+
 /*
 template<typename T>
 __device__ __inline__  T* atomicExch_block(T** address, T* value)
