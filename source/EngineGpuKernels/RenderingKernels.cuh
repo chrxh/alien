@@ -300,7 +300,6 @@ __global__ void drawCells(
 
     MapInfo map;
     map.init(universeSize);
-    //bool isSelected = cluster->isSelected();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);

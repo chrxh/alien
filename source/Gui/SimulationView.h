@@ -7,7 +7,10 @@
 class _SimulationView
 {
 public:
-    _SimulationView(SimulationController const& simController, ModeWindow const& modeWindow, Viewport const& viewport);
+    _SimulationView(
+        SimulationController const& simController,
+        ModeWindow const& modeWindow,
+        Viewport const& viewport);
     void resize(IntVector2D const& viewportSize);
 
     void processContent();

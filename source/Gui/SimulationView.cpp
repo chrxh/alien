@@ -116,27 +116,12 @@ void _SimulationView::resize(IntVector2D const& size)
 void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 {
     _shader->setFloat("motionBlurFactor", MotionBlurZooming);
-
-    if (_modeWindow->getMode() == _ModeWindow::Mode::Action && !_simController->isSimulationRunning()) {
-        auto pos = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-        auto zoom = _viewport->getZoomFactor();
-        _simController->switchSelection(pos, 10.0f / zoom);
-    }
 }
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
         _viewport->zoom(viewPos, _viewport->getZoomSensitivity());
-    } else {
-        auto start = _viewport->mapViewToWorldPosition({toFloat(prevViewPos.x), toFloat(prevViewPos.y)});
-        auto end = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-        auto zoom = _viewport->getZoomFactor();
-        if (_simController->isSimulationRunning()) {
-            _simController->applyForce_async(start, end, (end - start) / 30, 20.0f / zoom);
-        } else {
-            _simController->moveSelection(end - start);
-        }
     }
 }
 
