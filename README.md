@@ -5,7 +5,7 @@
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
-<b>Artificial Life Environment (ALiEn)</b> is an artificial life simulation tool based on a specialized 2D particle engine for soft bodies and fluid-like materials in CUDA. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, actuators, weapons, constructors, etc.) whose execution are orchestrated by a signaling system. The bodies can be thought of as small machines or agents operating in a common environment.
+<b>Artificial Life Environment (ALiEn)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like materials. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, actuators, weapons, constructors, etc.) whose execution are orchestrated by a signaling system. The bodies can be thought of as small machines or agents operating in a common environment.
 <br/><br/>
 <b>Note: This branch contains ongoing work for the next major release. For the latest stable version, please visit the <a href="https://github.com/chrxh/alien/tree/master">master branch</a>.</b>
 
