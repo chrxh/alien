@@ -5,11 +5,13 @@
 #include "Base/StringFormatter.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "EditorModel.h"
 
-_SelectionWindow::_SelectionWindow(StyleRepository const& styleRepository)
-    : _styleRepository(styleRepository)
+_SelectionWindow::_SelectionWindow(EditorModel const& editorModel, StyleRepository const& styleRepository)
+    : _editorModel(editorModel)
+    , _styleRepository(styleRepository)
 {
-    _on = GlobalSettings::getInstance().getBoolState("editor.selection.active", false);
+    _on = GlobalSettings::getInstance().getBoolState("editor.selection.active", true);
 }
 
 _SelectionWindow::~_SelectionWindow()
@@ -22,32 +24,42 @@ void _SelectionWindow::process()
     if (!_on) {
         return;
     }
+    auto selection = _editorModel->getSelectionShallowData();
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::Begin("Selection", &_on);
+    if (ImGui::Begin("Selection", &_on)) {
 
-    ImGui::Text("Cells");
-    ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::Text(StringFormatter::format(_selection.numCells).c_str());
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+        ImGui::Text("Cells");
+        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+        ImGui::Text(StringFormatter::format(selection.numCells).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
 
-    ImGui::Text("Connected cells");
-    ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::Text(StringFormatter::format(_selection.numIndirectCells).c_str());
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+        ImGui::Text("Cells from clusters");
+        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+        ImGui::Text(StringFormatter::format(selection.numClusterCells).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
 
-    ImGui::Text("Energy particles");
-    ImGui::PushFont(_styleRepository->getLargeFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::Text(StringFormatter::format(_selection.numParticles).c_str());
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
+        ImGui::Text("Energy particles");
+        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+        ImGui::Text(StringFormatter::format(selection.numParticles).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
 
-    ImGui::End();
+        /*
+    ImGui::Text("Angle");
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+    if (ImGui::SliderFloat("##angle", &_angle, -180.0f, 180.0f, "%.1f")) {
+    }
+    ImGui::PopItemWidth();
+*/
+
+        ImGui::End();
+    }
 }
 
 bool _SelectionWindow::isOn() const
@@ -58,9 +70,4 @@ bool _SelectionWindow::isOn() const
 void _SelectionWindow::setOn(bool value)
 {
     _on = value;
-}
-
-void _SelectionWindow::setSelection(SelectedEntities const& selection)
-{
-    _selection = selection;
 }

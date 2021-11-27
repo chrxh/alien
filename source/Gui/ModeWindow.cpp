@@ -49,3 +49,9 @@ auto _ModeWindow::getMode() const -> Mode
 {
     return _mode;
 }
+
+void _ModeWindow::setMode(Mode value)
+{
+    _mode = value;
+    _editorController->setOn(_mode == Mode::Action);
+}

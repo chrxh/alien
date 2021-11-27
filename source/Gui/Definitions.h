@@ -81,11 +81,17 @@ using SaveSimulationDialog = boost::shared_ptr<_SaveSimulationDialog>;
 class _DisplaySettingsDialog;
 using DisplaySettingsDialog = boost::shared_ptr<_DisplaySettingsDialog>;
 
+class _EditorModel;
+using EditorModel = boost::shared_ptr<_EditorModel>;
+
 class _EditorController;
 using EditorController = boost::shared_ptr<_EditorController>;
 
 class _SelectionWindow;
 using SelectionWindow = boost::shared_ptr<_SelectionWindow>;
+
+class _ActionsWindow;
+using ActionsWindow = boost::shared_ptr<_ActionsWindow>;
 
 struct GLFWvidmode;
 struct GLFWwindow;

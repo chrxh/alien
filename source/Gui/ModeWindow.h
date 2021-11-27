@@ -15,6 +15,7 @@ public:
         Action
     };
     Mode getMode() const;
+    void setMode(Mode value);
 
 private:
     EditorController _editorController;

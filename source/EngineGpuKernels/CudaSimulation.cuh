@@ -11,6 +11,7 @@
 
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/Settings.h"
+#include "EngineInterface/SelectionShallowData.h"
 
 #include "Definitions.cuh"
 #include "DllExport.h"
@@ -42,8 +43,8 @@ public:
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
     ENGINEGPUKERNELS_EXPORT void switchSelection(SwitchSelectionData const& switchData);
     ENGINEGPUKERNELS_EXPORT void setSelection(SetSelectionData const& selectionData);
-    ENGINEGPUKERNELS_EXPORT SelectedEntitites getSelection();
-    ENGINEGPUKERNELS_EXPORT void moveSelection(MoveSelectionData const& moveData);
+    ENGINEGPUKERNELS_EXPORT SelectionShallowData getSelectionShallowData();
+    ENGINEGPUKERNELS_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData);
     ENGINEGPUKERNELS_EXPORT void removeSelection();
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);

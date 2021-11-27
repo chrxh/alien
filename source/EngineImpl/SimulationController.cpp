@@ -182,9 +182,9 @@ void _SimulationController::switchSelection(RealVector2D const& pos, float radiu
     _worker.switchSelection(pos, radius);
 }
 
-void _SimulationController::getSelection(int& numCells, int& numIndirectCells, int& numParticles)
+SelectionShallowData _SimulationController::getSelectionShallowData()
 {
-    _worker.getSelection(numCells, numIndirectCells, numParticles);
+    return _worker.getSelectionShallowData();
 }
 
 void _SimulationController::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
@@ -195,6 +195,11 @@ void _SimulationController::setSelection(RealVector2D const& startPos, RealVecto
 void _SimulationController::moveSelection(RealVector2D const& displacement)
 {
     _worker.moveSelection(displacement);
+}
+
+void _SimulationController::accelerateSelection(RealVector2D const& velDelta)
+{
+    _worker.accelerateSelection(velDelta);
 }
 
 void _SimulationController::removeSelection()

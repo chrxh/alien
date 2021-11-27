@@ -51,6 +51,7 @@
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
 #include "SelectionWindow.h"
+#include "ActionsWindow.h"
 
 namespace
 {
@@ -106,8 +107,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _uiController = boost::make_shared<_UiController>();
     _autosaveController = boost::make_shared<_AutosaveController>(_simController);
 
-    _selectionWindow = boost::make_shared<_SelectionWindow>(_styleRepository);
-    _editorController = boost::make_shared<_EditorController>(_simController, _viewport, _selectionWindow);
+    _editorController =
+        boost::make_shared<_EditorController>(_simController, _viewport, _styleRepository);
     _modeWindow = boost::make_shared<_ModeWindow>(_editorController);
     _simulationView = boost::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
@@ -352,6 +353,9 @@ void _MainWindow::renderSimulation()
 
 void _MainWindow::processMenubar()
 {
+    auto selectionWindow = _editorController->getSelectionWindow();
+    auto actionsWindow = _editorController->getActionsWindow();
+
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
             _showExitDialog = true;
@@ -406,9 +410,17 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
+            if (ImGui::MenuItem("Activate", "ALT+E", _modeWindow->getMode() == _ModeWindow::Mode::Action)) {
+                _modeWindow->setMode(
+                    _modeWindow->getMode() == _ModeWindow::Mode::Action ? _ModeWindow::Mode::Navigation
+                                                                        : _ModeWindow::Mode::Action);
+            }
             ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode());
-            if (ImGui::MenuItem("Selection", "ALT+E", _selectionWindow->isOn())) {
-                _selectionWindow->setOn(!_selectionWindow->isOn());
+            if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
+                selectionWindow->setOn(!selectionWindow->isOn());
+            }
+            if (ImGui::MenuItem("Actions", "ALT+A", actionsWindow->isOn())) {
+                actionsWindow->setOn(!actionsWindow->isOn());
             }
             ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
@@ -491,7 +503,15 @@ void _MainWindow::processMenubar()
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
-        _selectionWindow->setOn(!_selectionWindow->isOn());
+        _modeWindow->setMode(
+            _modeWindow->getMode() == _ModeWindow::Mode::Action ? _ModeWindow::Mode::Navigation
+                                                                : _ModeWindow::Mode::Action);
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+        selectionWindow->setOn(!selectionWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+        actionsWindow->setOn(!actionsWindow->isOn());
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {

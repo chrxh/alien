@@ -5,21 +5,26 @@
 #include "EngineImpl/SimulationController.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
+#include "EditorModel.h"
 #include "SelectionWindow.h"
+#include "ActionsWindow.h"
 
 _EditorController::_EditorController(
     SimulationController const& simController,
     Viewport const& viewport,
-    SelectionWindow const selectionWindow)
+    StyleRepository const& styleRepository)
     : _simController(simController)
     , _viewport(viewport)
-    , _selectionWindow(selectionWindow)
+    , _styleRepository(styleRepository)
 {
+    _editorModel = boost::make_shared<_EditorModel>();
+    _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel, _styleRepository);
+    _actionsWindow = boost::make_shared<_ActionsWindow>(_editorModel, _styleRepository);
 }
 
 bool _EditorController::isOn() const
 {
-    return _on;;
+    return _on;
 }
 
 void _EditorController::setOn(bool value)
@@ -33,6 +38,7 @@ void _EditorController::process()
         return;
     }
     _selectionWindow->process();
+    _actionsWindow->process();
 
     if (_selectionRect) {
         ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
@@ -79,9 +85,41 @@ void _EditorController::process()
         rightMouseButtonReleased();
     }
 
+    synchronizeModelWithSimulation();
+}
 
+SelectionWindow _EditorController::getSelectionWindow() const
+{
+    return _selectionWindow;
+}
+
+ActionsWindow _EditorController::getActionsWindow() const
+{
+    return _actionsWindow;
+}
+
+void _EditorController::synchronizeModelWithSimulation()
+{
     if (_simController->removeSelectionIfInvalid()) {
-        _selectionWindow->setSelection({0, 0, 0});
+        _editorModel->clear();
+    }
+    {
+        auto delta = _editorModel->getDeltaExtCenterPos();
+        if (delta.x != 0 || delta.y != 0) {
+            _simController->moveSelection(delta);
+
+            auto selectionShallowData = _simController->getSelectionShallowData();
+            _editorModel->setOrigSelectionShallowData(selectionShallowData);
+        }
+    }
+    {
+        auto delta = _editorModel->getDeltaExtCenterVel();
+        if (delta.x != 0 || delta.y != 0) {
+            _simController->accelerateSelection(delta);
+
+            auto selectionShallowData = _simController->getSelectionShallowData();
+            _editorModel->setOrigSelectionShallowData(selectionShallowData);
+        }
     }
 }
 
@@ -92,11 +130,8 @@ void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos)
         auto zoom = _viewport->getZoomFactor();
         _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
 
-        int numCells;
-        int numIndirectCells;
-        int numParticles;
-        _simController->getSelection(numCells, numIndirectCells, numParticles);
-        _selectionWindow->setSelection({numCells, numIndirectCells, numParticles});
+        auto selectionShallowData = _simController->getSelectionShallowData();
+        _editorModel->setOrigSelectionShallowData(selectionShallowData);
     }
 }
 
@@ -108,7 +143,11 @@ void _EditorController::leftMouseButtonHold(RealVector2D const& viewPos, RealVec
     if (_simController->isSimulationRunning()) {
         _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
     } else {
-        _simController->moveSelection(end - start);
+        auto delta = end - start;
+        auto selectionData = _editorModel->getSelectionShallowData();
+        selectionData.extCenterPosX += delta.x;
+        selectionData.extCenterPosY += delta.y;
+        _editorModel->setSelectionShallowData(selectionData);
     }
 }
 
@@ -132,11 +171,8 @@ void _EditorController::rightMouseButtonHold(RealVector2D const& viewPos, RealVe
         auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 
         _simController->setSelection(topLeft, bottomRight);
-        int numCells;
-        int numIndirectCells;
-        int numParticles;
-        _simController->getSelection(numCells, numIndirectCells, numParticles);
-        _selectionWindow->setSelection({numCells, numIndirectCells, numParticles});
+        auto selectionShallowData = _simController->getSelectionShallowData();
+        _editorModel->setOrigSelectionShallowData(selectionShallowData);
     }
 }
 

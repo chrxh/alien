@@ -11,14 +11,19 @@ public:
     _EditorController(
         SimulationController const& simController,
         Viewport const& viewport,
-        SelectionWindow const selectionWindow);
+        StyleRepository const& styleRepository);
 
     bool isOn() const;
     void setOn(bool value);
 
     void process();
 
+    SelectionWindow getSelectionWindow() const;
+    ActionsWindow getActionsWindow() const;
+
 private:
+    void synchronizeModelWithSimulation();
+
     void leftMouseButtonPressed(RealVector2D const& viewPos);
     void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
     void leftMouseButtonReleased();
@@ -28,9 +33,13 @@ private:
     void rightMouseButtonReleased();
 
 private:
+    EditorModel _editorModel;
+    SelectionWindow _selectionWindow;
+    ActionsWindow _actionsWindow;
+
     SimulationController _simController;
     Viewport _viewport;
-    SelectionWindow _selectionWindow;
+    StyleRepository _styleRepository;
 
     bool _on = false;
 
