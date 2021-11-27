@@ -303,15 +303,15 @@ void _CudaSimulation::setSelection(SetSelectionData const& selectionData)
     GPU_FUNCTION(cudaSetSelection, selectionData, *_cudaSimulationData);
 }
 
- SelectedEntitites _CudaSimulation::getSelection()
+ SelectionShallowData _CudaSimulation::getSelectionShallowData()
 {
-     GPU_FUNCTION(cudaGetSelection, *_cudaSimulationData, *_cudaSelectionResult);
-     return _cudaSelectionResult->getSelection();
+     GPU_FUNCTION(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
+    return _cudaSelectionResult->getSelectionShallowData();
  }
 
-void _CudaSimulation::moveSelection(MoveSelectionData const& moveData)
+void _CudaSimulation::shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    GPU_FUNCTION(cudaMoveSelection, moveData, *_cudaSimulationData);
+    GPU_FUNCTION(cudaShallowUpdateSelection, shallowUpdateData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::removeSelection()
