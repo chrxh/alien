@@ -154,32 +154,18 @@ __global__ void rolloutSelection(SimulationData data, int* result)
                 atomicExch(result, 1);
             }
         }
-
-        //--
-/*
-        bool neighborSelected = false;
-        for(int i = 0; i < cell->numConnections; ++i) {
-            auto& otherCell = cell->connections[i].cell;
-            if (0 != otherCell->selected) {
-                neighborSelected = true;
-            }
-        }
-        if (neighborSelected && 0 == cell->selected) {
-            cell->selected = 2;
-            atomicExch(result, 1);
-        }
-*/
     }
 }
 
-__global__ void moveSelection(float2 displacement, SimulationData data)
+__global__ void shallowUpdateSelection(ShallowUpdateSelectionData shallowUpdateData, SimulationData data)
 {
     auto const cellBlock = calcPartition(
         data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
         if (0 != cell->selected) {
-            cell->absPos = cell->absPos + displacement;
+            cell->absPos = cell->absPos + shallowUpdateData.displacement;
+            cell->vel = cell->vel + shallowUpdateData.velDelta;
         }
     }
 
@@ -188,7 +174,8 @@ __global__ void moveSelection(float2 displacement, SimulationData data)
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
         if (0 != particle->selected) {
-            particle->absPos = particle->absPos + displacement;
+            particle->absPos = particle->absPos + shallowUpdateData.displacement;
+            particle->vel = particle->vel + shallowUpdateData.velDelta;
         }
     }
 }
@@ -212,18 +199,15 @@ __global__ void removeSelection(SimulationData data)
     }
 }
 
-__global__ void getSelection(SimulationData data, SelectionResult result)
+__global__ void getSelectionShallowData(SimulationData data, SelectionResult result)
 {
     auto const cellBlock = calcPartition(
         data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if (1 == cell->selected) {
-            result.incSelectedCell();
-        }
-        if (2 == cell->selected) {
-            result.incIndirectSelectedCell();
+        if (0 != cell->selected) {
+            result.collectCell(cell);
         }
     }
 
@@ -232,8 +216,8 @@ __global__ void getSelection(SimulationData data, SelectionResult result)
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
-        if (1 == particle->selected) {
-            result.incSelectedParticle();
+        if (0 != particle->selected) {
+            result.collectParticle(particle);
         }
     }
 }
@@ -281,15 +265,16 @@ __global__ void cudaSetSelection(SetSelectionData setData, SimulationData data)
 
 }
 
-__global__ void cudaGetSelection(SimulationData data, SelectionResult selectionResult)
+__global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult selectionResult)
 {
     selectionResult.reset();
-    KERNEL_CALL(getSelection, data, selectionResult);
+    KERNEL_CALL(getSelectionShallowData, data, selectionResult);
+    selectionResult.finalize();
 }
 
-__global__ void cudaMoveSelection(MoveSelectionData moveData, SimulationData data)
+__global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData shallowUpdateData, SimulationData data)
 {
-    KERNEL_CALL(moveSelection, moveData.displacement, data);
+    KERNEL_CALL(shallowUpdateSelection, shallowUpdateData, data);
 }
 
 __global__ void cudaRemoveSelection(SimulationData data)

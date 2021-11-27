@@ -298,14 +298,11 @@ void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
     _cudaSimulation->switchSelection(SwitchSelectionData{{pos.x, pos.y}, radius});
 }
 
-void EngineWorker::getSelection(int& numCells, int& numIndirectCells, int& numParticles)
+SelectionShallowData EngineWorker::getSelectionShallowData()
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    auto selectedEntitites = _cudaSimulation->getSelection();
-    numCells = selectedEntitites.numCells;
-    numIndirectCells = selectedEntitites.numIndirectCells;
-    numParticles = selectedEntitites.numParticles;
+    return _cudaSimulation->getSelectionShallowData();
 }
 
 void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
@@ -319,7 +316,14 @@ void EngineWorker::moveSelection(RealVector2D const& displacement)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    _cudaSimulation->moveSelection(MoveSelectionData{{displacement.x, displacement.y}});
+    _cudaSimulation->shallowUpdateSelection(ShallowUpdateSelectionData{{displacement.x, displacement.y}, {0, 0}});
+}
+
+void EngineWorker::accelerateSelection(RealVector2D const& velDelta)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->shallowUpdateSelection(ShallowUpdateSelectionData{{0, 0}, {velDelta.x, velDelta.y}});
 }
 
 void EngineWorker::removeSelection()

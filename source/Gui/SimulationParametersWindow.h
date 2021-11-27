@@ -22,8 +22,6 @@ private:
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
 
-    void createGroup(std::string const& name);
-
     StyleRepository _styleRepository;
     SimulationController _simController;
 

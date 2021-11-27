@@ -63,7 +63,6 @@ private:
     SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
     EditorController _editorController; 
-    SelectionWindow _selectionWindow;
 
     StyleRepository _styleRepository;
 

@@ -78,6 +78,9 @@
     <ClInclude Include="..\..\source\EngineInterface\SpaceCalculator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\EngineInterface\SelectionShallowData.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\EngineInterface\ChangeDescriptions.cpp">
