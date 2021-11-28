@@ -12,9 +12,9 @@
 
 namespace
 {
-    auto const LogoDuration = 1500ll;
-    auto const FadeOutDuration = 1500ll;
-    auto const FadeInDuration = 500ll;
+    std::chrono::milliseconds::rep const LogoDuration = 1500;
+    std::chrono::milliseconds::rep const FadeOutDuration = 1500;
+    std::chrono::milliseconds::rep const FadeInDuration = 500;
 }
 
 _StartupWindow::_StartupWindow(SimulationController const& simController, Viewport const& viewport)

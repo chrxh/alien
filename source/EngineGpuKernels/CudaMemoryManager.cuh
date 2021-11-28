@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <helper_cuda.h>
+#include <cuda/helper_cuda.h>
 
 #include "Base.cuh"
 #include "Macros.cuh"

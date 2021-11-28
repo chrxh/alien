@@ -1,6 +1,8 @@
 #pragma once
 
+#include <atomic>
 #include <mutex>
+#include <condition_variable>
 
 #if defined(_WIN32)
 #define NOMINMAX
@@ -84,9 +86,9 @@ private:
     std::condition_variable _conditionForWorkerLoop;
     std::condition_variable _conditionForAccess;
 
-    std::atomic<bool> _isSimulationRunning = false;
-    std::atomic<bool> _isShutdown = false;
-    std::atomic<bool> _requireAccess = false;
+    std::atomic<bool> _isSimulationRunning{false};
+    std::atomic<bool> _isShutdown{false};
+    std::atomic<bool> _requireAccess{false};
     ExceptionData _exceptionData;
 
     //async jobs
@@ -106,7 +108,7 @@ private:
     std::vector<ApplyForceJob> _applyForceJobs;
 
     //time step measurements
-    std::atomic<int> _tpsRestriction = 0;   //0 = no restriction
+    std::atomic<int> _tpsRestriction{0};  //0 = no restriction
     std::atomic<float> _tps;
     boost::optional<std::chrono::steady_clock::time_point> _timepoint;
     int _timestepsSinceTimepoint = 0;
@@ -117,15 +119,15 @@ private:
 
     //monitor data
     boost::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
-    std::atomic<uint64_t> _timeStep = 0;
-    std::atomic<int> _numCells = 0;
-    std::atomic<int> _numParticles = 0;
-    std::atomic<int> _numTokens = 0;
-    std::atomic<double> _totalInternalEnergy = 0.0;
-    std::atomic<int> _numCreatedCells = 0;
-    std::atomic<int> _numSuccessfulAttacks = 0;
-    std::atomic<int> _numFailedAttacks = 0;
-    std::atomic<int> _numMuscleActivities = 0;
+    std::atomic<uint64_t> _timeStep{0};
+    std::atomic<int> _numCells{0};
+    std::atomic<int> _numParticles{0};
+    std::atomic<int> _numTokens{0};
+    std::atomic<double> _totalInternalEnergy{0.0};
+    std::atomic<int> _numCreatedCells{0};
+    std::atomic<int> _numSuccessfulAttacks{0};
+    std::atomic<int> _numFailedAttacks{0};
+    std::atomic<int> _numMuscleActivities{0};
 
     //internals
     void* _cudaResource;

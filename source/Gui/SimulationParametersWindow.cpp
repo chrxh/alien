@@ -86,9 +86,8 @@ void _SimulationParametersWindow::process()
 
             ImGui::EndTabBar();
         }
-
-        ImGui::End();
     }
+    ImGui::End();
 
     if (simParameters != lastSimParameters) {
         _simController->setSimulationParameters_async(simParameters);
@@ -303,8 +302,8 @@ void _SimulationParametersWindow::processBase(
             "%.3f",
             std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
                         "geometry of the attacked cell does not match the attacking cell."));
-        ImGui::EndChild();
     }
+    ImGui::EndChild();
 }
 
 void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot)
@@ -378,9 +377,8 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             origSpot.values.cellFunctionWeaponGeometryDeviationExponent,
             0,
             5.0f);
-
-        ImGui::EndChild();
     }
+    ImGui::EndChild();
 }
 
 void _SimulationParametersWindow::createGroup(std::string const& name)

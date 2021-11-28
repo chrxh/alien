@@ -79,9 +79,8 @@ void _SpatialControlWindow::process()
         ImGui::PopFont();
 
         processZoomSensitivitySlider();
-
-        ImGui::EndChild();
     }
+    ImGui::EndChild();
 
     ImGui::End();
 
