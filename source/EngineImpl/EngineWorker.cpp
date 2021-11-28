@@ -155,7 +155,6 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-
     int numCells = 0;
     int numParticles = 0;
     int numTokens = 0;
@@ -175,11 +174,11 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
     _cudaSimulation->resizeArraysIfNecessary({numCells, numParticles, numTokens});
 
     auto arraySizes = _cudaSimulation->getArraySizes();
-    DataAccessTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    DataAccessTO dataTO = _dataTOCache->getDataTO(
+        {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
+
     _cudaSimulation->getSimulationData({0, 0}, worldSize, dataTO);
-//    _cudaSimulation->getSimulationData({0, 0}, {0, 0}, dataTO);
 
     DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
     converter.updateData(dataToUpdate);

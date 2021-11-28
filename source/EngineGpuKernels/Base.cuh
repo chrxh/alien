@@ -50,15 +50,15 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<int>(size, _array);
         CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _currentId);
 
-        checkCudaErrors(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
         unsigned long long int hostCurrentId = 1;
-        checkCudaErrors(cudaMemcpy(_currentId, &hostCurrentId, sizeof(_currentId), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentId, &hostCurrentId, sizeof(_currentId), cudaMemcpyHostToDevice));
 
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
             randomNumbers[i] = rand();
         }
-        checkCudaErrors(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
     }
 
 
