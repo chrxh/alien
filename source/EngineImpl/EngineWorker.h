@@ -47,7 +47,7 @@ public:
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ENGINEIMPL_EXPORT OverallStatistics getMonitorData() const;
 
-    ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
+    ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
 

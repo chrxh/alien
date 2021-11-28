@@ -108,5 +108,5 @@ void _ColorizeDialog::onColorize()
 
     _simController->closeSimulation();
     _simController->newSimulation(timestep, settings, symbolMap);
-    _simController->updateData(content);
+    _simController->setSimulationData(content);
 }

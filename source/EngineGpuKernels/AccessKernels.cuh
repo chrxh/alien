@@ -319,7 +319,7 @@ __global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-__global__ void getSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight,
+__global__ void cudaGetSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight,
     SimulationData data, DataAccessTO access)
 {
     *access.numCells = 0;
@@ -332,26 +332,6 @@ __global__ void getSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLower
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
 }
 
-__global__ void setSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight,
-    SimulationData data, DataAccessTO access)
-{
-    KERNEL_CALL(adaptNumberGenerator, data.numberGen, access);
-/*
-    KERNEL_CALL_1_1(filterCells, {0, 0}, {0, 0}, data.entities.cellPointers);
-    KERNEL_CALL(filterParticles, {0, 0}, {0, 0}, data.entities.particlePointers);
-*/
-    KERNEL_CALL_1_1(filterCells, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
-    KERNEL_CALL(filterParticles, rectUpperLeft, rectLowerRight, data.entities.particlePointers);
-    KERNEL_CALL(
-        createDataFromTO,
-        data,
-        access,
-        data.entities.particles.getNewSubarray(*access.numParticles),
-        data.entities.cells.getNewSubarray(*access.numCells),
-        data.entities.tokens.getNewSubarray(*access.numTokens));
-    KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
-}
-
 __global__ void cudaClearData(SimulationData data)
 {
     data.entities.cellPointers.reset();
@@ -360,4 +340,20 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.cells.reset();
     data.entities.tokens.reset();
     data.entities.particles.reset();
+    data.entities.strings.reset();
+}
+
+__global__ void cudaSetSimulationAccessDataKernel(SimulationData data, DataAccessTO access)
+{
+    KERNEL_CALL_1_1(cudaClearData, data);
+    KERNEL_CALL(adaptNumberGenerator, data.numberGen, access);
+    KERNEL_CALL(
+        createDataFromTO,
+        data,
+        access,
+        data.entities.particles.getNewSubarray(*access.numParticles),
+        data.entities.cells.getNewSubarray(*access.numCells),
+        data.entities.tokens.getNewSubarray(*access.numTokens));
+
+    KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
 }

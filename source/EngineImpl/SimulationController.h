@@ -30,7 +30,7 @@ public:
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
 
-    ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
+    ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
     ENGINEIMPL_EXPORT void runSimulation();

@@ -151,7 +151,7 @@ OverallStatistics EngineWorker::getMonitorData() const
     return result;
 }
 
-void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
+void EngineWorker::setSimulationData(DataChangeDescription const& dataToUpdate)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
@@ -178,14 +178,12 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
         {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 
-    _cudaSimulation->getSimulationData({0, 0}, worldSize, dataTO);
-
     DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
     converter.updateData(dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 
-    _cudaSimulation->setSimulationData({0, 0}, worldSize, dataTO);
+    _cudaSimulation->setSimulationData(dataTO);
     updateMonitorDataIntern();
 }
 
