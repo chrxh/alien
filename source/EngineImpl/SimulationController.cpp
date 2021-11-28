@@ -46,9 +46,9 @@ DataDescription _SimulationController::getSimulationData(IntVector2D const& rect
     return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
 }
 
-void _SimulationController::updateData(DataChangeDescription const& dataToUpdate)
+void _SimulationController::setSimulationData(DataChangeDescription const& dataToUpdate)
 {
-    _worker.updateData(dataToUpdate);
+    _worker.setSimulationData(dataToUpdate);
     _isSelectionInvalid = true;
 }
 
