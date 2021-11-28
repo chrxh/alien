@@ -77,7 +77,7 @@ public:
         _mapEntries.init();
 
         std::vector<Cell*> hostMap(size.x * size.y * 2, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y * 2, cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y * 2, cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
@@ -200,7 +200,7 @@ public:
         _mapEntries.init();
 
         std::vector<Particle*> hostMap(size.x * size.y, 0);
-        checkCudaErrors(cudaMemcpy(_map, hostMap.data(), sizeof(Particle*) * size.x * size.y, cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Particle*) * size.x * size.y, cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }

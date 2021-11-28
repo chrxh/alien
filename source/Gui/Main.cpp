@@ -19,9 +19,12 @@ int main(int, char**)
     SimpleLogger logger = boost::make_shared<_SimpleLogger>();
     FileLogger fileLogger = boost::make_shared<_FileLogger>();
 
+    SimulationController simController;
+    MainWindow mainWindow;
+
     try {
-        SimulationController simController = boost::make_shared<_SimulationController>();
-        MainWindow mainWindow = boost::make_shared<_MainWindow>(simController, logger);
+        simController = boost::make_shared<_SimulationController>();
+        mainWindow = boost::make_shared<_MainWindow>(simController, logger);
 
         simController->initCuda();
 

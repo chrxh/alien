@@ -406,9 +406,11 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
         GPU_FUNCTION(copyEntitiesKernel, *_cudaSimulationData);
+        _cudaSimulationData->resizeSource();
+        _cudaSimulationData->swap();
+    } else {
+        _cudaSimulationData->resizeSource();
     }
-    _cudaSimulationData->resizeSource();
-    _cudaSimulationData->swap();
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
