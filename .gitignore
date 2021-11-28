@@ -584,4 +584,3 @@ stable/
 external/boost*
 source/tests/testdata/comparison/computation.dat
 *log.txt
-*settings.json
