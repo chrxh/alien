@@ -210,5 +210,5 @@ void _SpatialControlWindow::onResizing()
     if (_scaleContent) {
         DescriptionHelper::duplicate(content, origWorldSize, {_width, _height});
     }
-    _simController->updateData(content);
+    _simController->setSimulationData(content);
 }

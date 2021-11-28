@@ -37,8 +37,7 @@ public:
         double zoom);
     ENGINEGPUKERNELS_EXPORT void
     getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void
-    setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    ENGINEGPUKERNELS_EXPORT void setSimulationData(DataAccessTO const& dataTO);
 
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
     ENGINEGPUKERNELS_EXPORT void switchSelection(SwitchSelectionData const& switchData);

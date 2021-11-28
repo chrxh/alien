@@ -36,7 +36,7 @@ void _OpenSimulationDialog::process()
         auto deserializedData = serializer->deserializeSimulation(serializedData);
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
-        _simController->updateData(deserializedData.content);
+        _simController->setSimulationData(deserializedData.content);
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});

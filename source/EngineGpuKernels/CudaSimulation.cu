@@ -235,7 +235,7 @@ void _CudaSimulation::getSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    GPU_FUNCTION(getSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    GPU_FUNCTION(cudaGetSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
@@ -259,10 +259,7 @@ void _CudaSimulation::getSimulationData(
         cudaMemcpyDeviceToHost));
 }
 
-void _CudaSimulation::setSimulationData(
-    int2 const& rectUpperLeft,
-    int2 const& rectLowerRight,
-    DataAccessTO const& dataTO)
+void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
 {
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
     CHECK_FOR_CUDA_ERROR(
@@ -285,7 +282,7 @@ void _CudaSimulation::setSimulationData(
         sizeof(char) * (*dataTO.numStringBytes),
         cudaMemcpyHostToDevice));
 
-    GPU_FUNCTION(setSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    GPU_FUNCTION(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO);
 }
 
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
