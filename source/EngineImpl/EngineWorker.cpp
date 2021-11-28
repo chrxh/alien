@@ -91,10 +91,12 @@ void EngineWorker::clear()
 
 void EngineWorker::registerImageResource(GLuint image)
 {
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    if (_cudaSimulation) {
+        CudaAccess access(
+            _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
-    _cudaResource = _cudaSimulation->registerImageResource(image);
+        _cudaResource = _cudaSimulation->registerImageResource(image);
+    }
 }
 
 void EngineWorker::getVectorImage(

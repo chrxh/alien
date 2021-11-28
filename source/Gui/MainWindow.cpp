@@ -4,9 +4,9 @@
 
 #include <glad/glad.h>
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
@@ -274,6 +274,7 @@ void _MainWindow::processUninitialized()
 void _MainWindow::processRequestLoading()
 {
     _startupWindow->process();
+    _simulationView->resize(_viewport->getViewSize());
     renderSimulation();
 }
 
