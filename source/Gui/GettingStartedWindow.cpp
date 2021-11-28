@@ -111,13 +111,14 @@ void _GettingStartedWindow::process()
 
             ImGui::PopTextWrapPos();
 
-            ImGui::EndChild();
         }
+        ImGui::EndChild();
+        
         AlienImGui::Separator();
         ImGui::Checkbox("Show after startup", &_showAfterStartup);
 
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 bool _GettingStartedWindow::isOn() const
