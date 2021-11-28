@@ -8,7 +8,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<bool>(1, _arrayResizingNeeded);
         CudaMemoryManager::getInstance().acquireMemory<Statistics>(1, _statistics);
         Statistics statistics;
-        checkCudaErrors(cudaMemcpy(_statistics, &statistics, sizeof(Statistics), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_statistics, &statistics, sizeof(Statistics), cudaMemcpyHostToDevice));
     }
 
     __host__ void free() {
@@ -19,7 +19,7 @@ public:
     __host__ bool isArrayResizeNeeded()
     {
         bool result;
-        checkCudaErrors(cudaMemcpy(&result, _arrayResizingNeeded, sizeof(bool), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _arrayResizingNeeded, sizeof(bool), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -33,7 +33,7 @@ public:
     __host__ Statistics getStatistics()
     {
         Statistics result;
-        checkCudaErrors(cudaMemcpy(&result, _statistics, sizeof(Statistics), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _statistics, sizeof(Statistics), cudaMemcpyDeviceToHost));
         return result;
     }
 
