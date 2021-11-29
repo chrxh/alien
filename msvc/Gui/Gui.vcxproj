@@ -160,10 +160,13 @@
     <ClInclude Include="..\..\external\ImPlot\implot_internal.h" />
     <ClInclude Include="..\..\external\stb\stb_image.h" />
     <ClInclude Include="..\..\source\Gui\AboutDialog.h" />
+    <ClInclude Include="..\..\source\Gui\ActionsWindow.h" />
     <ClInclude Include="..\..\source\Gui\AutosaveController.h" />
     <ClInclude Include="..\..\source\Gui\ColorizeDialog.h" />
     <ClInclude Include="..\..\source\Gui\Definitions.h" />
     <ClInclude Include="..\..\source\Gui\DisplaySettingsDialog.h" />
+    <ClInclude Include="..\..\source\Gui\EditorController.h" />
+    <ClInclude Include="..\..\source\Gui\EditorModel.h" />
     <ClInclude Include="..\..\source\Gui\FileLogger.h" />
     <ClInclude Include="..\..\source\Gui\FlowGeneratorWindow.h" />
     <ClInclude Include="..\..\source\Gui\GettingStartedWindow.h" />
@@ -171,6 +174,7 @@
     <ClInclude Include="..\..\source\Gui\GlobalSettings.h" />
     <ClInclude Include="..\..\source\Gui\OpenSimulationDialog.h" />
     <ClInclude Include="..\..\source\Gui\SaveSimulationDialog.h" />
+    <ClInclude Include="..\..\source\Gui\SelectionWindow.h" />
     <ClInclude Include="..\..\source\Gui\SimpleLogger.h" />
     <ClInclude Include="..\..\source\Gui\LogWindow.h" />
     <ClInclude Include="..\..\source\Gui\ModeWindow.h" />
@@ -206,9 +210,12 @@
     <ClCompile Include="..\..\external\ImPlot\implot_demo.cpp" />
     <ClCompile Include="..\..\external\ImPlot\implot_items.cpp" />
     <ClCompile Include="..\..\source\Gui\AboutDialog.cpp" />
+    <ClCompile Include="..\..\source\Gui\ActionsWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\AutosaveController.cpp" />
     <ClCompile Include="..\..\source\Gui\ColorizeDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\DisplaySettingsDialog.cpp" />
+    <ClCompile Include="..\..\source\Gui\EditorController.cpp" />
+    <ClCompile Include="..\..\source\Gui\EditorModel.cpp" />
     <ClCompile Include="..\..\source\Gui\FileLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\FlowGeneratorWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\GettingStartedWindow.cpp" />
@@ -216,6 +223,7 @@
     <ClCompile Include="..\..\source\Gui\GlobalSettings.cpp" />
     <ClCompile Include="..\..\source\Gui\OpenSimulationDialog.cpp" />
     <ClCompile Include="..\..\source\Gui\SaveSimulationDialog.cpp" />
+    <ClCompile Include="..\..\source\Gui\SelectionWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\SimpleLogger.cpp" />
     <ClCompile Include="..\..\source\Gui\LogWindow.cpp" />
     <ClCompile Include="..\..\source\Gui\ModeWindow.cpp" />

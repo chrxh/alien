@@ -41,4 +41,5 @@ public:
         RealVector2D const& size);
 
     static void Separator();
+    static void Group(std::string const& text);
 };

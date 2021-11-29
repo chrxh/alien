@@ -30,6 +30,7 @@ private:
     void processMenubar();
     void processDialogs();
     void processWindows();
+    void processControllers();
 
     void onRunSimulation();
     void onPauseSimulation();
@@ -61,6 +62,7 @@ private:
     OpenSimulationDialog _openSimulationDialog; 
     SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
+    EditorController _editorController; 
 
     StyleRepository _styleRepository;
 
@@ -69,6 +71,7 @@ private:
     bool _windowMenuToggled = false;
     bool _settingsMenuToggled = false;
     bool _viewMenuToggled = false;
+    bool _editorMenuToggled = false;
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
     bool _showExitDialog = false;

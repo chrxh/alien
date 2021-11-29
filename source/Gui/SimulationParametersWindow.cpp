@@ -129,7 +129,7 @@ void _SimulationParametersWindow::processBase(
     SimulationParameters const& origSimParameters)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        createGroup("Numerics");
+        AlienImGui::Group("Numerics");
         AlienImGui::SliderFloat(
             "Time step size",
             simParameters.timestepSize,
@@ -140,7 +140,7 @@ void _SimulationParametersWindow::processBase(
             "%.3f",
             std::string("Time duration calculated in a single step. Smaller values increase the accuracy of the simulation."));
 
-        createGroup("General physics");
+        AlienImGui::Group("General physics");
         AlienImGui::SliderFloat(
             "Friction",
             simParameters.spotValues.friction,
@@ -196,7 +196,7 @@ void _SimulationParametersWindow::processBase(
             "%.3f",
             std::string("Minimum distance between two cells without them annihilating each other."));
 
-        createGroup("Collision and binding");
+        AlienImGui::Group("Collision and binding");
         AlienImGui::SliderFloat(
             "Repulsion strength",
             simParameters.cellRepulsionStrength,
@@ -263,7 +263,7 @@ void _SimulationParametersWindow::processBase(
             6,
             std::string("Maximum number of connections a cell can establish with others."));
 
-        createGroup("Cell functions");
+        AlienImGui::Group("Cell functions");
         AlienImGui::SliderFloat(
             "Mutation rate",
             simParameters.spotValues.tokenMutationRate,
@@ -311,7 +311,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simController->getWorldSize();
 
-        createGroup("Location and meta data");
+        AlienImGui::Group("Location and meta data");
 
         auto& color = spot.color;
         AlienImGui::ColorButtonWithPicker(
@@ -326,14 +326,14 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         AlienImGui::SliderFloat("Core radius", spot.coreRadius, origSpot.coreRadius, 0, maxRadius, false, "%.1f");
         AlienImGui::SliderFloat("Fade-out radius", spot.fadeoutRadius, origSpot.fadeoutRadius, 0, maxRadius, false, "%.1f");
 
-        createGroup("General physics");
+        AlienImGui::Group("General physics");
         AlienImGui::SliderFloat("Friction", spot.values.friction, origSpot.values.friction, 0, 1.0f, true, "%.4f");
         AlienImGui::SliderFloat(
             "Radiation strength", spot.values.radiationFactor, origSpot.values.radiationFactor, 0, 0.01f, true, "%.5f");
         AlienImGui::SliderFloat("Maximum force", spot.values.cellMaxForce, origSpot.values.cellMaxForce, 0, 3.0f);
         AlienImGui::SliderFloat("Minimum energy", spot.values.cellMinEnergy, origSpot.values.cellMinEnergy, 0, 100.0f);
 
-        createGroup("Collision and binding");
+        AlienImGui::Group("Collision and binding");
         AlienImGui::SliderFloat(
             "Binding force strength", spot.values.cellBindingForce, origSpot.values.cellBindingForce, 0, 4.0f);
         AlienImGui::SliderFloat(
@@ -350,7 +350,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
         }
 
-        createGroup("Cell functions");
+        AlienImGui::Group("Cell functions");
         AlienImGui::SliderFloat(
             "Mutation rate",
             spot.values.tokenMutationRate,
@@ -379,14 +379,5 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             5.0f);
     }
     ImGui::EndChild();
-}
-
-void _SimulationParametersWindow::createGroup(std::string const& name)
-{
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Text(name.c_str());
-    ImGui::Separator();
-    ImGui::Spacing();
 }
 

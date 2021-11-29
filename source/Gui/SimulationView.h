@@ -7,7 +7,10 @@
 class _SimulationView
 {
 public:
-    _SimulationView(SimulationController const& simController, ModeWindow const& modeWindow, Viewport const& viewport);
+    _SimulationView(
+        SimulationController const& simController,
+        ModeWindow const& modeWindow,
+        Viewport const& viewport);
     void resize(IntVector2D const& viewportSize);
 
     void processContent();
@@ -16,7 +19,7 @@ public:
 private:
     void processEvents();
 
-    void leftMouseButtonPressed();
+    void leftMouseButtonPressed(IntVector2D const& viewPos);
     void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
     void leftMouseButtonReleased();
 
