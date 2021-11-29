@@ -28,15 +28,25 @@ DataAccessTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
         _arraySizes = arraySizes;
     }
 
+    auto clear = [](auto& result) {
+            *result.numCells = 0;
+            *result.numParticles = 0;
+            *result.numTokens = 0;
+            *result.numStringBytes = 0;
+    };
+
     DataAccessTO result;
     if (!_freeDataTOs.empty()) {
         result = *_freeDataTOs.begin();
         _freeDataTOs.erase(_freeDataTOs.begin());
         _usedDataTOs.emplace_back(result);
+
+        clear(result);
         return result;
     }
     result = getNewDataTO();
     _usedDataTOs.emplace_back(result);
+    clear(result);
     return result;
 }
 

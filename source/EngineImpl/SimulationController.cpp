@@ -16,11 +16,15 @@ void _SimulationController::newSimulation(uint64_t timestep, Settings const& set
     _origGpuSettings = _gpuSettings;
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
+
+    _isSelectionInvalid = true;
 }
 
 void _SimulationController::clear()
 {
     _worker.clear();
+
+    _isSelectionInvalid = true;
 }
 
 void _SimulationController::registerImageResource(GLuint image)
@@ -42,19 +46,22 @@ DataDescription _SimulationController::getSimulationData(IntVector2D const& rect
     return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
 }
 
-void _SimulationController::updateData(DataChangeDescription const& dataToUpdate)
+void _SimulationController::setSimulationData(DataChangeDescription const& dataToUpdate)
 {
-    _worker.updateData(dataToUpdate);
+    _worker.setSimulationData(dataToUpdate);
+    _isSelectionInvalid = true;
 }
 
 void _SimulationController::calcSingleTimestep()
 {
     _worker.calcSingleTimestep();
+    _isSelectionInvalid = true;
 }
 
 void _SimulationController::runSimulation()
 {
     _worker.runSimulation();
+    _isSelectionInvalid = true;
 }
 
 void _SimulationController::pauseSimulation()
@@ -73,6 +80,7 @@ void _SimulationController::closeSimulation()
     _thread->join();
     delete _thread;
     _worker.endShutdown();
+    _isSelectionInvalid = true;
 }
 
 uint64_t _SimulationController::getCurrentTimestep() const
@@ -167,6 +175,46 @@ void _SimulationController::applyForce_async(
     float radius)
 {
     _worker.applyForce_async(start, end, force, radius);
+}
+
+void _SimulationController::switchSelection(RealVector2D const& pos, float radius)
+{
+    _worker.switchSelection(pos, radius);
+}
+
+SelectionShallowData _SimulationController::getSelectionShallowData()
+{
+    return _worker.getSelectionShallowData();
+}
+
+void _SimulationController::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
+{
+    _worker.setSelection(startPos, endPos);
+}
+
+void _SimulationController::moveSelection(RealVector2D const& displacement)
+{
+    _worker.moveSelection(displacement);
+}
+
+void _SimulationController::accelerateSelection(RealVector2D const& velDelta)
+{
+    _worker.accelerateSelection(velDelta);
+}
+
+void _SimulationController::removeSelection()
+{
+    _worker.removeSelection();
+}
+
+bool _SimulationController::removeSelectionIfInvalid()
+{
+    auto result = _isSelectionInvalid;
+    _isSelectionInvalid = false;
+    if (result) {
+        removeSelection();
+    }
+    return result;
 }
 
 GeneralSettings _SimulationController::getGeneralSettings() const

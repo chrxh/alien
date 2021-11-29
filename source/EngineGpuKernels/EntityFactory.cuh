@@ -68,8 +68,8 @@ EntityFactory::createParticleFromTO(int targetIndex, ParticleAccessTO const& par
     particle->vel = particleTO.vel;
     particle->energy = particleTO.energy;
     particle->locked = 0;
+    particle->selected = 0;
     particle->metadata.color = particleTO.metadata.color;
-    particle->setSelected(false);
     return particle;
 }
 
@@ -141,6 +141,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
         cellTO.metadata.sourceCodeStringIndex,
         simulationTO->stringBytes);
 
+    cell->selected = 0;
     cell->locked = 0;
     cell->temp3 = {0, 0};
 
@@ -186,12 +187,12 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
     particle->id = _data->numberGen.createNewId_kernel();
+    particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
     particle->absPos = pos;
     particle->vel = vel;
     particle->metadata = metadata;
-    particle->setSelected(false);
     return particle;
 }
 
@@ -210,6 +211,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->numConnections = 0;
     cell->tokenBlocked = false;
     cell->locked = 0;
+    cell->selected = 0;
     cell->temp3 = {0, 0};
     cell->metadata.color = 0;
     cell->metadata.nameLen = 0;
@@ -247,6 +249,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     *cellPointer = result;
     result->tokenUsages = 0;
     result->id = _data->numberGen.createNewId_kernel();
+    result->selected = 0;
     result->locked = 0;
     result->temp3 = {0, 0};
     result->metadata.color = 0;

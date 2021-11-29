@@ -148,9 +148,8 @@ void _TemporalControlWindow::processStepBackwardButton()
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
     if (ImGui::ImageButton((void*)(intptr_t)_stepBackwardTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         auto const& snapshot = _history.back();
-        _simController->clear();
         _simController->setCurrentTimestep(snapshot.timestep);
-        _simController->updateData(snapshot.data);
+        _simController->setSimulationData(snapshot.data);
         _history.pop_back();
     }
     ImGui::EndDisabled();
@@ -187,9 +186,8 @@ void _TemporalControlWindow::processRestoreButton()
     ImGui::BeginDisabled(!_snapshot);
     if (ImGui::ImageButton((void*)(intptr_t)_restoreTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
         _statisticsWindow->reset();
-        _simController->clear();
         _simController->setCurrentTimestep(_snapshot->timestep);
-        _simController->updateData(_snapshot->data);
+        _simController->setSimulationData(_snapshot->data);
     }
     ImGui::EndDisabled();
 }

@@ -1,6 +1,7 @@
 #include "DescriptionHelper.h"
 
 #include "Base/NumberGenerator.h"
+#include "Base/Math.h"
 #include "SpaceCalculator.h"
 
 void DescriptionHelper::duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
@@ -42,7 +43,7 @@ void DescriptionHelper::duplicate(DataDescription& data, IntVector2D const& orig
 
 void DescriptionHelper::correctConnections(DataDescription& data, IntVector2D const& worldSize)
 {
-    SpaceCalculator spaceCalculator(worldSize);
+//     SpaceCalculator spaceCalculator(worldSize);
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     if (data.clusters) {
         std::unordered_map<uint64_t, CellDescription&> cellById;
@@ -57,7 +58,7 @@ void DescriptionHelper::correctConnections(DataDescription& data, IntVector2D co
                 float angleToAdd = 0;
                 for (auto connection : *cell.connections) {
                     auto& connectingCell = cellById.at(connection.cellId);
-                    if (spaceCalculator.distance(*cell.pos, *connectingCell.pos) > threshold) {
+                    if (/*spaceCalculator.distance*/Math::length(*cell.pos - *connectingCell.pos) > threshold) {
                         angleToAdd += connection.angleFromPrevious;
                     } else {
                         connection.angleFromPrevious += angleToAdd;

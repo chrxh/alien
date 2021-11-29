@@ -16,12 +16,12 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numParticles);
         CudaMemoryManager::getInstance().acquireMemory<double>(1, _internalEnergy);
 
-        checkCudaErrors(cudaMemset(_numCells, 0, sizeof(int)));
-        checkCudaErrors(cudaMemset(_numTokens, 0, sizeof(int)));
-        checkCudaErrors(cudaMemset(_numParticles, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numCells, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numTokens, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numParticles, 0, sizeof(int)));
 
         double zero = 0.0;
-        checkCudaErrors(cudaMemcpy(_internalEnergy, &zero, sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_internalEnergy, &zero, sizeof(double), cudaMemcpyHostToDevice));
 
     }
 
@@ -44,10 +44,10 @@ public:
     __host__ MonitorData getMonitorData(uint64_t timeStep)
     {
         MonitorData result;
-        checkCudaErrors(cudaMemcpy(&result.numCells, _numCells, sizeof(int), cudaMemcpyDeviceToHost));
-        checkCudaErrors(cudaMemcpy(&result.numParticles, _numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-        checkCudaErrors(cudaMemcpy(&result.numTokens, _numTokens, sizeof(int), cudaMemcpyDeviceToHost));
-        checkCudaErrors(cudaMemcpy(&result.totalInternalEnergy, _internalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.numCells, _numCells, sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.numParticles, _numParticles, sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.numTokens, _numTokens, sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.totalInternalEnergy, _internalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
         result.timeStep = timeStep;
         return result;
     }

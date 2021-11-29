@@ -157,6 +157,7 @@
     <ClInclude Include="..\..\source\EngineInterface\GpuSettings.h" />
     <ClInclude Include="..\..\source\EngineInterface\Metadata.h" />
     <ClInclude Include="..\..\source\EngineInterface\OverallStatistics.h" />
+    <ClInclude Include="..\..\source\EngineInterface\SelectionShallowData.h" />
     <ClInclude Include="..\..\source\EngineInterface\Serializer.h" />
     <ClInclude Include="..\..\source\EngineInterface\Settings.h" />
     <ClInclude Include="..\..\source\EngineInterface\SimulationParameters.h" />

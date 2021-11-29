@@ -24,21 +24,21 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<unsigned char*>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _bytesOccupied);
 
-        checkCudaErrors(cudaMemset(_bytesOccupied, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_bytesOccupied, 0, sizeof(int)));
     }
 
     __host__ __inline__ void resize(uint64_t size)
     {
         if (_size > 0) {
             unsigned char* data = nullptr;
-            checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
             CudaMemoryManager::getInstance().freeMemory(data);
         }
 
         _size = size;
         unsigned char* data = nullptr;
         CudaMemoryManager::getInstance().acquireMemory<unsigned char>(size, data);
-        checkCudaErrors(cudaMemcpy(_data, &data, sizeof(unsigned char*), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(unsigned char*), cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void free()
@@ -46,7 +46,7 @@ public:
 
         if (_size > 0) {
             unsigned char* data = nullptr;
-            checkCudaErrors(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
             CudaMemoryManager::getInstance().freeMemory(data);
         }
         CudaMemoryManager::getInstance().freeMemory(_data);
@@ -74,7 +74,7 @@ public:
     __device__ __inline__ int getNumBytes() { return *_bytesOccupied; }
     __host__ __inline__ int getNumBytes_host() {
         int result;
-        checkCudaErrors(cudaMemcpy(&result, _bytesOccupied, sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _bytesOccupied, sizeof(int), cudaMemcpyDeviceToHost));
         return result;
     }
 

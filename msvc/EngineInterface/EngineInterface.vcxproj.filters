@@ -60,12 +60,6 @@
     <ClInclude Include="..\..\source\EngineInterface\GpuSettings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\EngineInterface\DescriptionHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\EngineInterface\SpaceCalculator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\source\EngineInterface\FlowFieldSettings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -76,6 +70,15 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineInterface\SimulationParametersSpotValues.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineInterface\DescriptionHelper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineInterface\SpaceCalculator.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\EngineInterface\SelectionShallowData.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

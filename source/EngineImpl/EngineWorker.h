@@ -18,6 +18,7 @@
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/Settings.h"
+#include "EngineInterface/SelectionShallowData.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -48,7 +49,7 @@ public:
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ENGINEIMPL_EXPORT OverallStatistics getMonitorData() const;
 
-    ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
+    ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
 
@@ -69,6 +70,13 @@ public:
 
     ENGINEIMPL_EXPORT void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
+
+    ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
+    ENGINEIMPL_EXPORT SelectionShallowData getSelectionShallowData();
+    ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
+    ENGINEIMPL_EXPORT void moveSelection(RealVector2D const& displacement);
+    ENGINEIMPL_EXPORT void accelerateSelection(RealVector2D const& velDelta);
+    ENGINEIMPL_EXPORT void removeSelection();
 
     void runThreadLoop();
     void runSimulation();
@@ -97,6 +105,7 @@ private:
     boost::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
     boost::optional<GpuSettings> _updateGpuSettingsJob;
     boost::optional<FlowFieldSettings> _flowFieldSettings;
+    boost::optional<GLuint> _imageResourceToRegister;
 
     struct ApplyForceJob
     {

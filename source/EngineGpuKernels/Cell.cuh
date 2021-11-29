@@ -46,6 +46,9 @@ struct Cell
     float energy;
     int cellFunctionType;
 
+    //editing data
+    int selected;   //0 = no, 1 = selected, 2 = indirectly selected
+
     //temporary data
     int locked;	//0 = unlocked, 1 = locked
     int tag;

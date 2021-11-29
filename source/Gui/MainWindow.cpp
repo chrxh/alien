@@ -49,6 +49,9 @@
 #include "OpenSimulationDialog.h"
 #include "SaveSimulationDialog.h"
 #include "DisplaySettingsDialog.h"
+#include "EditorController.h"
+#include "SelectionWindow.h"
+#include "ActionsWindow.h"
 
 namespace
 {
@@ -96,20 +99,22 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    _modeWindow = boost::make_shared<_ModeWindow>();
-    auto worldSize = simController->getWorldSize();
+    auto worldSize = _simController->getWorldSize();
     _viewport = boost::make_shared<_Viewport>();
     _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
     _viewport->setZoomFactor(4.0f);
     _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
     _uiController = boost::make_shared<_UiController>();
-    _autosaveController = boost::make_shared<_AutosaveController>(simController);
+    _autosaveController = boost::make_shared<_AutosaveController>(_simController);
 
-    _simulationView = boost::make_shared<_SimulationView>(simController, _modeWindow, _viewport);
+    _editorController =
+        boost::make_shared<_EditorController>(_simController, _viewport, _styleRepository);
+    _modeWindow = boost::make_shared<_ModeWindow>(_editorController);
+    _simulationView = boost::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
-    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(simController, _styleRepository, _statisticsWindow);
-    _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(simController, _viewport, _styleRepository);
+    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(_simController, _styleRepository, _statisticsWindow);
+    _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(_simController, _viewport, _styleRepository);
     _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_styleRepository, _simController);
     _gpuSettingsDialog = boost::make_shared<_GpuSettingsDialog>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
@@ -292,6 +297,8 @@ void _MainWindow::processLoadingControls()
     processMenubar();
     processDialogs();
     processWindows();
+    processControllers();
+
     _uiController->process();
     _simulationView->processControls();
     _startupWindow->process();
@@ -318,6 +325,7 @@ void _MainWindow::processFinishedLoading()
 /*
     ImGui::PopStyleColor(3);
 */
+    processControllers();
     _uiController->process();
     _simulationView->processControls();
 
@@ -346,6 +354,9 @@ void _MainWindow::renderSimulation()
 
 void _MainWindow::processMenubar()
 {
+    auto selectionWindow = _editorController->getSelectionWindow();
+    auto actionsWindow = _editorController->getActionsWindow();
+
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
             _showExitDialog = true;
@@ -396,6 +407,23 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Log", "ALT+6", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
+            AlienImGui::EndMenuButton();
+        }
+
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
+            if (ImGui::MenuItem("Activate", "ALT+E", _modeWindow->getMode() == _ModeWindow::Mode::Action)) {
+                _modeWindow->setMode(
+                    _modeWindow->getMode() == _ModeWindow::Mode::Action ? _ModeWindow::Mode::Navigation
+                                                                        : _ModeWindow::Mode::Action);
+            }
+            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode());
+            if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
+                selectionWindow->setOn(!selectionWindow->isOn());
+            }
+            if (ImGui::MenuItem("Actions", "ALT+A", actionsWindow->isOn())) {
+                actionsWindow->setOn(!actionsWindow->isOn());
+            }
+            ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
         }
 
@@ -475,6 +503,18 @@ void _MainWindow::processMenubar()
         _logWindow->setOn(!_logWindow->isOn());
     }
 
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
+        _modeWindow->setMode(
+            _modeWindow->getMode() == _ModeWindow::Mode::Action ? _ModeWindow::Mode::Navigation
+                                                                : _ModeWindow::Mode::Action);
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+        selectionWindow->setOn(!selectionWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+        actionsWindow->setOn(!actionsWindow->isOn());
+    }
+
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
         _gpuSettingsDialog->show();
     }
@@ -515,6 +555,12 @@ void _MainWindow::processWindows()
     _flowGeneratorWindow->process();
     _logWindow->process();
     _gettingStartedWindow->process();
+}
+
+void _MainWindow::processControllers()
+{
+    _autosaveController->process();
+    _editorController->process();
 }
 
 void _MainWindow::onRunSimulation()

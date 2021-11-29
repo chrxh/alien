@@ -15,18 +15,11 @@ struct Particle
     ParticleMetadata metadata;
     float energy;
 
+    //editing data
+    int selected;  //0 = no, 1 = selected
+
     //auxiliary data
     int locked;	//0 = unlocked, 1 = locked
-
-    __device__ __inline__ bool isSelected()
-    {
-        return _selected;
-    }
-
-    __device__ __inline__ void setSelected(bool value)
-    {
-        _selected = value;
-    }
 
     __device__ __inline__ bool tryLock() {
         auto result = 0 == atomicExch(&locked, 1);
@@ -40,7 +33,4 @@ struct Particle
         __threadfence();
         atomicExch(&locked, 0);
     }
-
-private:
-    bool _selected;
 };

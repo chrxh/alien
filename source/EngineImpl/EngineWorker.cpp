@@ -80,6 +80,11 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, Gp
     _gpuConstants = gpuSettings;
     _dataTOCache = boost::make_shared<_AccessDataTOCache>(gpuSettings);
     _cudaSimulation = boost::make_shared<_CudaSimulation>(timestep, settings, gpuSettings);
+
+    if (_imageResourceToRegister) {
+        _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
+        _imageResourceToRegister = boost::none;
+    }
 }
 
 void EngineWorker::clear()
@@ -91,7 +96,12 @@ void EngineWorker::clear()
 
 void EngineWorker::registerImageResource(GLuint image)
 {
-    if (_cudaSimulation) {
+    if (!_cudaSimulation) {
+
+        //cuda is not initialized yet => register image resource later
+        _imageResourceToRegister = image;
+    } else {
+
         CudaAccess access(
             _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
@@ -153,11 +163,10 @@ OverallStatistics EngineWorker::getMonitorData() const
     return result;
 }
 
-void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
+void EngineWorker::setSimulationData(DataChangeDescription const& dataToUpdate)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-
     int numCells = 0;
     int numParticles = 0;
     int numTokens = 0;
@@ -177,18 +186,16 @@ void EngineWorker::updateData(DataChangeDescription const& dataToUpdate)
     _cudaSimulation->resizeArraysIfNecessary({numCells, numParticles, numTokens});
 
     auto arraySizes = _cudaSimulation->getArraySizes();
-    DataAccessTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    DataAccessTO dataTO = _dataTOCache->getDataTO(
+        {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
-    _cudaSimulation->getSimulationData({0, 0}, worldSize, dataTO);
-//    _cudaSimulation->getSimulationData({0, 0}, {0, 0}, dataTO);
 
     DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
     converter.updateData(dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 
-    _cudaSimulation->setSimulationData({0, 0}, worldSize, dataTO);
+    _cudaSimulation->setSimulationData(dataTO);
     updateMonitorDataIntern();
 }
 
@@ -291,6 +298,48 @@ void EngineWorker::applyForce_async(
         _applyForceJobs.emplace_back(ApplyForceJob{start, end, force, radius});
     }
     _conditionForWorkerLoop.notify_all();
+}
+
+void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->switchSelection(SwitchSelectionData{{pos.x, pos.y}, radius});
+}
+
+SelectionShallowData EngineWorker::getSelectionShallowData()
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    return _cudaSimulation->getSelectionShallowData();
+}
+
+void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->setSelection(SetSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
+}
+
+void EngineWorker::moveSelection(RealVector2D const& displacement)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->shallowUpdateSelection(ShallowUpdateSelectionData{{displacement.x, displacement.y}, {0, 0}});
+}
+
+void EngineWorker::accelerateSelection(RealVector2D const& velDelta)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->shallowUpdateSelection(ShallowUpdateSelectionData{{0, 0}, {velDelta.x, velDelta.y}});
+}
+
+void EngineWorker::removeSelection()
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->removeSelection();
 }
 
 void EngineWorker::runThreadLoop()
