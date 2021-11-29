@@ -80,6 +80,11 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, Gp
     _gpuConstants = gpuSettings;
     _dataTOCache = boost::make_shared<_AccessDataTOCache>(gpuSettings);
     _cudaSimulation = boost::make_shared<_CudaSimulation>(timestep, settings, gpuSettings);
+
+    if (_imageResourceToRegister) {
+        _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
+        _imageResourceToRegister = boost::none;
+    }
 }
 
 void EngineWorker::clear()
@@ -91,10 +96,17 @@ void EngineWorker::clear()
 
 void EngineWorker::registerImageResource(GLuint image)
 {
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    if (!_cudaSimulation) {
 
-    _cudaResource = _cudaSimulation->registerImageResource(image);
+        //cuda is not initialized yet => register image resource later
+        _imageResourceToRegister = image;
+    } else {
+
+        CudaAccess access(
+            _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+
+        _cudaResource = _cudaSimulation->registerImageResource(image);
+    }
 }
 
 void EngineWorker::getVectorImage(

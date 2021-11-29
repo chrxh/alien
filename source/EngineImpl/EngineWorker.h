@@ -103,6 +103,7 @@ private:
     boost::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
     boost::optional<GpuSettings> _updateGpuSettingsJob;
     boost::optional<FlowFieldSettings> _flowFieldSettings;
+    boost::optional<GLuint> _imageResourceToRegister;
 
     struct ApplyForceJob
     {
