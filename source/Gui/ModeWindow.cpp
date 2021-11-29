@@ -4,8 +4,10 @@
 
 #include "OpenGLHelper.h"
 #include "Resources.h"
+#include "EditorController.h"
 
-_ModeWindow::_ModeWindow()
+_ModeWindow::_ModeWindow(EditorController const& editorController)
+    : _editorController(editorController)
 {
     _navigationOn = OpenGLHelper::loadTexture(Const::NavigationOnFilename);
     _navigationOff = OpenGLHelper::loadTexture(Const::NavigationOffFilename);
@@ -30,11 +32,13 @@ void _ModeWindow::process()
     auto navTexture = Mode::Navigation == _mode ? _navigationOn.textureId : _navigationOff.textureId;
     if (ImGui::ImageButton((void*)(intptr_t)navTexture, {48.0f, 48.0f}, {0, 0}, {1.0f, 1.0f})) {
         _mode = Mode::Navigation;
+        _editorController->setOn(false);
     }
     ImGui::SameLine();
     auto actionTexture = Mode::Action == _mode ? _actionOn.textureId : _actionOff.textureId;
     if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {48.0f, 48.0f}, {0, 0}, {1.0f, 1.0f})) {
         _mode = Mode::Action;
+        _editorController->setOn(true);
     }
 
     ImGui::PopStyleColor(3);
@@ -44,4 +48,10 @@ void _ModeWindow::process()
 auto _ModeWindow::getMode() const -> Mode
 {
     return _mode;
+}
+
+void _ModeWindow::setMode(Mode value)
+{
+    _mode = value;
+    _editorController->setOn(_mode == Mode::Action);
 }

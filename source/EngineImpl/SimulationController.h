@@ -5,6 +5,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SymbolMap.h"
 #include "EngineInterface/Settings.h"
+#include "EngineInterface/SelectionShallowData.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
@@ -29,7 +30,7 @@ public:
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
 
-    ENGINEIMPL_EXPORT void updateData(DataChangeDescription const& dataToUpdate);
+    ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
     ENGINEIMPL_EXPORT void runSimulation();
@@ -63,6 +64,14 @@ public:
     ENGINEIMPL_EXPORT void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
+    ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
+    ENGINEIMPL_EXPORT SelectionShallowData getSelectionShallowData();
+    ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
+    ENGINEIMPL_EXPORT void moveSelection(RealVector2D const& displacement);
+    ENGINEIMPL_EXPORT void accelerateSelection(RealVector2D const& velDelta);
+    ENGINEIMPL_EXPORT void removeSelection();
+    ENGINEIMPL_EXPORT bool removeSelectionIfInvalid();
+
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
     ENGINEIMPL_EXPORT Settings getSettings() const;
@@ -75,6 +84,8 @@ public:
     ENGINEIMPL_EXPORT float getTps() const;
 
 private:
+    bool _isSelectionInvalid = false;
+
     Settings _origSettings;
     Settings _settings;
     GpuSettings _gpuSettings; 

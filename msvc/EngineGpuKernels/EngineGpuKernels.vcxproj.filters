@@ -59,7 +59,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\MonitorKernels.cuh">
       <Filter>Kernels</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\EngineGpuKernels\PhysicalActionKernels.cuh">
+    <ClInclude Include="..\..\source\EngineGpuKernels\ActionKernels.cuh">
       <Filter>Kernels</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\EngineGpuKernels\RenderingKernels.cuh">
@@ -71,6 +71,7 @@
     <ClInclude Include="..\..\source\EngineGpuKernels\SimulationResult.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\FlowFieldKernel.cuh" />
     <ClInclude Include="..\..\source\EngineGpuKernels\SpotCalculator.cuh" />
+    <ClInclude Include="..\..\source\EngineGpuKernels\SelectionResult.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Kernels">

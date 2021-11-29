@@ -5,7 +5,7 @@
 class _ModeWindow
 {
 public:
-    _ModeWindow();
+    _ModeWindow(EditorController const& editorController);
 
     void process();
 
@@ -15,8 +15,11 @@ public:
         Action
     };
     Mode getMode() const;
+    void setMode(Mode value);
 
 private:
+    EditorController _editorController;
+
     TextureData _navigationOn;
     TextureData _navigationOff;
     TextureData _actionOn;

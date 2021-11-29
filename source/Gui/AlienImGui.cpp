@@ -281,3 +281,12 @@ void AlienImGui::Separator()
     ImGui::Spacing();
     ImGui::Spacing();
 }
+
+void AlienImGui::Group(std::string const& text)
+{
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text(text.c_str());
+    ImGui::Separator();
+    ImGui::Spacing();
+}

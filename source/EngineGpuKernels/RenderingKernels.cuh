@@ -135,7 +135,7 @@ __device__ __inline__ float2 mapUniversePosToPixelImagePos(float2 const& rectUpp
         (toFloat(toInt(pos.y - toInt(rectUpperLeft.y))) - offset.y) * zoom};
 }
 
-__device__ __inline__ float3 calcColor(Cell* cell, bool selected)
+__device__ __inline__ float3 calcColor(Cell* cell, int selected)
 {
     unsigned int cellColor;
     switch (cell->metadata.color % 7) {
@@ -169,9 +169,12 @@ __device__ __inline__ float3 calcColor(Cell* cell, bool selected)
     }
     }
 
-    float factor = min(300.0f, cell->energy) / 250.0f;
-    if (!selected) {
-        factor *= 0.75f;
+    float factor = min(300.0f, cell->energy) / 300.0f;
+    if (1 == selected) {
+        factor *= 3.0f;
+    }
+    if (2 == selected) {
+        factor *= 2.0f;
     }
 
     return {
@@ -225,9 +228,9 @@ __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
         toFloat((particleColor >> 8) & 0xff) / 256.0f * factor,
         toFloat(particleColor & 0xff) / 256.0f * factor};
 */
-    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 200.0f;
-    if (!selected) {
-        intensity *= 0.75f;
+    auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 266.0f;
+    if (selected) {
+        intensity *= 3.0f;
     }
 
     return {intensity, 0, 0.08f};
@@ -300,7 +303,6 @@ __global__ void drawCells(
 
     MapInfo map;
     map.init(universeSize);
-    //bool isSelected = cluster->isSelected();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
@@ -309,8 +311,9 @@ __global__ void drawCells(
         map.mapPosCorrection(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-            auto color = calcColor(cell, false /*isSelected*/);
-            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 3, true);
+            auto color = calcColor(cell, cell->selected);
+            auto radius = 1 == cell->selected ? zoom / 2 : zoom / 3;
+            drawCircle(imageData, imageSize, cellImagePos, color, radius, true);
 
             if (zoom > 1 - FP_PRECISION) {
                 color = color * min((zoom - 1.0f) / 3, 1.0f);
@@ -384,8 +387,9 @@ __global__ void drawParticles(
 
         auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particle->absPos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
-            auto const color = calcColor(particle, particle->isSelected());
-            drawCircle(imageData, imageSize, particleImagePos, color, zoom / 3);
+            auto const color = calcColor(particle, 0 != particle->selected);
+            auto radius = 1 == particle->selected ? zoom / 2 : zoom / 3;
+            drawCircle(imageData, imageSize, particleImagePos, color, radius);
         }
     }
 }

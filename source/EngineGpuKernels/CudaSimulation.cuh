@@ -11,6 +11,7 @@
 
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/Settings.h"
+#include "EngineInterface/SelectionShallowData.h"
 
 #include "Definitions.cuh"
 #include "DllExport.h"
@@ -36,22 +37,14 @@ public:
         double zoom);
     ENGINEGPUKERNELS_EXPORT void
     getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void
-    setSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    ENGINEGPUKERNELS_EXPORT void setSimulationData(DataAccessTO const& dataTO);
 
-    ENGINEGPUKERNELS_EXPORT void selectData(int2 const& pos);
-    ENGINEGPUKERNELS_EXPORT void deselectData();
-
-    struct ApplyForceData
-    {
-        float2 startPos;
-        float2 endPos;
-        float2 force;
-        float radius;
-        bool onlyRotation;
-    };
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
-    ENGINEGPUKERNELS_EXPORT void moveSelection(float2 const& displacement);
+    ENGINEGPUKERNELS_EXPORT void switchSelection(SwitchSelectionData const& switchData);
+    ENGINEGPUKERNELS_EXPORT void setSelection(SetSelectionData const& selectionData);
+    ENGINEGPUKERNELS_EXPORT SelectionShallowData getSelectionShallowData();
+    ENGINEGPUKERNELS_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData);
+    ENGINEGPUKERNELS_EXPORT void removeSelection();
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
@@ -80,6 +73,7 @@ private:
     std::atomic<uint64_t> _currentTimestep;
     SimulationData* _cudaSimulationData;
     SimulationResult* _cudaSimulationResult;
+    SelectionResult* _cudaSelectionResult;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
 };
