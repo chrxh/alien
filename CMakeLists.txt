@@ -59,6 +59,10 @@ add_executable(alien
     source/Gui/ColorizeDialog.cpp
     source/Gui/SimulationParametersWindow.cpp
     source/Gui/GpuSettingsDialog.cpp
+    source/Gui/EditorController.cpp
+    source/Gui/EditorModel.cpp
+    source/Gui/SelectionWindow.cpp
+    source/Gui/ActionsWindow.cpp
     source/EngineGpuKernels/CudaSimulation.cu
     source/Base/Math.cpp
     source/Base/StringFormatter.cpp
