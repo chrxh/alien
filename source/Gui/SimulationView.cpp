@@ -70,17 +70,6 @@ _SimulationView::_SimulationView(
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // This would end up calling:
-    //  _SimulationController::registerImageResource()
-    //      EngineWorker::registerImageResource() 
-    // ... but _cudaSimulation is not yet set
-    //
-    // As a workaround:
-    // 1. EngineWorker::registerImageResource() will only register the
-    //      resources if _cudaSimulation is initialized
-    // 2. We'll call resize() in _MainWindow::processRequestLoading() too
-    //      (to make sure that the image resources are registered)
-    //
     resize(_viewport->getViewSize());
 
     _shader->use();

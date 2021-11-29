@@ -279,7 +279,6 @@ void _MainWindow::processUninitialized()
 void _MainWindow::processRequestLoading()
 {
     _startupWindow->process();
-    _simulationView->resize(_viewport->getViewSize());
     renderSimulation();
 }
 
