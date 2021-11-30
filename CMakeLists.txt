@@ -88,6 +88,8 @@ include_directories(
     source
     external)
 
+target_compile_definitions(alien PRIVATE ALIEN_STATIC)
+
 find_package(CUDAToolkit)
 target_link_libraries(alien CUDA::cudart_static)
 target_link_libraries(alien CUDA::cuda_driver)
