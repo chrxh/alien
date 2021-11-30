@@ -1,13 +1,8 @@
 
 cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
 
-# Using vcpkg (VCPKG_ROOT env variable must point to the vckpg location)
-if(DEFINED ENV{VCPKG_ROOT})
-    message("-- Using vcpkg from $ENV{VCPKG_ROOT}")
-    set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
-else()
-    message(FATAL_ERROR "$VCPKG_ROOT must be set and point to vcpkg location")
-endif()
+# Using the vcpkg submodule
+set(CMAKE_TOOLCHAIN_FILE external/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
 
 # Default to Debug
 if(NOT CMAKE_BUILD_TYPE)
