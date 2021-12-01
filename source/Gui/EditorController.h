@@ -25,7 +25,7 @@ private:
     void synchronizeModelWithSimulation();
 
     void leftMouseButtonPressed(RealVector2D const& viewPos);
-    void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
+    void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);
     void leftMouseButtonReleased();
 
     void rightMouseButtonPressed(RealVector2D const& viewPos);

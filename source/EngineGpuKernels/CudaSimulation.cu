@@ -399,14 +399,14 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeTarget(
+    _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        GPU_FUNCTION(copyEntitiesKernel, *_cudaSimulationData);
-        _cudaSimulationData->resizeSource();
+        GPU_FUNCTION(cudaCopyEntities, *_cudaSimulationData);
+        _cudaSimulationData->resizeRemainings();
         _cudaSimulationData->swap();
     } else {
-        _cudaSimulationData->resizeSource();
+        _cudaSimulationData->resizeRemainings();
     }
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);

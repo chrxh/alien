@@ -4,6 +4,7 @@
 #include "Definitions.cuh"
 
 struct AddConnectionOperation {
+    bool addTokens;
     Cell* cell;
     Cell* otherCell;
 };
@@ -11,6 +12,12 @@ struct AddConnectionOperation {
 struct DelConnectionsOperation
 {
     Cell* cell;
+};
+
+struct DelConnectionOperation
+{
+    Cell* cell1;
+    Cell* cell2;
 };
 
 struct DelCellOperation
@@ -29,6 +36,7 @@ union OperationData
 {
     AddConnectionOperation addConnectionOperation;
     DelConnectionsOperation delConnectionsOperation;
+    DelConnectionOperation delConnectionOperation;
     DelCellOperation delCellOperation;
     DelCellAndConnectionOperations delCellAndConnectionOperation;
 };
@@ -39,6 +47,7 @@ struct Operation
     {
         AddConnections,
         DelConnections,
+        DelConnection,
         DelCell,
         DelCellAndConnections,
     };

@@ -36,12 +36,6 @@ struct SetSelectionData
     float2 endPos;
 };
 
-struct ShallowUpdateSelectionData
-{
-    float2 displacement;
-    float2 velDelta;
-};
-
 
 
 #define FP_PRECISION 0.00001

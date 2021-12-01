@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include <glad/glad.h>
 #include "imgui.h"
 
 #include "EngineImpl/SimulationController.h"

@@ -38,10 +38,10 @@ public:
         _selectionShallowData->centerVelX = 0;
         _selectionShallowData->centerVelY = 0;
 
-        _selectionShallowData->extCenterPosX = 0;
-        _selectionShallowData->extCenterPosY = 0;
-        _selectionShallowData->extCenterVelX = 0;
-        _selectionShallowData->extCenterVelY = 0;
+        _selectionShallowData->clusterCenterPosX = 0;
+        _selectionShallowData->clusterCenterPosY = 0;
+        _selectionShallowData->clusterCenterVelX = 0;
+        _selectionShallowData->clusterCenterVelY = 0;
     }
 
     __device__ void collectCell(Cell* cell)
@@ -55,10 +55,10 @@ public:
         }
 
         atomicAdd(&_selectionShallowData->numClusterCells, 1);
-        atomicAdd(&_selectionShallowData->extCenterPosX, cell->absPos.x);
-        atomicAdd(&_selectionShallowData->extCenterPosY, cell->absPos.y);
-        atomicAdd(&_selectionShallowData->extCenterVelX, cell->vel.x);
-        atomicAdd(&_selectionShallowData->extCenterVelY, cell->vel.y);
+        atomicAdd(&_selectionShallowData->clusterCenterPosX, cell->absPos.x);
+        atomicAdd(&_selectionShallowData->clusterCenterPosY, cell->absPos.y);
+        atomicAdd(&_selectionShallowData->clusterCenterVelX, cell->vel.x);
+        atomicAdd(&_selectionShallowData->clusterCenterVelY, cell->vel.y);
     }
 
     __device__ void collectParticle(Particle* particle)
@@ -68,10 +68,10 @@ public:
         atomicAdd(&_selectionShallowData->centerPosY, particle->absPos.y);
         atomicAdd(&_selectionShallowData->centerVelX, particle->vel.x);
         atomicAdd(&_selectionShallowData->centerVelY, particle->vel.y);
-        atomicAdd(&_selectionShallowData->extCenterPosX, particle->absPos.x);
-        atomicAdd(&_selectionShallowData->extCenterPosY, particle->absPos.y);
-        atomicAdd(&_selectionShallowData->extCenterVelX, particle->vel.x);
-        atomicAdd(&_selectionShallowData->extCenterVelY, particle->vel.y);
+        atomicAdd(&_selectionShallowData->clusterCenterPosX, particle->absPos.x);
+        atomicAdd(&_selectionShallowData->clusterCenterPosY, particle->absPos.y);
+        atomicAdd(&_selectionShallowData->clusterCenterVelX, particle->vel.x);
+        atomicAdd(&_selectionShallowData->clusterCenterVelY, particle->vel.y);
     }
 
     __device__ void finalize()
@@ -86,10 +86,10 @@ public:
 
         auto numExtEntities = _selectionShallowData->numClusterCells + _selectionShallowData->numParticles;
         if (numEntities > 0) {
-            _selectionShallowData->extCenterPosX /= numExtEntities;
-            _selectionShallowData->extCenterPosY /= numExtEntities;
-            _selectionShallowData->extCenterVelX /= numExtEntities;
-            _selectionShallowData->extCenterVelY /= numExtEntities;
+            _selectionShallowData->clusterCenterPosX /= numExtEntities;
+            _selectionShallowData->clusterCenterPosY /= numExtEntities;
+            _selectionShallowData->clusterCenterVelX /= numExtEntities;
+            _selectionShallowData->clusterCenterVelY /= numExtEntities;
         }
     }
 

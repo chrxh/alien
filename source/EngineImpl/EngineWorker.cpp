@@ -321,18 +321,11 @@ void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const
     _cudaSimulation->setSelection(SetSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
 }
 
-void EngineWorker::moveSelection(RealVector2D const& displacement)
+void EngineWorker::shallowUpdateSelection(ShallowUpdateSelectionData const& updateData)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    _cudaSimulation->shallowUpdateSelection(ShallowUpdateSelectionData{{displacement.x, displacement.y}, {0, 0}});
-}
-
-void EngineWorker::accelerateSelection(RealVector2D const& velDelta)
-{
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    _cudaSimulation->shallowUpdateSelection(ShallowUpdateSelectionData{{0, 0}, {velDelta.x, velDelta.y}});
+    _cudaSimulation->shallowUpdateSelection(updateData);
 }
 
 void EngineWorker::removeSelection()

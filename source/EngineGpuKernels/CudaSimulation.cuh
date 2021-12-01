@@ -12,6 +12,7 @@
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
+#include "EngineInterface/ShallowUpdateSelectionData.h"
 
 #include "Definitions.cuh"
 #include "DllExport.h"

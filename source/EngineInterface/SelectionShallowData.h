@@ -11,18 +11,18 @@ struct SelectionShallowData
     float centerVelX = 0;
     float centerVelY = 0;
 
-    float extCenterPosX = 0;
-    float extCenterPosY = 0;
-    float extCenterVelX = 0;
-    float extCenterVelY = 0;
+    float clusterCenterPosX = 0;
+    float clusterCenterPosY = 0;
+    float clusterCenterVelX = 0;
+    float clusterCenterVelY = 0;
 
     bool operator==(SelectionShallowData const& other) const
     {
         return numCells == other.numCells && numClusterCells == other.numClusterCells
             && numParticles == other.numParticles && centerPosX == other.centerPosX && centerPosY == other.centerPosY
-            && centerVelX == other.centerVelX && centerVelY == other.centerVelY && extCenterPosX == other.extCenterPosX
-            && extCenterPosY == other.extCenterPosY && extCenterVelX == other.extCenterVelX
-            && extCenterVelY == other.extCenterVelY;
+            && centerVelX == other.centerVelX && centerVelY == other.centerVelY && clusterCenterPosX == other.clusterCenterPosX
+            && clusterCenterPosY == other.clusterCenterPosY && clusterCenterVelX == other.clusterCenterVelX
+            && clusterCenterVelY == other.clusterCenterVelY;
     }
     bool operator!=(SelectionShallowData const& other) const { return !(*this == other); }
 };

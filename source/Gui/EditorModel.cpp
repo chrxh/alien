@@ -33,16 +33,30 @@ bool _EditorModel::isSelectionEmpty() const
         && 0 == _selectionShallowData.numParticles;
 }
 
-RealVector2D _EditorModel::getDeltaExtCenterPos() const
+RealVector2D _EditorModel::getClusterCenterPosDelta() const
 {
     return {
-        _selectionShallowData.extCenterPosX - _origSelectionShallowData.extCenterPosX,
-        _selectionShallowData.extCenterPosY - _origSelectionShallowData.extCenterPosY};
+        _selectionShallowData.clusterCenterPosX - _origSelectionShallowData.clusterCenterPosX,
+        _selectionShallowData.clusterCenterPosY - _origSelectionShallowData.clusterCenterPosY};
 }
 
-RealVector2D _EditorModel::getDeltaExtCenterVel() const
+RealVector2D _EditorModel::getClusterCenterVelDelta() const
 {
     return {
-        _selectionShallowData.extCenterVelX - _origSelectionShallowData.extCenterVelX,
-        _selectionShallowData.extCenterVelY - _origSelectionShallowData.extCenterVelY};
+        _selectionShallowData.clusterCenterVelX - _origSelectionShallowData.clusterCenterVelX,
+        _selectionShallowData.clusterCenterVelY - _origSelectionShallowData.clusterCenterVelY};
+}
+
+RealVector2D _EditorModel::getCenterPosDelta() const
+{
+    return {
+        _selectionShallowData.centerPosX - _origSelectionShallowData.centerPosX,
+        _selectionShallowData.centerPosY - _origSelectionShallowData.centerPosY};
+}
+
+RealVector2D _EditorModel::getCenterVelDelta() const
+{
+    return {
+        _selectionShallowData.centerVelX - _origSelectionShallowData.centerVelX,
+        _selectionShallowData.centerVelY - _origSelectionShallowData.centerVelY};
 }

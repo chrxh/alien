@@ -160,6 +160,7 @@
     <ClInclude Include="..\..\source\EngineInterface\SelectionShallowData.h" />
     <ClInclude Include="..\..\source\EngineInterface\Serializer.h" />
     <ClInclude Include="..\..\source\EngineInterface\Settings.h" />
+    <ClInclude Include="..\..\source\EngineInterface\ShallowUpdateSelectionData.h" />
     <ClInclude Include="..\..\source\EngineInterface\SimulationParameters.h" />
     <ClInclude Include="..\..\source\EngineInterface\Parser.h" />
     <ClInclude Include="..\..\source\EngineInterface\SimulationParametersSpots.h" />

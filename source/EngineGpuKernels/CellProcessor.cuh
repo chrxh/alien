@@ -28,13 +28,6 @@ public:
     __inline__ __device__ void decay(SimulationData& data);
 
 private:
-    __inline__ __device__ void connectCells(Cell* cell1, Cell* cell2);
-    __inline__ __device__ void delConnections(Cell* cell);
-    __inline__ __device__ void delCell(Cell* cell, int cellIndex);
-
-    __inline__ __device__ void addConnection(Cell* cell1, Cell* cell2, float2 const& posDelta);
-    __inline__ __device__ void delConnection(Cell* cell1, Cell* cell2);
-
     SimulationData* _data;
     PartitionData _partition;
 };
@@ -142,7 +135,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         >= SpotCalculator::calc(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
                     && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
                     && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy) {
-                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
                 }
             }
 /*

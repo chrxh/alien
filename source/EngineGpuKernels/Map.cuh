@@ -120,6 +120,7 @@ public:
         __syncthreads();
     }
 
+    //returns at most 18 cells
     __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};

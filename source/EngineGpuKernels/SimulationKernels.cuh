@@ -113,13 +113,8 @@ __global__ void processingStep12(SimulationData data, int numParticlePointers)
 
 __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
-    data.cellMap.reset();
-    data.particleMap.reset();
-    data.dynamicMemory.reset();
+    data.prepareForSimulation();
     result.resetStatistics();
-
-    *data.numOperations = 0; 
-    data.operations = data.dynamicMemory.getArray<Operation>(data.entities.cellPointers.getNumEntries());
 
     KERNEL_CALL_1_1(applyFlowFieldSettingsKernel, data);
     KERNEL_CALL(processingStep1, data);

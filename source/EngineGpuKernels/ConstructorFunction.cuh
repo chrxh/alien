@@ -217,7 +217,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(
 
 
     if (!constructionData.isFinishConstruction || !constructionData.isSeparateConstruction) {
-        CellConnectionProcessor::addConnectionsForConstructor(
+        CellConnectionProcessor::addConnections(
             data,
             cell,
             newCell,
@@ -306,9 +306,9 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             break;
         }
     }
-    CellConnectionProcessor::delConnectionsForConstructor(cell, firstConstructedCell);
+    CellConnectionProcessor::delConnections(cell, firstConstructedCell);
     if (!constructionData.isFinishConstruction || !constructionData.isSeparateConstruction) {
-        CellConnectionProcessor::addConnectionsForConstructor(
+        CellConnectionProcessor::addConnections(
             data,
             cell,
             newCell,
@@ -317,7 +317,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
             cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
     }
     auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
-    CellConnectionProcessor::addConnectionsForConstructor(
+    CellConnectionProcessor::addConnections(
         data,
         newCell,
         firstConstructedCell,
@@ -372,7 +372,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                 auto distance = constructionData.uniformDist ? desiredDistance : Math::length(otherPosDelta);
-                CellConnectionProcessor::addConnectionsForConstructor(
+                CellConnectionProcessor::addConnections(
                     data, newCell, otherCell, 0, 0, distance, constructionData.angleAlignment);
             }
             otherCell->releaseLock();
