@@ -169,12 +169,12 @@ __device__ __inline__ float3 calcColor(Cell* cell, int selected)
     }
     }
 
-    float factor = min(300.0f, cell->energy) / 300.0f;
+    float factor = min(300.0f, cell->energy) / 320.0f;
     if (1 == selected) {
-        factor *= 3.0f;
+        factor *= 2.5f;
     }
     if (2 == selected) {
-        factor *= 2.0f;
+        factor *= 1.75f;
     }
 
     return {
@@ -185,52 +185,9 @@ __device__ __inline__ float3 calcColor(Cell* cell, int selected)
 
 __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 {
-/*
-    unsigned int particleColor;
-    switch (particle->metadata.color % 7) {
-    case 0: {
-        particleColor = Const::IndividualCellColor1;
-        break;
-    }
-    case 1: {
-        particleColor = Const::IndividualCellColor2;
-        break;
-    }
-    case 2: {
-        particleColor = Const::IndividualCellColor3;
-        break;
-    }
-    case 3: {
-        particleColor = Const::IndividualCellColor4;
-        break;
-    }
-    case 4: {
-        particleColor = Const::IndividualCellColor5;
-        break;
-    }
-    case 5: {
-        particleColor = Const::IndividualCellColor6;
-        break;
-    }
-    case 6: {
-        particleColor = Const::IndividualCellColor7;
-        break;
-    }
-    }
-
-    float factor = min(100.0f, sqrt(particle->energy) * 5 + 20.0f) / 100.0f;
-    if (!selected) {
-        factor *= 0.75f;
-    }
-
-    return {
-        toFloat((particleColor >> 16) & 0xff) / 256.0f * factor,
-        toFloat((particleColor >> 8) & 0xff) / 256.0f * factor,
-        toFloat(particleColor & 0xff) / 256.0f * factor};
-*/
     auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 266.0f;
     if (selected) {
-        intensity *= 3.0f;
+        intensity *= 2.5f;
     }
 
     return {intensity, 0, 0.08f};
@@ -238,7 +195,7 @@ __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
 
 __device__ __inline__ float3 calcColor(Token* token, bool selected)
 {
-    return selected ? float3{1.0f, 1.0f, 1.0f} : float3{0.75f, 0.75f, 0.75f};
+    return selected ? float3{0.75f, 0.75f, 0.75f} : float3{0.5f, 0.5f, 0.5f};
 }
 
 __device__ __inline__ void
