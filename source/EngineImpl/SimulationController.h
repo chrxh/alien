@@ -6,6 +6,7 @@
 #include "EngineInterface/SymbolMap.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
+#include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
@@ -66,9 +67,8 @@ public:
 
     ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
     ENGINEIMPL_EXPORT SelectionShallowData getSelectionShallowData();
+    ENGINEIMPL_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
     ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
-    ENGINEIMPL_EXPORT void moveSelection(RealVector2D const& displacement);
-    ENGINEIMPL_EXPORT void accelerateSelection(RealVector2D const& velDelta);
     ENGINEIMPL_EXPORT void removeSelection();
     ENGINEIMPL_EXPORT bool removeSelectionIfInvalid();
 

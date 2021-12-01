@@ -187,19 +187,14 @@ SelectionShallowData _SimulationController::getSelectionShallowData()
     return _worker.getSelectionShallowData();
 }
 
+void _SimulationController::shallowUpdateSelection(ShallowUpdateSelectionData const& updateData)
+{
+    _worker.shallowUpdateSelection(updateData);
+}
+
 void _SimulationController::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
 {
     _worker.setSelection(startPos, endPos);
-}
-
-void _SimulationController::moveSelection(RealVector2D const& displacement)
-{
-    _worker.moveSelection(displacement);
-}
-
-void _SimulationController::accelerateSelection(RealVector2D const& velDelta)
-{
-    _worker.accelerateSelection(velDelta);
 }
 
 void _SimulationController::removeSelection()

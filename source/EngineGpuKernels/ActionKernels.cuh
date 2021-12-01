@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
@@ -11,6 +12,8 @@
 #include "EntityFactory.cuh"
 #include "CleanupKernels.cuh"
 #include "SelectionResult.cuh"
+#include "CellConnectionProcessor.cuh"
+#include "CellProcessor.cuh"
 
 #include "SimulationData.cuh"
 
@@ -157,15 +160,16 @@ __global__ void rolloutSelection(SimulationData data, int* result)
     }
 }
 
-__global__ void shallowUpdateSelection(ShallowUpdateSelectionData shallowUpdateData, SimulationData data)
+__global__ void shallowUpdateSelection(ShallowUpdateSelectionData updateData, SimulationData data)
 {
     auto const cellBlock = calcPartition(
         data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if (0 != cell->selected) {
-            cell->absPos = cell->absPos + shallowUpdateData.displacement;
-            cell->vel = cell->vel + shallowUpdateData.velDelta;
+        if ((0 != cell->selected && updateData.considerClusters)
+            || (1 == cell->selected && !updateData.considerClusters)) {
+            cell->absPos = cell->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
+            cell->vel = cell->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
         }
     }
 
@@ -174,8 +178,8 @@ __global__ void shallowUpdateSelection(ShallowUpdateSelectionData shallowUpdateD
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
         if (0 != particle->selected) {
-            particle->absPos = particle->absPos + shallowUpdateData.displacement;
-            particle->vel = particle->vel + shallowUpdateData.velDelta;
+            particle->absPos = particle->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
+            particle->vel = particle->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
         }
     }
 }
@@ -196,6 +200,19 @@ __global__ void removeSelection(SimulationData data)
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
         particle->selected = 0;
+    }
+}
+
+__global__ void removeClusterSelection(SimulationData data)
+{
+    auto const cellBlock = calcPartition(
+        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (2 == cell->selected) {
+            cell->selected = 0;
+        }
     }
 }
 
@@ -221,6 +238,90 @@ __global__ void getSelectionShallowData(SimulationData data, SelectionResult res
         }
     }
 }
+
+__global__ void disconnectSelection(SimulationData data, int* result)
+{
+    auto const partition = calcPartition(
+        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (1 == cell->selected) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                
+                if (1 != connectedCell->selected && data.cellMap.mapDistance(cell->absPos, connectedCell->absPos) > cudaSimulationParameters.cellMaxBindingDistance) {
+                    CellConnectionProcessor::scheduleDelConnection(data, cell, connectedCell);
+                    atomicExch(result, 1);
+                }
+            }
+        }
+    }
+}
+
+__global__ void updateMapForConnection(SimulationData data)
+{
+    CellProcessor cellProcessor;
+    cellProcessor.updateMap(data);
+}
+
+__global__ void connectSelection(SimulationData data, int* result)
+{
+    auto const partition = calcPartition(
+        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    Cell* otherCells[18];
+    int numOtherCells;
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        if (1 != cell->selected) {
+            continue;
+        }
+        data.cellMap.get(otherCells, numOtherCells, cell->absPos);
+        for (int i = 0; i < numOtherCells; ++i) {
+            Cell* otherCell = otherCells[i];
+
+            if (!otherCell || otherCell == cell) {
+                continue;
+            }
+
+            if (1 == otherCell->selected) {
+                continue;
+            }
+
+            auto posDelta = cell->absPos - otherCell->absPos;
+            data.cellMap.mapDisplacementCorrection(posDelta);
+
+            auto distance = Math::length(posDelta);
+            if (distance >= cudaSimulationParameters.cellMaxCollisionDistance) {
+                continue;
+            }
+
+            bool alreadyConnected = false;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (connectedCell == otherCell) {
+                    alreadyConnected = true;
+                    break;
+                }
+            }
+            if (alreadyConnected) {
+                continue;
+            }
+
+            if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections) {
+                CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, false);
+                atomicExch(result, 1);
+            }
+        }
+    }
+}
+
+__global__ void processConnectionChanges(SimulationData data)
+{
+    CellConnectionProcessor::processConnectionsOperations(data);
+}
+
 
 /************************************************************************/
 /* Main                                                                 */
@@ -262,7 +363,6 @@ __global__ void cudaSetSelection(SetSelectionData setData, SimulationData data)
     } while (1 == *result);
 
     delete result;
-
 }
 
 __global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult selectionResult)
@@ -272,9 +372,48 @@ __global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult
     selectionResult.finalize();
 }
 
-__global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData shallowUpdateData, SimulationData data)
+__global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData, SimulationData data)
 {
-    KERNEL_CALL(shallowUpdateSelection, shallowUpdateData, data);
+    int* result = new int;
+
+    bool reconnectionRequired =
+        !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0);
+
+    //remove connections in case of reconnection
+    if (reconnectionRequired) {
+        do {
+            *result = 0;
+            data.prepareForSimulation();
+            KERNEL_CALL(disconnectSelection, data, result);
+            KERNEL_CALL(processConnectionChanges, data);
+        } while (1 == *result);
+    }
+
+    KERNEL_CALL(shallowUpdateSelection, updateData, data);
+
+    //add connections in case of reconnection
+    if (reconnectionRequired) {
+
+        do {
+            *result = 0;
+            data.prepareForSimulation();
+
+            KERNEL_CALL(updateMapForConnection, data);
+            KERNEL_CALL(connectSelection, data, result);
+            KERNEL_CALL(processConnectionChanges, data);
+
+            KERNEL_CALL(cleanupCellMap, data);
+        } while (1 == *result);
+
+        //update selection
+        KERNEL_CALL(removeClusterSelection, data);
+        do {
+            *result = 0;
+            KERNEL_CALL(rolloutSelection, data, result);
+        } while (1 == *result);
+    }
+
+    delete result;
 }
 
 __global__ void cudaRemoveSelection(SimulationData data)
