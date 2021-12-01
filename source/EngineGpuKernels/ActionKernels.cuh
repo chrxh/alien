@@ -277,7 +277,8 @@ __global__ void connectSelection(SimulationData data, int* result)
         if (1 != cell->selected) {
             continue;
         }
-        data.cellMap.get(otherCells, numOtherCells, cell->absPos);
+        data.cellMap.get(
+            otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellMaxCollisionDistance);
         for (int i = 0; i < numOtherCells; ++i) {
             Cell* otherCell = otherCells[i];
 
@@ -291,11 +292,6 @@ __global__ void connectSelection(SimulationData data, int* result)
 
             auto posDelta = cell->absPos - otherCell->absPos;
             data.cellMap.mapDisplacementCorrection(posDelta);
-
-            auto distance = Math::length(posDelta);
-            if (distance >= cudaSimulationParameters.cellMaxCollisionDistance) {
-                continue;
-            }
 
             bool alreadyConnected = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -379,21 +375,23 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
     bool reconnectionRequired =
         !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0);
 
-    //remove connections in case of reconnection
+    //disconnect selection in case of reconnection
     if (reconnectionRequired) {
+        int counter = 10;
         do {
             *result = 0;
             data.prepareForSimulation();
             KERNEL_CALL(disconnectSelection, data, result);
             KERNEL_CALL(processConnectionChanges, data);
-        } while (1 == *result);
+        } while (1 == *result && --counter > 0);    //due to locking not all affecting connections may be removed at first => repeat
     }
 
     KERNEL_CALL(shallowUpdateSelection, updateData, data);
 
-    //add connections in case of reconnection
+    //connect selection in case of reconnection
     if (reconnectionRequired) {
 
+        int counter = 10;
         do {
             *result = 0;
             data.prepareForSimulation();
@@ -403,7 +401,7 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
             KERNEL_CALL(processConnectionChanges, data);
 
             KERNEL_CALL(cleanupCellMap, data);
-        } while (1 == *result);
+        } while (1 == *result && --counter > 0);    //due to locking not all necessary connections may be established at first => repeat
 
         //update selection
         KERNEL_CALL(removeClusterSelection, data);
