@@ -24,8 +24,8 @@ namespace Const
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
 
-    ImColor const SelectionAreaFillColor = ImColor::HSV(0.83f, 0.8f, 0.5f, 0.6f);
-    ImColor const SelectionAreaBorderColor = ImColor::HSV(0.83f, 0.2f, 1.0f, 1.0f);
+    ImColor const SelectionAreaFillColor = ImColor::HSV(0.33f, 0.0f, 0.0f, 0.6f);
+    ImColor const SelectionAreaBorderColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 1.0f);
 
     float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 40.0f;
