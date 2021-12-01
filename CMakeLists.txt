@@ -123,3 +123,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/msvc/Gui/Resources
         ${CMAKE_CURRENT_BINARY_DIR}/Resources)
+
+# Copy imgui.ini
+add_custom_command(
+    TARGET alien POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/msvc/Gui/imgui.ini
+        ${CMAKE_CURRENT_BINARY_DIR})
