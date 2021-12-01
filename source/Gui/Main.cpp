@@ -4,7 +4,6 @@
 #include "Base/LoggingService.h"
 #include "Base/ServiceLocator.h"
 #include "EngineImpl/SimulationController.h"
-#include "EngineInterface/EngineInterfaceSettings.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/ChangeDescriptions.h"
 
