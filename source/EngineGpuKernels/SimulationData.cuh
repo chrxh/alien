@@ -48,6 +48,18 @@ struct SimulationData
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     }
 
+    __device__ void prepareForSimulation()
+    {
+        cellMap.reset();
+        particleMap.reset();
+        dynamicMemory.reset();
+
+        *numOperations = 0;
+        operations = dynamicMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
+    }
+
+    __device__ int getMaxOperations() { return entities.cellPointers.getNumEntries(); }
+
     void resizeImage(int2 const& newSize)
     {
         CudaMemoryManager::getInstance().freeMemory(imageData);
@@ -76,7 +88,7 @@ struct SimulationData
             || entities.tokens.shouldResize(0) || entities.tokenPointers.shouldResize(0);
     }
 
-    void resizeTarget(int additionalCells, int additionalParticles, int additionalTokens)
+    void resizeEntitiesForCleanup(int additionalCells, int additionalParticles, int additionalTokens)
     {
         auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
         auto tokenArraySizeInc = std::max(additionalTokens, cellAndParticleArraySizeInc / 3);
@@ -89,13 +101,7 @@ struct SimulationData
         resizeTargetIntern(entities.tokenPointers, entitiesForCleanup.tokenPointers, tokenArraySizeInc * 10);
     }
 
-    bool isEmpty()
-    {
-        return 0 == entities.cells.getNumEntries_host() && 0 == entities.particles.getNumEntries_host()
-            && 0 == entities.tokens.getNumEntries_host();
-    }
-
-    void resizeSource()
+    void resizeRemainings()
     {
         entities.cells.resize(entitiesForCleanup.cells.getSize_host());
         entities.cellPointers.resize(entitiesForCleanup.cellPointers.getSize_host());
@@ -110,6 +116,12 @@ struct SimulationData
 
         int upperBoundDynamicMemory = sizeof(Operation) * (cellArraySize + 1000);
         dynamicMemory.resize(upperBoundDynamicMemory);
+    }
+
+    bool isEmpty()
+    {
+        return 0 == entities.cells.getNumEntries_host() && 0 == entities.particles.getNumEntries_host()
+            && 0 == entities.tokens.getNumEntries_host();
     }
 
     void swap()

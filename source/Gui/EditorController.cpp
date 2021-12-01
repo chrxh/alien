@@ -66,7 +66,7 @@ void _EditorController::process()
             leftMouseButtonPressed(mousePos);
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            leftMouseButtonHold(mousePos, prevMousePosInt);
+            leftMouseButtonHold(mousePos, prevMousePosInt, ImGui::GetIO().KeyCtrl);
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
             rightMouseButtonPressed(mousePos);
@@ -104,18 +104,50 @@ void _EditorController::synchronizeModelWithSimulation()
         _editorModel->clear();
     }
     {
-        auto delta = _editorModel->getDeltaExtCenterPos();
+        auto delta = _editorModel->getClusterCenterPosDelta();
         if (delta.x != 0 || delta.y != 0) {
-            _simController->moveSelection(delta);
+            ShallowUpdateSelectionData updateData;
+            updateData.posDeltaX = delta.x;
+            updateData.posDeltaY = delta.y;
+            _simController->shallowUpdateSelection(updateData);
 
             auto selectionShallowData = _simController->getSelectionShallowData();
             _editorModel->setOrigSelectionShallowData(selectionShallowData);
         }
     }
     {
-        auto delta = _editorModel->getDeltaExtCenterVel();
+        auto delta = _editorModel->getClusterCenterVelDelta();
         if (delta.x != 0 || delta.y != 0) {
-            _simController->accelerateSelection(delta);
+            ShallowUpdateSelectionData updateData;
+            updateData.velDeltaX = delta.x;
+            updateData.velDeltaY = delta.y;
+            _simController->shallowUpdateSelection(updateData);
+
+            auto selectionShallowData = _simController->getSelectionShallowData();
+            _editorModel->setOrigSelectionShallowData(selectionShallowData);
+        }
+    }
+    {
+        auto delta = _editorModel->getCenterPosDelta();
+        if (delta.x != 0 || delta.y != 0) {
+            ShallowUpdateSelectionData updateData;
+            updateData.considerClusters = false;
+            updateData.posDeltaX = delta.x;
+            updateData.posDeltaY = delta.y;
+            _simController->shallowUpdateSelection(updateData);
+
+            auto selectionShallowData = _simController->getSelectionShallowData();
+            _editorModel->setOrigSelectionShallowData(selectionShallowData);
+        }
+    }
+    {
+        auto delta = _editorModel->getCenterVelDelta();
+        if (delta.x != 0 || delta.y != 0) {
+            ShallowUpdateSelectionData updateData;
+            updateData.considerClusters = false;
+            updateData.velDeltaX = delta.x;
+            updateData.velDeltaY = delta.y;
+            _simController->shallowUpdateSelection(updateData);
 
             auto selectionShallowData = _simController->getSelectionShallowData();
             _editorModel->setOrigSelectionShallowData(selectionShallowData);
@@ -135,7 +167,10 @@ void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos)
     }
 }
 
-void _EditorController::leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::leftMouseButtonHold(
+    RealVector2D const& viewPos,
+    RealVector2D const& prevViewPos,
+    bool modifierKeyPressed)
 {
     auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
@@ -145,8 +180,13 @@ void _EditorController::leftMouseButtonHold(RealVector2D const& viewPos, RealVec
     } else {
         auto delta = end - start;
         auto selectionData = _editorModel->getSelectionShallowData();
-        selectionData.extCenterPosX += delta.x;
-        selectionData.extCenterPosY += delta.y;
+        if (!modifierKeyPressed) {
+            selectionData.clusterCenterPosX += delta.x;
+            selectionData.clusterCenterPosY += delta.y;
+        } else {
+            selectionData.centerPosX += delta.x;
+            selectionData.centerPosY += delta.y;
+        }
         _editorModel->setSelectionShallowData(selectionData);
     }
 }

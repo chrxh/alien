@@ -15,8 +15,10 @@ public:
     void clear();
     bool isSelectionEmpty() const;
 
-    RealVector2D getDeltaExtCenterPos() const;
-    RealVector2D getDeltaExtCenterVel() const;
+    RealVector2D getClusterCenterPosDelta() const;
+    RealVector2D getClusterCenterVelDelta() const;
+    RealVector2D getCenterPosDelta() const;
+    RealVector2D getCenterVelDelta() const;
 
 private:
     SelectionShallowData _origSelectionShallowData;
