@@ -45,27 +45,32 @@ The development is driven by the desire to better understand the conditions for 
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 ## How to build the sources
-The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a git submodule.
+The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
 
-### Windows
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) (or an alternative tool chain) must be installed.
-
-Open the command prompt in a suitable directory (should not contain whitespace characters) and enter the following build steps:
+### Getting the sources
+To obtain the sources, please open a command prompt in a suitable directory (which should not contain whitespace characters) and enter the following command:
 ```
 git clone --recursive https://github.com/chrxh/alien.git
+```
+Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
+
+### Build instructions for Windows
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) (or an alternative tool chain)
+
+Build steps:
+```
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 .\Release\alien.exe
 ```
 
-### Linux
+### Build instructions for Linux
 
 Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and GCC 9.x+
 
 Build steps:
 ```
-git clone --recursive https://github.com/chrxh/alien.git
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j8
