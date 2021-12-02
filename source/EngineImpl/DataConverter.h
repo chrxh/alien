@@ -2,9 +2,12 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
 #include "Definitions.h"
+
+#include <unordered_map>
 
 class DataConverter
 {
