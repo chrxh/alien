@@ -63,7 +63,39 @@ Most of the free external libraries are already included in the repository, such
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 
 ### Linux
-A CMake script for cross-platform compilation will be provided in the future. At the moment, only Microsoft Visual Studio is used as a build system.
+
+> Linux support is experimental
+
+NOTE: Make sure the vcpkg submodule is cloned & initialized:
+
+`git clone --recursive https://github.com/chrxh/alien.git`
+
+Or, to update the submodule within an existing clone:
+
+```
+git submodule init
+git submodule update
+```
+
+Prerequisites:
+1. GCC 9.x+
+2. CUDA 11.2+
+3. [vcpkg](https://vcpkg.io/en/index.html)
+
+Build steps:
+
+```
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j8
+```
+
+If everything goes well, the alien executable can be found under
+the build directory:
+
+```
+./alien
+```
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).
