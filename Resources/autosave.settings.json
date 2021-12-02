@@ -26,6 +26,7 @@
             "min energy": "50.000000",
             "transformation probability": "0.200000",
             "fusion velocity": "0.206000",
+            "max binding energy": "500000.000000",
             "function": {
                 "computer": {
                     "max instructions": "15",
@@ -84,6 +85,7 @@
                     "min energy": "50.000000",
                     "binding force": "1.000000",
                     "fusion velocity": "0.206000",
+                    "max binding energy": "500000.000000",
                     "function": {
                         "weapon": {
                             "energy cost": "0.900000",
@@ -113,6 +115,7 @@
                     "min energy": "50.000000",
                     "binding force": "1.000000",
                     "fusion velocity": "0.206000",
+                    "max binding energy": "500000.000000",
                     "function": {
                         "weapon": {
                             "energy cost": "0.900000",
