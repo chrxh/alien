@@ -22,8 +22,8 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 ### Artificial Life extensions
 - Programmable particle actions for simulating digital organisms and studying evolution
-- Information and energy transportation layer between connected particles using tokens
-- Built-in graph editor and scripting environment for designing customized machines and environments
+- Information and energy transportation layer between connected particles
+- Built-in graph editor and scripting environment for designing customized machines and worlds
 
 <img src="img/alife engine.gif" width=100%>
 
@@ -46,53 +46,29 @@ An Nvidia graphics card with compute capability 6.0 or higher is needed. Please 
 
 ## How to build the sources
 ### Windows
-Prerequisites: [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
-1. Checkout source code.
-2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
-3. Open `./msvc/alien.sln` in Visual Studio.
-4. Select `Release` and `x64` as build configuration.
-5. Click on `Start Without Debugging` (CTRL + F5).
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) (or an alternative tool chain) must be installed.
 
-Most of the free external libraries are already included in the repository, such as
-- [Dear ImGui](https://github.com/ocornut/imgui)
-- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
-- [ImPlot](https://github.com/epezent/implot)
-- [Glad](https://glad.dav1d.de/)
-- [GLFW](https://www.glfw.org/)
-- [stb](https://github.com/nothings/stb)
-- [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+Open the command prompt in a suitable directory (should not contain whitespace characters) and enter the following build steps:
+```
+git clone --recursive https://github.com/chrxh/alien.git
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+.\Release\alien.exe
+```
 
 ### Linux
 
-> Linux support is experimental
-
-NOTE: Make sure the vcpkg submodule is cloned & initialized:
-
-`git clone --recursive https://github.com/chrxh/alien.git`
-
-Or, to update the submodule within an existing clone:
-
-```
-git submodule init
-git submodule update
-```
-
-Prerequisites:
-1. GCC 9.x+
-2. CUDA 11.2+
-3. [vcpkg](https://vcpkg.io/en/index.html)
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and GCC 9.x+
 
 Build steps:
-
 ```
+git clone --recursive https://github.com/chrxh/alien.git
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j8
 ```
-
-If everything goes well, the alien executable can be found under
-the build directory:
-
+If everything goes well, the alien executable can be found under the build directory:
 ```
 ./alien
 ```
