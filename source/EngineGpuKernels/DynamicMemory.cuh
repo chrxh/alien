@@ -2,7 +2,7 @@
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include <helper_cuda.h>
+#include <cuda/helper_cuda.h>
 
 #include "CudaMemoryManager.cuh"
 

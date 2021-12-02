@@ -6,7 +6,7 @@
 
 namespace
 {
-    constexpr auto FadeInOutDuration = 1000ll;
+    constexpr std::chrono::milliseconds::rep FadeInOutDuration = 1000;
 }
 
 bool _UiController::isOn() const
@@ -41,7 +41,8 @@ void _UiController::process()
             }
         }
         else {
-            ImGui::GetStyle().Alpha = toFloat(std::max(FadeInOutDuration - duration, 0ll)) / FadeInOutDuration;
+            ImGui::GetStyle().Alpha =
+                toFloat(std::max(FadeInOutDuration - duration, std::chrono::milliseconds::rep(0))) / FadeInOutDuration;
             if (ImGui::GetStyle().Alpha == 0) {
                 _lastChangeTimePoint = boost::none;
             }
