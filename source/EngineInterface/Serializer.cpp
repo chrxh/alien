@@ -10,8 +10,8 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/optional.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/range/adaptors.hpp>
 
 #include "Base/ServiceLocator.h"
@@ -248,7 +248,7 @@ std::pair<uint64_t, Settings> _Serializer::deserializeTimestepAndSettings(
 string _Serializer::serializeDataDescription(DataDescription const& desc) const
 {
     ostringstream stream;
-    boost::archive::binary_oarchive archive(stream);
+    boost::archive::text_oarchive archive(stream);
 
     archive << desc;
     return stream.str();
@@ -257,7 +257,7 @@ string _Serializer::serializeDataDescription(DataDescription const& desc) const
 DataDescription _Serializer::deserializeDataDescription(string const& data)
 {
     istringstream stream(data);
-    boost::archive::binary_iarchive ia(stream);
+    boost::archive::text_iarchive ia(stream);
 
     DataDescription result;
     ia >> result;

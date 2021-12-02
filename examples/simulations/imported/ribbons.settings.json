@@ -26,6 +26,7 @@
             "min energy": "50.000000",
             "transformation probability": "0.200000",
             "fusion velocity": "0.400000",
+            "max binding energy": "500000.000000",
             "function": {
                 "computer": {
                     "max instructions": "15",
@@ -35,20 +36,14 @@
                     "strength": "0.100000",
                     "energy cost": "0.000000",
                     "geometry deviation exponent": "0.000000",
-                    "inhomogeneous color factor": "1.000000"
+                    "color penalty": "0.000000"
                 },
                 "constructor": {
                     "offspring": {
                         "cell energy": "100.000000",
                         "cell distance": "1.600000",
                         "token energy": "60.000000",
-                        "token suppress memory copy": "false"
-                    },
-                    "mutation probability": {
-                        "token data": "0.002000",
-                        "cell data": "0.000000",
-                        "cell property": "0.000000",
-                        "cell structure": "0.000000"
+                        "token suppress memory copy": "0.002000"
                     }
                 },
                 "sensor": {
@@ -70,21 +65,84 @@
             "probability": "0.040000",
             "velocity multiplier": "1.000000",
             "velocity perturbation": "0.500000"
+        },
+        "spots": {
+            "num spots": "0",
+            "0": {
+                "color": "0",
+                "pos": {
+                    "x": "0.000000",
+                    "y": "0.000000"
+                },
+                "core radius": "100.000000",
+                "fadeout radius": "100.000000",
+                "friction": "0.001000",
+                "radiation": {
+                    "factor": "0.000200"
+                },
+                "cell": {
+                    "max force": "0.800000",
+                    "min energy": "50.000000",
+                    "binding force": "1.000000",
+                    "fusion velocity": "0.400000",
+                    "max binding energy": "500000.000000",
+                    "function": {
+                        "weapon": {
+                            "energy cost": "0.200000",
+                            "color penalty": "0.000000",
+                            "geometry deviation exponent": "0.000000"
+                        }
+                    }
+                },
+                "token": {
+                    "mutation rate": "0.000500"
+                }
+            },
+            "1": {
+                "color": "0",
+                "pos": {
+                    "x": "0.000000",
+                    "y": "0.000000"
+                },
+                "core radius": "100.000000",
+                "fadeout radius": "100.000000",
+                "friction": "0.001000",
+                "radiation": {
+                    "factor": "0.000200"
+                },
+                "cell": {
+                    "max force": "0.800000",
+                    "min energy": "50.000000",
+                    "binding force": "1.000000",
+                    "fusion velocity": "0.400000",
+                    "max binding energy": "500000.000000",
+                    "function": {
+                        "weapon": {
+                            "energy cost": "0.200000",
+                            "color penalty": "0.000000",
+                            "geometry deviation exponent": "0.000000"
+                        }
+                    }
+                },
+                "token": {
+                    "mutation rate": "0.000500"
+                }
+            }
         }
     },
     "flow field": {
         "active": "false",
         "num centers": "1",
         "center0": {
-            "position": {
-                "x": "1250.000000",
-                "y": "500.000000"
+            "pos": {
+                "x": "0.000000",
+                "y": "0.000000"
             },
             "radius": "100.000000",
             "strength": "0.010000"
         },
         "center1": {
-            "position": {
+            "pos": {
                 "x": "0.000000",
                 "y": "0.000000"
             },
