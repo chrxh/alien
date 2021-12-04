@@ -22,8 +22,8 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 ### Artificial Life extensions
 - Programmable particle actions for simulating digital organisms and studying evolution
-- Information and energy transportation layer between connected particles using tokens
-- Built-in graph editor and scripting environment for designing customized machines and environments
+- Information and energy transportation layer between connected particles
+- Built-in graph editor and scripting environment for designing customized machines and worlds
 
 <img src="img/alife engine.gif" width=100%>
 
@@ -45,25 +45,40 @@ The development is driven by the desire to better understand the conditions for 
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 ## How to build the sources
-### Windows
-Prerequisites: [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) and [CUDA Toolkit 11.2](https://developer.nvidia.com/cuda-11.2.0-download-archive) must be installed.
-1. Checkout source code.
-2. Download and install [boost library version 1.75.0](https://www.boost.org/users/history/version_1_75_0.html) to `./external/boost_1_75_0` (installation in command prompt via `bootstrap` and then `.\b2`).
-3. Open `./msvc/alien.sln` in Visual Studio.
-4. Select `Release` and `x64` as build configuration.
-5. Click on `Start Without Debugging` (CTRL + F5).
+The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
 
-Most of the free external libraries are already included in the repository, such as
-- [Dear ImGui](https://github.com/ocornut/imgui)
-- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
-- [ImPlot](https://github.com/epezent/implot)
-- [Glad](https://glad.dav1d.de/)
-- [GLFW](https://www.glfw.org/)
-- [stb](https://github.com/nothings/stb)
-- [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+### Getting the sources
+To obtain the sources, please open a command prompt in a suitable directory (which should not contain whitespace characters) and enter the following command:
+```
+git clone --recursive https://github.com/chrxh/alien.git
+```
+Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
-### Linux
-A CMake script for cross-platform compilation will be provided in the future. At the moment, only Microsoft Visual Studio is used as a build system.
+### Build instructions for Windows
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) (or an alternative tool chain)
+
+Build steps:
+```
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+.\Release\alien.exe
+```
+
+### Build instructions for Linux
+
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and GCC 9.x+
+
+Build steps:
+```
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j8
+```
+If everything goes well, the alien executable can be found under the build directory:
+```
+./alien
+```
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).

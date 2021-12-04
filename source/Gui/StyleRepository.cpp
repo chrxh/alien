@@ -2,8 +2,9 @@
 
 #include <stdexcept>
 
-#include "imgui.h"
-#include "misc/freetype/imgui_freetype.h"
+#include <imgui.h>
+#include <imgui_freetype.h>
+
 #include "Fonts/DroidSans.h"
 #include "Fonts/Cousine-Regular.h"
 #include "IconFontCppHeaders/FontAwesomeSolid.h"

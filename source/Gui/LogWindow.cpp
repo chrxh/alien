@@ -41,14 +41,14 @@ void _LogWindow::process()
             }
             ImGui::PopStyleColor();
             ImGui::PopFont();
-            ImGui::EndChild();
         }
+        ImGui::EndChild();
+        
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Checkbox("Verbose", &_verbose);
-
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 bool _LogWindow::isOn() const

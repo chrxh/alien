@@ -70,8 +70,8 @@ void _TemporalControlWindow::process()
         ImGui::Spacing();
         ImGui::Spacing();
         processTpsRestriction();
-        ImGui::EndChild();
     }
+    ImGui::EndChild();
 
     ImGui::End();
 }

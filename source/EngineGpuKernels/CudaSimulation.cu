@@ -8,7 +8,7 @@
 #include <cuda_gl_interop.h>
 
 #include <device_launch_parameters.h>
-#include <helper_cuda.h>
+#include <cuda/helper_cuda.h>
 
 #include "Base/Exceptions.h"
 #include "EngineInterface/SimulationParameters.h"
