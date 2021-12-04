@@ -1,5 +1,6 @@
 
 add_library(alien_engine_interface_lib
+    ShallowUpdateSelectionData.h
     ChangeDescriptions.cpp
     ChangeDescriptions.h
     Colors.h
