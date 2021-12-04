@@ -4,6 +4,14 @@
 #include <regex>
 #include <stdexcept>
 
+#include <optional>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/optional.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/list.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
 
@@ -13,15 +21,6 @@
 #include "ChangeDescriptions.h"
 #include "SimulationParameters.h"
 #include "Parser.h"
-
-#include <optional>
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/types/optional.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/list.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/vector.hpp>
 
 namespace cereal
 {
