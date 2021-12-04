@@ -27,22 +27,27 @@ struct DeserializedSimulation
 class _Serializer
 {
 public:
-    ENGINEINTERFACE_EXPORT bool loadSimulationDataFromFile(string const& filename, SerializedSimulation& data);
-    ENGINEINTERFACE_EXPORT bool saveSimulationDataToFile(string const& filename, SerializedSimulation& data);
-
-    ENGINEINTERFACE_EXPORT SerializedSimulation serializeSimulation(DeserializedSimulation const& data);
-    ENGINEINTERFACE_EXPORT DeserializedSimulation deserializeSimulation(SerializedSimulation const& data);
+    ENGINEINTERFACE_EXPORT bool serializeSimulationToFile(string const& filename, DeserializedSimulation const& data);
+    ENGINEINTERFACE_EXPORT bool deserializeSimulationFromFile(string const& filename, DeserializedSimulation& data);
 
 private:
-	ENGINEINTERFACE_EXPORT string serializeSymbolMap(SymbolMap const symbols) const;
-    ENGINEINTERFACE_EXPORT SymbolMap deserializeSymbolMap(string const& data);
+    void serializeDataDescription(DataDescription const data, std::ostream& stream) const;
+    void serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream) const;
+    void serializeSymbolMap(SymbolMap const symbols, std::ostream& stream) const;
 
-    ENGINEINTERFACE_EXPORT string serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings) const;
-    ENGINEINTERFACE_EXPORT std::pair<uint64_t, Settings> deserializeTimestepAndSettings(std::string const& data) const;
+    void deserializeDataDescription(DataDescription& data, std::istream& stream) const;
+    void deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream) const;
+    void deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream);
 
-    ENGINEINTERFACE_EXPORT string serializeDataDescription(DataDescription const& desc) const;
-    ENGINEINTERFACE_EXPORT DataDescription deserializeDataDescription(string const& data);
+	string serializeSymbolMap(SymbolMap const symbols) const;
+    SymbolMap deserializeSymbolMap(string const& data);
 
-    ENGINEINTERFACE_EXPORT bool loadDataFromFile(std::string const& filename, std::string& data);
-    ENGINEINTERFACE_EXPORT bool saveDataToFile(std::string const& filename, std::string const& data);
+    string serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings) const;
+    std::pair<uint64_t, Settings> deserializeTimestepAndSettings(std::string const& data) const;
+
+    string serializeDataDescription(DataDescription const& desc) const;
+    DataDescription deserializeDataDescription(string const& data);
+
+    bool loadDataFromFile(std::string const& filename, std::string& data);
+    bool saveDataToFile(std::string const& filename, std::string const& data);
 };

@@ -31,9 +31,9 @@ void _OpenSimulationDialog::process()
         _statisticsWindow->reset();
 
         Serializer serializer = boost::make_shared<_Serializer>();
-        SerializedSimulation serializedData;
-        serializer->loadSimulationDataFromFile(firstFilename.string(), serializedData);
-        auto deserializedData = serializer->deserializeSimulation(serializedData);
+
+        DeserializedSimulation deserializedData;
+        serializer->deserializeSimulationFromFile(firstFilename.string(), deserializedData);
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
         _simController->setSimulationData(deserializedData.content);

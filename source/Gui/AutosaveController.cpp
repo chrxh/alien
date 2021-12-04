@@ -58,6 +58,5 @@ void _AutosaveController::onSave()
     sim.content = _simController->getSimulationData(
         {-1000, -1000}, {_simController->getWorldSize().x + 1000, _simController->getWorldSize().y + 1000});
     Serializer serializer = boost::make_shared<_Serializer>();
-    auto serializedSim = serializer->serializeSimulation(sim);
-    serializer->saveSimulationDataToFile(Const::AutosaveFile, serializedSim);
+    serializer->serializeSimulationToFile(Const::AutosaveFile, sim);
 }
