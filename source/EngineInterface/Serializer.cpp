@@ -10,8 +10,6 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/optional.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include <boost/range/adaptors.hpp>
 
 #include "Base/ServiceLocator.h"
@@ -21,11 +19,114 @@
 #include "SimulationParameters.h"
 #include "Parser.h"
 
-using namespace std;
-using namespace boost;
+#include <optional>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/optional.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/list.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
 
+namespace cereal
+{
+    template <class Archive, class T>
+    inline void save(Archive& ar, boost::optional<T> const& data)
+    {
+        std::optional<T> temp = data ? std::make_optional(*data) : std::optional<T>();
+        ar(temp);
+    }
 
-namespace boost {
+    template <class Archive, class T>
+    inline void load(Archive& ar, boost::optional<T>& data)
+    {
+        std::optional<T> temp;
+        ar(temp);
+        data = temp ? boost::make_optional(*temp) : boost::optional<T>();
+    }
+
+    template <class Archive>
+    inline void save(Archive& ar, CellFeatureDescription const& data)
+    {
+        ar(data.getType(), data.volatileData, data.constData);
+    }
+    template <class Archive>
+    inline void load(Archive& ar, CellFeatureDescription& data)
+    {
+        Enums::CellFunction::Type type;
+        ar(type, data.volatileData, data.constData);
+        data.setType(type);
+    }
+
+    template <class Archive>
+    inline void serialize(Archive& ar, TokenDescription& data)
+    {
+        ar(data.energy, data.data);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, CellMetadata& data)
+    {
+        ar(data.computerSourcecode, data.name, data.description, data.color);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, ConnectionDescription& data)
+    {
+        ar(data.cellId, data.distance, data.angleFromPrevious);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, CellDescription& data)
+    {
+        ar(data.id,
+           data.pos,
+           data.vel,
+           data.energy,
+           data.maxConnections,
+           data.connections,
+           data.tokenBlocked,
+           data.tokenBranchNumber,
+           data.metadata,
+           data.cellFeature,
+           data.tokens,
+           data.tokenUsages);
+    }
+
+    template <class Archive>
+    inline void serialize(Archive& ar, ClusterDescription& data)
+    {
+        ar(data.id, data.cells);
+    }
+
+    template <class Archive>
+    inline void serialize(Archive& ar, ParticleMetadata& data)
+    {
+        ar(data.color);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, ParticleDescription& data)
+    {
+        ar(data.id, data.pos, data.vel, data.energy, data.metadata);
+    }
+
+    template <class Archive>
+    inline void serialize(Archive& ar, DataDescription& data)
+    {
+        ar(data.clusters, data.particles);
+    }
+
+    template <class Archive>
+    inline void serialize(Archive& ar, IntVector2D& data)
+    {
+        ar(data.x, data.y);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, RealVector2D& data)
+    {
+        ar(data.x, data.y);
+    }
+}
+
+namespace boost
+{
 	namespace serialization {
 
         template<class Archive>
@@ -245,28 +346,49 @@ std::pair<uint64_t, Settings> _Serializer::deserializeTimestepAndSettings(
     return Parser::decodeTimestepAndSettings(tree);
 }
 
-string _Serializer::serializeDataDescription(DataDescription const& desc) const
+string _Serializer::serializeDataDescription(DataDescription const& data) const
 {
+    std::ostringstream stream;
+    cereal::PortableBinaryOutputArchive archive(stream);
+
+    archive(data);
+
+    return stream.str();
+/*
     ostringstream stream;
     boost::archive::text_oarchive archive(stream);
 
     archive << desc;
     return stream.str();
+*/
 }
 
 DataDescription _Serializer::deserializeDataDescription(string const& data)
 {
-    istringstream stream(data);
+    std::istringstream stream(data);
+    cereal::PortableBinaryInputArchive archive(stream);
+
+    DataDescription result;
+    archive(result);
+
+    if(!result.clusters && !result.particles) {
+        throw std::runtime_error("no data found");
+    }
+    return result;
+
+/*
+    std::istringstream stream(data);
     boost::archive::text_iarchive ia(stream);
 
     DataDescription result;
     ia >> result;
     return result;
+*/
 }
 
 bool _Serializer::loadDataFromFile(std::string const& filename, std::string& data)
 {
-    ifstream stream(filename, ios::binary);
+    std::ifstream stream(filename, std::ios::binary);
     if (!stream) {
         return false;
     }
@@ -277,7 +399,7 @@ bool _Serializer::loadDataFromFile(std::string const& filename, std::string& dat
 
 bool _Serializer::saveDataToFile(std::string const& filename, std::string const& data)
 {
-    ofstream stream(filename, ios::binary);
+    std::ofstream stream(filename, std::ios::binary);
     if (!stream) {
         return false;
     }
