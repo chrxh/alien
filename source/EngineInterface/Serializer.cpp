@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <regex>
+#include <stdexcept>
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -9,8 +10,8 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/optional.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/range/adaptors.hpp>
 
 #include "Base/ServiceLocator.h"
@@ -143,7 +144,7 @@ bool _Serializer::loadSimulationDataFromFile(string const& filename, SerializedS
             return false;
         }
     } catch (std::exception const& e) {
-        throw std::exception(("An error occurred while loading the file " + filename + ": " + e.what()).c_str());
+        throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());
     }
 
     return true;
@@ -169,8 +170,8 @@ bool _Serializer::saveSimulationDataToFile(string const& filename, SerializedSim
             return false;
         }
     } catch (std::exception const& e) {
-        throw std::exception(
-            ("An error occurred while saving the file " + filename + ": " + e.what()).c_str());
+        throw std::runtime_error(
+            "An error occurred while saving the file " + filename + ": " + e.what());
     }
 
     return true;
@@ -184,17 +185,21 @@ SerializedSimulation _Serializer::serializeSimulation(DeserializedSimulation con
             serializeSymbolMap(data.symbolMap),
             serializeDataDescription(data.content)};
     } catch (std::exception const& e) {
-        throw std::exception((std::string("An error occurred while serializing simulation data: ") + e.what()).c_str());
+        throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
     }
 }
 
 DeserializedSimulation _Serializer::deserializeSimulation(SerializedSimulation const& data)
 {
+    if (data.timestepAndSettings.empty()) {
+        return DeserializedSimulation();
+    }
+
     try {
         auto [timestep, settings] = deserializeTimestepAndSettings(data.timestepAndSettings);
         return {timestep, settings, deserializeSymbolMap(data.symbolMap), deserializeDataDescription(data.content)};
     } catch (std::exception const& e) {
-        throw std::exception((std::string("An error occurred while deserializing simulation data: ") + e.what()).c_str());
+        throw std::runtime_error(std::string("An error occurred while deserializing simulation data: ") + e.what());
     }
 }
 
@@ -243,7 +248,7 @@ std::pair<uint64_t, Settings> _Serializer::deserializeTimestepAndSettings(
 string _Serializer::serializeDataDescription(DataDescription const& desc) const
 {
     ostringstream stream;
-    boost::archive::binary_oarchive archive(stream);
+    boost::archive::text_oarchive archive(stream);
 
     archive << desc;
     return stream.str();
@@ -252,7 +257,7 @@ string _Serializer::serializeDataDescription(DataDescription const& desc) const
 DataDescription _Serializer::deserializeDataDescription(string const& data)
 {
     istringstream stream(data);
-    boost::archive::binary_iarchive ia(stream);
+    boost::archive::text_iarchive ia(stream);
 
     DataDescription result;
     ia >> result;
