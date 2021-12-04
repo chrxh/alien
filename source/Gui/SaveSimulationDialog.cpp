@@ -27,8 +27,7 @@ void _SaveSimulationDialog::process()
         sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
 
         Serializer serializer = boost::make_shared<_Serializer>();
-        auto serializedSim = serializer->serializeSimulation(sim);
-        serializer->saveSimulationDataToFile(firstFilename.string(), serializedSim);
+        serializer->serializeSimulationToFile(firstFilename.string(), sim);
     }
     ifd::FileDialog::Instance().Close();
 }
