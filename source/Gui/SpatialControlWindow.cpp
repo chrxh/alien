@@ -59,14 +59,15 @@ void _SpatialControlWindow::process()
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto worldSize = _simController->getWorldSize();
-        ImGui::Text((StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
+        ImGui::TextUnformatted(
+            (StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Zoom factor");
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::Text(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
+        ImGui::TextUnformatted(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
@@ -74,7 +75,8 @@ void _SpatialControlWindow::process()
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto centerPos = _viewport->getCenterInWorldPos();
-        ImGui::Text((StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
+        ImGui::TextUnformatted(
+            (StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
