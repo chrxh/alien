@@ -33,4 +33,4 @@ add_library(alien_engine_interface_lib
     ZoomLevels.h)
 
 target_link_libraries(alien_engine_interface_lib Boost::boost)
-target_link_libraries(alien Boost::serialization)
+target_link_libraries(alien cereal)
