@@ -43,7 +43,7 @@ namespace
     class CudaInitializer
     {
     public:
-        static void init() { static CudaInitializer instance; }
+        static void init() { [[maybe_unused]] static CudaInitializer instance; }
 
         CudaInitializer()
         {
@@ -219,13 +219,16 @@ void _CudaSimulation::getVectorImage(
         static_cast<float>(zoom),
         *_cudaSimulationData);
 
-    cudaMemcpyToArray(
+    const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
         mappedArray,
         0,
         0,
         _cudaSimulationData->imageData,
-        sizeof(unsigned int) * imageSize.x * imageSize.y * 2,
-        cudaMemcpyDeviceToDevice);
+        widthBytes,
+        widthBytes,
+        imageSize.y,
+        cudaMemcpyDeviceToDevice));
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResource_));
 }

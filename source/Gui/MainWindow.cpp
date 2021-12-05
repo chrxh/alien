@@ -141,10 +141,10 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        return (void*)tex;
+        return reinterpret_cast<void*>(tex);
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
-        GLuint texID = (GLuint)((uintptr_t)tex);
+        GLuint texID = reinterpret_cast<uintptr_t>(tex);
         glDeleteTextures(1, &texID);
     };
 
