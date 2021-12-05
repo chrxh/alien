@@ -92,7 +92,7 @@ void _TemporalControlWindow::processTpsInfo()
 
     ImGui::PushFont(_styleRepository->getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
-    ImGui::Text(StringFormatter::format(_simController->getTps(), 1).c_str());
+    ImGui::TextUnformatted(StringFormatter::format(_simController->getTps(), 1).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -103,7 +103,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 
     ImGui::PushFont(_styleRepository->getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor/*0xffa07050*/);
-    ImGui::Text(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
+    ImGui::TextUnformatted(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }

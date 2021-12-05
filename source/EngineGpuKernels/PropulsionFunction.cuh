@@ -19,12 +19,13 @@ private:
 
 __inline__ __device__ void PropulsionFunction::processing(Token* token, SimulationData& data)
 {
-    auto const& cell = token->cell;
-    auto const& sourceCell = token->sourceCell;
     auto& tokenMem = token->memory;
-    auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::INPUT]) % Enums::PropIn::_COUNTER;
 
 /*
+    auto const& cell = token->cell;
+    auto const& sourceCell = token->sourceCell;
+    auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::INPUT]) % Enums::PropIn::_COUNTER;
+
     if (Enums::PropIn::DO_NOTHING == command) {
         tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
         return;

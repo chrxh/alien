@@ -1,7 +1,7 @@
 #include "StatisticsWindow.h"
 
-#include "imgui.h"
-#include "implot.h"
+#include <imgui.h>
+#include <implot.h>
 
 #include "Base/StringFormatter.h"
 #include "EngineInterface/OverallStatistics.h"
@@ -107,19 +107,19 @@ void _StatisticsWindow::processLiveStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Cells", 0);
+        ImGui::Text("Cells");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(0, _liveStatistics.numCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Energy particles", 0);
+        ImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(1, _liveStatistics.numParticlesHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Tokens", 0);
+        ImGui::Text("Tokens");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(2, _liveStatistics.numTokensHistory);
         ImPlot::PopColormap();
@@ -139,25 +139,25 @@ void _StatisticsWindow::processLiveStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Created cells", 0);
+        ImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(3, _liveStatistics.numCreatedCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Successful attacks", 0);
+        ImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(4, _liveStatistics.numSuccessfulAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Failed attacks", 0);
+        ImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(5, _liveStatistics.numFailedAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Muscle activities", 0);
+        ImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(6, _liveStatistics.numMuscleActivitiesHistory);
 
@@ -181,19 +181,19 @@ void _StatisticsWindow::processLongtermStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Cells", 0);
+        ImGui::Text("Cells");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(0, _longtermStatistics.numCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Energy particles", 0);
+        ImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(1, _longtermStatistics.numParticlesHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Tokens", 0);
+        ImGui::Text("Tokens");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(2, _longtermStatistics.numTokensHistory);
         ImPlot::PopColormap();
@@ -213,25 +213,25 @@ void _StatisticsWindow::processLongtermStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Created cells", 0);
+        ImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(3, _longtermStatistics.numCreatedCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Successful attacks", 0);
+        ImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(4, _longtermStatistics.numSuccessfulAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Failed attacks", 0);
+        ImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(5, _longtermStatistics.numFailedAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Muscle activities", 0);
+        ImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(6, _longtermStatistics.numMuscleActivitiesHistory);
 
@@ -265,6 +265,7 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
                 valueHistory.back(),
                 ImVec2(-10.0f, 10.0f),
                 color,
+                "%s",
                 StringFormatter::format(toInt(valueHistory.back())).c_str());
         }
 
@@ -309,6 +310,7 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
                 valueHistory.back(),
                 ImVec2(-10.0f, 10.0f),
                 ImPlot::GetLastItemColor(),
+                "%s",
                 StringFormatter::format(toInt(valueHistory.back())).c_str());
         }
         ImPlot::PushStyleColor(ImPlotCol_Line, color);
