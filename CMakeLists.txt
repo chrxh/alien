@@ -40,7 +40,6 @@ find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
-find_package(cereal CONFIG REQUIRED)
 
 add_subdirectory(external/ImFileDialog)
 add_subdirectory(source/Base)
