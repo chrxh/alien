@@ -46,7 +46,7 @@ public:
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom);
-    ENGINEIMPL_EXPORT DataDescription
+    ENGINEIMPL_EXPORT DataDescription2
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ENGINEIMPL_EXPORT OverallStatistics getMonitorData() const;
 

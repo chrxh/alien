@@ -28,7 +28,7 @@ public:
         IntVector2D const& imageSize,
         double zoom);
 
-    ENGINEIMPL_EXPORT DataDescription
+    ENGINEIMPL_EXPORT DataDescription2
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
 
     ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);

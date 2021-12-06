@@ -65,11 +65,6 @@ namespace cereal
     }
 
     template <class Archive>
-    inline void serialize(Archive& ar, TokenDescription& data)
-    {
-        ar(data.energy, data.data);
-    }
-    template <class Archive>
     inline void serialize(Archive& ar, CellMetadata& data)
     {
         ar(data.computerSourcecode, data.name, data.description, data.color);
@@ -79,46 +74,12 @@ namespace cereal
     {
         ar(data.cellId, data.distance, data.angleFromPrevious);
     }
-    template <class Archive>
-    inline void serialize(Archive& ar, CellDescription& data)
-    {
-        ar(data.id,
-           data.pos,
-           data.vel,
-           data.energy,
-           data.maxConnections,
-           data.connections,
-           data.tokenBlocked,
-           data.tokenBranchNumber,
-           data.metadata,
-           data.cellFeature,
-           data.tokens,
-           data.tokenUsages);
-    }
-
-    template <class Archive>
-    inline void serialize(Archive& ar, ClusterDescription& data)
-    {
-        ar(data.id, data.cells);
-    }
 
     template <class Archive>
     inline void serialize(Archive& ar, ParticleMetadata& data)
     {
         ar(data.color);
     }
-    template <class Archive>
-    inline void serialize(Archive& ar, ParticleDescription& data)
-    {
-        ar(data.id, data.pos, data.vel, data.energy, data.metadata);
-    }
-
-    template <class Archive>
-    inline void serialize(Archive& ar, DataDescription& data)
-    {
-        ar(data.clusters, data.particles);
-    }
-
     template <class Archive>
     inline void serialize(Archive& ar, TokenDescription2& data)
     {
@@ -238,11 +199,10 @@ bool _Serializer::deserializeSimulationFromFile(string const& filename, Deserial
     }
 }
 
-void _Serializer::serializeDataDescription(DataDescription const& data, std::ostream& stream) const
+void _Serializer::serializeDataDescription(DataDescription2 const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
-    DataDescription2 data2 = Converter::convert2(data);
-    archive(data2);
+    archive(data);
 }
 
 void _Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream)
@@ -261,12 +221,12 @@ void _Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stre
     boost::property_tree::json_parser::write_json(stream, tree);
 }
 
-void _Serializer::deserializeDataDescription(DataDescription& data, std::istream& stream) const
+void _Serializer::deserializeDataDescription(DataDescription2& data, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     archive(data);
 
-    if (!data.clusters && !data.particles) {
+    if (data.clusters.empty() && data.particles.empty()) {
         throw std::runtime_error("no data found");
     }
 }
