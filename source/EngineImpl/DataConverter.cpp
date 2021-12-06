@@ -83,12 +83,12 @@ namespace
     }
 }
 
-DataDescription DataConverter::getDataDescription() const
+DataDescription2 DataConverter::getDataDescription() const
 {
-	DataDescription result;
+	DataDescription2 result;
 
     //cells
-    std::list<ClusterDescription> clusters;
+    std::list<ClusterDescription2> clusters;
 	std::unordered_set<int> freeCellIndices;
     for (int i = 0; i < *_dataTO.numCells; ++i) {
         freeCellIndices.insert(i);
@@ -121,16 +121,16 @@ DataDescription DataConverter::getDataDescription() const
         }
         auto clusterDescIndex = cellTOIndexToClusterDescIndex.at(token.cellIndex); 
         auto cellDescIndex = cellTOIndexToCellDescIndex.at(token.cellIndex);
-        CellDescription& cell = result.clusters->at(clusterDescIndex).cells->at(cellDescIndex);
+        CellDescription2& cell = result.clusters.at(clusterDescIndex).cells.at(cellDescIndex);
             
-        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
+        cell.addToken(TokenDescription2().setEnergy(token.energy).setData(data));
     }
 
     //particles
-    std::list<ParticleDescription> particles;
+    std::list<ParticleDescription2> particles;
     for (int i = 0; i < *_dataTO.numParticles; ++i) {
         ParticleAccessTO const& particle = _dataTO.particles[i];
-        particles.emplace_back(ParticleDescription()
+        particles.emplace_back(ParticleDescription2()
                                .setId(particle.id)
                                .setPos({particle.pos.x, particle.pos.y})
                                .setVel({particle.vel.x, particle.vel.y})
@@ -248,7 +248,7 @@ auto DataConverter::scanAndCreateClusterDescription(int startCellIndex, std::uno
     currentCellIndices.insert(startCellIndex);
     std::unordered_set<int> scannedCellIndices = currentCellIndices;
 
-    std::list<CellDescription> cells;
+    std::list<CellDescription2> cells;
     std::unordered_set<int> nextCellIndices;
     int cellDescIndex = 0;
     do {
@@ -277,9 +277,9 @@ auto DataConverter::scanAndCreateClusterDescription(int startCellIndex, std::uno
     return result;
 }
 
-CellDescription DataConverter::createCellDescription(int cellIndex) const
+CellDescription2 DataConverter::createCellDescription(int cellIndex) const
 {
-    CellDescription result;
+    CellDescription2 result;
 
     auto const& cellTO = _dataTO.cells[cellIndex];
     result.id = cellTO.id;
@@ -287,7 +287,7 @@ CellDescription DataConverter::createCellDescription(int cellIndex) const
     result.vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
     result.energy = cellTO.energy;
     result.maxConnections = cellTO.maxConnections;
-    list<ConnectionDescription> connections;
+    std::vector<ConnectionDescription> connections;
     for (int i = 0; i < cellTO.numConnections; ++i) {
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
@@ -324,26 +324,20 @@ CellDescription DataConverter::createCellDescription(int cellIndex) const
                        .setVolatileData(convertToString(cellTO.mutableData, cellTO.numMutableBytes));
     result.cellFeature = feature;
     result.tokenUsages = cellTO.tokenUsages;
-    result.tokens = std::vector<TokenDescription>{};
 
     return result;
 }
 
-void DataConverter::addParticle(ParticleDescription const & particleDesc)
+void DataConverter::addParticle(ParticleDescription2 const & particleDesc)
 {
     auto particleIndex = (*_dataTO.numParticles)++;
 
 	ParticleAccessTO& particleTO = _dataTO.particles[particleIndex];
 	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
-	particleTO.pos = { particleDesc.pos->x, particleDesc.pos->y };
-	particleTO.vel = { particleDesc.vel->x, particleDesc.vel->y };
-	particleTO.energy = toFloat(*particleDesc.energy);
-    if (auto const& metadata = particleDesc.metadata) {
-        particleTO.metadata.color = metadata->color;
-    }
-    else {
-        particleTO.metadata.color = 0;
-    }
+	particleTO.pos = { particleDesc.pos.x, particleDesc.pos.y };
+	particleTO.vel = { particleDesc.vel.x, particleDesc.vel.y };
+	particleTO.energy = toFloat(particleDesc.energy);
+    particleTO.metadata.color = particleDesc.metadata.color;
 }
 
 void DataConverter::markDelCell(uint64_t cellId)
@@ -565,12 +559,12 @@ void DataConverter::addCell(
 
     if (cellDesc.tokens.getOptionalValue()) {
         for (int i = 0; i < cellDesc.tokens->size(); ++i) {
-            TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
+            TokenDescription2 const& tokenDesc = cellDesc.tokens->at(i);
             int tokenIndex = (*_dataTO.numTokens)++;
             TokenAccessTO& tokenTO = _dataTO.tokens[tokenIndex];
-            tokenTO.energy = toFloat(*tokenDesc.energy);
+            tokenTO.energy = toFloat(tokenDesc.energy);
             tokenTO.cellIndex = cellIndex;
-            convertToArray(*tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
+            convertToArray(tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
         }
     }
 /*

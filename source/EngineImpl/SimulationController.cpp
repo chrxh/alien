@@ -41,7 +41,7 @@ void _SimulationController::getVectorImage(
     _worker.getVectorImage(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
-DataDescription _SimulationController::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+DataDescription2 _SimulationController::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
 }
