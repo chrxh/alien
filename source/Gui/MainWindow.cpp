@@ -470,6 +470,9 @@ void _MainWindow::processMenubar()
 
     //menu hotkeys
     auto io = ImGui::GetIO();
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
+        _newSimulationDialog->show();
+    }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
         _openSimulationDialog->show();
     }

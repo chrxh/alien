@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "EngineInterface/GpuSettings.h"
 
 #include "Base.cuh"
@@ -11,7 +13,6 @@
 struct SimulationData
 {
     int2 size;
-    uint64_t timestep;
 
     CellMap cellMap;
     ParticleMap particleMap;
@@ -27,12 +28,11 @@ struct SimulationData
 
     CudaNumberGenerator numberGen;
     int numPixels;
-    unsigned int* imageData;
+    uint64_t* imageData;    //pixel in bbbbggggrrrr format (3 x 16 bit)
 
-    void init(int2 const& universeSize, uint64_t newTimestep)
+    void init(int2 const& universeSize)
     {
         size = universeSize;
-        timestep = newTimestep;
 
         entities.init();
         entitiesForCleanup.init();
@@ -41,10 +41,10 @@ struct SimulationData
         particleMap.init(size);
 
         dynamicMemory.init();
-        numberGen.init(40312357);
+        numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
         numPixels = size.x * size.y;
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(numPixels*2, imageData);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(numPixels, imageData);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     }
 
@@ -63,8 +63,8 @@ struct SimulationData
     void resizeImage(int2 const& newSize)
     {
         CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(
-            max(newSize.x * newSize.y, size.x * size.y)*2, imageData);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(
+            max(newSize.x * newSize.y, size.x * size.y), imageData);
         numPixels = newSize.x * newSize.y;
     }
 
