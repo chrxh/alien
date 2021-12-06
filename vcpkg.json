@@ -40,10 +40,6 @@
       "version>=": "1.77.0"
     },
     {
-      "name": "boost-serialization",
-      "version>=": "1.77.0"
-    },
-    {
       "name": "boost-optional",
       "version>=": "1.77.0"
     },
