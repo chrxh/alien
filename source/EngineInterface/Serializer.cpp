@@ -24,6 +24,18 @@
 
 namespace cereal
 {
+
+    template <class Archive>
+    inline void serialize(Archive& ar, IntVector2D& data)
+    {
+        ar(data.x, data.y);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, RealVector2D& data)
+    {
+        ar(data.x, data.y);
+    }
+
     template <class Archive, class T>
     inline void save(Archive& ar, boost::optional<T> const& data)
     {
@@ -108,14 +120,40 @@ namespace cereal
     }
 
     template <class Archive>
-    inline void serialize(Archive& ar, IntVector2D& data)
+    inline void serialize(Archive& ar, TokenDescription2& data)
     {
-        ar(data.x, data.y);
+        ar(data.energy, data.data);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, RealVector2D& data)
+    inline void serialize(Archive& ar, CellDescription2& data)
     {
-        ar(data.x, data.y);
+        ar(data.id,
+           data.pos,
+           data.vel,
+           data.energy,
+           data.maxConnections,
+           data.connections,
+           data.tokenBlocked,
+           data.tokenBranchNumber,
+           data.metadata,
+           data.cellFeature,
+           data.tokens,
+           data.tokenUsages);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, ClusterDescription2& data)
+    {
+        ar(data.id, data.cells);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, ParticleDescription2& data)
+    {
+        ar(data.id, data.pos, data.vel, data.energy, data.metadata);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DataDescription2& data)
+    {
+        ar(data.clusters, data.particles);
     }
 }
 
@@ -200,10 +238,11 @@ bool _Serializer::deserializeSimulationFromFile(string const& filename, Deserial
     }
 }
 
-void _Serializer::serializeDataDescription(DataDescription const data, std::ostream& stream) const
+void _Serializer::serializeDataDescription(DataDescription const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
-    archive(data);
+    DataDescription2 data2 = Converter::convert2(data);
+    archive(data2);
 }
 
 void _Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream)
