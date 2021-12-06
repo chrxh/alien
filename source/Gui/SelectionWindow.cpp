@@ -32,21 +32,21 @@ void _SelectionWindow::process()
         ImGui::Text("Cells");
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::Text(StringFormatter::format(selection.numCells).c_str());
+        ImGui::TextUnformatted(StringFormatter::format(selection.numCells).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Cells from clusters");
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::Text(StringFormatter::format(selection.numClusterCells).c_str());
+        ImGui::TextUnformatted(StringFormatter::format(selection.numClusterCells).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Energy particles");
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::Text(StringFormatter::format(selection.numParticles).c_str());
+        ImGui::TextUnformatted(StringFormatter::format(selection.numParticles).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
