@@ -160,7 +160,7 @@ struct ClusterDescription
         id = value;
         return *this;
     }
-    ClusterDescription& addCells(std::list<CellDescription> const& value)
+    ClusterDescription& addCells(std::vector<CellDescription> const& value)
     {
         cells.insert(cells.end(), value.begin(), value.end());
         return *this;
@@ -224,7 +224,7 @@ struct DataDescription
     vector<ParticleDescription> particles;
 
     ENGINEINTERFACE_EXPORT DataDescription() = default;
-    DataDescription& addClusters(list<ClusterDescription> const& value)
+    DataDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
         clusters.insert(clusters.end(), value.begin(), value.end());
         return *this;
@@ -235,7 +235,7 @@ struct DataDescription
         return *this;
     }
 
-    DataDescription& addParticles(list<ParticleDescription> const& value)
+    DataDescription& addParticles(std::vector<ParticleDescription> const& value)
     {
         particles.insert(particles.end(), value.begin(), value.end());
         return *this;
