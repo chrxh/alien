@@ -8,6 +8,11 @@
 
 #include "Base/Exceptions.h"
 
+#define KERNEL_CALL_HOST(func, ...) \
+    func<<<1, 1>>>(__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+
 #define KERNEL_CALL(func, ...)  \
         func<<<gpuConstants.NUM_BLOCKS, gpuConstants.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__); \
         cudaDeviceSynchronize();
@@ -15,7 +20,7 @@
 #define KERNEL_CALL_1_1(func, ...)  \
         func<<<1, 1>>>(__VA_ARGS__); \
         cudaDeviceSynchronize();
-
+        
 template< typename T >
 void checkAndThrowError(T result, char const *const func, const char *const file, int const line)
 {

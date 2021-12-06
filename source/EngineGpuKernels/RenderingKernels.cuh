@@ -12,22 +12,18 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-__device__ __inline__ void drawPixel(unsigned int* imageData, unsigned int index, float3 const& color)
+__device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
 {
-    unsigned int greenRed = toInt(color.y * 225.0f) << 16 | toInt(color.x * 225.0f);
-    unsigned int blue = toInt(color.z * 225.0f);
-
-    imageData[2 * index] = greenRed;
-    imageData[2 * index + 1] = blue;
+    imageData[index] =
+        toUInt64(color.y * 225.0f) << 16 | toUInt64(color.x * 225.0f) << 0 | toUInt64(color.z * 225.0f) << 32;
 }
 
-__device__ __inline__ void drawAddingPixel(unsigned int* imageData, unsigned int index, float3 const& colorToAdd)
+__device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int index, float3 const& colorToAdd)
 {
-    unsigned int greenRed = toInt(colorToAdd.y * 255.0f) << 16 | toInt(colorToAdd.x * 255.0f);
-    unsigned int blue = toInt(colorToAdd.z * 255.0f);
+    uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0
+        | toUInt64(colorToAdd.z * 255.0f) << 32;
 
-    atomicAdd(&imageData[2 * index], greenRed);
-    atomicAdd(&imageData[2 * index + 1], blue);
+    atomicAdd(&imageData[index], rawColorToAdd);
 }
 
 __device__ float3 colorToFloat3(unsigned int value)
@@ -57,7 +53,7 @@ __device__ float3 mix(float3 const& a, float3 const& b, float3 const& c, float f
 }
 
 __global__ void drawBackground(
-    unsigned int* imageData,
+    uint64_t* imageData,
     int2 imageSize,
     int2 worldSize,
     float zoom,
@@ -81,8 +77,7 @@ __global__ void drawBackground(
         auto y = index / imageSize.x;
         if (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x
             || y >= outsideRectLowerRight.y) {
-            imageData[2 * index] = 0;
-            imageData[2 * index + 1] = 0;
+            imageData[index] = 0;
         } else {
             if (0 == cudaSimulationParametersSpots.numSpots) {
                 drawPixel(imageData, index, spaceColor);
@@ -199,7 +194,7 @@ __device__ __inline__ float3 calcColor(Token* token, bool selected)
 }
 
 __device__ __inline__ void
-drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
+drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
 {
     int2 intPos{toInt(pos.x), toInt(pos.y)};
     if (intPos.x >= 1 && intPos.x < imageSize.x - 1 && intPos.y >= 1 && intPos.y < imageSize.y - 1) {
@@ -222,7 +217,7 @@ drawDot(unsigned int* imageData, int2 const& imageSize, float2 const& pos, float
 }
 
 __device__ __inline__ void
-drawCircle(unsigned int* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
+drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
 {
     if (radius > 1.5 - FP_PRECISION) {
         auto radiusSquared = radius * radius;
@@ -251,7 +246,7 @@ __global__ void drawCells(
     float2 rectUpperLeft,
     float2 rectLowerRight,
     Array<Cell*> cells,
-    unsigned int* imageData,
+    uint64_t* imageData,
     int2 imageSize,
     float zoom)
 {
@@ -304,7 +299,7 @@ __global__ void drawTokens(
     float2 rectUpperLeft,
     float2 rectLowerRight,
     Array<Token*> tokens,
-    unsigned int* imageData,
+    uint64_t* imageData,
     int2 imageSize,
     float zoom)
 {
@@ -332,7 +327,7 @@ __global__ void drawParticles(
     float2 rectUpperLeft,
     float2 rectLowerRight,
     Array<Particle*> particles,
-    unsigned int* imageData,
+    uint64_t* imageData,
     int2 imageSize,
     float zoom)
 {
@@ -351,7 +346,7 @@ __global__ void drawParticles(
     }
 }
 
-__device__ void drawFlowCenters(unsigned int* targetImage, float2 const& rectUpperLeft, int2 imageSize, float zoom)
+__device__ void drawFlowCenters(uint64_t* targetImage, float2 const& rectUpperLeft, int2 imageSize, float zoom)
 {
     if (cudaFlowFieldSettings.active) {
         for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
@@ -362,8 +357,7 @@ __device__ void drawFlowCenters(unsigned int* targetImage, float2 const& rectUpp
             auto drawY = screenPosY;
             if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
                 int index = drawX + drawY * imageSize.x;
-                targetImage[index * 2] = 0;
-                targetImage[index * 2 + 1] = 0xfffff;
+                targetImage[index] = 0xffff00000000;
             }
         }
     }
@@ -376,7 +370,7 @@ __device__ void drawFlowCenters(unsigned int* targetImage, float2 const& rectUpp
 __global__ void
 drawImageKernel(float2 rectUpperLeft, float2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
 {
-    unsigned int* targetImage = data.imageData;
+    uint64_t* targetImage = data.imageData;
 
     KERNEL_CALL(drawBackground, targetImage, imageSize, data.size, zoom, rectUpperLeft, rectLowerRight);
 

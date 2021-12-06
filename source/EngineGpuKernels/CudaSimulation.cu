@@ -33,11 +33,6 @@
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 
-#define GPU_FUNCTION(func, ...) \
-    func<<<1, 1>>>(__VA_ARGS__); \
-    cudaDeviceSynchronize(); \
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-
 namespace
 {
     class CudaInitializer
@@ -117,24 +112,22 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
 {
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
-//    CudaMemoryManager::getInstance().reset();
-
     setSimulationParameters(settings.simulationParameters);
     setSimulationParametersSpots(settings.simulationParametersSpots);
     setGpuConstants(gpuSettings);
     setFlowFieldSettings(settings.flowFieldSettings);
-    _currentTimestep.store(timestep);
 
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "initialize simulation");
 
+    _currentTimestep.store(timestep);
     _cudaSimulationData = new SimulationData();
     _cudaSimulationResult = new SimulationResult();
     _cudaSelectionResult = new SelectionResult();
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
-    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
+    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY});
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
     _cudaSelectionResult->init();
@@ -145,6 +138,7 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
     CudaMemoryManager::getInstance().acquireMemory<char>(Const::MetadataMemorySize, _cudaAccessTO->stringBytes);
 
+    //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000, 10000});
 }
 
@@ -184,14 +178,8 @@ void* _CudaSimulation::registerImageResource(GLuint image)
 
 void _CudaSimulation::calcCudaTimestep()
 {
-    GPU_FUNCTION(calcSimulationTimestepKernel, *_cudaSimulationData, *_cudaSimulationResult);
-    if (_currentTimestep % 10 == 0) {
-        if (_cudaSimulationResult->isArrayResizeNeeded()) {
-            resizeArrays({0, 0, 0});
-        }
-    }
-
-    ++_cudaSimulationData->timestep;
+    KERNEL_CALL_HOST(calcSimulationTimestepKernel, *_cudaSimulationData, *_cudaSimulationResult);
+    automaticResizeArrays();
     ++_currentTimestep;
 }
 
@@ -202,16 +190,16 @@ void _CudaSimulation::getVectorImage(
     int2 const& imageSize,
     double zoom)
 {
-    auto cudaResource_ = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResource_));
+    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
 
     cudaArray* mappedArray;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResource_, 0, 0));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
 
     if (imageSize.x * imageSize.y > _cudaSimulationData->numPixels) {
         _cudaSimulationData->resizeImage(imageSize);
     }
-    GPU_FUNCTION(
+    KERNEL_CALL_HOST(
         drawImageKernel,
         rectUpperLeft,
         rectLowerRight,
@@ -230,7 +218,7 @@ void _CudaSimulation::getVectorImage(
         imageSize.y,
         cudaMemcpyDeviceToDevice));
 
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResource_));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
 }
 
 void _CudaSimulation::getSimulationData(
@@ -238,7 +226,7 @@ void _CudaSimulation::getSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    GPU_FUNCTION(cudaGetSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    KERNEL_CALL_HOST(cudaGetSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
@@ -285,38 +273,38 @@ void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
         sizeof(char) * (*dataTO.numStringBytes),
         cudaMemcpyHostToDevice));
 
-    GPU_FUNCTION(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO);
+    KERNEL_CALL_HOST(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO);
 }
 
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
-    GPU_FUNCTION(cudaApplyForce, applyData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaApplyForce, applyData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::switchSelection(SwitchSelectionData const& switchData)
 {
-    GPU_FUNCTION(cudaSwitchSelection, switchData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaSwitchSelection, switchData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::setSelection(SetSelectionData const& selectionData)
 {
-    GPU_FUNCTION(cudaSetSelection, selectionData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaSetSelection, selectionData, *_cudaSimulationData);
 }
 
  SelectionShallowData _CudaSimulation::getSelectionShallowData()
 {
-     GPU_FUNCTION(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
+     KERNEL_CALL_HOST(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
     return _cudaSelectionResult->getSelectionShallowData();
  }
 
 void _CudaSimulation::shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    GPU_FUNCTION(cudaShallowUpdateSelection, shallowUpdateData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaShallowUpdateSelection, shallowUpdateData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::removeSelection()
 {
-    GPU_FUNCTION(cudaRemoveSelection, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaRemoveSelection, *_cudaSimulationData);
 }
 
 void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants_)
@@ -335,7 +323,7 @@ auto _CudaSimulation::getArraySizes() const -> ArraySizes
 
 OverallStatistics _CudaSimulation::getMonitorData()
 {
-    GPU_FUNCTION(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
+    KERNEL_CALL_HOST(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
     
     OverallStatistics result;
 
@@ -361,7 +349,6 @@ uint64_t _CudaSimulation::getCurrentTimestep() const
 
 void _CudaSimulation::setCurrentTimestep(uint64_t timestep)
 {
-    _cudaSimulationData->timestep = static_cast<int>(timestep);
     _currentTimestep.store(timestep);
 }
 
@@ -386,7 +373,7 @@ void _CudaSimulation::setFlowFieldSettings(FlowFieldSettings const& settings)
 
 void _CudaSimulation::clear()
 {
-    GPU_FUNCTION(cudaClearData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaClearData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
@@ -394,6 +381,16 @@ void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
     if (_cudaSimulationData->shouldResize(
             additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize)) {
         resizeArrays(additionals);
+    }
+}
+
+void _CudaSimulation::automaticResizeArrays()
+{
+    //make check after every 10th time step
+    if (_currentTimestep.load() % 10 == 0) {
+        if (_cudaSimulationResult->isArrayResizeNeeded()) {
+            resizeArrays({0, 0, 0});
+        }
     }
 }
 
@@ -405,7 +402,7 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        GPU_FUNCTION(cudaCopyEntities, *_cudaSimulationData);
+        KERNEL_CALL_HOST(cudaCopyEntities, *_cudaSimulationData);
         _cudaSimulationData->resizeRemainings();
         _cudaSimulationData->swap();
     } else {

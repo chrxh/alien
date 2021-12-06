@@ -69,6 +69,7 @@ public:
     ENGINEGPUKERNELS_EXPORT void resizeArraysIfNecessary(ArraySizes const& additionals);
 
 private:
+    void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals);
 
     std::atomic<uint64_t> _currentTimestep;
