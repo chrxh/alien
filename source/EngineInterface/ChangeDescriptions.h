@@ -38,12 +38,12 @@ struct CellChangeDescription
 	ValueTracker<int> tokenBranchNumber;
 	ValueTracker<CellMetadata> metadata;
 	ValueTracker<CellFeatureDescription> cellFeatures;
-	ValueTracker<vector<TokenDescription2>> tokens;
+	ValueTracker<vector<TokenDescription>> tokens;
     ValueTracker<int> tokenUsages;
 
 	ENGINEINTERFACE_EXPORT CellChangeDescription() = default;
-    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription2 const& desc);
-    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription2 const& before, CellDescription2 const& after);
+    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription const& desc);
+    ENGINEINTERFACE_EXPORT CellChangeDescription(CellDescription const& before, CellDescription const& after);
 
 	ENGINEINTERFACE_EXPORT bool isEmpty() const;
 	CellChangeDescription& setId(uint64_t value) { id = value; return *this; }
@@ -72,10 +72,10 @@ struct ParticleChangeDescription
 	ValueTracker<ParticleMetadata> metadata;
 
 	ENGINEINTERFACE_EXPORT ParticleChangeDescription() = default;
-    ENGINEINTERFACE_EXPORT ParticleChangeDescription(ParticleDescription2 const& desc);
+    ENGINEINTERFACE_EXPORT ParticleChangeDescription(ParticleDescription const& desc);
     ENGINEINTERFACE_EXPORT ParticleChangeDescription(
-        ParticleDescription2 const& before,
-        ParticleDescription2 const& after);
+        ParticleDescription const& before,
+        ParticleDescription const& after);
 
 	ENGINEINTERFACE_EXPORT bool isEmpty() const;
 	ParticleChangeDescription& setId(uint64_t value) { id = value; return *this; }
@@ -90,8 +90,8 @@ struct DataChangeDescription
     vector<StateTracker<ParticleChangeDescription>> particles;
 
 	ENGINEINTERFACE_EXPORT DataChangeDescription() = default;
-    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription2 const& desc);
-    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription2 const& dataBefore, DataDescription2 const& dataAfter);
+    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription const& desc);
+    ENGINEINTERFACE_EXPORT DataChangeDescription(DataDescription const& dataBefore, DataDescription const& dataAfter);
 
 	DataChangeDescription& addNewCell(CellChangeDescription const& value)
 	{
