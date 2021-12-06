@@ -28,7 +28,7 @@ namespace
 
 }
 
-CellDescription2::CellDescription2(CellChangeDescription const& change)
+CellDescription::CellDescription(CellChangeDescription const& change)
 {
     id = change.id;
     pos = *static_cast<boost::optional<RealVector2D>>(change.pos);
@@ -43,29 +43,29 @@ CellDescription2::CellDescription2(CellChangeDescription const& change)
     metadata = *static_cast<boost::optional<CellMetadata>>(change.metadata);
     cellFeature =
         *static_cast<boost::optional<CellFeatureDescription>>(change.cellFeatures);
-    tokens = *static_cast<boost::optional<vector<TokenDescription2>>>(change.tokens);
+    tokens = *static_cast<boost::optional<vector<TokenDescription>>>(change.tokens);
     tokenUsages = *static_cast<boost::optional<int>>(change.tokenUsages);
 }
 
-CellDescription2& CellDescription2::addToken(TokenDescription2 const& value)
+CellDescription& CellDescription::addToken(TokenDescription const& value)
 {
     tokens.emplace_back(value);
     return *this;
 }
 
-CellDescription2& CellDescription2::addToken(int index, TokenDescription2 const& value)
+CellDescription& CellDescription::addToken(int index, TokenDescription const& value)
 {
     tokens.insert(tokens.begin() + index, value);
     return *this;
 }
 
-CellDescription2& CellDescription2::delToken(int index)
+CellDescription& CellDescription::delToken(int index)
 {
     tokens.erase(tokens.begin() + index);
     return *this;
 }
 
-bool CellDescription2::isConnectedTo(uint64_t id) const
+bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(
                connections.begin(),
@@ -74,7 +74,7 @@ bool CellDescription2::isConnectedTo(uint64_t id) const
         != connections.end();
 }
 
-ClusterDescription2& ClusterDescription2::addConnection(
+ClusterDescription& ClusterDescription::addConnection(
     uint64_t const& cellId1,
     uint64_t const& cellId2,
     std::unordered_map<uint64_t, int>& cache)
@@ -163,7 +163,7 @@ ClusterDescription2& ClusterDescription2::addConnection(
     return *this;
 }
 
-RealVector2D ClusterDescription2::getClusterPosFromCells() const
+RealVector2D ClusterDescription::getClusterPosFromCells() const
 {
     RealVector2D result;
     for (auto const& cell : cells) {
@@ -173,7 +173,7 @@ RealVector2D ClusterDescription2::getClusterPosFromCells() const
     return result;
 }
 
-CellDescription2& ClusterDescription2::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
+CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
 {
     auto findResult = cache.find(cellId);
     if (findResult != cache.end()) {
@@ -189,7 +189,7 @@ CellDescription2& ClusterDescription2::getCellRef(uint64_t const& cellId, std::u
     THROW_NOT_IMPLEMENTED();
 }
 
-ParticleDescription2::ParticleDescription2(ParticleChangeDescription const& change)
+ParticleDescription::ParticleDescription(ParticleChangeDescription const& change)
 {
     id = change.id;
     pos = *static_cast<boost::optional<RealVector2D>>(change.pos);
@@ -198,7 +198,7 @@ ParticleDescription2::ParticleDescription2(ParticleChangeDescription const& chan
     metadata = *static_cast<boost::optional<ParticleMetadata>>(change.metadata);
 }
 
-RealVector2D DataDescription2::calcCenter() const
+RealVector2D DataDescription::calcCenter() const
 {
     RealVector2D result;
     int numEntities = 0;
@@ -216,7 +216,7 @@ RealVector2D DataDescription2::calcCenter() const
     return result;
 }
 
-void DataDescription2::shift(RealVector2D const& delta)
+void DataDescription::shift(RealVector2D const& delta)
 {
     for (auto& cluster : clusters) {
         for (auto& cell : cluster.cells) {

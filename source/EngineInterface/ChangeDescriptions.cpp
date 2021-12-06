@@ -20,7 +20,7 @@ namespace
     }
 }
 
-CellChangeDescription::CellChangeDescription(CellDescription2 const & desc)
+CellChangeDescription::CellChangeDescription(CellDescription const & desc)
 {
 	id = desc.id;
 	pos = desc.pos;
@@ -36,7 +36,7 @@ CellChangeDescription::CellChangeDescription(CellDescription2 const & desc)
     tokenUsages = desc.tokenUsages;
 }
 
-CellChangeDescription::CellChangeDescription(CellDescription2 const & before, CellDescription2 const & after)
+CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
 {
 	id = after.id;
 	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
@@ -49,7 +49,7 @@ CellChangeDescription::CellChangeDescription(CellDescription2 const & before, Ce
 	tokenBranchNumber = ValueTracker<int>(before.tokenBranchNumber, after.tokenBranchNumber);
 	metadata = ValueTracker<CellMetadata>(before.metadata, after.metadata);
 	cellFeatures = ValueTracker<CellFeatureDescription>(before.cellFeature, after.cellFeature);
-	tokens = ValueTracker<vector<TokenDescription2>>(before.tokens, after.tokens);
+	tokens = ValueTracker<vector<TokenDescription>>(before.tokens, after.tokens);
     tokenUsages = ValueTracker<int>(before.tokenUsages, after.tokenUsages);
 }
 
@@ -59,7 +59,7 @@ bool CellChangeDescription::isEmpty() const
         && !cellFeatures && !tokens;
 }
 
-ParticleChangeDescription::ParticleChangeDescription(ParticleDescription2 const & desc)
+ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & desc)
 {
 	id = desc.id;
 	pos = desc.pos;
@@ -68,7 +68,7 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription2 const 
 	metadata = desc.metadata;
 }
 
-ParticleChangeDescription::ParticleChangeDescription(ParticleDescription2 const & before, ParticleDescription2 const & after)
+ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & before, ParticleDescription const & after)
 {
 	id = after.id;
 	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
@@ -82,7 +82,7 @@ bool ParticleChangeDescription::isEmpty() const
     return !pos && !vel && !energy && !metadata;
 }
 
-DataChangeDescription::DataChangeDescription(DataDescription2 const & desc)
+DataChangeDescription::DataChangeDescription(DataDescription const & desc)
 {
     for (auto const& cluster : desc.clusters) {
         for (auto const& cell : cluster.cells) {
@@ -94,10 +94,10 @@ DataChangeDescription::DataChangeDescription(DataDescription2 const & desc)
     }
 }
 
-DataChangeDescription::DataChangeDescription(DataDescription2 const & dataBefore, DataDescription2 const & dataAfter)
+DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
-    std::vector<CellDescription2> cellsBefore;
-    std::vector<CellDescription2> cellsAfter;
+    std::vector<CellDescription> cellsBefore;
+    std::vector<CellDescription> cellsAfter;
     for (auto const& cluster : dataBefore.clusters) {
         cellsBefore.insert(cellsBefore.begin(), cluster.cells.begin(), cluster.cells.end());
     }

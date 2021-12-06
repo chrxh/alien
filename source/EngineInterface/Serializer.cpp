@@ -81,12 +81,12 @@ namespace cereal
         ar(data.color);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, TokenDescription2& data)
+    inline void serialize(Archive& ar, TokenDescription& data)
     {
         ar(data.energy, data.data);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, CellDescription2& data)
+    inline void serialize(Archive& ar, CellDescription& data)
     {
         ar(data.id,
            data.pos,
@@ -102,17 +102,17 @@ namespace cereal
            data.tokenUsages);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, ClusterDescription2& data)
+    inline void serialize(Archive& ar, ClusterDescription& data)
     {
         ar(data.id, data.cells);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, ParticleDescription2& data)
+    inline void serialize(Archive& ar, ParticleDescription& data)
     {
         ar(data.id, data.pos, data.vel, data.energy, data.metadata);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, DataDescription2& data)
+    inline void serialize(Archive& ar, DataDescription& data)
     {
         ar(data.clusters, data.particles);
     }
@@ -199,7 +199,7 @@ bool _Serializer::deserializeSimulationFromFile(string const& filename, Deserial
     }
 }
 
-void _Serializer::serializeDataDescription(DataDescription2 const& data, std::ostream& stream) const
+void _Serializer::serializeDataDescription(DataDescription const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(data);
@@ -221,7 +221,7 @@ void _Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stre
     boost::property_tree::json_parser::write_json(stream, tree);
 }
 
-void _Serializer::deserializeDataDescription(DataDescription2& data, std::istream& stream) const
+void _Serializer::deserializeDataDescription(DataDescription& data, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     archive(data);
