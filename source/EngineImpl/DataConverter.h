@@ -35,18 +35,7 @@ private:
 	void addCell(CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int>& cellIndexTOByIds);
     void addParticle(ParticleDescription const& particleDesc);
 
-	void markDelCell(uint64_t cellId);
-	void markDelParticle(uint64_t particleId);
-
-	void markModifyCell(CellChangeDescription const& clusterDesc);
-	void markModifyParticle(ParticleChangeDescription const& particleDesc);
-
-	void processDeletions();
-	void processModifications();
 	void setConnections(CellChangeDescription const& cellToAdd, unordered_map<uint64_t, int> const& cellIndexByIds);
-
-	void applyChangeDescription(ParticleChangeDescription const& particleChanges, ParticleAccessTO& particle);
-	void applyChangeDescription(CellChangeDescription const& cellChanges, CellAccessTO& cell);
 
     int convertStringAndReturnStringIndex(std::string const& s);
 
