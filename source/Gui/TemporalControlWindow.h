@@ -45,7 +45,7 @@ private:
     struct Snapshot
     {
         uint64_t timestep;
-        DataDescription2 data;
+        DataDescription data;
     };
     boost::optional<Snapshot> _snapshot;
 

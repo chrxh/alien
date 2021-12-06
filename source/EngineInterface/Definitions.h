@@ -11,10 +11,10 @@
 
 struct SimulationParameters;
 
-struct DataDescription2;
-struct ClusterDescription2;
-struct CellDescription2;
-struct ParticleDescription2;
+struct DataDescription;
+struct ClusterDescription;
+struct CellDescription;
+struct ParticleDescription;
 
 struct DataChangeDescription;
 struct CellChangeDescription;

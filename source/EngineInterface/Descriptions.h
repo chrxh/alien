@@ -37,23 +37,23 @@ private:
     Enums::CellFunction::Type _type = Enums::CellFunction::COMPUTER;
 };
 
-struct TokenDescription2
+struct TokenDescription
 {
     double energy = 0;
     std::string data;
 
-    TokenDescription2& setEnergy(double value)
+    TokenDescription& setEnergy(double value)
     {
         energy = value;
         return *this;
     }
-    TokenDescription2& setData(std::string const& value)
+    TokenDescription& setData(std::string const& value)
     {
         data = value;
         return *this;
     }
-    bool operator==(TokenDescription2 const& other) const { return energy == other.energy && data == other.data; }
-    bool operator!=(TokenDescription2 const& other) const { return !operator==(other); }
+    bool operator==(TokenDescription const& other) const { return energy == other.energy && data == other.data; }
+    bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
 struct ConnectionDescription
@@ -63,7 +63,7 @@ struct ConnectionDescription
     float angleFromPrevious = 0;
 };
 
-struct CellDescription2
+struct CellDescription
 {
     uint64_t id = 0;
 
@@ -76,70 +76,70 @@ struct CellDescription2
     int tokenBranchNumber;
     CellMetadata metadata;
     CellFeatureDescription cellFeature;
-    std::vector<TokenDescription2> tokens;
+    std::vector<TokenDescription> tokens;
     int tokenUsages;
 
-    ENGINEINTERFACE_EXPORT CellDescription2() = default;
-    ENGINEINTERFACE_EXPORT CellDescription2(CellChangeDescription const& change);
-    CellDescription2& setId(uint64_t value)
+    ENGINEINTERFACE_EXPORT CellDescription() = default;
+    ENGINEINTERFACE_EXPORT CellDescription(CellChangeDescription const& change);
+    CellDescription& setId(uint64_t value)
     {
         id = value;
         return *this;
     }
-    CellDescription2& setPos(RealVector2D const& value)
+    CellDescription& setPos(RealVector2D const& value)
     {
         pos = value;
         return *this;
     }
-    CellDescription2& setVel(RealVector2D const& value)
+    CellDescription& setVel(RealVector2D const& value)
     {
         vel = value;
         return *this;
     }
-    CellDescription2& setEnergy(double value)
+    CellDescription& setEnergy(double value)
     {
         energy = value;
         return *this;
     }
-    CellDescription2& setMaxConnections(int value)
+    CellDescription& setMaxConnections(int value)
     {
         maxConnections = value;
         return *this;
     }
-    CellDescription2& setConnectingCells(std::vector<ConnectionDescription> const& value)
+    CellDescription& setConnectingCells(std::vector<ConnectionDescription> const& value)
     {
         connections = value;
         return *this;
     }
-    CellDescription2& setFlagTokenBlocked(bool value)
+    CellDescription& setFlagTokenBlocked(bool value)
     {
         tokenBlocked = value;
         return *this;
     }
-    CellDescription2& setTokenBranchNumber(int value)
+    CellDescription& setTokenBranchNumber(int value)
     {
         tokenBranchNumber = value;
         return *this;
     }
-    CellDescription2& setMetadata(CellMetadata const& value)
+    CellDescription& setMetadata(CellMetadata const& value)
     {
         metadata = value;
         return *this;
     }
-    CellDescription2& setCellFeature(CellFeatureDescription const& value)
+    CellDescription& setCellFeature(CellFeatureDescription const& value)
     {
         cellFeature = value;
         return *this;
     }
-    CellDescription2& setTokens(vector<TokenDescription2> const& value)
+    CellDescription& setTokens(vector<TokenDescription> const& value)
     {
         tokens = value;
         return *this;
     }
-    ENGINEINTERFACE_EXPORT CellDescription2& addToken(TokenDescription2 const& value);
-    ENGINEINTERFACE_EXPORT CellDescription2& addToken(int index, TokenDescription2 const& value);
-    ENGINEINTERFACE_EXPORT CellDescription2& delToken(int index);
-    CellDescription2& setTokenUsages(int value)
+    ENGINEINTERFACE_EXPORT CellDescription& addToken(TokenDescription const& value);
+    ENGINEINTERFACE_EXPORT CellDescription& addToken(int index, TokenDescription const& value);
+    ENGINEINTERFACE_EXPORT CellDescription& delToken(int index);
+    CellDescription& setTokenUsages(int value)
     {
         tokenUsages = value;
         return *this;
@@ -147,40 +147,40 @@ struct CellDescription2
     ENGINEINTERFACE_EXPORT bool isConnectedTo(uint64_t id) const;
 };
 
-struct ClusterDescription2
+struct ClusterDescription
 {
     uint64_t id = 0;
 
-    std::vector<CellDescription2> cells;
+    std::vector<CellDescription> cells;
 
-    ENGINEINTERFACE_EXPORT ClusterDescription2() = default;
+    ENGINEINTERFACE_EXPORT ClusterDescription() = default;
 
-    ClusterDescription2& setId(uint64_t value)
+    ClusterDescription& setId(uint64_t value)
     {
         id = value;
         return *this;
     }
-    ClusterDescription2& addCells(std::list<CellDescription2> const& value)
+    ClusterDescription& addCells(std::list<CellDescription> const& value)
     {
         cells.insert(cells.end(), value.begin(), value.end());
         return *this;
     }
-    ClusterDescription2& addCell(CellDescription2 const& value)
+    ClusterDescription& addCell(CellDescription const& value)
     {
         addCells({value});
         return *this;
     }
 
-    ENGINEINTERFACE_EXPORT ClusterDescription2&
+    ENGINEINTERFACE_EXPORT ClusterDescription&
     addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
 
     ENGINEINTERFACE_EXPORT RealVector2D getClusterPosFromCells() const;
 
 private:
-    CellDescription2& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
+    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
 };
 
-struct ParticleDescription2
+struct ParticleDescription
 {
     uint64_t id = 0;
 
@@ -189,58 +189,58 @@ struct ParticleDescription2
     double energy;
     ParticleMetadata metadata;
 
-    ENGINEINTERFACE_EXPORT ParticleDescription2() = default;
-    ENGINEINTERFACE_EXPORT ParticleDescription2(ParticleChangeDescription const& change);
-    ParticleDescription2& setId(uint64_t value)
+    ENGINEINTERFACE_EXPORT ParticleDescription() = default;
+    ENGINEINTERFACE_EXPORT ParticleDescription(ParticleChangeDescription const& change);
+    ParticleDescription& setId(uint64_t value)
     {
         id = value;
         return *this;
     }
-    ParticleDescription2& setPos(RealVector2D const& value)
+    ParticleDescription& setPos(RealVector2D const& value)
     {
         pos = value;
         return *this;
     }
-    ParticleDescription2& setVel(RealVector2D const& value)
+    ParticleDescription& setVel(RealVector2D const& value)
     {
         vel = value;
         return *this;
     }
-    ParticleDescription2& setEnergy(double value)
+    ParticleDescription& setEnergy(double value)
     {
         energy = value;
         return *this;
     }
-    ParticleDescription2& setMetadata(ParticleMetadata const& value)
+    ParticleDescription& setMetadata(ParticleMetadata const& value)
     {
         metadata = value;
         return *this;
     }
 };
 
-struct DataDescription2
+struct DataDescription
 {
-    vector<ClusterDescription2> clusters;
-    vector<ParticleDescription2> particles;
+    vector<ClusterDescription> clusters;
+    vector<ParticleDescription> particles;
 
-    ENGINEINTERFACE_EXPORT DataDescription2() = default;
-    DataDescription2& addClusters(list<ClusterDescription2> const& value)
+    ENGINEINTERFACE_EXPORT DataDescription() = default;
+    DataDescription& addClusters(list<ClusterDescription> const& value)
     {
         clusters.insert(clusters.end(), value.begin(), value.end());
         return *this;
     }
-    DataDescription2& addCluster(ClusterDescription2 const& value)
+    DataDescription& addCluster(ClusterDescription const& value)
     {
         addClusters({value});
         return *this;
     }
 
-    DataDescription2& addParticles(list<ParticleDescription2> const& value)
+    DataDescription& addParticles(list<ParticleDescription> const& value)
     {
         particles.insert(particles.end(), value.begin(), value.end());
         return *this;
     }
-    DataDescription2& addParticle(ParticleDescription2 const& value)
+    DataDescription& addParticle(ParticleDescription const& value)
     {
         addParticles({value});
         return *this;
@@ -275,7 +275,7 @@ struct DescriptionNavigator
     std::map<uint64_t, int> cellIndicesByCellIds;
     std::map<uint64_t, int> particleIndicesByParticleIds;
 
-	void update(DataDescription2 const& data)
+	void update(DataDescription const& data)
 	{
 		cellIds.clear();
 		particleIds.clear();

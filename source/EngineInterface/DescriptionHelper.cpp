@@ -4,9 +4,9 @@
 #include "Base/Math.h"
 #include "SpaceCalculator.h"
 
-void DescriptionHelper::duplicate(DataDescription2& data, IntVector2D const& origSize, IntVector2D const& size)
+void DescriptionHelper::duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
-    DataDescription2 result;
+    DataDescription result;
 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
@@ -34,11 +34,11 @@ void DescriptionHelper::duplicate(DataDescription2& data, IntVector2D const& ori
     data = result;
 }
 
-void DescriptionHelper::correctConnections(DataDescription2& data, IntVector2D const& worldSize)
+void DescriptionHelper::correctConnections(DataDescription& data, IntVector2D const& worldSize)
 {
 //     SpaceCalculator spaceCalculator(worldSize);
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
-    std::unordered_map<uint64_t, CellDescription2&> cellById;
+    std::unordered_map<uint64_t, CellDescription&> cellById;
     for (auto& cluster : data.clusters) {
         for (auto& cell : cluster.cells) {
             cellById.emplace(cell.id, cell);
@@ -63,7 +63,7 @@ void DescriptionHelper::correctConnections(DataDescription2& data, IntVector2D c
     }
 }
 
-void DescriptionHelper::colorize(DataDescription2& data, std::vector<int> const& colorCodes)
+void DescriptionHelper::colorize(DataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
         auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
@@ -73,7 +73,7 @@ void DescriptionHelper::colorize(DataDescription2& data, std::vector<int> const&
     }
 }
 
-void DescriptionHelper::makeValid(ClusterDescription2& cluster)
+void DescriptionHelper::makeValid(ClusterDescription& cluster)
 {
     auto& numberGen = NumberGenerator::getInstance();
     cluster.id = numberGen.getId();

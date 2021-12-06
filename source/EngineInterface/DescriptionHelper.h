@@ -7,13 +7,13 @@ class DescriptionHelper
 {
 public:
     ENGINEINTERFACE_EXPORT static void
-    duplicate(DataDescription2& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
+    duplicate(DataDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
 
     ENGINEINTERFACE_EXPORT static void
-    correctConnections(DataDescription2& data, IntVector2D const& worldSize);
+    correctConnections(DataDescription& data, IntVector2D const& worldSize);
 
-    ENGINEINTERFACE_EXPORT static void colorize(DataDescription2& data, std::vector<int> const& colorCodes);
+    ENGINEINTERFACE_EXPORT static void colorize(DataDescription& data, std::vector<int> const& colorCodes);
 
 private:
-    static void makeValid(ClusterDescription2& cluster);
+    static void makeValid(ClusterDescription& cluster);
 };
