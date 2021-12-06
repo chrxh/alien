@@ -32,7 +32,7 @@ add_compile_definitions(ALIEN_STATIC)
 add_executable(alien)
 
 find_package(CUDAToolkit)
-find_package(Boost REQUIRED COMPONENTS serialization)
+find_package(Boost REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(cereal CONFIG REQUIRED)
