@@ -24,6 +24,11 @@ __device__ inline int toInt(float value)
     return static_cast<int>(value);
 }
 
+__device__ inline uint64_t toUInt64(float value)
+{
+    return static_cast<uint64_t>(value);
+}
+
 struct PartitionData
 {
     int startIndex;
