@@ -56,7 +56,8 @@ void _GpuSettingsDialog::process()
         ImGui::Text("Total threads");
         ImGui::PushFont(_styleRepository->getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::Text(StringFormatter::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
+        ImGui::TextUnformatted(
+            StringFormatter::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 

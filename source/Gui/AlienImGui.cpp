@@ -41,7 +41,7 @@ void AlienImGui::SliderFloat(
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::Text(name.c_str());
+    ImGui::TextUnformatted(name.c_str());
     if (tooltip) {
         AlienImGui::HelpMarker(tooltip->c_str());
     }
@@ -64,7 +64,7 @@ void AlienImGui::SliderInt(
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::Text(name.c_str());
+    ImGui::TextUnformatted(name.c_str());
 
     if (tooltip) {
         AlienImGui::HelpMarker(tooltip->c_str());
@@ -86,7 +86,7 @@ void AlienImGui::InputInt(
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::Text(name.c_str());
+    ImGui::TextUnformatted(name.c_str());
 
     if (tooltip) {
         AlienImGui::HelpMarker(tooltip->c_str());
@@ -112,7 +112,7 @@ void AlienImGui::Combo(std::string const& name, int& value, int defaultValue, st
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::Text(name.c_str());
+    ImGui::TextUnformatted(name.c_str());
     delete[] items;
 }
 
@@ -286,7 +286,7 @@ void AlienImGui::Group(std::string const& text)
 {
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::Text(text.c_str());
+    ImGui::TextUnformatted(text.c_str());
     ImGui::Separator();
     ImGui::Spacing();
 }

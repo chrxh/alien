@@ -37,7 +37,7 @@ void _LogWindow::process()
 
             for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important)
                      | boost::adaptors::reversed) {
-                ImGui::Text(logMessage.c_str());
+                ImGui::TextUnformatted(logMessage.c_str());
             }
             ImGui::PopStyleColor();
             ImGui::PopFont();
