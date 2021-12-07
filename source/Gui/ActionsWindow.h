@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
 class _ActionsWindow
@@ -7,6 +8,7 @@ class _ActionsWindow
 public:
     _ActionsWindow(
         EditorModel const& editorModel,
+        SimulationController const& simController,
         StyleRepository const& styleRepository);
     ~_ActionsWindow();
 
@@ -17,8 +19,10 @@ public:
 
 private:
     EditorModel _editorModel;
+    SimulationController _simController;
     StyleRepository _styleRepository;
 
     bool _on = false;
     bool _includeClusters = true;
+    float _angle = 0;
 };

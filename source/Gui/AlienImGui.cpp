@@ -21,98 +21,119 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-void AlienImGui::SliderFloat(
-    std::string const& name,
-    float& value,
-    float defaultValue,
-    float min,
-    float max,
-    bool logarithmic,
-    std::string const& format,
-    boost::optional<std::string> tooltip)
+void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 2);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
     ImGui::SliderFloat(
-        ("##" + name).c_str(), &value, min, max, format.c_str(), logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    ImGui::SameLine();
-    ImGui::BeginDisabled(value == defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
-        value = defaultValue;
+        ("##" + parameters._name).c_str(),
+        &value,
+        parameters._min,
+        parameters._max,
+        parameters._format.c_str(),
+        parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+    if (parameters._defaultValue) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            value = *parameters._defaultValue;
+        }
+        ImGui::EndDisabled();
     }
-    ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::TextUnformatted(name.c_str());
-    if (tooltip) {
-        AlienImGui::HelpMarker(tooltip->c_str());
+    ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(parameters._tooltip->c_str());
     }
 }
 
-void AlienImGui::SliderInt(
-    std::string const& name,
-    int& value,
-    int defaultValue,
-    int min,
-    int max,
-    boost::optional<std::string> tooltip)
+void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 2);
-    ImGui::SliderInt(("##" + name).c_str(), &value, min, max);
-    ImGui::SameLine();
-    ImGui::BeginDisabled(value == defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
-        value = defaultValue;
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    ImGui::SliderInt(("##" + parameters._name).c_str(), &value, parameters._min, parameters._max);
+    if (parameters._defaultValue) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            value = *parameters._defaultValue;
+        }
+        ImGui::EndDisabled();
     }
-    ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::TextUnformatted(name.c_str());
+    ImGui::TextUnformatted(parameters._name.c_str());
 
-    if (tooltip) {
-        AlienImGui::HelpMarker(tooltip->c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(parameters._tooltip->c_str());
     }
 }
 
-void AlienImGui::InputInt(
-    std::string const& name,
-    int& value,
-    int defaultValue,
-    boost::optional<std::string> tooltip)
+void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x / 2);
-    ImGui::InputInt(("##" + name).c_str(), &value);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    ImGui::SliderFloat(
+        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
     ImGui::SameLine();
-    ImGui::BeginDisabled(value == defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
-        value = defaultValue;
-    }
-    ImGui::EndDisabled();
-    ImGui::SameLine();
-    ImGui::TextUnformatted(name.c_str());
+    ImGui::TextUnformatted(parameters._name.c_str());
+}
 
-    if (tooltip) {
-        AlienImGui::HelpMarker(tooltip->c_str());
+void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
+{
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    ImGui::InputInt(("##" + parameters._name).c_str(), &value);
+    if (parameters._defaultValue) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            value = *parameters._defaultValue;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(parameters._tooltip->c_str());
     }
 }
 
-void AlienImGui::Combo(std::string const& name, int& value, int defaultValue, std::vector<std::string> const& values)
+void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
-    
-    const char** items = new const char*[values.size()];
-    for(int i = 0; i < values.size(); ++i) {
-        items[i] = values[i].c_str();
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str());
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            value = *parameters._defaultValue;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(parameters._tooltip->c_str());
+    }
+}
+
+void AlienImGui::Combo(ComboParameters const& parameters, int& value)
+{
+    const char** items = new const char*[parameters._values.size()];
+    for (int i = 0; i < parameters._values.size(); ++i) {
+        items[i] = parameters._values[i].c_str();
     }
 
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2);
-    ImGui::Combo("##", &value, items, toInt(values.size()));
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    ImGui::Combo("##", &value, items, toInt(parameters._values.size()));
     ImGui::PopItemWidth();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(value == defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + name).c_str())) {
-        value = defaultValue;
+    ImGui::BeginDisabled(value == parameters._defaultValue);
+    if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        value = parameters._defaultValue;
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    ImGui::TextUnformatted(name.c_str());
+    ImGui::TextUnformatted(parameters._name.c_str());
     delete[] items;
 }
 
@@ -207,8 +228,7 @@ void AlienImGui::ColorButtonWithPicker(
         imGuiSavedPalette[i] = ImColor(savedPalette[i]);
     }
 
-    bool openColorPicker = ImGui::ColorButton(
-        text.c_str(), imGuiColor, ImGuiColorEditFlags_NoBorder, ImVec2(ImGui::GetContentRegionAvail().x / 2, 0));
+    bool openColorPicker = ImGui::ColorButton(text.c_str(), imGuiColor, ImGuiColorEditFlags_NoBorder, {size.x, size.y});
     if (openColorPicker) {
         ImGui::OpenPopup("colorpicker");
         imGuiBackupColor = imGuiColor;

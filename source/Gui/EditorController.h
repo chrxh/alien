@@ -22,7 +22,7 @@ public:
     ActionsWindow getActionsWindow() const;
 
 private:
-    void synchronizeModelWithSimulation();
+    void processSelectionRect();
 
     void leftMouseButtonPressed(RealVector2D const& viewPos);
     void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);

@@ -17,9 +17,9 @@ _EditorController::_EditorController(
     , _viewport(viewport)
     , _styleRepository(styleRepository)
 {
-    _editorModel = boost::make_shared<_EditorModel>();
+    _editorModel = boost::make_shared<_EditorModel>(_simController);
     _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel, _styleRepository);
-    _actionsWindow = boost::make_shared<_ActionsWindow>(_editorModel, _styleRepository);
+    _actionsWindow = boost::make_shared<_ActionsWindow>(_editorModel, _simController, _styleRepository);
 }
 
 bool _EditorController::isOn() const
@@ -37,25 +37,13 @@ void _EditorController::process()
     if (!_on) {
         return;
     }
-    _selectionWindow->process();
-    _actionsWindow->process();
 
-    if (_selectionRect) {
-        ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
-        auto startPos = _selectionRect->startPos;
-        auto endPos = _selectionRect->endPos;
-        draw_list->AddRectFilled(
-            {startPos.x, startPos.y},
-            {endPos.x, endPos.y},
-            Const::SelectionAreaFillColor);
-        draw_list->AddRect(
-            {startPos.x, startPos.y},
-            {endPos.x, endPos.y},
-            Const::SelectionAreaBorderColor,
-            0,
-            0,
-            1.0f);
+    if (!_simController->isSimulationRunning()) {
+        _selectionWindow->process();
+        _actionsWindow->process();
     }
+    
+    processSelectionRect();
 
     if (!ImGui::GetIO().WantCaptureMouse) {
         auto mousePosImVec = ImGui::GetMousePos();
@@ -85,7 +73,9 @@ void _EditorController::process()
         rightMouseButtonReleased();
     }
 
-    synchronizeModelWithSimulation();
+    if (_simController->removeSelectionIfInvalid()) {
+        _editorModel->clear();
+    }
 }
 
 SelectionWindow _EditorController::getSelectionWindow() const
@@ -98,60 +88,14 @@ ActionsWindow _EditorController::getActionsWindow() const
     return _actionsWindow;
 }
 
-void _EditorController::synchronizeModelWithSimulation()
+void _EditorController::processSelectionRect()
 {
-    if (_simController->removeSelectionIfInvalid()) {
-        _editorModel->clear();
-    }
-    {
-        auto delta = _editorModel->getClusterCenterPosDelta();
-        if (delta.x != 0 || delta.y != 0) {
-            ShallowUpdateSelectionData updateData;
-            updateData.posDeltaX = delta.x;
-            updateData.posDeltaY = delta.y;
-            _simController->shallowUpdateSelection(updateData);
-
-            auto selectionShallowData = _simController->getSelectionShallowData();
-            _editorModel->setOrigSelectionShallowData(selectionShallowData);
-        }
-    }
-    {
-        auto delta = _editorModel->getClusterCenterVelDelta();
-        if (delta.x != 0 || delta.y != 0) {
-            ShallowUpdateSelectionData updateData;
-            updateData.velDeltaX = delta.x;
-            updateData.velDeltaY = delta.y;
-            _simController->shallowUpdateSelection(updateData);
-
-            auto selectionShallowData = _simController->getSelectionShallowData();
-            _editorModel->setOrigSelectionShallowData(selectionShallowData);
-        }
-    }
-    {
-        auto delta = _editorModel->getCenterPosDelta();
-        if (delta.x != 0 || delta.y != 0) {
-            ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = false;
-            updateData.posDeltaX = delta.x;
-            updateData.posDeltaY = delta.y;
-            _simController->shallowUpdateSelection(updateData);
-
-            auto selectionShallowData = _simController->getSelectionShallowData();
-            _editorModel->setOrigSelectionShallowData(selectionShallowData);
-        }
-    }
-    {
-        auto delta = _editorModel->getCenterVelDelta();
-        if (delta.x != 0 || delta.y != 0) {
-            ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = false;
-            updateData.velDeltaX = delta.x;
-            updateData.velDeltaY = delta.y;
-            _simController->shallowUpdateSelection(updateData);
-
-            auto selectionShallowData = _simController->getSelectionShallowData();
-            _editorModel->setOrigSelectionShallowData(selectionShallowData);
-        }
+    if (_selectionRect) {
+        ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
+        auto startPos = _selectionRect->startPos;
+        auto endPos = _selectionRect->endPos;
+        draw_list->AddRectFilled({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaFillColor);
+        draw_list->AddRect({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaBorderColor, 0, 0, 1.0f);
     }
 }
 
@@ -162,8 +106,7 @@ void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos)
         auto zoom = _viewport->getZoomFactor();
         _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
 
-        auto selectionShallowData = _simController->getSelectionShallowData();
-        _editorModel->setOrigSelectionShallowData(selectionShallowData);
+        _editorModel->update();
     }
 }
 
@@ -179,15 +122,14 @@ void _EditorController::leftMouseButtonHold(
         _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
     } else {
         auto delta = end - start;
-        auto selectionData = _editorModel->getSelectionShallowData();
-        if (!modifierKeyPressed) {
-            selectionData.clusterCenterPosX += delta.x;
-            selectionData.clusterCenterPosY += delta.y;
-        } else {
-            selectionData.centerPosX += delta.x;
-            selectionData.centerPosY += delta.y;
-        }
-        _editorModel->setSelectionShallowData(selectionData);
+
+        ShallowUpdateSelectionData updateData;
+        updateData.considerClusters = !modifierKeyPressed;
+        updateData.posDeltaX = delta.x;
+        updateData.posDeltaY = delta.y;
+        _simController->shallowUpdateSelection(updateData);
+        _editorModel->update();
+
     }
 }
 
@@ -211,8 +153,7 @@ void _EditorController::rightMouseButtonHold(RealVector2D const& viewPos, RealVe
         auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 
         _simController->setSelection(topLeft, bottomRight);
-        auto selectionShallowData = _simController->getSelectionShallowData();
-        _editorModel->setOrigSelectionShallowData(selectionShallowData);
+        _editorModel->update();
     }
 }
 
