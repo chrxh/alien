@@ -1,6 +1,9 @@
 #include "EditorModel.h"
 
-_EditorModel::_EditorModel()
+#include "EngineImpl/SimulationController.h"
+
+_EditorModel::_EditorModel(SimulationController const& simController)
+    : _simController(simController)
 {
     clear();
 }
@@ -10,21 +13,9 @@ SelectionShallowData const& _EditorModel::getSelectionShallowData() const
     return _selectionShallowData;
 }
 
-void _EditorModel::setSelectionShallowData(SelectionShallowData const& value)
+void _EditorModel::update()
 {
-    _selectionShallowData = value;
-}
-
-void _EditorModel::setOrigSelectionShallowData(SelectionShallowData const& value)
-{
-    _origSelectionShallowData = value;
-    _selectionShallowData = value;
-}
-
-void _EditorModel::clear()
-{
-    _origSelectionShallowData = SelectionShallowData();
-    _selectionShallowData = _origSelectionShallowData;
+    _selectionShallowData = _simController->getSelectionShallowData();
 }
 
 bool _EditorModel::isSelectionEmpty() const
@@ -33,30 +24,7 @@ bool _EditorModel::isSelectionEmpty() const
         && 0 == _selectionShallowData.numParticles;
 }
 
-RealVector2D _EditorModel::getClusterCenterPosDelta() const
+void _EditorModel::clear()
 {
-    return {
-        _selectionShallowData.clusterCenterPosX - _origSelectionShallowData.clusterCenterPosX,
-        _selectionShallowData.clusterCenterPosY - _origSelectionShallowData.clusterCenterPosY};
-}
-
-RealVector2D _EditorModel::getClusterCenterVelDelta() const
-{
-    return {
-        _selectionShallowData.clusterCenterVelX - _origSelectionShallowData.clusterCenterVelX,
-        _selectionShallowData.clusterCenterVelY - _origSelectionShallowData.clusterCenterVelY};
-}
-
-RealVector2D _EditorModel::getCenterPosDelta() const
-{
-    return {
-        _selectionShallowData.centerPosX - _origSelectionShallowData.centerPosX,
-        _selectionShallowData.centerPosY - _origSelectionShallowData.centerPosY};
-}
-
-RealVector2D _EditorModel::getCenterVelDelta() const
-{
-    return {
-        _selectionShallowData.centerVelX - _origSelectionShallowData.centerVelX,
-        _selectionShallowData.centerVelY - _origSelectionShallowData.centerVelY};
+    _selectionShallowData = SelectionShallowData();
 }
