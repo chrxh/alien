@@ -2,6 +2,9 @@
 
 #include "imgui.h"
 
+#include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineImpl/SimulationController.h"
+
 #include "EditorModel.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
@@ -9,8 +12,10 @@
 
 _ActionsWindow::_ActionsWindow(
     EditorModel const& editorModel,
+    SimulationController const& simController,
     StyleRepository const& styleRepository)
     : _editorModel(editorModel)
+    , _simController(simController)
     , _styleRepository(styleRepository)
 {
     _on = GlobalSettings::getInstance().getBoolState("editor.actions.active", true);
@@ -34,67 +39,47 @@ void _ActionsWindow::process()
 
         AlienImGui::Group("Center properties");
 
-        if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
+        auto const& selectionData = _editorModel->getSelectionShallowData();
 
-            auto selectionData = _editorModel->getSelectionShallowData();
-            auto origSelectionData = selectionData;
+        auto centerPosX = _includeClusters ? selectionData.clusterCenterPosX : selectionData.centerPosX;
+        auto origCenterPosX = centerPosX;
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Position X").format("%.2f"), centerPosX);
 
-            //center pos x
-            ImGui::TableNextRow();
+        auto centerPosY = _includeClusters ? selectionData.clusterCenterPosY : selectionData.centerPosY;
+        auto origCenterPosY = centerPosY;
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f"), centerPosY);
 
-            ImGui::TableSetColumnIndex(0);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-            auto& centerPosX = _includeClusters ? selectionData.clusterCenterPosX : selectionData.centerPosX;
-            ImGui::InputFloat("##centerX", &centerPosX, 1.0f, 0, "%.2f");
-            ImGui::PopItemWidth();
+        auto centerVelX = _includeClusters ? selectionData.clusterCenterVelX : selectionData.centerVelX;
+        auto origCenterVelX = centerVelX;
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Velocity X").step(0.1f).format("%.2f"), centerVelX);
 
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("Position X");
+        auto centerVelY = _includeClusters ? selectionData.clusterCenterVelY : selectionData.centerVelY;
+        auto origCenterVelY = centerVelY;
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Velocity Y").step(0.1f).format("%.2f"), centerVelY);
 
-            //center pos y
-            ImGui::TableNextRow();
+        if (centerPosX != origCenterPosX || centerPosY != origCenterPosY) {
+            ShallowUpdateSelectionData updateData;
+            updateData.considerClusters = _includeClusters;
+            updateData.posDeltaX = centerPosX - origCenterPosX;
+            updateData.posDeltaY = centerPosY - origCenterPosY;
+            _simController->shallowUpdateSelection(updateData);
+            _editorModel->update();
+        }
 
-            ImGui::TableSetColumnIndex(0);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-            auto& centerPosY = _includeClusters ? selectionData.clusterCenterPosY : selectionData.centerPosY;
-            ImGui::InputFloat("##centerY", &centerPosY, 1.0f, 0, "%.2f");
-            ImGui::PopItemWidth();
-
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("Position Y");
-
-            //center vel x
-            ImGui::TableNextRow();
-
-            ImGui::TableSetColumnIndex(0);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-            auto& centerVelX = _includeClusters ? selectionData.clusterCenterVelX: selectionData.centerVelX;
-            ImGui::InputFloat("##velX", &centerVelX, 0.1f, 0, "%.2f");
-            ImGui::PopItemWidth();
-
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("Velocity X");
-
-            //center vel y
-            ImGui::TableNextRow();
-
-            ImGui::TableSetColumnIndex(0);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-            auto& centerVelY = _includeClusters ? selectionData.clusterCenterVelY : selectionData.centerVelY;
-            ImGui::InputFloat("##velY", &centerVelY, 0.1f, 0, "%.2f");
-            ImGui::PopItemWidth();
-
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("Velocity Y");
-
-            ImGui::EndTable();
-
-            if (selectionData != origSelectionData) {
-                _editorModel->setSelectionShallowData(selectionData);
-            }
+        if (centerVelX != origCenterVelX || centerVelY != origCenterVelY) {
+            ShallowUpdateSelectionData updateData;
+            updateData.considerClusters = _includeClusters;
+            updateData.velDeltaX = centerVelX - origCenterVelX;
+            updateData.velDeltaY = centerVelY - origCenterVelY;
+            _simController->shallowUpdateSelection(updateData);
+            _editorModel->update();
         }
 
         AlienImGui::Group("Rotation");
+        AlienImGui::SliderInputFloat(AlienImGui::SliderInputFloatParameters().name("Angle").min(-180.0f).max(180.0f).format("%.1f deg"), _angle);
 
         ImGui::EndDisabled();
 

@@ -8,6 +8,11 @@
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 
+namespace
+{
+    auto const ItemTextWidth = 130.0f;
+}
+
 _FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
     : _simController(simController)
 {
@@ -66,24 +71,53 @@ void _FlowGeneratorWindow::process()
             if (ImGui::BeginTabItem(name, openPtr, ImGuiTabItemFlags_None)) {
 
                 AlienImGui::SliderFloat(
-                    "Position X", flowCenter.posX, origFlowCenter.posX, 0.0, toFloat(worldSize.x), false, "%.0f");
+                    AlienImGui::SliderFloatParameters()
+                        .name("Position X")
+                        .textWidth(ItemTextWidth)
+                        .min(0)
+                        .max(toFloat(worldSize.x))
+                        .format("%.0f")
+                        .defaultValue(origFlowCenter.posX),
+                    flowCenter.posX);
                 AlienImGui::SliderFloat(
-                    "Position Y", flowCenter.posY, origFlowCenter.posY, 0.0, toFloat(worldSize.y), false, "%.0f");
+                    AlienImGui::SliderFloatParameters()
+                        .name("Position Y")
+                        .textWidth(ItemTextWidth)
+                        .min(0)
+                        .max(toFloat(worldSize.y))
+                        .format("%.0f")
+                        .defaultValue(origFlowCenter.posY),
+                    flowCenter.posY);
                 AlienImGui::SliderFloat(
-                    "Radius",
-                    flowCenter.radius,
-                    origFlowCenter.radius,
-                    0.0,
-                    std::min(toFloat(worldSize.x), toFloat(worldSize.y)) / 2,
-                    false,
-                    "%.0f");
+                    AlienImGui::SliderFloatParameters()
+                        .name("Radius")
+                        .textWidth(ItemTextWidth)
+                        .min(0)
+                        .max(std::min(toFloat(worldSize.x), toFloat(worldSize.y)) / 2)
+                        .format("%.0f")
+                        .defaultValue(origFlowCenter.radius),
+                    flowCenter.radius);
                 AlienImGui::SliderFloat(
-                    "Strength", flowCenter.strength, origFlowCenter.strength, 0.0, 0.5f, true, "%.4f");
+                    AlienImGui::SliderFloatParameters()
+                        .name("Strength")
+                        .textWidth(ItemTextWidth)
+                        .min(0)
+                        .max(0.5f)
+                        .logarithmic(true)
+                        .format("%.4f")
+                        .defaultValue(origFlowCenter.strength),
+                    flowCenter.strength);
 
                 std::vector<std::string> orientations = {"Clockwise", "Counter clockwise"};
                 int currentOrientation = flowCenter.orientation == Orientation::Clockwise ? 0 : 1;
                 int origCurrentOrientation = origFlowCenter.orientation == Orientation::Clockwise ? 0 : 1;
-                AlienImGui::Combo("Orientation", currentOrientation, origCurrentOrientation, orientations);
+                AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Orientation")
+                        .textWidth(ItemTextWidth)
+                        .defaultValue(origCurrentOrientation)
+                        .values(orientations),
+                    currentOrientation);
                 flowCenter.orientation =
                     currentOrientation == 0 ? Orientation::Clockwise : Orientation::CounterClockwise;
                 ImGui::EndTabItem();

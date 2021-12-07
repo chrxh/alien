@@ -2,25 +2,20 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/SelectionShallowData.h"
+#include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
 class _EditorModel
 {
 public:
-    _EditorModel();
+    _EditorModel(SimulationController const& simController);
 
     SelectionShallowData const& getSelectionShallowData() const;
-    void setSelectionShallowData(SelectionShallowData const& value);
-    void setOrigSelectionShallowData(SelectionShallowData const& value);
-    void clear();
+    void update();
+
     bool isSelectionEmpty() const;
-
-    RealVector2D getClusterCenterPosDelta() const;
-    RealVector2D getClusterCenterVelDelta() const;
-    RealVector2D getCenterPosDelta() const;
-    RealVector2D getCenterVelDelta() const;
-
+    void clear();
 private:
-    SelectionShallowData _origSelectionShallowData;
+    SimulationController _simController;
     SelectionShallowData _selectionShallowData;
 };

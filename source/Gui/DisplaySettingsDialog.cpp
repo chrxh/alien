@@ -12,6 +12,11 @@
 #include "GlobalSettings.h"
 
 
+namespace
+{
+    auto const ItemTextWidth = 130.0f;
+}
+
 _DisplaySettingsDialog::_DisplaySettingsDialog(GLFWwindow* window)
     : _window(window)
 {
@@ -51,7 +56,13 @@ void _DisplaySettingsDialog::process()
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
 
         auto prevVideoModeSelection = _videoModeSelection;
-        AlienImGui::Combo("Resolution", _videoModeSelection, _origVideoModeSelection, createVideoModeStrings());
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Resolution")
+                .textWidth(ItemTextWidth)
+                .defaultValue(_origVideoModeSelection)
+                .values(createVideoModeStrings()),
+            _videoModeSelection);
 
         if (prevVideoModeSelection != _videoModeSelection) {
             onSetVideoMode();

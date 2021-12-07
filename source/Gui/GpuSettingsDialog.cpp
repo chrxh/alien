@@ -8,6 +8,10 @@
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 
+namespace
+{
+    auto const ItemTextWidth = 220.0f;
+}
 
 _GpuSettingsDialog::_GpuSettingsDialog(
     StyleRepository const& styleRepository,
@@ -38,13 +42,20 @@ void _GpuSettingsDialog::process()
     if (ImGui::BeginPopupModal("GPU settings", NULL, ImGuiWindowFlags_None)) {
 
         AlienImGui::InputInt(
-            "Blocks", gpuSettings.NUM_BLOCKS, origGpuSettings.NUM_BLOCKS, std::string("Number of GPU thread blocks."));
+            AlienImGui::InputIntParameters()
+                .name("Blocks")
+                .textWidth(ItemTextWidth)
+                .defaultValue(origGpuSettings.NUM_BLOCKS)
+                .tooltip(std::string("Number of GPU thread blocks.")),
+            gpuSettings.NUM_BLOCKS);
 
         AlienImGui::InputInt(
-            "Threads per Block",
-            gpuSettings.NUM_THREADS_PER_BLOCK,
-            origGpuSettings.NUM_THREADS_PER_BLOCK,
-            std::string("Number of GPU threads per blocks."));
+            AlienImGui::InputIntParameters()
+                .name("Threads per Block")
+                .textWidth(ItemTextWidth)
+                .defaultValue(origGpuSettings.NUM_THREADS_PER_BLOCK)
+                .tooltip(std::string("Number of GPU threads per blocks.")),
+            gpuSettings.NUM_THREADS_PER_BLOCK);
 
         ImGui::Spacing();
         ImGui::Separator();
