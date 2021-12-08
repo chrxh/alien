@@ -28,7 +28,7 @@ namespace Const
     ImColor const SelectionAreaBorderColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 1.0f);
 
     float const WindowAlpha = 0.8f;
-    float const SliderBarWidth = 40.0f;
+    float const SliderBarWidth = 30.0f;
 }
 
 class _StyleRepository
