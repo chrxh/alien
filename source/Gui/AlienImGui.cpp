@@ -68,9 +68,14 @@ void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+
+    ImGui::SetNextItemWidth(
+        ImGui::GetContentRegionAvail().x - parameters._textWidth - 50.0f - ImGui::GetStyle().FramePadding.x * 2);
     ImGui::SliderFloat(
-        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
+        ("##slider" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(50);
+    ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
 }

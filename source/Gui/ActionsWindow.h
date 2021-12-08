@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineInterface/SelectionShallowData.h"
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
@@ -18,6 +19,8 @@ public:
     void setOn(bool value);
 
 private:
+    bool hasSelectionChanged(SelectionShallowData const& selection) const;
+
     EditorModel _editorModel;
     SimulationController _simController;
     StyleRepository _styleRepository;
@@ -25,4 +28,6 @@ private:
     bool _on = false;
     bool _includeClusters = true;
     float _angle = 0;
+    float _angularVel = 0;
+    boost::optional<SelectionShallowData> _lastSelection;
 };
