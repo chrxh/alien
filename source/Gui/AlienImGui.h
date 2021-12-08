@@ -35,8 +35,8 @@ public:
     struct SliderInputFloatParameters
     {
         MEMBER_DECLARATION(SliderInputFloatParameters, std::string, name, "");
-        MEMBER_DECLARATION(SliderInputFloatParameters, int, min, 0);
-        MEMBER_DECLARATION(SliderInputFloatParameters, int, max, 0);
+        MEMBER_DECLARATION(SliderInputFloatParameters, float, min, 0);
+        MEMBER_DECLARATION(SliderInputFloatParameters, float, max, 0);
         MEMBER_DECLARATION(SliderInputFloatParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderInputFloatParameters, std::string, format, "%.3f");
     };

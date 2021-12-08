@@ -121,6 +121,12 @@ __device__ __inline__ PartitionData calcPartition(int numEntities, int division,
     return result;
 }
 
+__device__ __inline__ PartitionData calcAllThreadsPartition(int numEntities)
+{
+    return calcPartition(
+        numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+}
+
 __host__ __device__ __inline__ int2 toInt2(float2 const& p)
 {
     return {static_cast<int>(p.x), static_cast<int>(p.y)};

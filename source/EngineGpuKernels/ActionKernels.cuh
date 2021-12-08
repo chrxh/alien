@@ -19,8 +19,7 @@
 
 __global__ void applyForceToCells(ApplyForceData applyData, int2 universeSize, Array<Cell*> cells)
 {
-    auto const cellBlock =
-        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = cells.at(index);
@@ -37,8 +36,7 @@ __global__ void applyForceToCells(ApplyForceData applyData, int2 universeSize, A
 
 __global__ void applyForceToParticles(ApplyForceData applyData, int2 universeSize, Array<Particle*> particles)
 {
-    auto const particleBlock =
-        calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(particles.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
@@ -54,8 +52,7 @@ __global__ void applyForceToParticles(ApplyForceData applyData, int2 universeSiz
 
 __global__ void existSelection(SwitchSelectionData switchData, SimulationData data, int* result)
 {
-    auto const cellBlock =
-        calcPartition(data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -64,8 +61,7 @@ __global__ void existSelection(SwitchSelectionData switchData, SimulationData da
         }
     }
 
-    auto const particleBlock = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
@@ -77,8 +73,7 @@ __global__ void existSelection(SwitchSelectionData switchData, SimulationData da
 
 __global__ void setSelection(float2 pos, float radius, SimulationData data)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -89,8 +84,7 @@ __global__ void setSelection(float2 pos, float radius, SimulationData data)
         }
     }
 
-    auto const particleBlock = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
@@ -104,8 +98,7 @@ __global__ void setSelection(float2 pos, float radius, SimulationData data)
 
 __global__ void setSelection(SetSelectionData selectionData, SimulationData data)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -116,8 +109,7 @@ __global__ void setSelection(SetSelectionData selectionData, SimulationData data
         }
     }
 
-    auto const particleBlock = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
@@ -131,8 +123,7 @@ __global__ void setSelection(SetSelectionData selectionData, SimulationData data
 
 __global__ void rolloutSelection(SimulationData data, int* result)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -160,10 +151,9 @@ __global__ void rolloutSelection(SimulationData data, int* result)
     }
 }
 
-__global__ void shallowUpdateSelection(ShallowUpdateSelectionData updateData, SimulationData data)
+__global__ void updatePosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
         if ((0 != cell->selected && updateData.considerClusters)
@@ -173,8 +163,7 @@ __global__ void shallowUpdateSelection(ShallowUpdateSelectionData updateData, Si
         }
     }
 
-    auto const particleBlock = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
         if (0 != particle->selected) {
@@ -186,16 +175,14 @@ __global__ void shallowUpdateSelection(ShallowUpdateSelectionData updateData, Si
 
 __global__ void removeSelection(SimulationData data)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
         cell->selected = 0;
     }
 
-    auto const particleBlock = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
@@ -205,8 +192,7 @@ __global__ void removeSelection(SimulationData data)
 
 __global__ void removeClusterSelection(SimulationData data)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -218,8 +204,7 @@ __global__ void removeClusterSelection(SimulationData data)
 
 __global__ void getSelectionShallowData(SimulationData data, SelectionResult result)
 {
-    auto const cellBlock = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -228,8 +213,7 @@ __global__ void getSelectionShallowData(SimulationData data, SelectionResult res
         }
     }
 
-    auto const particleBlock = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
@@ -241,8 +225,7 @@ __global__ void getSelectionShallowData(SimulationData data, SelectionResult res
 
 __global__ void disconnectSelection(SimulationData data, int* result)
 {
-    auto const partition = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
@@ -250,7 +233,9 @@ __global__ void disconnectSelection(SimulationData data, int* result)
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
                 
-                if (1 != connectedCell->selected && data.cellMap.mapDistance(cell->absPos, connectedCell->absPos) > cudaSimulationParameters.cellMaxBindingDistance) {
+                if (1 != connectedCell->selected
+                    && data.cellMap.mapDistance(cell->absPos, connectedCell->absPos)
+                        > cudaSimulationParameters.cellMaxBindingDistance) {
                     CellConnectionProcessor::scheduleDelConnection(data, cell, connectedCell);
                     atomicExch(result, 1);
                 }
@@ -267,8 +252,7 @@ __global__ void updateMapForConnection(SimulationData data)
 
 __global__ void connectSelection(SimulationData data, int* result)
 {
-    auto const partition = calcPartition(
-        data.entities.cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     Cell* otherCells[18];
     int numOtherCells;
@@ -318,6 +302,82 @@ __global__ void processConnectionChanges(SimulationData data)
     CellConnectionProcessor::processConnectionsOperations(data);
 }
 
+__global__ void calcAccumulatedCenter(ShallowUpdateSelectionData updateData, SimulationData data, float2* center, int* numEntities)
+{
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& cell = data.entities.cellPointers.at(index);
+            if ((updateData.considerClusters && cell->selected != 0)
+                || (!updateData.considerClusters && cell->selected == 1)) {
+                atomicAdd(&center->x, cell->absPos.x);
+                atomicAdd(&center->y, cell->absPos.y);
+                atomicAdd(numEntities, 1);
+            }
+        }
+    }
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& particle = data.entities.particlePointers.at(index);
+            if (particle->selected != 0) {
+                atomicAdd(&center->x, particle->absPos.x);
+                atomicAdd(&center->y, particle->absPos.y);
+                atomicAdd(numEntities, 1);
+            }
+        }
+    }
+}
+
+__global__ void
+updateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center)
+{
+    __shared__ Math::Matrix rotationMatrix;
+    if (0 == threadIdx.x) {
+        Math::rotationMatrix(updateData.angleDelta, rotationMatrix);
+    }
+    __syncthreads();
+
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& cell = data.entities.cellPointers.at(index);
+            if ((updateData.considerClusters && cell->selected != 0)
+                || (!updateData.considerClusters && cell->selected == 1)) {
+                auto relPos = cell->absPos - center;
+                data.cellMap.mapDisplacementCorrection(relPos);
+
+                if (updateData.angleDelta != 0) {
+                    cell->absPos = Math::applyMatrix(relPos, rotationMatrix) + center;
+                    data.cellMap.mapPosCorrection(cell->absPos);
+                }
+
+                if (updateData.angularVelDelta != 0) {
+                    auto velDelta = relPos;
+                    Math::rotateQuarterClockwise(velDelta);
+                    velDelta = velDelta * updateData.angularVelDelta * DEG_TO_RAD;
+                    cell->vel = cell->vel + velDelta;
+                }
+            }
+        }
+    }
+
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& particle = data.entities.particlePointers.at(index);
+            if (particle->selected != 0) {
+                auto relPos = particle->absPos - center;
+                data.cellMap.mapDisplacementCorrection(relPos);
+                particle->absPos = Math::applyMatrix(relPos, rotationMatrix) + center;
+                data.cellMap.mapPosCorrection(particle->absPos);
+            }
+        }
+    }
+}
 
 /************************************************************************/
 /* Main                                                                 */
@@ -373,7 +433,7 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
     int* result = new int;
 
     bool reconnectionRequired =
-        !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0);
+        !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.angleDelta != 0);
 
     //disconnect selection in case of reconnection
     if (reconnectionRequired) {
@@ -386,7 +446,24 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
         } while (1 == *result && --counter > 0);    //due to locking not all affecting connections may be removed at first => repeat
     }
 
-    KERNEL_CALL(shallowUpdateSelection, updateData, data);
+    if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velDeltaX != 0
+        || updateData.velDeltaY != 0) {
+        KERNEL_CALL(updatePosAndVelForSelection, updateData, data);
+    }
+    if (updateData.angleDelta != 0 || updateData.angularVelDelta != 0) {
+        float2* center = new float2;
+        int* numEntities = new int;
+        *center = {0, 0};
+        *numEntities = 0;
+        KERNEL_CALL(calcAccumulatedCenter, updateData, data, center, numEntities);
+        if (*numEntities != 0) {
+            *center = *center / *numEntities;
+        }
+        KERNEL_CALL(updateAngleAndAngularVelForSelection, updateData, data, *center);
+
+        delete center;
+        delete numEntities;
+    }
 
     //connect selection in case of reconnection
     if (reconnectionRequired) {
