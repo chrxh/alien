@@ -4,14 +4,14 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
-class _ActionsWindow
+class _ManipulatorWindow
 {
 public:
-    _ActionsWindow(
+    _ManipulatorWindow(
         EditorModel const& editorModel,
         SimulationController const& simController,
         StyleRepository const& styleRepository);
-    ~_ActionsWindow();
+    ~_ManipulatorWindow();
 
     void process();
 

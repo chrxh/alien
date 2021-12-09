@@ -19,7 +19,7 @@ public:
     void process();
 
     SelectionWindow getSelectionWindow() const;
-    ActionsWindow getActionsWindow() const;
+    ManipulatorWindow getManipulatorWindow() const;
 
 private:
     void processSelectionRect();
@@ -35,7 +35,7 @@ private:
 private:
     EditorModel _editorModel;
     SelectionWindow _selectionWindow;
-    ActionsWindow _actionsWindow;
+    ManipulatorWindow _manipulatorWindow;
 
     SimulationController _simController;
     Viewport _viewport;

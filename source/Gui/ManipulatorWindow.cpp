@@ -1,4 +1,4 @@
-#include "ActionsWindow.h"
+#include "ManipulatorWindow.h"
 
 #include "imgui.h"
 
@@ -15,7 +15,7 @@ namespace
     auto const ItemTextWidth = 120.0f;
 }
 
-_ActionsWindow::_ActionsWindow(
+_ManipulatorWindow::_ManipulatorWindow(
     EditorModel const& editorModel,
     SimulationController const& simController,
     StyleRepository const& styleRepository)
@@ -23,22 +23,22 @@ _ActionsWindow::_ActionsWindow(
     , _simController(simController)
     , _styleRepository(styleRepository)
 {
-    _on = GlobalSettings::getInstance().getBoolState("editor.actions.active", true);
+    _on = GlobalSettings::getInstance().getBoolState("editor.manipulator.active", true);
 }
 
-_ActionsWindow::~_ActionsWindow()
+_ManipulatorWindow::~_ManipulatorWindow()
 {
-    GlobalSettings::getInstance().setBoolState("editor.actions.active", _on);
+    GlobalSettings::getInstance().setBoolState("editor.manipulator.active", _on);
 }
 
-void _ActionsWindow::process()
+void _ManipulatorWindow::process()
 {
     if (!_on) {
         return;
     }
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    if (ImGui::Begin("Actions", &_on)) {
+    if (ImGui::Begin("Manipulator", &_on)) {
         auto selection = _editorModel->getSelectionShallowData();
         if (hasSelectionChanged(selection)) {
             _angle = 0;
@@ -138,17 +138,17 @@ void _ActionsWindow::process()
     }
 }
 
-bool _ActionsWindow::isOn() const
+bool _ManipulatorWindow::isOn() const
 {
     return _on;
 }
 
-void _ActionsWindow::setOn(bool value)
+void _ManipulatorWindow::setOn(bool value)
 {
     _on = value;
 }
 
-bool _ActionsWindow::hasSelectionChanged(SelectionShallowData const& selection) const
+bool _ManipulatorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
 {
     if(!_lastSelection) {
         return false;

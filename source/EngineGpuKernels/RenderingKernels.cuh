@@ -9,6 +9,7 @@
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
+#include "RenderingData.cuh"
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
@@ -367,10 +368,15 @@ __device__ void drawFlowCenters(uint64_t* targetImage, float2 const& rectUpperLe
 /* Main      															*/
 /************************************************************************/
 
-__global__ void
-drawImageKernel(float2 rectUpperLeft, float2 rectLowerRight, int2 imageSize, float zoom, SimulationData data)
+__global__ void drawImageKernel(
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    int2 imageSize,
+    float zoom,
+    SimulationData data,
+    RenderingData renderingData)
 {
-    uint64_t* targetImage = data.imageData;
+    uint64_t* targetImage = renderingData.imageData;
 
     KERNEL_CALL(drawBackground, targetImage, imageSize, data.size, zoom, rectUpperLeft, rectLowerRight);
 

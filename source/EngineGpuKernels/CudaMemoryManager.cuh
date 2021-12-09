@@ -35,6 +35,9 @@ public:
     template<typename T>
     void freeMemory(T*& memory)
     {
+        if (!memory) {
+            return;
+        }
         auto findResult = _pointerToSizeMap.find(reinterpret_cast<void*>(memory));
         if (findResult != _pointerToSizeMap.end()) {
             CHECK_FOR_CUDA_ERROR(cudaFree(memory));

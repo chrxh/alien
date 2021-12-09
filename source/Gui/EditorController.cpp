@@ -7,7 +7,7 @@
 #include "StyleRepository.h"
 #include "EditorModel.h"
 #include "SelectionWindow.h"
-#include "ActionsWindow.h"
+#include "ManipulatorWindow.h"
 
 _EditorController::_EditorController(
     SimulationController const& simController,
@@ -19,7 +19,7 @@ _EditorController::_EditorController(
 {
     _editorModel = boost::make_shared<_EditorModel>(_simController);
     _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel, _styleRepository);
-    _actionsWindow = boost::make_shared<_ActionsWindow>(_editorModel, _simController, _styleRepository);
+    _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController, _styleRepository);
 }
 
 bool _EditorController::isOn() const
@@ -40,7 +40,7 @@ void _EditorController::process()
 
     if (!_simController->isSimulationRunning()) {
         _selectionWindow->process();
-        _actionsWindow->process();
+        _manipulatorWindow->process();
     }
     
     processSelectionRect();
@@ -83,9 +83,9 @@ SelectionWindow _EditorController::getSelectionWindow() const
     return _selectionWindow;
 }
 
-ActionsWindow _EditorController::getActionsWindow() const
+ManipulatorWindow _EditorController::getManipulatorWindow() const
 {
-    return _actionsWindow;
+    return _manipulatorWindow;
 }
 
 void _EditorController::processSelectionRect()
