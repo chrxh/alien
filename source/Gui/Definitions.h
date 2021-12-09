@@ -90,8 +90,8 @@ using EditorController = boost::shared_ptr<_EditorController>;
 class _SelectionWindow;
 using SelectionWindow = boost::shared_ptr<_SelectionWindow>;
 
-class _ActionsWindow;
-using ActionsWindow = boost::shared_ptr<_ActionsWindow>;
+class _ManipulatorWindow;
+using ManipulatorWindow = boost::shared_ptr<_ManipulatorWindow>;
 
 struct GLFWvidmode;
 struct GLFWwindow;

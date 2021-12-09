@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stb_image.h>
 #include <atomic>
 
 #include "EngineInterface/GpuSettings.h"
@@ -9,6 +10,7 @@
 #include "Entities.cuh"
 #include "CellFunctionData.cuh"
 #include "Operation.cuh"
+#include "Textures.cuh"
 
 struct SimulationData
 {
@@ -21,14 +23,11 @@ struct SimulationData
     Entities entities;
     Entities entitiesForCleanup;
 
-    DynamicMemory dynamicMemory;
-
     unsigned int* numOperations;
     Operation* operations;  //uses dynamic memory
 
+    DynamicMemory dynamicMemory;
     CudaNumberGenerator numberGen;
-    int numPixels;
-    uint64_t* imageData;    //pixel in bbbbggggrrrr format (3 x 16 bit)
 
     void init(int2 const& universeSize)
     {
@@ -43,8 +42,6 @@ struct SimulationData
         dynamicMemory.init();
         numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
-        numPixels = size.x * size.y;
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(numPixels, imageData);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     }
 
@@ -59,14 +56,6 @@ struct SimulationData
     }
 
     __device__ int getMaxOperations() { return entities.cellPointers.getNumEntries(); }
-
-    void resizeImage(int2 const& newSize)
-    {
-        CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(
-            max(newSize.x * newSize.y, size.x * size.y), imageData);
-        numPixels = newSize.x * newSize.y;
-    }
 
     bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
     {
@@ -144,7 +133,6 @@ struct SimulationData
         numberGen.free();
         dynamicMemory.free();
 
-        CudaMemoryManager::getInstance().freeMemory(imageData);
         CudaMemoryManager::getInstance().freeMemory(numOperations);
     }
 

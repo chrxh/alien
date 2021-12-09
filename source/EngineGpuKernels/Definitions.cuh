@@ -6,6 +6,7 @@ struct Particle;
 struct Entities;
 
 struct SimulationData;
+struct RenderingData;
 class SimulationResult;
 class SelectionResult;
 struct CellAccessTO;

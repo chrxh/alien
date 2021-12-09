@@ -32,6 +32,7 @@
 #include "SimulationKernels.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
+#include "RenderingData.cuh"
 
 namespace
 {
@@ -122,12 +123,15 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
 
     _currentTimestep.store(timestep);
     _cudaSimulationData = new SimulationData();
+    _cudaRenderingData = new RenderingData();
     _cudaSimulationResult = new SimulationResult();
     _cudaSelectionResult = new SelectionResult();
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
-    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY});
+    int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
+    _cudaSimulationData->init(worldSize);
+    _cudaRenderingData->init();
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
     _cudaSelectionResult->init();
@@ -145,6 +149,7 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
 _CudaSimulation::~_CudaSimulation()
 {
     _cudaSimulationData->free();
+    _cudaRenderingData->free();
     _cudaMonitorData->free();
     _cudaSimulationResult->free();
     _cudaSelectionResult->free();
@@ -163,6 +168,7 @@ _CudaSimulation::~_CudaSimulation()
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
+    delete _cudaRenderingData;
     delete _cudaMonitorData;
 }
 
@@ -196,23 +202,23 @@ void _CudaSimulation::getVectorImage(
     cudaArray* mappedArray;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
 
-    if (imageSize.x * imageSize.y > _cudaSimulationData->numPixels) {
-        _cudaSimulationData->resizeImage(imageSize);
-    }
+    _cudaRenderingData->resizeImageIfNecessary(imageSize);
+
     KERNEL_CALL_HOST(
         drawImageKernel,
         rectUpperLeft,
         rectLowerRight,
         imageSize,
         static_cast<float>(zoom),
-        *_cudaSimulationData);
+        *_cudaSimulationData,
+        *_cudaRenderingData);
 
     const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
     CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
         mappedArray,
         0,
         0,
-        _cudaSimulationData->imageData,
+        _cudaRenderingData->imageData,
         widthBytes,
         widthBytes,
         imageSize.y,
@@ -419,10 +425,12 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
 
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+
     loggingService->logMessage(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
     loggingService->logMessage(Priority::Unimportant, "particle array size: " + std::to_string(cellArraySize));
     loggingService->logMessage(Priority::Unimportant, "token array size: " + std::to_string(tokenArraySize));
 
-    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+        auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     loggingService->logMessage(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
 }

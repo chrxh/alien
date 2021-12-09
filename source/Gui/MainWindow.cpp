@@ -51,7 +51,7 @@
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
 #include "SelectionWindow.h"
-#include "ActionsWindow.h"
+#include "ManipulatorWindow.h"
 
 namespace
 {
@@ -354,7 +354,7 @@ void _MainWindow::renderSimulation()
 void _MainWindow::processMenubar()
 {
     auto selectionWindow = _editorController->getSelectionWindow();
-    auto actionsWindow = _editorController->getActionsWindow();
+    auto manipulatorWindow = _editorController->getManipulatorWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -419,8 +419,10 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
-            if (ImGui::MenuItem("Actions", "ALT+A", actionsWindow->isOn())) {
-                actionsWindow->setOn(!actionsWindow->isOn());
+            if (ImGui::MenuItem("Creator", "ALT+C", true)) {
+            }
+            if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
+                manipulatorWindow->setOn(!manipulatorWindow->isOn());
             }
             ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
@@ -513,8 +515,8 @@ void _MainWindow::processMenubar()
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
         selectionWindow->setOn(!selectionWindow->isOn());
     }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
-        actionsWindow->setOn(!actionsWindow->isOn());
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
+        manipulatorWindow->setOn(!manipulatorWindow->isOn());
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {

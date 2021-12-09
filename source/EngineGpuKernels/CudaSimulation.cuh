@@ -74,6 +74,7 @@ private:
 
     std::atomic<uint64_t> _currentTimestep;
     SimulationData* _cudaSimulationData;
+    RenderingData* _cudaRenderingData;
     SimulationResult* _cudaSimulationResult;
     SelectionResult* _cudaSelectionResult;
     DataAccessTO* _cudaAccessTO;
