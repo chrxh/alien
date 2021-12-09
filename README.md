@@ -62,6 +62,9 @@ Build steps:
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
+```
+If the compilation was successful, the alien executable is located in:
+```
 .\Release\alien.exe
 ```
 
