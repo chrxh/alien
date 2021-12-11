@@ -32,13 +32,22 @@ void _SimulationController::registerImageResource(GLuint image)
     _worker.registerImageResource(image);
 }
 
-void _SimulationController::getVectorImage(
+void _SimulationController::drawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
     double zoom)
 {
-    _worker.getVectorImage(rectUpperLeft, rectLowerRight, imageSize, zoom);
+    _worker.drawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
+}
+
+boost::optional<OverlayDescription> _SimulationController::drawVectorGraphicsAndReturnOverlay(
+    RealVector2D const& rectUpperLeft,
+    RealVector2D const& rectLowerRight,
+    IntVector2D const& imageSize,
+    double zoom)
+{
+    return _worker.drawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
 DataDescription _SimulationController::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)

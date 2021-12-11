@@ -3,6 +3,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/ChangeDescriptions.h"
+#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
 #include "Definitions.h"
@@ -14,8 +15,9 @@ class DataConverter
 public:
     DataConverter(SimulationParameters const& parameters, GpuSettings const& gpuConstants);
 
-    DataDescription convertAccessTOtoDescription(DataAccessTO const& dataTO);
-    void convertDescriptionToAccessTO(DataAccessTO& result, DataChangeDescription const& description);
+    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO);
+    OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO);
+    void convertDataDescriptionToAccessTO(DataAccessTO& result, DataChangeDescription const& description);
 
 private:
 	struct CreateClusterReturnData

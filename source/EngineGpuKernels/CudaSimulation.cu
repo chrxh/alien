@@ -189,7 +189,7 @@ void _CudaSimulation::calcCudaTimestep()
     ++_currentTimestep;
 }
 
-void _CudaSimulation::getVectorImage(
+void _CudaSimulation::drawVectorGraphics(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
     void* cudaResource,
@@ -232,12 +232,14 @@ void _CudaSimulation::getSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    KERNEL_CALL_HOST(cudaGetSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    KERNEL_CALL_HOST(
+        cudaGetSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
@@ -254,6 +256,15 @@ void _CudaSimulation::getSimulationData(
         _cudaAccessTO->stringBytes,
         sizeof(char) * (*dataTO.numStringBytes),
         cudaMemcpyDeviceToHost));
+}
+
+void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
+{
+    KERNEL_CALL_HOST(
+        cudaGetSimulationOverlayDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
 }
 
 void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)

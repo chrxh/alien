@@ -17,7 +17,7 @@ DataConverter::DataConverter(
 {
 }
 
-DataDescription DataConverter::convertAccessTOtoDescription(DataAccessTO const& dataTO)
+DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO)
 {
 	DataDescription result;
 
@@ -76,7 +76,21 @@ DataDescription DataConverter::convertAccessTOtoDescription(DataAccessTO const& 
     return result;
 }
 
-void DataConverter::convertDescriptionToAccessTO(DataAccessTO& result, DataChangeDescription const& description)
+OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO)
+{
+    OverlayDescription result;
+    result.elements.reserve(*dataTO.numCells);
+    for (int i = 0; i < *dataTO.numCells; ++i) {
+        auto const& cellTO = dataTO.cells[i];
+        OverlayElementDescription element;
+        element.pos = {cellTO.pos.x, cellTO.pos.y};
+        element.cellType = static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType);
+        result.elements.emplace_back(element);
+    }
+    return result;
+}
+
+void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataChangeDescription const& description)
 {
     unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cell : description.cells) {
