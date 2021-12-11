@@ -53,7 +53,6 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationResult.cuh
     SpotCalculator.cuh
     Swap.cuh
-    Textures.cuh
     Token.cuh
     TokenProcessor.cuh
     WeaponFunction.cuh)

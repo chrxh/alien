@@ -144,8 +144,8 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     _cudaSimulation->getSimulationData(
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
-    DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
-    return converter.getDataDescription();
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+    return converter.convertAccessTOtoDescription(dataTO);
 }
 
 OverallStatistics EngineWorker::getMonitorData() const
@@ -190,8 +190,8 @@ void EngineWorker::setSimulationData(DataChangeDescription const& dataToUpdate)
         {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 
-    DataConverter converter(dataTO, _settings.simulationParameters, _gpuConstants);
-    converter.updateData(dataToUpdate);
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+    converter.convertDescriptionToAccessTO(dataTO, dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 
