@@ -63,28 +63,6 @@ __global__ void rolloutTagToCellClusters(Array<Cell*> cells, int* change)
     }
 }
 
-__global__ void tagClusters(int2 rectUpperLeft, int2 rectLowerRight, Array<Cell*> cells)
-{
-    KERNEL_CALL(tagCells, rectUpperLeft, rectLowerRight, cells);
-    int* change = new int;
-    do {
-        *change = 0;
-        KERNEL_CALL(rolloutTagToCellClusters, cells, change);
-    } while (1 == *change);
-}
-
-__global__ void deleteTaggedCells(Array<Cell*> cells)
-{
-    auto const partition =
-        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        if (1 == cell->tag) {
-            cell = nullptr;
-        }
-    }
-}
-
 //tags cell with cellTO index and tags cellTO connections with cell index
 __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
 {
@@ -95,13 +73,11 @@ __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rec
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (0 == cell->tag) {
-            continue;
-        }
 
         auto pos = cell->absPos;
         data.cellMap.mapPosCorrection(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            cell->tag = -1;
             continue;
         }
         auto cellTOIndex = atomicAdd(accessTO.numCells, 1);
@@ -190,9 +166,31 @@ __global__ void resolveConnections(int2 rectUpperLeft, int2 rectLowerRight, Simu
 
 __global__ void getCellAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
 {
-    KERNEL_CALL_1_1(tagClusters, rectUpperLeft, rectLowerRight, data.entities.cellPointers);
     KERNEL_CALL(getCellAccessDataWithoutConnections, rectUpperLeft, rectLowerRight, data, accessTO);
     KERNEL_CALL(resolveConnections, rectUpperLeft, rectLowerRight, data, accessTO);
+}
+
+__global__ void getCellOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
+{
+    auto const& cells = data.entities.cellPointers;
+    auto const partition =
+        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const firstCell = data.entities.cells.getArray();
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        auto pos = cell->absPos;
+        data.cellMap.mapPosCorrection(pos);
+        if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            continue;
+        }
+        auto cellTOIndex = atomicAdd(accessTO.numCells, 1);
+        auto& cellTO = accessTO.cells[cellTOIndex];
+
+        cellTO.pos = cell->absPos;
+        cellTO.cellFunctionType = cell->cellFunctionType;
+    }
 }
 
 __global__ void getTokenAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
@@ -235,32 +233,6 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, S
         }
     }
 }
-
-__global__ void filterCells(int2 rectUpperLeft, int2 rectLowerRight, Array<Cell*> cells)
-{
-    KERNEL_CALL_1_1(tagClusters, rectUpperLeft, rectLowerRight, cells);
-    KERNEL_CALL_1_1(deleteTaggedCells, cells);
-}
-
-__device__ void filterParticle(int2 const& rectUpperLeft, int2 const& rectLowerRight,
-    Array<Particle*> particles, int particleIndex)
-{
-    auto& particle = particles.getArray()[particleIndex];
-    if (isContainedInRect(rectUpperLeft, rectLowerRight, particle->absPos)) {
-        particle = nullptr;
-    }
-}
-
-__global__ void filterParticles(int2 rectUpperLeft, int2 rectLowerRight, Array<Particle*> particles)
-{
-    PartitionData particleBlock =
-        calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        filterParticle(rectUpperLeft, rectLowerRight, particles, particleIndex);
-    }
-    __syncthreads();
-}
-
 
 __global__ void createDataFromTO(
     SimulationData data,
@@ -319,8 +291,8 @@ __global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-__global__ void cudaGetSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight,
-    SimulationData data, DataAccessTO access)
+__global__ void
+cudaGetSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
 {
     *access.numCells = 0;
     *access.numParticles = 0;
@@ -330,6 +302,13 @@ __global__ void cudaGetSimulationAccessDataKernel(int2 rectUpperLeft, int2 rectL
     KERNEL_CALL_1_1(getCellAccessData, rectUpperLeft, rectLowerRight, data, access);
     KERNEL_CALL(getTokenAccessData, rectUpperLeft, rectLowerRight, data, access);
     KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, access);
+}
+
+__global__ void
+cudaGetSimulationOverlayDataKernel(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
+{
+    *access.numCells = 0;
+    KERNEL_CALL(getCellOverlayData, rectUpperLeft, rectLowerRight, data, access);
 }
 
 __global__ void cudaClearData(SimulationData data)

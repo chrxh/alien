@@ -16,6 +16,7 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/OverallStatistics.h"
+#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
@@ -41,11 +42,17 @@ public:
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
 
-    ENGINEIMPL_EXPORT void getVectorImage(
+    ENGINEIMPL_EXPORT void drawVectorGraphics(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom);
+    ENGINEIMPL_EXPORT boost::optional<OverlayDescription> drawVectorGraphicsAndReturnOverlay(
+        RealVector2D const& rectUpperLeft,
+        RealVector2D const& rectLowerRight,
+        IntVector2D const& imageSize,
+        double zoom);
+
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ENGINEIMPL_EXPORT OverallStatistics getMonitorData() const;

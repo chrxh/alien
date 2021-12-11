@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stb_image.h>
 #include <atomic>
 
 #include "EngineInterface/GpuSettings.h"
@@ -10,7 +9,6 @@
 #include "Entities.cuh"
 #include "CellFunctionData.cuh"
 #include "Operation.cuh"
-#include "Textures.cuh"
 
 struct SimulationData
 {

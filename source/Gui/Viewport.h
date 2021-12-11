@@ -22,6 +22,7 @@ public:
 
     void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
+    RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos) const;
     RealRect getVisibleWorldRect() const;
 
 private:

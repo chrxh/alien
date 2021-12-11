@@ -7,6 +7,7 @@
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
@@ -22,7 +23,12 @@ public:
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
 
-    ENGINEIMPL_EXPORT void getVectorImage(
+    ENGINEIMPL_EXPORT void drawVectorGraphics(
+        RealVector2D const& rectUpperLeft,
+        RealVector2D const& rectLowerRight,
+        IntVector2D const& imageSize,
+        double zoom);
+    ENGINEIMPL_EXPORT boost::optional<OverlayDescription> drawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,

@@ -62,6 +62,13 @@ RealVector2D _Viewport::mapViewToWorldPosition(RealVector2D const& viewPos) cons
     return _worldCenter - relCenter + relWorldPos;
 }
 
+RealVector2D _Viewport::mapWorldToViewPosition(RealVector2D const& worldPos) const
+{
+    return {
+        worldPos.x * _zoomFactor - _worldCenter.x * _zoomFactor + _viewSize.x / 2,
+        worldPos.y * _zoomFactor - _worldCenter.y * _zoomFactor + _viewSize.y / 2};
+}
+
 RealRect _Viewport::getVisibleWorldRect() const
 {
     auto topLeft = mapViewToWorldPosition(RealVector2D{0, 0});
