@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
@@ -31,7 +32,7 @@ private:
     void middleMouseButtonHold(IntVector2D const& viewPos);
     void middleMouseButtonReleased();
 
-    void requestImageFromSimulation();
+    void updateImageFromSimulation();
 
     //widgets
     Viewport _viewport;
@@ -39,6 +40,9 @@ private:
     SimulationScrollbar _scrollbarY;
     ModeWindow _modeWindow;
 
+    //overlay
+    boost::optional<OverlayDescription> _overlay;
+    
     //shader data
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo;

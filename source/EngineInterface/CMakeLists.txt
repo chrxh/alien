@@ -18,6 +18,7 @@ add_library(alien_engine_interface_lib
     GpuSettings.h
     Metadata.h
     OverallStatistics.h
+    OverlayDescriptions.h
     Parser.cpp
     Parser.h
     SelectionShallowData.h

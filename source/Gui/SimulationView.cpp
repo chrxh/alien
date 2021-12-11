@@ -10,11 +10,23 @@
 #include "Viewport.h"
 #include "Resources.h"
 #include "ModeWindow.h"
+#include "StyleRepository.h"
 
 namespace
 {
     auto const MotionBlurStandard = 0.8f;
     auto const MotionBlurZooming = 0.5f;
+    auto const ZoomFactorForOverlay = 20.0f;
+
+    std::unordered_map<Enums::CellFunction::Type, std::string> cellFunctionToStringMap = {
+        {Enums::CellFunction::COMPUTER, "Computer"},
+        {Enums::CellFunction::PROPULSION, "Propulsion"},
+        {Enums::CellFunction::SCANNER, "Scanner"},
+        {Enums::CellFunction::WEAPON, "Weapon"},
+        {Enums::CellFunction::CONSTRUCTOR, "Constructor"},
+        {Enums::CellFunction::SENSOR, "Sensor"},
+        {Enums::CellFunction::MUSCLE, "Muscle"},
+    };
 }
 
 _SimulationView::_SimulationView(
@@ -206,7 +218,7 @@ void _SimulationView::processContent()
 {
     processEvents();
 
-    requestImageFromSimulation();
+    updateImageFromSimulation();
 
     _shader->use();
 
@@ -244,11 +256,34 @@ void _SimulationView::processControls()
     _scrollbarY->process({{viewport->Size.x - 17, viewport->Pos.y + 22}, {1, viewport->Size.y - 1 - 17}});
 }
 
-void _SimulationView::requestImageFromSimulation()
+void _SimulationView::updateImageFromSimulation()
 {
+
     auto worldRect = _viewport->getVisibleWorldRect();
     auto viewSize = _viewport->getViewSize();
-    _simController->getVectorImage(
-        worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, _viewport->getZoomFactor());
+    auto zoomFactor = _viewport->getZoomFactor();
+
+    if (zoomFactor < ZoomFactorForOverlay) {
+        _simController->drawVectorGraphics(
+            worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
+        _overlay = boost::none;
+
+    } else {
+        auto overlay = _simController->drawVectorGraphicsAndReturnOverlay(
+            worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
+        if (overlay) {
+            _overlay = overlay;
+        }
+    }
+
+    if(_overlay) {
+        ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
+        for (auto const& overlayElement : _overlay->elements) {
+            auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
+            auto text = cellFunctionToStringMap.at(overlayElement.cellType);
+            draw_list->AddText({viewPos.x - 30, viewPos.y}, Const::CellFunctionOverlayShadowColor, text.c_str());
+            draw_list->AddText({viewPos.x - 30 + 1, viewPos.y + 1}, Const::CellFunctionOverlayColor, text.c_str());
+        }
+    }
 }
 

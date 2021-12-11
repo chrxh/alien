@@ -109,7 +109,7 @@ void EngineWorker::registerImageResource(GLuint image)
     }
 }
 
-void EngineWorker::getVectorImage(
+void EngineWorker::drawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
@@ -124,13 +124,53 @@ void EngineWorker::getVectorImage(
         FrameTimeout);
 
     if (!access.isTimeout()) {
-        _cudaSimulation->getVectorImage(
+        _cudaSimulation->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y},
             {rectLowerRight.x, rectLowerRight.y},
             _cudaResource,
             {imageSize.x, imageSize.y},
             zoom);
     }
+}
+
+boost::optional<OverlayDescription> EngineWorker::drawVectorGraphicsAndReturnOverlay(
+    RealVector2D const& rectUpperLeft,
+    RealVector2D const& rectLowerRight,
+    IntVector2D const& imageSize,
+    double zoom)
+{
+    CudaAccess access(
+        _conditionForAccess,
+        _conditionForWorkerLoop,
+        _requireAccess,
+        _isSimulationRunning,
+        _exceptionData,
+        FrameTimeout);
+
+    if (!access.isTimeout()) {
+        _cudaSimulation->drawVectorGraphics(
+            {rectUpperLeft.x, rectUpperLeft.y},
+            {rectLowerRight.x, rectLowerRight.y},
+            _cudaResource,
+            {imageSize.x, imageSize.y},
+            zoom);
+
+        auto arraySizes = _cudaSimulation->getArraySizes();
+        DataAccessTO dataTO = _dataTOCache->getDataTO(
+            {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+
+        _cudaSimulation->getSimulationData(
+            {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
+            int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)},
+            dataTO);
+
+        DataConverter converter(_settings.simulationParameters, _gpuConstants);
+        auto result = converter.convertAccessTOtoOverlayDescription(dataTO);
+        _dataTOCache->releaseDataTO(dataTO);
+
+        return result;
+    }
+    return boost::none;
 }
 
 DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
@@ -145,7 +185,11 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
-    return converter.convertAccessTOtoDescription(dataTO);
+
+    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    _dataTOCache->releaseDataTO(dataTO);
+
+    return result;
 }
 
 OverallStatistics EngineWorker::getMonitorData() const
@@ -191,7 +235,7 @@ void EngineWorker::setSimulationData(DataChangeDescription const& dataToUpdate)
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
-    converter.convertDescriptionToAccessTO(dataTO, dataToUpdate);
+    converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 

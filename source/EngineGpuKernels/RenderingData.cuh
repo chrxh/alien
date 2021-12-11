@@ -2,10 +2,7 @@
 
 #include <atomic>
 
-#include <stb_image.h>
-
 #include "Base.cuh"
-#include "Textures.cuh"
 #include "Definitions.cuh"
 
 struct RenderingData
@@ -29,6 +26,5 @@ struct RenderingData
     void free()
     {
         CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().freeMemory(textures.computingFunction.data);
     }
 };
