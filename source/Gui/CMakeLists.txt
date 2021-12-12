@@ -69,7 +69,9 @@ PUBLIC
     UiController.cpp
     UiController.h
     Viewport.cpp
-    Viewport.h)
+    Viewport.h
+    WindowController.cpp
+    WindowController.h)
 
 target_link_libraries(alien alien_base_lib)
 target_link_libraries(alien alien_engine_gpu_kernels_lib)
