@@ -16,7 +16,7 @@ namespace
 {
     auto const MotionBlurStandard = 0.8f;
     auto const MotionBlurZooming = 0.5f;
-    auto const ZoomFactorForOverlay = 20.0f;
+    auto const ZoomFactorForOverlay = 16.0f;
 
     std::unordered_map<Enums::CellFunction::Type, std::string> cellFunctionToStringMap = {
         {Enums::CellFunction::COMPUTER, "Computer"},
@@ -30,10 +30,12 @@ namespace
 }
 
 _SimulationView::_SimulationView(
+    StyleRepository const& styleRepository,
     SimulationController const& simController,
     ModeWindow const& modeWindow,
     Viewport const& viewport)
     : _viewport(viewport)
+    , _styleRepository(styleRepository)
 {
     _modeWindow = modeWindow;
 
@@ -279,10 +281,21 @@ void _SimulationView::updateImageFromSimulation()
     if(_overlay) {
         ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
+            auto fontSize = std::min(30.0f, _viewport->getZoomFactor()) / 2;
             auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
             auto text = cellFunctionToStringMap.at(overlayElement.cellType);
-            draw_list->AddText({viewPos.x - 30, viewPos.y}, Const::CellFunctionOverlayShadowColor, text.c_str());
-            draw_list->AddText({viewPos.x - 30 + 1, viewPos.y + 1}, Const::CellFunctionOverlayColor, text.c_str());
+            draw_list->AddText(
+                _styleRepository->getMediumFont(),
+                fontSize,
+                {viewPos.x - 2*fontSize, viewPos.y},
+                Const::CellFunctionOverlayShadowColor,
+                text.c_str());
+            draw_list->AddText(
+                _styleRepository->getMediumFont(),
+                fontSize,
+                {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
+                Const::CellFunctionOverlayColor,
+                text.c_str());
         }
     }
 }

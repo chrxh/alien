@@ -9,6 +9,7 @@ class _SimulationView
 {
 public:
     _SimulationView(
+        StyleRepository const& styleRepository,
         SimulationController const& simController,
         ModeWindow const& modeWindow,
         Viewport const& viewport);
@@ -35,10 +36,8 @@ private:
     void updateImageFromSimulation();
 
     //widgets
-    Viewport _viewport;
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
-    ModeWindow _modeWindow;
 
     //overlay
     boost::optional<OverlayDescription> _overlay;
@@ -56,5 +55,8 @@ private:
     boost::optional<RealVector2D> _worldPosForMovement;
     boost::optional<IntVector2D> _prevMousePosInt;
 
+    Viewport _viewport;
+    ModeWindow _modeWindow;
+    StyleRepository _styleRepository;
     SimulationController _simController;
 };
