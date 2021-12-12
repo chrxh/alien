@@ -93,6 +93,10 @@ using SelectionWindow = boost::shared_ptr<_SelectionWindow>;
 class _ManipulatorWindow;
 using ManipulatorWindow = boost::shared_ptr<_ManipulatorWindow>;
 
+class _WindowController;
+using WindowController = boost::shared_ptr<_WindowController>;
+
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;
