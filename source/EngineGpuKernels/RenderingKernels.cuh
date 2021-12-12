@@ -22,7 +22,7 @@ __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, fl
 
 __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int index, float3 const& colorToAdd)
 {
-    unsigned long rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0
+    uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0
         | toUInt64(colorToAdd.z * 255.0f) << 32;
 
     // CUDA headers use "unsigned long long" for 64bit types, which
