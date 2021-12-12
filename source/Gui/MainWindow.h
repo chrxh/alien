@@ -11,13 +11,7 @@ public:
     void shutdown();
 
 private:
-    struct GlfwData
-    {
-        GLFWwindow* window;
-        GLFWvidmode const* mode;
-        char const* glsl_version;
-    };
-    GlfwData initGlfw();
+    char const* initGlfw();  //return glsl version
 
     void processUninitialized();
     void processRequestLoading();
@@ -41,6 +35,7 @@ private:
     GLFWwindow* _window;
     SimpleLogger _logger;
 
+    WindowController _windowController;
     SimulationController _simController;
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;

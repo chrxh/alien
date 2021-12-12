@@ -52,6 +52,7 @@
 #include "EditorController.h"
 #include "SelectionWindow.h"
 #include "ManipulatorWindow.h"
+#include "WindowController.h"
 
 namespace
 {
@@ -75,7 +76,13 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _logger = logger;
     _simController = simController;
     
-    auto glfwData = initGlfw();
+    auto glfwVersion = initGlfw();
+
+    _windowController = boost::make_shared<_WindowController>();
+
+    auto windowData = _windowController->getWindowData();
+    glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
+    glfwSwapInterval(1);  //enable vsync
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -85,25 +92,19 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
 
     _styleRepository = boost::make_shared<_StyleRepository>();
 
-//    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    //ImGui::StyleColorsDark();
-//    ImGui::StyleColorsLight();
+//     ImGui::StyleColorsDark();
+//     ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer back-ends
-    ImGui_ImplGlfw_InitForOpenGL(glfwData.window, true);
-    ImGui_ImplOpenGL3_Init(glfwData.glsl_version);
+    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);
+    ImGui_ImplOpenGL3_Init(glfwVersion);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
     auto worldSize = _simController->getWorldSize();
-    _viewport = boost::make_shared<_Viewport>();
-    _viewport->setCenterInWorldPos({toFloat(worldSize.x) / 2, toFloat(worldSize.y) / 2});
-    _viewport->setZoomFactor(4.0f);
-    _viewport->setViewSize(IntVector2D{glfwData.mode->width, glfwData.mode->height});
+    _viewport = boost::make_shared<_Viewport>(_windowController);
     _uiController = boost::make_shared<_UiController>();
     _autosaveController = boost::make_shared<_AutosaveController>(_simController);
 
@@ -126,7 +127,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _gettingStartedWindow = boost::make_shared<_GettingStartedWindow>(_styleRepository);
     _openSimulationDialog = boost::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
     _saveSimulationDialog = boost::make_shared<_SaveSimulationDialog>(_simController);
-    _displaySettingsDialog = boost::make_shared<_DisplaySettingsDialog>(glfwData.window);
+    _displaySettingsDialog = boost::make_shared<_DisplaySettingsDialog>(_windowController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -148,7 +149,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         glDeleteTextures(1, &texID);
     };
 
-    _window = glfwData.window;
+    _window = windowData.window;
 }
 
 void _MainWindow::mainLoop()
@@ -206,7 +207,7 @@ void _MainWindow::shutdown()
     _simulationView.reset();
 }
 
-auto _MainWindow::initGlfw() -> GlfwData
+char const* _MainWindow::initGlfw()
 {
     glfwSetErrorCallback(glfwErrorCallback);
 
@@ -237,26 +238,7 @@ auto _MainWindow::initGlfw() -> GlfwData
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-/*
-    int count;
-    primaryMonitor = glfwGetMonitors(&count)[1];
-*/
-    auto mode = glfwGetVideoMode(primaryMonitor);
-    auto screenWidth = mode->width;
-    auto screenHeight = mode->height;
-
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "alien", primaryMonitor, NULL);
-    if (window == NULL) {
-        throw std::runtime_error("Failed to create window.");
-    }
-//    glfwSetWindowMonitor(window, primaryMonitor, 0, 0, 2560, 1440/*1920, 1080*/, 120);
-
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSwapInterval(1);  // Enable vsync
-
-    return {window, mode, glsl_version};
+    return glsl_version;
 }
 
 void _MainWindow::processUninitialized()

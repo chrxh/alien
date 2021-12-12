@@ -1,5 +1,14 @@
 #include "Viewport.h"
 
+#include <GLFW/glfw3.h>
+
+#include "WindowController.h"
+
+_Viewport::_Viewport(WindowController const& windowController)
+{
+    _viewSize = windowController->getStartupWindowSize();
+}
+
 float _Viewport::getZoomFactor() const
 {
     return _zoomFactor;
