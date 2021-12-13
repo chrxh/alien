@@ -22,6 +22,7 @@ _DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowCon
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
+    _videoModeStrings = createVideoModeStrings();
 }
 
 _DisplaySettingsDialog::~_DisplaySettingsDialog()
@@ -38,23 +39,8 @@ void _DisplaySettingsDialog::process()
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
 
         auto isFullscreen = !_windowController->isWindowedMode();
-        auto prevIsFullscreen = isFullscreen;
 
-        ImGui::Checkbox("Full screen", &isFullscreen);
-
-        ImGui::BeginDisabled(!isFullscreen);
-
-        auto prevSelectionIndex = _selectionIndex;
-
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                .name("Resolution")
-                .textWidth(ItemTextWidth)
-                .defaultValue(_origSelectionIndex)
-                .values(createVideoModeStrings()),
-            _selectionIndex);
-
-        if (isFullscreen != prevIsFullscreen) {
+        if(ImGui::Checkbox("Full screen", &isFullscreen)) {
             if (isFullscreen) {
                 setFullscreen(_selectionIndex);
             } else {
@@ -63,7 +49,16 @@ void _DisplaySettingsDialog::process()
             }
         }
 
-        if (_selectionIndex != prevSelectionIndex) {
+        ImGui::BeginDisabled(!isFullscreen);
+
+        if (AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Resolution")
+                .textWidth(ItemTextWidth)
+                .defaultValue(_origSelectionIndex)
+                .values(_videoModeStrings),
+            _selectionIndex)) {
+
             setFullscreen(_selectionIndex);
         }
         ImGui::EndDisabled();
@@ -128,11 +123,14 @@ int _DisplaySettingsDialog::getSelectionIndex() const
     return result;
 }
 
-std::string _DisplaySettingsDialog::createVideoModeString(GLFWvidmode const& videoMode) const
+namespace
 {
-    std::stringstream ss;
-    ss << videoMode.width << " x " << videoMode.height << " @ " << videoMode.refreshRate << "Hz";
-    return ss.str();
+    std::string createVideoModeString(GLFWvidmode const& videoMode)
+    {
+        std::stringstream ss;
+        ss << videoMode.width << " x " << videoMode.height << " @ " << videoMode.refreshRate << "Hz";
+        return ss.str();
+    }
 }
 
 std::vector<std::string> _DisplaySettingsDialog::createVideoModeStrings() const

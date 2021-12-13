@@ -120,7 +120,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     }
 }
 
-void AlienImGui::Combo(ComboParameters const& parameters, int& value)
+bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
 {
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
@@ -128,18 +128,21 @@ void AlienImGui::Combo(ComboParameters const& parameters, int& value)
     }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
-    ImGui::Combo("##", &value, items, toInt(parameters._values.size()));
+    auto result = ImGui::Combo("##", &value, items, toInt(parameters._values.size()));
     ImGui::PopItemWidth();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(value == parameters._defaultValue);
     if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
         value = parameters._defaultValue;
+        result = true;
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     delete[] items;
+
+    return result;
 }
 
 bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup)

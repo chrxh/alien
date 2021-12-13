@@ -16,7 +16,6 @@ public:
 private:
     void setFullscreen(int selectionIndex);
     int getSelectionIndex() const;
-    std::string createVideoModeString(GLFWvidmode const& videoMode) const;
     std::vector<std::string> createVideoModeStrings() const;
 
     WindowController _windowController;
@@ -27,6 +26,7 @@ private:
 
     int _videoModesCount = 0;
     GLFWvidmode const* _videoModes;
+    std::vector<std::string> _videoModeStrings;
 
 //    int _videoModeSelection = 0;  //1 = full screen with desktop resolution, 2 ... n+2 = video mode n
 };
