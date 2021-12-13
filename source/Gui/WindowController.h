@@ -10,6 +10,8 @@ public:
     _WindowController();
     ~_WindowController();
 
+    void shutdown();
+
     struct WindowData
     {
         GLFWwindow* window;
@@ -23,10 +25,13 @@ public:
     IntVector2D getStartupWindowSize() const;
 
 private:
+    void updateWindowSize();
     std::string createVideoModeString(GLFWvidmode const& videoMode) const;
 
-    IntVector2D _defaultSize;
-    WindowData _displayData;
+    WindowData _windowData;
+    IntVector2D _statupSize;
+    IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
+
     bool _fullscreen = true;
     bool _useDesktopResolution = true; 
 

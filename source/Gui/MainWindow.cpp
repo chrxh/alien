@@ -193,6 +193,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
+    _windowController->shutdown();
     _autosaveController->shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
