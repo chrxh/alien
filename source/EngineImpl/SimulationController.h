@@ -23,12 +23,16 @@ public:
 
     ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
 
-    ENGINEIMPL_EXPORT void drawVectorGraphics(
+    /**
+     * Draws section of simulation to registered texture.
+     * If the GPU is busy for specific time, the texture will not be updated.
+     */
+    ENGINEIMPL_EXPORT void tryDrawVectorGraphics(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom);
-    ENGINEIMPL_EXPORT boost::optional<OverlayDescription> drawVectorGraphicsAndReturnOverlay(
+    ENGINEIMPL_EXPORT boost::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
