@@ -35,55 +35,53 @@ struct ExceptionData
 class EngineWorker
 {
 public:
-    ENGINEIMPL_EXPORT void initCuda();
+    void initCuda();
 
-    ENGINEIMPL_EXPORT void newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
-    ENGINEIMPL_EXPORT void clear();
+    void newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
+    void clear();
 
-    ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
+    void registerImageResource(GLuint image);
 
-    ENGINEIMPL_EXPORT void drawVectorGraphics(
+    void tryDrawVectorGraphics(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom);
-    ENGINEIMPL_EXPORT boost::optional<OverlayDescription> drawVectorGraphicsAndReturnOverlay(
+    boost::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom);
 
-    ENGINEIMPL_EXPORT DataDescription
-    getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    ENGINEIMPL_EXPORT OverallStatistics getMonitorData() const;
+    DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    OverallStatistics getMonitorData() const;
 
-    ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);
+    void setSimulationData(DataChangeDescription const& dataToUpdate);
 
-    ENGINEIMPL_EXPORT void calcSingleTimestep();
+    void calcSingleTimestep();
 
-    ENGINEIMPL_EXPORT void beginShutdown(); //caller should wait for termination of thread
-    ENGINEIMPL_EXPORT void endShutdown();
+    void beginShutdown(); //caller should wait for termination of thread
+    void endShutdown();
 
-    ENGINEIMPL_EXPORT int getTpsRestriction() const;
-    ENGINEIMPL_EXPORT void setTpsRestriction(int value);
+    int getTpsRestriction() const;
+    void setTpsRestriction(int value);
 
-    ENGINEIMPL_EXPORT float getTps() const;
-    ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
-    ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
+    float getTps() const;
+    uint64_t getCurrentTimestep() const;
+    void setCurrentTimestep(uint64_t value);
 
-    ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
-    ENGINEIMPL_EXPORT void setSimulationParametersSpots_async(SimulationParametersSpots const& spots);
-    ENGINEIMPL_EXPORT void setGpuSettings_async(GpuSettings const& gpuSettings);
-    ENGINEIMPL_EXPORT void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
+    void setSimulationParameters_async(SimulationParameters const& parameters);
+    void setSimulationParametersSpots_async(SimulationParametersSpots const& spots);
+    void setGpuSettings_async(GpuSettings const& gpuSettings);
+    void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
-    ENGINEIMPL_EXPORT void
-    applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
+    void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
-    ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
-    ENGINEIMPL_EXPORT SelectionShallowData getSelectionShallowData();
-    ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
-    ENGINEIMPL_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
-    ENGINEIMPL_EXPORT void removeSelection();
+    void switchSelection(RealVector2D const& pos, float radius);
+    SelectionShallowData getSelectionShallowData();
+    void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
+    void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
+    void removeSelection();
 
     void runThreadLoop();
     void runSimulation();

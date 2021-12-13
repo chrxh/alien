@@ -109,7 +109,7 @@ void EngineWorker::registerImageResource(GLuint image)
     }
 }
 
-void EngineWorker::drawVectorGraphics(
+void EngineWorker::tryDrawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
@@ -133,7 +133,7 @@ void EngineWorker::drawVectorGraphics(
     }
 }
 
-boost::optional<OverlayDescription> EngineWorker::drawVectorGraphicsAndReturnOverlay(
+boost::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
