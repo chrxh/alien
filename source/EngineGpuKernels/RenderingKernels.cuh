@@ -10,8 +10,9 @@
 #include "Map.cuh"
 #include "SimulationData.cuh"
 #include "RenderingData.cuh"
-#include "cuda_runtime_api.h"
-#include "sm_60_atomic_functions.h"
+
+#include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 
 __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
 {
@@ -24,7 +25,13 @@ __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int ind
     uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0
         | toUInt64(colorToAdd.z * 255.0f) << 32;
 
-    atomicAdd(&imageData[index], rawColorToAdd);
+    // CUDA headers use "unsigned long long" for 64bit types, which
+    // may not be struturally equivalent to std::uint64_t
+    //
+    // Due to this, we need an ugly type casting workaround here
+    //
+    static_assert(sizeof(unsigned long long) == sizeof(uint64_t));
+    atomicAdd(reinterpret_cast<unsigned long long*>(&imageData[index]), rawColorToAdd);
 }
 
 __device__ float3 colorToFloat3(unsigned int value)
