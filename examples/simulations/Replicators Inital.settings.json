@@ -61,8 +61,7 @@
         },
         "radiation": {
             "exponent": "1.000000",
-            "factor": "0.000200",
-            "probability": "0.000000",
+            "factor": "0.000000",
             "velocity multiplier": "1.000000",
             "velocity perturbation": "0.500000"
         },
