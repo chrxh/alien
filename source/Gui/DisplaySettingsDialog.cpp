@@ -35,9 +35,13 @@ void _DisplaySettingsDialog::process()
     ImGui::OpenPopup("Display settings");
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
 
-        auto isFullscreen = _windowController->isFullscreen();
+        auto isFullscreen = !_windowController->isWindowedMode();
         if (ImGui::Checkbox("Full screen", &isFullscreen)) {
-            _windowController->setFullscreen(isFullscreen);
+            if (isFullscreen) {
+                _windowController->setDesktopMode();
+            } else {
+                _windowController->setWindowedMode();
+            }
         }
 
 /*
@@ -70,7 +74,11 @@ void _DisplaySettingsDialog::process()
         if (ImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _show = false;
-            _windowController->setFullscreen(_origFullscreen);
+            if (_origFullscreen) {
+                _windowController->setDesktopMode();
+            } else {
+                _windowController->setWindowedMode();
+            }
         }
 
         ImGui::EndPopup();
@@ -80,5 +88,5 @@ void _DisplaySettingsDialog::process()
 void _DisplaySettingsDialog::show()
 {
     _show = true;
-    _origFullscreen = _windowController->isFullscreen();
+    _origFullscreen = !_windowController->isWindowedMode();
 }
