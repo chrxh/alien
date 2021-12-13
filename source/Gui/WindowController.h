@@ -29,13 +29,16 @@ public:
 
     IntVector2D getStartupWindowSize() const;
 
-private:
+    std::string getMode() const;
     void setMode(std::string const& mode);
+
+private:
 
     void updateWindowSize();
     std::string createLogString(GLFWvidmode const& videoMode) const;
 
     WindowData _windowData;
+    GLFWvidmode* _desktopVideoMode;
     IntVector2D _startupSize;
     IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
 
