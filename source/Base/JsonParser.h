@@ -37,6 +37,8 @@ void JsonParser::encodeDecode(
     if (ParserTask::Encode == task) {
         if constexpr (std::is_same<T, bool>::value) {
             tree.put(node, parameter ? "true" : "false");
+        } else if constexpr (std::is_same<T, std::string>::value) {
+            tree.put(node, parameter);
         } else {
             tree.put(node, std::to_string(parameter));
         }

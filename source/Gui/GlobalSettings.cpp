@@ -55,6 +55,18 @@ void GlobalSettings::setIntState(std::string const& name, int value)
     JsonParser::encodeDecode(_impl->_tree, value, 0, name, ParserTask::Encode);
 }
 
+std::string GlobalSettings::getStringState(std::string const& name, std::string defaultValue)
+{
+    std::string result;
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, name, ParserTask::Decode);
+    return result;
+}
+
+void GlobalSettings::setStringState(std::string const& name, std::string value)
+{
+    JsonParser::encodeDecode(_impl->_tree, value, std::string(), name, ParserTask::Encode);
+}
+
 void GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, ParserTask task)
 {
     GpuSettings defaultSettings;

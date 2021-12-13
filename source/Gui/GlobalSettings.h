@@ -24,6 +24,9 @@ public:
     int getIntState(std::string const& name, int defaultValue);
     void setIntState(std::string const& name, int value);
 
+    std::string getStringState(std::string const& name, std::string defaultValue);
+    void setStringState(std::string const& name, std::string value);
+
 private:
     GlobalSettings();
     ~GlobalSettings();
