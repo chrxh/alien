@@ -19,23 +19,33 @@ public:
     };
     WindowData getWindowData() const;
 
-    bool isFullscreen() const;
-    void setFullscreen(bool value);
+    bool isWindowedMode() const;
+    bool isDesktopMode() const;
+    GLFWvidmode getUserDefinedResolution() const;
+
+    void setWindowedMode();
+    void setDesktopMode();
+    void setUserDefinedResolution(GLFWvidmode const& videoMode);
 
     IntVector2D getStartupWindowSize() const;
 
 private:
+    void setMode(std::string const& mode);
+
     void updateWindowSize();
-    std::string createVideoModeString(GLFWvidmode const& videoMode) const;
+    std::string createLogString(GLFWvidmode const& videoMode) const;
 
     WindowData _windowData;
-    IntVector2D _statupSize;
+    IntVector2D _startupSize;
     IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
 
+    std::string _mode;
+
+/*
     bool _fullscreen = true;
     bool _useDesktopResolution = true; 
+*/
 
-    int _videoModesCount = 0;
-    GLFWvidmode const* _videoModes = nullptr;
-    int _videoModeSelection = 0;
+//    std::vector<GLFWvidmode const> _videoModes;
+//    int _selectionIndex = 0;   //0 = windowed mode, 1 = full screen with desktop resolution, 2 ... n+2 = video mode n
 };
