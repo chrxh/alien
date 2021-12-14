@@ -170,26 +170,46 @@ __global__ void getCellAccessData(int2 rectUpperLeft, int2 rectLowerRight, Simul
     KERNEL_CALL(resolveConnections, rectUpperLeft, rectLowerRight, data, accessTO);
 }
 
-__global__ void getCellOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
+__global__ void getOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
 {
-    auto const& cells = data.entities.cellPointers;
-    auto const partition =
-        calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    auto const firstCell = data.entities.cells.getArray();
+    {
+        auto const& cells = data.entities.cellPointers;
+        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
 
-        auto pos = cell->absPos;
-        data.cellMap.mapPosCorrection(pos);
-        if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            continue;
+            auto pos = cell->absPos;
+            data.cellMap.mapPosCorrection(pos);
+            if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+                continue;
+            }
+            auto cellTOIndex = atomicAdd(accessTO.numCells, 1);
+            auto& cellTO = accessTO.cells[cellTOIndex];
+
+            cellTO.pos = cell->absPos;
+            cellTO.cellFunctionType = cell->cellFunctionType;
+            cellTO.selected = cell->selected;
         }
-        auto cellTOIndex = atomicAdd(accessTO.numCells, 1);
-        auto& cellTO = accessTO.cells[cellTOIndex];
+    }
+    {
+        auto const& particles = data.entities.particlePointers;
+        auto const partition = calcAllThreadsPartition(particles.getNumEntries());
 
-        cellTO.pos = cell->absPos;
-        cellTO.cellFunctionType = cell->cellFunctionType;
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& particle = particles.at(index);
+
+            auto pos = particle->absPos;
+            data.particleMap.mapPosCorrection(pos);
+            if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+                continue;
+            }
+            auto particleTOIndex = atomicAdd(accessTO.numParticles, 1);
+            auto& particleTO = accessTO.particles[particleTOIndex];
+
+            particleTO.pos = particle->absPos;
+            particleTO.selected = particle->selected;
+        }
     }
 }
 
@@ -308,7 +328,8 @@ __global__ void
 cudaGetSimulationOverlayDataKernel(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
 {
     *access.numCells = 0;
-    KERNEL_CALL(getCellOverlayData, rectUpperLeft, rectLowerRight, data, access);
+    *access.numParticles = 0;
+    KERNEL_CALL(getOverlayData, rectUpperLeft, rectLowerRight, data, access);
 }
 
 __global__ void cudaClearData(SimulationData data)

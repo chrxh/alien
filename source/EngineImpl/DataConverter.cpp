@@ -79,12 +79,23 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO con
 OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO)
 {
     OverlayDescription result;
-    result.elements.reserve(*dataTO.numCells);
+    result.elements.reserve(*dataTO.numCells + *dataTO.numParticles);
     for (int i = 0; i < *dataTO.numCells; ++i) {
         auto const& cellTO = dataTO.cells[i];
         OverlayElementDescription element;
+        element.cell = true;
         element.pos = {cellTO.pos.x, cellTO.pos.y};
         element.cellType = static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType);
+        element.selected = cellTO.selected;
+        result.elements.emplace_back(element);
+    }
+
+    for (int i = 0; i < *dataTO.numParticles; ++i) {
+        auto const& particleTO = dataTO.particles[i];
+        OverlayElementDescription element;
+        element.cell = false;
+        element.pos = {particleTO.pos.x, particleTO.pos.y};
+        element.selected = particleTO.selected;
         result.elements.emplace_back(element);
     }
     return result;

@@ -27,8 +27,10 @@ namespace Const
     ImColor const SelectionAreaFillColor = ImColor::HSV(0.33f, 0.0f, 0.0f, 0.6f);
     ImColor const SelectionAreaBorderColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 1.0f);
 
-    ImColor const CellFunctionOverlayColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 0.5f);
-    ImColor const CellFunctionOverlayShadowColor = ImColor::HSV(0.33f, 0.0f, 0.0f, 0.7f);
+    ImColor const CellFunctionOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
+    ImColor const CellFunctionOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
+
+    ImColor const SelectedCellOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.8f);
 
     float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 30.0f;
