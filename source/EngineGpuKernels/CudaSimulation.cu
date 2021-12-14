@@ -305,12 +305,17 @@ void _CudaSimulation::applyForce(ApplyForceData const& applyData)
     KERNEL_CALL_HOST(cudaApplyForce, applyData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::switchSelection(SwitchSelectionData const& switchData)
+void _CudaSimulation::switchSelection(PointSelectionData const& pointData)
 {
-    KERNEL_CALL_HOST(cudaSwitchSelection, switchData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaSwitchSelection, pointData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::setSelection(SetSelectionData const& selectionData)
+void _CudaSimulation::swapSelection(PointSelectionData const& pointData)
+{
+    KERNEL_CALL_HOST(cudaSwapSelection, pointData, *_cudaSimulationData);
+}
+
+void _CudaSimulation::setSelection(AreaSelectionData const& selectionData)
 {
     KERNEL_CALL_HOST(cudaSetSelection, selectionData, *_cudaSimulationData);
 }
