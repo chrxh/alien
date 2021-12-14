@@ -348,7 +348,14 @@ void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    _cudaSimulation->switchSelection(SwitchSelectionData{{pos.x, pos.y}, radius});
+    _cudaSimulation->switchSelection(PointSelectionData{{pos.x, pos.y}, radius});
+}
+
+void EngineWorker::swapSelection(RealVector2D const& pos, float radius)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->swapSelection(PointSelectionData{{pos.x, pos.y}, radius});
 }
 
 SelectionShallowData EngineWorker::getSelectionShallowData()
@@ -362,7 +369,7 @@ void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    _cudaSimulation->setSelection(SetSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
+    _cudaSimulation->setSelection(AreaSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
 }
 
 void EngineWorker::shallowUpdateSelection(ShallowUpdateSelectionData const& updateData)

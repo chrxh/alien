@@ -76,6 +76,7 @@ public:
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
     ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
+    ENGINEIMPL_EXPORT void swapSelection(RealVector2D const& pos, float radius);
     ENGINEIMPL_EXPORT SelectionShallowData getSelectionShallowData();
     ENGINEIMPL_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
     ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);

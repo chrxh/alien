@@ -78,6 +78,7 @@ public:
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
     void switchSelection(RealVector2D const& pos, float radius);
+    void swapSelection(RealVector2D const& pos, float radius);
     SelectionShallowData getSelectionShallowData();
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);

@@ -25,13 +25,13 @@ struct ApplyForceData
     bool onlyRotation;
 };
 
-struct SwitchSelectionData
+struct PointSelectionData
 {
     float2 pos;
     float radius;
 };
 
-struct SetSelectionData
+struct AreaSelectionData
 {
     float2 startPos;
     float2 endPos;

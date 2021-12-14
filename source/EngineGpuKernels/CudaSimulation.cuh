@@ -43,8 +43,9 @@ public:
     ENGINEGPUKERNELS_EXPORT void setSimulationData(DataAccessTO const& dataTO);
 
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
-    ENGINEGPUKERNELS_EXPORT void switchSelection(SwitchSelectionData const& switchData);
-    ENGINEGPUKERNELS_EXPORT void setSelection(SetSelectionData const& selectionData);
+    ENGINEGPUKERNELS_EXPORT void switchSelection(PointSelectionData const& switchData);
+    ENGINEGPUKERNELS_EXPORT void swapSelection(PointSelectionData const& selectionData);
+    ENGINEGPUKERNELS_EXPORT void setSelection(AreaSelectionData const& selectionData);
     ENGINEGPUKERNELS_EXPORT SelectionShallowData getSelectionShallowData();
     ENGINEGPUKERNELS_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData);
     ENGINEGPUKERNELS_EXPORT void removeSelection();

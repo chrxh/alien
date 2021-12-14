@@ -51,10 +51,10 @@ void _EditorController::process()
         RealVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePos;
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            leftMouseButtonPressed(mousePos);
+            leftMouseButtonPressed(mousePos, ImGui::GetIO().KeyCtrl);
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            leftMouseButtonHold(mousePos, prevMousePosInt, ImGui::GetIO().KeyCtrl);
+            leftMouseButtonHold(mousePos, prevMousePosInt, ImGui::GetIO().KeyShift);
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
             rightMouseButtonPressed(mousePos);
@@ -99,12 +99,16 @@ void _EditorController::processSelectionRect()
     }
 }
 
-void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos)
+void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
     if (!_simController->isSimulationRunning()) {
         auto pos = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
         auto zoom = _viewport->getZoomFactor();
-        _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
+        if (!modifierKeyPressed) {
+            _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
+        } else {
+            _simController->swapSelection(pos, std::max(0.5f, 10.0f / zoom));
+        }
 
         _editorModel->update();
     }
