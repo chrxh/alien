@@ -282,7 +282,7 @@ void _SimulationView::updateImageFromSimulation()
         ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
             if (overlayElement.cell) {
-                auto fontSize = std::min(30.0f, _viewport->getZoomFactor()) / 2;
+                auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                 auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
                 auto text = cellFunctionToStringMap.at(overlayElement.cellType);
                 draw_list->AddText(
@@ -302,7 +302,7 @@ void _SimulationView::updateImageFromSimulation()
             if (overlayElement.selected == 1) {
                 auto center = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
                 draw_list->AddCircle(
-                    {center.x, center.y}, _viewport->getZoomFactor() * 0.8f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                    {center.x, center.y}, _viewport->getZoomFactor() * 0.65f, Const::SelectedCellOverlayColor, 0, 2.0f);
             }
         }
     }
