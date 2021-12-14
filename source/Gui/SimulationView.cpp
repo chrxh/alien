@@ -266,12 +266,12 @@ void _SimulationView::updateImageFromSimulation()
     auto zoomFactor = _viewport->getZoomFactor();
 
     if (zoomFactor < ZoomFactorForOverlay) {
-        _simController->drawVectorGraphics(
+        _simController->tryDrawVectorGraphics(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         _overlay = boost::none;
 
     } else {
-        auto overlay = _simController->drawVectorGraphicsAndReturnOverlay(
+        auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         if (overlay) {
             _overlay = overlay;
@@ -281,21 +281,29 @@ void _SimulationView::updateImageFromSimulation()
     if(_overlay) {
         ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
-            auto fontSize = std::min(30.0f, _viewport->getZoomFactor()) / 2;
-            auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
-            auto text = cellFunctionToStringMap.at(overlayElement.cellType);
-            draw_list->AddText(
-                _styleRepository->getMediumFont(),
-                fontSize,
-                {viewPos.x - 2*fontSize, viewPos.y},
-                Const::CellFunctionOverlayShadowColor,
-                text.c_str());
-            draw_list->AddText(
-                _styleRepository->getMediumFont(),
-                fontSize,
-                {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
-                Const::CellFunctionOverlayColor,
-                text.c_str());
+            if (overlayElement.cell) {
+                auto fontSize = std::min(30.0f, _viewport->getZoomFactor()) / 2;
+                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
+                auto text = cellFunctionToStringMap.at(overlayElement.cellType);
+                draw_list->AddText(
+                    _styleRepository->getMediumFont(),
+                    fontSize,
+                    {viewPos.x - 2 * fontSize, viewPos.y},
+                    Const::CellFunctionOverlayShadowColor,
+                    text.c_str());
+                draw_list->AddText(
+                    _styleRepository->getMediumFont(),
+                    fontSize,
+                    {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
+                    Const::CellFunctionOverlayColor,
+                    text.c_str());
+            }
+
+            if (overlayElement.selected == 1) {
+                auto center = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
+                draw_list->AddCircle(
+                    {center.x, center.y}, _viewport->getZoomFactor() * 0.8f, Const::SelectedCellOverlayColor, 0, 2.0f);
+            }
         }
     }
 }

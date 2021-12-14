@@ -28,6 +28,8 @@ struct ParticleAccessTO
 	float2 pos;
 	float2 vel;
     ParticleMetadataAccessTO metadata;
+
+	int selected;
 };
 
 struct CellMetadataAccessTO
@@ -69,6 +71,8 @@ struct CellAccessTO
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int tokenUsages;
     CellMetadataAccessTO metadata;
+
+	int selected;
 };
 
 struct DataAccessTO
