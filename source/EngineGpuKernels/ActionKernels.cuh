@@ -50,13 +50,13 @@ __global__ void applyForceToParticles(ApplyForceData applyData, int2 universeSiz
     }
 }
 
-__global__ void existSelection(SwitchSelectionData switchData, SimulationData data, int* result)
+__global__ void existSelection(PointSelectionData pointData, SimulationData data, int* result)
 {
     auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if (1 == cell->selected && data.cellMap.mapDistance(switchData.pos, cell->absPos) < switchData.radius) {
+        if (1 == cell->selected && data.cellMap.mapDistance(pointData.pos, cell->absPos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -65,7 +65,7 @@ __global__ void existSelection(SwitchSelectionData switchData, SimulationData da
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
-        if (1 == particle->selected && data.cellMap.mapDistance(switchData.pos, particle->absPos) < switchData.radius) {
+        if (1 == particle->selected && data.cellMap.mapDistance(pointData.pos, particle->absPos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -96,7 +96,7 @@ __global__ void setSelection(float2 pos, float radius, SimulationData data)
     }
 }
 
-__global__ void setSelection(SetSelectionData selectionData, SimulationData data)
+__global__ void setSelection(AreaSelectionData selectionData, SimulationData data)
 {
     auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
@@ -118,6 +118,30 @@ __global__ void setSelection(SetSelectionData selectionData, SimulationData data
         } else {
             particle->selected = 0;
         }
+    }
+}
+
+__global__ void swapSelection(float2 pos, float radius, SimulationData data)
+{
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (data.cellMap.mapDistance(pos, cell->absPos) < radius) {
+            if (cell->selected == 0) {
+                cell->selected = 1;
+            }
+            else if (cell->selected == 1) {
+                cell->selected = 0;
+            }
+        } 
+    }
+
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        if (data.particleMap.mapDistance(pos, particle->absPos) < radius) {
+            particle->selected = 1 - particle->selected;
+        } 
     }
 }
 
@@ -173,20 +197,24 @@ __global__ void updatePosAndVelForSelection(ShallowUpdateSelectionData updateDat
     }
 }
 
-__global__ void removeSelection(SimulationData data)
+__global__ void removeSelection(SimulationData data, bool onlyClusterSelection)
 {
     auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        cell->selected = 0;
+        if (!onlyClusterSelection || cell->selected == 2) {
+            cell->selected = 0;
+        }
     }
 
     auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
-        particle->selected = 0;
+        if (!onlyClusterSelection || particle->selected == 2) {
+            particle->selected = 0;
+        }
     }
 }
 
@@ -390,7 +418,7 @@ __global__ void cudaApplyForce(ApplyForceData applyData, SimulationData data)
 }
 
 __global__ void
-cudaSwitchSelection(SwitchSelectionData switchData, SimulationData data)
+cudaSwitchSelection(PointSelectionData switchData, SimulationData data)
 {
     int* result = new int;
     *result = 0; 
@@ -407,7 +435,23 @@ cudaSwitchSelection(SwitchSelectionData switchData, SimulationData data)
     delete result;
 }
 
-__global__ void cudaSetSelection(SetSelectionData setData, SimulationData data)
+__global__ void cudaSwapSelection(PointSelectionData switchData, SimulationData data)
+{
+    int* result = new int;
+    *result = 0;
+
+    KERNEL_CALL(removeSelection, data, true);
+
+    KERNEL_CALL(swapSelection, switchData.pos, switchData.radius, data);
+    do {
+        *result = 0;
+        KERNEL_CALL(rolloutSelection, data, result);
+    } while (1 == *result);
+
+    delete result;
+}
+
+__global__ void cudaSetSelection(AreaSelectionData setData, SimulationData data)
 {
     int* result = new int;
     *result = 0;
@@ -493,5 +537,5 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
 
 __global__ void cudaRemoveSelection(SimulationData data)
 {
-    KERNEL_CALL(removeSelection, data);
+    KERNEL_CALL(removeSelection, data, false);
 }

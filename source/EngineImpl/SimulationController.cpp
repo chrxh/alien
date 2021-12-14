@@ -191,6 +191,11 @@ void _SimulationController::switchSelection(RealVector2D const& pos, float radiu
     _worker.switchSelection(pos, radius);
 }
 
+void _SimulationController::swapSelection(RealVector2D const& pos, float radius)
+{
+    _worker.swapSelection(pos, radius);
+}
+
 SelectionShallowData _SimulationController::getSelectionShallowData()
 {
     return _worker.getSelectionShallowData();
