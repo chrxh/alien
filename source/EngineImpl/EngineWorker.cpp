@@ -159,7 +159,7 @@ boost::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturn
         DataAccessTO dataTO = _dataTOCache->getDataTO(
             {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
 
-        _cudaSimulation->getSimulationData(
+        _cudaSimulation->getOverlayData(
             {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
             int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)},
             dataTO);

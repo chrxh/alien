@@ -265,6 +265,13 @@ void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rect
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
         dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        dataTO.particles,
+        _cudaAccessTO->particles,
+        sizeof(CellAccessTO) * (*dataTO.numParticles),
+        cudaMemcpyDeviceToHost));
 }
 
 void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
