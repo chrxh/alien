@@ -13,7 +13,7 @@ public:
     void show();
 
 private:
-    void checkbox(std::string id, uint64_t cellColor, bool& check);
+    void colorCheckbox(std::string id, uint32_t cellColor, bool& check);
 
     void onColorize();
 

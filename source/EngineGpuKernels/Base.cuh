@@ -14,17 +14,20 @@
 #include "HashSet.cuh"
 #include "Swap.cuh"
 
-__device__ inline float toFloat(int value)
+template<typename T>
+__device__ inline float toFloat(T value)
 {
     return static_cast<float>(value);
 }
 
-__device__ inline int toInt(float value)
+template <typename T>
+__device__ inline int toInt(T value)
 {
     return static_cast<int>(value);
 }
 
-__device__ inline uint64_t toUInt64(float value)
+template <typename T>
+__device__ inline uint64_t toUInt64(T value)
 {
     return static_cast<uint64_t>(value);
 }

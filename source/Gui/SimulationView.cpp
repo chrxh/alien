@@ -254,8 +254,13 @@ void _SimulationView::processControls()
     float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - 17}, {viewport->Size.x - 1 - 17, 1}});
-    _scrollbarY->process({{viewport->Size.x - 17, viewport->Pos.y + 22}, {1, viewport->Size.y - 1 - 17}});
+    auto mainMenubarHeight = _styleRepository->scaleContent(20);
+    auto scrollbarWidth = 17;   //fixed
+    _scrollbarX->process(
+        {{viewport->Pos.x, viewport->Size.y - scrollbarWidth}, {viewport->Size.x - 1 - scrollbarWidth, 1}});
+    _scrollbarY->process(
+        {{viewport->Size.x - scrollbarWidth, viewport->Pos.y + mainMenubarHeight},
+         {1, viewport->Size.y - 1 - scrollbarWidth}});
 }
 
 void _SimulationView::updateImageFromSimulation()
