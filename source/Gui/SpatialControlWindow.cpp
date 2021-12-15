@@ -1,6 +1,8 @@
 #include "SpatialControlWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
+
+#include "IconFontCppHeaders/IconsFontAwesome5.h"
 
 #include "Base/StringFormatter.h"
 #include "EngineInterface/ChangeDescriptions.h"
@@ -8,22 +10,14 @@
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "OpenGLHelper.h"
 #include "Resources.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 
-_SpatialControlWindow::_SpatialControlWindow(
-    SimulationController const& simController,
-    Viewport const& viewport,
-    StyleRepository const& styleRepository)
+_SpatialControlWindow::_SpatialControlWindow(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
     , _viewport(viewport)
-    , _styleRepository(styleRepository)
 {
-    _zoomInTexture = OpenGLHelper::loadTexture(Const::ZoomInFilename);
-    _zoomOutTexture = OpenGLHelper::loadTexture(Const::ZoomOutFilename);
-    _resizeTexture = OpenGLHelper::loadTexture(Const::ResizeFilename);
     _on = GlobalSettings::getInstance().getBoolState("windows.spatial control.active", true);
 }
 
@@ -56,7 +50,7 @@ void _SpatialControlWindow::process()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::Text("World size");
-        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto worldSize = _simController->getWorldSize();
         ImGui::TextUnformatted(
@@ -65,14 +59,14 @@ void _SpatialControlWindow::process()
         ImGui::PopFont();
 
         ImGui::Text("Zoom factor");
-        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Center position");
-        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto centerPos = _viewport->getCenterInWorldPos();
         ImGui::TextUnformatted(
@@ -101,26 +95,29 @@ void _SpatialControlWindow::setOn(bool value)
 
 void _SpatialControlWindow::processZoomInButton()
 {
-    if (ImGui::ImageButton((void*)(intptr_t)_zoomInTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+    if (AlienImGui::BeginToolbarButton(ICON_FA_SEARCH_PLUS)) {
         _viewport->setZoomFactor(_viewport->getZoomFactor() * 2);
     }
+    AlienImGui::EndToolbarButton();
 }
 
 void _SpatialControlWindow::processZoomOutButton()
 {
-    if (ImGui::ImageButton((void*)(intptr_t)_zoomOutTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+    if (AlienImGui::BeginToolbarButton(ICON_FA_SEARCH_MINUS)) {
         _viewport->setZoomFactor(_viewport->getZoomFactor() / 2);
     }
+    AlienImGui::EndToolbarButton();
 }
 
 void _SpatialControlWindow::processResizeButton()
 {
-    if (ImGui::ImageButton((void*)(intptr_t)_resizeTexture.textureId, {32.0f, 32.0f}, {0, 0}, {1.0f, 1.0f})) {
+    if (AlienImGui::BeginToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
         _showResizeDialog = true;
         auto worldSize = _simController->getWorldSize();
         _width = worldSize.x;
         _height = worldSize.y;
     }
+    AlienImGui::EndToolbarButton();
 }
 
 void _SpatialControlWindow::processZoomSensitivitySlider()

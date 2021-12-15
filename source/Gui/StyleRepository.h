@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-#include "imgui.h"
+#include <imgui.h>
 
 namespace Const
 {
@@ -31,25 +31,32 @@ namespace Const
     ImColor const CellFunctionOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
 
     ImColor const SelectedCellOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
+    ImColor const ToolbarButtonTextColor = ImColor::HSV(0.17f, 0.33f, 1.0f, 1.0f);
 
     float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 30.0f;
 }
 
-class _StyleRepository
+class StyleRepository
 {
 public:
-    _StyleRepository();
+    static StyleRepository& getInstance();
+
+    void init();
 
     ImFont* getMediumFont() const;
     ImFont* getLargeFont() const;
+    ImFont* getHugeFont() const;
     ImFont* getMonospaceFont() const;
 
     float scaleContent(float value) const;
 
 private:
+    StyleRepository() = default;
+
     float _contentScaleFactor = 1.0f;
     ImFont* _mediumFont = nullptr;
     ImFont* _largeFont = nullptr;
+    ImFont* _hugeFont = nullptr;
     ImFont* _monospaceFont = nullptr;
 };

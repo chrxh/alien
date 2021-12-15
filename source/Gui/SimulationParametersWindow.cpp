@@ -1,6 +1,6 @@
 #include "SimulationParametersWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
@@ -15,11 +15,8 @@ namespace
     auto const MaxContentTextWidth = 240.0f;
 }
 
-_SimulationParametersWindow::_SimulationParametersWindow(
-    StyleRepository const& styleRepository,
-    SimulationController const& simController)
-    : _styleRepository(styleRepository)
-    , _simController(simController)
+_SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController)
+    : _simController(simController)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -133,7 +130,7 @@ void _SimulationParametersWindow::processBase(
     SimulationParameters& simParameters,
     SimulationParameters const& origSimParameters)
 {
-    auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
+    auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         AlienImGui::Group("Numerics");
         AlienImGui::SliderFloat(
@@ -334,7 +331,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
 
         AlienImGui::Group("Location and meta data");
 
-        auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
+        auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
         auto& color = spot.color;
         AlienImGui::ColorButtonWithPicker(
             "##",

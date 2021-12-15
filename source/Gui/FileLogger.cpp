@@ -11,7 +11,7 @@ _FileLogger::_FileLogger()
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->registerCallBack(this);
 
-    std::remove(Const::LogFilename.c_str());
+    std::remove(Const::LogFilename);
     _outfile.open(Const::LogFilename, std::ios_base::app);
 }
 

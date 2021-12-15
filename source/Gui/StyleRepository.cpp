@@ -14,7 +14,13 @@
 
 #include "Resources.h"
 
-_StyleRepository::_StyleRepository()
+StyleRepository& StyleRepository::getInstance()
+{
+    static StyleRepository instance;
+    return instance;
+}
+
+void StyleRepository::init()
 {
     float temp;
     glfwGetMonitorContentScale(
@@ -22,9 +28,10 @@ _StyleRepository::_StyleRepository()
 
     ImGuiIO& io = ImGui::GetIO();
 
+    //small font
     if (io.Fonts->AddFontFromMemoryCompressedTTF(
             DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * _contentScaleFactor)
-        == NULL) {
+        == nullptr) {
         throw std::runtime_error("Could not load font.");
     };
 
@@ -39,39 +46,63 @@ _StyleRepository::_StyleRepository()
         &configMerge,
         rangesIcons);
 
+    //medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(
         DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * _contentScaleFactor);
-    if (_mediumFont == NULL) {
+    if (_mediumFont == nullptr) {
         throw std::runtime_error("Could not load font.");
     }
-    _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(
+
+    //large font
+    {
+        ImFontConfig configMerge;
+        configMerge.MergeMode = true;
+        configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
+        static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+        _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(
+            FontAwesomeSolid_compressed_data,
+            FontAwesomeSolid_compressed_size,
+            28.0f * _contentScaleFactor,
+            &configMerge,
+            rangesIcons);
+    }
+
+    //huge font
+    _hugeFont = io.Fonts->AddFontFromMemoryCompressedTTF(
         DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * _contentScaleFactor);
-    if (_largeFont == NULL) {
+    if (_hugeFont == nullptr) {
         throw std::runtime_error("Could not load font.");
     }
+
+    //monospace font
     _monospaceFont = io.Fonts->AddFontFromMemoryCompressedTTF(
         Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * _contentScaleFactor);
-    if (_monospaceFont == NULL) {
+    if (_monospaceFont == nullptr) {
         throw std::runtime_error("Could not load font.");
     }
 }
 
-ImFont* _StyleRepository::getMediumFont() const
+ImFont* StyleRepository::getMediumFont() const
 {
     return _mediumFont;
 }
 
-ImFont* _StyleRepository::getLargeFont() const
+ImFont* StyleRepository::getLargeFont() const
 {
     return _largeFont;
 }
 
-ImFont* _StyleRepository::getMonospaceFont() const
+ImFont* StyleRepository::getHugeFont() const
+{
+    return _hugeFont;
+}
+
+ImFont* StyleRepository::getMonospaceFont() const
 {
     return _monospaceFont;
 }
 
-float _StyleRepository::scaleContent(float value) const
+float StyleRepository::scaleContent(float value) const
 {
     return _contentScaleFactor * value;
 }

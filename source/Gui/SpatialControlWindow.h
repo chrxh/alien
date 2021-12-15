@@ -8,10 +8,7 @@
 class _SpatialControlWindow
 {
 public:
-    _SpatialControlWindow(
-        SimulationController const& simController,
-        Viewport const& viewport,
-        StyleRepository const& styleRepository);
+    _SpatialControlWindow(SimulationController const& simController, Viewport const& viewport);
     ~_SpatialControlWindow();
 
     void process();
@@ -31,11 +28,6 @@ private:
 
     SimulationController _simController;
     Viewport _viewport;
-    StyleRepository _styleRepository;
-
-    TextureData _zoomInTexture;
-    TextureData _zoomOutTexture;
-    TextureData _resizeTexture;
 
     bool _on = false;
     bool _showResizeDialog = false;

@@ -1,7 +1,7 @@
 #include "SimulationView.h"
 
 #include <glad/glad.h>
-#include "imgui.h"
+#include <imgui.h>
 
 #include "EngineImpl/SimulationController.h"
 
@@ -30,12 +30,10 @@ namespace
 }
 
 _SimulationView::_SimulationView(
-    StyleRepository const& styleRepository,
     SimulationController const& simController,
     ModeWindow const& modeWindow,
     Viewport const& viewport)
     : _viewport(viewport)
-    , _styleRepository(styleRepository)
 {
     _modeWindow = modeWindow;
 
@@ -254,7 +252,7 @@ void _SimulationView::processControls()
     float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    auto mainMenubarHeight = _styleRepository->scaleContent(22);
+    auto mainMenubarHeight = StyleRepository::getInstance().scaleContent(22);
     auto scrollbarThickness = 17;   //fixed
     _scrollbarX->process(
         {{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
@@ -291,13 +289,13 @@ void _SimulationView::updateImageFromSimulation()
                 auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
                 auto text = cellFunctionToStringMap.at(overlayElement.cellType);
                 draw_list->AddText(
-                    _styleRepository->getMediumFont(),
+                    StyleRepository::getInstance().getMediumFont(),
                     fontSize,
                     {viewPos.x - 2 * fontSize, viewPos.y},
                     Const::CellFunctionOverlayShadowColor,
                     text.c_str());
                 draw_list->AddText(
-                    _styleRepository->getMediumFont(),
+                    StyleRepository::getInstance().getMediumFont(),
                     fontSize,
                     {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
                     Const::CellFunctionOverlayColor,

@@ -8,10 +8,7 @@
 class _EditorController
 {
 public:
-    _EditorController(
-        SimulationController const& simController,
-        Viewport const& viewport,
-        StyleRepository const& styleRepository);
+    _EditorController(SimulationController const& simController, Viewport const& viewport);
 
     bool isOn() const;
     void setOn(bool value);
@@ -39,7 +36,6 @@ private:
 
     SimulationController _simController;
     Viewport _viewport;
-    StyleRepository _styleRepository;
 
     bool _on = false;
 

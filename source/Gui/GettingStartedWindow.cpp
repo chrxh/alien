@@ -1,14 +1,13 @@
 #include "GettingStartedWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
 #include "GlobalSettings.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 
-_GettingStartedWindow::_GettingStartedWindow(StyleRepository const& styleRepository)
-    : _styleRepository(styleRepository)
+_GettingStartedWindow::_GettingStartedWindow()
 {
     _showAfterStartup = GlobalSettings::getInstance().getBoolState("windows.getting started.always active", true);
     _on = _showAfterStartup;
@@ -26,7 +25,7 @@ void _GettingStartedWindow::process()
     }
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Getting started", &_on)) {
-        ImGui::PushFont(_styleRepository->getMediumFont());
+        ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
         ImGui::Text("What is Artificial Life Environment (ALiEn)?");
         ImGui::PopStyleColor();

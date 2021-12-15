@@ -1,6 +1,6 @@
 #include "OpenSimulationDialog.h"
 
-#include "imgui.h"
+#include <imgui.h>
 #include "ImFileDialog.h"
 
 #include "EngineInterface/Serializer.h"

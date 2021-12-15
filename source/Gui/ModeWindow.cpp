@@ -1,6 +1,6 @@
 #include "ModeWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "OpenGLHelper.h"
 #include "Resources.h"

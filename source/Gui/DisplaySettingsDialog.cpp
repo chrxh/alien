@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include <GLFW/glfw3.h>
-#include "imgui.h"
+#include <imgui.h>
 
 #include "Base/LoggingService.h"
 #include "Base/ServiceLocator.h"
@@ -18,11 +18,8 @@ namespace
     auto const MaxContentTextWidth = 130.0f;
 }
 
-_DisplaySettingsDialog::_DisplaySettingsDialog(
-    WindowController const& windowController,
-    StyleRepository const& styleRepository)
+_DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
     : _windowController(windowController)
-    , _styleRepository(styleRepository)
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
@@ -41,7 +38,7 @@ void _DisplaySettingsDialog::process()
 
     ImGui::OpenPopup("Display settings");
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
-        auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
+        auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
 
         auto isFullscreen = !_windowController->isWindowedMode();
 
