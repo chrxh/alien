@@ -70,11 +70,12 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
 {
 
     ImGui::SetNextItemWidth(
-        ImGui::GetContentRegionAvail().x - parameters._textWidth - 50.0f - ImGui::GetStyle().FramePadding.x * 2);
+        ImGui::GetContentRegionAvail().x - parameters._textWidth - parameters._inputWidth
+        - ImGui::GetStyle().FramePadding.x * 2);
     ImGui::SliderFloat(
         ("##slider" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(50);
+    ImGui::SetNextItemWidth(parameters._inputWidth);
     ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
