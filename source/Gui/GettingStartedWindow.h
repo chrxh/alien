@@ -7,7 +7,7 @@
 class _GettingStartedWindow
 {
 public:
-    _GettingStartedWindow(StyleRepository const& styleRepository);
+    _GettingStartedWindow();
 
     ~_GettingStartedWindow();
 
@@ -17,8 +17,6 @@ public:
     void setOn(bool value);
 
 private:
-    StyleRepository _styleRepository;
-
     bool _on = false;
     bool _showAfterStartup = true;
 };
