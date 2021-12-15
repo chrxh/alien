@@ -38,6 +38,7 @@ public:
         MEMBER_DECLARATION(SliderInputFloatParameters, float, min, 0);
         MEMBER_DECLARATION(SliderInputFloatParameters, float, max, 0);
         MEMBER_DECLARATION(SliderInputFloatParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(SliderInputFloatParameters, int, inputWidth, 50);
         MEMBER_DECLARATION(SliderInputFloatParameters, std::string, format, "%.3f");
     };
     static void SliderInputFloat(SliderInputFloatParameters const& parameters, float& value);
