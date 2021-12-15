@@ -1,6 +1,6 @@
 #include "ColorizeDialog.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Colors.h"

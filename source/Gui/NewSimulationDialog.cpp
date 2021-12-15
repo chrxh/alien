@@ -1,6 +1,6 @@
 #include "NewSimulationDialog.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "EngineImpl/SimulationController.h"
 #include "Viewport.h"
@@ -9,12 +9,10 @@
 _NewSimulationDialog::_NewSimulationDialog(
     SimulationController const& simController,
     Viewport const& viewport,
-    StatisticsWindow const& statisticsWindow,
-    StyleRepository const& styleRepository)
+    StatisticsWindow const& statisticsWindow)
     : _simController(simController)
     , _viewport(viewport)
     , _statisticsWindow(statisticsWindow)
-    , _styleRepository(styleRepository)
 {}
 
 void _NewSimulationDialog::process()

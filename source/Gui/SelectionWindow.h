@@ -6,7 +6,7 @@
 class _SelectionWindow
 {
 public:
-    _SelectionWindow(EditorModel const& editorModel, StyleRepository const& styleRepository);
+    _SelectionWindow(EditorModel const& editorModel);
     ~_SelectionWindow();
 
     void process();
@@ -16,7 +16,6 @@ public:
 
 private:
     EditorModel _editorModel; 
-    StyleRepository _styleRepository;
 
     bool _on = false;
 };

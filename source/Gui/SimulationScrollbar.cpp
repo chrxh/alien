@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "EngineImpl/SimulationController.h"
 #include "Viewport.h"

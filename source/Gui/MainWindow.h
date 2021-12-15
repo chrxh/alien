@@ -59,8 +59,6 @@ private:
     DisplaySettingsDialog _displaySettingsDialog;
     EditorController _editorController; 
 
-    StyleRepository _styleRepository;
-
     bool _onClose = false;
     bool _simulationMenuToggled = false;
     bool _windowMenuToggled = false;

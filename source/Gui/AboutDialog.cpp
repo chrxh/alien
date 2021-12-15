@@ -1,6 +1,6 @@
 #include "AboutDialog.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "Resources.h"
 

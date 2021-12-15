@@ -1,6 +1,6 @@
 #include "FlowGeneratorWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "Base/Definitions.h"
 #include "EngineImpl/SimulationController.h"
@@ -13,11 +13,8 @@ namespace
     auto const MaxContentTextWidth = 120.0f;
 }
 
-_FlowGeneratorWindow::_FlowGeneratorWindow(
-    SimulationController const& simController,
-    StyleRepository const& styleRepository)
+_FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
     : _simController(simController)
-    , _styleRepository(styleRepository)
 {
     _on = GlobalSettings::getInstance().getBoolState("windows.flow generator.active", false);
 }
@@ -37,7 +34,7 @@ void _FlowGeneratorWindow::process()
     auto lastFlowFieldSettings = flowFieldSettings;
 
     auto worldSize = _simController->getWorldSize();
-    auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
+    auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Flow generator", &_on, ImGuiWindowFlags_None);

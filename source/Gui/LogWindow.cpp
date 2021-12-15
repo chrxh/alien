@@ -1,6 +1,6 @@
 #include "LogWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -8,9 +8,8 @@
 #include "SimpleLogger.h"
 #include "GlobalSettings.h"
 
-_LogWindow::_LogWindow(StyleRepository const& styleRepository, SimpleLogger const& logger)
-    : _styleRepository(styleRepository)
-    , _logger(logger)
+_LogWindow::_LogWindow(SimpleLogger const& logger)
+    : _logger(logger)
 {
     _on = GlobalSettings::getInstance().getBoolState("windows.log.active", false);
     _verbose = GlobalSettings::getInstance().getBoolState("windows.log.verbose", false);
@@ -32,7 +31,7 @@ void _LogWindow::process()
 
         if (ImGui::BeginChild(
                 "##", ImVec2(0, ImGui::GetContentRegionAvail().y - 40), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-            ImGui::PushFont(_styleRepository->getMonospaceFont());
+            ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
 
             for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important)

@@ -5,7 +5,7 @@
 class _LogWindow
 {
 public:
-    _LogWindow(StyleRepository const& styleRepository, SimpleLogger const& logger);
+    _LogWindow(SimpleLogger const& logger);
     ~_LogWindow();
 
     void process();
@@ -18,6 +18,5 @@ private:
     bool _on = false;
     bool _verbose = false;
 
-    StyleRepository _styleRepository;
     SimpleLogger _logger;
 };

@@ -1,6 +1,6 @@
 #include "ManipulatorWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -16,13 +16,9 @@ namespace
     auto const MaxContentTextWidth = 120.0f;
 }
 
-_ManipulatorWindow::_ManipulatorWindow(
-    EditorModel const& editorModel,
-    SimulationController const& simController,
-    StyleRepository const& styleRepository)
+_ManipulatorWindow::_ManipulatorWindow(EditorModel const& editorModel, SimulationController const& simController)
     : _editorModel(editorModel)
     , _simController(simController)
-    , _styleRepository(styleRepository)
 {
     _on = GlobalSettings::getInstance().getBoolState("editor.manipulator.active", true);
 }
@@ -37,7 +33,7 @@ void _ManipulatorWindow::process()
     if (!_on) {
         return;
     }
-    auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
+    auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
     
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Manipulator", &_on)) {
@@ -93,7 +89,7 @@ void _ManipulatorWindow::process()
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(maxContentTextWidthScaled)
-                .inputWidth(_styleRepository->scaleContent(50))
+                .inputWidth(StyleRepository::getInstance().scaleContent(50))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),

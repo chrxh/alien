@@ -10,8 +10,7 @@ public:
     _NewSimulationDialog(
         SimulationController const& simController,
         Viewport const& viewport,
-        StatisticsWindow const& statisticsWindow,
-        StyleRepository const& styleRepository);
+        StatisticsWindow const& statisticsWindow);
 
     void process();
 
@@ -23,7 +22,6 @@ private:
     SimulationController _simController;
     Viewport _viewport;
     StatisticsWindow _statisticsWindow;
-    StyleRepository _styleRepository;
 
     bool _on = false;
     int _width = 0;

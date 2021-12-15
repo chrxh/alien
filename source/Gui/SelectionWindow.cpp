@@ -1,15 +1,14 @@
 #include "SelectionWindow.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "Base/StringFormatter.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "EditorModel.h"
 
-_SelectionWindow::_SelectionWindow(EditorModel const& editorModel, StyleRepository const& styleRepository)
+_SelectionWindow::_SelectionWindow(EditorModel const& editorModel)
     : _editorModel(editorModel)
-    , _styleRepository(styleRepository)
 {
     _on = GlobalSettings::getInstance().getBoolState("editor.selection.active", true);
 }
@@ -30,21 +29,21 @@ void _SelectionWindow::process()
     if (ImGui::Begin("Selection", &_on)) {
 
         ImGui::Text("Cells");
-        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(StringFormatter::format(selection.numCells).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Cells from clusters");
-        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(StringFormatter::format(selection.numClusterCells).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Energy particles");
-        ImGui::PushFont(_styleRepository->getLargeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(StringFormatter::format(selection.numParticles).c_str());
         ImGui::PopStyleColor();

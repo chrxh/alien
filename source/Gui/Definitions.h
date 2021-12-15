@@ -18,8 +18,7 @@ using SimulationScrollbar = boost::shared_ptr<_SimulationScrollbar>;
 class _Viewport;
 using Viewport = boost::shared_ptr<_Viewport>;
 
-class _StyleRepository;
-using StyleRepository = boost::shared_ptr<_StyleRepository>;
+class StyleRepository;
 
 class _TemporalControlWindow;
 using TemporalControlWindow = boost::shared_ptr<_TemporalControlWindow>;

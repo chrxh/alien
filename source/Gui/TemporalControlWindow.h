@@ -8,10 +8,7 @@
 class _TemporalControlWindow
 {
 public:
-    _TemporalControlWindow(
-        SimulationController const& simController,
-        StyleRepository const& styleRepository,
-        StatisticsWindow const& statisticsWindow);
+    _TemporalControlWindow(SimulationController const& simController, StatisticsWindow const& statisticsWindow);
     ~_TemporalControlWindow();
 
     void process();
@@ -32,15 +29,7 @@ private:
     void processRestoreButton();
 
     SimulationController _simController; 
-    StyleRepository _styleRepository;
     StatisticsWindow _statisticsWindow;
-
-    TextureData _runTexture;
-    TextureData _pauseTexture;
-    TextureData _stepBackwardTexture;
-    TextureData _stepForwardTexture;
-    TextureData _snapshotTexture;
-    TextureData _restoreTexture;
 
     struct Snapshot
     {

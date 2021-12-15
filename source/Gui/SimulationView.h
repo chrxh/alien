@@ -9,7 +9,6 @@ class _SimulationView
 {
 public:
     _SimulationView(
-        StyleRepository const& styleRepository,
         SimulationController const& simController,
         ModeWindow const& modeWindow,
         Viewport const& viewport);
@@ -57,6 +56,5 @@ private:
 
     Viewport _viewport;
     ModeWindow _modeWindow;
-    StyleRepository _styleRepository;
     SimulationController _simController;
 };

@@ -85,5 +85,8 @@ public:
     static void Separator();
     static void Group(std::string const& text);
 
+    static bool BeginToolbarButton(std::string const& text);
+    static void EndToolbarButton();
+
     static void convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 };

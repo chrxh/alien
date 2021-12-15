@@ -1,6 +1,6 @@
 #include "EditorController.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "EngineImpl/SimulationController.h"
 #include "Viewport.h"
@@ -9,17 +9,13 @@
 #include "SelectionWindow.h"
 #include "ManipulatorWindow.h"
 
-_EditorController::_EditorController(
-    SimulationController const& simController,
-    Viewport const& viewport,
-    StyleRepository const& styleRepository)
+_EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
     , _viewport(viewport)
-    , _styleRepository(styleRepository)
 {
     _editorModel = boost::make_shared<_EditorModel>(_simController);
-    _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel, _styleRepository);
-    _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController, _styleRepository);
+    _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel);
+    _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController);
 }
 
 bool _EditorController::isOn() const

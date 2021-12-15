@@ -9,8 +9,7 @@ class _ManipulatorWindow
 public:
     _ManipulatorWindow(
         EditorModel const& editorModel,
-        SimulationController const& simController,
-        StyleRepository const& styleRepository);
+        SimulationController const& simController);
     ~_ManipulatorWindow();
 
     void process();
@@ -24,7 +23,6 @@ private:
 
     EditorModel _editorModel;
     SimulationController _simController;
-    StyleRepository _styleRepository;
 
     bool _on = false;
     bool _includeClusters = true;

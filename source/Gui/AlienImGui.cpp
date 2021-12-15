@@ -1,6 +1,6 @@
 #include "AlienImGui.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
@@ -319,6 +319,22 @@ void AlienImGui::Group(std::string const& text)
     ImGui::TextUnformatted(text.c_str());
     ImGui::Separator();
     ImGui::Spacing();
+}
+
+bool AlienImGui::BeginToolbarButton(std::string const& text)
+{
+    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonTextColor);
+    auto buttonSize = StyleRepository::getInstance().scaleContent(40.0f);
+    return ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+}
+
+void AlienImGui::EndToolbarButton()
+{
+    ImGui::PopStyleColor();
+    ImGui::PopStyleVar();
+    ImGui::PopFont();
 }
 
 void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
