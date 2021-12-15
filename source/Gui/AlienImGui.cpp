@@ -179,7 +179,8 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
         ImVec2 buttonPos{pos.x, pos.y};
         ImVec2 buttonSize = ImGui::GetItemRectSize();
 
-        ImVec2 windowPos{pos.x, pos.y + 22};
+        auto height = ImGui::GetWindowHeight();
+        ImVec2 windowPos{pos.x, pos.y + height};
         ImGui::SetNextWindowPos(windowPos);
         if (ImGui::Begin(
                 popup.c_str(),
@@ -317,4 +318,10 @@ void AlienImGui::Group(std::string const& text)
     ImGui::TextUnformatted(text.c_str());
     ImGui::Separator();
     ImGui::Spacing();
+}
+
+void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
+{
+    return ImGui::ColorConvertRGBtoHSV(
+        toFloat((rgb >> 16) & 0xff) / 255, toFloat((rgb >> 8) & 0xff) / 255, toFloat((rgb & 0xff)) / 255, h, s, v);
 }

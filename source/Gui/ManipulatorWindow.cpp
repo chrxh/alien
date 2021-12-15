@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 
+#include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineImpl/SimulationController.h"
 
@@ -12,7 +13,7 @@
 
 namespace
 {
-    auto const ItemTextWidth = 120.0f;
+    auto const MaxContentTextWidth = 120.0f;
 }
 
 _ManipulatorWindow::_ManipulatorWindow(
@@ -36,7 +37,8 @@ void _ManipulatorWindow::process()
     if (!_on) {
         return;
     }
-
+    auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
+    
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Manipulator", &_on)) {
         auto selection = _editorModel->getSelectionShallowData();
@@ -49,6 +51,15 @@ void _ManipulatorWindow::process()
             _angularVel = 0;
         }
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+        AlienImGui::Group("Edit");
+
+        ImGui::Button("Copy");
+        ImGui::SameLine();
+        ImGui::Button("Paste");
+        ImGui::SameLine();
+        ImGui::Button("Delete");
+        ImGui::SameLine();
+        ImGui::Button("Remove tensions");
 
         AlienImGui::Group("Center position and velocity");
 
@@ -57,23 +68,23 @@ void _ManipulatorWindow::process()
         auto centerPosX = _includeClusters ? selectionData.clusterCenterPosX : selectionData.centerPosX;
         auto origCenterPosX = centerPosX;
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Position X").textWidth(ItemTextWidth).format("%.2f"), centerPosX);
+            AlienImGui::InputFloatParameters().name("Position X").textWidth(maxContentTextWidthScaled).format("%.2f"), centerPosX);
 
         auto centerPosY = _includeClusters ? selectionData.clusterCenterPosY : selectionData.centerPosY;
         auto origCenterPosY = centerPosY;
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Position Y").textWidth(ItemTextWidth).format("%.2f"), centerPosY);
+            AlienImGui::InputFloatParameters().name("Position Y").textWidth(maxContentTextWidthScaled).format("%.2f"), centerPosY);
 
         auto centerVelX = _includeClusters ? selectionData.clusterCenterVelX : selectionData.centerVelX;
         auto origCenterVelX = centerVelX;
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Velocity X").textWidth(ItemTextWidth).step(0.1f).format("%.2f"),
+            AlienImGui::InputFloatParameters().name("Velocity X").textWidth(maxContentTextWidthScaled).step(0.1f).format("%.2f"),
             centerVelX);
 
         auto centerVelY = _includeClusters ? selectionData.clusterCenterVelY : selectionData.centerVelY;
         auto origCenterVelY = centerVelY;
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Velocity Y").textWidth(ItemTextWidth).step(0.1f).format("%.2f"),
+            AlienImGui::InputFloatParameters().name("Velocity Y").textWidth(maxContentTextWidthScaled).step(0.1f).format("%.2f"),
             centerVelY);
 
         AlienImGui::Group("Center rotation");
@@ -81,7 +92,7 @@ void _ManipulatorWindow::process()
         AlienImGui::SliderInputFloat(
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
-                .textWidth(ItemTextWidth)
+                .textWidth(maxContentTextWidthScaled)
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),
@@ -91,7 +102,7 @@ void _ManipulatorWindow::process()
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Angular velocity")
-                .textWidth(ItemTextWidth)
+                .textWidth(maxContentTextWidthScaled)
                 .step(0.01f)
                 .format("%.2f"),
             _angularVel);
@@ -130,12 +141,26 @@ void _ManipulatorWindow::process()
             _editorModel->update();
         }
 
-        ImGui::EndDisabled();
+        AlienImGui::Group("Colorize");
+        colorButton("    ##color1", Const::IndividualCellColor1);
+        ImGui::SameLine();
+        colorButton("    ##color2", Const::IndividualCellColor2);
+        ImGui::SameLine();
+        colorButton("    ##color3", Const::IndividualCellColor3);
+        ImGui::SameLine();
+        colorButton("    ##color4", Const::IndividualCellColor4);
+        ImGui::SameLine();
+        colorButton("    ##color5", Const::IndividualCellColor5);
+        ImGui::SameLine();
+        colorButton("    ##color6", Const::IndividualCellColor6);
+        ImGui::SameLine();
+        colorButton("    ##color7", Const::IndividualCellColor7);
 
-        ImGui::End();
+        ImGui::EndDisabled();
 
         _lastSelection = selection;
     }
+    ImGui::End();
 }
 
 bool _ManipulatorWindow::isOn() const
@@ -147,6 +172,20 @@ void _ManipulatorWindow::setOn(bool value)
 {
     _on = value;
 }
+
+bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)
+{
+    float h, s, v;
+    AlienImGui::convertRGBtoHSV(cellColor, h, s,v);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.6f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 1.0f));
+    auto result = ImGui::Button(id.c_str());
+    ImGui::PopStyleColor(3);
+
+    return result;
+}
+
 
 bool _ManipulatorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
 {

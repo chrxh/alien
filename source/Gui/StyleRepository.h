@@ -45,7 +45,10 @@ public:
     ImFont* getLargeFont() const;
     ImFont* getMonospaceFont() const;
 
+    float scaleContent(float value) const;
+
 private:
+    float _contentScaleFactor = 1.0f;
     ImFont* _mediumFont = nullptr;
     ImFont* _largeFont = nullptr;
     ImFont* _monospaceFont = nullptr;

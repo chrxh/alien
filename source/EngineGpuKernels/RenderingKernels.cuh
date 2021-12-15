@@ -140,7 +140,7 @@ __device__ __inline__ float2 mapUniversePosToPixelImagePos(float2 const& rectUpp
 
 __device__ __inline__ float3 calcColor(Cell* cell, int selected)
 {
-    unsigned int cellColor;
+    uint32_t cellColor;
     switch (cell->metadata.color % 7) {
     case 0: {
         cellColor = Const::IndividualCellColor1;

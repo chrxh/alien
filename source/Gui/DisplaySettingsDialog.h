@@ -6,7 +6,7 @@
 class _DisplaySettingsDialog
 {
 public:
-    _DisplaySettingsDialog(WindowController const& windowController);
+    _DisplaySettingsDialog(WindowController const& windowController, StyleRepository const& styleRepository);
     ~_DisplaySettingsDialog();
 
     void process();
@@ -19,6 +19,8 @@ private:
     std::vector<std::string> createVideoModeStrings() const;
 
     WindowController _windowController;
+    StyleRepository _styleRepository;
+
     bool _show = false;
     std::string _origMode;
     int _origSelectionIndex;

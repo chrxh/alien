@@ -10,11 +10,14 @@
 
 namespace
 {
-    auto const ItemTextWidth = 130.0f;
+    auto const MaxContentTextWidth = 120.0f;
 }
 
-_FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
+_FlowGeneratorWindow::_FlowGeneratorWindow(
+    SimulationController const& simController,
+    StyleRepository const& styleRepository)
     : _simController(simController)
+    , _styleRepository(styleRepository)
 {
     _on = GlobalSettings::getInstance().getBoolState("windows.flow generator.active", false);
 }
@@ -34,6 +37,7 @@ void _FlowGeneratorWindow::process()
     auto lastFlowFieldSettings = flowFieldSettings;
 
     auto worldSize = _simController->getWorldSize();
+    auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Flow generator", &_on, ImGuiWindowFlags_None);
@@ -73,7 +77,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position X")
-                        .textWidth(ItemTextWidth)
+                        .textWidth(maxContentTextWidthScaled)
                         .min(0)
                         .max(toFloat(worldSize.x))
                         .format("%.0f")
@@ -82,7 +86,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position Y")
-                        .textWidth(ItemTextWidth)
+                        .textWidth(maxContentTextWidthScaled)
                         .min(0)
                         .max(toFloat(worldSize.y))
                         .format("%.0f")
@@ -91,7 +95,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Radius")
-                        .textWidth(ItemTextWidth)
+                        .textWidth(maxContentTextWidthScaled)
                         .min(0)
                         .max(std::min(toFloat(worldSize.x), toFloat(worldSize.y)) / 2)
                         .format("%.0f")
@@ -100,7 +104,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Strength")
-                        .textWidth(ItemTextWidth)
+                        .textWidth(maxContentTextWidthScaled)
                         .min(0)
                         .max(0.5f)
                         .logarithmic(true)
@@ -114,7 +118,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Orientation")
-                        .textWidth(ItemTextWidth)
+                        .textWidth(maxContentTextWidthScaled)
                         .defaultValue(origCurrentOrientation)
                         .values(orientations),
                     currentOrientation);
