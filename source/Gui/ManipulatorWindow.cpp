@@ -93,6 +93,7 @@ void _ManipulatorWindow::process()
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(maxContentTextWidthScaled)
+                .inputWidth(_styleRepository->scaleContent(50))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),
