@@ -7,7 +7,7 @@
 class _FlowGeneratorWindow
 {
 public:
-    _FlowGeneratorWindow(SimulationController const& simController);
+    _FlowGeneratorWindow(SimulationController const& simController, StyleRepository const& styleRepository);
     ~_FlowGeneratorWindow();
 
     void process();
@@ -19,6 +19,7 @@ private:
     FlowCenter createFlowCenter();
 
     SimulationController _simController;
+    StyleRepository _styleRepository;
 
     bool _on = false;
 };

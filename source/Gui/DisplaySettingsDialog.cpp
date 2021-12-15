@@ -11,14 +11,18 @@
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 #include "WindowController.h"
+#include "StyleRepository.h"
 
 namespace
 {
-    auto const ItemTextWidth = 130.0f;
+    auto const MaxContentTextWidth = 130.0f;
 }
 
-_DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
+_DisplaySettingsDialog::_DisplaySettingsDialog(
+    WindowController const& windowController,
+    StyleRepository const& styleRepository)
     : _windowController(windowController)
+    , _styleRepository(styleRepository)
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
@@ -37,6 +41,7 @@ void _DisplaySettingsDialog::process()
 
     ImGui::OpenPopup("Display settings");
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
+        auto maxContentTextWidthScaled = _styleRepository->scaleContent(MaxContentTextWidth);
 
         auto isFullscreen = !_windowController->isWindowedMode();
 
@@ -52,12 +57,12 @@ void _DisplaySettingsDialog::process()
         ImGui::BeginDisabled(!isFullscreen);
 
         if (AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                .name("Resolution")
-                .textWidth(ItemTextWidth)
-                .defaultValue(_origSelectionIndex)
-                .values(_videoModeStrings),
-            _selectionIndex)) {
+                AlienImGui::ComboParameters()
+                    .name("Resolution")
+                    .textWidth(maxContentTextWidthScaled)
+                    .defaultValue(_origSelectionIndex)
+                    .values(_videoModeStrings),
+                _selectionIndex)) {
 
             setFullscreen(_selectionIndex);
         }

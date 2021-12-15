@@ -19,6 +19,7 @@ public:
     void setOn(bool value);
 
 private:
+    bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 
     EditorModel _editorModel;

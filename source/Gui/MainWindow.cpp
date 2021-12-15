@@ -120,14 +120,14 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _gpuSettingsDialog = boost::make_shared<_GpuSettingsDialog>(_styleRepository, _simController);
     _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow, _styleRepository);
     _startupWindow = boost::make_shared<_StartupWindow>(_simController, _viewport);
-    _flowGeneratorWindow = boost::make_shared<_FlowGeneratorWindow>(_simController);
+    _flowGeneratorWindow = boost::make_shared<_FlowGeneratorWindow>(_simController, _styleRepository);
     _aboutDialog = boost::make_shared<_AboutDialog>();
     _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
     _logWindow = boost::make_shared<_LogWindow>(_styleRepository, _logger);
     _gettingStartedWindow = boost::make_shared<_GettingStartedWindow>(_styleRepository);
     _openSimulationDialog = boost::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
     _saveSimulationDialog = boost::make_shared<_SaveSimulationDialog>(_simController);
-    _displaySettingsDialog = boost::make_shared<_DisplaySettingsDialog>(_windowController);
+    _displaySettingsDialog = boost::make_shared<_DisplaySettingsDialog>(_windowController, _styleRepository);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
