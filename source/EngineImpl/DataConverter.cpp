@@ -179,9 +179,11 @@ auto DataConverter::scanAndCreateClusterDescription(
             auto const& cellTO = dataTO.cells[currentCellIndex];
             for (int i = 0; i < cellTO.numConnections; ++i) {
                 auto connectionTO = cellTO.connections[i];
-                if (scannedCellIndices.find(connectionTO.cellIndex) == scannedCellIndices.end()) {
-                    nextCellIndices.insert(connectionTO.cellIndex);
-                    scannedCellIndices.insert(connectionTO.cellIndex);
+                if (connectionTO.cellIndex != -1) {
+                    if (scannedCellIndices.find(connectionTO.cellIndex) == scannedCellIndices.end()) {
+                        nextCellIndices.insert(connectionTO.cellIndex);
+                        scannedCellIndices.insert(connectionTO.cellIndex);
+                    }
                 }
             }
             ++cellDescIndex;
@@ -212,7 +214,11 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     for (int i = 0; i < cellTO.numConnections; ++i) {
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
-        connection.cellId = dataTO.cells[connectionTO.cellIndex].id;
+        if (connectionTO.cellIndex != -1) {
+            connection.cellId = dataTO.cells[connectionTO.cellIndex].id;
+        } else {
+            connection.cellId = 0;
+        }
         connection.distance = connectionTO.distance;
         connection.angleFromPrevious = connectionTO.angleFromPrevious;
         connections.emplace_back(connection);
@@ -293,12 +299,7 @@ void DataConverter::addCell(
     cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
     convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
     convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
-    if (cellDesc.connectingCells.getOptionalValue()) {
-		cellTO.numConnections = toInt(cellDesc.connectingCells->size());
-	}
-	else {
-		cellTO.numConnections = 0;
-	}
+	cellTO.numConnections = 0;
     if (cellDesc.metadata.getOptionalValue()) {
         auto& metadataTO = cellTO.metadata;
         metadataTO.color = cellDesc.metadata->color;
@@ -345,12 +346,21 @@ void DataConverter::setConnections(
 	if (cellToAdd.connectingCells.getOptionalValue()) {
 		int index = 0;
         auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
+        float angleOffset = 0;
         for (ConnectionChangeDescription const& connection : *cellToAdd.connectingCells) {
-            cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
-            cellTO.connections[index].distance = toFloat(connection.distance);
-            cellTO.connections[index].angleFromPrevious = toFloat(connection.angleFromPrevious);
-            ++index;
+            if (connection.cellId != 0) {
+                cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
+                cellTO.connections[index].distance = connection.distance;
+                cellTO.connections[index].angleFromPrevious = connection.angleFromPrevious + angleOffset;
+                ++index;
+                angleOffset = 0;
+            } else {
+                angleOffset += connection.angleFromPrevious;
+            }
 		}
+        if (angleOffset != 0 && index > 0) {
+            cellTO.connections[0].angleFromPrevious += angleOffset;
+        }
         cellTO.numConnections = index;
 	}
 }

@@ -15,7 +15,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
 {
     _editorModel = boost::make_shared<_EditorModel>(_simController);
     _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel);
-    _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController);
+    _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
 }
 
 bool _EditorController::isOn() const
