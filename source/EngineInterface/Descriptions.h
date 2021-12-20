@@ -58,7 +58,7 @@ struct TokenDescription
 
 struct ConnectionDescription
 {
-    uint64_t cellId;
+    uint64_t cellId;    //value of 0 means cell not present in DataDescription
     float distance = 0;
     float angleFromPrevious = 0;
 };
@@ -260,6 +260,8 @@ struct DataDescription
         }
         return true;
     }
+    void setCenter(RealVector2D const& center);
+
     RealVector2D calcCenter() const;
     void shift(RealVector2D const& delta);
 };
