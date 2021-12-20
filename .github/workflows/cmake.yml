@@ -2,13 +2,13 @@ name: CMake
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master ]
   pull_request:
-    branches: [ develop ]
+    branches: [ master ]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  buildDir: ${{ github.workspace }}/build
 
 jobs:
   build:
@@ -19,16 +19,41 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+        
+    - name: get-cmake
+      uses: lukka/get-cmake@v3.21.1
+      
+    - name: Install Packages
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y gcc-multilib python3 curl zip unzip
+        sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+        
+    - uses: Jimver/cuda-toolkit@v0.2.5
+      id: cuda-toolkit
       with:
-        submodules: recursive
-
-    # TODO: make it work!
-    # - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      # run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-    # TODO: make it work!
-    # - name: Build
-      # Build your program with the given configuration
-      # run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}      
+        cuda: '11.5.1'
+          
+    - name: Run vcpkg
+      uses: lukka/run-vcpkg@v6
+      with:
+          # Just install vcpkg for now, do not install any ports in this step yet.
+        setupOnly: true
+          # Location of the vcpkg as submodule of the repository.
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: '50fd3d9957195575849a49fa591e645f1d8e7156'
+          # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
+          # compute its hash and append this to the computed cache's key.
+        appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
+        vcpkgTriplet: ${{ matrix.triplet }}
+          # Ensure the vcpkg artifacts are cached, they are generated in the 'CMAKE_BINARY_DIR/vcpkg_installed'.
+        additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
+        
+    - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
+      uses: lukka/run-cmake@v3
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtBasic
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        useVcpkgToolchainFile: true
+        cmakeAppendedArgs: '-GNinja'
+        buildDirectory: ${{ env.buildDir }}
