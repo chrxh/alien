@@ -192,6 +192,24 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     return result;
 }
 
+DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+
+    auto arraySizes = _cudaSimulation->getArraySizes();
+    DataAccessTO dataTO =
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
+
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+
+    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    _dataTOCache->releaseDataTO(dataTO);
+
+    return result;
+}
+
 OverallStatistics EngineWorker::getMonitorData() const
 {
     OverallStatistics result;
@@ -207,27 +225,63 @@ OverallStatistics EngineWorker::getMonitorData() const
     return result;
 }
 
-void EngineWorker::setSimulationData(DataChangeDescription const& dataToUpdate)
+namespace
 {
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    int numCells = 0;
-    int numParticles = 0;
-    int numTokens = 0;
-    for (auto const& cell : dataToUpdate.cells) {
-        if (cell.isAdded()) {
-            ++numCells;
+    struct NumberOfEntities
+    {
+        int cells = 0;
+        int particles = 0;
+        int tokens = 0;
+    };
+    NumberOfEntities getNumberOfEntities(DataChangeDescription const& data)
+    {
+        NumberOfEntities result;
+        result.cells = data.cells.size();
+        result.particles = data.particles.size();
+        for (auto const& cell : data.cells) {
             if (cell->tokens.getOptionalValue()) {
-                numTokens += toInt(cell->tokens.getValue().size());
+                result.tokens += toInt(cell->tokens.getValue().size());
             }
         }
+        return result;
     }
-    for (auto const& particle : dataToUpdate.particles) {
-        if (particle.isAdded()) {
-            ++numParticles;
-        }
-    }
-    _cudaSimulation->resizeArraysIfNecessary({numCells, numParticles, numTokens});
+}
+
+void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
+{
+    DataChangeDescription rolloutData(dataToUpdate);
+
+    auto numberOfEntities = getNumberOfEntities(rolloutData);
+
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->resizeArraysIfNecessary(
+        {numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
+
+    auto arraySizes = _cudaSimulation->getArraySizes();
+    DataAccessTO dataTO =
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
+
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+    converter.convertDataDescriptionToAccessTO(dataTO, rolloutData);
+
+    _dataTOCache->releaseDataTO(dataTO);
+
+    _cudaSimulation->addAndSelectSimulationData(dataTO);
+    updateMonitorDataIntern();
+}
+
+void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
+{
+    DataChangeDescription rolloutData(dataToUpdate);
+
+    auto numberOfEntities = getNumberOfEntities(rolloutData);
+
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->resizeArraysIfNecessary(
+        {numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
 
     auto arraySizes = _cudaSimulation->getArraySizes();
     DataAccessTO dataTO = _dataTOCache->getDataTO(
@@ -235,7 +289,7 @@ void EngineWorker::setSimulationData(DataChangeDescription const& dataToUpdate)
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
-    converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
+    converter.convertDataDescriptionToAccessTO(dataTO, rolloutData);
 
     _dataTOCache->releaseDataTO(dataTO);
 

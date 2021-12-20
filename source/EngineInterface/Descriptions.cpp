@@ -198,6 +198,13 @@ ParticleDescription::ParticleDescription(ParticleChangeDescription const& change
     metadata = *static_cast<boost::optional<ParticleMetadata>>(change.metadata);
 }
 
+void DataDescription::setCenter(RealVector2D const& center)
+{
+    auto origCenter = calcCenter();
+    auto delta = center - origCenter;
+    shift(delta);
+}
+
 RealVector2D DataDescription::calcCenter() const
 {
     RealVector2D result;

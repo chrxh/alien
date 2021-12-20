@@ -233,13 +233,39 @@ void _CudaSimulation::getSimulationData(
     DataAccessTO const& dataTO)
 {
     KERNEL_CALL_HOST(
-        cudaGetSimulationAccessDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+        cudaGetSimulationDataKernel, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
 
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        dataTO.particles,
+        _cudaAccessTO->particles,
+        sizeof(ParticleAccessTO) * (*dataTO.numParticles),
+        cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        dataTO.tokens, _cudaAccessTO->tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        dataTO.stringBytes,
+        _cudaAccessTO->stringBytes,
+        sizeof(char) * (*dataTO.numStringBytes),
+        cudaMemcpyDeviceToHost));
+}
+
+void _CudaSimulation::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
+{
+    KERNEL_CALL_HOST(cudaGetSelectedSimulationDataKernel, *_cudaSimulationData, includeClusters, * _cudaAccessTO);
+
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
@@ -274,30 +300,18 @@ void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rect
         cudaMemcpyDeviceToHost));
 }
 
+void _CudaSimulation::addAndSelectSimulationData(DataAccessTO const& dataTO)
+{
+    copyToGpu(dataTO);
+    KERNEL_CALL_HOST(cudaRemoveSelection, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO, true);
+}
+
 void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->particles,
-        dataTO.particles,
-        sizeof(ParticleAccessTO) * (*dataTO.numParticles),
-        cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->stringBytes,
-        dataTO.stringBytes,
-        sizeof(char) * (*dataTO.numStringBytes),
-        cudaMemcpyHostToDevice));
-
-    KERNEL_CALL_HOST(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO);
+    copyToGpu(dataTO);
+    KERNEL_CALL_HOST(cudaClearData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO, false);
 }
 
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
@@ -411,6 +425,30 @@ void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
             additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize)) {
         resizeArrays(additionals);
     }
+}
+
+void _CudaSimulation::copyToGpu(DataAccessTO const& dataTO)
+{
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        _cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        _cudaAccessTO->particles,
+        dataTO.particles,
+        sizeof(ParticleAccessTO) * (*dataTO.numParticles),
+        cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        _cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        _cudaAccessTO->stringBytes,
+        dataTO.stringBytes,
+        sizeof(char) * (*dataTO.numStringBytes),
+        cudaMemcpyHostToDevice));
 }
 
 void _CudaSimulation::automaticResizeArrays()
