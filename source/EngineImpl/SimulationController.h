@@ -40,8 +40,10 @@ public:
 
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    ENGINEIMPL_EXPORT DataDescription getSelectedSimulationData(bool includeClusters);
 
-    ENGINEIMPL_EXPORT void setSimulationData(DataChangeDescription const& dataToUpdate);
+    ENGINEIMPL_EXPORT void addAndSelectSimulationData(DataDescription const& dataToAdd);
+    ENGINEIMPL_EXPORT void setSimulationData(DataDescription const& dataToUpdate);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
     ENGINEIMPL_EXPORT void runSimulation();

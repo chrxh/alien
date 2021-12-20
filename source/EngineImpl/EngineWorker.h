@@ -54,9 +54,11 @@ public:
         double zoom);
 
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    DataDescription getSelectedSimulationData(bool includeClusters);
     OverallStatistics getMonitorData() const;
 
-    void setSimulationData(DataChangeDescription const& dataToUpdate);
+    void addAndSelectSimulationData(DataDescription const& dataToUpdate);
+    void setSimulationData(DataDescription const& dataToUpdate);
 
     void calcSingleTimestep();
 
