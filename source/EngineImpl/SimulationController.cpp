@@ -55,7 +55,17 @@ DataDescription _SimulationController::getSimulationData(IntVector2D const& rect
     return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
 }
 
-void _SimulationController::setSimulationData(DataChangeDescription const& dataToUpdate)
+DataDescription _SimulationController::getSelectedSimulationData(bool includeClusters)
+{
+    return _worker.getSelectedSimulationData(includeClusters);
+}
+
+void _SimulationController::addAndSelectSimulationData(DataDescription const& dataToAdd)
+{
+    _worker.addAndSelectSimulationData(dataToAdd);
+}
+
+void _SimulationController::setSimulationData(DataDescription const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _isSelectionInvalid = true;
