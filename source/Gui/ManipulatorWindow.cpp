@@ -10,15 +10,20 @@
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
+#include "Viewport.h"
 
 namespace
 {
     auto const MaxContentTextWidth = 120.0f;
 }
 
-_ManipulatorWindow::_ManipulatorWindow(EditorModel const& editorModel, SimulationController const& simController)
+_ManipulatorWindow::_ManipulatorWindow(
+    EditorModel const& editorModel,
+    SimulationController const& simController,
+    Viewport const& viewport)
     : _editorModel(editorModel)
     , _simController(simController)
+    , _viewport(viewport)
 {
     _on = GlobalSettings::getInstance().getBoolState("editor.manipulator.active", true);
 }
@@ -48,11 +53,24 @@ void _ManipulatorWindow::process()
         }
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         AlienImGui::Group("Edit");
+        if (ImGui::Button("Copy")) {
+            _copiedSelection = _simController->getSelectedSimulationData(_includeClusters);
+        }
+        ImGui::EndDisabled();
 
-        ImGui::Button("Copy");
         ImGui::SameLine();
-        ImGui::Button("Paste");
+        ImGui::BeginDisabled(!_copiedSelection);
+        if (ImGui::Button("Paste")) {
+            auto data = *_copiedSelection;
+            auto center = _viewport->getCenterInWorldPos();
+            data.setCenter(center);
+            _simController->addAndSelectSimulationData(data);
+            _editorModel->update();
+        }
+        ImGui::EndDisabled();
+
         ImGui::SameLine();
+        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         ImGui::Button("Delete");
         ImGui::SameLine();
         ImGui::Button("Remove tensions");

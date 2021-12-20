@@ -145,7 +145,7 @@ __global__ void swapSelection(float2 pos, float radius, SimulationData data)
     }
 }
 
-__global__ void rolloutSelection(SimulationData data, int* result)
+__global__ void rolloutSelectionStep(SimulationData data, int* result)
 {
     auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
@@ -173,6 +173,16 @@ __global__ void rolloutSelection(SimulationData data, int* result)
             }
         }
     }
+}
+
+__global__ void rolloutSelection(SimulationData data)
+{
+    int* result = new int;
+    do {
+        *result = 0;
+        KERNEL_CALL(rolloutSelectionStep, data, result);
+    } while (1 == *result);
+    delete result;
 }
 
 __global__ void updatePosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
@@ -426,10 +436,7 @@ cudaSwitchSelection(PointSelectionData switchData, SimulationData data)
     KERNEL_CALL(existSelection, switchData, data, result);
     if (0 == *result) {
         KERNEL_CALL(setSelection, switchData.pos, switchData.radius, data);
-        do {
-            *result = 0;
-            KERNEL_CALL(rolloutSelection, data, result);
-        } while(1 == *result);
+        KERNEL_CALL_1_1(rolloutSelection, data);
     }
 
     delete result;
@@ -443,10 +450,7 @@ __global__ void cudaSwapSelection(PointSelectionData switchData, SimulationData 
     KERNEL_CALL(removeSelection, data, true);
 
     KERNEL_CALL(swapSelection, switchData.pos, switchData.radius, data);
-    do {
-        *result = 0;
-        KERNEL_CALL(rolloutSelection, data, result);
-    } while (1 == *result);
+    KERNEL_CALL_1_1(rolloutSelection, data);
 
     delete result;
 }
@@ -457,10 +461,7 @@ __global__ void cudaSetSelection(AreaSelectionData setData, SimulationData data)
     *result = 0;
 
     KERNEL_CALL(setSelection, setData, data);
-    do {
-        *result = 0;
-        KERNEL_CALL(rolloutSelection, data, result);
-    } while (1 == *result);
+    KERNEL_CALL_1_1(rolloutSelection, data);
 
     delete result;
 }
@@ -526,10 +527,7 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
 
         //update selection
         KERNEL_CALL(removeClusterSelection, data);
-        do {
-            *result = 0;
-            KERNEL_CALL(rolloutSelection, data, result);
-        } while (1 == *result);
+        KERNEL_CALL_1_1(rolloutSelection, data);
     }
 
     delete result;
