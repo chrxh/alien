@@ -44,6 +44,7 @@ public:
 
     ENGINEIMPL_EXPORT void addAndSelectSimulationData(DataDescription const& dataToAdd);
     ENGINEIMPL_EXPORT void setSimulationData(DataDescription const& dataToUpdate);
+    ENGINEIMPL_EXPORT void removeSelectedEntities(bool includeClusters);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
     ENGINEIMPL_EXPORT void runSimulation();

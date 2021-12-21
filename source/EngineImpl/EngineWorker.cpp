@@ -297,6 +297,15 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
     updateMonitorDataIntern();
 }
 
+void EngineWorker::removeSelectedEntities(bool includeClusters)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+
+    _cudaSimulation->removeSelectedEntities(includeClusters);
+    updateMonitorDataIntern();
+}
+
 void EngineWorker::calcSingleTimestep()
 {
     CudaAccess access(

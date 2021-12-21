@@ -59,6 +59,7 @@ public:
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setSimulationData(DataDescription const& dataToUpdate);
+    void removeSelectedEntities(bool includeClusters);
 
     void calcSingleTimestep();
 

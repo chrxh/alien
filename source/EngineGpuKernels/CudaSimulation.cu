@@ -314,6 +314,11 @@ void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
     KERNEL_CALL_HOST(cudaSetSimulationAccessDataKernel, *_cudaSimulationData, *_cudaAccessTO, false);
 }
 
+void _CudaSimulation::removeSelectedEntities(bool includeClusters)
+{
+    KERNEL_CALL_HOST(cudaRemoveSelectedEntities, *_cudaSimulationData, includeClusters);
+}
+
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
     KERNEL_CALL_HOST(cudaApplyForce, applyData, *_cudaSimulationData);
