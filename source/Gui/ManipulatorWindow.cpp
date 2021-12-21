@@ -71,9 +71,17 @@ void _ManipulatorWindow::process()
 
         ImGui::SameLine();
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
-        ImGui::Button("Delete");
+        if (ImGui::Button("Delete")) {
+            _simController->removeSelectedEntities(_includeClusters);
+            _editorModel->update();
+        }
         ImGui::SameLine();
-        ImGui::Button("Remove tensions");
+
+        ImGui::EndDisabled();
+        ImGui::Button("Load");
+        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+        ImGui::SameLine();
+        ImGui::Button("Save");
 
         AlienImGui::Group("Center position and velocity");
 
