@@ -71,6 +71,12 @@ void _SimulationController::setSimulationData(DataDescription const& dataToUpdat
     _isSelectionInvalid = true;
 }
 
+void _SimulationController::removeSelectedEntities(bool includeClusters)
+{
+    _worker.removeSelectedEntities(includeClusters);
+    _isSelectionInvalid = true;
+}
+
 void _SimulationController::calcSingleTimestep()
 {
     _worker.calcSingleTimestep();

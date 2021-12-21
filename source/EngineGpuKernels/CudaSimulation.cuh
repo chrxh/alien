@@ -43,6 +43,7 @@ public:
     getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void addAndSelectSimulationData(DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void setSimulationData(DataAccessTO const& dataTO);
+    ENGINEGPUKERNELS_EXPORT void removeSelectedEntities(bool includeClusters);
 
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
     ENGINEGPUKERNELS_EXPORT void switchSelection(PointSelectionData const& switchData);

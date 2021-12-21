@@ -417,6 +417,55 @@ updateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, Simu
     }
 }
 
+__global__ void removeSelectedCellConnections(SimulationData data, bool includeClusters, int* retry)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                if ((includeClusters && connectedCell->selected == 0)
+                    || (!includeClusters && connectedCell->selected != 1)) {
+
+                    if (connectedCell->tryLock()) {
+                        CellConnectionProcessor::delConnections(cell, connectedCell);
+                        --i;
+                        connectedCell->releaseLock();
+                    } else {
+                        atomicExch(retry, 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
+__global__ void removeSelectedCells(SimulationData data, bool includeClusters)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+            cell = nullptr;
+        }
+    }
+}
+
+__global__ void removeSelectedParticles(SimulationData data)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& particle = data.entities.particlePointers.at(index);
+        if (particle->selected == 1) {
+            particle = nullptr;
+        }
+    }
+}
+
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
@@ -536,4 +585,19 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
 __global__ void cudaRemoveSelection(SimulationData data)
 {
     KERNEL_CALL(removeSelection, data, false);
+}
+
+__global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters)
+{
+    int* result = new int;
+
+    do {
+        *result = 0;
+        KERNEL_CALL(removeSelectedCellConnections, data, includeClusters, result);
+    } while (1 == *result);
+    KERNEL_CALL(removeSelectedCells, data, includeClusters);
+    KERNEL_CALL(removeSelectedParticles, data);
+    KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
+
+    delete result;
 }
