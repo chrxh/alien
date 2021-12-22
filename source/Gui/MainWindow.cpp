@@ -342,6 +342,7 @@ void _MainWindow::processMenubar()
         if (AlienImGui::ShutdownButton()) {
             _showExitDialog = true;
         }
+        ImGui::Dummy(ImVec2(20.0f, 0.0f));
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
             if (ImGui::MenuItem("New", "CTRL+N")) {
                 _newSimulationDialog->show();
