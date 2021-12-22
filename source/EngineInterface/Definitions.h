@@ -16,10 +16,6 @@ struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
 
-struct DataChangeDescription;
-struct CellChangeDescription;
-struct ParticleChangeDescription;
-
 struct GpuSettings;
 
 struct GeneralSettings;

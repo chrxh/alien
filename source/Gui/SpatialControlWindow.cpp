@@ -5,7 +5,6 @@
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
 #include "Base/StringFormatter.h"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"

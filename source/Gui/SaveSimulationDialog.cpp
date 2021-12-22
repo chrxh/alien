@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "EngineImpl/SimulationController.h"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/Serializer.h"
 #include "ImFileDialog.h"
 

@@ -2,7 +2,6 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
@@ -17,7 +16,7 @@ public:
 
     DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO);
     OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO);
-    void convertDataDescriptionToAccessTO(DataAccessTO& result, DataChangeDescription const& description);
+    void convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description);
 
 private:
 	struct CreateClusterReturnData
@@ -33,13 +32,13 @@ private:
 
 	void addCell(
         DataAccessTO const& dataTO,
-        CellChangeDescription const& cellToAdd,
+        CellRolloutDescription const& cellToAdd,
         unordered_map<uint64_t, int>& cellIndexTOByIds);
-    void addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc);
+    void addParticle(DataAccessTO const& dataTO, ParticleRolloutDescription const& particleDesc);
 
 	void setConnections(
         DataAccessTO const& dataTO,
-        CellChangeDescription const& cellToAdd,
+        CellRolloutDescription const& cellToAdd,
         unordered_map<uint64_t, int> const& cellIndexByIds);
 
     int convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s);

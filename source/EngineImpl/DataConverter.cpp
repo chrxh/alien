@@ -6,7 +6,8 @@
 #include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/ChangeDescriptions.h"
+
+#include "RolloutDescriptions.h"
 
 
 DataConverter::DataConverter(
@@ -101,22 +102,24 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
     return result;
 }
 
-void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataChangeDescription const& description)
+void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description)
 {
+    DataRolloutDescription rolloutDescription(description);
+
     unordered_map<uint64_t, int> cellIndexByIds;
-    for (auto const& cell : description.cells) {
+    for (auto const& cell : rolloutDescription.cells) {
         if (cell.isAdded()) {
             addCell(result, cell.getValue(), cellIndexByIds);
         }
     }
-    for (auto const& cell : description.cells) {
+    for (auto const& cell : rolloutDescription.cells) {
         if (cell.isAdded()) {
             if (cell->id != 0) {
                 setConnections(result, cell.getValue(), cellIndexByIds);
             }
         }
     }
-    for (auto const& particle : description.particles) {
+    for (auto const& particle : rolloutDescription.particles) {
         if (particle.isAdded()) {
             addParticle(result, particle.getValue());
         }
@@ -255,16 +258,16 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     return result;
 }
 
-void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc)
+void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleRolloutDescription const& particleDesc)
 {
     auto particleIndex = (*dataTO.numParticles)++;
 
 	ParticleAccessTO& particleTO = dataTO.particles[particleIndex];
 	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
-	particleTO.pos = { particleDesc.pos.x, particleDesc.pos.y };
-	particleTO.vel = { particleDesc.vel.x, particleDesc.vel.y };
-	particleTO.energy = toFloat(particleDesc.energy);
-    particleTO.metadata.color = particleDesc.metadata.color;
+    particleTO.pos = {particleDesc.pos->x, particleDesc.pos->y};
+    particleTO.vel = {particleDesc.vel->x, particleDesc.vel->y};
+	particleTO.energy = toFloat(*particleDesc.energy);
+    particleTO.metadata.color = particleDesc.metadata->color;
 }
 
 int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s)
@@ -280,7 +283,7 @@ int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO,
 
 void DataConverter::addCell(
     DataAccessTO const& dataTO,
-    CellChangeDescription const& cellDesc,
+    CellRolloutDescription const& cellDesc,
     unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
     int cellIndex = (*dataTO.numCells)++;
@@ -340,14 +343,14 @@ void DataConverter::addCell(
 
 void DataConverter::setConnections(
     DataAccessTO const& dataTO,
-    CellChangeDescription const& cellToAdd,
+    CellRolloutDescription const& cellToAdd,
     unordered_map<uint64_t, int> const& cellIndexByIds)
 {
 	if (cellToAdd.connectingCells.getOptionalValue()) {
 		int index = 0;
         auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
         float angleOffset = 0;
-        for (ConnectionChangeDescription const& connection : *cellToAdd.connectingCells) {
+        for (ConnectionRolloutDescription const& connection : *cellToAdd.connectingCells) {
             if (connection.cellId != 0) {
                 cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
                 cellTO.connections[index].distance = connection.distance;

@@ -8,6 +8,8 @@ add_library(alien_engine_impl_lib
     DllExport.h
     EngineWorker.cpp
     EngineWorker.h
+    RolloutDescriptions.cpp
+    RolloutDescriptions.h
     SimulationController.cpp
     SimulationController.h)
 
