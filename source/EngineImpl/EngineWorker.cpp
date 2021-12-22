@@ -430,18 +430,25 @@ void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const
     _cudaSimulation->setSelection(AreaSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
 }
 
-void EngineWorker::shallowUpdateSelection(ShallowUpdateSelectionData const& updateData)
-{
-    CudaAccess access(
-        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
-    _cudaSimulation->shallowUpdateSelection(updateData);
-}
-
 void EngineWorker::removeSelection()
 {
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
     _cudaSimulation->removeSelection();
+}
+
+void EngineWorker::updateSelection()
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->updateSelection();
+}
+
+void EngineWorker::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->shallowUpdateSelectedEntities(updateData);
 }
 
 void EngineWorker::colorSelectedEntities(unsigned char color, bool includeClusters)

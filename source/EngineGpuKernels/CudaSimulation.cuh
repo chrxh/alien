@@ -50,8 +50,9 @@ public:
     ENGINEGPUKERNELS_EXPORT void swapSelection(PointSelectionData const& selectionData);
     ENGINEGPUKERNELS_EXPORT void setSelection(AreaSelectionData const& selectionData);
     ENGINEGPUKERNELS_EXPORT SelectionShallowData getSelectionShallowData();
-    ENGINEGPUKERNELS_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData);
+    ENGINEGPUKERNELS_EXPORT void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData);
     ENGINEGPUKERNELS_EXPORT void removeSelection();
+    ENGINEGPUKERNELS_EXPORT void updateSelection();
     ENGINEGPUKERNELS_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters);
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);

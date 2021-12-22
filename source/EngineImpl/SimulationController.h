@@ -82,10 +82,10 @@ public:
     ENGINEIMPL_EXPORT void switchSelection(RealVector2D const& pos, float radius);
     ENGINEIMPL_EXPORT void swapSelection(RealVector2D const& pos, float radius);
     ENGINEIMPL_EXPORT SelectionShallowData getSelectionShallowData();
-    ENGINEIMPL_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
+    ENGINEIMPL_EXPORT void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData);
     ENGINEIMPL_EXPORT void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     ENGINEIMPL_EXPORT void removeSelection();
-    ENGINEIMPL_EXPORT bool removeSelectionIfInvalid();
+    ENGINEIMPL_EXPORT bool updateSelectionIfNecessary();
 
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
@@ -99,7 +99,7 @@ public:
     ENGINEIMPL_EXPORT float getTps() const;
 
 private:
-    bool _isSelectionInvalid = false;
+    bool _selectionNeedsUpdate = false;
 
     Settings _origSettings;
     Settings _settings;

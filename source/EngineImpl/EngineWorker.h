@@ -84,8 +84,9 @@ public:
     void swapSelection(RealVector2D const& pos, float radius);
     SelectionShallowData getSelectionShallowData();
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
-    void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
     void removeSelection();
+    void updateSelection();
+    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData);
     void colorSelectedEntities(unsigned char color, bool includeClusters);
 
     void runThreadLoop();

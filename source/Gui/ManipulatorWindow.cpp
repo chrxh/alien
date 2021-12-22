@@ -143,7 +143,7 @@ void _ManipulatorWindow::process()
             updateData.considerClusters = _includeClusters;
             updateData.posDeltaX = centerPosX - origCenterPosX;
             updateData.posDeltaY = centerPosY - origCenterPosY;
-            _simController->shallowUpdateSelection(updateData);
+            _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
         }
 
@@ -152,7 +152,7 @@ void _ManipulatorWindow::process()
             updateData.considerClusters = _includeClusters;
             updateData.velDeltaX = centerVelX - origCenterVelX;
             updateData.velDeltaY = centerVelY - origCenterVelY;
-            _simController->shallowUpdateSelection(updateData);
+            _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
         }
 
@@ -160,7 +160,7 @@ void _ManipulatorWindow::process()
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = _includeClusters;
             updateData.angleDelta = _angle - origAngle;
-            _simController->shallowUpdateSelection(updateData);
+            _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
         }
 
@@ -168,7 +168,7 @@ void _ManipulatorWindow::process()
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = _includeClusters;
             updateData.angularVelDelta = _angularVel - origAngularVel;
-            _simController->shallowUpdateSelection(updateData);
+            _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
         }
 
