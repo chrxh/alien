@@ -198,6 +198,36 @@ bool _Serializer::deserializeSimulationFromFile(string const& filename, Deserial
     }
 }
 
+bool _Serializer::serializeContentToFile(string const& filename, DataDescription const& content)
+{
+    try {
+        std::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeDataDescription(content, stream);
+        stream.close();
+        return true;
+    } catch (std::exception const& e) {
+        throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
+    }
+}
+
+bool _Serializer::deserializeContentFromFile(string const& filename, DataDescription& content)
+{
+    try {
+        std::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        deserializeDataDescription(content, stream);
+        stream.close();
+        return true;
+    } catch (std::exception const& e) {
+        throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());
+    }
+}
+
 void _Serializer::serializeDataDescription(DataDescription const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);

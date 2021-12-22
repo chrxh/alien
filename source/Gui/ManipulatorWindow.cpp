@@ -11,6 +11,8 @@
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "Viewport.h"
+#include "SaveSelectionDialog.h"
+#include "OpenSelectionDialog.h"
 
 namespace
 {
@@ -26,6 +28,8 @@ _ManipulatorWindow::_ManipulatorWindow(
     , _viewport(viewport)
 {
     _on = GlobalSettings::getInstance().getBoolState("editor.manipulator.active", true);
+    _saveSelectionDialog = boost::make_shared<_SaveSelectionDialog>(simController);
+    _openSelectionDialog = boost::make_shared<_OpenSelectionDialog>(editorModel, simController, viewport);
 }
 
 _ManipulatorWindow::~_ManipulatorWindow()
@@ -78,10 +82,14 @@ void _ManipulatorWindow::process()
         ImGui::SameLine();
 
         ImGui::EndDisabled();
-        ImGui::Button("Load");
+        if (ImGui::Button("Load")) {
+            _openSelectionDialog->show();
+        }
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         ImGui::SameLine();
-        ImGui::Button("Save");
+        if (ImGui::Button("Save")) {
+            _saveSelectionDialog->show(_includeClusters);
+        }
 
         AlienImGui::Group("Center position and velocity");
 
@@ -198,6 +206,9 @@ void _ManipulatorWindow::process()
         _lastSelection = selection;
     }
     ImGui::End();
+
+    _saveSelectionDialog->process();
+    _openSelectionDialog->process();
 }
 
 bool _ManipulatorWindow::isOn() const

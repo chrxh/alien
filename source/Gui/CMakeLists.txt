@@ -39,9 +39,13 @@ PUBLIC
     NewSimulationDialog.h
     OpenGLHelper.cpp
     OpenGLHelper.h
+    OpenSelectionDialog.cpp
+    OpenSelectionDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
     Resources.h
+    SaveSelectionDialog.cpp
+    SaveSelectionDialog.h
     SaveSimulationDialog.cpp
     SaveSimulationDialog.h
     SelectionWindow.cpp

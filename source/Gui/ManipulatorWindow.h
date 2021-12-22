@@ -26,6 +26,8 @@ private:
     EditorModel _editorModel;
     SimulationController _simController;
     Viewport _viewport;
+    OpenSelectionDialog _openSelectionDialog;
+    SaveSelectionDialog _saveSelectionDialog;
 
     bool _on = false;
     bool _includeClusters = true;

@@ -95,6 +95,11 @@ using ManipulatorWindow = boost::shared_ptr<_ManipulatorWindow>;
 class _WindowController;
 using WindowController = boost::shared_ptr<_WindowController>;
 
+class _SaveSelectionDialog;
+using SaveSelectionDialog = boost::shared_ptr<_SaveSelectionDialog>;
+
+class _OpenSelectionDialog;
+using OpenSelectionDialog = boost::shared_ptr<_OpenSelectionDialog>;
 
 struct GLFWvidmode;
 struct GLFWwindow;
