@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineImpl/SimulationController.h"
 #include "OpenGLHelper.h"

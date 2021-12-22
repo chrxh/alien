@@ -3,7 +3,6 @@
 #include <chrono>
 
 #include "EngineGpuKernels/AccessTOs.cuh"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "AccessDataTOCache.h"
 #include "DataConverter.h"
 
@@ -233,25 +232,23 @@ namespace
         int particles = 0;
         int tokens = 0;
     };
-    NumberOfEntities getNumberOfEntities(DataChangeDescription const& data)
+    NumberOfEntities getNumberOfEntities(DataDescription const& data)
     {
         NumberOfEntities result;
-        result.cells = data.cells.size();
-        result.particles = data.particles.size();
-        for (auto const& cell : data.cells) {
-            if (cell->tokens.getOptionalValue()) {
-                result.tokens += toInt(cell->tokens.getValue().size());
+        for (auto const& cluster : data.clusters) {
+            result.cells += cluster.cells.size();
+            for (auto const& cell : cluster.cells) {
+                result.tokens += cell.tokens.size();
             }
         }
+        result.particles = data.particles.size();
         return result;
     }
 }
 
 void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
 {
-    DataChangeDescription rolloutData(dataToUpdate);
-
-    auto numberOfEntities = getNumberOfEntities(rolloutData);
+    auto numberOfEntities = getNumberOfEntities(dataToUpdate);
 
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
@@ -264,7 +261,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
-    converter.convertDataDescriptionToAccessTO(dataTO, rolloutData);
+    converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 
@@ -274,9 +271,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 {
-    DataChangeDescription rolloutData(dataToUpdate);
-
-    auto numberOfEntities = getNumberOfEntities(rolloutData);
+    auto numberOfEntities = getNumberOfEntities(dataToUpdate);
 
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
@@ -289,7 +284,7 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
     int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
-    converter.convertDataDescriptionToAccessTO(dataTO, rolloutData);
+    converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
 
     _dataTOCache->releaseDataTO(dataTO);
 

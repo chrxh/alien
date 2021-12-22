@@ -5,7 +5,6 @@
 #include "Base/ServiceLocator.h"
 #include "EngineImpl/SimulationController.h"
 #include "EngineInterface/Serializer.h"
-#include "EngineInterface/ChangeDescriptions.h"
 
 #include "MainWindow.h"
 #include "Resources.h"
