@@ -2,7 +2,6 @@
 add_library(alien_engine_gpu_kernels_lib
     AccessKernels.cuh
     AccessTOs.cuh
-    ActionKernels.cuh
     Array.cuh
     Base.cuh
     CellComputerFunction.cuh
@@ -24,6 +23,7 @@ add_library(alien_engine_gpu_kernels_lib
     Definitions.h
     DllExport.h
     DynamicMemory.cuh
+    EditKernels.cuh
     EnergyGuidance.cuh
     Entities.cuh
     EntityFactory.cuh

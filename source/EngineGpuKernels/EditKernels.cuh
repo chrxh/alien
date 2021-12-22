@@ -466,6 +466,25 @@ __global__ void removeSelectedParticles(SimulationData data)
     }
 }
 
+__global__ void colorSelection(SimulationData data, unsigned char color, bool includeClusters)
+{
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if ((0 != cell->selected && includeClusters) || (1 == cell->selected && !includeClusters)) {
+            cell->metadata.color = color;
+        }
+    }
+
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        if (0 != particle->selected) {
+            particle->metadata.color = color;
+        }
+    }
+}
+
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
@@ -600,4 +619,9 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
     KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
 
     delete result;
+}
+
+__global__ void cudaColorSelectedEntities(SimulationData data, unsigned char color, bool includeClusters)
+{
+    KERNEL_CALL(colorSelection, data, color, includeClusters);
 }

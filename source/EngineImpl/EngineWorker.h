@@ -86,6 +86,7 @@ public:
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     void shallowUpdateSelection(ShallowUpdateSelectionData const& updateData);
     void removeSelection();
+    void colorSelectedEntities(unsigned char color, bool includeClusters);
 
     void runThreadLoop();
     void runSimulation();
