@@ -29,8 +29,12 @@ void _LogWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Log", &_on)) {
 
+        auto styleRepository = StyleRepository::getInstance();
         if (ImGui::BeginChild(
-                "##", ImVec2(0, ImGui::GetContentRegionAvail().y - 40), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+                "##",
+                ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(40.0f)),
+                true,
+                ImGuiWindowFlags_HorizontalScrollbar)) {
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
 

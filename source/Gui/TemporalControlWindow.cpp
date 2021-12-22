@@ -49,11 +49,7 @@ void _TemporalControlWindow::process()
     ImGui::SameLine();
     processRestoreButton();
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-    ImGui::Spacing();
+    AlienImGui::Separator();
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         processTpsInfo();
@@ -119,7 +115,7 @@ void _TemporalControlWindow::processTpsRestriction()
 void _TemporalControlWindow::processRunButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
-    if(AlienImGui::BeginToolbarButton(ICON_FA_PLAY)) {
+    if (AlienImGui::BeginToolbarButton(ICON_FA_PLAY)) {
         _history.clear();
         _simController->runSimulation();
     }
