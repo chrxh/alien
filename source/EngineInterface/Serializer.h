@@ -23,6 +23,9 @@ public:
     ENGINEINTERFACE_EXPORT bool serializeSimulationToFile(string const& filename, DeserializedSimulation const& data);
     ENGINEINTERFACE_EXPORT bool deserializeSimulationFromFile(string const& filename, DeserializedSimulation& data);
 
+    ENGINEINTERFACE_EXPORT bool serializeContentToFile(string const& filename, DataDescription const& content);
+    ENGINEINTERFACE_EXPORT bool deserializeContentFromFile(string const& filename, DataDescription& content);
+
 private:
     void serializeDataDescription(DataDescription const& data, std::ostream& stream) const;
     void serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream) const;
