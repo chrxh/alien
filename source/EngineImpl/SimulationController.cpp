@@ -17,14 +17,14 @@ void _SimulationController::newSimulation(uint64_t timestep, Settings const& set
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
-    _isSelectionInvalid = true;
+    _selectionNeedsUpdate = true;
 }
 
 void _SimulationController::clear()
 {
     _worker.clear();
 
-    _isSelectionInvalid = true;
+    _selectionNeedsUpdate = true;
 }
 
 void _SimulationController::registerImageResource(GLuint image)
@@ -68,13 +68,13 @@ void _SimulationController::addAndSelectSimulationData(DataDescription const& da
 void _SimulationController::setSimulationData(DataDescription const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
-    _isSelectionInvalid = true;
+    _selectionNeedsUpdate = true;
 }
 
 void _SimulationController::removeSelectedEntities(bool includeClusters)
 {
     _worker.removeSelectedEntities(includeClusters);
-    _isSelectionInvalid = true;
+    _selectionNeedsUpdate = true;
 }
 
 void _SimulationController::colorSelectedEntities(unsigned char color, bool includeClusters)
@@ -85,18 +85,18 @@ void _SimulationController::colorSelectedEntities(unsigned char color, bool incl
 void _SimulationController::calcSingleTimestep()
 {
     _worker.calcSingleTimestep();
-    _isSelectionInvalid = true;
+    _selectionNeedsUpdate = true;
 }
 
 void _SimulationController::runSimulation()
 {
     _worker.runSimulation();
-    _isSelectionInvalid = true;
 }
 
 void _SimulationController::pauseSimulation()
 {
     _worker.pauseSimulation();
+    _selectionNeedsUpdate = true;
 }
 
 bool _SimulationController::isSimulationRunning() const
@@ -110,7 +110,7 @@ void _SimulationController::closeSimulation()
     _thread->join();
     delete _thread;
     _worker.endShutdown();
-    _isSelectionInvalid = true;
+    _selectionNeedsUpdate = true;
 }
 
 uint64_t _SimulationController::getCurrentTimestep() const
@@ -222,9 +222,9 @@ SelectionShallowData _SimulationController::getSelectionShallowData()
     return _worker.getSelectionShallowData();
 }
 
-void _SimulationController::shallowUpdateSelection(ShallowUpdateSelectionData const& updateData)
+void _SimulationController::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData)
 {
-    _worker.shallowUpdateSelection(updateData);
+    _worker.shallowUpdateSelectedEntities(updateData);
 }
 
 void _SimulationController::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
@@ -237,12 +237,12 @@ void _SimulationController::removeSelection()
     _worker.removeSelection();
 }
 
-bool _SimulationController::removeSelectionIfInvalid()
+bool _SimulationController::updateSelectionIfNecessary()
 {
-    auto result = _isSelectionInvalid;
-    _isSelectionInvalid = false;
+    auto result = _selectionNeedsUpdate;
+    _selectionNeedsUpdate = false;
     if (result) {
-        removeSelection();
+        _worker.updateSelection();
     }
     return result;
 }

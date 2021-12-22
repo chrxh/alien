@@ -341,18 +341,23 @@ void _CudaSimulation::setSelection(AreaSelectionData const& selectionData)
 
  SelectionShallowData _CudaSimulation::getSelectionShallowData()
 {
-     KERNEL_CALL_HOST(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
+    KERNEL_CALL_HOST(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
     return _cudaSelectionResult->getSelectionShallowData();
- }
+}
 
-void _CudaSimulation::shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData)
+void _CudaSimulation::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    KERNEL_CALL_HOST(cudaShallowUpdateSelection, shallowUpdateData, *_cudaSimulationData);
+    KERNEL_CALL_HOST(cudaShallowUpdateSelectedEntities, shallowUpdateData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::removeSelection()
 {
     KERNEL_CALL_HOST(cudaRemoveSelection, *_cudaSimulationData);
+}
+
+void _CudaSimulation::updateSelection()
+{
+    KERNEL_CALL_HOST(cudaUpdateSelection, *_cudaSimulationData);
 }
 
 void _CudaSimulation::colorSelectedEntities(unsigned char color, bool includeClusters)

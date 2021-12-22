@@ -541,7 +541,13 @@ __global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult
     selectionResult.finalize();
 }
 
-__global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData, SimulationData data)
+__global__ void cudaUpdateSelection(SimulationData data)
+{
+    KERNEL_CALL(removeSelection, data, true);
+    KERNEL_CALL_1_1(rolloutSelection, data);
+}
+
+__global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData updateData, SimulationData data)
 {
     int* result = new int;
 
@@ -593,9 +599,7 @@ __global__ void cudaShallowUpdateSelection(ShallowUpdateSelectionData updateData
             KERNEL_CALL(cleanupCellMap, data);
         } while (1 == *result && --counter > 0);    //due to locking not all necessary connections may be established at first => repeat
 
-        //update selection
-        KERNEL_CALL(removeClusterSelection, data);
-        KERNEL_CALL_1_1(rolloutSelection, data);
+        KERNEL_CALL_1_1(cudaUpdateSelection, data);
     }
 
     delete result;
