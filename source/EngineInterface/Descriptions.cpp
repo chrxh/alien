@@ -5,48 +5,6 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-#include "ChangeDescriptions.h"
-
-namespace
-{
-    boost::optional<std::list<ConnectionDescription>> convert(
-        boost::optional<std::list<ConnectionChangeDescription>> const& connections)
-    {
-        if (!connections) {
-            return boost::none;
-        }
-        std::list<ConnectionDescription> result;
-        for (auto const& connectionChange : *connections) {
-            ConnectionDescription connection;
-            connection.cellId = connectionChange.cellId;
-            connection.distance = connectionChange.distance;
-            connection.angleFromPrevious = connectionChange.angleFromPrevious;
-            result.emplace_back(connection);
-        }
-        return result;
-    }
-
-}
-
-CellDescription::CellDescription(CellChangeDescription const& change)
-{
-    id = change.id;
-    pos = *static_cast<boost::optional<RealVector2D>>(change.pos);
-    energy = *static_cast<boost::optional<double>>(change.energy);
-    maxConnections = *static_cast<boost::optional<int>>(change.maxConnections);
-
-    std::list<ConnectionDescription> connectionList =
-        *convert(static_cast<boost::optional<std::list<ConnectionChangeDescription>>>(change.connectingCells));
-    connections = std::vector<ConnectionDescription>(connectionList.begin(), connectionList.end());
-    tokenBlocked = *change.tokenBlocked.getOptionalValue();  //static_cast<boost::optional<bool>> doesn't work for some reason
-    tokenBranchNumber = *static_cast<boost::optional<int>>(change.tokenBranchNumber);
-    metadata = *static_cast<boost::optional<CellMetadata>>(change.metadata);
-    cellFeature =
-        *static_cast<boost::optional<CellFeatureDescription>>(change.cellFeatures);
-    tokens = *static_cast<boost::optional<vector<TokenDescription>>>(change.tokens);
-    tokenUsages = *static_cast<boost::optional<int>>(change.tokenUsages);
-}
-
 CellDescription& CellDescription::addToken(TokenDescription const& value)
 {
     tokens.emplace_back(value);
@@ -189,7 +147,8 @@ CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::uno
     THROW_NOT_IMPLEMENTED();
 }
 
-ParticleDescription::ParticleDescription(ParticleChangeDescription const& change)
+/*
+ParticleDescription::ParticleDescription(ParticleRolloutDescription const& change)
 {
     id = change.id;
     pos = *static_cast<boost::optional<RealVector2D>>(change.pos);
@@ -197,6 +156,7 @@ ParticleDescription::ParticleDescription(ParticleChangeDescription const& change
     energy = *static_cast<boost::optional<double>>(change.energy);
     metadata = *static_cast<boost::optional<ParticleMetadata>>(change.metadata);
 }
+*/
 
 void DataDescription::setCenter(RealVector2D const& center)
 {

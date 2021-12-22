@@ -80,7 +80,6 @@ struct CellDescription
     int tokenUsages;
 
     ENGINEINTERFACE_EXPORT CellDescription() = default;
-    ENGINEINTERFACE_EXPORT CellDescription(CellChangeDescription const& change);
     CellDescription& setId(uint64_t value)
     {
         id = value;
@@ -190,7 +189,6 @@ struct ParticleDescription
     ParticleMetadata metadata;
 
     ENGINEINTERFACE_EXPORT ParticleDescription() = default;
-    ENGINEINTERFACE_EXPORT ParticleDescription(ParticleChangeDescription const& change);
     ParticleDescription& setId(uint64_t value)
     {
         id = value;

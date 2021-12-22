@@ -22,7 +22,6 @@
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
 #include "EngineInterface/Serializer.h"
-#include "EngineInterface/ChangeDescriptions.h"
 #include "EngineImpl/SimulationController.h"
 
 #include "ModeWindow.h"

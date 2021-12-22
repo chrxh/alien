@@ -1,16 +1,16 @@
-#include "ChangeDescriptions.h"
+#include "RolloutDescriptions.h"
 
 #include <boost/range/adaptors.hpp>
 
 
 namespace
 {
-    boost::optional<std::list<ConnectionChangeDescription>> convert(
+    boost::optional<std::list<ConnectionRolloutDescription>> convert(
         std::vector<ConnectionDescription> const& connections)
 	{
-        std::list<ConnectionChangeDescription> result;
+        std::list<ConnectionRolloutDescription> result;
         for (auto const& connection : connections) {
-            ConnectionChangeDescription connectionChange;
+            ConnectionRolloutDescription connectionChange;
             connectionChange.cellId = connection.cellId;
             connectionChange.distance = connection.distance;
             connectionChange.angleFromPrevious = connection.angleFromPrevious;
@@ -20,7 +20,7 @@ namespace
     }
 }
 
-CellChangeDescription::CellChangeDescription(CellDescription const & desc)
+CellRolloutDescription::CellRolloutDescription(CellDescription const & desc)
 {
 	id = desc.id;
 	pos = desc.pos;
@@ -36,7 +36,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & desc)
     tokenUsages = desc.tokenUsages;
 }
 
-CellChangeDescription::CellChangeDescription(CellDescription const & before, CellDescription const & after)
+CellRolloutDescription::CellRolloutDescription(CellDescription const & before, CellDescription const & after)
 {
 	id = after.id;
 	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
@@ -44,7 +44,7 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
     energy = ValueTracker<double>(before.energy, after.energy);
 	maxConnections = ValueTracker<int>(before.maxConnections, after.maxConnections);
     connectingCells =
-        ValueTracker<std::list<ConnectionChangeDescription>>(convert(before.connections), convert(after.connections));
+        ValueTracker<std::list<ConnectionRolloutDescription>>(convert(before.connections), convert(after.connections));
     tokenBlocked = ValueTracker<bool>(before.tokenBlocked, after.tokenBlocked);
 	tokenBranchNumber = ValueTracker<int>(before.tokenBranchNumber, after.tokenBranchNumber);
 	metadata = ValueTracker<CellMetadata>(before.metadata, after.metadata);
@@ -53,13 +53,13 @@ CellChangeDescription::CellChangeDescription(CellDescription const & before, Cel
     tokenUsages = ValueTracker<int>(before.tokenUsages, after.tokenUsages);
 }
 
-bool CellChangeDescription::isEmpty() const
+bool CellRolloutDescription::isEmpty() const
 {
     return !pos && !energy && !maxConnections && !connectingCells && !tokenBlocked && !tokenBranchNumber && !metadata
         && !cellFeatures && !tokens;
 }
 
-ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & desc)
+ParticleRolloutDescription::ParticleRolloutDescription(ParticleDescription const & desc)
 {
 	id = desc.id;
 	pos = desc.pos;
@@ -68,7 +68,7 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 	metadata = desc.metadata;
 }
 
-ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const & before, ParticleDescription const & after)
+ParticleRolloutDescription::ParticleRolloutDescription(ParticleDescription const & before, ParticleDescription const & after)
 {
 	id = after.id;
 	pos = ValueTracker<RealVector2D>(before.pos, after.pos);
@@ -77,12 +77,12 @@ ParticleChangeDescription::ParticleChangeDescription(ParticleDescription const &
 	metadata = ValueTracker<ParticleMetadata>(before.metadata, after.metadata);
 }
 
-bool ParticleChangeDescription::isEmpty() const
+bool ParticleRolloutDescription::isEmpty() const
 {
     return !pos && !vel && !energy && !metadata;
 }
 
-DataChangeDescription::DataChangeDescription(DataDescription const & desc)
+DataRolloutDescription::DataRolloutDescription(DataDescription const & desc)
 {
     for (auto const& cluster : desc.clusters) {
         for (auto const& cell : cluster.cells) {
@@ -94,7 +94,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & desc)
     }
 }
 
-DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
+DataRolloutDescription::DataRolloutDescription(DataDescription const & dataBefore, DataDescription const & dataAfter)
 {
     std::vector<CellDescription> cellsBefore;
     std::vector<CellDescription> cellsAfter;
@@ -113,12 +113,12 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 	for (auto const& cellBefore : cellsBefore) {
         auto cellIdAfterIt = cellsAfterIndicesByIds.find(cellBefore.id);
         if (cellIdAfterIt == cellsAfterIndicesByIds.end()) {
-            addDeletedCell(CellChangeDescription().setId(cellBefore.id).setPos(cellBefore.pos));
+            addDeletedCell(CellRolloutDescription().setId(cellBefore.id).setPos(cellBefore.pos));
 		}
 		else {
 			int cellAfterIndex = cellIdAfterIt->second;
             auto const& cellAfter = cellsAfter.at(cellAfterIndex);
-			CellChangeDescription change(cellBefore, cellAfter);
+			CellRolloutDescription change(cellBefore, cellAfter);
 			if (!change.isEmpty()) {
 				addModifiedCell(change);
 			}
@@ -128,7 +128,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 
 	for (auto const& cellAfterIndex : cellsAfterIndicesByIds | boost::adaptors::map_values) {
         auto const& cellAfter = cellsAfter.at(cellAfterIndex);
-        CellChangeDescription change(cellAfter);
+        CellRolloutDescription change(cellAfter);
         addNewCell(change);
 	}
 
@@ -140,11 +140,11 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
     for (auto const& particleBefore : dataBefore.particles) {
         auto particleIdAfterIt = particleAfterIndicesByIds.find(particleBefore.id);
         if (particleIdAfterIt == particleAfterIndicesByIds.end()) {
-            addDeletedParticle(ParticleChangeDescription().setId(particleBefore.id).setPos(particleBefore.pos));
+            addDeletedParticle(ParticleRolloutDescription().setId(particleBefore.id).setPos(particleBefore.pos));
         } else {
             int particleAfterIndex = particleIdAfterIt->second;
             auto const& particleAfter = dataAfter.particles.at(particleAfterIndex);
-            ParticleChangeDescription change(particleBefore, particleAfter);
+            ParticleRolloutDescription change(particleBefore, particleAfter);
             if (!change.isEmpty()) {
                 addModifiedParticle(change);
             }
@@ -154,7 +154,7 @@ DataChangeDescription::DataChangeDescription(DataDescription const & dataBefore,
 
     for (auto const& particleAfterIndexById : particleAfterIndicesByIds) {
         auto const& particleAfter = dataAfter.particles.at(particleAfterIndexById.second);
-        addNewParticle(ParticleChangeDescription(particleAfter));
+        addNewParticle(ParticleRolloutDescription(particleAfter));
     }
 }
 
