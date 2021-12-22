@@ -77,6 +77,11 @@ void _SimulationController::removeSelectedEntities(bool includeClusters)
     _isSelectionInvalid = true;
 }
 
+void _SimulationController::colorSelectedEntities(unsigned char color, bool includeClusters)
+{
+    _worker.colorSelectedEntities(color, includeClusters);
+}
+
 void _SimulationController::calcSingleTimestep()
 {
     _worker.calcSingleTimestep();

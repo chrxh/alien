@@ -444,6 +444,13 @@ void EngineWorker::removeSelection()
     _cudaSimulation->removeSelection();
 }
 
+void EngineWorker::colorSelectedEntities(unsigned char color, bool includeClusters)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+    _cudaSimulation->colorSelectedEntities(color, includeClusters);
+}
+
 void EngineWorker::runThreadLoop()
 {
     try {

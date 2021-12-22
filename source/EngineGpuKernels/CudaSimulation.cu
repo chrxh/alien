@@ -26,7 +26,7 @@
 #include "Entities.cuh"
 #include "Map.cuh"
 #include "MonitorKernels.cuh"
-#include "ActionKernels.cuh"
+#include "EditKernels.cuh"
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernels.cuh"
@@ -353,6 +353,11 @@ void _CudaSimulation::shallowUpdateSelection(ShallowUpdateSelectionData const& s
 void _CudaSimulation::removeSelection()
 {
     KERNEL_CALL_HOST(cudaRemoveSelection, *_cudaSimulationData);
+}
+
+void _CudaSimulation::colorSelectedEntities(unsigned char color, bool includeClusters)
+{
+    KERNEL_CALL_HOST(cudaColorSelectedEntities, *_cudaSimulationData, color, includeClusters);
 }
 
 void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants_)

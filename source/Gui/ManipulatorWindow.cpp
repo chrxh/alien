@@ -165,19 +165,33 @@ void _ManipulatorWindow::process()
         }
 
         AlienImGui::Group("Colorize");
-        colorButton("    ##color1", Const::IndividualCellColor1);
+        if (colorButton("    ##color1", Const::IndividualCellColor1)) {
+            _simController->colorSelectedEntities(0, _includeClusters);
+        }
         ImGui::SameLine();
-        colorButton("    ##color2", Const::IndividualCellColor2);
+        if (colorButton("    ##color2", Const::IndividualCellColor2)) {
+            _simController->colorSelectedEntities(1, _includeClusters);
+        }
         ImGui::SameLine();
-        colorButton("    ##color3", Const::IndividualCellColor3);
+        if (colorButton("    ##color3", Const::IndividualCellColor3)) {
+            _simController->colorSelectedEntities(2, _includeClusters);
+        }
         ImGui::SameLine();
-        colorButton("    ##color4", Const::IndividualCellColor4);
+        if (colorButton("    ##color4", Const::IndividualCellColor4)) {
+            _simController->colorSelectedEntities(3, _includeClusters);
+        }
         ImGui::SameLine();
-        colorButton("    ##color5", Const::IndividualCellColor5);
+        if (colorButton("    ##color5", Const::IndividualCellColor5)) {
+            _simController->colorSelectedEntities(4, _includeClusters);
+        }
         ImGui::SameLine();
-        colorButton("    ##color6", Const::IndividualCellColor6);
+        if (colorButton("    ##color6", Const::IndividualCellColor6)) {
+            _simController->colorSelectedEntities(5, _includeClusters);
+        }
         ImGui::SameLine();
-        colorButton("    ##color7", Const::IndividualCellColor7);
+        if (colorButton("    ##color7", Const::IndividualCellColor7)) {
+            _simController->colorSelectedEntities(6, _includeClusters);
+        }
 
         ImGui::EndDisabled();
 
