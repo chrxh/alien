@@ -44,7 +44,7 @@ __global__ void applyFlowFieldSettings(SimulationData data)
     }
 }
 
-__global__ void applyFlowFieldSettingsKernel(SimulationData data)
+__global__ void cudaApplyFlowFieldSettings(SimulationData data)
 {
     if (cudaFlowFieldSettings.active) {
         KERNEL_CALL(applyFlowFieldSettings, data);

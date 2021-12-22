@@ -69,8 +69,8 @@ void _EditorController::process()
         rightMouseButtonReleased();
     }
 
-    if (_simController->removeSelectionIfInvalid()) {
-        _editorModel->clear();
+    if (_simController->updateSelectionIfNecessary()) {
+        _editorModel->update();
     }
 }
 
@@ -127,7 +127,7 @@ void _EditorController::leftMouseButtonHold(
         updateData.considerClusters = !modifierKeyPressed;
         updateData.posDeltaX = delta.x;
         updateData.posDeltaY = delta.y;
-        _simController->shallowUpdateSelection(updateData);
+        _simController->shallowUpdateSelectedEntities(updateData);
         _editorModel->update();
 
     }

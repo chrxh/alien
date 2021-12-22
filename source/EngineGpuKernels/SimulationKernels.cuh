@@ -116,7 +116,7 @@ __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResu
     data.prepareForSimulation();
     result.resetStatistics();
 
-    KERNEL_CALL_1_1(applyFlowFieldSettingsKernel, data);
+    KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, data);
     KERNEL_CALL(processingStep1, data);
     KERNEL_CALL(processingStep2, data);
     KERNEL_CALL(processingStep3, data);
