@@ -325,14 +325,20 @@ bool AlienImGui::BeginToolbarButton(std::string const& text)
 {
     ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonTextColor);
+    auto color = Const::ToolbarButtonColor;
+    float h, s, v;
+    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.3f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.4f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonColor);
     auto buttonSize = StyleRepository::getInstance().scaleContent(40.0f);
     return ImGui::Button(text.c_str(), {buttonSize, buttonSize});
 }
 
 void AlienImGui::EndToolbarButton()
 {
-    ImGui::PopStyleColor();
+    ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
     ImGui::PopFont();
 }
