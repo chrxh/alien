@@ -52,6 +52,7 @@ public:
     ENGINEGPUKERNELS_EXPORT SelectionShallowData getSelectionShallowData();
     ENGINEGPUKERNELS_EXPORT void shallowUpdateSelection(ShallowUpdateSelectionData const& shallowUpdateData);
     ENGINEGPUKERNELS_EXPORT void removeSelection();
+    ENGINEGPUKERNELS_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters);
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
