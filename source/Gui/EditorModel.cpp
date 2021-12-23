@@ -2,8 +2,9 @@
 
 #include "EngineImpl/SimulationController.h"
 
-_EditorModel::_EditorModel(SimulationController const& simController)
+_EditorModel::_EditorModel(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
+    , _viewport(viewport)
 {
     clear();
 }
@@ -27,4 +28,16 @@ bool _EditorModel::isSelectionEmpty() const
 void _EditorModel::clear()
 {
     _selectionShallowData = SelectionShallowData();
+}
+
+std::vector<InspectorWindow> const& _EditorModel::getInspectorWindows() const
+{
+    return _inspectorWindows;
+}
+
+void _EditorModel::inspectEntities(std::vector<CellOrParticleDescription> const& entities)
+{
+    for (auto const& entity : entities) {
+        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(entity, _viewport));
+    }
 }

@@ -28,6 +28,8 @@ PUBLIC
     GlobalSettings.h
     GpuSettingsDialog.cpp
     GpuSettingsDialog.h
+    InspectorWindow.cpp
+    InspectorWindow.h
     LogWindow.cpp
     LogWindow.h
     Main.cpp
