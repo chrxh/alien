@@ -13,7 +13,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     : _simController(simController)
     , _viewport(viewport)
 {
-    _editorModel = boost::make_shared<_EditorModel>(_simController);
+    _editorModel = boost::make_shared<_EditorModel>(_simController, _viewport);
     _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel);
     _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
 }
@@ -40,6 +40,7 @@ void _EditorController::process()
     }
     
     processSelectionRect();
+    processInspectorWindows();
 
     if (!ImGui::GetIO().WantCaptureMouse) {
         auto mousePosImVec = ImGui::GetMousePos();
@@ -92,6 +93,13 @@ void _EditorController::processSelectionRect()
         auto endPos = _selectionRect->endPos;
         draw_list->AddRectFilled({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaFillColor);
         draw_list->AddRect({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaBorderColor, 0, 0, 1.0f);
+    }
+}
+
+void _EditorController::processInspectorWindows()
+{
+    for (auto const& inspectorWindow : _editorModel->getInspectorWindows()) {
+        inspectorWindow->process();
     }
 }
 

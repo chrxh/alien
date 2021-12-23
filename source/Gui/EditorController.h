@@ -20,6 +20,7 @@ public:
 
 private:
     void processSelectionRect();
+    void processInspectorWindows();
 
     void leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed);
     void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);

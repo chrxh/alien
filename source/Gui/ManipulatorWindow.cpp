@@ -19,6 +19,7 @@
 namespace
 {
     auto const MaxContentTextWidth = 120.0f;
+    auto const MaxInspectors = 10;
 }
 
 _ManipulatorWindow::_ManipulatorWindow(
@@ -108,10 +109,11 @@ void _ManipulatorWindow::process()
             AlienImGui::EndToolbarButton();
             ImGui::EndDisabled();
 
-            //nexus button
+            //inspector button
             ImGui::SameLine();
             ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
             if (AlienImGui::BeginToolbarButton(ICON_FA_MICROSCOPE)) {
+                onInspect();
             }
             AlienImGui::EndToolbarButton();
             ImGui::EndDisabled();
@@ -272,21 +274,28 @@ void _ManipulatorWindow::setOn(bool value)
     _on = value;
 }
 
-bool _ManipulatorWindow::nexusButton()
+void _ManipulatorWindow::onInspect()
 {
-/*
-    auto color = ImColor::HSV(0, 0, 0.5);
-    float h, s, v;
-    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 1.0f));
-*/
-    auto result = ImGui::Button("Add to Nexus");
-/*
-    ImGui::PopStyleColor(3);
-*/
-    return result;
+    DataDescription selectedData = _simController->getSelectedSimulationData(false);
+
+    int numEntities = selectedData.particles.size();
+    for (auto const& cluster : selectedData.clusters) {
+        numEntities += cluster.cells.size();
+    }
+    if (_editorModel->getInspectorWindows().size() + numEntities > MaxInspectors) {
+        return;
+    }
+
+    std::vector<CellOrParticleDescription> entities;
+    for (auto const& particle : selectedData.particles) {
+        entities.emplace_back(particle);
+    }
+    for (auto const& cluster : selectedData.clusters) {
+        for (auto const& cell : cluster.cells) {
+            entities.emplace_back(cell);
+        }
+    }
+    _editorModel->inspectEntities(entities);
 }
 
 bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)
@@ -301,7 +310,6 @@ bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)
 
     return result;
 }
-
 
 bool _ManipulatorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
 {

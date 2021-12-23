@@ -101,6 +101,9 @@ using SaveSelectionDialog = boost::shared_ptr<_SaveSelectionDialog>;
 class _OpenSelectionDialog;
 using OpenSelectionDialog = boost::shared_ptr<_OpenSelectionDialog>;
 
+class _InspectorWindow;
+using InspectorWindow = boost::shared_ptr<_InspectorWindow>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;
