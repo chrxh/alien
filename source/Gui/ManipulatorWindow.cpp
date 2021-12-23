@@ -19,7 +19,6 @@
 namespace
 {
     auto const MaxContentTextWidth = 120.0f;
-    auto const MaxInspectors = 10;
 }
 
 _ManipulatorWindow::_ManipulatorWindow(
@@ -277,14 +276,6 @@ void _ManipulatorWindow::setOn(bool value)
 void _ManipulatorWindow::onInspect()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(false);
-
-    int numEntities = selectedData.particles.size();
-    for (auto const& cluster : selectedData.clusters) {
-        numEntities += cluster.cells.size();
-    }
-    if (_editorModel->getInspectorWindows().size() + numEntities > MaxInspectors) {
-        return;
-    }
 
     std::vector<CellOrParticleDescription> entities;
     for (auto const& particle : selectedData.particles) {

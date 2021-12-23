@@ -10,19 +10,19 @@ using CellOrParticleDescription = std::variant<CellDescription, ParticleDescript
 class _InspectorWindow
 {
 public:
-    _InspectorWindow(CellOrParticleDescription const& entity, Viewport const& viewport);
+    _InspectorWindow(CellOrParticleDescription const& entity, RealVector2D const& initialPos);
     ~_InspectorWindow();
 
     void process();
 
     bool isClosed() const;
+    CellOrParticleDescription getDescription() const;
 
 private:
     std::string generateTitle() const;
-    RealVector2D getEntityPos() const;
-
+    
 private:
-    Viewport _viewport;
+    RealVector2D _initialPos;
 
     bool _on = true;
     CellOrParticleDescription _entity;

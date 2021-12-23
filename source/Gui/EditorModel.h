@@ -17,8 +17,8 @@ public:
     bool isSelectionEmpty() const;
     void clear();
 
-    std::vector<InspectorWindow> const& getInspectorWindows() const;
-    void inspectEntities(std::vector<CellOrParticleDescription> const& entities);
+    std::vector<InspectorWindow>& getInspectorWindows();
+    bool inspectEntities(std::vector<CellOrParticleDescription> const& entities);
 
 private:
     SimulationController _simController;

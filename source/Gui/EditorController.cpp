@@ -98,9 +98,14 @@ void _EditorController::processSelectionRect()
 
 void _EditorController::processInspectorWindows()
 {
+    std::vector<InspectorWindow> newInspectorWindow;
     for (auto const& inspectorWindow : _editorModel->getInspectorWindows()) {
         inspectorWindow->process();
+        if (!inspectorWindow->isClosed()) {
+            newInspectorWindow.emplace_back(inspectorWindow);
+        }
     }
+    _editorModel->getInspectorWindows() = newInspectorWindow;
 }
 
 void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed)
