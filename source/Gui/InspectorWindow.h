@@ -1,11 +1,7 @@
 #pragma once
 
-#include <variant>
-
 #include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
-
-using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;
 
 class _InspectorWindow
 {

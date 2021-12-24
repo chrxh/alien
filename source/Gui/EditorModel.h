@@ -9,7 +9,7 @@
 class _EditorModel
 {
 public:
-    _EditorModel(SimulationController const& simController, Viewport const& viewport);
+    _EditorModel(SimulationController const& simController);
 
     SelectionShallowData const& getSelectionShallowData() const;
     void update();
@@ -17,13 +17,12 @@ public:
     bool isSelectionEmpty() const;
     void clear();
 
-    std::vector<InspectorWindow>& getInspectorWindows();
-    bool inspectEntities(std::vector<CellOrParticleDescription> const& entities);
+    std::vector<CellOrParticleDescription> fetchEntitiesToInspect();
+    void inspectEntities(std::vector<CellOrParticleDescription> const& entities);
 
 private:
     SimulationController _simController;
-    Viewport _viewport;
     SelectionShallowData _selectionShallowData;
 
-    std::vector<InspectorWindow> _inspectorWindows;
+    std::vector<CellOrParticleDescription> _entitiesToInspect;
 };
