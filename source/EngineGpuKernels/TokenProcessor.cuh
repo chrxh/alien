@@ -25,6 +25,7 @@ public:
     __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);
     __inline__ __device__ void
     executeModifyingCellFunctions(SimulationData& data, SimulationResult& result, int numTokenPointers);
+    __inline__ __device__ void deleteTokenIfCellDeleted(SimulationData& data);
 };
 
 /************************************************************************/
@@ -158,6 +159,26 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
                     cell->releaseLock();
                 }
 /*            } while (!success);*/
+        }
+    }
+}
+
+__inline__ __device__ void TokenProcessor::deleteTokenIfCellDeleted(SimulationData& data)
+{
+    auto& tokens = data.entities.tokenPointers;
+    auto partition =
+        calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        if (auto& token = tokens.at(index)) {
+            auto& cell = token->cell;
+            if (cell->isDeleted()) {
+                EntityFactory factory;
+                factory.init(&data);
+                factory.createParticle(token->energy, cell->absPos, cell->vel, {cell->metadata.color});
+
+                token = nullptr;
+            }
         }
     }
 }

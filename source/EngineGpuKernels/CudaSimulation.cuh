@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <atomic>
+#include <vector>
 
 #if defined(_WIN32)
 #define NOMINMAX
@@ -39,6 +40,9 @@ public:
     ENGINEGPUKERNELS_EXPORT void
     getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO);
+    ENGINEGPUKERNELS_EXPORT void getInspectedSimulationData(
+        std::vector<uint64_t> entityIds,
+        DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void
     getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void addAndSelectSimulationData(DataAccessTO const& dataTO);
@@ -78,6 +82,7 @@ public:
 
 private:
     void copyToGpu(DataAccessTO const& dataTO);
+    void copyFromGpu(DataAccessTO const& dataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals);
 

@@ -60,6 +60,11 @@ DataDescription _SimulationController::getSelectedSimulationData(bool includeClu
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
+DataDescription _SimulationController::getInspectedSimulationData(std::vector<uint64_t> entityIds)
+{
+    return _worker.getInspectedSimulationData(entityIds);
+}
+
 void _SimulationController::addAndSelectSimulationData(DataDescription const& dataToAdd)
 {
     _worker.addAndSelectSimulationData(dataToAdd);

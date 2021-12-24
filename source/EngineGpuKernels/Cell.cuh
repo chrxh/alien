@@ -56,6 +56,13 @@ struct Cell
     float2 temp2;
     float2 temp3;
 
+    __device__ __inline__ bool isDeleted() const { return energy == 0; }
+
+    __device__ __inline__ void setDeleted()
+    {
+        energy = 0;
+    }
+
     __device__ __inline__ void getLock()
     {
         while (1 == atomicExch(&locked, 1)) {}

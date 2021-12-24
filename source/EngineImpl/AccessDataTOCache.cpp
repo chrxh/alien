@@ -16,7 +16,7 @@ _AccessDataTOCache::~_AccessDataTOCache()
 
 DataAccessTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
 {
-    if (!_arraySizes || * _arraySizes != arraySizes) {
+    if (!_arraySizes || *_arraySizes != arraySizes) {
         for (DataAccessTO const& dataTO : _freeDataTOs) {
             deleteDataTO(dataTO);
         }

@@ -107,10 +107,15 @@ __global__ void processingStep12(SimulationData data, int numParticlePointers)
     CellConnectionProcessor::processDelCellOperations(data);
 }
 
+__global__ void processingStep13(SimulationData data)
+{
+    TokenProcessor tokenProcessor;
+    tokenProcessor.deleteTokenIfCellDeleted(data);
+}
+
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-
 __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
     data.prepareForSimulation();
@@ -129,9 +134,9 @@ __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResu
     KERNEL_CALL(processingStep10, data);
     KERNEL_CALL(processingStep11, data);
     KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
+    KERNEL_CALL(processingStep13, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
-
     result.setArrayResizeNeeded(data.shouldResize());
 }
 

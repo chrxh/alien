@@ -4,6 +4,7 @@
 
 #include "Base/Math.h"
 #include "EngineImpl/SimulationController.h"
+#include "EngineInterface/Constants.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
@@ -100,21 +101,47 @@ void _EditorController::processSelectionRect()
 
 void _EditorController::processInspectorWindows()
 {
+    //new entities to inspect
     newEntitiesToInspect(_editorModel->fetchEntitiesToInspect());
 
-    std::vector<InspectorWindow> inspectorWindows;
-    std::unordered_map<uint64_t, CellOrParticleDescription> inspectedEntityById;
+    //process inspector windows
     for (auto const& inspectorWindow : _inspectorWindows) {
         inspectorWindow->process();
+    }
+
+    //inspector windows closed?
+    std::vector<InspectorWindow> inspectorWindows;
+    std::vector<CellOrParticleDescription> inspectedEntities;
+    for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
             inspectorWindows.emplace_back(inspectorWindow);
 
             auto id = inspectorWindow->getId();
-            inspectedEntityById.emplace(id, _editorModel->getInspectedEntity(id));
+            inspectedEntities.emplace_back(_editorModel->getInspectedEntity(id));
         }
     }
     _inspectorWindows = inspectorWindows;
-    _editorModel->setInspectedEntityById(inspectedEntityById);
+    _editorModel->setInspectedEntities(inspectedEntities);
+
+    //update inspected entities from simulation
+    if (inspectedEntities.empty()) {
+        return;
+    }
+    std::vector<uint64_t> entityIds;
+    for (auto const& entity : inspectedEntities) {
+        entityIds.emplace_back(DescriptionHelper::getId(entity));
+    }
+    auto inspectedData = _simController->getInspectedSimulationData(entityIds);
+    auto newInspectedEntities = DescriptionHelper::getEntities(inspectedData);
+    _editorModel->setInspectedEntities(newInspectedEntities);
+
+    inspectorWindows.clear();
+    for (auto const& inspectorWindow : _inspectorWindows) {
+        if (_editorModel->existsInspectedEntity(inspectorWindow->getId())) {
+            inspectorWindows.emplace_back(inspectorWindow);
+        }
+    }
+    _inspectorWindows = inspectorWindows;
 }
 
 void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities)
@@ -138,6 +165,9 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
         }
     }
     if (newEntities.empty()) {
+        return;
+    }
+    if (inspectedIds.size() > Const::MaxInspectedEntities) {
         return;
     }
     RealVector2D center;

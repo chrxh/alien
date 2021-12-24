@@ -209,6 +209,24 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
     return result;
 }
 
+DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> entityIds)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+
+    auto arraySizes = _cudaSimulation->getArraySizes();
+    DataAccessTO dataTO =
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    _cudaSimulation->getInspectedSimulationData(entityIds, dataTO);
+
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+
+    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    _dataTOCache->releaseDataTO(dataTO);
+
+    return result;
+}
+
 OverallStatistics EngineWorker::getMonitorData() const
 {
     OverallStatistics result;
