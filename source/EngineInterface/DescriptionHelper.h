@@ -14,6 +14,9 @@ public:
 
     ENGINEINTERFACE_EXPORT static void colorize(DataDescription& data, std::vector<int> const& colorCodes);
 
+    ENGINEINTERFACE_EXPORT static uint64_t getId(CellOrParticleDescription const& entity);
+    ENGINEINTERFACE_EXPORT static RealVector2D getPos(CellOrParticleDescription const& entity);
+
 private:
     static void makeValid(ClusterDescription& cluster);
 };

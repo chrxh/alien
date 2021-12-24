@@ -6,7 +6,7 @@
 class _InspectorWindow
 {
 public:
-    _InspectorWindow(CellOrParticleDescription const& entity, RealVector2D const& initialPos);
+    _InspectorWindow(Viewport const& viewport, CellOrParticleDescription const& entity, RealVector2D const& initialPos);
     ~_InspectorWindow();
 
     void process();
@@ -18,6 +18,7 @@ private:
     std::string generateTitle() const;
     
 private:
+    Viewport _viewport; 
     RealVector2D _initialPos;
 
     bool _on = true;

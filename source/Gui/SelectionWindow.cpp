@@ -49,14 +49,6 @@ void _SelectionWindow::process()
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
-        /*
-    ImGui::Text("Angle");
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    if (ImGui::SliderFloat("##angle", &_angle, -180.0f, 180.0f, "%.1f")) {
-    }
-    ImGui::PopItemWidth();
-*/
-
         ImGui::End();
     }
 }

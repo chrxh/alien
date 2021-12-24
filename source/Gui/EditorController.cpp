@@ -4,6 +4,7 @@
 
 #include "Base/Math.h"
 #include "EngineImpl/SimulationController.h"
+#include "EngineInterface/DescriptionHelper.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
 #include "EditorModel.h"
@@ -14,7 +15,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     : _simController(simController)
     , _viewport(viewport)
 {
-    _editorModel = boost::make_shared<_EditorModel>(_simController, _viewport);
+    _editorModel = boost::make_shared<_EditorModel>(_simController);
     _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel);
     _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
 }
@@ -111,26 +112,6 @@ void _EditorController::processInspectorWindows()
     _inspectorWindows = newInspectorWindow;
 }
 
-namespace
-{
-    uint64_t getId(CellOrParticleDescription const& entity)
-    {
-        if (std::holds_alternative<CellDescription>(entity)) {
-            return std::get<CellDescription>(entity).id;
-        }
-        return std::get<ParticleDescription>(entity).id;
-    }
-
-    RealVector2D getPos(CellOrParticleDescription const& entity)
-    {
-        if (std::holds_alternative<CellDescription>(entity)) {
-            return std::get<CellDescription>(entity).pos;
-        }
-        return std::get<ParticleDescription>(entity).pos;
-    }
-
-}
-
 void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities)
 {
     if (entities.empty()) {
@@ -138,16 +119,16 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
     }
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {
-        inspectedIds.insert(getId(inspectorWindow->getDescription()));
+        inspectedIds.insert(DescriptionHelper::getId(inspectorWindow->getDescription()));
     }
     auto origInspectedIds = inspectedIds;
     for (auto const& entity : entities) {
-        inspectedIds.insert(getId(entity));
+        inspectedIds.insert(DescriptionHelper::getId(entity));
     }
 
     std::vector<CellOrParticleDescription> newEntities;
     for (auto const& entity : entities) {
-        if (origInspectedIds.find(getId(entity)) == origInspectedIds.end()) {
+        if (origInspectedIds.find(DescriptionHelper::getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
         }
     }
@@ -157,7 +138,7 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
     RealVector2D center;
     int num = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
         center += entityPos;
         ++num;
     }
@@ -165,7 +146,7 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
 
     float maxDistanceFromCenter = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
@@ -174,11 +155,11 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
     auto factor = maxDistanceFromCenter == 0 ? 1.0f : viewRadius / maxDistanceFromCenter / 1.2f;
 
     for (auto const& entity : newEntities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
         auto windowPos = (entityPos - center) * factor + center;
         windowPos.x = std::min(std::max(windowPos.x, 0.0f), toFloat(viewSize.x) - 100.0f);
         windowPos.y = std::min(std::max(windowPos.y, 0.0f), toFloat(viewSize.y) - 100.0f);
-        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(entity, windowPos));
+        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(_viewport, entity, windowPos));
     }
 }
 
