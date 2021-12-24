@@ -1,5 +1,7 @@
 #pragma once
 
+#include <variant>
+
 #include "Base/Definitions.h"
 
 #include "Definitions.h"
@@ -307,3 +309,5 @@ struct DescriptionNavigator
 		}
 	}
 };
+
+using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;

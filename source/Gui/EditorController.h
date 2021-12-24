@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "EngineInterface/Descriptions.h"
 #include "EngineImpl/Definitions.h"
 
 #include "Definitions.h"
@@ -21,6 +22,8 @@ public:
 private:
     void processSelectionRect();
     void processInspectorWindows();
+
+    void newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities);
 
     void leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed);
     void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);
@@ -48,4 +51,6 @@ private:
         RealVector2D endPos;
     };
     boost::optional<SelectionRect> _selectionRect;
+
+    std::vector<InspectorWindow> _inspectorWindows;
 };

@@ -18,6 +18,7 @@
 
 namespace
 {
+    auto const MaxInspectorWindowsToAdd = 10;
     auto const MaxContentTextWidth = 120.0f;
 }
 
@@ -110,7 +111,8 @@ void _ManipulatorWindow::process()
 
             //inspector button
             ImGui::SameLine();
-            ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+            ImGui::BeginDisabled(
+                _editorModel->isSelectionEmpty() || selection.numCells + selection.numParticles > MaxInspectorWindowsToAdd);
             if (AlienImGui::BeginToolbarButton(ICON_FA_MICROSCOPE)) {
                 onInspect();
             }
