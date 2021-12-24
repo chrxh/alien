@@ -102,14 +102,19 @@ void _EditorController::processInspectorWindows()
 {
     newEntitiesToInspect(_editorModel->fetchEntitiesToInspect());
 
-    std::vector<InspectorWindow> newInspectorWindow;
+    std::vector<InspectorWindow> inspectorWindows;
+    std::unordered_map<uint64_t, CellOrParticleDescription> inspectedEntityById;
     for (auto const& inspectorWindow : _inspectorWindows) {
         inspectorWindow->process();
         if (!inspectorWindow->isClosed()) {
-            newInspectorWindow.emplace_back(inspectorWindow);
+            inspectorWindows.emplace_back(inspectorWindow);
+
+            auto id = inspectorWindow->getId();
+            inspectedEntityById.emplace(id, _editorModel->getInspectedEntity(id));
         }
     }
-    _inspectorWindows = newInspectorWindow;
+    _inspectorWindows = inspectorWindows;
+    _editorModel->setInspectedEntityById(inspectedEntityById);
 }
 
 void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities)
@@ -119,7 +124,7 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
     }
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {
-        inspectedIds.insert(DescriptionHelper::getId(inspectorWindow->getDescription()));
+        inspectedIds.insert(inspectorWindow->getId());
     }
     auto origInspectedIds = inspectedIds;
     for (auto const& entity : entities) {
@@ -155,11 +160,13 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
     auto factor = maxDistanceFromCenter == 0 ? 1.0f : viewRadius / maxDistanceFromCenter / 1.2f;
 
     for (auto const& entity : newEntities) {
+        auto id = DescriptionHelper::getId(entity);
+        _editorModel->addInspectedEntity(entity);
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
         auto windowPos = (entityPos - center) * factor + center;
         windowPos.x = std::min(std::max(windowPos.x, 0.0f), toFloat(viewSize.x) - 100.0f);
         windowPos.y = std::min(std::max(windowPos.y, 0.0f), toFloat(viewSize.y) - 100.0f);
-        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(_viewport, entity, windowPos));
+        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(_viewport, _editorModel, id, windowPos));
     }
 }
 
