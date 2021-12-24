@@ -282,19 +282,19 @@ void _SimulationView::updateImageFromSimulation()
     }
 
     if(_overlay) {
-        ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
             if (overlayElement.cell) {
                 auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                 auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
                 auto text = cellFunctionToStringMap.at(overlayElement.cellType);
-                draw_list->AddText(
+                drawList->AddText(
                     StyleRepository::getInstance().getMediumFont(),
                     fontSize,
                     {viewPos.x - 2 * fontSize, viewPos.y},
                     Const::CellFunctionOverlayShadowColor,
                     text.c_str());
-                draw_list->AddText(
+                drawList->AddText(
                     StyleRepository::getInstance().getMediumFont(),
                     fontSize,
                     {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
@@ -304,7 +304,7 @@ void _SimulationView::updateImageFromSimulation()
 
             if (overlayElement.selected == 1) {
                 auto center = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
-                draw_list->AddCircle(
+                drawList->AddCircle(
                     {center.x, center.y}, _viewport->getZoomFactor() * 0.65f, Const::SelectedCellOverlayColor, 0, 2.0f);
             }
         }

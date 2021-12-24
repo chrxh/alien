@@ -90,3 +90,19 @@ void DescriptionHelper::makeValid(ClusterDescription& cluster)
         }
     }
 }
+
+uint64_t DescriptionHelper::getId(CellOrParticleDescription const& entity)
+{
+    if (std::holds_alternative<CellDescription>(entity)) {
+        return std::get<CellDescription>(entity).id;
+    }
+    return std::get<ParticleDescription>(entity).id;
+}
+
+RealVector2D DescriptionHelper::getPos(CellOrParticleDescription const& entity)
+{
+    if (std::holds_alternative<CellDescription>(entity)) {
+        return std::get<CellDescription>(entity).pos;
+    }
+    return std::get<ParticleDescription>(entity).pos;
+}
