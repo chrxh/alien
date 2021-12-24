@@ -55,6 +55,7 @@ public:
 
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     DataDescription getSelectedSimulationData(bool includeClusters);
+    DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds);
     OverallStatistics getMonitorData() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
