@@ -6,6 +6,7 @@
 
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineInterface/DescriptionHelper.h"
 #include "EngineImpl/SimulationController.h"
 
 #include "EditorModel.h"
@@ -278,17 +279,7 @@ void _ManipulatorWindow::setOn(bool value)
 void _ManipulatorWindow::onInspect()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(false);
-
-    std::vector<CellOrParticleDescription> entities;
-    for (auto const& particle : selectedData.particles) {
-        entities.emplace_back(particle);
-    }
-    for (auto const& cluster : selectedData.clusters) {
-        for (auto const& cell : cluster.cells) {
-            entities.emplace_back(cell);
-        }
-    }
-    _editorModel->inspectEntities(entities);
+    _editorModel->inspectEntities(DescriptionHelper::getEntities(selectedData));
 }
 
 bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)

@@ -16,6 +16,7 @@ public:
 
     ENGINEINTERFACE_EXPORT static uint64_t getId(CellOrParticleDescription const& entity);
     ENGINEINTERFACE_EXPORT static RealVector2D getPos(CellOrParticleDescription const& entity);
+    ENGINEINTERFACE_EXPORT static std::vector<CellOrParticleDescription> getEntities(DataDescription const& data);
 
 private:
     static void makeValid(ClusterDescription& cluster);

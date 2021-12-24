@@ -41,6 +41,7 @@ public:
     ENGINEIMPL_EXPORT DataDescription
     getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ENGINEIMPL_EXPORT DataDescription getSelectedSimulationData(bool includeClusters);
+    ENGINEIMPL_EXPORT DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds);
 
     ENGINEIMPL_EXPORT void addAndSelectSimulationData(DataDescription const& dataToAdd);
     ENGINEIMPL_EXPORT void setSimulationData(DataDescription const& dataToUpdate);

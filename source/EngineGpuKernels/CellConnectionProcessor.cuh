@@ -384,7 +384,7 @@ __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data
             EntityFactory factory;
             factory.init(&data);
             factory.createParticle(cell->energy, cell->absPos, cell->vel, {cell->metadata.color});
-            cell->energy = 0;
+            cell->setDeleted();
 
             data.entities.cellPointers.at(cellIndex) = nullptr;
         }

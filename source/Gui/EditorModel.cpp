@@ -42,6 +42,11 @@ void _EditorModel::inspectEntities(std::vector<CellOrParticleDescription> const&
     _entitiesToInspect = entities;
 }
 
+bool _EditorModel::existsInspectedEntity(uint64_t id) const
+{
+    return _inspectedEntityById.find(id) != _inspectedEntityById.end();
+}
+
 CellOrParticleDescription _EditorModel::getInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.at(id);
@@ -52,8 +57,10 @@ void _EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
     _inspectedEntityById.emplace(DescriptionHelper::getId(entity), entity);
 }
 
-void _EditorModel::setInspectedEntityById(
-    std::unordered_map<uint64_t, CellOrParticleDescription> const& inspectedEntityById)
+void _EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities)
 {
-    _inspectedEntityById = inspectedEntityById;
+    _inspectedEntityById.clear();
+    for (auto const& entity : inspectedEntities) {
+        _inspectedEntityById.emplace(DescriptionHelper::getId(entity), entity);
+    }
 }

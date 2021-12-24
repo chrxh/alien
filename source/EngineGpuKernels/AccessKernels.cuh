@@ -3,6 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
+#include "EngineInterface/Constants.h"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
@@ -11,8 +12,6 @@
 #include "EditKernels.cuh"
 
 #include "SimulationData.cuh"
-
-#define SELECTION_RADIUS 30
 
 __device__ void copyString(
     int& targetLen,
@@ -131,7 +130,7 @@ __global__ void rolloutTagToCellClusters(Array<Cell*> cells, int* change)
 }
 
 //tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
+__global__ void getCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
 {
     auto const& cells = data.entities.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -151,8 +150,38 @@ __global__ void getCellAccessDataWithoutConnections(int2 rectUpperLeft, int2 rec
     }
 }
 
+ __global__ void getInspectedCellDataWithoutConnections(
+    EntityIds ids,
+    SimulationData data,
+    DataAccessTO accessTO)
+{
+    auto const& cells = data.entities.cellPointers;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const cellArrayStart = data.entities.cells.getArray();
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+            if (ids.values[i] == 0) {
+                break;
+            }
+            if (ids.values[i] == cell->id) {
+                found = true;
+            }
+        }
+        if (!found) {
+            cell->tag = -1;
+            continue;
+        }
+
+        createCellTO(cell, accessTO, cellArrayStart);
+    }
+}
+
 __global__ void
-getSelectedCellAccessDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO accessTO)
+getSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO accessTO)
 {
     auto const& cells = data.entities.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -164,7 +193,6 @@ getSelectedCellAccessDataWithoutConnections(SimulationData data, bool includeClu
             cell->tag = -1;
             continue;
         }
-
         createCellTO(cell, accessTO, cellArrayStart);
     }
 }
@@ -227,7 +255,7 @@ __global__ void getOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simulati
     }
 }
 
-__global__ void getTokenAccessData(SimulationData data, DataAccessTO accessTO)
+__global__ void getTokenData(SimulationData data, DataAccessTO accessTO)
 {
     auto const& tokens = data.entities.tokenPointers;
 
@@ -251,7 +279,7 @@ __global__ void getTokenAccessData(SimulationData data, DataAccessTO accessTO)
     }
 }
 
-__global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
+__global__ void getParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
 {
     PartitionData particleBlock = calcPartition(
         data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -268,7 +296,30 @@ __global__ void getParticleAccessData(int2 rectUpperLeft, int2 rectLowerRight, S
     }
 }
 
-__global__ void getSelectedParticleAccessData(SimulationData data, DataAccessTO access)
+__global__ void getInspectedParticleData(EntityIds ids, SimulationData data, DataAccessTO access)
+{
+    PartitionData particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+    for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
+        auto const& particle = data.entities.particlePointers.at(particleIndex);
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+            if (ids.values[i] == 0) {
+                break;
+            }
+            if (ids.values[i] == particle->id) {
+                found = true;
+            }
+        }
+        if (!found) {
+            continue;
+        }
+
+        createParticleTO(particle, access);
+    }
+}
+
+__global__ void getSelectedParticleData(SimulationData data, DataAccessTO access)
 {
     PartitionData particleBlock = calcPartition(
         data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -348,35 +399,49 @@ __global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO
 /* Main      															*/
 /************************************************************************/
 __global__ void
-cudaGetSelectedSimulationDataKernel(SimulationData data, bool includeClusters, DataAccessTO accessTO)
+cudaGetSelectedSimulationData(SimulationData data, bool includeClusters, DataAccessTO accessTO)
 {
     *accessTO.numCells = 0;
     *accessTO.numParticles = 0;
     *accessTO.numTokens = 0;
     *accessTO.numStringBytes = 0;
 
-    KERNEL_CALL(getSelectedCellAccessDataWithoutConnections, data, includeClusters, accessTO);
+    KERNEL_CALL(getSelectedCellDataWithoutConnections, data, includeClusters, accessTO);
     KERNEL_CALL(resolveConnections, data, accessTO);
-    KERNEL_CALL(getTokenAccessData, data, accessTO);
-    KERNEL_CALL(getSelectedParticleAccessData, data, accessTO);
+    KERNEL_CALL(getTokenData, data, accessTO);
+    KERNEL_CALL(getSelectedParticleData, data, accessTO);
 }
 
 __global__ void
-cudaGetSimulationDataKernel(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
+cudaGetSimulationData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO accessTO)
 {
     *accessTO.numCells = 0;
     *accessTO.numParticles = 0;
     *accessTO.numTokens = 0;
     *accessTO.numStringBytes = 0;
 
-    KERNEL_CALL(getCellAccessDataWithoutConnections, rectUpperLeft, rectLowerRight, data, accessTO);
+    KERNEL_CALL(getCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, accessTO);
     KERNEL_CALL(resolveConnections, data, accessTO);
-    KERNEL_CALL(getTokenAccessData, data, accessTO);
-    KERNEL_CALL(getParticleAccessData, rectUpperLeft, rectLowerRight, data, accessTO);
+    KERNEL_CALL(getTokenData, data, accessTO);
+    KERNEL_CALL(getParticleData, rectUpperLeft, rectLowerRight, data, accessTO);
 }
 
 __global__ void
-cudaGetSimulationOverlayDataKernel(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
+cudaGetInspectedSimulationData(SimulationData data, EntityIds entityIds, DataAccessTO accessTO)
+{
+    *accessTO.numCells = 0;
+    *accessTO.numParticles = 0;
+    *accessTO.numTokens = 0;
+    *accessTO.numStringBytes = 0;
+
+    KERNEL_CALL(getInspectedCellDataWithoutConnections, entityIds, data, accessTO);
+    KERNEL_CALL(resolveConnections, data, accessTO);
+    KERNEL_CALL(getTokenData, data, accessTO);
+    KERNEL_CALL(getInspectedParticleData, entityIds, data, accessTO);
+}
+
+__global__ void
+cudaGetSimulationOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
 {
     *access.numCells = 0;
     *access.numParticles = 0;
@@ -394,7 +459,7 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.strings.reset();
 }
 
-__global__ void cudaSetSimulationAccessDataKernel(SimulationData data, DataAccessTO access, bool selectNewData)
+__global__ void cudaSetSimulationAccessData(SimulationData data, DataAccessTO access, bool selectNewData)
 {
     KERNEL_CALL(adaptNumberGenerator, data.numberGen, access);
     KERNEL_CALL(
