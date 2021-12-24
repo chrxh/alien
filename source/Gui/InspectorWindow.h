@@ -6,21 +6,26 @@
 class _InspectorWindow
 {
 public:
-    _InspectorWindow(Viewport const& viewport, CellOrParticleDescription const& entity, RealVector2D const& initialPos);
+    _InspectorWindow(
+        Viewport const& viewport,
+        EditorModel const& editorModel,
+        uint64_t entityId,
+        RealVector2D const& initialPos);
     ~_InspectorWindow();
 
     void process();
 
     bool isClosed() const;
-    CellOrParticleDescription getDescription() const;
+    uint64_t getId() const;
 
 private:
     std::string generateTitle() const;
     
 private:
     Viewport _viewport; 
+    EditorModel _editorModel;
     RealVector2D _initialPos;
 
     bool _on = true;
-    CellOrParticleDescription _entity;
+    uint64_t _entityId = 0;
 };

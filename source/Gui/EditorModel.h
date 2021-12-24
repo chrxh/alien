@@ -20,9 +20,14 @@ public:
     std::vector<CellOrParticleDescription> fetchEntitiesToInspect();
     void inspectEntities(std::vector<CellOrParticleDescription> const& entities);
 
+    CellOrParticleDescription getInspectedEntity(uint64_t id) const;
+    void addInspectedEntity(CellOrParticleDescription const& entity);
+    void setInspectedEntityById(std::unordered_map<uint64_t, CellOrParticleDescription> const& inspectedEntityById);
+
 private:
     SimulationController _simController;
     SelectionShallowData _selectionShallowData;
 
     std::vector<CellOrParticleDescription> _entitiesToInspect;
+    std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
 };

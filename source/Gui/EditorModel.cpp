@@ -1,5 +1,6 @@
 #include "EditorModel.h"
 
+#include "EngineInterface/DescriptionHelper.h"
 #include "EngineImpl/SimulationController.h"
 
 _EditorModel::_EditorModel(SimulationController const& simController)
@@ -39,4 +40,20 @@ std::vector<CellOrParticleDescription> _EditorModel::fetchEntitiesToInspect()
 void _EditorModel::inspectEntities(std::vector<CellOrParticleDescription> const& entities)
 {
     _entitiesToInspect = entities;
+}
+
+CellOrParticleDescription _EditorModel::getInspectedEntity(uint64_t id) const
+{
+    return _inspectedEntityById.at(id);
+}
+
+void _EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
+{
+    _inspectedEntityById.emplace(DescriptionHelper::getId(entity), entity);
+}
+
+void _EditorModel::setInspectedEntityById(
+    std::unordered_map<uint64_t, CellOrParticleDescription> const& inspectedEntityById)
+{
+    _inspectedEntityById = inspectedEntityById;
 }
