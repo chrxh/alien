@@ -11,7 +11,7 @@
 #include <cuda/helper_cuda.h>
 
 #include "Base/Exceptions.h"
-#include "EngineInterface/Constants.h"
+#include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
 
@@ -245,7 +245,7 @@ void _CudaSimulation::getSelectedSimulationData(bool includeClusters, DataAccess
 
 void _CudaSimulation::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO)
 {
-    EntityIds ids;
+    InspectedEntityIds ids;
     if (entityIds.size() > Const::MaxInspectedEntities) {
         return;
     }

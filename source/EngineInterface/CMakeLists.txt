@@ -2,7 +2,6 @@
 add_library(alien_engine_interface_lib
     ShallowUpdateSelectionData.h
     Colors.h
-    Constants.h
     Definitions.h
     DescriptionHelper.cpp
     DescriptionHelper.h
@@ -15,6 +14,7 @@ add_library(alien_engine_interface_lib
     FlowFieldSettings.h
     GeneralSettings.h
     GpuSettings.h
+    InspectedEntityIds.h
     Metadata.h
     OverallStatistics.h
     OverlayDescriptions.h
