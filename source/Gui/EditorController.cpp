@@ -4,7 +4,7 @@
 
 #include "Base/Math.h"
 #include "EngineImpl/SimulationController.h"
-#include "EngineInterface/Constants.h"
+#include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
