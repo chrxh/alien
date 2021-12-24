@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/Constants.h"
+#include "EngineInterface/InspectedEntityIds.h"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
@@ -151,7 +151,7 @@ __global__ void getCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLower
 }
 
  __global__ void getInspectedCellDataWithoutConnections(
-    EntityIds ids,
+    InspectedEntityIds ids,
     SimulationData data,
     DataAccessTO accessTO)
 {
@@ -296,7 +296,7 @@ __global__ void getParticleData(int2 rectUpperLeft, int2 rectLowerRight, Simulat
     }
 }
 
-__global__ void getInspectedParticleData(EntityIds ids, SimulationData data, DataAccessTO access)
+__global__ void getInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access)
 {
     PartitionData particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
@@ -427,7 +427,7 @@ cudaGetSimulationData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData da
 }
 
 __global__ void
-cudaGetInspectedSimulationData(SimulationData data, EntityIds entityIds, DataAccessTO accessTO)
+cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds, DataAccessTO accessTO)
 {
     *accessTO.numCells = 0;
     *accessTO.numParticles = 0;
