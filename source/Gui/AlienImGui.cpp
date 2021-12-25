@@ -23,7 +23,8 @@ void AlienImGui::HelpMarker(std::string const& text)
 
 void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     ImGui::SliderFloat(
         ("##" + parameters._name).c_str(),
         &value,
@@ -48,7 +49,8 @@ void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
 
 void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     ImGui::SliderInt(("##" + parameters._name).c_str(), &value, parameters._min, parameters._max);
     if (parameters._defaultValue) {
         ImGui::SameLine();
@@ -68,14 +70,16 @@ void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto inputWidth = StyleRepository::getInstance().scaleContent(parameters._inputWidth);
 
     ImGui::SetNextItemWidth(
-        ImGui::GetContentRegionAvail().x - parameters._textWidth - parameters._inputWidth
+        ImGui::GetContentRegionAvail().x - textWidth - inputWidth
         - ImGui::GetStyle().FramePadding.x * 2);
     ImGui::SliderFloat(
         ("##slider" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(parameters._inputWidth);
+    ImGui::SetNextItemWidth(inputWidth);
     ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
@@ -83,7 +87,9 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
 
 void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     ImGui::InputInt(("##" + parameters._name).c_str(), &value);
     if (parameters._defaultValue) {
         ImGui::SameLine();
@@ -103,7 +109,9 @@ void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
 
 void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str());
     ImGui::SameLine();
     if (parameters._defaultValue) {
@@ -123,12 +131,14 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
 
 bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
 {
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
         items[i] = parameters._values[i].c_str();
     }
 
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - parameters._textWidth);
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     auto result = ImGui::Combo("##", &value, items, toInt(parameters._values.size()));
     ImGui::PopItemWidth();
 

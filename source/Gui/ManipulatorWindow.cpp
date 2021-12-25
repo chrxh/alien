@@ -46,8 +46,6 @@ void _ManipulatorWindow::process()
     if (!_on) {
         return;
     }
-    auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
-    
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Manipulator", &_on)) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
@@ -130,7 +128,7 @@ void _ManipulatorWindow::process()
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Position X")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .format("%.2f"),
                 centerPosX);
 
@@ -139,7 +137,7 @@ void _ManipulatorWindow::process()
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Position Y")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .format("%.2f"),
                 centerPosY);
 
@@ -148,7 +146,7 @@ void _ManipulatorWindow::process()
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Velocity X")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .step(0.1f)
                     .format("%.2f"),
                 centerVelX);
@@ -158,7 +156,7 @@ void _ManipulatorWindow::process()
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Velocity Y")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .step(0.1f)
                     .format("%.2f"),
                 centerVelY);
@@ -168,7 +166,7 @@ void _ManipulatorWindow::process()
             AlienImGui::SliderInputFloat(
                 AlienImGui::SliderInputFloatParameters()
                     .name("Angle")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .inputWidth(StyleRepository::getInstance().scaleContent(50))
                     .min(-180.0f)
                     .max(180.0f)
@@ -179,7 +177,7 @@ void _ManipulatorWindow::process()
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Angular velocity")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .step(0.01f)
                     .format("%.2f"),
                 _angularVel);

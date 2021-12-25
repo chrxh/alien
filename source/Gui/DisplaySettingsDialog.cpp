@@ -38,8 +38,6 @@ void _DisplaySettingsDialog::process()
 
     ImGui::OpenPopup("Display settings");
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
-        auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
-
         auto isFullscreen = !_windowController->isWindowedMode();
 
         if(ImGui::Checkbox("Full screen", &isFullscreen)) {
@@ -56,7 +54,7 @@ void _DisplaySettingsDialog::process()
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Resolution")
-                    .textWidth(maxContentTextWidthScaled)
+                    .textWidth(MaxContentTextWidth)
                     .defaultValue(_origSelectionIndex)
                     .values(_videoModeStrings),
                 _selectionIndex)) {
