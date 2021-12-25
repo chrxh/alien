@@ -55,21 +55,21 @@ void _InspectorWindow::process()
     drawList->AddLine(
         {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
         {entityPos.x, entityPos.y},
-        Const::ToolbarButtonColor,
+        Const::InspectorLineColor,
         1.5f);
-    drawList->AddRect(
-        {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
-        {windowPos.x + 25.0f * factor, windowPos.y},
-        Const::ToolbarButtonColor,
-        1.0,
-        0,
-        2.0f);
     drawList->AddRectFilled(
         {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
         {windowPos.x + 25.0f * factor, windowPos.y},
-        ImColor::HSV(0.54f, 0.33f, 1.0f, 0.5f),
+        Const::InspectorRectColor,
         1.0,
         0);
+    drawList->AddRect(
+        {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
+        {windowPos.x + 25.0f * factor, windowPos.y},
+        Const::InspectorLineColor,
+        1.0,
+        0,
+        2.0f);
 }
 
 bool _InspectorWindow::isClosed() const
