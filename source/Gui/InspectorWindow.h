@@ -21,8 +21,12 @@ public:
 private:
     bool isCell() const;
     std::string generateTitle() const;
+    void processCell(CellDescription cell);
+    void processCellPropertyTab(CellDescription& cell);
+    void processCodeTab(CellDescription& cell);
+
     void processParticle(ParticleDescription particle);
-    
+
 private:
     Viewport _viewport; 
     EditorModel _editorModel;
