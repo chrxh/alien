@@ -19,7 +19,9 @@ public:
     uint64_t getId() const;
 
 private:
+    bool isCell() const;
     std::string generateTitle() const;
+    void processParticle(ParticleDescription particle);
     
 private:
     Viewport _viewport; 

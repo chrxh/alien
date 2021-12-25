@@ -34,7 +34,6 @@ void _GpuSettingsDialog::process()
     auto gpuSettings = _simController->getGpuSettings();
     auto origGpuSettings = _simController->getOriginalGpuSettings();
     auto lastGpuSettings = gpuSettings;
-    auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
 
     ImGui::OpenPopup("GPU settings");
     if (ImGui::BeginPopupModal("GPU settings", NULL, ImGuiWindowFlags_None)) {
@@ -42,7 +41,7 @@ void _GpuSettingsDialog::process()
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Blocks")
-                .textWidth(maxContentTextWidthScaled)
+                .textWidth(MaxContentTextWidth)
                 .defaultValue(origGpuSettings.NUM_BLOCKS)
                 .tooltip(std::string("Number of GPU thread blocks.")),
             gpuSettings.NUM_BLOCKS);
@@ -50,7 +49,7 @@ void _GpuSettingsDialog::process()
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Threads per Block")
-                .textWidth(maxContentTextWidthScaled)
+                .textWidth(MaxContentTextWidth)
                 .defaultValue(origGpuSettings.NUM_THREADS_PER_BLOCK)
                 .tooltip(std::string("Number of GPU threads per blocks.")),
             gpuSettings.NUM_THREADS_PER_BLOCK);

@@ -34,7 +34,6 @@ void _FlowGeneratorWindow::process()
     auto lastFlowFieldSettings = flowFieldSettings;
 
     auto worldSize = _simController->getWorldSize();
-    auto maxContentTextWidthScaled = StyleRepository::getInstance().scaleContent(MaxContentTextWidth);
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Flow generator", &_on, ImGuiWindowFlags_None);
@@ -74,7 +73,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position X")
-                        .textWidth(maxContentTextWidthScaled)
+                        .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(toFloat(worldSize.x))
                         .format("%.0f")
@@ -83,7 +82,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position Y")
-                        .textWidth(maxContentTextWidthScaled)
+                        .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(toFloat(worldSize.y))
                         .format("%.0f")
@@ -92,7 +91,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Radius")
-                        .textWidth(maxContentTextWidthScaled)
+                        .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(std::min(toFloat(worldSize.x), toFloat(worldSize.y)) / 2)
                         .format("%.0f")
@@ -101,7 +100,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Strength")
-                        .textWidth(maxContentTextWidthScaled)
+                        .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(0.5f)
                         .logarithmic(true)
@@ -115,7 +114,7 @@ void _FlowGeneratorWindow::process()
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Orientation")
-                        .textWidth(maxContentTextWidthScaled)
+                        .textWidth(MaxContentTextWidth)
                         .defaultValue(origCurrentOrientation)
                         .values(orientations),
                     currentOrientation);
