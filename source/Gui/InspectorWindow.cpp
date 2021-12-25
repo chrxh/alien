@@ -51,7 +51,6 @@ void _InspectorWindow::process()
         }
     }
     auto windowPos = ImGui::GetWindowPos();
-    auto windowSize = ImGui::GetWindowSize();
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -137,6 +136,7 @@ void _InspectorWindow::processCodeTab(CellDescription& cell)
         auto sourcecode = CellComputerCompiler::decompileSourceCode(
             cell.cellFeature.constData, _simController->getSymbolMap(), _simController->getSimulationParameters());
         sourcecode.copy(_sourcecode, std::min(toInt(sourcecode.length()), IM_ARRAYSIZE(_sourcecode) - 1), 0);
+        _sourcecode[sourcecode.length()] = '\0';
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::InputTextMultiline(
             "##source",
