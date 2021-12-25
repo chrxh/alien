@@ -3,7 +3,9 @@
 #include <sstream>
 #include <imgui.h>
 
+#include "EngineInterface/CellComputerCompiler.h"
 #include "EngineInterface/DescriptionHelper.h"
+#include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "EditorModel.h"
@@ -15,6 +17,7 @@ namespace
 }
 
 _InspectorWindow::_InspectorWindow(
+    SimulationController const& simController,
     Viewport const& viewport,
     EditorModel const& editorModel,
     uint64_t entityId,
@@ -23,6 +26,7 @@ _InspectorWindow::_InspectorWindow(
     , _initialPos(initialPos)
     , _viewport(viewport)
     , _editorModel(editorModel)
+    , _simController(simController)
 {}
 
 _InspectorWindow::~_InspectorWindow() {}
@@ -34,7 +38,7 @@ void _InspectorWindow::process()
     }
     auto entity = _editorModel->getInspectedEntity(_entityId);
     auto width = StyleRepository::getInstance().scaleContent(260.0f);
-    auto height = isCell() ? StyleRepository::getInstance().scaleContent(250.0f)
+    auto height = isCell() ? StyleRepository::getInstance().scaleContent(280.0f)
                            : StyleRepository::getInstance().scaleContent(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
@@ -130,13 +134,17 @@ void _InspectorWindow::processCellPropertyTab(CellDescription& cell)
 void _InspectorWindow::processCodeTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Code", nullptr, ImGuiTabItemFlags_None)) {
-        static char text[1024 * 16] = "Test\n";
+        auto sourcecode = CellComputerCompiler::decompileSourceCode(
+            cell.cellFeature.constData, _simController->getSymbolMap(), _simController->getSimulationParameters());
+        sourcecode.copy(_sourcecode, std::min(toInt(sourcecode.length()), IM_ARRAYSIZE(_sourcecode) - 1), 0);
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::InputTextMultiline(
             "##source",
-            text,
-            IM_ARRAYSIZE(text),
-            ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 15),
+            _sourcecode,
+            IM_ARRAYSIZE(_sourcecode),
+            ImGui::GetContentRegionAvail(),
             ImGuiInputTextFlags_AllowTabInput);
+        ImGui::PopFont();
         ImGui::EndTabItem();
     }
 }
