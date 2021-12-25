@@ -33,7 +33,7 @@ void _InspectorWindow::process()
         return;
     }
     auto entity = _editorModel->getInspectedEntity(_entityId);
-    auto width = StyleRepository::getInstance().scaleContent(250.0f);
+    auto width = StyleRepository::getInstance().scaleContent(260.0f);
     auto height = isCell() ? StyleRepository::getInstance().scaleContent(250.0f)
                            : StyleRepository::getInstance().scaleContent(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
@@ -41,6 +41,7 @@ void _InspectorWindow::process()
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
     if (ImGui::Begin(generateTitle().c_str(), &_on)) {
         if (isCell()) {
+            processCell(std::get<CellDescription>(entity));
         } else {
             processParticle(std::get<ParticleDescription>(entity));
         }
@@ -100,6 +101,46 @@ std::string _InspectorWindow::generateTitle() const
     return ss.str();
 }
 
+void _InspectorWindow::processCell(CellDescription cell)
+{
+    if (ImGui::BeginTabBar(
+            "##CellInspect", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        processCellPropertyTab(cell);
+        if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTER) {
+            processCodeTab(cell);
+        }
+        ImGui::EndTabBar();
+    }
+}
+
+void _InspectorWindow::processCellPropertyTab(CellDescription& cell)
+{
+    if (ImGui::BeginTabItem("Properties", nullptr, ImGuiTabItemFlags_None)) {
+        auto energy = toFloat(cell.energy);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters()
+                .name("Energy")
+                .defaultValue(cell.energy)
+                .textWidth(MaxParticleContentTextWidth),
+            energy);
+        ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::processCodeTab(CellDescription& cell)
+{
+    if (ImGui::BeginTabItem("Code", nullptr, ImGuiTabItemFlags_None)) {
+        static char text[1024 * 16] = "Test\n";
+        ImGui::InputTextMultiline(
+            "##source",
+            text,
+            IM_ARRAYSIZE(text),
+            ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 15),
+            ImGuiInputTextFlags_AllowTabInput);
+        ImGui::EndTabItem();
+    }
+}
+
 void _InspectorWindow::processParticle(ParticleDescription particle)
 {
     auto energy = toFloat(particle.energy);
@@ -110,3 +151,4 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
             .textWidth(MaxParticleContentTextWidth),
         energy);
 }
+
