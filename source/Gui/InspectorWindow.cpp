@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto const MaxParticleContentTextWidth = 100.0f;
+    auto const MaxParticleContentTextWidth = 80.0f;
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -174,7 +174,6 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
     AlienImGui::InputFloat(
         AlienImGui::InputFloatParameters()
             .name("Energy")
-            .defaultValue(particle.energy)
             .textWidth(MaxParticleContentTextWidth),
         energy);
 }

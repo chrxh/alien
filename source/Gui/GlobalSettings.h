@@ -33,5 +33,5 @@ private:
 
     void encodeDecodeGpuSettings(GpuSettings& gpuSettings, ParserTask task);
 
-    GlobalSettingsImpl* _impl;
+    boost::shared_ptr<GlobalSettingsImpl> _impl;
 };
