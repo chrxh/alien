@@ -4,6 +4,8 @@
 #include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
+struct MemoryEditor;
+
 class _InspectorWindow
 {
 public:
@@ -24,12 +26,14 @@ private:
     bool isCell() const;
     std::string generateTitle() const;
     void processCell(CellDescription cell);
-    void processCellPropertyTab(CellDescription& cell);
+    void processCellGeneralTab(CellDescription& cell);
     void processCodeTab(CellDescription& cell);
+    void processMemoryTab(CellDescription& cell);
 
     void processParticle(ParticleDescription particle);
 
 private:
+    boost::shared_ptr<MemoryEditor> _cellMemEdit;
     SimulationController _simController;
     Viewport _viewport; 
     EditorModel _editorModel;
@@ -37,5 +41,6 @@ private:
 
     bool _on = true;
     uint64_t _entityId = 0;
-    char _sourcecode[1024 * 16];
+    char _cellCode[1024 * 16];
+    char _cellMemory[256];
 };
