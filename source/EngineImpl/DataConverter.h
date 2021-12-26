@@ -32,13 +32,13 @@ private:
 
 	void addCell(
         DataAccessTO const& dataTO,
-        CellRolloutDescription const& cellToAdd,
+        CellDescription const& cellToAdd,
         unordered_map<uint64_t, int>& cellIndexTOByIds);
-    void addParticle(DataAccessTO const& dataTO, ParticleRolloutDescription const& particleDesc);
+    void addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc);
 
 	void setConnections(
         DataAccessTO const& dataTO,
-        CellRolloutDescription const& cellToAdd,
+        CellDescription const& cellToAdd,
         unordered_map<uint64_t, int> const& cellIndexByIds);
 
     int convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s);

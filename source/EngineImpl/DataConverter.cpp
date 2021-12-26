@@ -7,8 +7,6 @@
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
 
-#include "RolloutDescriptions.h"
-
 
 DataConverter::DataConverter(
     SimulationParameters const& parameters,
@@ -104,25 +102,21 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
 
 void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description)
 {
-    DataRolloutDescription rolloutDescription(description);
-
     unordered_map<uint64_t, int> cellIndexByIds;
-    for (auto const& cell : rolloutDescription.cells) {
-        if (cell.isAdded()) {
-            addCell(result, cell.getValue(), cellIndexByIds);
+    for (auto const& cluster: description.clusters) {
+        for (auto const& cell : cluster.cells) {
+            addCell(result, cell, cellIndexByIds);
         }
     }
-    for (auto const& cell : rolloutDescription.cells) {
-        if (cell.isAdded()) {
-            if (cell->id != 0) {
-                setConnections(result, cell.getValue(), cellIndexByIds);
+    for (auto const& cluster : description.clusters) {
+        for (auto const& cell : cluster.cells) {
+            if (cell.id != 0) {
+                setConnections(result, cell, cellIndexByIds);
             }
         }
     }
-    for (auto const& particle : rolloutDescription.particles) {
-        if (particle.isAdded()) {
-            addParticle(result, particle.getValue());
-        }
+    for (auto const& particle : description.particles) {
+        addParticle(result, particle);
     }
 }
 
@@ -258,16 +252,16 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     return result;
 }
 
-void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleRolloutDescription const& particleDesc)
+void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc)
 {
     auto particleIndex = (*dataTO.numParticles)++;
 
 	ParticleAccessTO& particleTO = dataTO.particles[particleIndex];
 	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
-    particleTO.pos = {particleDesc.pos->x, particleDesc.pos->y};
-    particleTO.vel = {particleDesc.vel->x, particleDesc.vel->y};
-	particleTO.energy = toFloat(*particleDesc.energy);
-    particleTO.metadata.color = particleDesc.metadata->color;
+    particleTO.pos = {particleDesc.pos.x, particleDesc.pos.y};
+    particleTO.vel = {particleDesc.vel.x, particleDesc.vel.y};
+	particleTO.energy = toFloat(particleDesc.energy);
+    particleTO.metadata.color = particleDesc.metadata.color;
 }
 
 int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s)
@@ -283,89 +277,76 @@ int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO,
 
 void DataConverter::addCell(
     DataAccessTO const& dataTO,
-    CellRolloutDescription const& cellDesc,
+    CellDescription const& cellDesc,
     unordered_map<uint64_t, int>& cellIndexTOByIds)
 {
     int cellIndex = (*dataTO.numCells)++;
     CellAccessTO& cellTO = dataTO.cells[cellIndex];
     cellTO.id = cellDesc.id == 0 ? NumberGenerator::getInstance().getId() : cellDesc.id;
-	cellTO.pos= { cellDesc.pos->x, cellDesc.pos->y };
-    cellTO.vel = {cellDesc.vel->x, cellDesc.vel->y};
-    cellTO.energy = toFloat(*cellDesc.energy);
-	cellTO.maxConnections = *cellDesc.maxConnections;
-    cellTO.branchNumber = cellDesc.tokenBranchNumber.getOptionalValue().get_value_or(0);
-    cellTO.tokenBlocked = cellDesc.tokenBlocked.getOptionalValue().get_value_or(false);
-    cellTO.tokenUsages = cellDesc.tokenUsages.getOptionalValue().get_value_or(0);
-    auto const& cellFunction = cellDesc.cellFeatures.getOptionalValue().get_value_or(CellFeatureDescription());
+	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
+    cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
+    cellTO.energy = toFloat(cellDesc.energy);
+	cellTO.maxConnections = cellDesc.maxConnections;
+    cellTO.branchNumber = cellDesc.tokenBranchNumber;
+    cellTO.tokenBlocked = cellDesc.tokenBlocked;
+    cellTO.tokenUsages = cellDesc.tokenUsages;
+    auto const& cellFunction = cellDesc.cellFeature;
     cellTO.cellFunctionType = cellFunction.getType();
     cellTO.numStaticBytes = std::min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
     cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
     convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
     convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
 	cellTO.numConnections = 0;
-    if (cellDesc.metadata.getOptionalValue()) {
-        auto& metadataTO = cellTO.metadata;
-        metadataTO.color = cellDesc.metadata->color;
-        metadataTO.nameLen = toInt(cellDesc.metadata->name.size());
-        if (metadataTO.nameLen > 0) {
-            metadataTO.nameStringIndex = convertStringAndReturnStringIndex(dataTO, cellDesc.metadata->name);
-        }
-        metadataTO.descriptionLen = toInt(cellDesc.metadata->description.size());
-        if (metadataTO.descriptionLen > 0) {
-            metadataTO.descriptionStringIndex =
-                convertStringAndReturnStringIndex(dataTO, cellDesc.metadata->description);
-        }
-        metadataTO.sourceCodeLen = toInt(cellDesc.metadata->computerSourcecode.size());
-        if (metadataTO.sourceCodeLen > 0) {
-            metadataTO.sourceCodeStringIndex =
-                convertStringAndReturnStringIndex(dataTO, cellDesc.metadata->computerSourcecode);
-        }
+    auto& metadataTO = cellTO.metadata;
+    metadataTO.color = cellDesc.metadata.color;
+    metadataTO.nameLen = toInt(cellDesc.metadata.name.size());
+    if (metadataTO.nameLen > 0) {
+        metadataTO.nameStringIndex = convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.name);
     }
-    else {
-        cellTO.metadata.color = 0;
-        cellTO.metadata.nameLen = 0;
-        cellTO.metadata.descriptionLen = 0;
-        cellTO.metadata.sourceCodeLen= 0;
+    metadataTO.descriptionLen = toInt(cellDesc.metadata.description.size());
+    if (metadataTO.descriptionLen > 0) {
+        metadataTO.descriptionStringIndex = convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.description);
+    }
+    metadataTO.sourceCodeLen = toInt(cellDesc.metadata.computerSourcecode.size());
+    if (metadataTO.sourceCodeLen > 0) {
+        metadataTO.sourceCodeStringIndex =
+            convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.computerSourcecode);
     }
 
-    if (cellDesc.tokens.getOptionalValue()) {
-        for (int i = 0; i < cellDesc.tokens->size(); ++i) {
-            TokenDescription const& tokenDesc = cellDesc.tokens->at(i);
-            int tokenIndex = (*dataTO.numTokens)++;
-            TokenAccessTO& tokenTO = dataTO.tokens[tokenIndex];
-            tokenTO.energy = toFloat(tokenDesc.energy);
-            tokenTO.cellIndex = cellIndex;
-            convertToArray(tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
-        }
+    for (int i = 0; i < cellDesc.tokens.size(); ++i) {
+        TokenDescription const& tokenDesc = cellDesc.tokens.at(i);
+        int tokenIndex = (*dataTO.numTokens)++;
+        TokenAccessTO& tokenTO = dataTO.tokens[tokenIndex];
+        tokenTO.energy = toFloat(tokenDesc.energy);
+        tokenTO.cellIndex = cellIndex;
+        convertToArray(tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
     }
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
 void DataConverter::setConnections(
     DataAccessTO const& dataTO,
-    CellRolloutDescription const& cellToAdd,
+    CellDescription const& cellToAdd,
     unordered_map<uint64_t, int> const& cellIndexByIds)
 {
-	if (cellToAdd.connectingCells.getOptionalValue()) {
-		int index = 0;
-        auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
-        float angleOffset = 0;
-        for (ConnectionRolloutDescription const& connection : *cellToAdd.connectingCells) {
-            if (connection.cellId != 0) {
-                cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
-                cellTO.connections[index].distance = connection.distance;
-                cellTO.connections[index].angleFromPrevious = connection.angleFromPrevious + angleOffset;
-                ++index;
-                angleOffset = 0;
-            } else {
-                angleOffset += connection.angleFromPrevious;
-            }
-		}
-        if (angleOffset != 0 && index > 0) {
-            cellTO.connections[0].angleFromPrevious += angleOffset;
+    int index = 0;
+    auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
+    float angleOffset = 0;
+    for (ConnectionDescription const& connection : cellToAdd.connections) {
+        if (connection.cellId != 0) {
+            cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
+            cellTO.connections[index].distance = connection.distance;
+            cellTO.connections[index].angleFromPrevious = connection.angleFromPrevious + angleOffset;
+            ++index;
+            angleOffset = 0;
+        } else {
+            angleOffset += connection.angleFromPrevious;
         }
-        cellTO.numConnections = index;
-	}
+    }
+    if (angleOffset != 0 && index > 0) {
+        cellTO.connections[0].angleFromPrevious += angleOffset;
+    }
+    cellTO.numConnections = index;
 }
 
 namespace
