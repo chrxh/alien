@@ -19,7 +19,6 @@ add_library(alien_base_lib
     ServiceLocator.cpp
     ServiceLocator.h
     StringFormatter.cpp
-    StringFormatter.h
-    Tracker.h)
+    StringFormatter.h)
 
 target_link_libraries(alien_base_lib Boost::boost)

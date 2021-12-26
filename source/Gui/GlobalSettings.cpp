@@ -85,7 +85,7 @@ void GlobalSettings::encodeDecodeGpuSettings(GpuSettings& gpuSettings, ParserTas
 GlobalSettings::GlobalSettings()
 {
     try {
-        _impl = new GlobalSettingsImpl;
+        _impl = boost::make_shared<GlobalSettingsImpl>();
         std::ifstream stream(Const::SettingsFilename, std::ios::binary);
         if (!stream) {
             return;
@@ -116,6 +116,4 @@ GlobalSettings::~GlobalSettings()
     } catch (...) {
         //do nothing
     }
-
-    delete _impl;
 }
