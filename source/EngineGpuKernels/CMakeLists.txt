@@ -21,6 +21,7 @@ add_library(alien_engine_gpu_kernels_lib
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
+    DigestionFunction.cuh
     DllExport.h
     DynamicMemory.cuh
     EditKernels.cuh
@@ -54,8 +55,7 @@ add_library(alien_engine_gpu_kernels_lib
     SpotCalculator.cuh
     Swap.cuh
     Token.cuh
-    TokenProcessor.cuh
-    WeaponFunction.cuh)
+    TokenProcessor.cuh)
 
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
 set_property(TARGET alien_engine_gpu_kernels_lib PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)

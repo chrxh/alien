@@ -1,12 +1,12 @@
 #pragma once
 
+#include "EngineInterface/ElementaryTypes.h"
 #include "Cell.cuh"
 #include "ConstantMemory.cuh"
-#include "EngineInterface/ElementaryTypes.h"
 #include "SimulationData.cuh"
 #include "Token.cuh"
 
-class WeaponFunction
+class DigestionFunction
 {
 public:
     __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
@@ -22,11 +22,11 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void WeaponFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
+__inline__ __device__ void DigestionFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
 {
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
-    tokenMem[Enums::Weapon::OUTPUT] = Enums::WeaponOut::NO_TARGET;
+    tokenMem[Enums::Digestion::OUTPUT] = Enums::DigestionOut::NO_TARGET;
 
     Cell* otherCells[18];
     int numOtherCells;
@@ -88,14 +88,14 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
                     otherCell->energy -= energyToTransfer;
                     token->energy += energyToTransfer / 2;
                     cell->energy += energyToTransfer / 2;
-                    token->memory[Enums::Weapon::OUTPUT] = Enums::WeaponOut::STRIKE_SUCCESSFUL;
+                    token->memory[Enums::Digestion::OUTPUT] = Enums::DigestionOut::STRIKE_SUCCESSFUL;
                     result.incSuccessfulAttack();
                 }
             }
             otherCell->releaseLock();
         }
     }
-    if (Enums::WeaponOut::NO_TARGET == token->memory[Enums::Weapon::OUTPUT]) {
+    if (Enums::DigestionOut::NO_TARGET == token->memory[Enums::Digestion::OUTPUT]) {
         result.incFailedAttack();
     }
     auto cellFunctionWeaponEnergyCost =
@@ -119,7 +119,7 @@ __inline__ __device__ void WeaponFunction::processing(Token* token, SimulationDa
     }
 }
 
-__inline__ __device__ bool WeaponFunction::isHomogene(Cell* cell)
+__inline__ __device__ bool DigestionFunction::isHomogene(Cell* cell)
 {
     int color = cell->metadata.color;
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -137,7 +137,7 @@ __inline__ __device__ bool WeaponFunction::isHomogene(Cell* cell)
     return true;
 }
 
-__inline__ __device__ float WeaponFunction::calcOpenAngle(Cell* cell, float2 direction)
+__inline__ __device__ float DigestionFunction::calcOpenAngle(Cell* cell, float2 direction)
 {
     if (0 == cell->numConnections) {
         return 0.0f;
@@ -177,7 +177,7 @@ __inline__ __device__ float WeaponFunction::calcOpenAngle(Cell* cell, float2 dir
     return Math::subtractAngle(largerAngle, smallerAngle);
 }
 
-__inline__ __device__ bool WeaponFunction::isConnectedConnected(Cell* cell, Cell* otherCell)
+__inline__ __device__ bool DigestionFunction::isConnectedConnected(Cell* cell, Cell* otherCell)
 {
     if (cell == otherCell) {
         return true;

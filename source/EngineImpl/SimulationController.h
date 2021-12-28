@@ -59,7 +59,7 @@ public:
     ENGINEIMPL_EXPORT uint64_t getCurrentTimestep() const;
     ENGINEIMPL_EXPORT void setCurrentTimestep(uint64_t value);
 
-    ENGINEIMPL_EXPORT SimulationParameters getSimulationParameters() const;
+    ENGINEIMPL_EXPORT SimulationParameters const& getSimulationParameters() const;
     ENGINEIMPL_EXPORT SimulationParameters getOriginalSimulationParameters() const;
     ENGINEIMPL_EXPORT void setSimulationParameters_async(SimulationParameters const& parameters);
 

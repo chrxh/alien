@@ -22,7 +22,7 @@ namespace
         {Enums::CellFunction::COMPUTER, "Computer"},
         {Enums::CellFunction::PROPULSION, "Propulsion"},
         {Enums::CellFunction::SCANNER, "Scanner"},
-        {Enums::CellFunction::WEAPON, "Digestion"},
+        {Enums::CellFunction::DIGESTION, "Digestion"},
         {Enums::CellFunction::CONSTRUCTOR, "Constructor"},
         {Enums::CellFunction::SENSOR, "Sensor"},
         {Enums::CellFunction::MUSCLE, "Muscle"},
