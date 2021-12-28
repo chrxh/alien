@@ -11,7 +11,7 @@
 #include "CellComputerFunction.cuh"
 #include "ConstructorFunction.cuh"
 #include "ScannerFunction.cuh"
-#include "WeaponFunction.cuh"
+#include "DigestionFunction.cuh"
 #include "PropulsionFunction.cuh"
 #include "MuscleFunction.cuh"
 
@@ -113,8 +113,8 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
                 if (Enums::CellFunction::SCANNER == cellFunctionType) {
                     ScannerFunction::processing(token, data);
                 }
-                if (Enums::CellFunction::WEAPON == cellFunctionType) {
-                    WeaponFunction::processing(token, data, result);
+                if (Enums::CellFunction::DIGESTION == cellFunctionType) {
+                    DigestionFunction::processing(token, data, result);
                 }
                 cell->releaseLock();
             }

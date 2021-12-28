@@ -195,6 +195,7 @@ void _InspectorWindow::processCodeTab(CellDescription& cell)
 void _InspectorWindow::processMemoryTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
+        auto parameters = _simController->getSimulationParameters();
         if (ImGui::BeginChild(
                 "##1", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(90)),
                 false,
@@ -203,7 +204,11 @@ void _InspectorWindow::processMemoryTab(CellDescription& cell)
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
             auto dataSize = cell.cellFeature.constData.size();
             cell.cellFeature.constData.copy(_cellMemory, dataSize);
-            _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
+            auto maxBytes = parameters.cellFunctionComputerMaxInstructions * 3;
+            for (int i = dataSize; i < maxBytes; ++i) {
+                _cellMemory[i] = 0;
+            }
+            _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), maxBytes);
             ImGui::PopFont();
         }
         ImGui::EndChild();
