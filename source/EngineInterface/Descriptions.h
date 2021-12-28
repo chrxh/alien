@@ -71,7 +71,7 @@ struct CellDescription
 
     RealVector2D pos;
     RealVector2D vel;
-    double energy;
+    double energy; 
     int maxConnections;
     std::vector<ConnectionDescription> connections;
     bool tokenBlocked;

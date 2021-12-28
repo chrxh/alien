@@ -12,9 +12,14 @@
 #include "EditorModel.h"
 #include "AlienImGui.h"
 
+using namespace std::string_literals;
+
 namespace
 {
+    auto const MaxCellContentTextWidth = 110.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
+    auto const CellFunctions =
+        std::vector{"Computer"s, "Propulsion"s, "Scanner"s, "Digestion"s, "Constructor"s, "Sensor"s, "Muscle"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -29,10 +34,17 @@ _InspectorWindow::_InspectorWindow(
     , _editorModel(editorModel)
     , _simController(simController)
 {
-    _cellMemEdit = boost::make_shared<MemoryEditor>();
-    _cellMemEdit->OptShowOptions = false;
-    _cellMemEdit->OptShowAscii = false;
-    _cellMemEdit->OptMidColsCount = 0;
+    _cellInstructionMemoryEdit = boost::make_shared<MemoryEditor>();
+    _cellInstructionMemoryEdit->OptShowOptions = false;
+    _cellInstructionMemoryEdit->OptShowAscii = false;
+    _cellInstructionMemoryEdit->OptMidColsCount = 0;
+    _cellInstructionMemoryEdit->Cols = 8;
+
+    _cellDataMemoryEdit = boost::make_shared<MemoryEditor>();
+    _cellDataMemoryEdit->OptShowOptions = false;
+    _cellDataMemoryEdit->OptShowAscii = false;
+    _cellDataMemoryEdit->OptMidColsCount = 0;
+    _cellDataMemoryEdit->Cols = 8;
 }
 
 _InspectorWindow::~_InspectorWindow() {}
@@ -57,11 +69,13 @@ void _InspectorWindow::process()
         }
     }
     auto windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize();
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
     auto factor = StyleRepository::getInstance().scaleContent(1);
+
     drawList->AddLine(
         {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
         {entityPos.x, entityPos.y},
@@ -126,12 +140,33 @@ void _InspectorWindow::processCell(CellDescription cell)
 void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
+        auto parameters = _simController->getSimulationParameters();
+        int type = static_cast<int>(cell.cellFeature.getType());
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                              .name("Specialization")
+                              .values(CellFunctions)
+                              .textWidth(MaxCellContentTextWidth), type);
+
         auto energy = toFloat(cell.energy);
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
-                .name("Energy")
-                .textWidth(MaxParticleContentTextWidth),
-            energy);
+            AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Max connections")
+                .textWidth(MaxCellContentTextWidth)
+                .max(parameters.cellMaxBonds)
+                .min(0),
+            cell.maxConnections);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Branch number")
+                .textWidth(MaxCellContentTextWidth)
+                .max(parameters.cellMaxTokenBranchNumber - 1)
+                .min(0),
+            cell.tokenBranchNumber);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckBoxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
 
         ImGui::EndTabItem();
     }
@@ -139,7 +174,8 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
 
 void _InspectorWindow::processCodeTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem("Code", nullptr, ImGuiTabItemFlags_None)) {
+    ImGuiTabItemFlags flags = 0;
+    if (ImGui::BeginTabItem("Code", nullptr, flags)) {
         auto sourcecode = CellComputerCompiler::decompileSourceCode(
             cell.cellFeature.constData, _simController->getSymbolMap(), _simController->getSimulationParameters());
         sourcecode.copy(_cellCode, std::min(toInt(sourcecode.length()), IM_ARRAYSIZE(_cellCode) - 1), 0);
@@ -159,12 +195,30 @@ void _InspectorWindow::processCodeTab(CellDescription& cell)
 void _InspectorWindow::processMemoryTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-        auto dataSize = cell.cellFeature.volatileData.size();
-        cell.cellFeature.volatileData.copy(_cellMemory, dataSize);
-        _cellMemEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
-        ImGui::PopFont();
-        ImGui::EndTabItem();
+        if (ImGui::BeginChild(
+                "##1", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(90)),
+                false,
+                0)) {
+            AlienImGui::Group("Instruction section");
+            ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+            auto dataSize = cell.cellFeature.constData.size();
+            cell.cellFeature.constData.copy(_cellMemory, dataSize);
+            _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
+            ImGui::PopFont();
+        }
+        ImGui::EndChild();
+        if (ImGui::BeginChild(
+                "##2", ImVec2(0, 0), false, 0)) {
+            AlienImGui::Group("Data section");
+            ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+            auto dataSize = cell.cellFeature.volatileData.size();
+            cell.cellFeature.volatileData.copy(_cellMemory, dataSize);
+            _cellInstructionMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
+//            std::string t(_cellMemory, dataSize);
+            ImGui::PopFont();
+            ImGui::EndTabItem();
+        }
+        ImGui::EndChild();
     }
 }
 
