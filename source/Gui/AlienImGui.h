@@ -71,6 +71,14 @@ public:
     };
     static bool Combo(ComboParameters const& parameters, int& value);
 
+    struct CheckBoxParameters
+    {
+        MEMBER_DECLARATION(CheckBoxParameters, std::string, name, "");
+        MEMBER_DECLARATION(CheckBoxParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(CheckBoxParameters, bool, defaultValue, false);
+    };
+    static bool Checkbox(CheckBoxParameters const& parameters, bool& value);
+
     static bool BeginMenuButton(std::string const& text, bool& toggle,
                                 std::string const& popup);  //return toggle
     static void EndMenuButton();

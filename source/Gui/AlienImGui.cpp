@@ -143,15 +143,38 @@ bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
     ImGui::PopItemWidth();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(value == parameters._defaultValue);
-    if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-        value = parameters._defaultValue;
-        result = true;
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(value == parameters._defaultValue);
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            value = parameters._defaultValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
     }
-    ImGui::EndDisabled();
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     delete[] items;
+
+    return result;
+}
+
+bool AlienImGui::Checkbox(CheckBoxParameters const& parameters, bool& value)
+{
+    auto result = ImGui::Checkbox("##", &value);
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - parameters._textWidth, 0.0f));
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(value == parameters._defaultValue);
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            value = parameters._defaultValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
 
     return result;
 }

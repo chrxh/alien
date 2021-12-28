@@ -33,7 +33,8 @@ private:
     void processParticle(ParticleDescription particle);
 
 private:
-    boost::shared_ptr<MemoryEditor> _cellMemEdit;
+    boost::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
+    boost::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
     SimulationController _simController;
     Viewport _viewport; 
     EditorModel _editorModel;
