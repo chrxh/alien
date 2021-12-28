@@ -128,7 +128,7 @@ void _SimulationController::setCurrentTimestep(uint64_t value)
     _worker.setCurrentTimestep(value);
 }
 
-SimulationParameters _SimulationController::getSimulationParameters() const
+SimulationParameters const& _SimulationController::getSimulationParameters() const
 {
     return _settings.simulationParameters;
 }

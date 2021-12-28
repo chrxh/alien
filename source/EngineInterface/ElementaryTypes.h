@@ -15,7 +15,7 @@ namespace Enums
             COMPUTER,
             PROPULSION,
             SCANNER,
-            WEAPON,
+            DIGESTION,
             CONSTRUCTOR,
             SENSOR,
             MUSCLE,
@@ -209,12 +209,12 @@ namespace Enums
         };
     };
 
-    struct Weapon {
+    struct Digestion {
         enum Type {
             OUTPUT = 5,
         };
     };
-    struct WeaponOut {
+    struct DigestionOut {
         enum Type {
             NO_TARGET,
             STRIKE_SUCCESSFUL
