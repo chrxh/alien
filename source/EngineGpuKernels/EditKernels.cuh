@@ -485,6 +485,22 @@ __global__ void colorSelection(SimulationData data, unsigned char color, bool in
     }
 }
 
+__global__ void changeSimulationData(SimulationData data, DataAccessTO changeDataTO)
+{
+    if (*changeDataTO.numCells == 1) {
+        auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+            auto const& cell = data.entities.cellPointers.at(index);
+            auto cellTO = changeDataTO.cells[0];
+            if (cell->id == cellTO.id) {
+                EntityFactory entityFactory;
+                entityFactory.init(&data);
+                entityFactory.changeCellFromTO(cellTO, changeDataTO, cell);
+            }
+        }
+    }
+}
+
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
@@ -628,4 +644,9 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
 __global__ void cudaColorSelectedEntities(SimulationData data, unsigned char color, bool includeClusters)
 {
     KERNEL_CALL(colorSelection, data, color, includeClusters);
+}
+
+__global__ void cudaChangeSimulationData(SimulationData data, DataAccessTO changeDataTO)
+{
+    KERNEL_CALL(changeSimulationData, data, changeDataTO);
 }

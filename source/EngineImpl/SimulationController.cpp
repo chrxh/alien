@@ -87,6 +87,11 @@ void _SimulationController::colorSelectedEntities(unsigned char color, bool incl
     _worker.colorSelectedEntities(color, includeClusters);
 }
 
+void _SimulationController::changeCell(CellDescription const& changedCell)
+{
+    _worker.changeCell(changedCell);
+}
+
 void _SimulationController::calcSingleTimestep()
 {
     _worker.calcSingleTimestep();

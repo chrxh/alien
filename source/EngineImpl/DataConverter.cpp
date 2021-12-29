@@ -16,7 +16,7 @@ DataConverter::DataConverter(
 {
 }
 
-DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO)
+DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO) const
 {
 	DataDescription result;
 
@@ -75,7 +75,7 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO con
     return result;
 }
 
-OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO)
+OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO) const
 {
     OverlayDescription result;
     result.elements.reserve(*dataTO.numCells + *dataTO.numParticles);
@@ -100,7 +100,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
     return result;
 }
 
-void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description)
+void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const
 {
     unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cluster: description.clusters) {
@@ -119,6 +119,13 @@ void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataD
         addParticle(result, particle);
     }
 }
+
+void DataConverter::convertCellDescriptionToAccessTO(DataAccessTO& result, CellDescription const& cell) const
+{
+    unordered_map<uint64_t, int> cellIndexByIds;
+    addCell(result, cell, cellIndexByIds);
+    *result.numTokens = 0;
+}    
 
 namespace
 {
@@ -252,7 +259,7 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     return result;
 }
 
-void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc)
+void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc) const
 {
     auto particleIndex = (*dataTO.numParticles)++;
 
@@ -264,7 +271,7 @@ void DataConverter::addParticle(DataAccessTO const& dataTO, ParticleDescription 
     particleTO.metadata.color = particleDesc.metadata.color;
 }
 
-int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s)
+int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s) const
 {
     auto result = *dataTO.numStringBytes;
     int len = static_cast<int>(s.size());
@@ -278,7 +285,7 @@ int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO,
 void DataConverter::addCell(
     DataAccessTO const& dataTO,
     CellDescription const& cellDesc,
-    unordered_map<uint64_t, int>& cellIndexTOByIds)
+    unordered_map<uint64_t, int>& cellIndexTOByIds) const
 {
     int cellIndex = (*dataTO.numCells)++;
     CellAccessTO& cellTO = dataTO.cells[cellIndex];
@@ -327,7 +334,7 @@ void DataConverter::addCell(
 void DataConverter::setConnections(
     DataAccessTO const& dataTO,
     CellDescription const& cellToAdd,
-    unordered_map<uint64_t, int> const& cellIndexByIds)
+    unordered_map<uint64_t, int> const& cellIndexByIds) const
 {
     int index = 0;
     auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];

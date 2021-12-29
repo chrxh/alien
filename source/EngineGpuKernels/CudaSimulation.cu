@@ -294,6 +294,12 @@ void _CudaSimulation::removeSelectedEntities(bool includeClusters)
     KERNEL_CALL_HOST(cudaRemoveSelectedEntities, *_cudaSimulationData, includeClusters);
 }
 
+void _CudaSimulation::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
+{
+    copyToGpu(changeDataTO);
+    KERNEL_CALL_HOST(cudaChangeSimulationData, *_cudaSimulationData, *_cudaAccessTO);
+}
+
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
     KERNEL_CALL_HOST(cudaApplyForce, applyData, *_cudaSimulationData);
