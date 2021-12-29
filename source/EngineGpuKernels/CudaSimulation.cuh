@@ -48,6 +48,7 @@ public:
     ENGINEGPUKERNELS_EXPORT void addAndSelectSimulationData(DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void setSimulationData(DataAccessTO const& dataTO);
     ENGINEGPUKERNELS_EXPORT void removeSelectedEntities(bool includeClusters);
+    ENGINEGPUKERNELS_EXPORT void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
 
     ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
     ENGINEGPUKERNELS_EXPORT void switchSelection(PointSelectionData const& switchData);

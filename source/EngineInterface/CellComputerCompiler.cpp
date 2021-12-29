@@ -132,6 +132,22 @@ namespace
         return true;
     }
 
+    std::string lastChar(std::string const& s)
+    {
+        if (!s.empty()) {
+            return std::string(1, s.back());
+        }
+        return s;
+    }
+
+    std::string lastTwoChars(std::string const& s)
+    {
+        if (s.size() > 1) {
+            return s.substr(s.size() - 2, 2);
+        }
+        return s;
+    };
+
     std::string applyTableToCode(SymbolMap const& symbols, std::string s)
     {
         std::string prefix;
@@ -144,7 +160,7 @@ namespace
             }
         }
         for (int i = 0; i < 2; ++i) {
-            auto last = s.substr(s.size() - 1, 1);
+            auto last = lastChar(s);
             if (last == "]" || last == ")") {
                 postfix = last + postfix;
                 s = s.substr(0, s.size() - 1);
@@ -163,18 +179,6 @@ namespace
         InstructionUncoded instructionUncoded)
     {
         try {
-            auto lastChar = [](std::string const& s) {
-                if (!s.empty()) {
-                    return std::string(1, s.back());
-                }
-                return s;
-            };
-            auto lastTwoChars = [](std::string const& s) {
-                if (s.size() > 1) {
-                    return s.substr(s.size() - 2, 2);
-                }
-                return s;
-            };
             boost::algorithm::to_lower(instructionUncoded.name);
             instructionUncoded.operand1 = applyTableToCode(symbols, instructionUncoded.operand1);
             instructionUncoded.operand2 = applyTableToCode(symbols, instructionUncoded.operand2);

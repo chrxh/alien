@@ -14,9 +14,10 @@ class DataConverter
 public:
     DataConverter(SimulationParameters const& parameters, GpuSettings const& gpuConstants);
 
-    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO);
-    OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO);
-    void convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description);
+    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO) const;
+    OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO) const;
+    void convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const;
+    void convertCellDescriptionToAccessTO(DataAccessTO& result, CellDescription const& cell) const;
 
 private:
 	struct CreateClusterReturnData
@@ -33,15 +34,15 @@ private:
 	void addCell(
         DataAccessTO const& dataTO,
         CellDescription const& cellToAdd,
-        unordered_map<uint64_t, int>& cellIndexTOByIds);
-    void addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc);
+        unordered_map<uint64_t, int>& cellIndexTOByIds) const;
+    void addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc) const;
 
 	void setConnections(
         DataAccessTO const& dataTO,
         CellDescription const& cellToAdd,
-        unordered_map<uint64_t, int> const& cellIndexByIds);
+        unordered_map<uint64_t, int> const& cellIndexByIds) const;
 
-    int convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s);
+    int convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s) const;
 
 private:
 	SimulationParameters _parameters;

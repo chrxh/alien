@@ -20,6 +20,7 @@ public:
     createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray);
     __inline__ __device__ Cell*
     createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
+    __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
     __inline__ __device__ Token* createTokenFromTO(
         int targetIndex,
         TokenAccessTO const& tokenTO,
@@ -146,6 +147,63 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->temp3 = {0, 0};
 
     return cell;
+}
+
+__inline__ __device__ void EntityFactory::changeCellFromTO(
+    CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell)
+{
+    cell->id = cellTO.id;
+    cell->absPos = cellTO.pos;
+    _map.mapPosCorrection(cell->absPos);
+    cell->vel = cellTO.vel;
+    cell->branchNumber = cellTO.branchNumber;
+    cell->tokenBlocked = cellTO.tokenBlocked;
+    cell->maxConnections = cellTO.maxConnections;
+    cell->energy = cellTO.energy;
+    cell->cellFunctionType = cellTO.cellFunctionType;
+
+    switch (cell->cellFunctionType) {
+    case Enums::CellFunction::COMPUTER: {
+        cell->numStaticBytes = cellTO.numStaticBytes;
+        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
+    } break;
+    case Enums::CellFunction::SENSOR: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 5;
+    } break;
+    default: {
+        cell->numStaticBytes = 0;
+        cell->numMutableBytes = 0;
+    }
+    }
+    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+        cell->staticData[i] = cellTO.staticData[i];
+    }
+    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+        cell->mutableData[i] = cellTO.mutableData[i];
+    }
+    cell->metadata.color = cellTO.metadata.color;
+
+    copyString(
+        cell->metadata.nameLen,
+        cell->metadata.name,
+        cellTO.metadata.nameLen,
+        cellTO.metadata.nameStringIndex,
+        dataTO.stringBytes);
+
+    copyString(
+        cell->metadata.descriptionLen,
+        cell->metadata.description,
+        cellTO.metadata.descriptionLen,
+        cellTO.metadata.descriptionStringIndex,
+        dataTO.stringBytes);
+
+    copyString(
+        cell->metadata.sourceCodeLen,
+        cell->metadata.sourceCode,
+        cellTO.metadata.sourceCodeLen,
+        cellTO.metadata.sourceCodeStringIndex,
+        dataTO.stringBytes);
 }
 
 __inline__ __device__ Token* EntityFactory::createTokenFromTO(

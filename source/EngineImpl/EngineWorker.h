@@ -32,6 +32,8 @@ struct ExceptionData
     boost::optional<std::string> errorMessage;
 };
 
+struct DataAccessTO;
+
 class EngineWorker
 {
 public:
@@ -61,6 +63,7 @@ public:
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setSimulationData(DataDescription const& dataToUpdate);
     void removeSelectedEntities(bool includeClusters);
+    void changeCell(CellDescription const& changedCell);
 
     void calcSingleTimestep();
 
@@ -96,6 +99,7 @@ public:
     bool isSimulationRunning() const;
 
 private:
+    DataAccessTO provideTO(); 
     void updateMonitorDataIntern();
     void processJobs();
 
