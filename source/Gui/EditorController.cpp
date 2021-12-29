@@ -194,8 +194,8 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
         _editorModel->addInspectedEntity(entity);
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
         auto windowPos = (entityPos - center) * factor + center;
-        windowPos.x = std::min(std::max(windowPos.x, 0.0f), toFloat(viewSize.x) - 100.0f);
-        windowPos.y = std::min(std::max(windowPos.y, 0.0f), toFloat(viewSize.y) - 100.0f);
+        windowPos.x = std::min(std::max(windowPos.x, 0.0f), toFloat(viewSize.x) - 100.0f) + 40.0f;
+        windowPos.y = std::min(std::max(windowPos.y, 0.0f), toFloat(viewSize.y) - 100.0f) + 40.0f;
         _inspectorWindows.emplace_back(
             boost::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, id, windowPos));
     }
