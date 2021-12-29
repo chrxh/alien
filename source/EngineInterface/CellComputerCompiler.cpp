@@ -150,7 +150,10 @@ namespace
                 s = s.substr(0, s.size() - 1);
             }
         }
-        s = symbols.at(s);
+        auto findResult = symbols.find(s);
+        if (findResult != symbols.end()) {
+            s = findResult->second;
+        }
         return prefix + s + postfix;
     }
 
@@ -160,6 +163,18 @@ namespace
         InstructionUncoded instructionUncoded)
     {
         try {
+            auto lastChar = [](std::string const& s) {
+                if (!s.empty()) {
+                    return std::string(1, s.back());
+                }
+                return s;
+            };
+            auto lastTwoChars = [](std::string const& s) {
+                if (s.size() > 1) {
+                    return s.substr(s.size() - 2, 2);
+                }
+                return s;
+            };
             boost::algorithm::to_lower(instructionUncoded.name);
             instructionUncoded.operand1 = applyTableToCode(symbols, instructionUncoded.operand1);
             instructionUncoded.operand2 = applyTableToCode(symbols, instructionUncoded.operand2);
@@ -210,8 +225,8 @@ namespace
                 {
                     auto left1 = instructionUncoded.operand1.substr(0, 1);
                     auto left2 = instructionUncoded.operand1.substr(0, 2);
-                    auto right1 = instructionUncoded.operand1.substr(instructionUncoded.operand1.size() - 1, 1);
-                    auto right2 = instructionUncoded.operand1.substr(instructionUncoded.operand1.size() - 2, 2);
+                    auto right1 = lastChar(instructionUncoded.operand1);
+                    auto right2 = lastTwoChars(instructionUncoded.operand1);
                     if (left2 == "[[" && right2 == "]]") {
                         instructionCoded.opType1 = Enums::ComputerOptype::MEMMEM;
                         instructionUncoded.operand1 =
@@ -231,8 +246,8 @@ namespace
                 {
                     auto left1 = instructionUncoded.operand2.substr(0, 1);
                     auto left2 = instructionUncoded.operand2.substr(0, 2);
-                    auto right1 = instructionUncoded.operand2.substr(instructionUncoded.operand2.size() - 1, 1);
-                    auto right2 = instructionUncoded.operand2.substr(instructionUncoded.operand2.size() - 2, 2);
+                    auto right1 = lastChar(instructionUncoded.operand2);
+                    auto right2 = lastTwoChars(instructionUncoded.operand2);
                     if (left2 == "[[" && right2 == "]]") {
                         instructionCoded.opType2 = Enums::ComputerOptype::MEMMEM;
                         instructionUncoded.operand2 =

@@ -69,7 +69,6 @@ void _InspectorWindow::process()
         }
     }
     auto windowPos = ImGui::GetWindowPos();
-    auto windowSize = ImGui::GetWindowSize();
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -185,9 +184,27 @@ void _InspectorWindow::processCodeTab(CellDescription& cell)
             "##source",
             _cellCode,
             IM_ARRAYSIZE(_cellCode),
-            ImGui::GetContentRegionAvail(),
+            {ImGui::GetContentRegionAvail().x,
+             ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(50)},
             ImGuiInputTextFlags_AllowTabInput);
         ImGui::PopFont();
+
+        //compilation state
+        sourcecode = std::string(_cellCode);
+        auto compilationResult = CellComputerCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap());
+        ImGui::Text("Compilation state: ");
+        if (compilationResult.compilationOk) {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.3, 1.0, 1.0));
+            ImGui::SameLine();
+            ImGui::Text("Ok");
+            ImGui::PopStyleColor();
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.05, 1.0, 1.0));
+            ImGui::SameLine();
+            ImGui::Text(("Error at line " + std::to_string(compilationResult.lineOfFirstError)).c_str());
+            ImGui::PopStyleColor();
+        }
+
         ImGui::EndTabItem();
     }
 }
@@ -197,7 +214,8 @@ void _InspectorWindow::processMemoryTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
         auto parameters = _simController->getSimulationParameters();
         if (ImGui::BeginChild(
-                "##1", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(90)),
+                "##1",
+                ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(90)),
                 false,
                 0)) {
             AlienImGui::Group("Instruction section");
@@ -208,7 +226,7 @@ void _InspectorWindow::processMemoryTab(CellDescription& cell)
             for (int i = dataSize; i < maxBytes; ++i) {
                 _cellMemory[i] = 0;
             }
-            _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), maxBytes);
+             _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), maxBytes);
             ImGui::PopFont();
         }
         ImGui::EndChild();
@@ -221,9 +239,9 @@ void _InspectorWindow::processMemoryTab(CellDescription& cell)
             _cellInstructionMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
 //            std::string t(_cellMemory, dataSize);
             ImGui::PopFont();
-            ImGui::EndTabItem();
         }
         ImGui::EndChild();
+        ImGui::EndTabItem();
     }
 }
 
