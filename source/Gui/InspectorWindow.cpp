@@ -56,7 +56,7 @@ void _InspectorWindow::process()
     }
     auto entity = _editorModel->getInspectedEntity(_entityId);
     auto width = StyleRepository::getInstance().scaleContent(260.0f);
-    auto height = isCell() ? StyleRepository::getInstance().scaleContent(280.0f)
+    auto height = isCell() ? StyleRepository::getInstance().scaleContent(310.0f)
                            : StyleRepository::getInstance().scaleContent(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
@@ -123,16 +123,33 @@ std::string _InspectorWindow::generateTitle() const
     return ss.str();
 }
 
+namespace
+{
+    bool hasChanges(CellDescription const& left, CellDescription const& right)
+    {
+        return left.energy != right.energy || left.maxConnections != right.maxConnections || left.tokenBlocked != right.tokenBlocked
+            || left.tokenBranchNumber != right.tokenBranchNumber || left.cellFeature.getType() != right.cellFeature.getType()
+            || left.cellFeature.constData != right.cellFeature.constData || left.cellFeature.volatileData != right.cellFeature.volatileData
+            || left.metadata.computerSourcecode != right.metadata.computerSourcecode
+            || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description;
+    }
+}
+
 void _InspectorWindow::processCell(CellDescription cell)
 {
     if (ImGui::BeginTabBar(
             "##CellInspect", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        auto origCell = cell;
         processCellGeneralTab(cell);
         if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTER) {
             processCodeTab(cell);
             processMemoryTab(cell);
         }
         ImGui::EndTabBar();
+
+        if (hasChanges(cell, origCell)) {
+            _simController->changeCell(cell);
+        }
     }
 }
 
@@ -146,10 +163,13 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                               .name("Specialization")
                               .values(CellFunctions)
                               .textWidth(MaxCellContentTextWidth), type);
+        cell.cellFeature.setType(static_cast<Enums::CellFunction::Type>(type));
 
         auto energy = toFloat(cell.energy);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
+        cell.energy = energy;
+
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name("Max connections")
@@ -175,35 +195,36 @@ void _InspectorWindow::processCodeTab(CellDescription& cell)
 {
     ImGuiTabItemFlags flags = 0;
     if (ImGui::BeginTabItem("Code", nullptr, flags)) {
-        auto sourcecode = CellComputerCompiler::decompileSourceCode(
-            cell.cellFeature.constData, _simController->getSymbolMap(), _simController->getSimulationParameters());
-        sourcecode.copy(_cellCode, std::min(toInt(sourcecode.length()), IM_ARRAYSIZE(_cellCode) - 1), 0);
-        _cellCode[sourcecode.length()] = '\0';
+        auto origSourcecode = [&] {
+            if (cell.metadata.computerSourcecode.empty()) {
+                return CellComputerCompiler::decompileSourceCode(
+                    cell.cellFeature.constData,
+                    _simController->getSymbolMap(),
+                    _simController->getSimulationParameters());
+            }
+            return cell.metadata.computerSourcecode;
+        }();
+        origSourcecode.copy(_cellCode, std::min(toInt(origSourcecode.length()), IM_ARRAYSIZE(_cellCode) - 1), 0);
+        _cellCode[origSourcecode.length()] = '\0';
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::InputTextMultiline(
             "##source",
             _cellCode,
             IM_ARRAYSIZE(_cellCode),
             {ImGui::GetContentRegionAvail().x,
-             ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(50)},
+             ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(20)},
             ImGuiInputTextFlags_AllowTabInput);
         ImGui::PopFont();
 
         //compilation state
-        sourcecode = std::string(_cellCode);
-        auto compilationResult = CellComputerCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap());
-        ImGui::Text("Compilation state: ");
-        if (compilationResult.compilationOk) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.3, 1.0, 1.0));
-            ImGui::SameLine();
-            ImGui::Text("Ok");
-            ImGui::PopStyleColor();
-        } else {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.05, 1.0, 1.0));
-            ImGui::SameLine();
-            ImGui::Text(("Error at line " + std::to_string(compilationResult.lineOfFirstError)).c_str());
-            ImGui::PopStyleColor();
+        auto sourcecode = std::string(_cellCode);
+        if (sourcecode != origSourcecode || !_lastCompilationResult) {
+            _lastCompilationResult = boost::make_shared<CompilationResult>(
+                CellComputerCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap()));
+            cell.cellFeature.constData = _lastCompilationResult->compilation;
+            cell.metadata.computerSourcecode = sourcecode;
         }
+        showCompilationResult(*_lastCompilationResult);
 
         ImGui::EndTabItem();
     }
@@ -242,6 +263,22 @@ void _InspectorWindow::processMemoryTab(CellDescription& cell)
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::showCompilationResult(CompilationResult const& compilationResult)
+{
+    ImGui::Text("Compilation result: ");
+    if (compilationResult.compilationOk) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.3, 1.0, 1.0));
+        ImGui::SameLine();
+        ImGui::Text("Ok");
+        ImGui::PopStyleColor();
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.05, 1.0, 1.0));
+        ImGui::SameLine();
+        ImGui::Text(("Error at line " + std::to_string(compilationResult.lineOfFirstError)).c_str());
+        ImGui::PopStyleColor();
     }
 }
 

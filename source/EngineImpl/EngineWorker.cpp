@@ -273,18 +273,15 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
     _cudaSimulation->resizeArraysIfNecessary(
         {numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataAccessTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
-    int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
+    DataAccessTO dataTO = provideTO();
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
     converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
 
-    _dataTOCache->releaseDataTO(dataTO);
-
     _cudaSimulation->addAndSelectSimulationData(dataTO);
     updateMonitorDataIntern();
+
+    _dataTOCache->releaseDataTO(dataTO);
 }
 
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
@@ -296,18 +293,15 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
     _cudaSimulation->resizeArraysIfNecessary(
         {numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataAccessTO dataTO = _dataTOCache->getDataTO(
-        {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
-    int2 worldSize{_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
+    DataAccessTO dataTO = provideTO();
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
     converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
 
-    _dataTOCache->releaseDataTO(dataTO);
-
     _cudaSimulation->setSimulationData(dataTO);
     updateMonitorDataIntern();
+
+    _dataTOCache->releaseDataTO(dataTO);
 }
 
 void EngineWorker::removeSelectedEntities(bool includeClusters)
@@ -317,6 +311,21 @@ void EngineWorker::removeSelectedEntities(bool includeClusters)
 
     _cudaSimulation->removeSelectedEntities(includeClusters);
     updateMonitorDataIntern();
+}
+
+void EngineWorker::changeCell(CellDescription const& changedCell)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+
+    auto dataTO = provideTO();
+
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+    converter.convertCellDescriptionToAccessTO(dataTO, changedCell);
+
+    _cudaSimulation->changeInspectedSimulationData(dataTO);
+
+    _dataTOCache->releaseDataTO(dataTO);
 }
 
 void EngineWorker::calcSingleTimestep()
@@ -555,6 +564,12 @@ void EngineWorker::pauseSimulation()
 bool EngineWorker::isSimulationRunning() const
 {
     return _isSimulationRunning.load();
+}
+
+DataAccessTO EngineWorker::provideTO()
+{
+    auto arraySizes = _cudaSimulation->getArraySizes();
+    return _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
 }
 
 void EngineWorker::updateMonitorDataIntern()

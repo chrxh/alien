@@ -5,6 +5,7 @@
 #include "Definitions.h"
 
 struct MemoryEditor;
+struct CompilationResult;
 
 class _InspectorWindow
 {
@@ -29,12 +30,14 @@ private:
     void processCellGeneralTab(CellDescription& cell);
     void processCodeTab(CellDescription& cell);
     void processMemoryTab(CellDescription& cell);
+    void showCompilationResult(CompilationResult const& compilationResult);
 
     void processParticle(ParticleDescription particle);
 
 private:
     boost::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
     boost::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
+    boost::shared_ptr<CompilationResult> _lastCompilationResult;
     SimulationController _simController;
     Viewport _viewport; 
     EditorModel _editorModel;
