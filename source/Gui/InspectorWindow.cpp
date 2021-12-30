@@ -55,7 +55,7 @@ void _InspectorWindow::process()
         return;
     }
     auto entity = _editorModel->getInspectedEntity(_entityId);
-    auto width = StyleRepository::getInstance().scaleContent(260.0f);
+    auto width = StyleRepository::getInstance().scaleContent(310.0f);
     auto height = isCell() ? StyleRepository::getInstance().scaleContent(310.0f)
                            : StyleRepository::getInstance().scaleContent(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
@@ -142,8 +142,8 @@ void _InspectorWindow::processCell(CellDescription cell)
         auto origCell = cell;
         processCellGeneralTab(cell);
         if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTER) {
-            processCodeTab(cell);
-            processMemoryTab(cell);
+            processCellCodeTab(cell);
+            processCellMemoryTab(cell);
         }
         ImGui::EndTabBar();
 
@@ -189,12 +189,29 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
             cell.tokenBranchNumber);
         AlienImGui::Checkbox(
             AlienImGui::CheckBoxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
+        AlienImGui::Separator();
+
+        cell.metadata.name.copy(_cellName, cell.metadata.name.size());
+        _cellName[cell.metadata.name.size()] = 0;
+        AlienImGui::InputText(
+            AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth),
+            _cellName,
+            IM_ARRAYSIZE(_cellName));
+        cell.metadata.name = std::string(_cellName);
+
+        cell.metadata.description.copy(_cellName, cell.metadata.description.size());
+        _cellDescription[cell.metadata.description.size()] = 0;
+        AlienImGui::InputTextMultiline(
+            AlienImGui::InputTextMultilineParameters().name("Description").textWidth(MaxCellContentTextWidth).height(0),
+            _cellDescription,
+            IM_ARRAYSIZE(_cellDescription));
+        cell.metadata.description = std::string(_cellDescription);
 
         ImGui::EndTabItem();
     }
 }
 
-void _InspectorWindow::processCodeTab(CellDescription& cell)
+void _InspectorWindow::processCellCodeTab(CellDescription& cell)
 {
     ImGuiTabItemFlags flags = 0;
     if (ImGui::BeginTabItem("Code", nullptr, flags)) {
@@ -228,12 +245,11 @@ void _InspectorWindow::processCodeTab(CellDescription& cell)
             cell.metadata.computerSourcecode = sourcecode;
         }
         showCompilationResult(*_lastCompilationResult);
-
         ImGui::EndTabItem();
     }
 }
 
-void _InspectorWindow::processMemoryTab(CellDescription& cell)
+void _InspectorWindow::processCellMemoryTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
         auto parameters = _simController->getSimulationParameters();
