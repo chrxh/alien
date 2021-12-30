@@ -160,7 +160,7 @@ bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
 
 bool AlienImGui::Checkbox(CheckBoxParameters const& parameters, bool& value)
 {
-    auto result = ImGui::Checkbox("##", &value);
+    auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
     ImGui::SameLine();
     ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - parameters._textWidth, 0.0f));
 
