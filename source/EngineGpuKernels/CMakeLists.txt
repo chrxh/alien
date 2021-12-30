@@ -4,13 +4,13 @@ add_library(alien_engine_gpu_kernels_lib
     AccessTOs.cuh
     Array.cuh
     Base.cuh
-    CellComputerFunction.cuh
     CellConnectionProcessor.cuh
     Cell.cuh
     CellFunctionData.cuh
     CellProcessor.cuh
     CleanupKernels.cuh
     CommunicatorFunction.cuh
+    ComputationFunction.cuh
     ConstantMemory.cuh
     ConstructorFunction.cuh
     CudaMemoryManager.cuh

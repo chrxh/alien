@@ -14,7 +14,7 @@ struct CompilationResult
 /**
  * Simple compiler for cell's machine language
  */
-class CellComputerCompiler
+class CellComputationCompiler
 {
 public:
     static CompilationResult compileSourceCode(std::string const& code, SymbolMap const& symbols);

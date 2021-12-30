@@ -36,7 +36,7 @@ struct CellFeatureDescription
 	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
 
 private:
-    Enums::CellFunction::Type _type = Enums::CellFunction::COMPUTER;
+    Enums::CellFunction::Type _type = Enums::CellFunction::COMPUTATION;
 };
 
 struct TokenDescription

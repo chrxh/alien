@@ -8,7 +8,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "EnergyGuidance.cuh"
-#include "CellComputerFunction.cuh"
+#include "ComputationFunction.cuh"
 #include "ConstructorFunction.cuh"
 #include "ScannerFunction.cuh"
 #include "DigestionFunction.cuh"
@@ -142,8 +142,8 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
                 if (cell->tryLock()) {
 
                     EnergyGuidance::processing(data, token);
-                    if (Enums::CellFunction::COMPUTER == cellFunctionType) {
-                        CellComputerFunction::processing(token);
+                    if (Enums::CellFunction::COMPUTATION == cellFunctionType) {
+                        ComputationFunction::processing(token);
                     }
                     if (Enums::CellFunction::CONSTRUCTOR == cellFunctionType) {
                         ConstructorFunction::processing(token, data, result);
