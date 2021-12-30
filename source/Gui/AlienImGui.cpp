@@ -129,6 +129,27 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     }
 }
 
+void AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
+{
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize);
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+}
+
+void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& parameters, char* buffer, int bufferSize)
+{
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    auto height = parameters._height == 0
+        ? ImGui::GetContentRegionAvail().y
+        : StyleRepository::getInstance().scaleContent(parameters._height);
+    ImGui::InputTextMultiline(("##" + parameters._name).c_str(), buffer, bufferSize, {0, height});
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+}
+
 bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
