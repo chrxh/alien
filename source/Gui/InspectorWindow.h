@@ -28,8 +28,8 @@ private:
     std::string generateTitle() const;
     void processCell(CellDescription cell);
     void processCellGeneralTab(CellDescription& cell);
-    void processCodeTab(CellDescription& cell);
-    void processMemoryTab(CellDescription& cell);
+    void processCellCodeTab(CellDescription& cell);
+    void processCellMemoryTab(CellDescription& cell);
     void showCompilationResult(CompilationResult const& compilationResult);
 
     void processParticle(ParticleDescription particle);
@@ -47,4 +47,7 @@ private:
     uint64_t _entityId = 0;
     char _cellCode[1024 * 16];
     char _cellMemory[256];
+
+    char _cellName[1024];
+    char _cellDescription[1024*16];
 };

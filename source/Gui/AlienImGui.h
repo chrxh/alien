@@ -52,7 +52,8 @@ public:
     };
     static void InputInt(InputIntParameters const& parameters, int& value);
 
-    struct InputFloatParameters{
+    struct InputFloatParameters
+    {
         MEMBER_DECLARATION(InputFloatParameters, std::string, name, "");
         MEMBER_DECLARATION(InputFloatParameters, float, step, 1.0f);
         MEMBER_DECLARATION(InputFloatParameters, std::string, format, "%.3f");
@@ -61,6 +62,21 @@ public:
         MEMBER_DECLARATION(InputFloatParameters, boost::optional<std::string>, tooltip, boost::none);
     };
     static void InputFloat(InputFloatParameters const& parameters, float& value);
+
+    struct InputTextParameters
+    {
+        MEMBER_DECLARATION(InputTextParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputTextParameters, int, textWidth, 100);
+    };
+    static void InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
+
+    struct InputTextMultilineParameters
+    {
+        MEMBER_DECLARATION(InputTextMultilineParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputTextMultilineParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputTextMultilineParameters, float, height, 100.0f);
+    };
+    static void InputTextMultiline(InputTextMultilineParameters const& parameters, char* buffer, int bufferSize);
 
     struct ComboParameters
     {

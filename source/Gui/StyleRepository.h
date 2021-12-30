@@ -34,8 +34,8 @@ namespace Const
 
     ImColor const ToolbarButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
 
-    ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
-    ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.33f, 0.5f, 1.0f);
+    ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
+    ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 
     float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 30.0f;
