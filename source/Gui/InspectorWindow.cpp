@@ -4,7 +4,8 @@
 #include <imgui.h>
 
 #include "ImguiMemoryEditor/imgui_memory_editor.h"
-#include "EngineInterface/CellComputerCompiler.h"
+
+#include "EngineInterface/CellComputationCompiler.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
@@ -19,7 +20,7 @@ namespace
     auto const MaxCellContentTextWidth = 110.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
     auto const CellFunctions =
-        std::vector{"Computer"s, "Propulsion"s, "Scanner"s, "Digestion"s, "Constructor"s, "Sensor"s, "Muscle"s};
+        std::vector{"Computation"s, "Propulsion"s, "Scanner"s, "Digestion"s, "Constructor"s, "Sensor"s, "Muscle"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -141,7 +142,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             "##CellInspect", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
         processCellGeneralTab(cell);
-        if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTER) {
+        if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTATION) {
             processCellCodeTab(cell);
             processCellMemoryTab(cell);
         }
@@ -217,7 +218,7 @@ void _InspectorWindow::processCellCodeTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Code", nullptr, flags)) {
         auto origSourcecode = [&] {
             if (cell.metadata.computerSourcecode.empty()) {
-                return CellComputerCompiler::decompileSourceCode(
+                return CellComputationCompiler::decompileSourceCode(
                     cell.cellFeature.constData,
                     _simController->getSymbolMap(),
                     _simController->getSimulationParameters());
@@ -240,7 +241,7 @@ void _InspectorWindow::processCellCodeTab(CellDescription& cell)
         auto sourcecode = std::string(_cellCode);
         if (sourcecode != origSourcecode || !_lastCompilationResult) {
             _lastCompilationResult = boost::make_shared<CompilationResult>(
-                CellComputerCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap()));
+                CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap()));
             cell.cellFeature.constData = _lastCompilationResult->compilation;
             cell.metadata.computerSourcecode = sourcecode;
         }
@@ -263,7 +264,7 @@ void _InspectorWindow::processCellMemoryTab(CellDescription& cell)
 
             auto dataSize = cell.cellFeature.constData.size();
             cell.cellFeature.constData.copy(_cellMemory, dataSize);
-            auto maxDataSize = CellComputerCompiler::getMaxBytes(parameters);
+            auto maxDataSize = CellComputationCompiler::getMaxBytes(parameters);
             for (int i = dataSize; i < maxDataSize; ++i) {
                 _cellMemory[i] = 0;
             }
