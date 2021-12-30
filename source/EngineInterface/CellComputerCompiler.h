@@ -21,6 +21,8 @@ public:
     static std::string
     decompileSourceCode(std::string const& data, SymbolMap const& symbols, SimulationParameters const& parameters);
 
+    static int getMaxBytes(SimulationParameters const& parameters);
+
 private:
     static void writeInstruction(std::string& data, InstructionCoded const& instructionCoded);
     static void readInstruction(

@@ -148,6 +148,9 @@ void _InspectorWindow::processCell(CellDescription cell)
         ImGui::EndTabBar();
 
         if (hasChanges(cell, origCell)) {
+            if (cell.cellFeature != origCell.cellFeature) {
+                cell.metadata.computerSourcecode.clear();
+            }
             _simController->changeCell(cell);
         }
     }
@@ -241,24 +244,26 @@ void _InspectorWindow::processMemoryTab(CellDescription& cell)
                 0)) {
             AlienImGui::Group("Instruction section");
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+
             auto dataSize = cell.cellFeature.constData.size();
             cell.cellFeature.constData.copy(_cellMemory, dataSize);
-            auto maxBytes = parameters.cellFunctionComputerMaxInstructions * 3;
-            for (int i = dataSize; i < maxBytes; ++i) {
+            auto maxDataSize = CellComputerCompiler::getMaxBytes(parameters);
+            for (int i = dataSize; i < maxDataSize; ++i) {
                 _cellMemory[i] = 0;
             }
-             _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), maxBytes);
+             _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), maxDataSize);
+
+            cell.cellFeature.constData = std::string(_cellMemory, maxDataSize);
             ImGui::PopFont();
         }
         ImGui::EndChild();
-        if (ImGui::BeginChild(
-                "##2", ImVec2(0, 0), false, 0)) {
+        if (ImGui::BeginChild("##2", ImVec2(0, 0), false, 0)) {
             AlienImGui::Group("Data section");
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
             auto dataSize = cell.cellFeature.volatileData.size();
             cell.cellFeature.volatileData.copy(_cellMemory, dataSize);
             _cellInstructionMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
-//            std::string t(_cellMemory, dataSize);
+            cell.cellFeature.volatileData = std::string(_cellMemory, dataSize);
             ImGui::PopFont();
         }
         ImGui::EndChild();
@@ -272,7 +277,7 @@ void _InspectorWindow::showCompilationResult(CompilationResult const& compilatio
     if (compilationResult.compilationOk) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.3, 1.0, 1.0));
         ImGui::SameLine();
-        ImGui::Text("Ok");
+        ImGui::Text("Success");
         ImGui::PopStyleColor();
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.05, 1.0, 1.0));
