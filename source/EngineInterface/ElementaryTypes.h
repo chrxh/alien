@@ -12,7 +12,7 @@ namespace Enums
 
     struct CellFunction {
         enum Type {
-            COMPUTER,
+            COMPUTATION,
             PROPULSION,
             SCANNER,
             DIGESTION,
@@ -73,12 +73,12 @@ namespace Enums
         };
     };
 
-    struct ComputerOperation {
+    struct ComputationOperation {
         enum Type {
             MOV, ADD, SUB, MUL, DIV, XOR, OR, AND, IFG, IFGE, IFE, IFNE, IFLE, IFL, ELSE, ENDIF
         };
     };
-    struct ComputerOptype {
+    struct ComputationOpType {
         enum Type {
             MEM, MEMMEM, CMEM, CONSTANT
         };
@@ -246,9 +246,9 @@ namespace Enums
 }
 
 struct InstructionCoded {
-    Enums::ComputerOperation::Type operation;
-    Enums::ComputerOptype::Type opType1;
-    Enums::ComputerOptype::Type opType2;
+    Enums::ComputationOperation::Type operation;
+    Enums::ComputationOpType::Type opType1;
+    Enums::ComputationOpType::Type opType2;
     uint8_t operand1;
     uint8_t operand2;
 };

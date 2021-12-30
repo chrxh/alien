@@ -1,8 +1,8 @@
 
 add_library(alien_engine_interface_lib
     ShallowUpdateSelectionData.h
-    CellComputerCompiler.cpp
-    CellComputerCompiler.h
+    CellComputationCompiler.cpp
+    CellComputationCompiler.h
     Colors.h
     Definitions.h
     DescriptionHelper.cpp
