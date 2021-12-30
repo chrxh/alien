@@ -355,8 +355,19 @@ std::string CellComputerCompiler::decompileSourceCode(
 {
     std::string text;
     std::string textOp1, textOp2;
-    int conditionLevel = 0;
-    auto const dataSize = (data.size() / 3) * 3;
+    int nestingLevel = 0;
+    auto dataSize = (data.size() / 3) * 3;
+    auto isNullInstruction = [&data](int address) {
+        return data[address] == 0 && data[address + 1] == 0 && data[address + 2] == 0;
+    };
+    while (dataSize >= 3) {
+        if (isNullInstruction(dataSize - 3)) {
+            dataSize -= 3;
+        } else {
+            break;
+        }
+    }
+
     for (int instructionPointer = 0; instructionPointer < dataSize;) {
 
         //decode instruction data
@@ -364,7 +375,7 @@ std::string CellComputerCompiler::decompileSourceCode(
         readInstruction(data, instructionPointer, instruction);
 
         //write spacing
-        for (int j = 0; j < conditionLevel; ++j)
+        for (int j = 0; j < nestingLevel; ++j)
             text += "  ";
 
         //write operation
@@ -387,17 +398,17 @@ std::string CellComputerCompiler::decompileSourceCode(
         if ((instruction.operation >= Enums::ComputerOperation::IFG)
             && (instruction.operation <= Enums::ComputerOperation::IFL)) {
             text += "if";
-            ++conditionLevel;
+            ++nestingLevel;
         }
         if (instruction.operation == Enums::ComputerOperation::ELSE) {
-            if (conditionLevel > 0)
+            if (nestingLevel > 0)
                 text = text.substr(0, text.size() - 2);
             text += "else";
         }
         if (instruction.operation == Enums::ComputerOperation::ENDIF) {
-            if (conditionLevel > 0) {
+            if (nestingLevel > 0) {
                 text = text.substr(0, text.size() - 2);
-                --conditionLevel;
+                --nestingLevel;
             }
             text += "endif";
         }
@@ -442,6 +453,11 @@ std::string CellComputerCompiler::decompileSourceCode(
             text += "\n";
     }
     return text;
+}
+
+int CellComputerCompiler::getMaxBytes(SimulationParameters const& parameters)
+{
+    return parameters.cellFunctionComputerMaxInstructions * 3;
 }
 
 void CellComputerCompiler::writeInstruction(std::string& data, InstructionCoded const& instructionCoded)
