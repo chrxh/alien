@@ -69,6 +69,7 @@ __device__ void createCellTO(Cell* cell, DataAccessTO& accessTO, Cell* cellArray
         cell->metadata.sourceCode,
         *accessTO.numStringBytes,
         accessTO.stringBytes);
+
     cell->tag = cellTOIndex;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectingCell = cell->connections[i].cell;
