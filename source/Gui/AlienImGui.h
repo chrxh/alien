@@ -112,5 +112,7 @@ public:
     static bool BeginToolbarButton(std::string const& text);
     static void EndToolbarButton();
 
+    static void Tooltip(std::string const& text);
+
     static void convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 };
