@@ -46,6 +46,13 @@ _InspectorWindow::_InspectorWindow(
     _cellDataMemoryEdit->OptShowAscii = false;
     _cellDataMemoryEdit->OptMidColsCount = 0;
     _cellDataMemoryEdit->Cols = 8;
+
+    auto tokenMemoryEdit = boost::make_shared<MemoryEditor>();
+    tokenMemoryEdit->OptShowOptions = false;
+    tokenMemoryEdit->OptShowAscii = false;
+    tokenMemoryEdit->OptMidColsCount = 0;
+    tokenMemoryEdit->Cols = 8;
+    _tokenMemoryEdits.emplace_back(tokenMemoryEdit);
 }
 
 _InspectorWindow::~_InspectorWindow() {}
@@ -55,13 +62,13 @@ void _InspectorWindow::process()
     if (!_on) {
         return;
     }
-    auto entity = _editorModel->getInspectedEntity(_entityId);
-    auto width = StyleRepository::getInstance().scaleContent(310.0f);
-    auto height = isCell() ? StyleRepository::getInstance().scaleContent(310.0f)
+    auto width = calcWindowWidth();
+    auto height = isCell() ? StyleRepository::getInstance().scaleContent(330.0f)
                            : StyleRepository::getInstance().scaleContent(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
+    auto entity = _editorModel->getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on)) {
         if (isCell()) {
             processCell(std::get<CellDescription>(entity));
@@ -132,7 +139,8 @@ namespace
             || left.tokenBranchNumber != right.tokenBranchNumber || left.cellFeature.getType() != right.cellFeature.getType()
             || left.cellFeature.constData != right.cellFeature.constData || left.cellFeature.volatileData != right.cellFeature.volatileData
             || left.metadata.computerSourcecode != right.metadata.computerSourcecode
-            || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description;
+            || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
+            || left.tokens != right.tokens;
     }
 }
 
@@ -141,10 +149,18 @@ void _InspectorWindow::processCell(CellDescription cell)
     if (ImGui::BeginTabBar(
             "##CellInspect", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
-        processCellGeneralTab(cell);
+        showCellGeneralTab(cell);
         if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTATION) {
-            processCellCodeTab(cell);
-            processCellMemoryTab(cell);
+            showCellCodeTab(cell);
+            showCellMemoryTab(cell);
+        }
+        for (int i = 0; i < cell.tokens.size(); ++i) {
+            showTokenTab(cell.tokens.at(i), i);
+        }
+        auto const& parameters = _simController->getSimulationParameters();
+        if (cell.tokens.size() < parameters.cellMaxToken) {
+            ImGui::TabItemButton("+", ImGuiTabItemFlags_SetSelected);
+            AlienImGui::Tooltip("Add token");
         }
         ImGui::EndTabBar();
 
@@ -157,10 +173,11 @@ void _InspectorWindow::processCell(CellDescription cell)
     }
 }
 
-void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
+void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
+        AlienImGui::Group("Properties");
+        auto const& parameters = _simController->getSimulationParameters();
         int type = static_cast<int>(cell.cellFeature.getType());
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
@@ -190,7 +207,8 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
             cell.tokenBranchNumber);
         AlienImGui::Checkbox(
             AlienImGui::CheckBoxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
-        AlienImGui::Separator();
+
+        AlienImGui::Group("Metadata");
 
         cell.metadata.name.copy(_cellName, cell.metadata.name.size());
         _cellName[cell.metadata.name.size()] = 0;
@@ -212,7 +230,7 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::processCellCodeTab(CellDescription& cell)
+void _InspectorWindow::showCellCodeTab(CellDescription& cell)
 {
     ImGuiTabItemFlags flags = 0;
     if (ImGui::BeginTabItem("Code", nullptr, flags)) {
@@ -242,7 +260,9 @@ void _InspectorWindow::processCellCodeTab(CellDescription& cell)
         if (sourcecode != origSourcecode || !_lastCompilationResult) {
             _lastCompilationResult = boost::make_shared<CompilationResult>(
                 CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap()));
-            cell.cellFeature.constData = _lastCompilationResult->compilation;
+            if (_lastCompilationResult->compilationOk) {
+                cell.cellFeature.constData = _lastCompilationResult->compilation;
+            }
             cell.metadata.computerSourcecode = sourcecode;
         }
         showCompilationResult(*_lastCompilationResult);
@@ -250,7 +270,7 @@ void _InspectorWindow::processCellCodeTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::processCellMemoryTab(CellDescription& cell)
+void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
         auto parameters = _simController->getSimulationParameters();
@@ -288,6 +308,31 @@ void _InspectorWindow::processCellMemoryTab(CellDescription& cell)
     }
 }
 
+void _InspectorWindow::showTokenTab(TokenDescription& token, int index)
+{
+    if (ImGui::BeginTabItem(("Token " + std::to_string(index + 1)).c_str(), nullptr, ImGuiTabItemFlags_None)) {
+        AlienImGui::Group("Properties");
+        auto energy = toFloat(token.energy);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
+        token.energy = energy;
+
+        AlienImGui::Group("Memory");
+        std::map<int, std::vector<std::string>> addressToSymbolNamesMap;
+        auto const& symbolMap = _simController->getSymbolMap();
+        for (auto const& [key, value] : symbolMap) {
+            if (auto address = CellComputationCompiler::extractAddress(key)) {
+                addressToSymbolNamesMap[*address].emplace_back(value);
+            }
+        }
+        if (addressToSymbolNamesMap.empty() || addressToSymbolNamesMap.begin()->first != 0) {
+            int numBytes = addressToSymbolNamesMap.empty() ? 256 : addressToSymbolNamesMap.begin()->first;
+            _tokenMemoryEdits.at(0)->DrawContents(reinterpret_cast<void*>(_tokenMemory), numBytes);
+        }
+        ImGui::EndTabItem();
+    }
+}
+
 void _InspectorWindow::showCompilationResult(CompilationResult const& compilationResult)
 {
     ImGui::Text("Compilation result: ");
@@ -312,5 +357,14 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
             .name("Energy")
             .textWidth(MaxParticleContentTextWidth),
         energy);
+}
+
+float _InspectorWindow::calcWindowWidth() const
+{
+    if (isCell()) {
+        auto cell = std::get<CellDescription>(_editorModel->getInspectedEntity(_entityId));
+        return StyleRepository::getInstance().scaleContent(280.0f + 50.0f * cell.tokens.size());
+    }
+    return StyleRepository::getInstance().scaleContent(280.0f);
 }
 

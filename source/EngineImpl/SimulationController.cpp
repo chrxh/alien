@@ -272,7 +272,7 @@ Settings _SimulationController::getSettings() const
     return _settings;
 }
 
-SymbolMap _SimulationController::getSymbolMap() const
+SymbolMap const& _SimulationController::getSymbolMap() const
 {
     return _symbolMap;
 }

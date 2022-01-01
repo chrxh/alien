@@ -59,6 +59,7 @@ void _SimulationParametersWindow::process()
                     _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[index], index);
                     ++simParametersSpots.numSpots;
                 }
+                AlienImGui::Tooltip("Add spot");
             }
 
             if (ImGui::BeginTabItem("Base", NULL, ImGuiTabItemFlags_None)) {

@@ -29,6 +29,22 @@ namespace
         std::string comp;
     };
 
+    std::string lastChar(std::string const& s)
+    {
+        if (!s.empty()) {
+            return std::string(1, s.back());
+        }
+        return s;
+    }
+
+    std::string lastTwoChars(std::string const& s)
+    {
+        if (s.size() > 1) {
+            return s.substr(s.size() - 2, 2);
+        }
+        return s;
+    }
+
     bool isNameChar(char const& c) { return std::isalnum(c) || (c == ':'); }
 
     bool gotoNextStateAndReturnSuccess(
@@ -131,22 +147,6 @@ namespace
         }
         return true;
     }
-
-    std::string lastChar(std::string const& s)
-    {
-        if (!s.empty()) {
-            return std::string(1, s.back());
-        }
-        return s;
-    }
-
-    std::string lastTwoChars(std::string const& s)
-    {
-        if (s.size() > 1) {
-            return s.substr(s.size() - 2, 2);
-        }
-        return s;
-    };
 
     std::string applyTableToCode(SymbolMap const& symbols, std::string s)
     {
@@ -453,6 +453,28 @@ std::string CellComputationCompiler::decompileSourceCode(
             text += "\n";
     }
     return text;
+}
+
+boost::optional<int> CellComputationCompiler::extractAddress(std::string const& s)
+{
+    try {
+        auto left1 = s.substr(0, 1);
+        auto left2 = s.substr(0, 2);
+        auto right1 = lastChar(s);
+        auto right2 = lastTwoChars(s);
+        if (left1 == "[" && left1 != "[[" && right1 == "]" && right2 != "]]") {
+            auto address = s.substr(1, s.size() - 2);
+            if (s.substr(0, 2) == "0x") {
+                return static_cast<int>(std::stoul(s.substr(2), nullptr, 16));
+            } else {
+                return static_cast<int>(std::stoul(s, nullptr, 10));
+            }
+        }
+        return boost::none;
+    }
+    catch(...) {
+        return boost::none;
+    }
 }
 
 int CellComputationCompiler::getMaxBytes(SimulationParameters const& parameters)

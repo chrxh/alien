@@ -92,7 +92,7 @@ public:
     ENGINEIMPL_EXPORT GeneralSettings getGeneralSettings() const;
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const;
     ENGINEIMPL_EXPORT Settings getSettings() const;
-    ENGINEIMPL_EXPORT SymbolMap getSymbolMap() const;
+    ENGINEIMPL_EXPORT SymbolMap const& getSymbolMap() const;
     ENGINEIMPL_EXPORT OverallStatistics getStatistics() const;
 
     ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;

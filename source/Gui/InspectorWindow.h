@@ -26,17 +26,23 @@ public:
 private:
     bool isCell() const;
     std::string generateTitle() const;
+
     void processCell(CellDescription cell);
-    void processCellGeneralTab(CellDescription& cell);
-    void processCellCodeTab(CellDescription& cell);
-    void processCellMemoryTab(CellDescription& cell);
+    void showCellGeneralTab(CellDescription& cell);
+    void showCellCodeTab(CellDescription& cell);
+    void showCellMemoryTab(CellDescription& cell);
+    void showTokenTab(TokenDescription& cell, int index);
     void showCompilationResult(CompilationResult const& compilationResult);
 
     void processParticle(ParticleDescription particle);
 
+    float calcWindowWidth() const;
+
 private:
     boost::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
     boost::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
+    std::vector<boost::shared_ptr<MemoryEditor>> _tokenMemoryEdits;
+
     boost::shared_ptr<CompilationResult> _lastCompilationResult;
     SimulationController _simController;
     Viewport _viewport; 
@@ -50,4 +56,6 @@ private:
 
     char _cellName[1024];
     char _cellDescription[1024*16];
+
+    char _tokenMemory[256];
 };
