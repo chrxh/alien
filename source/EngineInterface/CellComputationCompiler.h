@@ -21,6 +21,7 @@ public:
     static std::string
     decompileSourceCode(std::string const& data, SymbolMap const& symbols, SimulationParameters const& parameters);
 
+    static boost::optional<int> extractAddress(std::string const& s);
     static int getMaxBytes(SimulationParameters const& parameters);
 
 private:

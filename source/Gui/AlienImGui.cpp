@@ -397,6 +397,17 @@ void AlienImGui::EndToolbarButton()
     ImGui::PopFont();
 }
 
+void AlienImGui::Tooltip(std::string const& text)
+{
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text.c_str());
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
 void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(

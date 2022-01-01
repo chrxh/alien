@@ -59,6 +59,7 @@ void _FlowGeneratorWindow::process()
                 _simController->setOriginalFlowFieldCenter(flowFieldSettings.centers[index], index);
                 ++flowFieldSettings.numCenters;
             }
+            AlienImGui::Tooltip("Add center");
         }
 
         for (int tab = 0; tab < flowFieldSettings.numCenters; ++tab) {
