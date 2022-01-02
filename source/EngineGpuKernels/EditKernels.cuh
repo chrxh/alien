@@ -485,20 +485,41 @@ __global__ void colorSelection(SimulationData data, unsigned char color, bool in
     }
 }
 
-__global__ void changeSimulationData(SimulationData data, DataAccessTO changeDataTO)
+//assumes that *changeDataTO.numCells == 1
+__global__ void changeCell(SimulationData data, DataAccessTO changeDataTO, int numTokenPointers)
 {
-    if (*changeDataTO.numCells == 1) {
-        auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    //delete tokens on cell to be changed
+    {
+        auto const partition = calcAllThreadsPartition(numTokenPointers);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& token = data.entities.tokenPointers.at(index);
+            if (token->cell->id == changeDataTO.cells[0].id) {
+                token = nullptr;
+            }
+        }
+    }
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = data.entities.cellPointers.at(index);
-            auto cellTO = changeDataTO.cells[0];
+            auto const& cellTO = changeDataTO.cells[0];
             if (cell->id == cellTO.id) {
                 EntityFactory entityFactory;
                 entityFactory.init(&data);
                 entityFactory.changeCellFromTO(cellTO, changeDataTO, cell);
+
+                auto tokenSubarray = data.entities.tokens.getNewSubarray(*changeDataTO.numTokens);
+                for (int i = 0; i < *changeDataTO.numTokens; ++i) {
+                    entityFactory.createTokenFromTO(i, changeDataTO.tokens[i], cell, tokenSubarray);
+                }
             }
         }
     }
+}
+
+//assumes that *changeDataTO.numCells == 1
+__global__ void delTokens(SimulationData data, DataAccessTO changeDataTO)
+{
 }
 
 /************************************************************************/
@@ -648,5 +669,8 @@ __global__ void cudaColorSelectedEntities(SimulationData data, unsigned char col
 
 __global__ void cudaChangeSimulationData(SimulationData data, DataAccessTO changeDataTO)
 {
-    KERNEL_CALL(changeSimulationData, data, changeDataTO);
+    if (*changeDataTO.numCells == 1) {
+        KERNEL_CALL(changeCell, data, changeDataTO, data.entities.tokenPointers.getNumEntries());
+        KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
+    }
 }

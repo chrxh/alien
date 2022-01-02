@@ -150,7 +150,7 @@ namespace
 void _InspectorWindow::processCell(CellDescription cell)
 {
     if (ImGui::BeginTabBar(
-            "##CellInspect", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+            "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
         showCellGeneralTab(cell);
         if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTATION) {

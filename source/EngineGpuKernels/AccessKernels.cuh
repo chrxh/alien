@@ -370,7 +370,7 @@ __global__ void createDataFromTO(
     auto tokenPartition =
         calcPartition(*simulationTO.numTokens, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = tokenPartition.startIndex; index <= tokenPartition.endIndex; ++index) {
-        factory.createTokenFromTO(index, simulationTO.tokens[index], cellTargetArray, tokenTargetArray, &simulationTO);
+        factory.createTokenFromTO(index, simulationTO.tokens[index], cellTargetArray, tokenTargetArray);
     }
 }
 

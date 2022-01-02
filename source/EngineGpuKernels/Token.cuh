@@ -6,9 +6,11 @@
 struct Token
 {
     char memory[MAX_TOKEN_MEM_SIZE];
-    Cell* sourceCell;
     Cell* cell;
     float energy;
+
+    //only for temporary usage
+    Cell* sourceCell;
 
     __inline__ __device__ int getTokenBranchNumber()
     {
