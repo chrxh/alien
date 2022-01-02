@@ -88,6 +88,16 @@ ManipulatorWindow _EditorController::getManipulatorWindow() const
     return _manipulatorWindow;
 }
 
+bool _EditorController::areInspectionWindowsActive() const
+{
+    return !_inspectorWindows.empty();
+}
+
+void _EditorController::onCloseAllInspectorWindows()
+{
+    _inspectorWindows.clear();
+}
+
 void _EditorController::processSelectionRect()
 {
     if (_selectionRect) {
@@ -186,18 +196,19 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
     auto viewSize = _viewport->getViewSize();
-    auto viewRadius = std::min(viewSize.x, viewSize.y) / 2;
-    auto factor = maxDistanceFromCenter == 0 ? 1.0f : viewRadius / maxDistanceFromCenter / 1.2f;
+    auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 2.8f;
+    auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 2.4f;
 
     for (auto const& entity : newEntities) {
         auto id = DescriptionHelper::getId(entity);
         _editorModel->addInspectedEntity(entity);
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        auto windowPos = (entityPos - center) * factor + center;
-        windowPos.x = std::min(std::max(windowPos.x, 0.0f), toFloat(viewSize.x) - 100.0f) + 40.0f;
-        windowPos.y = std::min(std::max(windowPos.y, 0.0f), toFloat(viewSize.y) - 100.0f) + 40.0f;
-        _inspectorWindows.emplace_back(
-            boost::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, id, windowPos));
+        auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
+        auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
+        windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 200.0f) + 40.0f;
+        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 200.0f) + 40.0f;
+        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(
+            _simController, _viewport, _editorModel, id, RealVector2D{windowPosX, windowPosY}));
     }
 }
 

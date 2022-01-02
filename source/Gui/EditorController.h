@@ -19,6 +19,9 @@ public:
     SelectionWindow getSelectionWindow() const;
     ManipulatorWindow getManipulatorWindow() const;
 
+    bool areInspectionWindowsActive() const;
+    void onCloseAllInspectorWindows();
+
 private:
     void processSelectionRect();
     void processInspectorWindows();

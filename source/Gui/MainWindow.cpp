@@ -408,6 +408,13 @@ void _MainWindow::processMenubar()
                 manipulatorWindow->setOn(!manipulatorWindow->isOn());
             }
             ImGui::EndDisabled();
+            ImGui::BeginDisabled(
+                _ModeWindow::Mode::Navigation == _modeWindow->getMode()
+                || !_editorController->areInspectionWindowsActive());
+            if (ImGui::MenuItem("Close inspections", "ESC")) {
+                _editorController->onCloseAllInspectorWindows();
+            }
+            ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
         }
 
@@ -500,6 +507,9 @@ void _MainWindow::processMenubar()
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
         manipulatorWindow->setOn(!manipulatorWindow->isOn());
+    }
+    if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
+        _editorController->onCloseAllInspectorWindows();
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
