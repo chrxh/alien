@@ -124,7 +124,6 @@ void DataConverter::convertCellDescriptionToAccessTO(DataAccessTO& result, CellD
 {
     unordered_map<uint64_t, int> cellIndexByIds;
     addCell(result, cell, cellIndexByIds);
-    *result.numTokens = 0;
 }    
 
 namespace

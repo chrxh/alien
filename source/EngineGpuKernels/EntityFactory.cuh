@@ -21,12 +21,8 @@ public:
     __inline__ __device__ Cell*
     createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
     __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
-    __inline__ __device__ Token* createTokenFromTO(
-        int targetIndex,
-        TokenAccessTO const& tokenTO,
-        Cell* cellArray,
-        Token* tokenArray,
-        DataAccessTO* simulationTO);
+    __inline__ __device__ Token*
+    createTokenFromTO(int targetIndex, TokenAccessTO const& tokenTO, Cell* cellArray, Token* tokenArray);
     __inline__ __device__ Particle*
     createParticle(
         float energy,
@@ -210,8 +206,7 @@ __inline__ __device__ Token* EntityFactory::createTokenFromTO(
     int targetIndex,
     TokenAccessTO const& tokenTO,
     Cell* cellArray,
-    Token* tokenArray,
-    DataAccessTO* simulationTO)
+    Token* tokenArray)
 {
     Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
     Token* token = tokenArray + targetIndex;
