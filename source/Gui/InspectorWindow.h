@@ -31,7 +31,9 @@ private:
     void showCellGeneralTab(CellDescription& cell);
     void showCellCodeTab(CellDescription& cell);
     void showCellMemoryTab(CellDescription& cell);
+    void showCellInOutTab(CellDescription& cell);
     void showTokenTab(TokenDescription& cell, int index);
+    void showTokenMemorySection(int address, int numBytes, int& currentMemoryEditIndex);
     void showCompilationResult(CompilationResult const& compilationResult);
 
     void processParticle(ParticleDescription particle);

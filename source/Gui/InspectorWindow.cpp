@@ -4,6 +4,7 @@
 #include <imgui.h>
 
 #include "ImguiMemoryEditor/imgui_memory_editor.h"
+#include "IconFontCppHeaders/IconsFontAwesome5.h"
 
 #include "EngineInterface/CellComputationCompiler.h"
 #include "EngineInterface/DescriptionHelper.h"
@@ -47,12 +48,15 @@ _InspectorWindow::_InspectorWindow(
     _cellDataMemoryEdit->OptMidColsCount = 0;
     _cellDataMemoryEdit->Cols = 8;
 
-    auto tokenMemoryEdit = boost::make_shared<MemoryEditor>();
-    tokenMemoryEdit->OptShowOptions = false;
-    tokenMemoryEdit->OptShowAscii = false;
-    tokenMemoryEdit->OptMidColsCount = 0;
-    tokenMemoryEdit->Cols = 8;
-    _tokenMemoryEdits.emplace_back(tokenMemoryEdit);
+    auto const& parameters = _simController->getSimulationParameters();
+    for (int i = 0; i < parameters.tokenMemorySize; ++i) {
+        auto tokenMemoryEdit = boost::make_shared<MemoryEditor>();
+        tokenMemoryEdit->OptShowOptions = false;
+        tokenMemoryEdit->OptShowAscii = false;
+        tokenMemoryEdit->OptMidColsCount = 0;
+        tokenMemoryEdit->Cols = 8;
+        _tokenMemoryEdits.emplace_back(tokenMemoryEdit);
+    }
 }
 
 _InspectorWindow::~_InspectorWindow() {}
@@ -70,37 +74,36 @@ void _InspectorWindow::process()
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
     auto entity = _editorModel->getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on)) {
+        auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
             processCell(std::get<CellDescription>(entity));
         } else {
             processParticle(std::get<ParticleDescription>(entity));
         }
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto factor = StyleRepository::getInstance().scaleContent(1);
+
+        drawList->AddLine(
+            {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
+            {entityPos.x, entityPos.y},
+            Const::InspectorLineColor,
+            1.5f);
+        drawList->AddRectFilled(
+            {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
+            {windowPos.x + 25.0f * factor, windowPos.y},
+            Const::InspectorRectColor,
+            1.0,
+            0);
+        drawList->AddRect(
+            {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
+            {windowPos.x + 25.0f * factor, windowPos.y},
+            Const::InspectorLineColor,
+            1.0,
+            0,
+            2.0f);
     }
-    auto windowPos = ImGui::GetWindowPos();
     ImGui::End();
-
-    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-    auto factor = StyleRepository::getInstance().scaleContent(1);
-
-    drawList->AddLine(
-        {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
-        {entityPos.x, entityPos.y},
-        Const::InspectorLineColor,
-        1.5f);
-    drawList->AddRectFilled(
-        {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
-        {windowPos.x + 25.0f * factor, windowPos.y},
-        Const::InspectorRectColor,
-        1.0,
-        0);
-    drawList->AddRect(
-        {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
-        {windowPos.x + 25.0f * factor, windowPos.y},
-        Const::InspectorLineColor,
-        1.0,
-        0,
-        2.0f);
 }
 
 bool _InspectorWindow::isClosed() const
@@ -153,6 +156,8 @@ void _InspectorWindow::processCell(CellDescription cell)
         if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTATION) {
             showCellCodeTab(cell);
             showCellMemoryTab(cell);
+        } else {
+            showCellInOutTab(cell);
         }
         for (int i = 0; i < cell.tokens.size(); ++i) {
             showTokenTab(cell.tokens.at(i), i);
@@ -308,9 +313,19 @@ void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
     }
 }
 
+void _InspectorWindow::showCellInOutTab(CellDescription& cell)
+{
+    if (ImGui::BeginTabItem(ICON_FA_EXCHANGE_ALT " In/out channels", nullptr, ImGuiTabItemFlags_None)) {
+
+        ImGui::EndTabItem();
+    }
+}
+
 void _InspectorWindow::showTokenTab(TokenDescription& token, int index)
 {
     if (ImGui::BeginTabItem(("Token " + std::to_string(index + 1)).c_str(), nullptr, ImGuiTabItemFlags_None)) {
+        auto parameters = _simController->getSimulationParameters();
+
         AlienImGui::Group("Properties");
         auto energy = toFloat(token.energy);
         AlienImGui::InputFloat(
@@ -318,6 +333,9 @@ void _InspectorWindow::showTokenTab(TokenDescription& token, int index)
         token.energy = energy;
 
         AlienImGui::Group("Memory");
+        auto dataSize = token.data.size();
+        token.data.copy(_tokenMemory, dataSize);
+
         std::map<int, std::vector<std::string>> addressToSymbolNamesMap;
         auto const& symbolMap = _simController->getSymbolMap();
         for (auto const& [key, value] : symbolMap) {
@@ -325,11 +343,47 @@ void _InspectorWindow::showTokenTab(TokenDescription& token, int index)
                 addressToSymbolNamesMap[*address].emplace_back(value);
             }
         }
+        int currentMemoryEditIndex = 0;
         if (addressToSymbolNamesMap.empty() || addressToSymbolNamesMap.begin()->first != 0) {
             int numBytes = addressToSymbolNamesMap.empty() ? 256 : addressToSymbolNamesMap.begin()->first;
-            _tokenMemoryEdits.at(0)->DrawContents(reinterpret_cast<void*>(_tokenMemory), numBytes);
+            showTokenMemorySection(0, numBytes, currentMemoryEditIndex);
         }
+
+        boost::optional<int> lastAddress;
+        for (auto const& [address, symbolNames] : addressToSymbolNamesMap) {
+            if (lastAddress) {
+                showTokenMemorySection(*lastAddress + 1, address - *lastAddress - 1, currentMemoryEditIndex);
+            }
+            showTokenMemorySection(address, 1, currentMemoryEditIndex);
+            lastAddress = address;
+        }
+
+        if (!addressToSymbolNamesMap.empty()
+            && addressToSymbolNamesMap.rbegin()->first < parameters.tokenMemorySize - 1) {
+            auto lastAddress = addressToSymbolNamesMap.rbegin()->first;
+            showTokenMemorySection(
+                lastAddress + 1, parameters.tokenMemorySize - lastAddress - 1, currentMemoryEditIndex);
+        }
+
+        token.data = std::string(_tokenMemory, dataSize);
         ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::showTokenMemorySection(int address, int numBytes, int& currentMemoryEditIndex)
+{
+    ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+    int height = ImGui::GetTextLineHeight() * ((numBytes + 7) / 8);
+    ImGui::BeginChild(
+        ("##TokenMemorySection" + std::to_string(currentMemoryEditIndex)).c_str(), ImVec2(0, height), false, 0);
+    currentMemoryEditIndex++;
+    _tokenMemoryEdits.at(currentMemoryEditIndex++)
+        ->DrawContents(reinterpret_cast<void*>(&_tokenMemory[address]), numBytes, address);
+    ImGui::EndChild();
+    ImGui::PopFont();
+    auto parameters = _simController->getSimulationParameters();
+    if (address + numBytes < parameters.tokenMemorySize) {
+        AlienImGui::Separator();
     }
 }
 
