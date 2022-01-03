@@ -277,6 +277,7 @@ __global__ void getTokenData(SimulationData data, DataAccessTO accessTO)
             tokenTO.memory[i] = token->memory[i];
         }
         tokenTO.cellIndex = token->cell->tag;
+        tokenTO.sequenceNumber = tokenIndex;
     }
 }
 

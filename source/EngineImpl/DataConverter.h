@@ -14,7 +14,9 @@ class DataConverter
 public:
     DataConverter(SimulationParameters const& parameters, GpuSettings const& gpuConstants);
 
-    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO) const;
+    enum class SortTokens {No, Yes};
+    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens = SortTokens::No)
+        const;
     OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO) const;
     void convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const;
     void convertCellDescriptionToAccessTO(DataAccessTO& result, CellDescription const& cell) const;

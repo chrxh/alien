@@ -44,6 +44,9 @@ struct TokenDescription
     double energy = 0;
     std::string data;
 
+    //only for temporary use
+    int sequenceNumber = 0;
+
     TokenDescription& setEnergy(double value)
     {
         energy = value;
@@ -54,7 +57,15 @@ struct TokenDescription
         data = value;
         return *this;
     }
-    bool operator==(TokenDescription const& other) const { return energy == other.energy && data == other.data; }
+    TokenDescription& setSequenceNumber(int value)
+    {
+        sequenceNumber = value;
+        return *this;
+    }
+    bool operator==(TokenDescription const& other) const
+    {
+        return energy == other.energy && data == other.data && sequenceNumber == other.sequenceNumber;
+    }
     bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
