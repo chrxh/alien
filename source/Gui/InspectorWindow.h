@@ -32,7 +32,7 @@ private:
     void showCellCodeTab(CellDescription& cell);
     void showCellMemoryTab(CellDescription& cell);
     void showCellInOutTab(CellDescription& cell);
-    void showTokenTab(TokenDescription& cell, int index);
+    void showTokenTab(CellDescription& cell, int tokenIndex);
     void showTokenMemorySection(int address, int numBytes, int& currentMemoryEditIndex);
     void showCompilationResult(CompilationResult const& compilationResult);
 
@@ -40,6 +40,7 @@ private:
 
     float calcWindowWidth() const;
     void addToken(CellDescription& cell);
+    void delToken(CellDescription& cell, int index);
 
 private:
     boost::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
