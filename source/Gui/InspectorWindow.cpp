@@ -3,6 +3,8 @@
 #include <sstream>
 #include <imgui.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include "ImguiMemoryEditor/imgui_memory_editor.h"
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
@@ -18,7 +20,7 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const MaxCellContentTextWidth = 110.0f;
+    auto const MaxCellContentTextWidth = 120.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
     auto const CellFunctions =
         std::vector{"Computation"s, "Propulsion"s, "Scanner"s, "Digestion"s, "Constructor"s, "Sensor"s, "Muscle"s};
@@ -73,7 +75,7 @@ void _InspectorWindow::process()
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
     auto entity = _editorModel->getInspectedEntity(_entityId);
-    if (ImGui::Begin(generateTitle().c_str(), &_on)) {
+    if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
             processCell(std::get<CellDescription>(entity));
@@ -358,7 +360,7 @@ void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
             if (lastAddress) {
                 showTokenMemorySection(*lastAddress + 1, address - *lastAddress - 1, currentMemoryEditIndex);
             }
-            showTokenMemorySection(address, 1, currentMemoryEditIndex);
+            showTokenMemorySection(address, 1, currentMemoryEditIndex, symbolNames);
             lastAddress = address;
         }
 
@@ -377,7 +379,11 @@ void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
     }
 }
 
-void _InspectorWindow::showTokenMemorySection(int address, int numBytes, int& currentMemoryEditIndex)
+void _InspectorWindow::showTokenMemorySection(
+    int address,
+    int numBytes,
+    int& currentMemoryEditIndex,
+    std::vector<std::string> const& symbols)
 {
     ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
     int height = ImGui::GetTextLineHeight() * ((numBytes + 7) / 8);
@@ -387,7 +393,14 @@ void _InspectorWindow::showTokenMemorySection(int address, int numBytes, int& cu
     _tokenMemoryEdits.at(currentMemoryEditIndex++)
         ->DrawContents(reinterpret_cast<void*>(&_tokenMemory[address]), numBytes, address);
     ImGui::EndChild();
+
+    ImGui::SameLine();
+    ImGui::SetCursorPosX(StyleRepository::getInstance().scaleContent(205.0f));
+
+    auto text = !symbols.empty() ? boost::join(symbols, "\n") : std::string("unnamed block");
+    ImGui::TextUnformatted(text.c_str());
     ImGui::PopFont();
+
     auto parameters = _simController->getSimulationParameters();
     if (address + numBytes < parameters.tokenMemorySize) {
         AlienImGui::Separator();
