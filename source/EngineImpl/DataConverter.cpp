@@ -16,7 +16,7 @@ DataConverter::DataConverter(
 {
 }
 
-DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO) const
+DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens) const
 {
 	DataDescription result;
 
@@ -55,8 +55,20 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO con
         auto clusterDescIndex = cellTOIndexToClusterDescIndex.at(token.cellIndex);
         auto cellDescIndex = cellTOIndexToCellDescIndex.at(token.cellIndex);
         CellDescription& cell = result.clusters.at(clusterDescIndex).cells.at(cellDescIndex);
-
-        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data));
+        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data).setSequenceNumber(token.sequenceNumber));
+    }
+    //sort tokens by sequence number
+    if (sortTokens == SortTokens::Yes) {
+        for (auto& cluster : result.clusters) {
+            for (auto& cell : cluster.cells) {
+                std::sort(
+                    cell.tokens.begin(),
+                    cell.tokens.end(),
+                    [](TokenDescription const& left, TokenDescription const& right) {
+                        return left.sequenceNumber < right.sequenceNumber;
+                    });
+            }
+        }
     }
 
     //particles

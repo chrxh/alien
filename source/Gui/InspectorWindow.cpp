@@ -164,7 +164,9 @@ void _InspectorWindow::processCell(CellDescription cell)
         }
         auto const& parameters = _simController->getSimulationParameters();
         if (cell.tokens.size() < parameters.cellMaxToken) {
-            ImGui::TabItemButton("+", ImGuiTabItemFlags_SetSelected);
+            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_SetSelected)) {
+                addToken(cell);
+            }
             AlienImGui::Tooltip("Add token");
         }
         ImGui::EndTabBar();
@@ -420,5 +422,14 @@ float _InspectorWindow::calcWindowWidth() const
         return StyleRepository::getInstance().scaleContent(280.0f + 50.0f * cell.tokens.size());
     }
     return StyleRepository::getInstance().scaleContent(280.0f);
+}
+
+void _InspectorWindow::addToken(CellDescription& cell)
+{
+    auto const& parameters = _simController->getSimulationParameters();
+
+    cell.addToken(TokenDescription()
+                      .setEnergy(parameters.tokenMinEnergy * 2)
+                      .setData(std::string(parameters.tokenMemorySize, 0)));
 }
 
