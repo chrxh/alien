@@ -160,7 +160,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             showCellInOutTab(cell);
         }
         for (int i = 0; i < cell.tokens.size(); ++i) {
-            showTokenTab(cell.tokens.at(i), i);
+            showTokenTab(cell, i);
         }
         auto const& parameters = _simController->getSimulationParameters();
         if (cell.tokens.size() < parameters.cellMaxToken) {
@@ -323,12 +323,14 @@ void _InspectorWindow::showCellInOutTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showTokenTab(TokenDescription& token, int index)
+void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
 {
-    if (ImGui::BeginTabItem(("Token " + std::to_string(index + 1)).c_str(), nullptr, ImGuiTabItemFlags_None)) {
+    bool open = true;
+    if (ImGui::BeginTabItem(("Token " + std::to_string(tokenIndex + 1)).c_str(), &open, ImGuiTabItemFlags_None)) {
         auto parameters = _simController->getSimulationParameters();
 
         AlienImGui::Group("Properties");
+        auto& token = cell.tokens.at(tokenIndex);
         auto energy = toFloat(token.energy);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
@@ -369,6 +371,9 @@ void _InspectorWindow::showTokenTab(TokenDescription& token, int index)
 
         token.data = std::string(_tokenMemory, dataSize);
         ImGui::EndTabItem();
+    }
+    if (!open) {
+        delToken(cell, tokenIndex);
     }
 }
 
@@ -431,5 +436,10 @@ void _InspectorWindow::addToken(CellDescription& cell)
     cell.addToken(TokenDescription()
                       .setEnergy(parameters.tokenMinEnergy * 2)
                       .setData(std::string(parameters.tokenMemorySize, 0)));
+}
+
+void _InspectorWindow::delToken(CellDescription& cell, int index)
+{
+    cell.tokens.erase(cell.tokens.begin() + index);
 }
 
