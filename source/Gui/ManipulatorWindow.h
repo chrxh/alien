@@ -19,8 +19,10 @@ public:
     bool isOn() const;
     void setOn(bool value);
 
+    bool isInspectionPossible() const;
+    void onInspectEntities();
+
 private:
-    void onInspect();
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 

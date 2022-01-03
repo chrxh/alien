@@ -98,6 +98,16 @@ void _EditorController::onCloseAllInspectorWindows()
     _inspectorWindows.clear();
 }
 
+bool _EditorController::isInspectionPossible() const
+{
+    return _manipulatorWindow->isInspectionPossible();
+}
+
+void _EditorController::onInspectEntities() const
+{
+    _manipulatorWindow->onInspectEntities();
+}
+
 void _EditorController::processSelectionRect()
 {
     if (_selectionRect) {
