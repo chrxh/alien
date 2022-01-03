@@ -221,7 +221,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> e
 
     DataConverter converter(_settings.simulationParameters, _gpuConstants);
 
-    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    auto result = converter.convertAccessTOtoDataDescription(dataTO, DataConverter::SortTokens::Yes);
     _dataTOCache->releaseDataTO(dataTO);
 
     return result;

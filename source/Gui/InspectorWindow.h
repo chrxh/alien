@@ -39,6 +39,7 @@ private:
     void processParticle(ParticleDescription particle);
 
     float calcWindowWidth() const;
+    void addToken(CellDescription& cell);
 
 private:
     boost::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
