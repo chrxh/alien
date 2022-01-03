@@ -33,7 +33,11 @@ private:
     void showCellMemoryTab(CellDescription& cell);
     void showCellInOutTab(CellDescription& cell);
     void showTokenTab(CellDescription& cell, int tokenIndex);
-    void showTokenMemorySection(int address, int numBytes, int& currentMemoryEditIndex);
+    void showTokenMemorySection(
+        int address,
+        int numBytes,
+        int& currentMemoryEditIndex,
+        std::vector<std::string> const& symbols = {});
     void showCompilationResult(CompilationResult const& compilationResult);
 
     void processParticle(ParticleDescription particle);
