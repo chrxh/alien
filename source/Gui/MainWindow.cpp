@@ -410,6 +410,13 @@ void _MainWindow::processMenubar()
             ImGui::EndDisabled();
             ImGui::BeginDisabled(
                 _ModeWindow::Mode::Navigation == _modeWindow->getMode()
+                || !_editorController->isInspectionPossible());
+            if (ImGui::MenuItem("Inspect entities", "ALT+N")) {
+                _editorController->onInspectEntities();
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(
+                _ModeWindow::Mode::Navigation == _modeWindow->getMode()
                 || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
@@ -507,6 +514,9 @@ void _MainWindow::processMenubar()
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
         manipulatorWindow->setOn(!manipulatorWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
+        _editorController->onInspectEntities();
     }
     if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
         _editorController->onCloseAllInspectorWindows();

@@ -22,6 +22,9 @@ public:
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
 
+    bool isInspectionPossible() const;
+    void onInspectEntities() const;
+
 private:
     void processSelectionRect();
     void processInspectorWindows();

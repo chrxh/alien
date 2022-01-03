@@ -110,10 +110,9 @@ void _ManipulatorWindow::process()
 
             //inspector button
             ImGui::SameLine();
-            ImGui::BeginDisabled(
-                _editorModel->isSelectionEmpty() || selection.numCells + selection.numParticles > MaxInspectorWindowsToAdd);
+            ImGui::BeginDisabled(!isInspectionPossible());
             if (AlienImGui::BeginToolbarButton(ICON_FA_MICROSCOPE)) {
-                onInspect();
+                onInspectEntities();
             }
             AlienImGui::EndToolbarButton();
             ImGui::EndDisabled();
@@ -274,7 +273,13 @@ void _ManipulatorWindow::setOn(bool value)
     _on = value;
 }
 
-void _ManipulatorWindow::onInspect()
+bool _ManipulatorWindow::isInspectionPossible() const
+{
+    auto selection = _editorModel->getSelectionShallowData();
+    return !_editorModel->isSelectionEmpty() && selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd;
+}
+
+void _ManipulatorWindow::onInspectEntities()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(false);
     _editorModel->inspectEntities(DescriptionHelper::getEntities(selectedData));
