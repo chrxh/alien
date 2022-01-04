@@ -147,6 +147,10 @@ namespace
             || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
             || left.tokens != right.tokens;
     }
+    bool hasChanges(ParticleDescription const& left, ParticleDescription const& right)
+    {
+        return left.energy != right.energy;
+    }
 }
 
 void _InspectorWindow::processCell(CellDescription cell)
@@ -425,12 +429,18 @@ void _InspectorWindow::showCompilationResult(CompilationResult const& compilatio
 
 void _InspectorWindow::processParticle(ParticleDescription particle)
 {
+    auto origParticle = particle;
     auto energy = toFloat(particle.energy);
     AlienImGui::InputFloat(
         AlienImGui::InputFloatParameters()
             .name("Energy")
             .textWidth(MaxParticleContentTextWidth),
         energy);
+
+    particle.energy = energy;
+    if (hasChanges(particle, origParticle)) {
+        _simController->changeParticle(particle);
+    }
 }
 
 float _InspectorWindow::calcWindowWidth() const
