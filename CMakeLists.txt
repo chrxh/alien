@@ -32,7 +32,16 @@ add_compile_definitions(ALIEN_STATIC)
 if (MSVC)
     # Suppress `warning C4005: 'FOO': macro redefinition`
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-wd4005>)
+    
+    # Treat warnings as errors
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-WX>)
+else()
+    # Treat warnings as errors
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Werror>)
 endif()
+
+# Treat all NVCC (CUDA) warnings as errors
+add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
 
 add_executable(alien)
 

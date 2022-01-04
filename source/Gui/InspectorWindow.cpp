@@ -422,7 +422,7 @@ void _InspectorWindow::showCompilationResult(CompilationResult const& compilatio
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.05, 1.0, 1.0));
         ImGui::SameLine();
-        ImGui::Text(("Error at line " + std::to_string(compilationResult.lineOfFirstError)).c_str());
+        ImGui::TextUnformatted(("Error at line " + std::to_string(compilationResult.lineOfFirstError)).c_str());
         ImGui::PopStyleColor();
     }
 }
