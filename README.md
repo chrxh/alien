@@ -54,34 +54,16 @@ git clone --recursive https://github.com/chrxh/alien.git
 ```
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
-### Build instructions for Windows
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/) (or an alternative tool chain)
+### Build instructions
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [Visual Studio 2019](https://visualstudio.microsoft.com/de/free-developer-offers/))
 
 Build steps:
 ```
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release
+cmake --build . --config Release -j8
 ```
-If the compilation was successful, the alien executable is located in:
-```
-.\Release\alien.exe
-```
-
-### Build instructions for Linux
-
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and GCC 9.x+
-
-Build steps:
-```
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j8
-```
-If everything goes well, the alien executable can be found under the build directory:
-```
-./alien
-```
+If everything goes well, the alien executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).
