@@ -518,8 +518,18 @@ __global__ void changeCell(SimulationData data, DataAccessTO changeDataTO, int n
 }
 
 //assumes that *changeDataTO.numCells == 1
-__global__ void delTokens(SimulationData data, DataAccessTO changeDataTO)
+__global__ void changeParticle(SimulationData data, DataAccessTO changeDataTO)
 {
+    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        auto const& particleTO = changeDataTO.particles[0];
+        if (particle->id == particleTO.id) {
+            EntityFactory entityFactory;
+            entityFactory.init(&data);
+            entityFactory.changeParticleFromTO(particleTO, particle);
+        }
+    }
 }
 
 /************************************************************************/
@@ -671,6 +681,9 @@ __global__ void cudaChangeSimulationData(SimulationData data, DataAccessTO chang
 {
     if (*changeDataTO.numCells == 1) {
         KERNEL_CALL(changeCell, data, changeDataTO, data.entities.tokenPointers.getNumEntries());
-        KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
     }
+    if (*changeDataTO.numParticles == 1) {
+        KERNEL_CALL(changeParticle, data, changeDataTO);
+    }
+    KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
 }

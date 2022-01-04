@@ -328,6 +328,21 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
     _dataTOCache->releaseDataTO(dataTO);
 }
 
+void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
+{
+    CudaAccess access(
+        _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
+
+    auto dataTO = provideTO();
+
+    DataConverter converter(_settings.simulationParameters, _gpuConstants);
+    converter.convertParticleDescriptionToAccessTO(dataTO, changedParticle);
+
+    _cudaSimulation->changeInspectedSimulationData(dataTO);
+
+    _dataTOCache->releaseDataTO(dataTO);
+}
+
 void EngineWorker::calcSingleTimestep()
 {
     CudaAccess access(

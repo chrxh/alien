@@ -20,6 +20,7 @@ public:
     OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO) const;
     void convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const;
     void convertCellDescriptionToAccessTO(DataAccessTO& result, CellDescription const& cell) const;
+    void convertParticleDescriptionToAccessTO(DataAccessTO& result, ParticleDescription const& particle) const;
 
 private:
 	struct CreateClusterReturnData
