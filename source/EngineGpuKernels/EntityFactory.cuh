@@ -23,6 +23,7 @@ public:
     __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
     __inline__ __device__ Token*
     createTokenFromTO(int targetIndex, TokenAccessTO const& tokenTO, Cell* cellArray, Token* tokenArray);
+    __inline__ __device__ void changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle*
     createParticle(
         float energy,
@@ -219,6 +220,13 @@ __inline__ __device__ Token* EntityFactory::createTokenFromTO(
     token->cell = cellArray + tokenTO.cellIndex;
     token->sourceCell = token->cell;
     return token;
+}
+
+__inline__ __device__ void EntityFactory::changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle)
+{
+    particle->energy = particleTO.energy;
+    particle->absPos = particleTO.pos;
+    particle->metadata.color = particleTO.metadata.color;
 }
 
 __inline__ __device__ void

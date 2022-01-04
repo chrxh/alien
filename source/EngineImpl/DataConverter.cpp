@@ -136,6 +136,11 @@ void DataConverter::convertCellDescriptionToAccessTO(DataAccessTO& result, CellD
 {
     unordered_map<uint64_t, int> cellIndexByIds;
     addCell(result, cell, cellIndexByIds);
+}
+
+void DataConverter::convertParticleDescriptionToAccessTO(DataAccessTO& result, ParticleDescription const& particle) const
+{
+    addParticle(result, particle);
 }    
 
 namespace

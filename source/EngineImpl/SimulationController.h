@@ -48,6 +48,7 @@ public:
     ENGINEIMPL_EXPORT void removeSelectedEntities(bool includeClusters);
     ENGINEIMPL_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters);
     ENGINEIMPL_EXPORT void changeCell(CellDescription const& changedCell);
+    ENGINEIMPL_EXPORT void changeParticle(ParticleDescription const& changedParticle);
 
     ENGINEIMPL_EXPORT void calcSingleTimestep();
     ENGINEIMPL_EXPORT void runSimulation();

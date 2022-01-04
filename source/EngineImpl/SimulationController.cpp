@@ -92,6 +92,11 @@ void _SimulationController::changeCell(CellDescription const& changedCell)
     _worker.changeCell(changedCell);
 }
 
+void _SimulationController::changeParticle(ParticleDescription const& changedParticle)
+{
+    _worker.changeParticle(changedParticle);
+}
+
 void _SimulationController::calcSingleTimestep()
 {
     _worker.calcSingleTimestep();

@@ -64,6 +64,7 @@ public:
     void setSimulationData(DataDescription const& dataToUpdate);
     void removeSelectedEntities(bool includeClusters);
     void changeCell(CellDescription const& changedCell);
+    void changeParticle(ParticleDescription const& changedParticle);
 
     void calcSingleTimestep();
 
