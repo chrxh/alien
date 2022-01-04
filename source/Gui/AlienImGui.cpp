@@ -150,7 +150,19 @@ void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& paramete
     ImGui::TextUnformatted(parameters._name.c_str());
 }
 
-bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
+namespace
+{
+    auto vectorGetter = [](void* vec, int idx, const char** outText) {
+        auto& vector = *static_cast<std::vector<std::string>*>(vec);
+        if (idx < 0 || idx >= static_cast<int>(vector.size())) {
+            return false;
+        }
+        *outText = vector.at(idx).c_str();
+        return true;
+    };
+}
+
+bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
 
@@ -160,7 +172,9 @@ bool AlienImGui::Combo(ComboParameters const& parameters, int& value)
     }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    auto result = ImGui::Combo("##", &value, items, toInt(parameters._values.size()));
+    auto values = parameters._values;
+    auto result = ImGui::Combo(
+        ("##" + parameters._name).c_str(), &value, vectorGetter, static_cast<void*>(&values), values.size());
     ImGui::PopItemWidth();
 
     ImGui::SameLine();

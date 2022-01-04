@@ -85,7 +85,7 @@ public:
         MEMBER_DECLARATION(ComboParameters, int, defaultValue, 0);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
     };
-    static bool Combo(ComboParameters const& parameters, int& value);
+    static bool Combo(ComboParameters& parameters, int& value);
 
     struct CheckBoxParameters
     {
