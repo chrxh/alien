@@ -172,9 +172,12 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    auto values = parameters._values;
     auto result = ImGui::Combo(
-        ("##" + parameters._name).c_str(), &value, vectorGetter, static_cast<void*>(&values), values.size());
+        ("##" + parameters._name).c_str(),
+        &value,
+        vectorGetter,
+        static_cast<void*>(&parameters._values),
+        parameters._values.size());
     ImGui::PopItemWidth();
 
     ImGui::SameLine();
