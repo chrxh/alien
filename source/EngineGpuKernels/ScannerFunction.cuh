@@ -44,7 +44,7 @@ __inline__ __device__ void ScannerFunction::processing(Token* token, SimulationD
         tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = 0;
         lookupResult.prevPrevCell = lookupResult.prevCell;
         lookupResult.prevCell = lookupResult.cell;
-        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::RESTART;
+        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::FINISHED;
     }
 
     //no restart? => increase cell number

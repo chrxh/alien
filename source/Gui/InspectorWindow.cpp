@@ -163,7 +163,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             showCellCodeTab(cell);
             showCellMemoryTab(cell);
         } else {
-            showCellInOutTab(cell);
+            showCellInOutChannelTab(cell);
         }
         for (int i = 0; i < cell.tokens.size(); ++i) {
             showTokenTab(cell, i);
@@ -321,9 +321,24 @@ void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showCellInOutTab(CellDescription& cell)
+void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem(ICON_FA_EXCHANGE_ALT " In/out channels", nullptr, ImGuiTabItemFlags_None)) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Const::InfoTextColor));
+        AlienImGui::Text("This is a pure information tab.");
+        ImGui::PopStyleColor();
+        
+        if (ImGui::BeginTable(
+                "##Input", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter)) {
+            ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("Semantic", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+            ImGui::TableNextRow();
+            if (cell.cellFeature.getType() == Enums::CellFunction::SCANNER) {
+                showScannerInfo();
+            }
+            ImGui::EndTable();
+        }
 
         ImGui::EndTabItem();
     }
@@ -402,7 +417,7 @@ void _InspectorWindow::showTokenMemorySection(
     ImGui::SetCursorPosX(StyleRepository::getInstance().scaleContent(205.0f));
 
     auto text = !symbols.empty() ? boost::join(symbols, "\n") : std::string("unnamed block");
-    ImGui::TextUnformatted(text.c_str());
+    AlienImGui::Text(text);
     ImGui::PopFont();
 
     auto parameters = _simController->getSimulationParameters();
@@ -415,14 +430,14 @@ void _InspectorWindow::showCompilationResult(CompilationResult const& compilatio
 {
     ImGui::Text("Compilation result: ");
     if (compilationResult.compilationOk) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.3, 1.0, 1.0));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::CompilationSuccessColor);
         ImGui::SameLine();
         ImGui::Text("Success");
         ImGui::PopStyleColor();
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.05, 1.0, 1.0));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::CompilationErrorColor);
         ImGui::SameLine();
-        ImGui::TextUnformatted(("Error at line " + std::to_string(compilationResult.lineOfFirstError)).c_str());
+        AlienImGui::Text("Error at line " + std::to_string(compilationResult.lineOfFirstError));
         ImGui::PopStyleColor();
     }
 }
@@ -441,6 +456,111 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
     if (hasChanges(particle, origParticle)) {
         _simController->changeParticle(particle);
     }
+}
+
+namespace
+{
+    std::string formatHex(int value)
+    {
+        std::stringstream stream;
+        stream << "0x" << std::hex << static_cast<int>(value);
+        return stream.str();
+    }
+}
+
+void _InspectorWindow::showScannerInfo()
+{
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUTPUT));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output:");
+    AlienImGui::Text(formatHex(Enums::ScannerOut::SUCCESS) + ": cell scanned");
+    AlienImGui::Text(formatHex(Enums::ScannerOut::FINISHED) + ": scanning process completed");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::INOUT_CELL_NUMBER));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input: number of the cell to be scanned");
+    AlienImGui::Text("Output: number of the next cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_ENERGY));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: energy of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_ANGLE));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: relative angle of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_DISTANCE));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: relative distance of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_MAX_CONNECTIONS));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: max connections of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_BRANCH_NO));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: branch number of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_METADATA));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: color of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_FUNCTION));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: specialization of scanned cell");
+    ImGui::Spacing();
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(
+        formatHex(Enums::Scanner::OUT_CELL_FUNCTION_DATA) + " - "
+        + formatHex(Enums::Scanner::OUT_CELL_FUNCTION_DATA + 48 + 16 + 1));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output:\ninternal data of scanned cell\n(e.g. cell code and cell memory");
 }
 
 float _InspectorWindow::calcWindowWidth() const

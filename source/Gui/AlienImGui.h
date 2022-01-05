@@ -95,6 +95,8 @@ public:
     };
     static bool Checkbox(CheckBoxParameters const& parameters, bool& value);
 
+    static void Text(std::string const& text);
+
     static bool BeginMenuButton(std::string const& text, bool& toggle,
                                 std::string const& popup);  //return toggle
     static void EndMenuButton();

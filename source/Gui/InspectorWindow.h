@@ -31,7 +31,7 @@ private:
     void showCellGeneralTab(CellDescription& cell);
     void showCellCodeTab(CellDescription& cell);
     void showCellMemoryTab(CellDescription& cell);
-    void showCellInOutTab(CellDescription& cell);
+    void showCellInOutChannelTab(CellDescription& cell);
     void showTokenTab(CellDescription& cell, int tokenIndex);
     void showTokenMemorySection(
         int address,
@@ -42,6 +42,7 @@ private:
 
     void processParticle(ParticleDescription particle);
 
+    void showScannerInfo();
     float calcWindowWidth() const;
     void addToken(CellDescription& cell);
     void delToken(CellDescription& cell, int index);
