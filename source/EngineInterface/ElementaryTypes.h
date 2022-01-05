@@ -177,7 +177,7 @@ namespace Enums
     struct ScannerOut {
         enum Type {
             SUCCESS,
-            RESTART
+            FINISHED
         };
     };
 

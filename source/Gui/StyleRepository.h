@@ -38,6 +38,11 @@ namespace Const
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 
+    ImColor const CompilationSuccessColor = ImColor::HSV(0.3, 1.0, 1.0);
+    ImColor const CompilationErrorColor = ImColor::HSV(0.05, 1.0, 1.0);
+
+    ImColor const InfoTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
+
     float const WindowAlpha = 0.8f;
     float const SliderBarWidth = 30.0f;
 }

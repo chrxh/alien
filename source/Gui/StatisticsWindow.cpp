@@ -8,6 +8,7 @@
 #include "EngineImpl/SimulationController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "AlienImGui.h"
 
 namespace
 {
@@ -100,26 +101,27 @@ void _StatisticsWindow::processLiveStatistics()
             /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg
                 | ImGuiTableFlags_BordersOuter,
             ImVec2(- 1, 0))) {
-        ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+        ImGui::TableSetupColumn(
+            "Entities", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(125.0f));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Cells");
+        AlienImGui::Text("Cells");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(0, _liveStatistics.numCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Energy particles");
+        AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(1, _liveStatistics.numParticlesHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Tokens");
+        AlienImGui::Text("Tokens");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(2, _liveStatistics.numTokensHistory);
         ImPlot::PopColormap();
@@ -132,32 +134,33 @@ void _StatisticsWindow::processLiveStatistics()
             2,
             /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
             ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Processes", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+        ImGui::TableSetupColumn(
+            "Processes", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(125.0f));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Created cells");
+        AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(3, _liveStatistics.numCreatedCellsHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Successful attacks");
+        AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(4, _liveStatistics.numSuccessfulAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Failed attacks");
+        AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(5, _liveStatistics.numFailedAttacksHistory);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Muscle activities");
+        AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(6, _liveStatistics.numMuscleActivitiesHistory);
 

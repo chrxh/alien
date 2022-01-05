@@ -217,6 +217,11 @@ bool AlienImGui::Checkbox(CheckBoxParameters const& parameters, bool& value)
     return result;
 }
 
+void AlienImGui::Text(std::string const& text)
+{
+    ImGui::TextUnformatted(text.c_str());
+}
+
 bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
