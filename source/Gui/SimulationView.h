@@ -12,10 +12,15 @@ public:
         SimulationController const& simController,
         ModeWindow const& modeWindow,
         Viewport const& viewport);
+    ~_SimulationView();
+
     void resize(IntVector2D const& viewportSize);
 
     void processContent();
     void processControls();
+
+    bool isOverlayActive() const;
+    void setOverlayActive(bool active);
 
 private:
     void processEvents();
@@ -39,6 +44,7 @@ private:
     SimulationScrollbar _scrollbarY;
 
     //overlay
+    bool _isOverlayActive = true;
     boost::optional<OverlayDescription> _overlay;
     
     //shader data

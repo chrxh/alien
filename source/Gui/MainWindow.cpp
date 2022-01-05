@@ -438,6 +438,9 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
+            if (ImGui::MenuItem("Information overlay", "ALT+O", _simulationView->isOverlayActive())) {
+                _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
+            }
             if (ImGui::MenuItem("Render UI", "ALT+U", _uiController->isOn())) {
                 _uiController->setOn(!_uiController->isOn());
             }
@@ -529,12 +532,16 @@ void _MainWindow::processMenubar()
         _displaySettingsDialog->show();
     }
 
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_O)) {
+        _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
+    }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_U)) {
         _uiController->setOn(!_uiController->isOn());
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_I)) {
         _renderSimulation = !_renderSimulation;
     }
+
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
         _colorizeDialog->show();
     }

@@ -11,6 +11,7 @@
 #include "Resources.h"
 #include "ModeWindow.h"
 #include "StyleRepository.h"
+#include "GlobalSettings.h"
 
 namespace
 {
@@ -35,6 +36,7 @@ _SimulationView::_SimulationView(
     Viewport const& viewport)
     : _viewport(viewport)
 {
+    _isOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", true);
     _modeWindow = modeWindow;
 
     _simController = simController;
@@ -90,6 +92,11 @@ _SimulationView::_SimulationView(
     _shader->setBool("glowEffect", true);
     _shader->setBool("motionEffect", true);
     _shader->setFloat("motionBlurFactor", MotionBlurStandard);
+}
+
+_SimulationView::~_SimulationView()
+{
+    GlobalSettings::getInstance().setBoolState("settings.simulation view.overlay", _isOverlayActive);
 }
 
 void _SimulationView::resize(IntVector2D const& size)
@@ -261,24 +268,32 @@ void _SimulationView::processControls()
          {1, viewport->Size.y - 1 - scrollbarThickness}});
 }
 
+bool _SimulationView::isOverlayActive() const
+{
+    return _isOverlayActive;
+}
+
+void _SimulationView::setOverlayActive(bool active)
+{
+    _isOverlayActive = active;
+}
+
 void _SimulationView::updateImageFromSimulation()
 {
-
     auto worldRect = _viewport->getVisibleWorldRect();
     auto viewSize = _viewport->getViewSize();
     auto zoomFactor = _viewport->getZoomFactor();
 
-    if (zoomFactor < ZoomFactorForOverlay) {
-        _simController->tryDrawVectorGraphics(
-            worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
-        _overlay = boost::none;
-
-    } else {
+    if (_isOverlayActive && zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         if (overlay) {
             _overlay = overlay;
         }
+    } else {
+        _simController->tryDrawVectorGraphics(
+            worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
+        _overlay = boost::none;
     }
 
     if(_overlay) {
