@@ -42,7 +42,10 @@ private:
 
     void processParticle(ParticleDescription particle);
 
-    void showScannerInfo();
+    void showScannerTableContent();
+    void showDigestionTableContent();
+    void showConstructionTableContent();
+
     float calcWindowWidth() const;
     void addToken(CellDescription& cell);
     void delToken(CellDescription& cell, int index);

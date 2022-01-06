@@ -43,7 +43,7 @@ void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(parameters._tooltip->c_str());
+        AlienImGui::HelpMarker(*parameters._tooltip);
     }
 }
 
@@ -64,7 +64,7 @@ void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
     ImGui::TextUnformatted(parameters._name.c_str());
 
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(parameters._tooltip->c_str());
+        AlienImGui::HelpMarker(*parameters._tooltip);
     }
 }
 
@@ -103,7 +103,7 @@ void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
     ImGui::TextUnformatted(parameters._name.c_str());
 
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(parameters._tooltip->c_str());
+        AlienImGui::HelpMarker(*parameters._tooltip);
     }
 }
 
@@ -125,7 +125,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     ImGui::TextUnformatted(parameters._name.c_str());
 
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(parameters._tooltip->c_str());
+        AlienImGui::HelpMarker(*parameters._tooltip);
     }
 }
 

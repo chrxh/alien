@@ -24,7 +24,7 @@ namespace
         {Enums::CellFunction::PROPULSION, "Propulsion"},
         {Enums::CellFunction::SCANNER, "Scanner"},
         {Enums::CellFunction::DIGESTION, "Digestion"},
-        {Enums::CellFunction::CONSTRUCTOR, "Constructor"},
+        {Enums::CellFunction::CONSTRUCTOR, "Construction"},
         {Enums::CellFunction::SENSOR, "Sensor"},
         {Enums::CellFunction::MUSCLE, "Muscle"},
     };
