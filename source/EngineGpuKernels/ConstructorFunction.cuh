@@ -254,9 +254,6 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     auto desiredDistance = QuantityConverter::convertDataToDistance(constructionData.distance);
     posDelta =
         Math::normalized(posDelta) * (cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance);
-/*
-    printf("distance: %f\n", desiredDistance);
-*/
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
         || cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance < 0) {
