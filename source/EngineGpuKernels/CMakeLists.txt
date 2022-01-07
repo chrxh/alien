@@ -14,8 +14,8 @@ add_library(alien_engine_gpu_kernels_lib
     ConstructorFunction.cuh
     CudaMemoryManager.cuh
     CudaMonitorData.cuh
-    CudaSimulation.cu
-    CudaSimulation.cuh
+    CudaSimulationAdapter.cu
+    CudaSimulationAdapter.cuh
     DEBUG_cluster.cuh
     DebugKernels.cuh
     Definitions.cuh

@@ -2,6 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/AccessTOs.cuh"

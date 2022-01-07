@@ -2,5 +2,5 @@
 
 #include <boost/shared_ptr.hpp>
 
-class _CudaSimulation;
-using CudaSimulation = boost::shared_ptr<_CudaSimulation>;
+class _CudaSimulationAdapter;
+using CudaSimulationAdapter = boost::shared_ptr<_CudaSimulationAdapter>;
