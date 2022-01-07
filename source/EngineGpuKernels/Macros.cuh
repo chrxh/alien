@@ -15,7 +15,7 @@
 #define DEPRECATED_KERNEL_CALL(func, ...) func<<<cudaThreadSettings.NUM_BLOCKS, cudaThreadSettings.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__);
 #define DEPRECATED_KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
 
-#define KERNEL_CALL_HOST_SYNC(func, ...) \
+#define DEPRECATED_KERNEL_CALL_HOST_SYNC(func, ...) \
     func<<<1, 1>>>(__VA_ARGS__); \
     cudaDeviceSynchronize(); \
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

@@ -212,6 +212,8 @@ __global__ void cleanupAfterSimulationKernel(SimulationData data)
     DEPRECATED_KERNEL_CALL(cleanupEntities<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
     DEPRECATED_KERNEL_CALL(cleanupEntities<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
 
+    cudaDeviceSynchronize();
+
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
     data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);

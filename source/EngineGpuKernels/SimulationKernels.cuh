@@ -125,7 +125,6 @@ __global__ void prepareForNextTimestep(SimulationData data, SimulationResult res
 /************************************************************************/
 __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
-//     DEPRECATED_KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     DEPRECATED_KERNEL_CALL(processingStep5, data);
     DEPRECATED_KERNEL_CALL(processingStep6, data, result);
     DEPRECATED_KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
