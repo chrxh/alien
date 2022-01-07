@@ -104,7 +104,7 @@ private:
     void updateMonitorDataIntern();
     void processJobs();
 
-    CudaSimulation _cudaSimulation;
+    CudaSimulationAdapter _cudaSimulation;
 
     //sync
     mutable std::mutex _mutexForLoop;

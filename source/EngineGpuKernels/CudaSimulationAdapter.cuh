@@ -19,14 +19,14 @@
 #include "Definitions.cuh"
 #include "DllExport.h"
 
-class _CudaSimulation
+class _CudaSimulationAdapter
 {
 public:
     ENGINEGPUKERNELS_EXPORT static void initCuda();
 
     ENGINEGPUKERNELS_EXPORT
-    _CudaSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
-    ENGINEGPUKERNELS_EXPORT ~_CudaSimulation();
+    _CudaSimulationAdapter(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
+    ENGINEGPUKERNELS_EXPORT ~_CudaSimulationAdapter();
 
     ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
 

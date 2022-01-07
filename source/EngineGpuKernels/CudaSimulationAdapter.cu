@@ -1,4 +1,4 @@
-#include "CudaSimulation.cuh"
+#include "CudaSimulationAdapter.cuh"
 
 #include <functional>
 #include <iostream>
@@ -105,12 +105,12 @@ namespace
     };
 }
 
-void _CudaSimulation::initCuda()
+void _CudaSimulationAdapter::initCuda()
 {
     CudaInitializer::init();
 }
 
-_CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings)
+_CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings)
 {
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
@@ -149,7 +149,7 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
     resizeArrays({100000, 100000, 10000});
 }
 
-_CudaSimulation::~_CudaSimulation()
+_CudaSimulationAdapter::~_CudaSimulationAdapter()
 {
     _cudaSimulationData->free();
     _cudaRenderingData->free();
@@ -176,7 +176,7 @@ _CudaSimulation::~_CudaSimulation()
     delete _simulationKernels;
 }
 
-void* _CudaSimulation::registerImageResource(GLuint image)
+void* _CudaSimulationAdapter::registerImageResource(GLuint image)
 {
     cudaGraphicsResource* cudaResource;
 
@@ -186,14 +186,14 @@ void* _CudaSimulation::registerImageResource(GLuint image)
     return reinterpret_cast<void*>(cudaResource);
 }
 
-void _CudaSimulation::calcTimestep()
+void _CudaSimulationAdapter::calcTimestep()
 {
     _simulationKernels->calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
     automaticResizeArrays();
     ++_currentTimestep;
 }
 
-void _CudaSimulation::drawVectorGraphics(
+void _CudaSimulationAdapter::drawVectorGraphics(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
     void* cudaResource,
@@ -231,7 +231,7 @@ void _CudaSimulation::drawVectorGraphics(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
 }
 
-void _CudaSimulation::getSimulationData(
+void _CudaSimulationAdapter::getSimulationData(
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
@@ -240,13 +240,13 @@ void _CudaSimulation::getSimulationData(
     copyDataTOtoHost(dataTO);
 }
 
-void _CudaSimulation::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSelectedSimulationData, *_cudaSimulationData, includeClusters, * _cudaAccessTO);
     copyDataTOtoHost(dataTO);
 }
 
-void _CudaSimulation::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO)
 {
     InspectedEntityIds ids;
     if (entityIds.size() > Const::MaxInspectedEntities) {
@@ -262,7 +262,7 @@ void _CudaSimulation::getInspectedSimulationData(std::vector<uint64_t> entityIds
     copyDataTOtoHost(dataTO);
 }
 
-void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(
         cudaGetSimulationOverlayData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
@@ -273,78 +273,78 @@ void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rect
     copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
 }
 
-void _CudaSimulation::addAndSelectSimulationData(DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::addAndSelectSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, true);
 }
 
-void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::setSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, false);
 }
 
-void _CudaSimulation::removeSelectedEntities(bool includeClusters)
+void _CudaSimulationAdapter::removeSelectedEntities(bool includeClusters)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelectedEntities, *_cudaSimulationData, includeClusters);
 }
 
-void _CudaSimulation::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
+void _CudaSimulationAdapter::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaChangeSimulationData, *_cudaSimulationData, *_cudaAccessTO);
 }
 
-void _CudaSimulation::applyForce(ApplyForceData const& applyData)
+void _CudaSimulationAdapter::applyForce(ApplyForceData const& applyData)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaApplyForce, applyData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::switchSelection(PointSelectionData const& pointData)
+void _CudaSimulationAdapter::switchSelection(PointSelectionData const& pointData)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSwitchSelection, pointData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::swapSelection(PointSelectionData const& pointData)
+void _CudaSimulationAdapter::swapSelection(PointSelectionData const& pointData)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSwapSelection, pointData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::setSelection(AreaSelectionData const& selectionData)
+void _CudaSimulationAdapter::setSelection(AreaSelectionData const& selectionData)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSetSelection, selectionData, *_cudaSimulationData);
 }
 
- SelectionShallowData _CudaSimulation::getSelectionShallowData()
+ SelectionShallowData _CudaSimulationAdapter::getSelectionShallowData()
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
-void _CudaSimulation::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
+void _CudaSimulationAdapter::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaShallowUpdateSelectedEntities, shallowUpdateData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::removeSelection()
+void _CudaSimulationAdapter::removeSelection()
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
 }
 
-void _CudaSimulation::updateSelection()
+void _CudaSimulationAdapter::updateSelection()
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaUpdateSelection, *_cudaSimulationData);
 }
 
-void _CudaSimulation::colorSelectedEntities(unsigned char color, bool includeClusters)
+void _CudaSimulationAdapter::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaColorSelectedEntities, *_cudaSimulationData, color, includeClusters);
 }
 
-void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants)
+void _CudaSimulationAdapter::setGpuConstants(GpuSettings const& gpuConstants)
 {
     _gpuSettings = gpuConstants;
 
@@ -352,7 +352,7 @@ void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants)
         cudaMemcpyToSymbol(cudaThreadSettings, &gpuConstants, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
 }
 
-auto _CudaSimulation::getArraySizes() const -> ArraySizes
+auto _CudaSimulationAdapter::getArraySizes() const -> ArraySizes
 {
     return {
         _cudaSimulationData->entities.cells.getSize_host(),
@@ -360,7 +360,7 @@ auto _CudaSimulation::getArraySizes() const -> ArraySizes
         _cudaSimulationData->entities.tokens.getSize_host()};
 }
 
-OverallStatistics _CudaSimulation::getMonitorData()
+OverallStatistics _CudaSimulationAdapter::getMonitorData()
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
     
@@ -381,41 +381,41 @@ OverallStatistics _CudaSimulation::getMonitorData()
     return result;
 }
 
-uint64_t _CudaSimulation::getCurrentTimestep() const
+uint64_t _CudaSimulationAdapter::getCurrentTimestep() const
 {
     return _currentTimestep.load();
 }
 
-void _CudaSimulation::setCurrentTimestep(uint64_t timestep)
+void _CudaSimulationAdapter::setCurrentTimestep(uint64_t timestep)
 {
     _currentTimestep.store(timestep);
 }
 
-void _CudaSimulation::setSimulationParameters(SimulationParameters const& parameters)
+void _CudaSimulationAdapter::setSimulationParameters(SimulationParameters const& parameters)
 {
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
-void _CudaSimulation::setSimulationParametersSpots(SimulationParametersSpots const& spots)
+void _CudaSimulationAdapter::setSimulationParametersSpots(SimulationParametersSpots const& spots)
 {
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaSimulationParametersSpots, &spots, sizeof(SimulationParametersSpots), 0, cudaMemcpyHostToDevice));
 }
 
-void _CudaSimulation::setFlowFieldSettings(FlowFieldSettings const& settings)
+void _CudaSimulationAdapter::setFlowFieldSettings(FlowFieldSettings const& settings)
 {
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaFlowFieldSettings, &settings, sizeof(FlowFieldSettings), 0, cudaMemcpyHostToDevice));
 }
 
 
-void _CudaSimulation::clear()
+void _CudaSimulationAdapter::clear()
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
 }
 
-void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
+void _CudaSimulationAdapter::resizeArraysIfNecessary(ArraySizes const& additionals)
 {
     if (_cudaSimulationData->shouldResize(
             additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize)) {
@@ -423,7 +423,7 @@ void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
     }
 }
 
-void _CudaSimulation::copyDataTOtoDevice(DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::copyDataTOtoDevice(DataAccessTO const& dataTO)
 {
     copyToDevice(_cudaAccessTO->numCells, dataTO.numCells);
     copyToDevice(_cudaAccessTO->numParticles, dataTO.numParticles);
@@ -436,7 +436,7 @@ void _CudaSimulation::copyDataTOtoDevice(DataAccessTO const& dataTO)
     copyToDevice(_cudaAccessTO->stringBytes, dataTO.stringBytes, *dataTO.numStringBytes);
 }
 
-void _CudaSimulation::copyDataTOtoHost(DataAccessTO const& dataTO)
+void _CudaSimulationAdapter::copyDataTOtoHost(DataAccessTO const& dataTO)
 {
     copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
     copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);
@@ -449,7 +449,7 @@ void _CudaSimulation::copyDataTOtoHost(DataAccessTO const& dataTO)
     copyToHost(dataTO.stringBytes, _cudaAccessTO->stringBytes, *dataTO.numStringBytes);
 }
 
-void _CudaSimulation::automaticResizeArrays()
+void _CudaSimulationAdapter::automaticResizeArrays()
 {
     //make check after every 10th time step
     if (_currentTimestep.load() % 10 == 0) {
@@ -459,7 +459,7 @@ void _CudaSimulation::automaticResizeArrays()
     }
 }
 
-void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
+void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
 {
     auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     loggingService->logMessage(Priority::Important, "resize arrays");

@@ -2,6 +2,7 @@
 
 #include "Base/Definitions.h"
 
+#include "EngineInterface/GpuSettings.h"
 #include "EngineGpuKernels/AccessTOs.cuh"
 
 #include "Definitions.h"

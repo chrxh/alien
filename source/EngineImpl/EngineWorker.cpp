@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "EngineGpuKernels/AccessTOs.cuh"
+#include "EngineGpuKernels/CudaSimulationAdapter.cuh"
 #include "AccessDataTOCache.h"
 #include "DataConverter.h"
 
@@ -70,7 +71,7 @@ namespace
 
 void EngineWorker::initCuda()
 {
-    _CudaSimulation::initCuda();
+    _CudaSimulationAdapter::initCuda();
 }
 
 void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings)
@@ -78,7 +79,7 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, Gp
     _settings = settings;
     _gpuConstants = gpuSettings;
     _dataTOCache = boost::make_shared<_AccessDataTOCache>(gpuSettings);
-    _cudaSimulation = boost::make_shared<_CudaSimulation>(timestep, settings, gpuSettings);
+    _cudaSimulation = boost::make_shared<_CudaSimulationAdapter>(timestep, settings, gpuSettings);
 
     if (_imageResourceToRegister) {
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
