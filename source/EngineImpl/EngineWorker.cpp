@@ -348,7 +348,7 @@ void EngineWorker::calcSingleTimestep()
     CudaAccess access(
         _conditionForAccess, _conditionForWorkerLoop, _requireAccess, _isSimulationRunning, _exceptionData);
 
-    _cudaSimulation->calcCudaTimestep();
+    _cudaSimulation->calcTimestep();
     updateMonitorDataIntern();
 }
 
@@ -552,7 +552,7 @@ void EngineWorker::runThreadLoop()
                 }
 
                 startTimestepTime = std::chrono::steady_clock::now();
-                _cudaSimulation->calcCudaTimestep();
+                _cudaSimulation->calcTimestep();
                 updateMonitorDataIntern();
                 ++_timestepsSinceTimepoint;
             }

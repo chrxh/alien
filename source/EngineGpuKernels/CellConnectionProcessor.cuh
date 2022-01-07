@@ -54,7 +54,7 @@ CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell
 {
     auto index = atomicAdd(data.numOperations, 1);
     if (index < data.getMaxOperations()) {
-        Operation& operation = data.operations[index];
+        Operation& operation = (*data.operations)[index];
         operation.type = Operation::Type::AddConnections; 
         operation.data.addConnectionOperation.cell = cell1;
         operation.data.addConnectionOperation.otherCell = cell2;
@@ -69,7 +69,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(Simul
 {
     auto index = atomicAdd(data.numOperations, 1);
     if (index < data.getMaxOperations()) {
-        Operation& operation = data.operations[index];
+        Operation& operation = (*data.operations)[index];
         operation.type = Operation::Type::DelConnections;
         operation.data.delConnectionsOperation.cell = cell;
     } else {
@@ -82,7 +82,7 @@ CellConnectionProcessor::scheduleDelConnection(SimulationData& data, Cell* cell1
 {
     auto index = atomicAdd(data.numOperations, 1);
     if (index < data.getMaxOperations()) {
-        Operation& operation = data.operations[index];
+        Operation& operation = (*data.operations)[index];
         operation.type = Operation::Type::DelConnection;
         operation.data.delConnectionOperation.cell1 = cell1;
         operation.data.delConnectionOperation.cell2 = cell2;
@@ -95,7 +95,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationDa
 {
     auto index = atomicAdd(data.numOperations, 1);
     if (index < data.getMaxOperations()) {
-        Operation& operation = data.operations[index];
+        Operation& operation = (*data.operations)[index];
         operation.type = Operation::Type::DelCell;
         operation.data.delCellOperation.cell = cell;
         operation.data.delCellOperation.cellIndex = cellIndex;
@@ -109,7 +109,7 @@ CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cel
 {
     auto index = atomicAdd(data.numOperations, 1);
     if (index < data.getMaxOperations()) {
-        Operation& operation = data.operations[index];
+        Operation& operation = (*data.operations)[index];
         operation.type = Operation::Type::DelCellAndConnections;
         operation.data.delCellAndConnectionOperation.cell = cell;
         operation.data.delCellAndConnectionOperation.cellIndex = cellIndex;
@@ -123,7 +123,7 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
     auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& operation = data.operations[index];
+        auto const& operation = (*data.operations)[index];
         if (Operation::Type::DelConnection == operation.type) {
             delConnectionIntern(operation.data.delConnectionOperation.cell1, operation.data.delConnectionOperation.cell2);
         }
@@ -152,7 +152,7 @@ __inline__ __device__ void CellConnectionProcessor::processDelCellOperations(Sim
     auto partition = calcPartition(*data.numOperations, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& operation = data.operations[index];
+        auto const& operation = (*data.operations)[index];
         if (Operation::Type::DelCell == operation.type) {
             delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
         }

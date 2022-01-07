@@ -63,7 +63,7 @@ __global__ void DEBUG_kernel(SimulationData data, int location)
     float* sumEnergy = new float;
     *sumEnergy = 0;
 
-    KERNEL_CALL_SYNC(DEBUG_checkCellsAndParticles, data, sumEnergy, location);
+    DEPRECATED_KERNEL_CALL_SYNC(DEBUG_checkCellsAndParticles, data, sumEnergy, location);
 
     float const expectedEnergy = 187500;
     if (abs(*sumEnergy - expectedEnergy) > 1) {

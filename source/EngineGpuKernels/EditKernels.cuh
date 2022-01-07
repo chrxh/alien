@@ -180,7 +180,7 @@ __global__ void rolloutSelection(SimulationData data)
     int* result = new int;
     do {
         *result = 0;
-        KERNEL_CALL_SYNC(rolloutSelectionStep, data, result);
+        DEPRECATED_KERNEL_CALL_SYNC(rolloutSelectionStep, data, result);
     } while (1 == *result);
     delete result;
 }
@@ -538,8 +538,8 @@ __global__ void changeParticle(SimulationData data, DataAccessTO changeDataTO)
 
 __global__ void cudaApplyForce(ApplyForceData applyData, SimulationData data)
 {
-    KERNEL_CALL_SYNC(applyForceToCells, applyData, data.size, data.entities.cellPointers);
-    KERNEL_CALL_SYNC(applyForceToParticles, applyData, data.size, data.entities.particlePointers);
+    DEPRECATED_KERNEL_CALL_SYNC(applyForceToCells, applyData, data.size, data.entities.cellPointers);
+    DEPRECATED_KERNEL_CALL_SYNC(applyForceToParticles, applyData, data.size, data.entities.particlePointers);
 }
 
 __global__ void
@@ -548,10 +548,10 @@ cudaSwitchSelection(PointSelectionData switchData, SimulationData data)
     int* result = new int;
     *result = 0; 
 
-    KERNEL_CALL_SYNC(existSelection, switchData, data, result);
+    DEPRECATED_KERNEL_CALL_SYNC(existSelection, switchData, data, result);
     if (0 == *result) {
-        KERNEL_CALL_SYNC(setSelection, switchData.pos, switchData.radius, data);
-        KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
+        DEPRECATED_KERNEL_CALL_SYNC(setSelection, switchData.pos, switchData.radius, data);
+        DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
     }
 
     delete result;
@@ -562,10 +562,10 @@ __global__ void cudaSwapSelection(PointSelectionData switchData, SimulationData 
     int* result = new int;
     *result = 0;
 
-    KERNEL_CALL_SYNC(removeSelection, data, true);
+    DEPRECATED_KERNEL_CALL_SYNC(removeSelection, data, true);
 
-    KERNEL_CALL_SYNC(swapSelection, switchData.pos, switchData.radius, data);
-    KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
+    DEPRECATED_KERNEL_CALL_SYNC(swapSelection, switchData.pos, switchData.radius, data);
+    DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
 
     delete result;
 }
@@ -575,8 +575,8 @@ __global__ void cudaSetSelection(AreaSelectionData setData, SimulationData data)
     int* result = new int;
     *result = 0;
 
-    KERNEL_CALL_SYNC(setSelection, setData, data);
-    KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
+    DEPRECATED_KERNEL_CALL_SYNC(setSelection, setData, data);
+    DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
 
     delete result;
 }
@@ -584,14 +584,14 @@ __global__ void cudaSetSelection(AreaSelectionData setData, SimulationData data)
 __global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult selectionResult)
 {
     selectionResult.reset();
-    KERNEL_CALL_SYNC(getSelectionShallowData, data, selectionResult);
+    DEPRECATED_KERNEL_CALL_SYNC(getSelectionShallowData, data, selectionResult);
     selectionResult.finalize();
 }
 
 __global__ void cudaUpdateSelection(SimulationData data)
 {
-    KERNEL_CALL_SYNC(removeSelection, data, true);
-    KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
+    DEPRECATED_KERNEL_CALL_SYNC(removeSelection, data, true);
+    DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
 }
 
 __global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData updateData, SimulationData data)
@@ -606,26 +606,26 @@ __global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData upd
         int counter = 10;
         do {
             *result = 0;
-            data.prepareForSimulation();
-            KERNEL_CALL_SYNC(disconnectSelection, data, result);
-            KERNEL_CALL_SYNC(processConnectionChanges, data);
+            data.prepareForNextTimestep();
+            DEPRECATED_KERNEL_CALL_SYNC(disconnectSelection, data, result);
+            DEPRECATED_KERNEL_CALL_SYNC(processConnectionChanges, data);
         } while (1 == *result && --counter > 0);    //due to locking not all affecting connections may be removed at first => repeat
     }
 
     if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velDeltaX != 0
         || updateData.velDeltaY != 0) {
-        KERNEL_CALL_SYNC(updatePosAndVelForSelection, updateData, data);
+        DEPRECATED_KERNEL_CALL_SYNC(updatePosAndVelForSelection, updateData, data);
     }
     if (updateData.angleDelta != 0 || updateData.angularVelDelta != 0) {
         float2* center = new float2;
         int* numEntities = new int;
         *center = {0, 0};
         *numEntities = 0;
-        KERNEL_CALL_SYNC(calcAccumulatedCenter, updateData, data, center, numEntities);
+        DEPRECATED_KERNEL_CALL_SYNC(calcAccumulatedCenter, updateData, data, center, numEntities);
         if (*numEntities != 0) {
             *center = *center / *numEntities;
         }
-        KERNEL_CALL_SYNC(updateAngleAndAngularVelForSelection, updateData, data, *center);
+        DEPRECATED_KERNEL_CALL_SYNC(updateAngleAndAngularVelForSelection, updateData, data, *center);
 
         delete center;
         delete numEntities;
@@ -637,16 +637,16 @@ __global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData upd
         int counter = 10;
         do {
             *result = 0;
-            data.prepareForSimulation();
+            data.prepareForNextTimestep();
 
-            KERNEL_CALL_SYNC(updateMapForConnection, data);
-            KERNEL_CALL_SYNC(connectSelection, data, result);
-            KERNEL_CALL_SYNC(processConnectionChanges, data);
+            DEPRECATED_KERNEL_CALL_SYNC(updateMapForConnection, data);
+            DEPRECATED_KERNEL_CALL_SYNC(connectSelection, data, result);
+            DEPRECATED_KERNEL_CALL_SYNC(processConnectionChanges, data);
 
-            KERNEL_CALL_SYNC(cleanupCellMap, data);
+            DEPRECATED_KERNEL_CALL_SYNC(cleanupCellMap, data);
         } while (1 == *result && --counter > 0);    //due to locking not all necessary connections may be established at first => repeat
 
-        KERNEL_CALL_SYNC_1_1(cudaUpdateSelection, data);
+        DEPRECATED_KERNEL_CALL_SYNC_1_1(cudaUpdateSelection, data);
     }
 
     delete result;
@@ -654,7 +654,7 @@ __global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData upd
 
 __global__ void cudaRemoveSelection(SimulationData data)
 {
-    KERNEL_CALL_SYNC(removeSelection, data, false);
+    DEPRECATED_KERNEL_CALL_SYNC(removeSelection, data, false);
 }
 
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters)
@@ -663,27 +663,27 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
 
     do {
         *result = 0;
-        KERNEL_CALL_SYNC(removeSelectedCellConnections, data, includeClusters, result);
+        DEPRECATED_KERNEL_CALL_SYNC(removeSelectedCellConnections, data, includeClusters, result);
     } while (1 == *result);
-    KERNEL_CALL_SYNC(removeSelectedCells, data, includeClusters);
-    KERNEL_CALL_SYNC(removeSelectedParticles, data);
-    KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
+    DEPRECATED_KERNEL_CALL_SYNC(removeSelectedCells, data, includeClusters);
+    DEPRECATED_KERNEL_CALL_SYNC(removeSelectedParticles, data);
+    DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
 
     delete result;
 }
 
 __global__ void cudaColorSelectedEntities(SimulationData data, unsigned char color, bool includeClusters)
 {
-    KERNEL_CALL_SYNC(colorSelection, data, color, includeClusters);
+    DEPRECATED_KERNEL_CALL_SYNC(colorSelection, data, color, includeClusters);
 }
 
 __global__ void cudaChangeSimulationData(SimulationData data, DataAccessTO changeDataTO)
 {
     if (*changeDataTO.numCells == 1) {
-        KERNEL_CALL_SYNC(changeCell, data, changeDataTO, data.entities.tokenPointers.getNumEntries());
+        DEPRECATED_KERNEL_CALL_SYNC(changeCell, data, changeDataTO, data.entities.tokenPointers.getNumEntries());
     }
     if (*changeDataTO.numParticles == 1) {
-        KERNEL_CALL_SYNC(changeParticle, data, changeDataTO);
+        DEPRECATED_KERNEL_CALL_SYNC(changeParticle, data, changeDataTO);
     }
-    KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
+    DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
 }
