@@ -18,13 +18,13 @@ public:
 void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
 {
     KERNEL_CALL_1_1(prepareForNextTimestep, simulationData, result);
-/*
-     KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, simulationData);
+    KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, simulationData);
 
     KERNEL_CALL(processingStep1, simulationData);
     KERNEL_CALL(processingStep2, simulationData);
     KERNEL_CALL(processingStep3, simulationData);
     KERNEL_CALL(processingStep4, simulationData);
+/*
     KERNEL_CALL(processingStep5, simulationData);
     KERNEL_CALL(processingStep6, simulationData, result);
     KERNEL_CALL(processingStep7, simulationData);

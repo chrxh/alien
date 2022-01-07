@@ -285,11 +285,8 @@ void _CudaSimulation::addAndSelectSimulationData(DataAccessTO const& dataTO)
 void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
 {
     copyToGpu(dataTO);
-    printf("1\n");
     KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
-    printf("2\n");
     KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, false);
-    printf("3\n");
 }
 
 void _CudaSimulation::removeSelectedEntities(bool includeClusters)
