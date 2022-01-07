@@ -22,7 +22,7 @@ public:
 
     __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);
     __inline__ __device__ void
-    executeModifyingCellFunctions(SimulationData& data, SimulationResult& result, int numTokenPointers);
+    executeModifyingCellFunctions(SimulationData& data, SimulationResult& result);
     __inline__ __device__ void deleteTokenIfCellDeleted(SimulationData& data);
 };
 
@@ -121,10 +121,10 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
 }
 
 __inline__ __device__ void
-TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationResult& result, int numTokenPointers)
+TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationResult& result)
 {
     auto& tokens = data.entities.tokenPointers;
-    auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(data.originalArraySizes->tokenArraySize);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);

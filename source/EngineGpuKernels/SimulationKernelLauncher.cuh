@@ -24,7 +24,6 @@ void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, Simu
     KERNEL_CALL(processingStep2, simulationData);
     KERNEL_CALL(processingStep3, simulationData);
     KERNEL_CALL(processingStep4, simulationData);
-/*
     KERNEL_CALL(processingStep5, simulationData);
     KERNEL_CALL(processingStep6, simulationData, result);
     KERNEL_CALL(processingStep7, simulationData);
@@ -34,8 +33,7 @@ void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, Simu
     KERNEL_CALL(processingStep11, simulationData);
     KERNEL_CALL(processingStep12, simulationData);
     KERNEL_CALL(processingStep13, simulationData);
-*/
-    KERNEL_CALL_1_1(calcSimulationTimestepKernel, simulationData, result);
+    KERNEL_CALL_1_1(cleanupAfterSimulationKernel, simulationData);
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

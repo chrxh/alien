@@ -69,16 +69,16 @@ __global__ void processingStep6(SimulationData data, SimulationResult result)
     tokenProcessor.executeReadonlyCellFunctions(data, result);
 }
 
-__global__ void processingStep7(SimulationData data, int numCellPointers)
+__global__ void processingStep7(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcVelocities(data, numCellPointers);
+    cellProcessor.calcVelocities(data);
 }
 
-__global__ void processingStep8(SimulationData data, SimulationResult result, int numTokenPointers)
+__global__ void processingStep8(SimulationData data, SimulationResult result)
 {
     TokenProcessor tokenProcessor;
-    tokenProcessor.executeModifyingCellFunctions(data, result, numTokenPointers);
+    tokenProcessor.executeModifyingCellFunctions(data, result);
 }
 
 __global__ void processingStep9(SimulationData data)
@@ -99,10 +99,10 @@ __global__ void processingStep11(SimulationData data)
     CellConnectionProcessor::processConnectionsOperations(data);
 } 
 
-__global__ void processingStep12(SimulationData data, int numParticlePointers)
+__global__ void processingStep12(SimulationData data)
 {
     ParticleProcessor particleProcessor;
-    particleProcessor.transformation(data, numParticlePointers);
+    particleProcessor.transformation(data);
 
     CellConnectionProcessor::processDelCellOperations(data);
 }
@@ -119,22 +119,3 @@ __global__ void prepareForNextTimestep(SimulationData data, SimulationResult res
     result.resetStatistics();
     result.setArrayResizeNeeded(data.shouldResize());
 }
-
-/************************************************************************/
-/* Main      															*/
-/************************************************************************/
-__global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
-{
-    DEPRECATED_KERNEL_CALL(processingStep5, data);
-    DEPRECATED_KERNEL_CALL(processingStep6, data, result);
-    DEPRECATED_KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
-    DEPRECATED_KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
-    DEPRECATED_KERNEL_CALL(processingStep9, data);
-    DEPRECATED_KERNEL_CALL(processingStep10, data);
-    DEPRECATED_KERNEL_CALL(processingStep11, data);
-    DEPRECATED_KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
-    DEPRECATED_KERNEL_CALL(processingStep13, data);
-
-    DEPRECATED_KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
-}
-

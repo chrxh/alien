@@ -108,7 +108,8 @@ struct SimulationData
         cellMap.resize(cellArraySize);
         particleMap.resize(cellArraySize);
 
-        int upperBoundDynamicMemory = sizeof(Operation) * (cellArraySize + 1000);
+        //heuristic
+        int upperBoundDynamicMemory = sizeof(Operation) * (cellArraySize + 1000) + 50000000;
         dynamicMemory.resize(upperBoundDynamicMemory);
     }
 
