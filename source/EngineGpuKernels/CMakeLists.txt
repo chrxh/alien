@@ -8,7 +8,6 @@ add_library(alien_engine_gpu_kernels_lib
     Cell.cuh
     CellFunctionData.cuh
     CellProcessor.cuh
-    CleanupKernels.cuh
     CommunicatorFunction.cuh
     ComputationFunction.cuh
     ConstantMemory.cuh
@@ -29,6 +28,8 @@ add_library(alien_engine_gpu_kernels_lib
     Entities.cuh
     EntityFactory.cuh
     FlowFieldKernel.cuh
+    GarbageCollectorKernels.cuh
+    GarbageCollectorKernelLauncher.cuh
     HashMap.cuh
     HashSet.cuh
     List.cuh

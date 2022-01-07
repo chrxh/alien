@@ -10,7 +10,7 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "EntityFactory.cuh"
-#include "CleanupKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "SelectionResult.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "CellProcessor.cuh"

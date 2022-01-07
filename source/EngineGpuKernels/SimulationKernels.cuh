@@ -10,10 +10,10 @@
 #include "CellProcessor.cuh"
 #include "ParticleProcessor.cuh"
 #include "TokenProcessor.cuh"
-#include "CleanupKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "Operation.cuh"
 #include "DebugKernels.cuh"
-#include "SimulationResult.cuh"
+#include "SimulationResult.cuh" 
 #include "FlowFieldKernel.cuh"
 
 __global__ void processingStep1(SimulationData data)

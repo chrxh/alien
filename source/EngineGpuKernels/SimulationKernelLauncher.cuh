@@ -5,6 +5,7 @@
 #include "Definitions.cuh"
 #include "Macros.cuh"
 #include "SimulationKernels.cuh"
+#include "GarbageCollectorKernelLauncher.cuh"
 
 class SimulationKernelLauncher
 {
@@ -33,7 +34,8 @@ void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, Simu
     KERNEL_CALL(processingStep11, simulationData);
     KERNEL_CALL(processingStep12, simulationData);
     KERNEL_CALL(processingStep13, simulationData);
-    KERNEL_CALL_1_1(cleanupAfterSimulationKernel, simulationData);
+
+    GarbageCollectorKernelLauncher::cleanupAfterTimestep(gpuSettings, simulationData);
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

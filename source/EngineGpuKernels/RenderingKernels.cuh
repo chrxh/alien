@@ -5,7 +5,7 @@
 
 #include "AccessTOs.cuh"
 #include "Base.cuh"
-#include "CleanupKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "EntityFactory.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
