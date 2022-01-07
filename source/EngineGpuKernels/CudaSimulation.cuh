@@ -77,8 +77,8 @@ public:
     ENGINEGPUKERNELS_EXPORT void resizeArraysIfNecessary(ArraySizes const& additionals);
 
 private:
-    void copyToGpu(DataAccessTO const& dataTO);
-    void copyFromGpu(DataAccessTO const& dataTO);
+    void copyDataTOtoDevice(DataAccessTO const& dataTO);
+    void copyDataTOtoHost(DataAccessTO const& dataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals);
 

@@ -287,7 +287,27 @@ private:
     int _lockState2;
 };
 
-float random(float max)
+inline float random(float max)
 {
     return ((float)rand() / RAND_MAX) * max;
+}
+
+template <typename T>
+inline T copyToHost(T* source)
+{
+    T result;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, source, sizeof(T), cudaMemcpyDeviceToHost));
+    return result;
+}
+
+template <typename T>
+inline void copyToHost(T* target, T* source, int count = 1)
+{
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyDeviceToHost));
+}
+
+template <typename T>
+inline void copyToDevice(T* target, T* source, int count = 1)
+{
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyHostToDevice));
 }
