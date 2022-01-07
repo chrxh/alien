@@ -338,11 +338,8 @@ __global__ void getSelectedParticleData(SimulationData data, DataAccessTO access
 
 __global__ void createDataFromTO(
     SimulationData data,
-    DataAccessTO simulationTO,
-    bool selectNewData,
-    Particle* particleTargetArray,
-    Cell* cellTargetArray,
-    Token* tokenTargetArray)
+    DataAccessTO dataTO,
+    bool selectNewData)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -351,27 +348,28 @@ __global__ void createDataFromTO(
     __syncthreads();
 
     auto particlePartition =
-        calcPartition(*simulationTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(*dataTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto particle = factory.createParticleFromTO(index, simulationTO.particles[index], particleTargetArray);
+        auto particle = factory.createParticleFromTO(dataTO.particles[index]);
         if (selectNewData) {
             particle->selected = 1;
         }
     }
 
     auto cellPartition =
-        calcPartition(*simulationTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto cellTargetArray = data.entities.cells.getArray() + data.originalArraySizes->cellArraySize;
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(index, simulationTO.cells[index], cellTargetArray, &simulationTO);
+        auto cell = factory.createCellFromTO(index, dataTO.cells[index], cellTargetArray, &dataTO);
         if (selectNewData) {
             cell->selected = 1;
         }
     }
 
     auto tokenPartition =
-        calcPartition(*simulationTO.numTokens, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        calcPartition(*dataTO.numTokens, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = tokenPartition.startIndex; index <= tokenPartition.endIndex; ++index) {
-        factory.createTokenFromTO(index, simulationTO.tokens[index], cellTargetArray, tokenTargetArray);
+        factory.createTokenFromTO(dataTO.tokens[index], cellTargetArray);
     }
 }
 
@@ -406,6 +404,11 @@ __global__ void clearDataTO(DataAccessTO dataTO)
     *dataTO.numParticles = 0;
     *dataTO.numTokens = 0;
     *dataTO.numStringBytes = 0;
+}
+
+__global__ void prepareSetData(SimulationData data)
+{
+    data.originalArraySizes->cellArraySize = data.entities.cells.getNumEntries();
 }
 
 __global__ void
@@ -453,23 +456,4 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.tokens.reset();
     data.entities.particles.reset();
     data.entities.strings.reset();
-}
-
-__global__ void cudaSetSimulationAccessData(SimulationData data, DataAccessTO access, bool selectNewData)
-{
-    DEPRECATED_KERNEL_CALL_SYNC(adaptNumberGenerator, data.numberGen, access);
-    DEPRECATED_KERNEL_CALL_SYNC(
-        createDataFromTO,
-        data,
-        access,
-        selectNewData,
-        data.entities.particles.getNewSubarray(*access.numParticles),
-        data.entities.cells.getNewSubarray(*access.numCells),
-        data.entities.tokens.getNewSubarray(*access.numTokens));
-
-    DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
-
-    if (selectNewData) {
-        DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
-    }
 }
