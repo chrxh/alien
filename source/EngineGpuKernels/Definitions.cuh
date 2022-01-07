@@ -16,6 +16,8 @@ struct SimulationParameters;
 struct GpuSettings;
 class CudaMonitorData;
 
+class SimulationKernelLauncher;
+
 struct ApplyForceData
 {
     float2 startPos;
