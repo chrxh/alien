@@ -201,9 +201,6 @@ __global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory s
 
 __global__ void cleanupAfterSimulationKernel(SimulationData data)
 {
-    DEPRECATED_KERNEL_CALL(cleanupCellMap, data);
-    DEPRECATED_KERNEL_CALL(cleanupParticleMap, data);
-
     data.entitiesForCleanup.particlePointers.reset();
     data.entitiesForCleanup.cellPointers.reset();
     data.entitiesForCleanup.tokenPointers.reset();

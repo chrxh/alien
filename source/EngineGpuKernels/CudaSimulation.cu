@@ -20,7 +20,7 @@
 #include "AccessKernels.cuh"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
-#include "CleanupKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "ConstantMemory.cuh"
 #include "CudaMemoryManager.cuh"
 #include "CudaMonitorData.cuh"

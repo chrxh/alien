@@ -8,7 +8,7 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "EntityFactory.cuh"
-#include "CleanupKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "EditKernels.cuh"
 
 #include "SimulationData.cuh"
