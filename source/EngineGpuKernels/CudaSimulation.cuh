@@ -90,4 +90,6 @@ private:
     SelectionResult* _cudaSelectionResult;
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
+
+    SimulationKernelLauncher* _simulationKernels;
 };

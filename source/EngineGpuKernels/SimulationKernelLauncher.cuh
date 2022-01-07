@@ -10,7 +10,10 @@
 class SimulationKernelLauncher
 {
 public:
-    static void calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result);
+    void calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result);
+
+private:
+    GarbageCollectorKernelLauncher _garbageCollector;
 };
 
 /**
@@ -35,7 +38,7 @@ void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, Simu
     KERNEL_CALL(processingStep12, simulationData);
     KERNEL_CALL(processingStep13, simulationData);
 
-    GarbageCollectorKernelLauncher::cleanupAfterTimestep(gpuSettings, simulationData);
+    _garbageCollector.cleanupAfterTimestep(gpuSettings, simulationData);
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

@@ -130,6 +130,8 @@ _CudaSimulation::_CudaSimulation(uint64_t timestep, Settings const& settings, Gp
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
+    _simulationKernels = new SimulationKernelLauncher();
+
     int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
     _cudaSimulationData->init(worldSize);
     _cudaRenderingData->init();
@@ -171,6 +173,7 @@ _CudaSimulation::~_CudaSimulation()
     delete _cudaSimulationData;
     delete _cudaRenderingData;
     delete _cudaMonitorData;
+    delete _simulationKernels;
 }
 
 void* _CudaSimulation::registerImageResource(GLuint image)
@@ -185,7 +188,7 @@ void* _CudaSimulation::registerImageResource(GLuint image)
 
 void _CudaSimulation::calcTimestep()
 {
-    SimulationKernelLauncher::calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
+    _simulationKernels->calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
     automaticResizeArrays();
     ++_currentTimestep;
 }
