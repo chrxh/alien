@@ -113,7 +113,7 @@ __device__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell* cell, Ce
 {
     SpiralLookupResult result;
 
-    Cell * visitedCellData[256*2];
+    auto visitedCellData = data.dynamicMemory.getArray<Cell*>(256 * 2);
     HashSet<Cell*, HashFunctor<Cell*>> visitedCell(depth * 2, visitedCellData);
 
     result.cell = cell;

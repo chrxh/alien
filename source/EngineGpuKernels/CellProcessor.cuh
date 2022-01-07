@@ -21,7 +21,7 @@ public:
     __inline__ __device__ void applyAndCheckForces(SimulationData& data);    //prerequisite: tag from collisions
     __inline__ __device__ void calcForces(SimulationData& data);
     __inline__ __device__ void calcPositionsAndCheckBindings(SimulationData& data);
-    __inline__ __device__ void calcVelocities(SimulationData& data, int numCellPointers);
+    __inline__ __device__ void calcVelocities(SimulationData& data);
     __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
     __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
     __inline__ __device__ void radiation(SimulationData& data);
@@ -292,12 +292,11 @@ __inline__ __device__ void CellProcessor::calcPositionsAndCheckBindings(Simulati
     }
 }
 
-__inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data, int numCellPointers)
+__inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
 {
     _data = &data;
     auto& cells = data.entities.cellPointers;
-    auto const partition =
-        calcPartition(numCellPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(data.originalArraySizes->cellArraySize);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
