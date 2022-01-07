@@ -120,6 +120,7 @@ __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResu
 {
     data.prepareForSimulation();
     result.resetStatistics();
+    result.setArrayResizeNeeded(data.shouldResize());
 
     KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, data);
     KERNEL_CALL(processingStep1, data);
@@ -137,6 +138,5 @@ __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResu
     KERNEL_CALL(processingStep13, data);
 
     KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
-    result.setArrayResizeNeeded(data.shouldResize());
 }
 
