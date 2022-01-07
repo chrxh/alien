@@ -1,6 +1,5 @@
 
 add_library(alien_engine_gpu_kernels_lib
-    AccessKernels.cuh
     AccessTOs.cuh
     Array.cuh
     Base.cuh
@@ -16,6 +15,8 @@ add_library(alien_engine_gpu_kernels_lib
     CudaMonitorData.cuh
     CudaSimulationAdapter.cu
     CudaSimulationAdapter.cuh
+    DataAccessKernels.cuh
+    DataAccessKernelLauncher.cuh
     DEBUG_cluster.cuh
     DebugKernels.cuh
     Definitions.cuh

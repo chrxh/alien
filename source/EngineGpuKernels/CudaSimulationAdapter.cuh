@@ -92,4 +92,5 @@ private:
     CudaMonitorData* _cudaMonitorData;
 
     SimulationKernelLauncher* _simulationKernels;
+    DataAccessKernelLauncher* _dataAccessKernels;
 };

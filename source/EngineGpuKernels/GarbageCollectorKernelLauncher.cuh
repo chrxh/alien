@@ -19,9 +19,9 @@ private:
     bool* _cudaBool;
 };
 
-/**
- * Implementation
- */
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
 GarbageCollectorKernelLauncher::GarbageCollectorKernelLauncher()
 {
     CudaMemoryManager::getInstance().acquireMemory<bool>(1, _cudaBool);

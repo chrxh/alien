@@ -16,9 +16,9 @@ private:
     GarbageCollectorKernelLauncher _garbageCollector;
 };
 
-/**
- * Implementation
- */
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
 void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
 {
     KERNEL_CALL_1_1(prepareForNextTimestep, simulationData, result);

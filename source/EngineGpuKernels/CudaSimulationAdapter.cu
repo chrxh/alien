@@ -17,7 +17,7 @@
 
 #include "Base/LoggingService.h"
 #include "Base/ServiceLocator.h"
-#include "AccessKernels.cuh"
+#include "DataAccessKernels.cuh"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
@@ -31,6 +31,7 @@
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernelLauncher.cuh"
+#include "DataAccessKernelLauncher.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
@@ -131,6 +132,7 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     _cudaMonitorData = new CudaMonitorData();
 
     _simulationKernels = new SimulationKernelLauncher();
+    _dataAccessKernels = new DataAccessKernelLauncher();
 
     int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
     _cudaSimulationData->init(worldSize);
@@ -174,6 +176,7 @@ _CudaSimulationAdapter::~_CudaSimulationAdapter()
     delete _cudaRenderingData;
     delete _cudaMonitorData;
     delete _simulationKernels;
+    delete _dataAccessKernels;
 }
 
 void* _CudaSimulationAdapter::registerImageResource(GLuint image)
@@ -236,7 +239,7 @@ void _CudaSimulationAdapter::getSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSimulationData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    _dataAccessKernels->getData(_gpuSettings, *_cudaSimulationData, rectUpperLeft, rectLowerRight, *_cudaAccessTO);
     copyDataTOtoHost(dataTO);
 }
 

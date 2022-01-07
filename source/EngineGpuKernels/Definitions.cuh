@@ -17,6 +17,7 @@ struct GpuSettings;
 class CudaMonitorData;
 
 class SimulationKernelLauncher;
+class DataAccessKernelLauncher;
 
 struct ApplyForceData
 {
