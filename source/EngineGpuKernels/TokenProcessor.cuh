@@ -18,9 +18,7 @@
 class TokenProcessor
 {
 public:
-    __inline__ __device__ void movement(
-        SimulationData& data,
-        int numTokenPointers);  //prerequisite: clearTag, need numTokenPointers because it might be changed
+    __inline__ __device__ void movement(SimulationData& data);  //prerequisite: clearTag, need numTokenPointers because it might be changed
 
     __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);
     __inline__ __device__ void
@@ -32,10 +30,10 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void TokenProcessor::movement(SimulationData& data, int numTokenPointers)
+__inline__ __device__ void TokenProcessor::movement(SimulationData& data)
 {
     auto& tokens = data.entities.tokenPointers;
-    auto partition = calcPartition(numTokenPointers, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcPartition(data.originalArraySizes->tokenArraySize, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);

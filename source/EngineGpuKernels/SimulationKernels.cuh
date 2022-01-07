@@ -45,13 +45,13 @@ __global__ void processingStep3(SimulationData data)
     particleProcessor.collision(data);
 }
 
-__global__ void processingStep4(SimulationData data, int numTokenPointers)
+__global__ void processingStep4(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcForces(data);
 
     TokenProcessor tokenProcessor;
-    tokenProcessor.movement(data, numTokenPointers);    //changes cell energy without lock
+    tokenProcessor.movement(data);    //changes cell energy without lock
 }
 
 __global__ void processingStep5(SimulationData data)
@@ -125,21 +125,7 @@ __global__ void prepareForNextTimestep(SimulationData data, SimulationResult res
 /************************************************************************/
 __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
-/*
-    DEPRECATED_KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
-    DEPRECATED_KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
-    DEPRECATED_KERNEL_CALL(processingStep9, data);
-    DEPRECATED_KERNEL_CALL(processingStep10, data);
-    DEPRECATED_KERNEL_CALL(processingStep11, data);
-    DEPRECATED_KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
-    DEPRECATED_KERNEL_CALL(processingStep13, data);
-*/
-
-    DEPRECATED_KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, data);
-    DEPRECATED_KERNEL_CALL(processingStep1, data);
-    DEPRECATED_KERNEL_CALL(processingStep2, data);
-    DEPRECATED_KERNEL_CALL(processingStep3, data);
-    DEPRECATED_KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
+//     DEPRECATED_KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
     DEPRECATED_KERNEL_CALL(processingStep5, data);
     DEPRECATED_KERNEL_CALL(processingStep6, data, result);
     DEPRECATED_KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());

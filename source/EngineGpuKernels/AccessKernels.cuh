@@ -463,9 +463,7 @@ __global__ void cudaClearData(SimulationData data)
 
 __global__ void cudaSetSimulationAccessData(SimulationData data, DataAccessTO access, bool selectNewData)
 {
-    printf("21\n");
     DEPRECATED_KERNEL_CALL_SYNC(adaptNumberGenerator, data.numberGen, access);
-    printf("22\n");
     DEPRECATED_KERNEL_CALL_SYNC(
         createDataFromTO,
         data,
@@ -474,13 +472,10 @@ __global__ void cudaSetSimulationAccessData(SimulationData data, DataAccessTO ac
         data.entities.particles.getNewSubarray(*access.numParticles),
         data.entities.cells.getNewSubarray(*access.numCells),
         data.entities.tokens.getNewSubarray(*access.numTokens));
-    printf("23\n");
 
     DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
 
-    printf("24\n");
     if (selectNewData) {
         DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
     }
-    printf("25\n");
 }
