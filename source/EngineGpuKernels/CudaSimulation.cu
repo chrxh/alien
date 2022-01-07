@@ -30,7 +30,7 @@
 #include "EditKernels.cuh"
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
-#include "SimulationKernels.cuh"
+#include "SimulationKernelLauncher.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
@@ -183,9 +183,9 @@ void* _CudaSimulation::registerImageResource(GLuint image)
     return reinterpret_cast<void*>(cudaResource);
 }
 
-void _CudaSimulation::calcCudaTimestep()
+void _CudaSimulation::calcTimestep()
 {
-    KERNEL_CALL_HOST(calcSimulationTimestepKernel, *_cudaSimulationData, *_cudaSimulationResult);
+    SimulationKernelLauncher::calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
     automaticResizeArrays();
     ++_currentTimestep;
 }
@@ -205,7 +205,7 @@ void _CudaSimulation::drawVectorGraphics(
 
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
-    KERNEL_CALL_HOST(
+    KERNEL_CALL_HOST_SYNC(
         drawImageKernel,
         rectUpperLeft,
         rectLowerRight,
@@ -233,13 +233,13 @@ void _CudaSimulation::getSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    KERNEL_CALL_HOST(cudaGetSimulationData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    KERNEL_CALL_HOST_SYNC(cudaGetSimulationData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
     copyFromGpu(dataTO);
 }
 
 void _CudaSimulation::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
 {
-    KERNEL_CALL_HOST(cudaGetSelectedSimulationData, *_cudaSimulationData, includeClusters, * _cudaAccessTO);
+    KERNEL_CALL_HOST_SYNC(cudaGetSelectedSimulationData, *_cudaSimulationData, includeClusters, * _cudaAccessTO);
     copyFromGpu(dataTO);
 }
 
@@ -255,13 +255,13 @@ void _CudaSimulation::getInspectedSimulationData(std::vector<uint64_t> entityIds
     if (entityIds.size() < Const::MaxInspectedEntities) {
         ids.values[entityIds.size()] = 0;
     }
-    KERNEL_CALL_HOST(cudaGetInspectedSimulationData, *_cudaSimulationData, ids, *_cudaAccessTO);
+    KERNEL_CALL_HOST_SYNC(cudaGetInspectedSimulationData, *_cudaSimulationData, ids, *_cudaAccessTO);
     copyFromGpu(dataTO);
 }
 
 void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    KERNEL_CALL_HOST(
+    KERNEL_CALL_HOST_SYNC(
         cudaGetSimulationOverlayData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(
@@ -278,78 +278,83 @@ void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rect
 void _CudaSimulation::addAndSelectSimulationData(DataAccessTO const& dataTO)
 {
     copyToGpu(dataTO);
-    KERNEL_CALL_HOST(cudaRemoveSelection, *_cudaSimulationData);
-    KERNEL_CALL_HOST(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, true);
+    KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, true);
 }
 
 void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
 {
     copyToGpu(dataTO);
-    KERNEL_CALL_HOST(cudaClearData, *_cudaSimulationData);
-    KERNEL_CALL_HOST(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, false);
+    printf("1\n");
+    KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
+    printf("2\n");
+    KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, false);
+    printf("3\n");
 }
 
 void _CudaSimulation::removeSelectedEntities(bool includeClusters)
 {
-    KERNEL_CALL_HOST(cudaRemoveSelectedEntities, *_cudaSimulationData, includeClusters);
+    KERNEL_CALL_HOST_SYNC(cudaRemoveSelectedEntities, *_cudaSimulationData, includeClusters);
 }
 
 void _CudaSimulation::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyToGpu(changeDataTO);
-    KERNEL_CALL_HOST(cudaChangeSimulationData, *_cudaSimulationData, *_cudaAccessTO);
+    KERNEL_CALL_HOST_SYNC(cudaChangeSimulationData, *_cudaSimulationData, *_cudaAccessTO);
 }
 
 void _CudaSimulation::applyForce(ApplyForceData const& applyData)
 {
-    KERNEL_CALL_HOST(cudaApplyForce, applyData, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaApplyForce, applyData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::switchSelection(PointSelectionData const& pointData)
 {
-    KERNEL_CALL_HOST(cudaSwitchSelection, pointData, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaSwitchSelection, pointData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::swapSelection(PointSelectionData const& pointData)
 {
-    KERNEL_CALL_HOST(cudaSwapSelection, pointData, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaSwapSelection, pointData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::setSelection(AreaSelectionData const& selectionData)
 {
-    KERNEL_CALL_HOST(cudaSetSelection, selectionData, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaSetSelection, selectionData, *_cudaSimulationData);
 }
 
  SelectionShallowData _CudaSimulation::getSelectionShallowData()
 {
-    KERNEL_CALL_HOST(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
+    KERNEL_CALL_HOST_SYNC(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
 void _CudaSimulation::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    KERNEL_CALL_HOST(cudaShallowUpdateSelectedEntities, shallowUpdateData, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaShallowUpdateSelectedEntities, shallowUpdateData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::removeSelection()
 {
-    KERNEL_CALL_HOST(cudaRemoveSelection, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
 }
 
 void _CudaSimulation::updateSelection()
 {
-    KERNEL_CALL_HOST(cudaUpdateSelection, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaUpdateSelection, *_cudaSimulationData);
 }
 
 void _CudaSimulation::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
-    KERNEL_CALL_HOST(cudaColorSelectedEntities, *_cudaSimulationData, color, includeClusters);
+    KERNEL_CALL_HOST_SYNC(cudaColorSelectedEntities, *_cudaSimulationData, color, includeClusters);
 }
 
-void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants_)
+void _CudaSimulation::setGpuConstants(GpuSettings const& gpuConstants)
 {
+    _gpuSettings = gpuConstants;
+
     CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(gpuConstants, &gpuConstants_, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
+        cudaMemcpyToSymbol(cudaThreadSettings, &gpuConstants, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
 }
 
 auto _CudaSimulation::getArraySizes() const -> ArraySizes
@@ -362,7 +367,7 @@ auto _CudaSimulation::getArraySizes() const -> ArraySizes
 
 OverallStatistics _CudaSimulation::getMonitorData()
 {
-    KERNEL_CALL_HOST(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
+    KERNEL_CALL_HOST_SYNC(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
     
     OverallStatistics result;
 
@@ -412,7 +417,7 @@ void _CudaSimulation::setFlowFieldSettings(FlowFieldSettings const& settings)
 
 void _CudaSimulation::clear()
 {
-    KERNEL_CALL_HOST(cudaClearData, *_cudaSimulationData);
+    KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
 }
 
 void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
@@ -489,7 +494,7 @@ void _CudaSimulation::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        KERNEL_CALL_HOST(cudaCopyEntities, *_cudaSimulationData);
+        KERNEL_CALL_HOST_SYNC(cudaCopyEntities, *_cudaSimulationData);
         _cudaSimulationData->resizeRemainings();
         _cudaSimulationData->swap();
     } else {

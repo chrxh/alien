@@ -21,8 +21,10 @@ struct SimulationData
     Entities entities;
     Entities entitiesForCleanup;
 
+    ArraySizes* originalArraySizes;
+
     unsigned int* numOperations;
-    Operation* operations;  //uses dynamic memory
+    Operation** operations;  //uses dynamic memory
 
     DynamicMemory dynamicMemory;
     CudaNumberGenerator numberGen;
@@ -40,17 +42,22 @@ struct SimulationData
         dynamicMemory.init();
         numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
+        CudaMemoryManager::getInstance().acquireMemory<ArraySizes>(1, originalArraySizes);
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
+        CudaMemoryManager::getInstance().acquireMemory<Operation*>(1, operations);
     }
 
-    __device__ void prepareForSimulation()
+    __device__ void prepareForNextTimestep()
     {
         cellMap.reset();
         particleMap.reset();
         dynamicMemory.reset();
 
         *numOperations = 0;
-        operations = dynamicMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
+        *operations = dynamicMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
+        originalArraySizes->cellArraySize = entities.cellPointers.getNumEntries();
+        originalArraySizes->particleArraySize = entities.particlePointers.getNumEntries();
+        originalArraySizes->tokenArraySize = entities.tokenPointers.getNumEntries();
     }
 
     __device__ int getMaxOperations() { return entities.cellPointers.getNumEntries(); }
@@ -132,6 +139,8 @@ struct SimulationData
         dynamicMemory.free();
 
         CudaMemoryManager::getInstance().freeMemory(numOperations);
+        CudaMemoryManager::getInstance().freeMemory(operations);
+        CudaMemoryManager::getInstance().freeMemory(originalArraySizes);
     }
 
 private:

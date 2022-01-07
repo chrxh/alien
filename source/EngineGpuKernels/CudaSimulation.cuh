@@ -12,6 +12,7 @@
 
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/Settings.h"
+#include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 
@@ -29,7 +30,7 @@ public:
 
     ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
 
-    ENGINEGPUKERNELS_EXPORT void calcCudaTimestep();
+    ENGINEGPUKERNELS_EXPORT void calcTimestep();
 
     ENGINEGPUKERNELS_EXPORT void drawVectorGraphics(
         float2 const& rectUpperLeft,
@@ -65,12 +66,6 @@ public:
     ENGINEGPUKERNELS_EXPORT void setSimulationParametersSpots(SimulationParametersSpots const& spots);
     ENGINEGPUKERNELS_EXPORT void setFlowFieldSettings(FlowFieldSettings const& settings);
 
-    struct ArraySizes
-    {
-        int cellArraySize;
-        int particleArraySize;
-        int tokenArraySize;
-    };
     ENGINEGPUKERNELS_EXPORT ArraySizes getArraySizes() const;
 
     ENGINEGPUKERNELS_EXPORT OverallStatistics getMonitorData();
@@ -88,6 +83,7 @@ private:
     void resizeArrays(ArraySizes const& additionals);
 
     std::atomic<uint64_t> _currentTimestep;
+    GpuSettings _gpuSettings;
     SimulationData* _cudaSimulationData;
     RenderingData* _cudaRenderingData;
     SimulationResult* _cudaSimulationResult;

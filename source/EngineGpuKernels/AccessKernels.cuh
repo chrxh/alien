@@ -408,10 +408,10 @@ cudaGetSelectedSimulationData(SimulationData data, bool includeClusters, DataAcc
     *accessTO.numTokens = 0;
     *accessTO.numStringBytes = 0;
 
-    KERNEL_CALL_SYNC(getSelectedCellDataWithoutConnections, data, includeClusters, accessTO);
-    KERNEL_CALL_SYNC(resolveConnections, data, accessTO);
-    KERNEL_CALL_SYNC(getTokenData, data, accessTO);
-    KERNEL_CALL_SYNC(getSelectedParticleData, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getSelectedCellDataWithoutConnections, data, includeClusters, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(resolveConnections, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getTokenData, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getSelectedParticleData, data, accessTO);
 }
 
 __global__ void
@@ -422,10 +422,10 @@ cudaGetSimulationData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData da
     *accessTO.numTokens = 0;
     *accessTO.numStringBytes = 0;
 
-    KERNEL_CALL_SYNC(getCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, accessTO);
-    KERNEL_CALL_SYNC(resolveConnections, data, accessTO);
-    KERNEL_CALL_SYNC(getTokenData, data, accessTO);
-    KERNEL_CALL_SYNC(getParticleData, rectUpperLeft, rectLowerRight, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(resolveConnections, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getTokenData, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getParticleData, rectUpperLeft, rectLowerRight, data, accessTO);
 }
 
 __global__ void
@@ -436,10 +436,10 @@ cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds
     *accessTO.numTokens = 0;
     *accessTO.numStringBytes = 0;
 
-    KERNEL_CALL_SYNC(getInspectedCellDataWithoutConnections, entityIds, data, accessTO);
-    KERNEL_CALL_SYNC(resolveConnections, data, accessTO);
-    KERNEL_CALL_SYNC(getTokenData, data, accessTO);
-    KERNEL_CALL_SYNC(getInspectedParticleData, entityIds, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getInspectedCellDataWithoutConnections, entityIds, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(resolveConnections, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getTokenData, data, accessTO);
+    DEPRECATED_KERNEL_CALL_SYNC(getInspectedParticleData, entityIds, data, accessTO);
 }
 
 __global__ void
@@ -447,7 +447,7 @@ cudaGetSimulationOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simulation
 {
     *access.numCells = 0;
     *access.numParticles = 0;
-    KERNEL_CALL_SYNC(getOverlayData, rectUpperLeft, rectLowerRight, data, access);
+    DEPRECATED_KERNEL_CALL_SYNC(getOverlayData, rectUpperLeft, rectLowerRight, data, access);
 }
 
 __global__ void cudaClearData(SimulationData data)
@@ -463,8 +463,10 @@ __global__ void cudaClearData(SimulationData data)
 
 __global__ void cudaSetSimulationAccessData(SimulationData data, DataAccessTO access, bool selectNewData)
 {
-    KERNEL_CALL_SYNC(adaptNumberGenerator, data.numberGen, access);
-    KERNEL_CALL_SYNC(
+    printf("21\n");
+    DEPRECATED_KERNEL_CALL_SYNC(adaptNumberGenerator, data.numberGen, access);
+    printf("22\n");
+    DEPRECATED_KERNEL_CALL_SYNC(
         createDataFromTO,
         data,
         access,
@@ -472,10 +474,13 @@ __global__ void cudaSetSimulationAccessData(SimulationData data, DataAccessTO ac
         data.entities.particles.getNewSubarray(*access.numParticles),
         data.entities.cells.getNewSubarray(*access.numCells),
         data.entities.tokens.getNewSubarray(*access.numTokens));
+    printf("23\n");
 
-    KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
+    DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
 
+    printf("24\n");
     if (selectNewData) {
-        KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
+        DEPRECATED_KERNEL_CALL_SYNC_1_1(rolloutSelection, data);
     }
+    printf("25\n");
 }

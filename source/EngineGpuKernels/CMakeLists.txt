@@ -51,6 +51,7 @@ add_library(alien_engine_gpu_kernels_lib
     SensorFunction.cuh
     SimulationData.cuh
     SimulationKernels.cuh
+    SimulationKernelLauncher.cuh
     SimulationResult.cuh
     SpotCalculator.cuh
     Swap.cuh

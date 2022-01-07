@@ -37,9 +37,9 @@ struct AreaSelectionData
     float2 endPos;
 };
 
-
-
-#define FP_PRECISION 0.00001
-
-#define CUDA_THROW_NOT_IMPLEMENTED() printf("not implemented"); \
-    asm("trap;");
+struct ArraySizes
+{
+    int cellArraySize;
+    int particleArraySize;
+    int tokenArraySize;
+};

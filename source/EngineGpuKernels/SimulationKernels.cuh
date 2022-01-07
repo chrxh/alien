@@ -113,30 +113,43 @@ __global__ void processingStep13(SimulationData data)
     tokenProcessor.deleteTokenIfCellDeleted(data);
 }
 
+__global__ void prepareForNextTimestep(SimulationData data, SimulationResult result)
+{
+    data.prepareForNextTimestep();
+    result.resetStatistics();
+    result.setArrayResizeNeeded(data.shouldResize());
+}
+
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
 __global__ void calcSimulationTimestepKernel(SimulationData data, SimulationResult result)
 {
-    data.prepareForSimulation();
-    result.resetStatistics();
-    result.setArrayResizeNeeded(data.shouldResize());
+/*
+    DEPRECATED_KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep9, data);
+    DEPRECATED_KERNEL_CALL(processingStep10, data);
+    DEPRECATED_KERNEL_CALL(processingStep11, data);
+    DEPRECATED_KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep13, data);
+*/
 
-    KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, data);
-    KERNEL_CALL(processingStep1, data);
-    KERNEL_CALL(processingStep2, data);
-    KERNEL_CALL(processingStep3, data);
-    KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
-    KERNEL_CALL(processingStep5, data);
-    KERNEL_CALL(processingStep6, data, result);
-    KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
-    KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
-    KERNEL_CALL(processingStep9, data);
-    KERNEL_CALL(processingStep10, data);
-    KERNEL_CALL(processingStep11, data);
-    KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
-    KERNEL_CALL(processingStep13, data);
+    DEPRECATED_KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, data);
+    DEPRECATED_KERNEL_CALL(processingStep1, data);
+    DEPRECATED_KERNEL_CALL(processingStep2, data);
+    DEPRECATED_KERNEL_CALL(processingStep3, data);
+    DEPRECATED_KERNEL_CALL(processingStep4, data, data.entities.tokenPointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep5, data);
+    DEPRECATED_KERNEL_CALL(processingStep6, data, result);
+    DEPRECATED_KERNEL_CALL(processingStep7, data, data.entities.cellPointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep8, data, result, data.entities.tokenPointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep9, data);
+    DEPRECATED_KERNEL_CALL(processingStep10, data);
+    DEPRECATED_KERNEL_CALL(processingStep11, data);
+    DEPRECATED_KERNEL_CALL(processingStep12, data, data.entities.particlePointers.getNumEntries());
+    DEPRECATED_KERNEL_CALL(processingStep13, data);
 
-    KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
+    DEPRECATED_KERNEL_CALL_1_1(cleanupAfterSimulationKernel, data);
 }
 

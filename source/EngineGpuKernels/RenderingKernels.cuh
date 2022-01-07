@@ -385,15 +385,15 @@ __global__ void drawImageKernel(
 {
     uint64_t* targetImage = renderingData.imageData;
 
-    KERNEL_CALL(drawBackground, targetImage, imageSize, data.size, zoom, rectUpperLeft, rectLowerRight);
+    DEPRECATED_KERNEL_CALL(drawBackground, targetImage, imageSize, data.size, zoom, rectUpperLeft, rectLowerRight);
 
-    KERNEL_CALL(
+    DEPRECATED_KERNEL_CALL(
         drawCells, data.size, rectUpperLeft, rectLowerRight, data.entities.cellPointers, targetImage, imageSize, zoom);
 
-    KERNEL_CALL(
+    DEPRECATED_KERNEL_CALL(
         drawTokens, data.size, rectUpperLeft, rectLowerRight, data.entities.tokenPointers, targetImage, imageSize, zoom);
 
-    KERNEL_CALL(
+    DEPRECATED_KERNEL_CALL(
         drawParticles,
         data.size,
         rectUpperLeft,
