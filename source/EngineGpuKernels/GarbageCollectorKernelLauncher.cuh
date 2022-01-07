@@ -4,6 +4,7 @@
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
+#include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
 
 class GarbageCollectorKernelLauncher
@@ -21,7 +22,6 @@ private:
 /**
  * Implementation
  */
-
 GarbageCollectorKernelLauncher::GarbageCollectorKernelLauncher()
 {
     CudaMemoryManager::getInstance().acquireMemory<bool>(1, _cudaBool);
@@ -46,10 +46,7 @@ void GarbageCollectorKernelLauncher::cleanupAfterTimestep(GpuSettings const& gpu
 
     KERNEL_CALL_1_1(cleanupEntityArraysNecessary, simulationData, _cudaBool);
     cudaDeviceSynchronize();
-    bool result;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _cudaBool, sizeof(bool), cudaMemcpyDeviceToHost));
-
-    if (result) {
+    if (copyToHost(_cudaBool)) {
         KERNEL_CALL_1_1(prepareArraysForCleanup, simulationData);
         KERNEL_CALL(cleanupParticles, simulationData.entities.particlePointers, simulationData.entitiesForCleanup.particles);
         KERNEL_CALL(cleanupCellsStep1, simulationData.entities.cellPointers, simulationData.entitiesForCleanup.cells);

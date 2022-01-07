@@ -237,13 +237,13 @@ void _CudaSimulation::getSimulationData(
     DataAccessTO const& dataTO)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSimulationData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
-    copyFromGpu(dataTO);
+    copyDataTOtoHost(dataTO);
 }
 
 void _CudaSimulation::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSelectedSimulationData, *_cudaSimulationData, includeClusters, * _cudaAccessTO);
-    copyFromGpu(dataTO);
+    copyDataTOtoHost(dataTO);
 }
 
 void _CudaSimulation::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO)
@@ -259,35 +259,30 @@ void _CudaSimulation::getInspectedSimulationData(std::vector<uint64_t> entityIds
         ids.values[entityIds.size()] = 0;
     }
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetInspectedSimulationData, *_cudaSimulationData, ids, *_cudaAccessTO);
-    copyFromGpu(dataTO);
+    copyDataTOtoHost(dataTO);
 }
 
 void _CudaSimulation::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
     DEPRECATED_KERNEL_CALL_HOST_SYNC(
         cudaGetSimulationOverlayData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.particles,
-        _cudaAccessTO->particles,
-        sizeof(CellAccessTO) * (*dataTO.numParticles),
-        cudaMemcpyDeviceToHost));
+
+    copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
+    copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);
+    copyToHost(dataTO.cells, _cudaAccessTO->cells, *dataTO.numCells);
+    copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
 }
 
 void _CudaSimulation::addAndSelectSimulationData(DataAccessTO const& dataTO)
 {
-    copyToGpu(dataTO);
+    copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, true);
 }
 
 void _CudaSimulation::setSimulationData(DataAccessTO const& dataTO)
 {
-    copyToGpu(dataTO);
+    copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSetSimulationAccessData, *_cudaSimulationData, *_cudaAccessTO, false);
 }
@@ -299,7 +294,7 @@ void _CudaSimulation::removeSelectedEntities(bool includeClusters)
 
 void _CudaSimulation::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
-    copyToGpu(changeDataTO);
+    copyDataTOtoDevice(changeDataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaChangeSimulationData, *_cudaSimulationData, *_cudaAccessTO);
 }
 
@@ -428,52 +423,30 @@ void _CudaSimulation::resizeArraysIfNecessary(ArraySizes const& additionals)
     }
 }
 
-void _CudaSimulation::copyToGpu(DataAccessTO const& dataTO)
+void _CudaSimulation::copyDataTOtoDevice(DataAccessTO const& dataTO)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numCells, dataTO.numCells, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(_cudaAccessTO->numParticles, dataTO.numParticles, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(_cudaAccessTO->numTokens, dataTO.numTokens, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(_cudaAccessTO->numStringBytes, dataTO.numStringBytes, sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->cells, dataTO.cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->particles,
-        dataTO.particles,
-        sizeof(ParticleAccessTO) * (*dataTO.numParticles),
-        cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->tokens, dataTO.tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyHostToDevice));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        _cudaAccessTO->stringBytes,
-        dataTO.stringBytes,
-        sizeof(char) * (*dataTO.numStringBytes),
-        cudaMemcpyHostToDevice));
+    copyToDevice(_cudaAccessTO->numCells, dataTO.numCells);
+    copyToDevice(_cudaAccessTO->numParticles, dataTO.numParticles);
+    copyToDevice(_cudaAccessTO->numTokens, dataTO.numTokens);
+    copyToDevice(_cudaAccessTO->numStringBytes, dataTO.numStringBytes);
+
+    copyToDevice(_cudaAccessTO->cells, dataTO.cells, *dataTO.numCells);
+    copyToDevice(_cudaAccessTO->particles, dataTO.particles, *dataTO.numParticles);
+    copyToDevice(_cudaAccessTO->tokens, dataTO.tokens, *dataTO.numTokens);
+    copyToDevice(_cudaAccessTO->stringBytes, dataTO.stringBytes, *dataTO.numStringBytes);
 }
 
-void _CudaSimulation::copyFromGpu(DataAccessTO const& dataTO)
+void _CudaSimulation::copyDataTOtoHost(DataAccessTO const& dataTO)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numCells, _cudaAccessTO->numCells, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(dataTO.numParticles, _cudaAccessTO->numParticles, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(dataTO.numTokens, _cudaAccessTO->numTokens, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpy(dataTO.numStringBytes, _cudaAccessTO->numStringBytes, sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.cells, _cudaAccessTO->cells, sizeof(CellAccessTO) * (*dataTO.numCells), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.particles,
-        _cudaAccessTO->particles,
-        sizeof(ParticleAccessTO) * (*dataTO.numParticles),
-        cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.tokens, _cudaAccessTO->tokens, sizeof(TokenAccessTO) * (*dataTO.numTokens), cudaMemcpyDeviceToHost));
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-        dataTO.stringBytes,
-        _cudaAccessTO->stringBytes,
-        sizeof(char) * (*dataTO.numStringBytes),
-        cudaMemcpyDeviceToHost));
+    copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
+    copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);
+    copyToHost(dataTO.numTokens, _cudaAccessTO->numTokens);
+    copyToHost(dataTO.numStringBytes, _cudaAccessTO->numStringBytes);
+
+    copyToHost(dataTO.cells, _cudaAccessTO->cells, *dataTO.numCells);
+    copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
+    copyToHost(dataTO.tokens, _cudaAccessTO->tokens, *dataTO.numTokens);
+    copyToHost(dataTO.stringBytes, _cudaAccessTO->stringBytes, *dataTO.numStringBytes);
 }
 
 void _CudaSimulation::automaticResizeArrays()
