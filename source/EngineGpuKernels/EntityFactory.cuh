@@ -16,20 +16,12 @@ class EntityFactory
 {
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ Particle*
-    createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray);
-    __inline__ __device__ Cell*
-    createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
+    __inline__ __device__ Particle* createParticleFromTO(ParticleAccessTO const& particleTO);
+    __inline__ __device__ Cell* createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
     __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
-    __inline__ __device__ Token*
-    createTokenFromTO(int targetIndex, TokenAccessTO const& tokenTO, Cell* cellArray, Token* tokenArray);
+    __inline__ __device__ Token* createTokenFromTO(TokenAccessTO const& tokenTO, Cell* cellArray);
     __inline__ __device__ void changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle);
-    __inline__ __device__ Particle*
-    createParticle(
-        float energy,
-        float2 const& pos,
-        float2 const& vel,
-        ParticleMetadata const& metadata);
+    __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, ParticleMetadata const& metadata);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
     __inline__ __device__ Cell* createCell();
     __inline__ __device__ Token* duplicateToken(Cell* targetCell, Token* sourceToken);
@@ -54,10 +46,10 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
 }
 
 __inline__ __device__ Particle*
-EntityFactory::createParticleFromTO(int targetIndex, ParticleAccessTO const& particleTO, Particle* particleTargetArray)
+EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO)
 {
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
-    Particle* particle = particleTargetArray + targetIndex;
+    Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
     
     particle->id = _data->numberGen.createNewId_kernel();
@@ -203,14 +195,10 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
         dataTO.stringBytes);
 }
 
-__inline__ __device__ Token* EntityFactory::createTokenFromTO(
-    int targetIndex,
-    TokenAccessTO const& tokenTO,
-    Cell* cellArray,
-    Token* tokenArray)
+__inline__ __device__ Token* EntityFactory::createTokenFromTO(TokenAccessTO const& tokenTO, Cell* cellArray)
 {
     Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
-    Token* token = tokenArray + targetIndex;
+    Token* token = _data->entities.tokens.getNewElement();
     *tokenPointer = token;
 
     token->energy = tokenTO.energy;

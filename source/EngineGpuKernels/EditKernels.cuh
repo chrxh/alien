@@ -508,9 +508,8 @@ __global__ void changeCell(SimulationData data, DataAccessTO changeDataTO, int n
                 entityFactory.init(&data);
                 entityFactory.changeCellFromTO(cellTO, changeDataTO, cell);
 
-                auto tokenSubarray = data.entities.tokens.getNewSubarray(*changeDataTO.numTokens);
                 for (int i = 0; i < *changeDataTO.numTokens; ++i) {
-                    entityFactory.createTokenFromTO(i, changeDataTO.tokens[i], cell, tokenSubarray);
+                    entityFactory.createTokenFromTO(changeDataTO.tokens[i], cell);
                 }
             }
         }
