@@ -185,8 +185,8 @@ __global__ void cleanupAfterDataManipulationKernel(SimulationData data)
     DEPRECATED_KERNEL_CALL_SYNC(cleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
     data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
 
+/*
     data.entitiesForCleanup.strings.reset();
-    /*
     KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
     data.entities.strings.swapContent(data.entitiesForCleanup.strings);
 */

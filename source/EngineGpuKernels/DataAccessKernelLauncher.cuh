@@ -7,6 +7,7 @@
 #include "Definitions.cuh"
 #include "DataAccessKernels.cuh"
 #include "Macros.cuh"
+#include "GarbageCollectorKernelLauncher.cuh"
 
 class DataAccessKernelLauncher
 {
@@ -20,5 +21,8 @@ public:
 
     void addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData);
     void clearData(GpuSettings const& gpuSettings, SimulationData data);
+
+private:
+    GarbageCollectorKernelLauncher _garbageCollector;
 };
 

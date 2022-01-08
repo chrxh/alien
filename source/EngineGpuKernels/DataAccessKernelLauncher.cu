@@ -25,7 +25,7 @@ void DataAccessKernelLauncher::addData(GpuSettings const& gpuSettings, Simulatio
     KERNEL_CALL_1_1(prepareSetData, data);
     KERNEL_CALL(adaptNumberGenerator, data.numberGen, dataTO);
     KERNEL_CALL(createDataFromTO, data, dataTO, selectData);
-    KERNEL_CALL_1_1(cleanupAfterDataManipulationKernel, data);
+    _garbageCollector.cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
         KERNEL_CALL_1_1(rolloutSelection, data);
     }
