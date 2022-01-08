@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 namespace Const
 {
     uint32_t const IndividualCellColor1 = 0x5070ff;

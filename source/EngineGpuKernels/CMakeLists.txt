@@ -15,21 +15,25 @@ add_library(alien_engine_gpu_kernels_lib
     CudaMonitorData.cuh
     CudaSimulationAdapter.cu
     CudaSimulationAdapter.cuh
+    DataAccessKernels.cu
     DataAccessKernels.cuh
+    DataAccessKernelLauncher.cu
     DataAccessKernelLauncher.cuh
-    DEBUG_cluster.cuh
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
     DigestionFunction.cuh
     DllExport.h
     DynamicMemory.cuh
+    EditKernels.cu
     EditKernels.cuh
     EnergyGuidance.cuh
     Entities.cuh
     EntityFactory.cuh
     FlowFieldKernel.cuh
+    GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
+    GarbageCollectorKernelLauncher.cu
     GarbageCollectorKernelLauncher.cuh
     HashMap.cuh
     HashSet.cuh

@@ -9,6 +9,7 @@
 #include "Entities.cuh"
 #include "CellFunctionData.cuh"
 #include "Operation.cuh"
+#include "Map.cuh"
 
 struct SimulationData
 {
