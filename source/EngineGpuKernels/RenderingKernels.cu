@@ -20,17 +20,17 @@ __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int ind
     atomicAdd(reinterpret_cast<unsigned long long*>(&imageData[index]), rawColorToAdd);
 }
 
-__device__ float3 colorToFloat3(unsigned int value)
+__device__ __inline__ float3 colorToFloat3(unsigned int value)
 {
     return float3{toFloat(value & 0xff) / 255, toFloat((value >> 8) & 0xff) / 255, toFloat((value >> 16) & 0xff) / 255};
 }
 
-__device__ float3 mix(float3 const& a, float3 const& b, float factor)
+__device__ __inline__ float3 mix(float3 const& a, float3 const& b, float factor)
 {
     return float3{a.x * factor + b.x * (1 - factor), a.y * factor + b.y * (1 - factor), a.z * factor + b.z * (1 - factor)};
 }
 
-__device__ float3 mix(float3 const& a, float3 const& b, float3 const& c, float factor1, float factor2)
+__device__ __inline__ float3 mix(float3 const& a, float3 const& b, float3 const& c, float factor1, float factor2)
 {
     float weight1 = factor1 * factor2;
     float weight2 = 1 - factor1;
@@ -186,7 +186,7 @@ __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, f
     }
 }
 
-__device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted)
+__device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
 {
     if (radius > 1.5 - FP_PRECISION) {
         auto radiusSquared = radius * radius;
@@ -210,7 +210,8 @@ __device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize
     }
 }
 
-__global__ void drawCells(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void
+drawCells(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
     auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -292,7 +293,7 @@ drawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Ar
     }
 }
 
-__device__ void drawFlowCenters(uint64_t* targetImage, float2 const& rectUpperLeft, int2 imageSize, float zoom)
+__device__ __inline__ void drawFlowCenters(uint64_t* targetImage, float2 const& rectUpperLeft, int2 imageSize, float zoom)
 {
     if (cudaFlowFieldSettings.active) {
         for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {

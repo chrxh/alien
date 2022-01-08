@@ -42,3 +42,4 @@ __global__ extern void processingStep12(SimulationData data);
 __global__ extern void processingStep13(SimulationData data);
 
 __global__ extern void prepareForNextTimestep(SimulationData data, SimulationResult result);
+

@@ -1,5 +1,6 @@
 ﻿#include "SimulationData.cuh"
 
+/*
 #include "Token.cuh"
 
 void SimulationData::init(int2 const& universeSize)
@@ -125,3 +126,4 @@ void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<
         targetArray.resize(newSize);
     }
 }
+*/
