@@ -273,8 +273,8 @@ void _CudaSimulationAdapter::getInspectedSimulationData(std::vector<uint64_t> en
 
 void _CudaSimulationAdapter::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(
-        cudaGetSimulationOverlayData, rectUpperLeft, rectLowerRight, *_cudaSimulationData, *_cudaAccessTO);
+    _dataAccessKernels->getOverlayData(_gpuSettings, *_cudaSimulationData, rectUpperLeft, rectLowerRight, *_cudaAccessTO);
+    syncAndCheck();
 
     copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
     copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);

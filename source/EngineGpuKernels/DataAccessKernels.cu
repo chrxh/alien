@@ -74,49 +74,6 @@ namespace
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
     }
-
-    __global__ void getOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
-    {
-        {
-            auto const& cells = data.entities.cellPointers;
-            auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto& cell = cells.at(index);
-
-                auto pos = cell->absPos;
-                data.cellMap.mapPosCorrection(pos);
-                if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-                    continue;
-                }
-                auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
-                auto& cellTO = dataTO.cells[cellTOIndex];
-
-                cellTO.pos = cell->absPos;
-                cellTO.cellFunctionType = cell->cellFunctionType;
-                cellTO.selected = cell->selected;
-            }
-        }
-        {
-            auto const& particles = data.entities.particlePointers;
-            auto const partition = calcAllThreadsPartition(particles.getNumEntries());
-
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto& particle = particles.at(index);
-
-                auto pos = particle->absPos;
-                data.particleMap.mapPosCorrection(pos);
-                if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-                    continue;
-                }
-                auto particleTOIndex = atomicAdd(dataTO.numParticles, 1);
-                auto& particleTO = dataTO.particles[particleTOIndex];
-
-                particleTO.pos = particle->absPos;
-                particleTO.selected = particle->selected;
-            }
-        }
-    }
 }
 
 /************************************************************************/
@@ -200,6 +157,49 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
         }
 
         createParticleTO(particle, access);
+    }
+}
+
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
+{
+    {
+        auto const& cells = data.entities.cellPointers;
+        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
+
+            auto pos = cell->absPos;
+            data.cellMap.mapPosCorrection(pos);
+            if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+                continue;
+            }
+            auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
+            auto& cellTO = dataTO.cells[cellTOIndex];
+
+            cellTO.pos = cell->absPos;
+            cellTO.cellFunctionType = cell->cellFunctionType;
+            cellTO.selected = cell->selected;
+        }
+    }
+    {
+        auto const& particles = data.entities.particlePointers;
+        auto const partition = calcAllThreadsPartition(particles.getNumEntries());
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& particle = particles.at(index);
+
+            auto pos = particle->absPos;
+            data.particleMap.mapPosCorrection(pos);
+            if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+                continue;
+            }
+            auto particleTOIndex = atomicAdd(dataTO.numParticles, 1);
+            auto& particleTO = dataTO.particles[particleTOIndex];
+
+            particleTO.pos = particle->absPos;
+            particleTO.selected = particle->selected;
+        }
     }
 }
 
@@ -354,13 +354,6 @@ __global__ void cudaGetSelectedSimulationData(SimulationData data, bool includeC
     DEPRECATED_KERNEL_CALL_SYNC(cudaResolveConnections, data, dataTO);
     DEPRECATED_KERNEL_CALL_SYNC(cudaGetTokenData, data, dataTO);
     DEPRECATED_KERNEL_CALL_SYNC(cudaGetSelectedParticleData, data, dataTO);
-}
-
-__global__ void cudaGetSimulationOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
-{
-    *access.numCells = 0;
-    *access.numParticles = 0;
-    DEPRECATED_KERNEL_CALL_SYNC(getOverlayData, rectUpperLeft, rectLowerRight, data, access);
 }
 
 __global__ void cudaClearData(SimulationData data)
