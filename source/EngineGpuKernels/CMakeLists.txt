@@ -19,6 +19,7 @@ add_library(alien_engine_gpu_kernels_lib
     DataAccessKernels.cuh
     DataAccessKernelLauncher.cu
     DataAccessKernelLauncher.cuh
+    DebugKernels.cu
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
@@ -28,9 +29,11 @@ add_library(alien_engine_gpu_kernels_lib
     EditKernels.cu
     EditKernels.cuh
     EnergyGuidance.cuh
+    Entities.cu
     Entities.cuh
     EntityFactory.cuh
-    FlowFieldKernel.cuh
+    FlowFieldKernels.cu
+    FlowFieldKernels.cuh
     GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
     GarbageCollectorKernelLauncher.cu
@@ -42,6 +45,7 @@ add_library(alien_engine_gpu_kernels_lib
     Map.cuh
     MapSectionCollector.cuh
     Math.cuh
+    MonitorKernels.cu
     MonitorKernels.cuh
     MuscleFunction.cuh
     Operation.cuh
@@ -51,12 +55,17 @@ add_library(alien_engine_gpu_kernels_lib
     PropulsionFunction.cuh
     QuantityConverter.cuh
     RenderingData.cuh
+    RenderingKernels.cu
     RenderingKernels.cuh
+    ScannerFunction.cu
     ScannerFunction.cuh
     SelectionResult.cuh
     SensorFunction.cuh
+    SimulationData.cu
     SimulationData.cuh
+    SimulationKernels.cu
     SimulationKernels.cuh
+    SimulationKernelLauncher.cu
     SimulationKernelLauncher.cuh
     SimulationResult.cuh
     SpotCalculator.cuh

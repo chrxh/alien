@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include <stdint.h>
 
 #define MAX_TOKEN_MEM_SIZE 256
 #define MAX_CELL_BONDS 6
