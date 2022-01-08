@@ -56,8 +56,7 @@ __global__ extern void cleanupCellMap(SimulationData data);
 __global__ extern void cleanupParticleMap(SimulationData data);
 __global__ extern void swapPointerArrays(SimulationData data);
 __global__ extern void swapArrays(SimulationData data);
-__global__ extern void cleanupEntityArraysNecessary(SimulationData data, bool* result);
+__global__ extern void checkIfCleanupIsNecessary(SimulationData data, bool* result);
 
 //#TODO remove
 __global__ void cleanupAfterDataManipulationKernel(SimulationData data);
-__global__ extern void cudaCopyEntities(SimulationData data);

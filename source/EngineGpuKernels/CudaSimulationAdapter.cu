@@ -133,6 +133,7 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
 
     _simulationKernels = new SimulationKernelLauncher();
     _dataAccessKernels = new DataAccessKernelLauncher();
+    _garbageCollectorKernels = new GarbageCollectorKernelLauncher();
 
     int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
     _cudaSimulationData->init(worldSize);
@@ -177,6 +178,7 @@ _CudaSimulationAdapter::~_CudaSimulationAdapter()
     delete _cudaMonitorData;
     delete _simulationKernels;
     delete _dataAccessKernels;
+    delete _garbageCollectorKernels;
 }
 
 void* _CudaSimulationAdapter::registerImageResource(GLuint image)
@@ -192,6 +194,9 @@ void* _CudaSimulationAdapter::registerImageResource(GLuint image)
 void _CudaSimulationAdapter::calcTimestep()
 {
     _simulationKernels->calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
+    cudaDeviceSynchronize();
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+
     automaticResizeArrays();
     ++_currentTimestep;
 }
@@ -470,7 +475,9 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaCopyEntities, *_cudaSimulationData);
+        _garbageCollectorKernels->copyArrays(_gpuSettings, *_cudaSimulationData);
+        cudaDeviceSynchronize();
+
         _cudaSimulationData->resizeRemainings();
         _cudaSimulationData->swap();
     } else {

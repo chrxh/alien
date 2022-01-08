@@ -93,4 +93,5 @@ private:
 
     SimulationKernelLauncher* _simulationKernels;
     DataAccessKernelLauncher* _dataAccessKernels;
+    GarbageCollectorKernelLauncher* _garbageCollectorKernels;
 };
