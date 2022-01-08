@@ -4,6 +4,7 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
+#include "AccessTOs.cuh"
 
 struct CellMetadata
 {

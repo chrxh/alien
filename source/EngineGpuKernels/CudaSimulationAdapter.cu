@@ -280,14 +280,14 @@ void _CudaSimulationAdapter::addAndSelectSimulationData(DataAccessTO const& data
 {
     copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
-    _dataAccessKernels->setData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true);
+    _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true);
 }
 
 void _CudaSimulationAdapter::setSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
-    _dataAccessKernels->setData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, false);
+    _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, false);
 }
 
 void _CudaSimulationAdapter::removeSelectedEntities(bool includeClusters)
