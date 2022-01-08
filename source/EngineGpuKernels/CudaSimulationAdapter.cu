@@ -287,13 +287,15 @@ void _CudaSimulationAdapter::addAndSelectSimulationData(DataAccessTO const& data
     copyDataTOtoDevice(dataTO);
     DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
     _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::setSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
+    _dataAccessKernels->clearData(_gpuSettings, *_cudaSimulationData);
     _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, false);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::removeSelectedEntities(bool includeClusters)
@@ -402,8 +404,7 @@ void _CudaSimulationAdapter::setCurrentTimestep(uint64_t timestep)
 
 void _CudaSimulationAdapter::setSimulationParameters(SimulationParameters const& parameters)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
-        cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
 void _CudaSimulationAdapter::setSimulationParametersSpots(SimulationParametersSpots const& spots)
@@ -421,7 +422,8 @@ void _CudaSimulationAdapter::setFlowFieldSettings(FlowFieldSettings const& setti
 
 void _CudaSimulationAdapter::clear()
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaClearData, *_cudaSimulationData);
+    _dataAccessKernels->clearData(_gpuSettings, *_cudaSimulationData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::resizeArraysIfNecessary(ArraySizes const& additionals)
