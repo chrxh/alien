@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "GarbageCollectorKernelLauncher.cuh"
+﻿#include "GarbageCollectorKernelLauncher.cuh"
 
 GarbageCollectorKernelLauncher::GarbageCollectorKernelLauncher()
 {
