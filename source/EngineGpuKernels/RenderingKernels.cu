@@ -290,7 +290,7 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
     }
 }
 
-__global__ void cudaDrawFlowCenters(uint64_t* targetImage, float2 const& rectUpperLeft, int2 imageSize, float zoom)
+__global__ void cudaDrawFlowCenters(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
 {
     if (cudaFlowFieldSettings.active) {
         for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {

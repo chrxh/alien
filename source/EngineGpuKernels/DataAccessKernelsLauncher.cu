@@ -48,13 +48,13 @@ void DataAccessKernelsLauncher::getOverlayData(
     SimulationData const& data,
     int2 rectUpperLeft,
     int2 rectLowerRight,
-    DataAccessTO dataTO)
+    DataAccessTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
-void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData)
+void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& dataTO, bool selectData)
 {
     KERNEL_CALL_1_1(cudaPrepareSetData, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen, dataTO);
@@ -63,9 +63,9 @@ void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, Simulati
     if (selectData) {
         KERNEL_CALL_1_1(cudaRolloutSelection, data);
     }
-
-    cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 }
 
-void DataAccessKernelsLauncher::clearData(GpuSettings const& gpuSettings, SimulationData data) {}
+void DataAccessKernelsLauncher::clearData(GpuSettings const& gpuSettings, SimulationData const& data)
+{
+    KERNEL_CALL(cudaClearData, data);
+}
