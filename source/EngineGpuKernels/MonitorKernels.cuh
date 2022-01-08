@@ -7,6 +7,3 @@
 #include "CudaMonitorData.cuh"
 
 __global__ extern void cudaGetCudaMonitorData(SimulationData data, CudaMonitorData monitorData);
-
-__global__ extern void getEnergyForMonitorData(SimulationData data, CudaMonitorData monitorData);
-

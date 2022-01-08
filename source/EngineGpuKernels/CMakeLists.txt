@@ -57,7 +57,6 @@ add_library(alien_engine_gpu_kernels_lib
     RenderingData.cuh
     RenderingKernels.cu
     RenderingKernels.cuh
-    ScannerFunction.cu
     ScannerFunction.cuh
     SelectionResult.cuh
     SensorFunction.cuh
