@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "RenderingKernels.cuh"
+﻿#include "RenderingKernels.cuh"
 
 __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
 {
