@@ -5,14 +5,14 @@
 #include "Definitions.cuh"
 #include "Macros.cuh"
 #include "SimulationKernels.cuh"
-#include "GarbageCollectorKernelLauncher.cuh"
+#include "GarbageCollectorKernelsLauncher.cuh"
 
-class SimulationKernelLauncher
+class SimulationKernelsLauncher
 {
 public:
     void calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result);
 
 private:
-    GarbageCollectorKernelLauncher _garbageCollector;
+    GarbageCollectorKernelsLauncher _garbageCollector;
 };
 

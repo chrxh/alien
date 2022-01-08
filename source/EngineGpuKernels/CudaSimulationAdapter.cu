@@ -30,8 +30,8 @@
 #include "EditKernels.cuh"
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
-#include "SimulationKernelLauncher.cuh"
-#include "DataAccessKernelLauncher.cuh"
+#include "SimulationKernelsLauncher.cuh"
+#include "DataAccessKernelsLauncher.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
@@ -131,9 +131,9 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
-    _simulationKernels = new SimulationKernelLauncher();
-    _dataAccessKernels = new DataAccessKernelLauncher();
-    _garbageCollectorKernels = new GarbageCollectorKernelLauncher();
+    _simulationKernels = new SimulationKernelsLauncher();
+    _dataAccessKernels = new DataAccessKernelsLauncher();
+    _garbageCollectorKernels = new GarbageCollectorKernelsLauncher();
 
     int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
     _cudaSimulationData->init(worldSize);

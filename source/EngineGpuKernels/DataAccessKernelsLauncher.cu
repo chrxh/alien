@@ -1,9 +1,9 @@
-﻿#include "DataAccessKernelLauncher.cuh"
+﻿#include "DataAccessKernelsLauncher.cuh"
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-void DataAccessKernelLauncher::getData(
+void DataAccessKernelsLauncher::getData(
     GpuSettings const& gpuSettings,
     SimulationData const& simulationData,
     int2 const& rectUpperLeft,
@@ -20,18 +20,18 @@ void DataAccessKernelLauncher::getData(
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 }
 
-void DataAccessKernelLauncher::addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData)
+void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData)
 {
     KERNEL_CALL_1_1(prepareSetData, data);
     KERNEL_CALL(adaptNumberGenerator, data.numberGen, dataTO);
     KERNEL_CALL(createDataFromTO, data, dataTO, selectData);
     _garbageCollector.cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
-        KERNEL_CALL_1_1(rolloutSelection, data);
+        KERNEL_CALL_1_1(cudaRolloutSelection, data);
     }
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 }
 
-void DataAccessKernelLauncher::clearData(GpuSettings const& gpuSettings, SimulationData data) {}
+void DataAccessKernelsLauncher::clearData(GpuSettings const& gpuSettings, SimulationData data) {}

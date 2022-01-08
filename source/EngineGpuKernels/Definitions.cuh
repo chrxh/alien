@@ -16,9 +16,9 @@ struct SimulationParameters;
 struct GpuSettings;
 class CudaMonitorData;
 
-class SimulationKernelLauncher;
-class DataAccessKernelLauncher;
-class GarbageCollectorKernelLauncher;
+class SimulationKernelsLauncher;
+class DataAccessKernelsLauncher;
+class GarbageCollectorKernelsLauncher;
 
 struct ApplyForceData
 {
