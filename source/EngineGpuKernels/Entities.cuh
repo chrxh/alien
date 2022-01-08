@@ -18,27 +18,8 @@ struct Entities
 
     DynamicMemory strings;
 
-    void init()
-    {
-        cellPointers.init();
-        cells.init();
-        tokenPointers.init();
-        tokens.init();
-        particles.init();
-        particlePointers.init();
-        strings.init();
-        strings.resize(Const::MetadataMemorySize);
-    }
+    void init();
 
-    void free()
-    {
-        cellPointers.free();
-        cells.free();
-        tokenPointers.free();
-        tokens.free();
-        particles.free();
-        particlePointers.free();
-        strings.free();
-    }
+    void free();
 };
 

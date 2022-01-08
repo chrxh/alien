@@ -1,8 +1,8 @@
-﻿#pragma once
+﻿#include "FlowFieldKernels.cuh"
 
-#include "Math.cuh"
-#include "Map.cuh"
-#include "SimulationData.cuh"
+#include "EngineInterface/FlowFieldSettings.h"
+
+#include "ConstantMemory.cuh"
 
 __device__ float getHeight(float2 const& pos, MapInfo const& mapInfo)
 {
@@ -50,3 +50,4 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
         DEPRECATED_KERNEL_CALL_SYNC(applyFlowFieldSettings, data);
     }
 }
+
