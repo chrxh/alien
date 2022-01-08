@@ -197,8 +197,7 @@ void* _CudaSimulationAdapter::registerImageResource(GLuint image)
 void _CudaSimulationAdapter::calcTimestep()
 {
     _simulationKernels->calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
-    cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    syncAndCheck();
 
     automaticResizeArrays();
     ++_currentTimestep;
@@ -220,8 +219,7 @@ void _CudaSimulationAdapter::drawVectorGraphics(
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
     _renderingKernels->drawImage(_gpuSettings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), *_cudaSimulationData, *_cudaRenderingData);
-    cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    syncAndCheck();
 
     const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
     CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
@@ -243,12 +241,16 @@ void _CudaSimulationAdapter::getSimulationData(
     DataAccessTO const& dataTO)
 {
     _dataAccessKernels->getData(_gpuSettings, *_cudaSimulationData, rectUpperLeft, rectLowerRight, *_cudaAccessTO);
+    syncAndCheck();
+
     copyDataTOtoHost(dataTO);
 }
 
 void _CudaSimulationAdapter::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSelectedSimulationData, *_cudaSimulationData, includeClusters, * _cudaAccessTO);
+    _dataAccessKernels->getSelectedData(_gpuSettings, *_cudaSimulationData, includeClusters, *_cudaAccessTO);
+    syncAndCheck();
+
     copyDataTOtoHost(dataTO);
 }
 
@@ -264,7 +266,8 @@ void _CudaSimulationAdapter::getInspectedSimulationData(std::vector<uint64_t> en
     if (entityIds.size() < Const::MaxInspectedEntities) {
         ids.values[entityIds.size()] = 0;
     }
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetInspectedSimulationData, *_cudaSimulationData, ids, *_cudaAccessTO);
+    _dataAccessKernels->getInspectedData(_gpuSettings, *_cudaSimulationData, ids, *_cudaAccessTO);
+    syncAndCheck();
     copyDataTOtoHost(dataTO);
 }
 
@@ -429,6 +432,12 @@ void _CudaSimulationAdapter::resizeArraysIfNecessary(ArraySizes const& additiona
     }
 }
 
+void _CudaSimulationAdapter::syncAndCheck()
+{
+    cudaDeviceSynchronize();
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+}
+
 void _CudaSimulationAdapter::copyDataTOtoDevice(DataAccessTO const& dataTO)
 {
     copyToDevice(_cudaAccessTO->numCells, dataTO.numCells);
@@ -474,7 +483,7 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
         _garbageCollectorKernels->copyArrays(_gpuSettings, *_cudaSimulationData);
-        cudaDeviceSynchronize();
+        syncAndCheck();
 
         _cudaSimulationData->resizeRemainings();
         _cudaSimulationData->swap();

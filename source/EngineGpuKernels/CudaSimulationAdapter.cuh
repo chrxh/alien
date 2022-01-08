@@ -77,6 +77,7 @@ public:
     ENGINEGPUKERNELS_EXPORT void resizeArraysIfNecessary(ArraySizes const& additionals);
 
 private:
+    void syncAndCheck();
     void copyDataTOtoDevice(DataAccessTO const& dataTO);
     void copyDataTOtoHost(DataAccessTO const& dataTO);
     void automaticResizeArrays();

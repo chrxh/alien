@@ -75,49 +75,6 @@ namespace
         particleTO.energy = particle->energy;
     }
 
-    __global__ void getInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataAccessTO dataTO)
-    {
-        auto const& cells = data.entities.cellPointers;
-        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-        auto const cellArrayStart = data.entities.cells.getArray();
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = cells.at(index);
-
-            bool found = false;
-            for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
-                if (ids.values[i] == 0) {
-                    break;
-                }
-                if (ids.values[i] == cell->id) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                cell->tag = -1;
-                continue;
-            }
-
-            createCellTO(cell, dataTO, cellArrayStart);
-        }
-    }
-
-    __global__ void getSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO)
-    {
-        auto const& cells = data.entities.cellPointers;
-        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-        auto const cellArrayStart = data.entities.cells.getArray();
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = cells.at(index);
-            if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
-                cell->tag = -1;
-                continue;
-            }
-            createCellTO(cell, dataTO, cellArrayStart);
-        }
-    }
-
     __global__ void getOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
     {
         {
@@ -160,50 +117,91 @@ namespace
             }
         }
     }
-
-    __global__ void getInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access)
-    {
-        PartitionData particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
-
-        for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-            auto const& particle = data.entities.particlePointers.at(particleIndex);
-            bool found = false;
-            for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
-                if (ids.values[i] == 0) {
-                    break;
-                }
-                if (ids.values[i] == particle->id) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                continue;
-            }
-
-            createParticleTO(particle, access);
-        }
-    }
-
-    __global__ void getSelectedParticleData(SimulationData data, DataAccessTO access)
-    {
-        PartitionData particleBlock =
-            calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-        for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-            auto const& particle = data.entities.particlePointers.at(particleIndex);
-            if (particle->selected == 0) {
-                continue;
-            }
-
-            createParticleTO(particle, access);
-        }
-    }
-
 }
 
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
+
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO)
+{
+    auto const& cells = data.entities.cellPointers;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const cellArrayStart = data.entities.cells.getArray();
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+            cell->tag = -1;
+            continue;
+        }
+        createCellTO(cell, dataTO, cellArrayStart);
+    }
+}
+
+__global__ void cudaGetSelectedParticleData(SimulationData data, DataAccessTO access)
+{
+    PartitionData particleBlock = calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
+        auto const& particle = data.entities.particlePointers.at(particleIndex);
+        if (particle->selected == 0) {
+            continue;
+        }
+
+        createParticleTO(particle, access);
+    }
+}
+
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataAccessTO dataTO)
+{
+    auto const& cells = data.entities.cellPointers;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const cellArrayStart = data.entities.cells.getArray();
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+            if (ids.values[i] == 0) {
+                break;
+            }
+            if (ids.values[i] == cell->id) {
+                found = true;
+            }
+        }
+        if (!found) {
+            cell->tag = -1;
+            continue;
+        }
+
+        createCellTO(cell, dataTO, cellArrayStart);
+    }
+}
+
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access)
+{
+    PartitionData particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+    for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
+        auto const& particle = data.entities.particlePointers.at(particleIndex);
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+            if (ids.values[i] == 0) {
+                break;
+            }
+            if (ids.values[i] == particle->id) {
+                found = true;
+            }
+        }
+        if (!found) {
+            continue;
+        }
+
+        createParticleTO(particle, access);
+    }
+}
 
 //tags cell with cellTO index and tags cellTO connections with cell index
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
@@ -352,23 +350,10 @@ __global__ void cudaGetSelectedSimulationData(SimulationData data, bool includeC
     *dataTO.numTokens = 0;
     *dataTO.numStringBytes = 0;
 
-    DEPRECATED_KERNEL_CALL_SYNC(getSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
     DEPRECATED_KERNEL_CALL_SYNC(cudaResolveConnections, data, dataTO);
     DEPRECATED_KERNEL_CALL_SYNC(cudaGetTokenData, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(getSelectedParticleData, data, dataTO);
-}
-
-__global__ void cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds, DataAccessTO dataTO)
-{
-    *dataTO.numCells = 0;
-    *dataTO.numParticles = 0;
-    *dataTO.numTokens = 0;
-    *dataTO.numStringBytes = 0;
-
-    DEPRECATED_KERNEL_CALL_SYNC(getInspectedCellDataWithoutConnections, entityIds, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(cudaResolveConnections, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(cudaGetTokenData, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(getInspectedParticleData, entityIds, data, dataTO);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaGetSelectedParticleData, data, dataTO);
 }
 
 __global__ void cudaGetSimulationOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
