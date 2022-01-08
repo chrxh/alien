@@ -1,8 +1,8 @@
-﻿#include "SimulationKernelLauncher.cuh"
+﻿#include "SimulationKernelsLauncher.cuh"
 
 #include "FlowFieldKernels.cuh"
 
-void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
+void SimulationKernelsLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
 {
     KERNEL_CALL_1_1(prepareForNextTimestep, simulationData, result);
     KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, simulationData);
