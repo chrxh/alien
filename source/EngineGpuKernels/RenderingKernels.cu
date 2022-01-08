@@ -106,7 +106,7 @@ namespace
         return {intensity, 0, 0.08f};
     }
 
-    __device__ __inline__ float3 calcColor(Token* token, bool selected) { return selected ? float3{0.75f, 0.75f, 0.75f} : float3{0.5f, 0.5f, 0.5f}; }
+    __device__ __inline__ float3 calcColor(bool selected) { return selected ? float3{0.75f, 0.75f, 0.75f} : float3{0.5f, 0.5f, 0.5f}; }
 
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
     {
@@ -267,7 +267,7 @@ cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, A
         map.mapPosCorrection(cellPos);
         auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
         if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
-            auto const color = calcColor(token, false);
+            auto const color = calcColor(false);
             drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
         }
     }
