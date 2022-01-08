@@ -19,6 +19,7 @@ class CudaMonitorData;
 class SimulationKernelsLauncher;
 class DataAccessKernelsLauncher;
 class GarbageCollectorKernelsLauncher;
+class RenderingKernelsLauncher;
 
 struct ApplyForceData
 {
