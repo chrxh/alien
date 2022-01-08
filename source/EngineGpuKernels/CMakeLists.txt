@@ -9,6 +9,7 @@ add_library(alien_engine_gpu_kernels_lib
     CellProcessor.cuh
     CommunicatorFunction.cuh
     ComputationFunction.cuh
+    ConstantMemory.cu
     ConstantMemory.cuh
     ConstructorFunction.cuh
     CudaMemoryManager.cuh
