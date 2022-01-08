@@ -22,7 +22,4 @@ void SimulationKernelLauncher::calcTimestep(GpuSettings const& gpuSettings, Simu
     KERNEL_CALL(processingStep13, simulationData);
 
     _garbageCollector.cleanupAfterTimestep(gpuSettings, simulationData);
-
-    cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 }

@@ -125,29 +125,7 @@ __global__ void cleanupParticles(Array<Particle*> particlePointers, Array<Partic
     }
 }
 
-__global__ void cudaCopyEntities(SimulationData data)
-{
-    data.entitiesForCleanup.particlePointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupPointerArray<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
-
-    data.entitiesForCleanup.cellPointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupPointerArray<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
-
-    data.entitiesForCleanup.tokenPointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupPointerArray<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
-
-    data.entitiesForCleanup.particles.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupParticles, data.entitiesForCleanup.particlePointers, data.entitiesForCleanup.particles);
-
-    data.entitiesForCleanup.cells.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupCellsStep1, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.cells);
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupCellsStep2, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.cells);
-
-    data.entitiesForCleanup.tokens.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupTokens, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.tokens);
-}
-
-__global__ void cleanupEntityArraysNecessary(SimulationData data, bool* result)
+__global__ void checkIfCleanupIsNecessary(SimulationData data, bool* result)
 {
     if (data.entities.particles.getNumEntries() > data.entities.particles.getSize() * Const::ArrayFillLevelFactor
         || data.entities.cells.getNumEntries() > data.entities.cells.getSize() * Const::ArrayFillLevelFactor
