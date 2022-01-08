@@ -32,6 +32,7 @@
 #include "SimulationData.cuh"
 #include "SimulationKernelsLauncher.cuh"
 #include "DataAccessKernelsLauncher.cuh"
+#include "RenderingKernelsLauncher.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
@@ -134,6 +135,7 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     _simulationKernels = new SimulationKernelsLauncher();
     _dataAccessKernels = new DataAccessKernelsLauncher();
     _garbageCollectorKernels = new GarbageCollectorKernelsLauncher();
+    _renderingKernels = new RenderingKernelsLauncher();
 
     int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
     _cudaSimulationData->init(worldSize);
@@ -179,6 +181,7 @@ _CudaSimulationAdapter::~_CudaSimulationAdapter()
     delete _simulationKernels;
     delete _dataAccessKernels;
     delete _garbageCollectorKernels;
+    delete _renderingKernels;
 }
 
 void* _CudaSimulationAdapter::registerImageResource(GLuint image)
@@ -216,14 +219,9 @@ void _CudaSimulationAdapter::drawVectorGraphics(
 
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(
-        cudaDrawImageKernel,
-        rectUpperLeft,
-        rectLowerRight,
-        imageSize,
-        static_cast<float>(zoom),
-        *_cudaSimulationData,
-        *_cudaRenderingData);
+    _renderingKernels->drawImage(_gpuSettings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), *_cudaSimulationData, *_cudaRenderingData);
+    cudaDeviceSynchronize();
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
     CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(

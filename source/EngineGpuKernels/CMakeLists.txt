@@ -54,6 +54,7 @@ add_library(alien_engine_gpu_kernels_lib
     Physics.cuh
     PropulsionFunction.cuh
     QuantityConverter.cuh
+    RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu
     RenderingKernels.cuh
