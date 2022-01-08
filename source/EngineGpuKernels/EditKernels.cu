@@ -2,7 +2,7 @@
 
 namespace
 {
-    __global__ void applyForceToCells(ApplyForceData applyData, int2 universeSize, Array<Cell*> cells)
+    __global__ void applyForceToCells(ApplyForceData applyData, Array<Cell*> cells)
     {
         auto const cellBlock = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -18,7 +18,7 @@ namespace
         }
     }
 
-    __global__ void applyForceToParticles(ApplyForceData applyData, int2 universeSize, Array<Particle*> particles)
+    __global__ void applyForceToParticles(ApplyForceData applyData, Array<Particle*> particles)
     {
         auto const particleBlock = calcAllThreadsPartition(particles.getNumEntries());
 
@@ -498,8 +498,8 @@ __global__ void cudaRolloutSelection(SimulationData data)
 
 __global__ void cudaApplyForce(ApplyForceData applyData, SimulationData data)
 {
-    DEPRECATED_KERNEL_CALL_SYNC(applyForceToCells, applyData, data.size, data.entities.cellPointers);
-    DEPRECATED_KERNEL_CALL_SYNC(applyForceToParticles, applyData, data.size, data.entities.particlePointers);
+    DEPRECATED_KERNEL_CALL_SYNC(applyForceToCells, applyData, data.entities.cellPointers);
+    DEPRECATED_KERNEL_CALL_SYNC(applyForceToParticles, applyData, data.entities.particlePointers);
 }
 
 __global__ void cudaSwitchSelection(PointSelectionData switchData, SimulationData data)
