@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "SimulationKernels.cuh"
+﻿#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 
 __global__ void processingStep1(SimulationData data)
