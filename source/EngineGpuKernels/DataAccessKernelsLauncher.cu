@@ -43,6 +43,17 @@ void DataAccessKernelsLauncher::getInspectedData(
     KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, dataTO);
 }
 
+void DataAccessKernelsLauncher::getOverlayData(
+    GpuSettings const& gpuSettings,
+    SimulationData const& data,
+    int2 rectUpperLeft,
+    int2 rectLowerRight,
+    DataAccessTO dataTO)
+{
+    KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
+    KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
+}
+
 void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData)
 {
     KERNEL_CALL_1_1(cudaPrepareSetData, data);
