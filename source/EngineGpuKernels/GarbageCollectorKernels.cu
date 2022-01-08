@@ -1,20 +1,20 @@
 ﻿#include "GarbageCollectorKernels.cuh"
 
-__global__ void preparePointerArraysForCleanup(SimulationData data)
+__global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
 {
     data.entitiesForCleanup.particlePointers.reset();
     data.entitiesForCleanup.cellPointers.reset();
     data.entitiesForCleanup.tokenPointers.reset();
 }
 
-__global__ void prepareArraysForCleanup(SimulationData data)
+__global__ void cudaPrepareArraysForCleanup(SimulationData data)
 {
     data.entitiesForCleanup.particles.reset();
     data.entitiesForCleanup.cells.reset();
     data.entitiesForCleanup.tokens.reset();
 }
 
-__global__ void cleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
+__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
 {
     //assumes that cellPointers are already cleaned up
     PartitionData pointerBlock = calcPartition(cellPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -37,7 +37,7 @@ __global__ void cleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
     }
 }
 
-__global__ void cleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells)
+__global__ void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells)
 {
     {
         auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -62,7 +62,7 @@ __global__ void cleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells
     }
 }
 
-__global__ void cleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken)
+__global__ void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken)
 {
     auto partition = calcPartition(tokenPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -79,24 +79,24 @@ __global__ void cleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken
     }
 }
 
-__global__ void cleanupCellMap(SimulationData data)
+__global__ void cudaCleanupCellMap(SimulationData data)
 {
     data.cellMap.cleanup_system();
 }
 
-__global__ void cleanupParticleMap(SimulationData data)
+__global__ void cudaCleanupParticleMap(SimulationData data)
 {
     data.particleMap.cleanup_system();
 }
 
-__global__ void swapPointerArrays(SimulationData data)
+__global__ void cudaSwapPointerArrays(SimulationData data)
 {
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
     data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 }
 
-__global__ void swapArrays(SimulationData data)
+__global__ void cudaSwapArrays(SimulationData data)
 {
     data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
@@ -104,7 +104,7 @@ __global__ void swapArrays(SimulationData data)
 }
 
 
-__global__ void cleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles)
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles)
 {
     //assumes that particlePointers are already cleaned up
     PartitionData pointerBlock = calcPartition(particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -125,7 +125,7 @@ __global__ void cleanupParticles(Array<Particle*> particlePointers, Array<Partic
     }
 }
 
-__global__ void checkIfCleanupIsNecessary(SimulationData data, bool* result)
+__global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
 {
     if (data.entities.particles.getNumEntries() > data.entities.particles.getSize() * Const::ArrayFillLevelFactor
         || data.entities.cells.getNumEntries() > data.entities.cells.getSize() * Const::ArrayFillLevelFactor
@@ -139,28 +139,28 @@ __global__ void checkIfCleanupIsNecessary(SimulationData data, bool* result)
 __global__ void cleanupAfterDataManipulationKernel(SimulationData data)
 {
     data.entitiesForCleanup.particlePointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupPointerArray<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupPointerArray<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
     data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
 
     data.entitiesForCleanup.cellPointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupPointerArray<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupPointerArray<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
     data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
 
     data.entitiesForCleanup.tokenPointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupPointerArray<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupPointerArray<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
     data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
 
     data.entitiesForCleanup.particles.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupParticles, data.entities.particlePointers, data.entitiesForCleanup.particles);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupParticles, data.entities.particlePointers, data.entitiesForCleanup.particles);
     data.entities.particles.swapContent(data.entitiesForCleanup.particles);
 
     data.entitiesForCleanup.cells.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
     data.entities.cells.swapContent(data.entitiesForCleanup.cells);
 
     data.entitiesForCleanup.tokens.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
     data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
 
 /*

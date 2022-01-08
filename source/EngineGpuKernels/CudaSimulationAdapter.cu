@@ -217,7 +217,7 @@ void _CudaSimulationAdapter::drawVectorGraphics(
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
     DEPRECATED_KERNEL_CALL_HOST_SYNC(
-        drawImageKernel,
+        cudaDrawImageKernel,
         rectUpperLeft,
         rectLowerRight,
         imageSize,

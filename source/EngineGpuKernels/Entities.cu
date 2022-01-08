@@ -12,8 +12,8 @@ void Entities::init()
     tokens.init();
     particles.init();
     particlePointers.init();
-    strings.init();
-    strings.resize(Const::MetadataMemorySize);
+    dynamicMemory.init();
+    dynamicMemory.resize(Const::MetadataMemorySize);
 }
 
 void Entities::free()
@@ -24,5 +24,5 @@ void Entities::free()
     tokens.free();
     particles.free();
     particlePointers.free();
-    strings.free();
+    dynamicMemory.free();
 }
