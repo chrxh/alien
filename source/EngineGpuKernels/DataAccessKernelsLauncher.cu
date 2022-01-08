@@ -5,19 +5,42 @@
 /************************************************************************/
 void DataAccessKernelsLauncher::getData(
     GpuSettings const& gpuSettings,
-    SimulationData const& simulationData,
+    SimulationData const& data,
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
-    KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, simulationData, dataTO);
-    KERNEL_CALL(cudaResolveConnections, simulationData, dataTO);
-    KERNEL_CALL(cudaGetTokenData, simulationData, dataTO);
-    KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, simulationData, dataTO);
+    KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, dataTO);
+    KERNEL_CALL(cudaResolveConnections, data, dataTO);
+    KERNEL_CALL(cudaGetTokenData, data, dataTO);
+    KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, dataTO);
+}
 
-    cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+void DataAccessKernelsLauncher::getSelectedData(
+    GpuSettings const& gpuSettings,
+    SimulationData const& data,
+    bool includeClusters,
+    DataAccessTO const& dataTO)
+{
+    KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
+    KERNEL_CALL(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
+    KERNEL_CALL(cudaResolveConnections, data, dataTO);
+    KERNEL_CALL(cudaGetTokenData, data, dataTO);
+    KERNEL_CALL(cudaGetSelectedParticleData, data, dataTO);
+}
+
+void DataAccessKernelsLauncher::getInspectedData(
+    GpuSettings const& gpuSettings,
+    SimulationData const& data,
+    InspectedEntityIds entityIds,
+    DataAccessTO const& dataTO)
+{
+    KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
+    KERNEL_CALL(cudaGetInspectedCellDataWithoutConnections, entityIds, data, dataTO);
+    KERNEL_CALL(cudaResolveConnections, data, dataTO);
+    KERNEL_CALL(cudaGetTokenData, data, dataTO);
+    KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, dataTO);
 }
 
 void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData)
