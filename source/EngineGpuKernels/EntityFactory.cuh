@@ -222,7 +222,7 @@ EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, in
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
-        targetString = _data->entities.strings.getArray<char>(sourceLen);
+        targetString = _data->entities.dynamicMemory.getArray<char>(sourceLen);
         for (int i = 0; i < sourceLen; ++i) {
             targetString[i] = stringBytes[sourceStringIndex + i];
         }

@@ -16,10 +16,9 @@ struct Entities
     Array<Token> tokens;
     Array<Particle> particles;
 
-    DynamicMemory strings;
+    DynamicMemory dynamicMemory;
 
     void init();
-
     void free();
 };
 

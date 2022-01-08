@@ -10,11 +10,11 @@ void DataAccessKernelsLauncher::getData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    KERNEL_CALL_1_1(clearDataTO, dataTO);
-    KERNEL_CALL(getCellDataWithoutConnections, rectUpperLeft, rectLowerRight, simulationData, dataTO);
-    KERNEL_CALL(resolveConnections, simulationData, dataTO);
-    KERNEL_CALL(getTokenData, simulationData, dataTO);
-    KERNEL_CALL(getParticleData, rectUpperLeft, rectLowerRight, simulationData, dataTO);
+    KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
+    KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, simulationData, dataTO);
+    KERNEL_CALL(cudaResolveConnections, simulationData, dataTO);
+    KERNEL_CALL(cudaGetTokenData, simulationData, dataTO);
+    KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, simulationData, dataTO);
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
@@ -22,9 +22,9 @@ void DataAccessKernelsLauncher::getData(
 
 void DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData data, DataAccessTO dataTO, bool selectData)
 {
-    KERNEL_CALL_1_1(prepareSetData, data);
-    KERNEL_CALL(adaptNumberGenerator, data.numberGen, dataTO);
-    KERNEL_CALL(createDataFromTO, data, dataTO, selectData);
+    KERNEL_CALL_1_1(cudaPrepareSetData, data);
+    KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen, dataTO);
+    KERNEL_CALL(cudaCreateDataFromTO, data, dataTO, selectData);
     _garbageCollector.cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
         KERNEL_CALL_1_1(cudaRolloutSelection, data);

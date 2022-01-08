@@ -206,7 +206,7 @@ namespace
 /************************************************************************/
 
 //tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void getCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
 {
     auto const& cells = data.entities.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -226,7 +226,7 @@ __global__ void getCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLower
     }
 }
 
-__global__ void resolveConnections(SimulationData data, DataAccessTO dataTO)
+__global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO)
 {
     auto const partition = calcAllThreadsPartition(*dataTO.numCells);
     auto const firstCell = data.entities.cells.getArray();
@@ -241,7 +241,7 @@ __global__ void resolveConnections(SimulationData data, DataAccessTO dataTO)
     }
 }
 
-__global__ void getTokenData(SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetTokenData(SimulationData data, DataAccessTO dataTO)
 {
     auto const& tokens = data.entities.tokenPointers;
 
@@ -265,7 +265,7 @@ __global__ void getTokenData(SimulationData data, DataAccessTO dataTO)
     }
 }
 
-__global__ void getParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
 {
     PartitionData particleBlock = calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -281,7 +281,7 @@ __global__ void getParticleData(int2 rectUpperLeft, int2 rectLowerRight, Simulat
     }
 }
 
-__global__ void createDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData)
+__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -312,7 +312,7 @@ __global__ void createDataFromTO(SimulationData data, DataAccessTO dataTO, bool 
     }
 }
 
-__global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO)
 {
     {
         auto const partition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -332,7 +332,7 @@ __global__ void adaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO
     }
 }
 
-__global__ void clearDataTO(DataAccessTO dataTO)
+__global__ void cudaClearDataTO(DataAccessTO dataTO)
 {
     *dataTO.numCells = 0;
     *dataTO.numParticles = 0;
@@ -340,7 +340,7 @@ __global__ void clearDataTO(DataAccessTO dataTO)
     *dataTO.numStringBytes = 0;
 }
 
-__global__ void prepareSetData(SimulationData data)
+__global__ void cudaPrepareSetData(SimulationData data)
 {
     data.originalArraySizes->cellArraySize = data.entities.cells.getNumEntries();
 }
@@ -353,8 +353,8 @@ __global__ void cudaGetSelectedSimulationData(SimulationData data, bool includeC
     *dataTO.numStringBytes = 0;
 
     DEPRECATED_KERNEL_CALL_SYNC(getSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(resolveConnections, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(getTokenData, data, dataTO);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaResolveConnections, data, dataTO);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaGetTokenData, data, dataTO);
     DEPRECATED_KERNEL_CALL_SYNC(getSelectedParticleData, data, dataTO);
 }
 
@@ -366,8 +366,8 @@ __global__ void cudaGetInspectedSimulationData(SimulationData data, InspectedEnt
     *dataTO.numStringBytes = 0;
 
     DEPRECATED_KERNEL_CALL_SYNC(getInspectedCellDataWithoutConnections, entityIds, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(resolveConnections, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(getTokenData, data, dataTO);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaResolveConnections, data, dataTO);
+    DEPRECATED_KERNEL_CALL_SYNC(cudaGetTokenData, data, dataTO);
     DEPRECATED_KERNEL_CALL_SYNC(getInspectedParticleData, entityIds, data, dataTO);
 }
 
@@ -386,5 +386,5 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.cells.reset();
     data.entities.tokens.reset();
     data.entities.particles.reset();
-    data.entities.strings.reset();
+    data.entities.dynamicMemory.reset();
 }

@@ -1,6 +1,5 @@
 ﻿#include "SimulationData.cuh"
 
-/*
 #include "Token.cuh"
 
 void SimulationData::init(int2 const& universeSize)
@@ -33,8 +32,6 @@ __device__ void SimulationData::prepareForNextTimestep()
     originalArraySizes->particleArraySize = entities.particlePointers.getNumEntries();
     originalArraySizes->tokenArraySize = entities.tokenPointers.getNumEntries();
 }
-
-__device__ int SimulationData::getMaxOperations() { return entities.cellPointers.getNumEntries(); }
 
 bool SimulationData::shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
 {
@@ -126,4 +123,3 @@ void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<
         targetArray.resize(newSize);
     }
 }
-*/

@@ -600,7 +600,7 @@ __global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData upd
             DEPRECATED_KERNEL_CALL_SYNC(connectSelection, data, result);
             DEPRECATED_KERNEL_CALL_SYNC(processConnectionChanges, data);
 
-            DEPRECATED_KERNEL_CALL_SYNC(cleanupCellMap, data);
+            DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupCellMap, data);
         } while (1 == *result && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat
 
         DEPRECATED_KERNEL_CALL_SYNC_1_1(cudaUpdateSelection, data);
