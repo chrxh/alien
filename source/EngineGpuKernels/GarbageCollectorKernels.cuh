@@ -49,23 +49,15 @@ __global__ void cleanupPointerArray(Array<Entity> entityArray, Array<Entity> new
 }
 
 __global__ extern void cleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles);
+__global__ extern void cleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells);
+__global__ extern void cleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells);
+__global__ extern void cleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken);
+__global__ extern void cleanupCellMap(SimulationData data);
+__global__ extern void cleanupParticleMap(SimulationData data);
+__global__ extern void swapPointerArrays(SimulationData data);
+__global__ extern void swapArrays(SimulationData data);
+__global__ extern void cleanupEntityArraysNecessary(SimulationData data, bool* result);
 
-__global__ void cleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells);
-
-__global__ void cleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells);
-
-__global__ void cleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken);
-
-__global__ void cleanupCellMap(SimulationData data);
-
-__global__ void cleanupParticleMap(SimulationData data);
-
-__global__ void swapPointerArrays(SimulationData data);
-
-__global__ void swapArrays(SimulationData data);
-
-__global__ void cleanupEntityArraysNecessary(SimulationData data, bool* result);
-
+//#TODO remove
 __global__ void cleanupAfterDataManipulationKernel(SimulationData data);
-
 __global__ extern void cudaCopyEntities(SimulationData data);

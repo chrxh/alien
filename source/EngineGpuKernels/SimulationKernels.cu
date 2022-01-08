@@ -1,6 +1,13 @@
 ﻿#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 
+__global__ void prepareForNextTimestep(SimulationData data, SimulationResult result)
+{
+    data.prepareForNextTimestep();
+    result.resetStatistics();
+    result.setArrayResizeNeeded(data.shouldResize());
+}
+
 __global__ void processingStep1(SimulationData data)
 {
     CellProcessor cellProcessor;
@@ -96,11 +103,4 @@ __global__ void processingStep13(SimulationData data)
 {
     TokenProcessor tokenProcessor;
     tokenProcessor.deleteTokenIfCellDeleted(data);
-}
-
-__global__ void prepareForNextTimestep(SimulationData data, SimulationResult result)
-{
-    data.prepareForNextTimestep();
-    result.resetStatistics();
-    result.setArrayResizeNeeded(data.shouldResize());
 }
