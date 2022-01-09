@@ -38,13 +38,13 @@ _InspectorWindow::_InspectorWindow(
     , _editorModel(editorModel)
     , _simController(simController)
 {
-    _cellInstructionMemoryEdit = boost::make_shared<MemoryEditor>();
+    _cellInstructionMemoryEdit = std::make_shared<MemoryEditor>();
     _cellInstructionMemoryEdit->OptShowOptions = false;
     _cellInstructionMemoryEdit->OptShowAscii = false;
     _cellInstructionMemoryEdit->OptMidColsCount = 0;
     _cellInstructionMemoryEdit->Cols = 8;
 
-    _cellDataMemoryEdit = boost::make_shared<MemoryEditor>();
+    _cellDataMemoryEdit = std::make_shared<MemoryEditor>();
     _cellDataMemoryEdit->OptShowOptions = false;
     _cellDataMemoryEdit->OptShowAscii = false;
     _cellDataMemoryEdit->OptMidColsCount = 0;
@@ -52,7 +52,7 @@ _InspectorWindow::_InspectorWindow(
 
     auto const& parameters = _simController->getSimulationParameters();
     for (int i = 0; i < parameters.tokenMemorySize; ++i) {
-        auto tokenMemoryEdit = boost::make_shared<MemoryEditor>();
+        auto tokenMemoryEdit = std::make_shared<MemoryEditor>();
         tokenMemoryEdit->OptShowOptions = false;
         tokenMemoryEdit->OptShowAscii = false;
         tokenMemoryEdit->OptMidColsCount = 0;
@@ -271,7 +271,8 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
         //compilation state
         auto sourcecode = std::string(_cellCode);
         if (sourcecode != origSourcecode || !_lastCompilationResult) {
-            _lastCompilationResult = boost::make_shared<CompilationResult>(
+            _lastCompilationResult =
+                std::make_shared<CompilationResult>(
                 CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap()));
             if (_lastCompilationResult->compilationOk) {
                 cell.cellFeature.constData = _lastCompilationResult->compilation;

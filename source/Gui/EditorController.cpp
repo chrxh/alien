@@ -16,9 +16,9 @@ _EditorController::_EditorController(SimulationController const& simController, 
     : _simController(simController)
     , _viewport(viewport)
 {
-    _editorModel = boost::make_shared<_EditorModel>(_simController);
-    _selectionWindow = boost::make_shared<_SelectionWindow>(_editorModel);
-    _manipulatorWindow = boost::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
+    _editorModel = std::make_shared<_EditorModel>(_simController);
+    _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
+    _manipulatorWindow = std::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
 }
 
 bool _EditorController::isOn() const
@@ -217,7 +217,7 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 200.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 200.0f) + 40.0f;
-        _inspectorWindows.emplace_back(boost::make_shared<_InspectorWindow>(
+        _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(
             _simController, _viewport, _editorModel, id, RealVector2D{windowPosX, windowPosY}));
     }
 }

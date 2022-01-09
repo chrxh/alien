@@ -11,15 +11,15 @@
 
 int main(int, char**)
 {
-    SimpleLogger logger = boost::make_shared<_SimpleLogger>();
-    FileLogger fileLogger = boost::make_shared<_FileLogger>();
+    SimpleLogger logger = std::make_shared<_SimpleLogger>();
+    FileLogger fileLogger = std::make_shared<_FileLogger>();
 
     SimulationController simController;
     MainWindow mainWindow;
 
     try {
-        simController = boost::make_shared<_SimulationController>();
-        mainWindow = boost::make_shared<_MainWindow>(simController, logger);
+        simController = std::make_shared<_SimulationController>();
+        mainWindow = std::make_shared<_MainWindow>(simController, logger);
 
         simController->initCuda();
 

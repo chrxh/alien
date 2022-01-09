@@ -77,7 +77,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     
     auto glfwVersion = initGlfw();
 
-    _windowController = boost::make_shared<_WindowController>();
+    _windowController = std::make_shared<_WindowController>();
 
     auto windowData = _windowController->getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
@@ -103,30 +103,30 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     }
 
     auto worldSize = _simController->getWorldSize();
-    _viewport = boost::make_shared<_Viewport>(_windowController);
-    _uiController = boost::make_shared<_UiController>();
-    _autosaveController = boost::make_shared<_AutosaveController>(_simController);
+    _viewport = std::make_shared<_Viewport>(_windowController);
+    _uiController = std::make_shared<_UiController>();
+    _autosaveController = std::make_shared<_AutosaveController>(_simController);
 
     _editorController =
-        boost::make_shared<_EditorController>(_simController, _viewport);
-    _modeWindow = boost::make_shared<_ModeWindow>(_editorController);
-    _simulationView = boost::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
+        std::make_shared<_EditorController>(_simController, _viewport);
+    _modeWindow = std::make_shared<_ModeWindow>(_editorController);
+    _simulationView = std::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
     simulationViewPtr = _simulationView.get();
-    _statisticsWindow = boost::make_shared<_StatisticsWindow>(_simController);
-    _temporalControlWindow = boost::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
-    _spatialControlWindow = boost::make_shared<_SpatialControlWindow>(_simController, _viewport);
-    _simulationParametersWindow = boost::make_shared<_SimulationParametersWindow>(_simController);
-    _gpuSettingsDialog = boost::make_shared<_GpuSettingsDialog>(_simController);
-    _newSimulationDialog = boost::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow);
-    _startupWindow = boost::make_shared<_StartupWindow>(_simController, _viewport);
-    _flowGeneratorWindow = boost::make_shared<_FlowGeneratorWindow>(_simController);
-    _aboutDialog = boost::make_shared<_AboutDialog>();
-    _colorizeDialog = boost::make_shared<_ColorizeDialog>(_simController);
-    _logWindow = boost::make_shared<_LogWindow>(_logger);
-    _gettingStartedWindow = boost::make_shared<_GettingStartedWindow>();
-    _openSimulationDialog = boost::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
-    _saveSimulationDialog = boost::make_shared<_SaveSimulationDialog>(_simController);
-    _displaySettingsDialog = boost::make_shared<_DisplaySettingsDialog>(_windowController);
+    _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
+    _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
+    _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController);
+    _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
+    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow);
+    _startupWindow = std::make_shared<_StartupWindow>(_simController, _viewport);
+    _flowGeneratorWindow = std::make_shared<_FlowGeneratorWindow>(_simController);
+    _aboutDialog = std::make_shared<_AboutDialog>();
+    _colorizeDialog = std::make_shared<_ColorizeDialog>(_simController);
+    _logWindow = std::make_shared<_LogWindow>(_logger);
+    _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
+    _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
+    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController);
+    _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;

@@ -16,7 +16,6 @@
 #include "Exceptions.h"
 
 using boost::optional;
-using boost::shared_ptr;
 using std::int32_t;
 using std::int64_t;
 using std::list;
