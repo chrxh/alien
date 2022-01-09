@@ -36,6 +36,7 @@ struct DataAccessTO;
 
 class EngineWorker
 {
+    friend class EngineWorkerGuard;
 public:
     void initCuda();
 
@@ -151,4 +152,21 @@ private:
     //internals
     void* _cudaResource;
     AccessDataTOCache _dataTOCache;
+};
+
+class EngineWorkerGuard
+{
+public:
+    EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration = std::nullopt);
+    ~EngineWorkerGuard();
+
+    bool isTimeout() const;
+
+private:
+    void checkForException(ExceptionData const& exceptionData);
+
+    std::atomic<bool>& _accessFlag;
+    std::condition_variable& _conditionForWorkerLoop;
+
+    bool _isTimeout = false;
 };
