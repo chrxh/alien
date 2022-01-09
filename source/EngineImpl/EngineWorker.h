@@ -43,7 +43,7 @@ public:
     void newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
     void clear();
 
-    void registerImageResource(GLuint image);
+    void registerImageResource(void* image);
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
     std::optional<OverlayDescription>

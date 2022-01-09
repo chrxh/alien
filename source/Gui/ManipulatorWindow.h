@@ -1,8 +1,8 @@
 #pragma once
 
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
 class _ManipulatorWindow

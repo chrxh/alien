@@ -8,11 +8,12 @@
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/OverlayDescriptions.h"
+#include "EngineInterface/SimulationController.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
 
-class _SimulationController
+class _SimulationControllerImpl : public _SimulationController
 {
 public:
 
@@ -21,7 +22,7 @@ public:
     ENGINEIMPL_EXPORT void newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap);
     ENGINEIMPL_EXPORT void clear();
 
-    ENGINEIMPL_EXPORT void registerImageResource(GLuint image);
+    ENGINEIMPL_EXPORT void registerImageResource(void* image);
 
     /**
      * Draws section of simulation to registered texture.

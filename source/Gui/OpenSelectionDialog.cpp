@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Serializer.h"
 #include "ImFileDialog.h"
 #include "StatisticsWindow.h"

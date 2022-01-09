@@ -7,7 +7,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/DescriptionHelper.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 
 #include "EditorModel.h"
 #include "StyleRepository.h"

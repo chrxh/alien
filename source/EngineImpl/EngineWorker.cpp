@@ -37,16 +37,17 @@ void EngineWorker::clear()
     return _cudaSimulation->clear();
 }
 
-void EngineWorker::registerImageResource(GLuint image)
+void EngineWorker::registerImageResource(void* image)
 {
+    GLuint imageId = reinterpret_cast<uintptr_t>(image);
     if (!_cudaSimulation) {
 
         //cuda is not initialized yet => register image resource later
-        _imageResourceToRegister = image;
+        _imageResourceToRegister = imageId;
     } else {
 
         EngineWorkerGuard access(this);
-        _cudaResource = _cudaSimulation->registerImageResource(image);
+        _cudaResource = _cudaSimulation->registerImageResource(imageId);
     }
 }
 

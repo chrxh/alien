@@ -1,8 +1,8 @@
 #pragma once
 
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SimulationParametersSpots.h"
-#include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
 class _SimulationParametersWindow

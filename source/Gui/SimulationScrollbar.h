@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base/Definitions.h"
-#include "EngineImpl/Definitions.h"
+#include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
 

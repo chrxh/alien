@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "Base/LoggingService.h"
-#include "EngineImpl/SimulationController.h"
 #include "EngineInterface/Serializer.h"
+#include "EngineImpl/SimulationControllerImpl.h"
 
 #include "MainWindow.h"
 #include "Resources.h"
@@ -18,7 +18,7 @@ int main(int, char**)
     MainWindow mainWindow;
 
     try {
-        simController = std::make_shared<_SimulationController>();
+        simController = std::make_shared<_SimulationControllerImpl>();
         mainWindow = std::make_shared<_MainWindow>(simController, logger);
 
         simController->initCuda();

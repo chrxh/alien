@@ -4,7 +4,7 @@
 #include "ImFileDialog.h"
 
 #include "EngineInterface/Serializer.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 #include "StatisticsWindow.h"
 #include "Viewport.h"
 

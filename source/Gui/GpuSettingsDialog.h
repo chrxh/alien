@@ -1,7 +1,7 @@
 #pragma once
 
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
 class _GpuSettingsDialog

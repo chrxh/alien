@@ -4,7 +4,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Serializer.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 #include "OpenGLHelper.h"
 #include "Resources.h"
 #include "Viewport.h"

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "EngineInterface/Definitions.h"
 #include "Definitions.h"
-#include "EngineImpl/Definitions.h"
 
 class _SelectionWindow
 {
