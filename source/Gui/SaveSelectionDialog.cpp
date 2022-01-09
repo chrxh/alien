@@ -20,7 +20,7 @@ void _SaveSelectionDialog::process()
 
         auto content = _simController->getSelectedSimulationData(_includeClusters);
 
-        Serializer serializer = boost::make_shared<_Serializer>();
+        Serializer serializer = std::make_shared<_Serializer>();
         serializer->serializeContentToFile(firstFilename.string(), content);
     }
     ifd::FileDialog::Instance().Close();

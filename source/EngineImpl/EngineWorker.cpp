@@ -78,8 +78,8 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, Gp
 {
     _settings = settings;
     _gpuConstants = gpuSettings;
-    _dataTOCache = boost::make_shared<_AccessDataTOCache>(gpuSettings);
-    _cudaSimulation = boost::make_shared<_CudaSimulationAdapter>(timestep, settings, gpuSettings);
+    _dataTOCache = std::make_shared<_AccessDataTOCache>(gpuSettings);
+    _cudaSimulation = std::make_shared<_CudaSimulationAdapter>(timestep, settings, gpuSettings);
 
     if (_imageResourceToRegister) {
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);

@@ -40,11 +40,11 @@ _SimulationView::_SimulationView(
     _modeWindow = modeWindow;
 
     _simController = simController;
-    _shader = boost::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
+    _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
-    _scrollbarX = boost::make_shared<_SimulationScrollbar>(
+    _scrollbarX = std::make_shared<_SimulationScrollbar>(
         "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController, _viewport);
-    _scrollbarY = boost::make_shared<_SimulationScrollbar>(
+    _scrollbarY = std::make_shared<_SimulationScrollbar>(
         "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController, _viewport);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes

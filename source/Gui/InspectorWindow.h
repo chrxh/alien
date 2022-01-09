@@ -51,11 +51,11 @@ private:
     void delToken(CellDescription& cell, int index);
 
 private:
-    boost::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
-    boost::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
-    std::vector<boost::shared_ptr<MemoryEditor>> _tokenMemoryEdits;
+    std::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
+    std::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
+    std::vector<std::shared_ptr<MemoryEditor>> _tokenMemoryEdits;
 
-    boost::shared_ptr<CompilationResult> _lastCompilationResult;
+    std::shared_ptr<CompilationResult> _lastCompilationResult;
     SimulationController _simController;
     Viewport _viewport; 
     EditorModel _editorModel;

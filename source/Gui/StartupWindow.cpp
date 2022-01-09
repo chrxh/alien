@@ -38,7 +38,7 @@ void _StartupWindow::process()
     }
 
     if (_state == State::RequestLoading) {
-        Serializer serializer = boost::make_shared<_Serializer>();
+        Serializer serializer = std::make_shared<_Serializer>();
 
         DeserializedSimulation deserializedData;
         serializer->deserializeSimulationFromFile(Const::AutosaveFile, deserializedData);

@@ -27,7 +27,7 @@ void _OpenSelectionDialog::process()
         const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
         auto firstFilename = res.front();
 
-        Serializer serializer = boost::make_shared<_Serializer>();
+        Serializer serializer = std::make_shared<_Serializer>();
 
         DataDescription content;
         if (serializer->deserializeContentFromFile(firstFilename.string(), content)) {

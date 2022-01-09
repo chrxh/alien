@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class _CudaSimulationAdapter;
-using CudaSimulationAdapter = boost::shared_ptr<_CudaSimulationAdapter>;
+using CudaSimulationAdapter = std::shared_ptr<_CudaSimulationAdapter>;

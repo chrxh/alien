@@ -32,8 +32,8 @@ _ManipulatorWindow::_ManipulatorWindow(
     , _viewport(viewport)
 {
     _on = GlobalSettings::getInstance().getBoolState("editor.manipulator.active", true);
-    _saveSelectionDialog = boost::make_shared<_SaveSelectionDialog>(simController);
-    _openSelectionDialog = boost::make_shared<_OpenSelectionDialog>(editorModel, simController, viewport);
+    _saveSelectionDialog = std::make_shared<_SaveSelectionDialog>(simController);
+    _openSelectionDialog = std::make_shared<_OpenSelectionDialog>(editorModel, simController, viewport);
 }
 
 _ManipulatorWindow::~_ManipulatorWindow()
