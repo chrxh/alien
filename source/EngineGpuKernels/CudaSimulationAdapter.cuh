@@ -85,12 +85,12 @@ private:
 
     std::atomic<uint64_t> _currentTimestep;
     GpuSettings _gpuSettings;
-    SimulationData* _cudaSimulationData;
-    RenderingData* _cudaRenderingData;
-    SimulationResult* _cudaSimulationResult;
-    SelectionResult* _cudaSelectionResult;
-    DataAccessTO* _cudaAccessTO;
-    CudaMonitorData* _cudaMonitorData;
+    std::shared_ptr<SimulationData> _cudaSimulationData;
+    std::shared_ptr<RenderingData> _cudaRenderingData;
+    std::shared_ptr<SimulationResult> _cudaSimulationResult;
+    std::shared_ptr<SelectionResult> _cudaSelectionResult;
+    std::shared_ptr<DataAccessTO> _cudaAccessTO;
+    std::shared_ptr<CudaMonitorData> _cudaMonitorData;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;
