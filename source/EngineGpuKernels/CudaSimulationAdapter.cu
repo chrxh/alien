@@ -121,24 +121,23 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     log(Priority::Important, "initialize simulation");
 
     _currentTimestep.store(timestep);
-    _cudaSimulationData = new SimulationData();
-    _cudaRenderingData = new RenderingData();
-    _cudaSimulationResult = new SimulationResult();
-    _cudaSelectionResult = new SelectionResult();
-    _cudaAccessTO = new DataAccessTO();
-    _cudaMonitorData = new CudaMonitorData();
+    _cudaSimulationData = std::make_shared<SimulationData>();
+    _cudaRenderingData = std::make_shared<RenderingData>();
+    _cudaSimulationResult = std::make_shared<SimulationResult>();
+    _cudaSelectionResult = std::make_shared<SelectionResult>();
+    _cudaAccessTO = std::make_shared<DataAccessTO>();
+    _cudaMonitorData = std::make_shared<CudaMonitorData>();
+
+    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY});
+    _cudaRenderingData->init();
+    _cudaMonitorData->init();
+    _cudaSimulationResult->init();
+    _cudaSelectionResult->init();
 
     _simulationKernels = std::make_shared<_SimulationKernelsLauncher>();
     _dataAccessKernels = std::make_shared<_DataAccessKernelsLauncher>();
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
     _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
-
-    int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
-    _cudaSimulationData->init(worldSize);
-    _cudaRenderingData->init();
-    _cudaMonitorData->init();
-    _cudaSimulationResult->init();
-    _cudaSelectionResult->init();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
@@ -168,11 +167,6 @@ _CudaSimulationAdapter::~_CudaSimulationAdapter()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
 
     log(Priority::Important, "close simulation");
-
-    delete _cudaAccessTO;
-    delete _cudaSimulationData;
-    delete _cudaRenderingData;
-    delete _cudaMonitorData;
 }
 
 void* _CudaSimulationAdapter::registerImageResource(GLuint image)
