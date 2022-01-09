@@ -7,11 +7,11 @@
 #include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
 
-class GarbageCollectorKernelsLauncher
+class _GarbageCollectorKernelsLauncher
 {
 public:
-    GarbageCollectorKernelsLauncher();
-    ~GarbageCollectorKernelsLauncher();
+    _GarbageCollectorKernelsLauncher();
+    ~_GarbageCollectorKernelsLauncher();
 
     void cleanupAfterTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData);
     void cleanupAfterDataManipulation(GpuSettings const& gpuSettings, SimulationData const& simulationData);

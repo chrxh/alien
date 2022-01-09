@@ -1,8 +1,15 @@
 ﻿#include "SimulationKernelsLauncher.cuh"
 
+#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
+#include "GarbageCollectorKernelsLauncher.cuh"
 
-void SimulationKernelsLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
+_SimulationKernelsLauncher::_SimulationKernelsLauncher()
+{
+    _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
+}
+
+void _SimulationKernelsLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
 {
     KERNEL_CALL_1_1(prepareForNextTimestep, simulationData, result);
     KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, simulationData);
@@ -21,5 +28,5 @@ void SimulationKernelsLauncher::calcTimestep(GpuSettings const& gpuSettings, Sim
     KERNEL_CALL(processingStep12, simulationData);
     KERNEL_CALL(processingStep13, simulationData);
 
-    _garbageCollector.cleanupAfterTimestep(gpuSettings, simulationData);
+    _garbageCollector->cleanupAfterTimestep(gpuSettings, simulationData);
 }

@@ -1,16 +1,16 @@
 ﻿#include "GarbageCollectorKernelsLauncher.cuh"
 
-GarbageCollectorKernelsLauncher::GarbageCollectorKernelsLauncher()
+_GarbageCollectorKernelsLauncher::_GarbageCollectorKernelsLauncher()
 {
     CudaMemoryManager::getInstance().acquireMemory<bool>(1, _cudaBool);
 }
 
-GarbageCollectorKernelsLauncher::~GarbageCollectorKernelsLauncher()
+_GarbageCollectorKernelsLauncher::~_GarbageCollectorKernelsLauncher()
 {
     CudaMemoryManager::getInstance().freeMemory(_cudaBool);
 }
 
-void GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData)
+void _GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData)
 {
     KERNEL_CALL(cudaCleanupCellMap, simulationData);
     KERNEL_CALL(cudaCleanupParticleMap, simulationData);
@@ -34,7 +34,7 @@ void GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& gp
     }
 }
 
-void GarbageCollectorKernelsLauncher::cleanupAfterDataManipulation(GpuSettings const& gpuSettings, SimulationData const& simulationData)
+void _GarbageCollectorKernelsLauncher::cleanupAfterDataManipulation(GpuSettings const& gpuSettings, SimulationData const& simulationData)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, simulationData);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, simulationData.entities.particlePointers, simulationData.entitiesForCleanup.particlePointers);
@@ -50,7 +50,7 @@ void GarbageCollectorKernelsLauncher::cleanupAfterDataManipulation(GpuSettings c
     KERNEL_CALL_1_1(cudaSwapArrays, simulationData);
 }
 
-void GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings, SimulationData const& simulationData)
+void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings, SimulationData const& simulationData)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, simulationData);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, simulationData.entities.particlePointers, simulationData.entitiesForCleanup.particlePointers);
