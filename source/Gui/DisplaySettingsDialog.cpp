@@ -6,7 +6,6 @@
 #include <imgui.h>
 
 #include "Base/LoggingService.h"
-#include "Base/ServiceLocator.h"
 
 #include "AlienImGui.h"
 #include "GlobalSettings.h"

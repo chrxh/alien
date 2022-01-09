@@ -7,8 +7,8 @@
 #include "Cell.cuh"
 #include "Token.cuh"
 
-__global__ extern void cudaPreparePointerArraysForCleanup(SimulationData data);
-__global__ extern void cudaPrepareArraysForCleanup(SimulationData data);
+__global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
+__global__ void cudaPrepareArraysForCleanup(SimulationData data);
 
 template<typename Entity>
 __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity> newEntityArray)
@@ -48,15 +48,15 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     __syncthreads();
 }
 
-__global__ extern void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles);
-__global__ extern void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells);
-__global__ extern void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells);
-__global__ extern void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken);
-__global__ extern void cudaCleanupCellMap(SimulationData data);
-__global__ extern void cudaCleanupParticleMap(SimulationData data);
-__global__ extern void cudaSwapPointerArrays(SimulationData data);
-__global__ extern void cudaSwapArrays(SimulationData data);
-__global__ extern void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles);
+__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells);
+__global__ void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells);
+__global__ void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken);
+__global__ void cudaCleanupCellMap(SimulationData data);
+__global__ void cudaCleanupParticleMap(SimulationData data);
+__global__ void cudaSwapPointerArrays(SimulationData data);
+__global__ void cudaSwapArrays(SimulationData data);
+__global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);
 
 //#TODO remove
 __global__ void cleanupAfterDataManipulationKernel(SimulationData data);

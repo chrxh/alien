@@ -5,7 +5,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include "Base/LoggingService.h"
-#include "Base/ServiceLocator.h"
 
 #include "GlobalSettings.h"
 
@@ -57,15 +56,13 @@ _WindowController::_WindowController()
     _desktopVideoMode = new GLFWvidmode;
     *_desktopVideoMode = *_windowData.mode;
 
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-
     _windowData.window = [&] {
         if (isWindowedMode()) {
-            loggingService->logMessage(Priority::Important, "set windowed mode");
+            log(Priority::Important, "set windowed mode");
             _startupSize = _sizeInWindowedMode;
             return glfwCreateWindow(_sizeInWindowedMode.x, _sizeInWindowedMode.y, "alien", nullptr, nullptr);
         } else {
-            loggingService->logMessage(Priority::Important, "set full screen mode");
+            log(Priority::Important, "set full screen mode");
             _startupSize = {_windowData.mode->width, _windowData.mode->height };
             return glfwCreateWindow(_windowData.mode->width, _windowData.mode->height, "alien", primaryMonitor, nullptr);
         }
@@ -79,7 +76,7 @@ _WindowController::_WindowController()
     if (!isWindowedMode() && !isDesktopMode()) {
         auto userMode = getUserDefinedResolution();
         _startupSize = {userMode.width, userMode.height};
-        loggingService->logMessage(Priority::Important, "switching to  " + createLogString(userMode));
+        log(Priority::Important, "switching to  " + createLogString(userMode));
         glfwSetWindowMonitor(
             _windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
     }
@@ -153,11 +150,10 @@ void _WindowController::setMode(std::string const& mode)
         updateWindowSize();
     }
 
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 
     if(mode == WindowedMode) {
-        loggingService->logMessage(Priority::Important, "set windowed mode");
+        log(Priority::Important, "set windowed mode");
         GLFWvidmode const* desktopVideoMode = glfwGetVideoMode(primaryMonitor);
         glfwSetWindowMonitor(
             _windowData.window,
@@ -168,7 +164,7 @@ void _WindowController::setMode(std::string const& mode)
             _sizeInWindowedMode.y,
             desktopVideoMode->refreshRate);
     } else if(mode == DesktopMode) {
-        loggingService->logMessage(
+        log(
             Priority::Important, "set full screen mode with " + createLogString(*_desktopVideoMode));
         glfwSetWindowMonitor(
             _windowData.window,
@@ -180,7 +176,7 @@ void _WindowController::setMode(std::string const& mode)
             _desktopVideoMode->refreshRate);
     } else {
         auto userMode = convert(mode);
-        loggingService->logMessage(Priority::Important, "set full screen mode with " + createLogString(userMode));
+        log(Priority::Important, "set full screen mode with " + createLogString(userMode));
         glfwSetWindowMonitor(
             _windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
     }

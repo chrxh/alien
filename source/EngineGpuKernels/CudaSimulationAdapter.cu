@@ -16,7 +16,6 @@
 #include "EngineInterface/GpuSettings.h"
 
 #include "Base/LoggingService.h"
-#include "Base/ServiceLocator.h"
 #include "DataAccessKernels.cuh"
 #include "AccessTOs.cuh"
 #include "Base.cuh"
@@ -48,7 +47,6 @@ namespace
         {
             int deviceNumber = getDeviceNumberOfHighestComputeCapability();
 
-            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
             auto result = cudaSetDevice(deviceNumber);
             if (result != cudaSuccess) {
                 throw SystemRequirementNotMetException("CUDA device could not be initialized.");
@@ -56,7 +54,7 @@ namespace
 
             std::stringstream stream;
             stream << "device " << deviceNumber << " is set";
-            loggingService->logMessage(Priority::Important, stream.str());
+            log(Priority::Important, stream.str());
         }
 
         ~CudaInitializer() { cudaDeviceReset(); }
@@ -64,7 +62,6 @@ namespace
     private:
         int getDeviceNumberOfHighestComputeCapability()
         {
-            auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
             int result = 0;
             int numberOfDevices;
             CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
@@ -78,7 +75,7 @@ namespace
                 } else {
                     stream << numberOfDevices << " CUDA devices found";
                 }
-                loggingService->logMessage(Priority::Important, stream.str());
+                log(Priority::Important, stream.str());
             }
 
             int highestComputeCapability = 0;
@@ -89,7 +86,7 @@ namespace
                 std::stringstream stream;
                 stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major
                        << "." << prop.minor;
-                loggingService->logMessage(Priority::Important, stream.str());
+                log(Priority::Important, stream.str());
 
                 int computeCapability = prop.major * 100 + prop.minor;
                 if (computeCapability > highestComputeCapability) {
@@ -121,8 +118,7 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     setGpuConstants(gpuSettings);
     setFlowFieldSettings(settings.flowFieldSettings);
 
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "initialize simulation");
+    log(Priority::Important, "initialize simulation");
 
     _currentTimestep.store(timestep);
     _cudaSimulationData = new SimulationData();
@@ -171,8 +167,7 @@ _CudaSimulationAdapter::~_CudaSimulationAdapter()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
 
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "close simulation");
+    log(Priority::Important, "close simulation");
 
     delete _cudaAccessTO;
     delete _cudaSimulationData;
@@ -478,8 +473,7 @@ void _CudaSimulationAdapter::automaticResizeArrays()
 
 void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
 {
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->logMessage(Priority::Important, "resize arrays");
+    log(Priority::Important, "resize arrays");
 
     _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
@@ -505,10 +499,10 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
-    loggingService->logMessage(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
-    loggingService->logMessage(Priority::Unimportant, "particle array size: " + std::to_string(cellArraySize));
-    loggingService->logMessage(Priority::Unimportant, "token array size: " + std::to_string(tokenArraySize));
+    log(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
+    log(Priority::Unimportant, "particle array size: " + std::to_string(cellArraySize));
+    log(Priority::Unimportant, "token array size: " + std::to_string(tokenArraySize));
 
         auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
-    loggingService->logMessage(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
+    log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
 }
