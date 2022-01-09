@@ -49,14 +49,14 @@ private:
 
     bool _on = false;
 
-    boost::optional<RealVector2D> _prevMousePosInt;
+    std::optional<RealVector2D> _prevMousePosInt;
 
     struct SelectionRect
     {
         RealVector2D startPos;
         RealVector2D endPos;
     };
-    boost::optional<SelectionRect> _selectionRect;
+    std::optional<SelectionRect> _selectionRect;
 
     std::vector<InspectorWindow> _inspectorWindows;
 };

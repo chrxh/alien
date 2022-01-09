@@ -45,7 +45,7 @@ private:
 
     //overlay
     bool _isOverlayActive = true;
-    boost::optional<OverlayDescription> _overlay;
+    std::optional<OverlayDescription> _overlay;
     
     //shader data
     unsigned int _vao, _vbo, _ebo;
@@ -57,8 +57,8 @@ private:
     unsigned int _textureFramebufferId = 0;
 
     //navigation
-    boost::optional<RealVector2D> _worldPosForMovement;
-    boost::optional<IntVector2D> _prevMousePosInt;
+    std::optional<RealVector2D> _worldPosForMovement;
+    std::optional<IntVector2D> _prevMousePosInt;
 
     Viewport _viewport;
     ModeWindow _modeWindow;

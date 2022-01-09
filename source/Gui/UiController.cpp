@@ -37,14 +37,14 @@ void _UiController::process()
         if (_on) {
             ImGui::GetStyle().Alpha = toFloat(std::min(duration, FadeInOutDuration)) / FadeInOutDuration;
             if (ImGui::GetStyle().Alpha == 1) {
-                _lastChangeTimePoint = boost::none;
+                _lastChangeTimePoint = std::nullopt;
             }
         }
         else {
             ImGui::GetStyle().Alpha =
                 toFloat(std::max(FadeInOutDuration - duration, std::chrono::milliseconds::rep(0))) / FadeInOutDuration;
             if (ImGui::GetStyle().Alpha == 0) {
-                _lastChangeTimePoint = boost::none;
+                _lastChangeTimePoint = std::nullopt;
             }
         }
     }

@@ -77,7 +77,7 @@ void DescriptionHelper::makeValid(ClusterDescription& cluster)
 {
     auto& numberGen = NumberGenerator::getInstance();
     cluster.id = numberGen.getId();
-    unordered_map<uint64_t, uint64_t> newByOldIds;
+    std::unordered_map<uint64_t, uint64_t> newByOldIds;
     for (auto& cell : cluster.cells) {
         uint64_t newId = numberGen.getId();
         newByOldIds.insert_or_assign(cell.id, newId);

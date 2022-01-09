@@ -14,5 +14,5 @@ public:
 
 private:
     bool _on = true;
-    boost::optional<std::chrono::steady_clock::time_point> _lastChangeTimePoint;
+    std::optional<std::chrono::steady_clock::time_point> _lastChangeTimePoint;
 };

@@ -36,6 +36,6 @@ private:
     bool _includeClusters = true;
     float _angle = 0;
     float _angularVel = 0;
-    boost::optional<SelectionShallowData> _lastSelection;
-    boost::optional<DataDescription> _copiedSelection;
+    std::optional<SelectionShallowData> _lastSelection;
+    std::optional<DataDescription> _copiedSelection;
 };

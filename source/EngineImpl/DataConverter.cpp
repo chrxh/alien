@@ -114,7 +114,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
 
 void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const
 {
-    unordered_map<uint64_t, int> cellIndexByIds;
+    std::unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cluster: description.clusters) {
         for (auto const& cell : cluster.cells) {
             addCell(result, cell, cellIndexByIds);
@@ -134,7 +134,7 @@ void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataD
 
 void DataConverter::convertCellDescriptionToAccessTO(DataAccessTO& result, CellDescription const& cell) const
 {
-    unordered_map<uint64_t, int> cellIndexByIds;
+    std::unordered_map<uint64_t, int> cellIndexByIds;
     addCell(result, cell, cellIndexByIds);
 }
 
@@ -299,9 +299,7 @@ int DataConverter::convertStringAndReturnStringIndex(DataAccessTO const& dataTO,
 }
 
 void DataConverter::addCell(
-    DataAccessTO const& dataTO,
-    CellDescription const& cellDesc,
-    unordered_map<uint64_t, int>& cellIndexTOByIds) const
+    DataAccessTO const& dataTO, CellDescription const& cellDesc, std::unordered_map<uint64_t, int>& cellIndexTOByIds) const
 {
     int cellIndex = (*dataTO.numCells)++;
     CellAccessTO& cellTO = dataTO.cells[cellIndex];
@@ -347,10 +345,7 @@ void DataConverter::addCell(
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
-void DataConverter::setConnections(
-    DataAccessTO const& dataTO,
-    CellDescription const& cellToAdd,
-    unordered_map<uint64_t, int> const& cellIndexByIds) const
+void DataConverter::setConnections(DataAccessTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const
 {
     int index = 0;
     auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];

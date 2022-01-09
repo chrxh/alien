@@ -33,21 +33,6 @@ namespace cereal
         ar(data.x, data.y);
     }
 
-    template <class Archive, class T>
-    inline void save(Archive& ar, boost::optional<T> const& data)
-    {
-        std::optional<T> temp = data ? std::make_optional(*data) : std::optional<T>();
-        ar(temp);
-    }
-
-    template <class Archive, class T>
-    inline void load(Archive& ar, boost::optional<T>& data)
-    {
-        std::optional<T> temp;
-        ar(temp);
-        data = temp ? boost::make_optional(*temp) : boost::optional<T>();
-    }
-
     template <class Archive>
     inline void save(Archive& ar, CellFeatureDescription const& data)
     {
@@ -115,7 +100,7 @@ namespace cereal
     }
 }
 
-bool _Serializer::serializeSimulationToFile(string const& filename, DeserializedSimulation const& data)
+bool _Serializer::serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
         std::regex fileEndingExpr("\\.\\w+$");
@@ -155,7 +140,7 @@ bool _Serializer::serializeSimulationToFile(string const& filename, Deserialized
     }
 }
 
-bool _Serializer::deserializeSimulationFromFile(string const& filename, DeserializedSimulation& data)
+bool _Serializer::deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data)
 {
     try {
         std::regex fileEndingExpr("\\.\\w+$");
@@ -196,7 +181,7 @@ bool _Serializer::deserializeSimulationFromFile(string const& filename, Deserial
     }
 }
 
-bool _Serializer::serializeContentToFile(string const& filename, DataDescription const& content)
+bool _Serializer::serializeContentToFile(std::string const& filename, DataDescription const& content)
 {
     try {
         std::ofstream stream(filename, std::ios::binary);
@@ -211,7 +196,7 @@ bool _Serializer::serializeContentToFile(string const& filename, DataDescription
     }
 }
 
-bool _Serializer::deserializeContentFromFile(string const& filename, DataDescription& content)
+bool _Serializer::deserializeContentFromFile(std::string const& filename, DataDescription& content)
 {
     try {
         std::ifstream stream(filename, std::ios::binary);

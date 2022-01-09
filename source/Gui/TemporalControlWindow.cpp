@@ -106,7 +106,7 @@ void _TemporalControlWindow::processTpsRestriction()
     if (_slowDown) {
         _simController->setTpsRestriction(_tpsRestriction);
     } else {
-        _simController->setTpsRestriction(boost::none);
+        _simController->setTpsRestriction(std::nullopt);
     }
     ImGui::PopItemWidth();
     ImGui::EndDisabled();

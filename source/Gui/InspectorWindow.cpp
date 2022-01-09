@@ -386,7 +386,7 @@ void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
             showTokenMemorySection(0, numBytes, currentMemoryEditIndex);
         }
 
-        boost::optional<int> lastAddress;
+        std::optional<int> lastAddress;
         for (auto const& [address, symbolNames] : addressToSymbolNamesMap) {
             if (lastAddress) {
                 showTokenMemorySection(*lastAddress + 1, address - *lastAddress - 1, currentMemoryEditIndex);

@@ -4,9 +4,7 @@
 #include <map>
 #include <string>
 
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-
+#include "Base/Definitions.h"
 #include "ElementaryTypes.h"
 
 struct SimulationParameters;

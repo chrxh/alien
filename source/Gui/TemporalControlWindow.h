@@ -36,7 +36,7 @@ private:
         uint64_t timestep;
         DataDescription data;
     };
-    boost::optional<Snapshot> _snapshot;
+    std::optional<Snapshot> _snapshot;
 
     std::vector<Snapshot> _history;
     bool _on = false;

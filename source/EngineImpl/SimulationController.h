@@ -32,7 +32,8 @@ public:
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom);
-    ENGINEIMPL_EXPORT boost::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
+    ENGINEIMPL_EXPORT std::optional<OverlayDescription>
+    tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
@@ -96,8 +97,8 @@ public:
     ENGINEIMPL_EXPORT SymbolMap const& getSymbolMap() const;
     ENGINEIMPL_EXPORT OverallStatistics getStatistics() const;
 
-    ENGINEIMPL_EXPORT boost::optional<int> getTpsRestriction() const;
-    ENGINEIMPL_EXPORT void setTpsRestriction(boost::optional<int> const& value);
+    ENGINEIMPL_EXPORT std::optional<int> getTpsRestriction() const;
+    ENGINEIMPL_EXPORT void setTpsRestriction(std::optional<int> const& value);
 
     ENGINEIMPL_EXPORT float getTps() const;
 
