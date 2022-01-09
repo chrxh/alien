@@ -22,4 +22,7 @@ struct Settings;
 class _Serializer;
 using Serializer = std::shared_ptr<_Serializer>;
 
+class _SimulationController;
+using SimulationController = std::shared_ptr<_SimulationController>;
+
 struct OverallStatistics;

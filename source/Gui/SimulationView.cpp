@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <imgui.h>
 
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 
 #include "Shader.h"
 #include "SimulationScrollbar.h"
@@ -114,7 +114,7 @@ void _SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-    _simController->registerImageResource(_textureId);
+    _simController->registerImageResource(reinterpret_cast<void*>(uintptr_t(_textureId)));
 
     glGenTextures(1, &_textureFramebufferId);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);

@@ -26,6 +26,7 @@ add_library(alien_engine_interface_lib
     Serializer.cpp
     Serializer.h
     Settings.h
+    SimulationController.h
     SimulationParameters.h
     SimulationParametersSpots.h
     SimulationParametersSpotValues.h

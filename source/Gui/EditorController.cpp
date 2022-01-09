@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "Base/Math.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 #include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "Viewport.h"

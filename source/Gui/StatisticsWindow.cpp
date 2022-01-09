@@ -5,7 +5,7 @@
 
 #include "Base/StringFormatter.h"
 #include "EngineInterface/OverallStatistics.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"

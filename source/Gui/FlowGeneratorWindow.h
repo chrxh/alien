@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineImpl/Definitions.h"
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/FlowFieldSettings.h"
 #include "Definitions.h"
 

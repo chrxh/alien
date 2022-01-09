@@ -1,7 +1,7 @@
 #include "EditorModel.h"
 
 #include "EngineInterface/DescriptionHelper.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 
 _EditorModel::_EditorModel(SimulationController const& simController)
     : _simController(simController)

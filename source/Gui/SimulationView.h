@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineImpl/Definitions.h"
 #include "Definitions.h"
 
 class _SimulationView

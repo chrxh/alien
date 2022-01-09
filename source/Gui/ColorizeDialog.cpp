@@ -6,7 +6,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionHelper.h"
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
 

@@ -4,7 +4,7 @@
 
 #include "IconFontCppHeaders/IconsFontAwesome5.h"
 
-#include "EngineImpl/SimulationController.h"
+#include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
