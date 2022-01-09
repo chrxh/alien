@@ -1,10 +1,13 @@
 ﻿#include "DataAccessKernelsLauncher.cuh"
 
+#include "DataAccessKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
+#include "EditKernelsLauncher.cuh"
 
 _DataAccessKernelsLauncher::_DataAccessKernelsLauncher()
 {
-    _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
+    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
+    _editKernels = std::make_shared<_EditKernelsLauncher>();
 }
 
 void _DataAccessKernelsLauncher::getData(
@@ -63,9 +66,9 @@ void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, Simulat
     KERNEL_CALL_1_1(cudaPrepareSetData, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen, dataTO);
     KERNEL_CALL(cudaCreateDataFromTO, data, dataTO, selectData);
-    _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
+    _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
-        KERNEL_CALL_1_1(cudaRolloutSelection, data);
+        _editKernels->rolloutSelection(gpuSettings, data);
     }
 }
 

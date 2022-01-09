@@ -96,4 +96,5 @@ private:
     DataAccessKernelsLauncher _dataAccessKernels;
     GarbageCollectorKernelsLauncher _garbageCollectorKernels;
     RenderingKernelsLauncher _renderingKernels;
+    EditKernelsLauncher _editKernels;
 };

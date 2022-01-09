@@ -2,10 +2,10 @@
 
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineInterface/InspectedEntityIds.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "DataAccessKernels.cuh"
 #include "Macros.cuh"
 
 class _DataAccessKernelsLauncher
@@ -22,6 +22,7 @@ public:
     void clearData(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    GarbageCollectorKernelsLauncher _garbageCollector;
+    GarbageCollectorKernelsLauncher _garbageCollectorKernels;
+    EditKernelsLauncher _editKernels;
 };
 

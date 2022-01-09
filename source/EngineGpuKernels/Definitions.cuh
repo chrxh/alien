@@ -30,6 +30,9 @@ using GarbageCollectorKernelsLauncher = std::shared_ptr<_GarbageCollectorKernels
 class _RenderingKernelsLauncher;
 using RenderingKernelsLauncher = std::shared_ptr<_RenderingKernelsLauncher>;
 
+class _EditKernelsLauncher;
+using EditKernelsLauncher = std::shared_ptr<_EditKernelsLauncher>;
+
 struct ApplyForceData
 {
     float2 startPos;
