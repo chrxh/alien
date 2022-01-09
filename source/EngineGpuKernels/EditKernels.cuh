@@ -18,15 +18,15 @@
 
 #include "SimulationData.cuh"
 
-__global__ extern void cudaRolloutSelection(SimulationData data);
-__global__ extern void cudaApplyForce(ApplyForceData applyData, SimulationData data);
-__global__ extern void cudaSwitchSelection(PointSelectionData switchData, SimulationData data);
-__global__ extern void cudaSwapSelection(PointSelectionData switchData, SimulationData data);
-__global__ extern void cudaSetSelection(AreaSelectionData setData, SimulationData data);
-__global__ extern void cudaGetSelectionShallowData(SimulationData data, SelectionResult selectionResult);
-__global__ extern void cudaUpdateSelection(SimulationData data);
-__global__ extern void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData updateData, SimulationData data);
-__global__ extern void cudaRemoveSelection(SimulationData data);
-__global__ extern void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
-__global__ extern void cudaColorSelectedEntities(SimulationData data, unsigned char color, bool includeClusters);
-__global__ extern void cudaChangeSimulationData(SimulationData data, DataAccessTO changeDataTO);
+__global__ void cudaRolloutSelection(SimulationData data);
+__global__ void cudaApplyForce(ApplyForceData applyData, SimulationData data);
+__global__ void cudaSwitchSelection(PointSelectionData switchData, SimulationData data);
+__global__ void cudaSwapSelection(PointSelectionData switchData, SimulationData data);
+__global__ void cudaSetSelection(AreaSelectionData setData, SimulationData data);
+__global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult selectionResult);
+__global__ void cudaUpdateSelection(SimulationData data);
+__global__ void cudaShallowUpdateSelectedEntities(ShallowUpdateSelectionData updateData, SimulationData data);
+__global__ void cudaRemoveSelection(SimulationData data);
+__global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
+__global__ void cudaColorSelectedEntities(SimulationData data, unsigned char color, bool includeClusters);
+__global__ void cudaChangeSimulationData(SimulationData data, DataAccessTO changeDataTO);

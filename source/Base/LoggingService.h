@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <mutex>
 
 enum class Priority
 {
@@ -17,10 +19,16 @@ public:
 class LoggingService
 {
 public:
-    virtual ~LoggingService() = default;
+    static LoggingService& getInstance();
 
-    virtual void logMessage(Priority priority, std::string const& message) = 0;
+    void log(Priority priority, std::string const& message);
 
-    virtual void registerCallBack(LoggingCallBack* callback) = 0;
-    virtual void unregisterCallBack(LoggingCallBack* callback) = 0;
+    void registerCallBack(LoggingCallBack* callback);
+    void unregisterCallBack(LoggingCallBack* callback);
+
+private:
+    std::vector<LoggingCallBack*> _callbacks;
+    std::mutex _mutex;
 };
+
+void log(Priority priority, std::string const& message);

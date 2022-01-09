@@ -1,18 +1,15 @@
 #include "SimpleLogger.h"
 
-#include "Base/ServiceLocator.h"
 #include "Base/LoggingService.h"
 
 _SimpleLogger::_SimpleLogger()
 {
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->registerCallBack(this);
+    LoggingService::getInstance().registerCallBack(this);
 }
 
 _SimpleLogger::~_SimpleLogger()
 {
-    auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
-    loggingService->unregisterCallBack(this);
+    LoggingService::getInstance().unregisterCallBack(this);
 }
 
 std::vector<std::string> const& _SimpleLogger::getMessages(Priority minPriority) const

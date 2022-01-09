@@ -15,8 +15,6 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
 
-#include "Base/ServiceLocator.h"
-
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "Parser.h"

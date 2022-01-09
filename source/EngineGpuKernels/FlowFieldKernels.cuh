@@ -4,4 +4,4 @@
 #include "Map.cuh"
 #include "SimulationData.cuh"
 
-__global__ extern void cudaApplyFlowFieldSettings(SimulationData data);
+__global__ void cudaApplyFlowFieldSettings(SimulationData data);

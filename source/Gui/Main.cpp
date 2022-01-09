@@ -1,8 +1,6 @@
 #include <iostream>
 
-#include "Base/BaseServices.h"
 #include "Base/LoggingService.h"
-#include "Base/ServiceLocator.h"
 #include "EngineImpl/SimulationController.h"
 #include "EngineInterface/Serializer.h"
 
@@ -13,7 +11,6 @@
 
 int main(int, char**)
 {
-    BaseServices baseServices;
     SimpleLogger logger = boost::make_shared<_SimpleLogger>();
     FileLogger fileLogger = boost::make_shared<_FileLogger>();
 
@@ -31,10 +28,9 @@ int main(int, char**)
         mainWindow->shutdown();
         simController->closeSimulation();
     } catch (std::exception const& e) {
-        auto loggingService = ServiceLocator::getInstance().getService<LoggingService>();
         auto message = std::string("The following exception occurred: ")
             + e.what();
-        loggingService->logMessage(Priority::Important, message);
+        log(Priority::Important, message);
         std::cerr << message
                   << std::endl
                   << std::endl

@@ -14,18 +14,18 @@
 #include "SimulationData.cuh"
 
 //tags cell with cellTO index and tags cellTO connections with cell index
-__global__ extern void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO);
-__global__ extern void cudaGetSelectedParticleData(SimulationData data, DataAccessTO access);
-__global__ extern void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataAccessTO dataTO);
-__global__ extern void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access);
-__global__ extern void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO);
-__global__ extern void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO);
-__global__ extern void cudaResolveConnections(SimulationData data, DataAccessTO dataTO);
-__global__ extern void cudaGetTokenData(SimulationData data, DataAccessTO dataTO);
-__global__ extern void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access);
-__global__ extern void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData);
-__global__ extern void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO);
-__global__ extern void cudaClearDataTO(DataAccessTO dataTO);
-__global__ extern void cudaPrepareSetData(SimulationData data);
-__global__ extern void cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds, DataAccessTO dataTO);
-__global__ extern void cudaClearData(SimulationData data);
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO);
+__global__ void cudaGetSelectedParticleData(SimulationData data, DataAccessTO access);
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataAccessTO dataTO);
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access);
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO);
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO);
+__global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO);
+__global__ void cudaGetTokenData(SimulationData data, DataAccessTO dataTO);
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access);
+__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData);
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO);
+__global__ void cudaClearDataTO(DataAccessTO dataTO);
+__global__ void cudaPrepareSetData(SimulationData data);
+__global__ void cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds, DataAccessTO dataTO);
+__global__ void cudaClearData(SimulationData data);
