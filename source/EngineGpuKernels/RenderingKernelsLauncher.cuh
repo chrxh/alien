@@ -9,7 +9,7 @@
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "Macros.cuh"
 
-class RenderingKernelsLauncher
+class _RenderingKernelsLauncher
 {
 public:
     void drawImage(

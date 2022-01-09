@@ -128,10 +128,10 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     _cudaAccessTO = new DataAccessTO();
     _cudaMonitorData = new CudaMonitorData();
 
-    _simulationKernels = new SimulationKernelsLauncher();
-    _dataAccessKernels = new DataAccessKernelsLauncher();
-    _garbageCollectorKernels = new GarbageCollectorKernelsLauncher();
-    _renderingKernels = new RenderingKernelsLauncher();
+    _simulationKernels = std::make_shared<_SimulationKernelsLauncher>();
+    _dataAccessKernels = std::make_shared<_DataAccessKernelsLauncher>();
+    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
+    _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
 
     int2 worldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
     _cudaSimulationData->init(worldSize);
@@ -173,10 +173,6 @@ _CudaSimulationAdapter::~_CudaSimulationAdapter()
     delete _cudaSimulationData;
     delete _cudaRenderingData;
     delete _cudaMonitorData;
-    delete _simulationKernels;
-    delete _dataAccessKernels;
-    delete _garbageCollectorKernels;
-    delete _renderingKernels;
 }
 
 void* _CudaSimulationAdapter::registerImageResource(GLuint image)

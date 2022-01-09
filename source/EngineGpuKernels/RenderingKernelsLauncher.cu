@@ -3,7 +3,7 @@
 #include "RenderingData.cuh"
 #include "RenderingKernels.cuh"
 
-void RenderingKernelsLauncher::drawImage(
+void _RenderingKernelsLauncher::drawImage(
     GpuSettings const& gpuSettings,
     float2 rectUpperLeft,
     float2 rectLowerRight,

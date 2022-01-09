@@ -92,8 +92,8 @@ private:
     DataAccessTO* _cudaAccessTO;
     CudaMonitorData* _cudaMonitorData;
 
-    SimulationKernelsLauncher* _simulationKernels;
-    DataAccessKernelsLauncher* _dataAccessKernels;
-    GarbageCollectorKernelsLauncher* _garbageCollectorKernels;
-    RenderingKernelsLauncher* _renderingKernels;
+    SimulationKernelsLauncher _simulationKernels;
+    DataAccessKernelsLauncher _dataAccessKernels;
+    GarbageCollectorKernelsLauncher _garbageCollectorKernels;
+    RenderingKernelsLauncher _renderingKernels;
 };
