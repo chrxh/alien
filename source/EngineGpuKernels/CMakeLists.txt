@@ -29,6 +29,8 @@ add_library(alien_engine_gpu_kernels_lib
     DynamicMemory.cuh
     EditKernels.cu
     EditKernels.cuh
+    EditKernelsLauncher.cu
+    EditKernelsLauncher.cuh
     EnergyGuidance.cuh
     Entities.cu
     Entities.cuh

@@ -32,6 +32,7 @@
 #include "SimulationKernelsLauncher.cuh"
 #include "DataAccessKernelsLauncher.cuh"
 #include "RenderingKernelsLauncher.cuh"
+#include "EditKernelsLauncher.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
@@ -138,6 +139,7 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     _dataAccessKernels = std::make_shared<_DataAccessKernelsLauncher>();
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
     _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
+    _editKernels = std::make_shared<_EditKernelsLauncher>();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
@@ -270,7 +272,7 @@ void _CudaSimulationAdapter::getOverlayData(int2 const& rectUpperLeft, int2 cons
 void _CudaSimulationAdapter::addAndSelectSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
+    _editKernels->removeSelection(_gpuSettings, *_cudaSimulationData);
     _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true);
     syncAndCheck();
 }
@@ -301,17 +303,19 @@ void _CudaSimulationAdapter::applyForce(ApplyForceData const& applyData)
 
 void _CudaSimulationAdapter::switchSelection(PointSelectionData const& pointData)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSwitchSelection, pointData, *_cudaSimulationData);
+    _editKernels->switchSelection(_gpuSettings, *_cudaSimulationData, pointData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::swapSelection(PointSelectionData const& pointData)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSwapSelection, pointData, *_cudaSimulationData);
+    _editKernels->swapSelection(_gpuSettings, *_cudaSimulationData, pointData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::setSelection(AreaSelectionData const& selectionData)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaSetSelection, selectionData, *_cudaSimulationData);
+    _editKernels->setSelection(_gpuSettings, *_cudaSimulationData, selectionData);
 }
 
  SelectionShallowData _CudaSimulationAdapter::getSelectionShallowData()
@@ -322,17 +326,20 @@ void _CudaSimulationAdapter::setSelection(AreaSelectionData const& selectionData
 
 void _CudaSimulationAdapter::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaShallowUpdateSelectedEntities, shallowUpdateData, *_cudaSimulationData);
+    _editKernels->shallowUpdateSelectedEntities(_gpuSettings, *_cudaSimulationData, shallowUpdateData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::removeSelection()
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelection, *_cudaSimulationData);
+    _editKernels->removeSelection(_gpuSettings, *_cudaSimulationData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::updateSelection()
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaUpdateSelection, *_cudaSimulationData);
+    _editKernels->updateSelection(_gpuSettings, *_cudaSimulationData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::colorSelectedEntities(unsigned char color, bool includeClusters)
