@@ -20,11 +20,11 @@ struct DeserializedSimulation
 class _Serializer
 {
 public:
-    ENGINEINTERFACE_EXPORT bool serializeSimulationToFile(string const& filename, DeserializedSimulation const& data);
-    ENGINEINTERFACE_EXPORT bool deserializeSimulationFromFile(string const& filename, DeserializedSimulation& data);
+    ENGINEINTERFACE_EXPORT bool serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data);
+    ENGINEINTERFACE_EXPORT bool deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data);
 
-    ENGINEINTERFACE_EXPORT bool serializeContentToFile(string const& filename, DataDescription const& content);
-    ENGINEINTERFACE_EXPORT bool deserializeContentFromFile(string const& filename, DataDescription& content);
+    ENGINEINTERFACE_EXPORT bool serializeContentToFile(std::string const& filename, DataDescription const& content);
+    ENGINEINTERFACE_EXPORT bool deserializeContentFromFile(std::string const& filename, DataDescription& content);
 
 private:
     void serializeDataDescription(DataDescription const& data, std::ostream& stream) const;

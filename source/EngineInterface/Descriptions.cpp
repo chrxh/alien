@@ -147,17 +147,6 @@ CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::uno
     THROW_NOT_IMPLEMENTED();
 }
 
-/*
-ParticleDescription::ParticleDescription(ParticleRolloutDescription const& change)
-{
-    id = change.id;
-    pos = *static_cast<boost::optional<RealVector2D>>(change.pos);
-    vel = *static_cast<boost::optional<RealVector2D>>(change.vel);
-    energy = *static_cast<boost::optional<double>>(change.energy);
-    metadata = *static_cast<boost::optional<ParticleMetadata>>(change.metadata);
-}
-*/
-
 void DataDescription::setCenter(RealVector2D const& center)
 {
     auto origCenter = calcCenter();

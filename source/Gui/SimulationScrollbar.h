@@ -31,5 +31,5 @@ private:
     SimulationController _simController;
     Viewport _viewport;
 
-    boost::optional<RealVector2D> _worldCenterForDragging;
+    std::optional<RealVector2D> _worldCenterForDragging;
 };

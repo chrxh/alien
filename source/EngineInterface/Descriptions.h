@@ -143,7 +143,7 @@ struct CellDescription
         cellFeature = value;
         return *this;
     }
-    CellDescription& setTokens(vector<TokenDescription> const& value)
+    CellDescription& setTokens(std::vector<TokenDescription> const& value)
     {
         tokens = value;
         return *this;
@@ -231,8 +231,8 @@ struct ParticleDescription
 
 struct DataDescription
 {
-    vector<ClusterDescription> clusters;
-    vector<ParticleDescription> particles;
+    std::vector<ClusterDescription> clusters;
+    std::vector<ParticleDescription> particles;
 
     ENGINEINTERFACE_EXPORT DataDescription() = default;
     DataDescription& addClusters(std::vector<ClusterDescription> const& value)

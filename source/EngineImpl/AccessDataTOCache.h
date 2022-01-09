@@ -37,6 +37,6 @@ private:
     GpuSettings _gpuConstants;
     std::vector<DataAccessTO> _freeDataTOs;
     std::vector<DataAccessTO> _usedDataTOs;
-    boost::optional<ArraySizes> _arraySizes;
+    std::optional<ArraySizes> _arraySizes;
 };
 

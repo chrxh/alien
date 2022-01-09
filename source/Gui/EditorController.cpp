@@ -287,6 +287,6 @@ void _EditorController::rightMouseButtonHold(RealVector2D const& viewPos, RealVe
 void _EditorController::rightMouseButtonReleased()
 {
     if (!_simController->isSimulationRunning()) {
-        _selectionRect = boost::none;
+        _selectionRect = std::nullopt;
     }
 }

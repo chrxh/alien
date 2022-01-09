@@ -41,7 +41,7 @@ void _SimulationController::tryDrawVectorGraphics(
     _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
-boost::optional<OverlayDescription> _SimulationController::tryDrawVectorGraphicsAndReturnOverlay(
+std::optional<OverlayDescription> _SimulationController::tryDrawVectorGraphicsAndReturnOverlay(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
@@ -287,13 +287,13 @@ OverallStatistics _SimulationController::getStatistics() const
     return _worker.getMonitorData();
 }
 
-boost::optional<int> _SimulationController::getTpsRestriction() const
+std::optional<int> _SimulationController::getTpsRestriction() const
 {
     auto result = _worker.getTpsRestriction();
-    return 0 != result ? boost::optional<int>(result) : boost::optional<int>();
+    return 0 != result ? std::optional<int>(result) : std::optional<int>();
 }
 
-void _SimulationController::setTpsRestriction(boost::optional<int> const& value)
+void _SimulationController::setTpsRestriction(std::optional<int> const& value)
 {
     _worker.setTpsRestriction(value ? *value : 0);
 }

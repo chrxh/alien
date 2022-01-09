@@ -24,5 +24,5 @@ private:
     SimulationController _simController;
 
     bool _on = true;
-    boost::optional<std::chrono::steady_clock::time_point> _startTimePoint;
+    std::optional<std::chrono::steady_clock::time_point> _startTimePoint;
 };

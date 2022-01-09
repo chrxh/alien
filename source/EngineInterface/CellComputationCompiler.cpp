@@ -5,6 +5,7 @@
 
 #include "SymbolMap.h"
 #include "SimulationParameters.h"
+#include "Definitions.h"
 
 namespace
 {
@@ -455,7 +456,7 @@ std::string CellComputationCompiler::decompileSourceCode(
     return text;
 }
 
-boost::optional<int> CellComputationCompiler::extractAddress(std::string const& s)
+std::optional<int> CellComputationCompiler::extractAddress(std::string const& s)
 {
     try {
         auto left1 = s.substr(0, 1);
@@ -470,10 +471,10 @@ boost::optional<int> CellComputationCompiler::extractAddress(std::string const& 
                 return static_cast<int>(std::stoul(s, nullptr, 10));
             }
         }
-        return boost::none;
+        return std::nullopt;
     }
     catch(...) {
-        return boost::none;
+        return std::nullopt;
     }
 }
 

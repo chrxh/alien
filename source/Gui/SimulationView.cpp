@@ -178,7 +178,7 @@ void _SimulationView::middleMouseButtonHold(IntVector2D const& viewPos)
 
 void _SimulationView::middleMouseButtonReleased()
 {
-    _worldPosForMovement = boost::none;
+    _worldPosForMovement = std::nullopt;
 }
 
 void _SimulationView::processEvents()
@@ -293,7 +293,7 @@ void _SimulationView::updateImageFromSimulation()
     } else {
         _simController->tryDrawVectorGraphics(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
-        _overlay = boost::none;
+        _overlay = std::nullopt;
     }
 
     if(_overlay) {

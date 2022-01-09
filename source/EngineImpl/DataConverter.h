@@ -36,15 +36,11 @@ private:
     CellDescription createCellDescription(DataAccessTO const& dataTO, int cellIndex) const;
 
 	void addCell(
-        DataAccessTO const& dataTO,
-        CellDescription const& cellToAdd,
-        unordered_map<uint64_t, int>& cellIndexTOByIds) const;
+        DataAccessTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int>& cellIndexTOByIds) const;
     void addParticle(DataAccessTO const& dataTO, ParticleDescription const& particleDesc) const;
 
 	void setConnections(
-        DataAccessTO const& dataTO,
-        CellDescription const& cellToAdd,
-        unordered_map<uint64_t, int> const& cellIndexByIds) const;
+        DataAccessTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const;
 
     int convertStringAndReturnStringIndex(DataAccessTO const& dataTO, std::string const& s) const;
 

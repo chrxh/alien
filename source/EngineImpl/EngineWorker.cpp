@@ -21,7 +21,7 @@ namespace
             std::atomic<bool>& accessFlag,
             std::atomic<bool> const& isSimulationRunning,
             ExceptionData const& exceptionData,
-            boost::optional<std::chrono::milliseconds> const& maxDuration = boost::none)
+            std::optional<std::chrono::milliseconds> const& maxDuration = std::nullopt)
             : _accessFlag(accessFlag)
             , _conditionForWorkerLoop(conditionForWorkerLoop)
         {
@@ -83,7 +83,7 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings, Gp
 
     if (_imageResourceToRegister) {
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
-        _imageResourceToRegister = boost::none;
+        _imageResourceToRegister = std::nullopt;
     }
 }
 
@@ -133,7 +133,7 @@ void EngineWorker::tryDrawVectorGraphics(
     }
 }
 
-boost::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(
+std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
@@ -170,7 +170,7 @@ boost::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturn
 
         return result;
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
@@ -505,7 +505,7 @@ void EngineWorker::runThreadLoop()
 {
     try {
         std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
-        boost::optional<std::chrono::steady_clock::time_point> startTimestepTime;
+        std::optional<std::chrono::steady_clock::time_point> startTimestepTime;
         while (true) {
             if (!_isSimulationRunning.load()) {
 
@@ -613,19 +613,19 @@ void EngineWorker::processJobs()
     std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
     if (_updateSimulationParametersJob) {
         _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
-        _updateSimulationParametersJob = boost::none;
+        _updateSimulationParametersJob = std::nullopt;
     }
     if (_updateSimulationParametersSpotsJob) {
         _cudaSimulation->setSimulationParametersSpots(*_updateSimulationParametersSpotsJob);
-        _updateSimulationParametersSpotsJob = boost::none;
+        _updateSimulationParametersSpotsJob = std::nullopt;
     }
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
-        _updateGpuSettingsJob = boost::none;
+        _updateGpuSettingsJob = std::nullopt;
     }
     if (_flowFieldSettings) {
         _cudaSimulation->setFlowFieldSettings(*_flowFieldSettings);
-        _flowFieldSettings = boost::none;
+        _flowFieldSettings = std::nullopt;
     }
     if (!_applyForceJobs.empty()) {
         for (auto const& applyForceJob : _applyForceJobs) {

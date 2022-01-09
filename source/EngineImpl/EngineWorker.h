@@ -29,7 +29,7 @@
 struct ExceptionData
 {
     mutable std::mutex mutex;
-    boost::optional<std::string> errorMessage;
+    std::optional<std::string> errorMessage;
 };
 
 struct DataAccessTO;
@@ -44,16 +44,9 @@ public:
 
     void registerImageResource(GLuint image);
 
-    void tryDrawVectorGraphics(
-        RealVector2D const& rectUpperLeft,
-        RealVector2D const& rectLowerRight,
-        IntVector2D const& imageSize,
-        double zoom);
-    boost::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
-        RealVector2D const& rectUpperLeft,
-        RealVector2D const& rectLowerRight,
-        IntVector2D const& imageSize,
-        double zoom);
+    void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
+    std::optional<OverlayDescription>
+    tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     DataDescription getSelectedSimulationData(bool includeClusters);
@@ -118,11 +111,11 @@ private:
 
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
-    boost::optional<SimulationParameters> _updateSimulationParametersJob;
-    boost::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
-    boost::optional<GpuSettings> _updateGpuSettingsJob;
-    boost::optional<FlowFieldSettings> _flowFieldSettings;
-    boost::optional<GLuint> _imageResourceToRegister;
+    std::optional<SimulationParameters> _updateSimulationParametersJob;
+    std::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
+    std::optional<GpuSettings> _updateGpuSettingsJob;
+    std::optional<FlowFieldSettings> _flowFieldSettings;
+    std::optional<GLuint> _imageResourceToRegister;
 
     struct ApplyForceJob
     {
@@ -136,7 +129,7 @@ private:
     //time step measurements
     std::atomic<int> _tpsRestriction{0};  //0 = no restriction
     std::atomic<float> _tps;
-    boost::optional<std::chrono::steady_clock::time_point> _timepoint;
+    std::optional<std::chrono::steady_clock::time_point> _timepoint;
     int _timestepsSinceTimepoint = 0;
   
     //settings
@@ -144,7 +137,7 @@ private:
     GpuSettings _gpuConstants;
 
     //monitor data
-    boost::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
+    std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
     std::atomic<uint64_t> _timeStep{0};
     std::atomic<int> _numCells{0};
     std::atomic<int> _numParticles{0};

@@ -16,8 +16,8 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderFloatParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(SliderFloatParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(SliderFloatParameters, boost::optional<float>, defaultValue, boost::none);
-        MEMBER_DECLARATION(SliderFloatParameters, boost::optional<std::string>, tooltip, boost::none);
+        MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void SliderFloat(SliderFloatParameters const& parameters, float& value);
 
@@ -27,8 +27,8 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, int, min, 0);
         MEMBER_DECLARATION(SliderIntParameters, int, max, 0);
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(SliderIntParameters, boost::optional<int>, defaultValue, boost::none);
-        MEMBER_DECLARATION(SliderIntParameters, boost::optional<std::string>, tooltip, boost::none);
+        MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void SliderInt(SliderIntParameters const& parameters, int& value);
 
@@ -47,8 +47,8 @@ public:
     {
         MEMBER_DECLARATION(InputIntParameters, std::string, name, "");
         MEMBER_DECLARATION(InputIntParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(InputIntParameters, boost::optional<int>, defaultValue, boost::none);
-        MEMBER_DECLARATION(InputIntParameters, boost::optional<std::string>, tooltip, boost::none);
+        MEMBER_DECLARATION(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputInt(InputIntParameters const& parameters, int& value);
 
@@ -58,8 +58,8 @@ public:
         MEMBER_DECLARATION(InputFloatParameters, float, step, 1.0f);
         MEMBER_DECLARATION(InputFloatParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(InputFloatParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(InputFloatParameters, boost::optional<float>, defaultValue, boost::none);
-        MEMBER_DECLARATION(InputFloatParameters, boost::optional<std::string>, tooltip, boost::none);
+        MEMBER_DECLARATION(InputFloatParameters, std::optional<float>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputFloat(InputFloatParameters const& parameters, float& value);
 

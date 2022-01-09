@@ -7,27 +7,16 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include <boost/make_shared.hpp>
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <optional>
+#include <memory>
 
 #include "DllExport.h"
 #include "Exceptions.h"
 
-using boost::optional;
 using std::int32_t;
 using std::int64_t;
-using std::list;
-using std::map;
-using std::pair;
-using std::set;
-using std::string;
 using std::uint32_t;
 using std::uint64_t;
-using std::unordered_map;
-using std::unordered_set;
-using std::vector;
 
 const double FLOATINGPOINT_HIGH_PRECISION = 1.0e-7;
 const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
