@@ -10,6 +10,7 @@ struct OverlayElementDescription
     bool cell;  //false = energy particle
     Enums::CellFunction::Type cellType;
     RealVector2D pos;
+    int branchNumber;
     int selected;
 };
 
