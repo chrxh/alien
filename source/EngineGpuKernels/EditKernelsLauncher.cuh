@@ -13,20 +13,32 @@ public:
     ~_EditKernelsLauncher();
 
     void removeSelection(GpuSettings const& gpuSettings, SimulationData const& data);
-    void swapSelection(GpuSettings const& gpuSettings, SimulationData const& data, PointSelectionData switchData);
-    void switchSelection(GpuSettings const& gpuSettings, SimulationData data, PointSelectionData switchData);
-    void setSelection(GpuSettings const& gpuSettings, SimulationData data, AreaSelectionData setData);
-    void updateSelection(GpuSettings const& gpuSettings, SimulationData data);
-    void shallowUpdateSelectedEntities(GpuSettings const& gpuSettings, SimulationData data, ShallowUpdateSelectionData updateData);
+    void swapSelection(GpuSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
+    void switchSelection(GpuSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
+    void setSelection(GpuSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData);
+    void updateSelection(GpuSettings const& gpuSettings, SimulationData const& data);
 
-    void rolloutSelection(GpuSettings const& gpuSettings, SimulationData data);
+    void getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
+    void shallowUpdateSelectedEntities(
+        GpuSettings const& gpuSettings,
+        SimulationData const& data,
+        ShallowUpdateSelectionData const& updateData);
+    void removeSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
+    void changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& changeDataTO);
+    void colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
+
+    void applyForce(GpuSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);
+
+    void rolloutSelection(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:
+    GarbageCollectorKernelsLauncher _garbageCollector;
+
+    //gpu memory
     int* _cudaRolloutResult;
     int* _cudaSwitchResult;
     int* _cudaUpdateResult;
+    int* _cudaRemoveResult;
     float2* _cudaCenter;
     int* _cudaNumEntities;
-
-    GarbageCollectorKernelsLauncher _garbageCollector;
 };

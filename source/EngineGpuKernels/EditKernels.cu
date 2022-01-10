@@ -1,179 +1,123 @@
 ﻿#include "EditKernels.cuh"
 
-namespace
+__global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters)
 {
-    __global__ void applyForceToCells(ApplyForceData applyData, Array<Cell*> cells)
-    {
-        auto const cellBlock = calcAllThreadsPartition(cells.getNumEntries());
-
-        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
-            auto const& cell = cells.at(index);
-            auto const& pos = cell->absPos;
-            auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
-            if (distanceToSegment < applyData.radius) {
-                auto weightedForce = applyData.force;
-                //*(actionRadius - distanceToSegment) / actionRadius;
-                cell->vel = cell->vel + weightedForce;
-            }
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if ((0 != cell->selected && includeClusters) || (1 == cell->selected && !includeClusters)) {
+            cell->metadata.color = color;
         }
     }
 
-    __global__ void applyForceToParticles(ApplyForceData applyData, Array<Particle*> particles)
-    {
-        auto const particleBlock = calcAllThreadsPartition(particles.getNumEntries());
-
-        for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
-            auto const& particle = particles.at(index);
-            auto const& pos = particle->absPos;
-            auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
-            if (distanceToSegment < applyData.radius) {
-                auto weightedForce = applyData.force;  //*(actionRadius - distanceToSegment) / actionRadius;
-                particle->vel = particle->vel + weightedForce;
-            }
-        }
-    }
-
-    __global__ void getSelectionShallowData(SimulationData data, SelectionResult result)
-    {
-        auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-
-        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
-            auto const& cell = data.entities.cellPointers.at(index);
-            if (0 != cell->selected) {
-                result.collectCell(cell);
-            }
-        }
-
-        auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
-
-        for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
-            auto const& particle = data.entities.particlePointers.at(index);
-            if (0 != particle->selected) {
-                result.collectParticle(particle);
-            }
-        }
-    }
-
-    __global__ void removeSelectedCellConnections(SimulationData data, bool includeClusters, int* retry)
-    {
-        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = data.entities.cellPointers.at(index);
-            if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto connectedCell = cell->connections[i].cell;
-                    if ((includeClusters && connectedCell->selected == 0) || (!includeClusters && connectedCell->selected != 1)) {
-
-                        if (connectedCell->tryLock()) {
-                            CellConnectionProcessor::delConnections(cell, connectedCell);
-                            --i;
-                            connectedCell->releaseLock();
-                        } else {
-                            atomicExch(retry, 1);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    __global__ void removeSelectedCells(SimulationData data, bool includeClusters)
-    {
-        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = data.entities.cellPointers.at(index);
-            if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
-                cell = nullptr;
-            }
-        }
-    }
-
-    __global__ void removeSelectedParticles(SimulationData data)
-    {
-        auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& particle = data.entities.particlePointers.at(index);
-            if (particle->selected == 1) {
-                particle = nullptr;
-            }
-        }
-    }
-
-    __global__ void colorSelection(SimulationData data, unsigned char color, bool includeClusters)
-    {
-        auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
-            auto const& cell = data.entities.cellPointers.at(index);
-            if ((0 != cell->selected && includeClusters) || (1 == cell->selected && !includeClusters)) {
-                cell->metadata.color = color;
-            }
-        }
-
-        auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
-        for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
-            auto const& particle = data.entities.particlePointers.at(index);
-            if (0 != particle->selected) {
-                particle->metadata.color = color;
-            }
-        }
-    }
-
-    //assumes that *changeDataTO.numCells == 1
-    __global__ void changeCell(SimulationData data, DataAccessTO changeDataTO, int numTokenPointers)
-    {
-        //delete tokens on cell to be changed
-        {
-            auto const partition = calcAllThreadsPartition(numTokenPointers);
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto& token = data.entities.tokenPointers.at(index);
-                if (token->cell->id == changeDataTO.cells[0].id) {
-                    token = nullptr;
-                }
-            }
-        }
-        {
-            auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto const& cell = data.entities.cellPointers.at(index);
-                auto const& cellTO = changeDataTO.cells[0];
-                if (cell->id == cellTO.id) {
-                    EntityFactory entityFactory;
-                    entityFactory.init(&data);
-                    entityFactory.changeCellFromTO(cellTO, changeDataTO, cell);
-
-                    for (int i = 0; i < *changeDataTO.numTokens; ++i) {
-                        entityFactory.createTokenFromTO(changeDataTO.tokens[i], cell);
-                    }
-                }
-            }
-        }
-    }
-
-    //assumes that *changeDataTO.numCells == 1
-    __global__ void changeParticle(SimulationData data, DataAccessTO changeDataTO)
-    {
-        auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& particle = data.entities.particlePointers.at(index);
-            auto const& particleTO = changeDataTO.particles[0];
-            if (particle->id == particleTO.id) {
-                EntityFactory entityFactory;
-                entityFactory.init(&data);
-                entityFactory.changeParticleFromTO(particleTO, particle);
-            }
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        if (0 != particle->selected) {
+            particle->metadata.color = color;
         }
     }
 }
 
-/************************************************************************/
-/* Main                                                                 */
-/************************************************************************/
 __global__ void cudaPrepareForUpdate(SimulationData data)
 {
     data.prepareForNextTimestep();
+}
+
+//assumes that *changeDataTO.numCells == 1
+/*
+__global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO)
+{
+    //delete tokens on cell to be changed
+    {
+        auto const partition = calcAllThreadsPartition(data.origPointerArraySizes->tokenArraySize);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& token = data.entities.tokenPointers.at(index);
+            if (token->cell->id == changeDataTO.cells[0].id) {
+                token = nullptr;
+            }
+        }
+    }
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& cell = data.entities.cellPointers.at(index);
+            auto const& cellTO = changeDataTO.cells[0];
+            if (cell->id == cellTO.id) {
+                EntityFactory entityFactory;
+                entityFactory.init(&data);
+                entityFactory.changeCellFromTO(cellTO, changeDataTO, cell);
+
+                for (int i = 0; i < *changeDataTO.numTokens; ++i) {
+                    entityFactory.createTokenFromTO(changeDataTO.tokens[i], cell);
+                }
+            }
+        }
+    }
+}
+*/
+
+//assumes that *changeDataTO.numParticles == 1
+__global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataTO)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        auto const& particleTO = changeDataTO.particles[0];
+        if (particle->id == particleTO.id) {
+            EntityFactory entityFactory;
+            entityFactory.init(&data);
+            entityFactory.changeParticleFromTO(particleTO, particle);
+        }
+    }
+}
+
+__global__ void cudaRemoveSelectedCells(SimulationData data, bool includeClusters)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+            cell = nullptr;
+        }
+    }
+}
+
+__global__ void cudaRemoveSelectedParticles(SimulationData data)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& particle = data.entities.particlePointers.at(index);
+        if (particle->selected == 1) {
+            particle = nullptr;
+        }
+    }
+}
+
+__global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters, int* retry)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                if ((includeClusters && connectedCell->selected == 0) || (!includeClusters && connectedCell->selected != 1)) {
+
+                    if (connectedCell->tryLock()) {
+                        CellConnectionProcessor::delConnections(cell, connectedCell);
+                        --i;
+                        connectedCell->releaseLock();
+                    } else {
+                        atomicExch(retry, 1);
+                    }
+                }
+            }
+        }
+    }
 }
 
 __global__ void cudaConnectSelection(SimulationData data, int* result)
@@ -493,46 +437,64 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
     }
 }
 
-__global__ void cudaApplyForce(ApplyForceData applyData, SimulationData data)
+__global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
 {
-    DEPRECATED_KERNEL_CALL_SYNC(applyForceToCells, applyData, data.entities.cellPointers);
-    DEPRECATED_KERNEL_CALL_SYNC(applyForceToParticles, applyData, data.entities.particlePointers);
-}
+    {
+        auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
-__global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult selectionResult)
-{
-    selectionResult.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(getSelectionShallowData, data, selectionResult);
-    selectionResult.finalize();
-}
-
-__global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters)
-{
-    int* result = new int;
-
-    do {
-        *result = 0;
-        DEPRECATED_KERNEL_CALL_SYNC(removeSelectedCellConnections, data, includeClusters, result);
-    } while (1 == *result);
-    DEPRECATED_KERNEL_CALL_SYNC(removeSelectedCells, data, includeClusters);
-    DEPRECATED_KERNEL_CALL_SYNC(removeSelectedParticles, data);
-    DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
-
-    delete result;
-}
-
-__global__ void cudaColorSelectedEntities(SimulationData data, unsigned char color, bool includeClusters)
-{
-    DEPRECATED_KERNEL_CALL_SYNC(colorSelection, data, color, includeClusters);
-}
-
-__global__ void cudaChangeSimulationData(SimulationData data, DataAccessTO changeDataTO)
-{
-    if (*changeDataTO.numCells == 1) {
-        DEPRECATED_KERNEL_CALL_SYNC(changeCell, data, changeDataTO, data.entities.tokenPointers.getNumEntries());
+        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+            auto const& cell = data.entities.cellPointers.at(index);
+            auto const& pos = cell->absPos;
+            auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
+            if (distanceToSegment < applyData.radius) {
+                auto weightedForce = applyData.force;
+                //*(actionRadius - distanceToSegment) / actionRadius;
+                cell->vel = cell->vel + weightedForce;
+            }
+        }
     }
-    if (*changeDataTO.numParticles == 1) {
-        DEPRECATED_KERNEL_CALL_SYNC(changeParticle, data, changeDataTO);
+    {
+        auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+        for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+            auto const& particle = data.entities.particlePointers.at(index);
+            auto const& pos = particle->absPos;
+            auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
+            if (distanceToSegment < applyData.radius) {
+                auto weightedForce = applyData.force;  //*(actionRadius - distanceToSegment) / actionRadius;
+                particle->vel = particle->vel + weightedForce;
+            }
+        }
     }
-    DEPRECATED_KERNEL_CALL_SYNC_1_1(cleanupAfterDataManipulationKernel, data);
+}
+
+__global__ void cudaResetSelectionResult(SelectionResult result)
+{
+    result.reset();
+}
+
+__global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult result)
+{
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (0 != cell->selected) {
+            result.collectCell(cell);
+        }
+    }
+
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        if (0 != particle->selected) {
+            result.collectParticle(particle);
+        }
+    }
+}
+
+__global__ void cudaFinalizeSelectionResult(SelectionResult result)
+{
+    result.finalize();
 }

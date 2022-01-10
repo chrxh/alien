@@ -136,40 +136,6 @@ __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
     }
 }
 
-__global__ void cleanupAfterDataManipulationKernel(SimulationData data)
-{
-    data.entitiesForCleanup.particlePointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupPointerArray<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
-    data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
-
-    data.entitiesForCleanup.cellPointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupPointerArray<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
-    data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
-
-    data.entitiesForCleanup.tokenPointers.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupPointerArray<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
-    data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
-
-    data.entitiesForCleanup.particles.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupParticles, data.entities.particlePointers, data.entitiesForCleanup.particles);
-    data.entities.particles.swapContent(data.entitiesForCleanup.particles);
-
-    data.entitiesForCleanup.cells.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
-    data.entities.cells.swapContent(data.entitiesForCleanup.cells);
-
-    data.entitiesForCleanup.tokens.reset();
-    DEPRECATED_KERNEL_CALL_SYNC(cudaCleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
-    data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
-
-/*
-    data.entitiesForCleanup.strings.reset();
-    KERNEL_CALL(cleanupMetadata, data.entities.clusterPointers, data.entitiesForCleanup.strings);
-    data.entities.strings.swapContent(data.entitiesForCleanup.strings);
-*/
-}
-
 /*
 __global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory strings)
 {
