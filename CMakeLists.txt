@@ -19,7 +19,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast_math")
 
 project(alien-project LANGUAGES C CXX CUDA)
 
