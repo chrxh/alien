@@ -13,6 +13,7 @@
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 
@@ -85,6 +86,8 @@ private:
 
     std::atomic<uint64_t> _currentTimestep;
     GpuSettings _gpuSettings;
+    FlowFieldSettings _flowFieldSettings;
+
     std::shared_ptr<SimulationData> _cudaSimulationData;
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SimulationResult> _cudaSimulationResult;
@@ -97,4 +100,5 @@ private:
     GarbageCollectorKernelsLauncher _garbageCollectorKernels;
     RenderingKernelsLauncher _renderingKernels;
     EditKernelsLauncher _editKernels;
+    MonitorKernelsLauncher _monitorKernels;
 };

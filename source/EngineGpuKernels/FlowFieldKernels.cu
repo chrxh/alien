@@ -35,22 +35,15 @@ namespace
     }
 
 
-    __global__ void applyFlowFieldSettings(SimulationData data)
-    {
-        auto& cells = data.entities.cellPointers;
-        auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = cells.at(index);
-            cell->vel = cell->vel + calcVelocity(cell->absPos, data.cellMap);
-        }
-    }
 }
 
 __global__ void cudaApplyFlowFieldSettings(SimulationData data)
 {
-    if (cudaFlowFieldSettings.active) {
-        DEPRECATED_KERNEL_CALL_SYNC(applyFlowFieldSettings, data);
+    auto& cells = data.entities.cellPointers;
+    auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        cell->vel = cell->vel + calcVelocity(cell->absPos, data.cellMap);
     }
 }
-

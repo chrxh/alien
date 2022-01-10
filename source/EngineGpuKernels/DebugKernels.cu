@@ -49,6 +49,7 @@ __global__ void DEBUG_checkCellsAndParticles(SimulationData data, float* sumEner
     DEBUG_checkParticles(data, sumEnergy, location);
 }
 
+/*
 __global__ void DEBUG_kernel(SimulationData data, int location)
 {
     float* sumEnergy = new float;
@@ -63,3 +64,4 @@ __global__ void DEBUG_kernel(SimulationData data, int location)
     }
     delete sumEnergy;
 }
+*/
