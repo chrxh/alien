@@ -300,21 +300,39 @@ void _SimulationView::updateImageFromSimulation()
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
             if (overlayElement.cell) {
-                auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
-                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
-                auto text = cellFunctionToStringMap.at(overlayElement.cellType);
-                drawList->AddText(
-                    StyleRepository::getInstance().getMediumFont(),
-                    fontSize,
-                    {viewPos.x - 2 * fontSize, viewPos.y},
-                    Const::CellFunctionOverlayShadowColor,
-                    text.c_str());
-                drawList->AddText(
-                    StyleRepository::getInstance().getMediumFont(),
-                    fontSize,
-                    {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
-                    Const::CellFunctionOverlayColor,
-                    text.c_str());
+                {
+                    auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
+                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
+                    auto text = cellFunctionToStringMap.at(overlayElement.cellType);
+                    drawList->AddText(
+                        StyleRepository::getInstance().getMediumFont(),
+                        fontSize,
+                        {viewPos.x - 2 * fontSize, viewPos.y},
+                        Const::CellFunctionOverlayShadowColor,
+                        text.c_str());
+                    drawList->AddText(
+                        StyleRepository::getInstance().getMediumFont(),
+                        fontSize,
+                        {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
+                        Const::CellFunctionOverlayColor,
+                        text.c_str());
+                }
+                {
+                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f});
+                    auto fontSize = _viewport->getZoomFactor() / 2;
+                    drawList->AddText(
+                        StyleRepository::getInstance().getHugeFont(),
+                        fontSize,
+                        {viewPos.x, viewPos.y},
+                        Const::BranchNumberOverlayShadowColor,
+                        std::to_string(overlayElement.branchNumber).c_str());
+                    drawList->AddText(
+                        StyleRepository::getInstance().getHugeFont(),
+                        fontSize,
+                        {viewPos.x + 1, viewPos.y + 1},
+                        Const::BranchNumberOverlayColor,
+                        std::to_string(overlayElement.branchNumber).c_str());
+                }
             }
 
             if (overlayElement.selected == 1) {

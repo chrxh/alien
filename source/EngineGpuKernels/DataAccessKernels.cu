@@ -180,6 +180,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             cellTO.pos = cell->absPos;
             cellTO.cellFunctionType = cell->cellFunctionType;
             cellTO.selected = cell->selected;
+            cellTO.branchNumber = cell->branchNumber;
         }
     }
     {

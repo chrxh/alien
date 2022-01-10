@@ -98,6 +98,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
         element.pos = {cellTO.pos.x, cellTO.pos.y};
         element.cellType = static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType);
         element.selected = cellTO.selected;
+        element.branchNumber = cellTO.branchNumber;
         result.elements.emplace_back(element);
     }
 

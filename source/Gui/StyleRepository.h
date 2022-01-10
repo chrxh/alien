@@ -30,6 +30,8 @@ namespace Const
 
     ImColor const CellFunctionOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
     ImColor const CellFunctionOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
+    ImColor const BranchNumberOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.8f);
+    ImColor const BranchNumberOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
 
     ImColor const SelectedCellOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
 
