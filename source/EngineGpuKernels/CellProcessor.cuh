@@ -296,7 +296,7 @@ __inline__ __device__ void CellProcessor::calcVelocities(SimulationData& data)
 {
     _data = &data;
     auto& cells = data.entities.cellPointers;
-    auto const partition = calcAllThreadsPartition(data.originalArraySizes->cellArraySize);
+    auto const partition = calcAllThreadsPartition(cells.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);

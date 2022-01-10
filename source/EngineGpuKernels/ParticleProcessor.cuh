@@ -91,7 +91,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 
 __inline__ __device__ void ParticleProcessor::transformation(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.originalArraySizes->particleArraySize);
+    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.entities.particlePointers.at(particleIndex)) {

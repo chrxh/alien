@@ -33,7 +33,7 @@ public:
 __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
 {
     auto& tokens = data.entities.tokenPointers;
-    auto partition = calcPartition(data.originalArraySizes->tokenArraySize, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(tokens.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
@@ -124,7 +124,7 @@ __inline__ __device__ void
 TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationResult& result)
 {
     auto& tokens = data.entities.tokenPointers;
-    auto const partition = calcAllThreadsPartition(data.originalArraySizes->tokenArraySize);
+    auto const partition = calcAllThreadsPartition(tokens.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);

@@ -18,6 +18,7 @@ class Array
 private:
     int* _size;
     int* _numEntries;
+    int* _numOrigEntries;
 
 public:
     T** _data;
@@ -29,10 +30,12 @@ public:
         T* data = nullptr;
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _size);
 
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(int)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(int)));
     }
 
@@ -43,10 +46,12 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<T>(size, data);
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _size);
 
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(int)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_size, size, sizeof(int)));
     }
 
@@ -58,6 +63,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(data);
         CudaMemoryManager::getInstance().freeMemory(_data);
         CudaMemoryManager::getInstance().freeMemory(_numEntries);
+        CudaMemoryManager::getInstance().freeMemory(_numOrigEntries);
         CudaMemoryManager::getInstance().freeMemory(_size);
     }
 
@@ -93,6 +99,9 @@ public:
     {
         checkCudaErrors(cudaMemcpy(_numEntries, &value, sizeof(int), cudaMemcpyHostToDevice));
     }
+    __device__ __inline__ int getNumOrigEntries() const { return *_numOrigEntries; }
+    __device__ __inline__ int saveNumEntries() const { return *_numOrigEntries = *_numEntries; }
+
 
     __device__ __inline__ void swapContent(Array& other)
     {

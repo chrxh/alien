@@ -25,12 +25,11 @@ __global__ void cudaPrepareForUpdate(SimulationData data)
 }
 
 //assumes that *changeDataTO.numCells == 1
-/*
 __global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO)
 {
     //delete tokens on cell to be changed
     {
-        auto const partition = calcAllThreadsPartition(data.origPointerArraySizes->tokenArraySize);
+        auto const partition = calcAllThreadsPartition(data.entities.tokenPointers.getNumOrigEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& token = data.entities.tokenPointers.at(index);
             if (token->cell->id == changeDataTO.cells[0].id) {
@@ -55,7 +54,6 @@ __global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO)
         }
     }
 }
-*/
 
 //assumes that *changeDataTO.numParticles == 1
 __global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataTO)

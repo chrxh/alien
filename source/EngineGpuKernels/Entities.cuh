@@ -20,5 +20,15 @@ struct Entities
 
     void init();
     void free();
+
+    __device__ __inline__ void saveNumEntries()
+    {
+        cellPointers.saveNumEntries();
+        tokenPointers.saveNumEntries();
+        particlePointers.saveNumEntries();
+        cells.saveNumEntries();
+        tokens.saveNumEntries();
+        particles.saveNumEntries();
+    }
 };
 
