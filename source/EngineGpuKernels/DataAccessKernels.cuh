@@ -27,5 +27,4 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, b
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO);
 __global__ void cudaClearDataTO(DataAccessTO dataTO);
 __global__ void cudaSaveNumEntries(SimulationData data);
-__global__ void cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds, DataAccessTO dataTO);
 __global__ void cudaClearData(SimulationData data);

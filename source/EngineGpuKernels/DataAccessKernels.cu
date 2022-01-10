@@ -74,12 +74,12 @@ namespace
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
     }
+
 }
 
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
-
 __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO)
 {
     auto const& cells = data.entities.cellPointers;
@@ -338,24 +338,6 @@ __global__ void cudaClearDataTO(DataAccessTO dataTO)
     *dataTO.numStringBytes = 0;
 }
 
-__global__ void cudaSaveNumEntries(SimulationData data)
-{
-    data.entities.saveNumEntries();
-}
-
-__global__ void cudaGetSelectedSimulationData(SimulationData data, bool includeClusters, DataAccessTO dataTO)
-{
-    *dataTO.numCells = 0;
-    *dataTO.numParticles = 0;
-    *dataTO.numTokens = 0;
-    *dataTO.numStringBytes = 0;
-
-    DEPRECATED_KERNEL_CALL_SYNC(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(cudaResolveConnections, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(cudaGetTokenData, data, dataTO);
-    DEPRECATED_KERNEL_CALL_SYNC(cudaGetSelectedParticleData, data, dataTO);
-}
-
 __global__ void cudaClearData(SimulationData data)
 {
     data.entities.cellPointers.reset();
@@ -365,4 +347,9 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.tokens.reset();
     data.entities.particles.reset();
     data.entities.dynamicMemory.reset();
+}
+
+__global__ void cudaSaveNumEntries(SimulationData data)
+{
+    data.entities.saveNumEntries();
 }

@@ -11,23 +11,6 @@
 #define KERNEL_CALL(func, ...) func<<<gpuSettings.NUM_BLOCKS, gpuSettings.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__);
 #define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
 
-//#TODO remove following macros
-#define DEPRECATED_KERNEL_CALL(func, ...) func<<<cudaThreadSettings.NUM_BLOCKS, cudaThreadSettings.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__);
-#define DEPRECATED_KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
-
-#define DEPRECATED_KERNEL_CALL_HOST_SYNC(func, ...) \
-    func<<<1, 1>>>(__VA_ARGS__); \
-    cudaDeviceSynchronize(); \
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-
-#define DEPRECATED_KERNEL_CALL_SYNC(func, ...)  \
-        func<<<cudaThreadSettings.NUM_BLOCKS, cudaThreadSettings.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize();
-
-#define DEPRECATED_KERNEL_CALL_SYNC_1_1(func, ...)  \
-        func<<<1, 1>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize();
-
 template< typename T >
 void checkAndThrowError(T result, char const *const func, const char *const file, int const line)
 {

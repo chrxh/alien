@@ -104,3 +104,11 @@ __global__ void processingStep13(SimulationData data)
     TokenProcessor tokenProcessor;
     tokenProcessor.deleteTokenIfCellDeleted(data);
 }
+
+//This is the only kernel that uses dynamic parallelism.
+//When it is removed, performance drops by about 20% for unknown reasons.
+__global__ void nestedDummy() {}
+__global__ void dummy()
+{
+    nestedDummy<<<1, 1>>>();
+}
