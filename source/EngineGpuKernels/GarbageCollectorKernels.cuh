@@ -57,6 +57,3 @@ __global__ void cudaCleanupParticleMap(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);
 __global__ void cudaSwapArrays(SimulationData data);
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);
-
-//#TODO remove
-__global__ void cleanupAfterDataManipulationKernel(SimulationData data);

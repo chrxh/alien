@@ -289,18 +289,21 @@ void _CudaSimulationAdapter::setSimulationData(DataAccessTO const& dataTO)
 
 void _CudaSimulationAdapter::removeSelectedEntities(bool includeClusters)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaRemoveSelectedEntities, *_cudaSimulationData, includeClusters);
+    _editKernels->removeSelectedEntities(_gpuSettings, *_cudaSimulationData, includeClusters);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaChangeSimulationData, *_cudaSimulationData, *_cudaAccessTO);
+    _editKernels->changeSimulationData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::applyForce(ApplyForceData const& applyData)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaApplyForce, applyData, *_cudaSimulationData);
+    _editKernels->applyForce(_gpuSettings, *_cudaSimulationData, applyData);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::switchSelection(PointSelectionData const& pointData)
@@ -322,7 +325,8 @@ void _CudaSimulationAdapter::setSelection(AreaSelectionData const& selectionData
 
  SelectionShallowData _CudaSimulationAdapter::getSelectionShallowData()
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetSelectionShallowData, *_cudaSimulationData, *_cudaSelectionResult);
+    _editKernels->getSelectionShallowData(_gpuSettings, *_cudaSimulationData, *_cudaSelectionResult);
+    syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
@@ -346,7 +350,8 @@ void _CudaSimulationAdapter::updateSelection()
 
 void _CudaSimulationAdapter::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaColorSelectedEntities, *_cudaSimulationData, color, includeClusters);
+    _editKernels->colorSelectedCells(_gpuSettings, *_cudaSimulationData, color, includeClusters);
+    syncAndCheck();
 }
 
 void _CudaSimulationAdapter::setGpuConstants(GpuSettings const& gpuConstants)
