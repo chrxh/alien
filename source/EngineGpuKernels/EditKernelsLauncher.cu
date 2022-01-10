@@ -145,7 +145,7 @@ void _EditKernelsLauncher::removeSelectedEntities(GpuSettings const& gpuSettings
 
 void _EditKernelsLauncher::changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& changeDataTO)
 {
-    KERNEL_CALL_1_1(cudaSetOrignalPointerArraySizes, data);
+    KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

@@ -26,6 +26,6 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
 __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData);
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO);
 __global__ void cudaClearDataTO(DataAccessTO dataTO);
-__global__ void cudaPrepareSetData(SimulationData data);
+__global__ void cudaSaveNumEntries(SimulationData data);
 __global__ void cudaGetInspectedSimulationData(SimulationData data, InspectedEntityIds entityIds, DataAccessTO dataTO);
 __global__ void cudaClearData(SimulationData data);

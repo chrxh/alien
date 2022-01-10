@@ -296,7 +296,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, b
     }
 
     auto cellPartition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    auto cellTargetArray = data.entities.cells.getArray() + data.originalArraySizes->cellArraySize;
+    auto cellTargetArray = data.entities.cells.getArray() + data.entities.cells.getNumOrigEntries();
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto cell = factory.createCellFromTO(index, dataTO.cells[index], cellTargetArray, &dataTO);
         if (selectNewData) {
@@ -338,9 +338,9 @@ __global__ void cudaClearDataTO(DataAccessTO dataTO)
     *dataTO.numStringBytes = 0;
 }
 
-__global__ void cudaPrepareSetData(SimulationData data)
+__global__ void cudaSaveNumEntries(SimulationData data)
 {
-    data.originalArraySizes->cellArraySize = data.entities.cells.getNumEntries();
+    data.entities.saveNumEntries();
 }
 
 __global__ void cudaGetSelectedSimulationData(SimulationData data, bool includeClusters, DataAccessTO dataTO)

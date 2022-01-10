@@ -15,7 +15,6 @@ void SimulationData::init(int2 const& universeSize)
     dynamicMemory.init();
     numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
-    CudaMemoryManager::getInstance().acquireMemory<ArraySizes>(1, originalArraySizes);
     CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     CudaMemoryManager::getInstance().acquireMemory<Operation*>(1, operations);
 }
@@ -28,9 +27,7 @@ __device__ void SimulationData::prepareForNextTimestep()
 
     *numOperations = 0;
     *operations = dynamicMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
-    originalArraySizes->cellArraySize = entities.cellPointers.getNumEntries();
-    originalArraySizes->particleArraySize = entities.particlePointers.getNumEntries();
-    originalArraySizes->tokenArraySize = entities.tokenPointers.getNumEntries();
+    entities.saveNumEntries();
 }
 
 bool SimulationData::shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
@@ -112,7 +109,6 @@ void SimulationData::free()
 
     CudaMemoryManager::getInstance().freeMemory(numOperations);
     CudaMemoryManager::getInstance().freeMemory(operations);
-    CudaMemoryManager::getInstance().freeMemory(originalArraySizes);
 }
 
 template <typename Entity>

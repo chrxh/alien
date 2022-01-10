@@ -63,7 +63,7 @@ void _DataAccessKernelsLauncher::getOverlayData(
 
 void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& dataTO, bool selectData)
 {
-    KERNEL_CALL_1_1(cudaPrepareSetData, data);
+    KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen, dataTO);
     KERNEL_CALL(cudaCreateDataFromTO, data, dataTO, selectData);
     _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);

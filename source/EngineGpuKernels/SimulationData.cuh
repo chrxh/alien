@@ -22,8 +22,6 @@ struct SimulationData
     Entities entities;
     Entities entitiesForCleanup;
 
-    ArraySizes* originalArraySizes;
-
     unsigned int* numOperations;
     Operation** operations;  //uses dynamic memory
 
