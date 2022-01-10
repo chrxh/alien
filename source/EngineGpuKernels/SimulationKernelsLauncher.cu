@@ -9,10 +9,16 @@ _SimulationKernelsLauncher::_SimulationKernelsLauncher()
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
 }
 
-void _SimulationKernelsLauncher::calcTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData, SimulationResult const& result)
+void _SimulationKernelsLauncher::calcTimestep(
+    GpuSettings const& gpuSettings,
+    FlowFieldSettings const& flowFieldSettings,
+    SimulationData const& simulationData,
+    SimulationResult const& result)
 {
     KERNEL_CALL_1_1(prepareForNextTimestep, simulationData, result);
-    KERNEL_CALL_1_1(cudaApplyFlowFieldSettings, simulationData);
+    if (flowFieldSettings.active) {
+        KERNEL_CALL(cudaApplyFlowFieldSettings, simulationData);
+    }
 
     KERNEL_CALL(processingStep1, simulationData);
     KERNEL_CALL(processingStep2, simulationData);

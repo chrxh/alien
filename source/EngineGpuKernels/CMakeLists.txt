@@ -48,6 +48,8 @@ add_library(alien_engine_gpu_kernels_lib
     Map.cuh
     MapSectionCollector.cuh
     Math.cuh
+    MonitorKernelsLauncher.cu
+    MonitorKernelsLauncher.cuh
     MonitorKernels.cu
     MonitorKernels.cuh
     MuscleFunction.cuh

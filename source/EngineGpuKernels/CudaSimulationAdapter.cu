@@ -33,6 +33,7 @@
 #include "DataAccessKernelsLauncher.cuh"
 #include "RenderingKernelsLauncher.cuh"
 #include "EditKernelsLauncher.cuh"
+#include "MonitorKernelsLauncher.cuh"
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
@@ -140,6 +141,7 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
     _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
     _editKernels = std::make_shared<_EditKernelsLauncher>();
+    _monitorKernels = std::make_shared<_MonitorKernelsLauncher>();
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
@@ -183,7 +185,7 @@ void* _CudaSimulationAdapter::registerImageResource(GLuint image)
 
 void _CudaSimulationAdapter::calcTimestep()
 {
-    _simulationKernels->calcTimestep(_gpuSettings, *_cudaSimulationData, *_cudaSimulationResult);
+    _simulationKernels->calcTimestep(_gpuSettings, _flowFieldSettings, *_cudaSimulationData, *_cudaSimulationResult);
     syncAndCheck();
 
     automaticResizeArrays();
@@ -365,10 +367,10 @@ auto _CudaSimulationAdapter::getArraySizes() const -> ArraySizes
 
 OverallStatistics _CudaSimulationAdapter::getMonitorData()
 {
-    DEPRECATED_KERNEL_CALL_HOST_SYNC(cudaGetCudaMonitorData, *_cudaSimulationData, *_cudaMonitorData);
+    _monitorKernels->getMonitorData(_gpuSettings, *_cudaSimulationData, *_cudaMonitorData);
+    syncAndCheck();
     
     OverallStatistics result;
-
     auto monitorData = _cudaMonitorData->getMonitorData(getCurrentTimestep());
     result.timeStep = monitorData.timeStep;
     result.numCells = monitorData.numCells;
@@ -409,6 +411,8 @@ void _CudaSimulationAdapter::setFlowFieldSettings(FlowFieldSettings const& setti
 {
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaFlowFieldSettings, &settings, sizeof(FlowFieldSettings), 0, cudaMemcpyHostToDevice));
+
+    _flowFieldSettings = settings;
 }
 
 

@@ -18,5 +18,6 @@ public:
     void copyArrays(GpuSettings const& gpuSettings, SimulationData const& simulationData);
 
 private:
+    //gpu memory
     bool* _cudaBool;
 };
