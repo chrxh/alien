@@ -11,6 +11,7 @@
 #include "EditorModel.h"
 #include "SelectionWindow.h"
 #include "ManipulatorWindow.h"
+#include "CreatorWindow.h"
 
 _EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
@@ -19,6 +20,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _editorModel = std::make_shared<_EditorModel>(_simController);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
     _manipulatorWindow = std::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
+    _creatorWindow = std::make_shared<_CreatorWindow>();
 }
 
 bool _EditorController::isOn() const
@@ -40,6 +42,7 @@ void _EditorController::process()
     if (!_simController->isSimulationRunning()) {
         _selectionWindow->process();
         _manipulatorWindow->process();
+        _creatorWindow->process();
     }
     
     processSelectionRect();
@@ -86,6 +89,11 @@ SelectionWindow _EditorController::getSelectionWindow() const
 ManipulatorWindow _EditorController::getManipulatorWindow() const
 {
     return _manipulatorWindow;
+}
+
+CreatorWindow _EditorController::getCreatorWindow() const
+{
+    return _creatorWindow;
 }
 
 bool _EditorController::areInspectionWindowsActive() const
