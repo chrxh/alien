@@ -66,8 +66,8 @@ add_subdirectory(source/Gui)
 add_custom_command(
     TARGET alien POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/Resources
-        ${CMAKE_CURRENT_BINARY_DIR}/Resources)
+        ${CMAKE_SOURCE_DIR}/resources
+        ${CMAKE_CURRENT_BINARY_DIR}/resources)
 
 # Copy imgui.ini
 add_custom_command(
