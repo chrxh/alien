@@ -103,6 +103,10 @@ using OpenSelectionDialog = std::shared_ptr<_OpenSelectionDialog>;
 class _InspectorWindow;
 using InspectorWindow = std::shared_ptr<_InspectorWindow>;
 
+class _CreatorWindow;
+using CreatorWindow = std::shared_ptr<_CreatorWindow>;
+
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

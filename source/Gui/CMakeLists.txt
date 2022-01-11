@@ -11,6 +11,8 @@ PUBLIC
     AutosaveController.h
     ColorizeDialog.cpp
     ColorizeDialog.h
+    CreatorWindow.cpp
+    CreatorWindow.h
     Definitions.h
     DisplaySettingsDialog.cpp
     DisplaySettingsDialog.h

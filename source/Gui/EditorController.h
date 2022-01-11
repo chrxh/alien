@@ -17,6 +17,7 @@ public:
 
     SelectionWindow getSelectionWindow() const;
     ManipulatorWindow getManipulatorWindow() const;
+    CreatorWindow getCreatorWindow() const;
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
@@ -42,6 +43,7 @@ private:
     EditorModel _editorModel;
     SelectionWindow _selectionWindow;
     ManipulatorWindow _manipulatorWindow;
+    CreatorWindow _creatorWindow; 
 
     SimulationController _simController;
     Viewport _viewport;

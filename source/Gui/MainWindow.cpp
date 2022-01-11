@@ -52,6 +52,7 @@
 #include "SelectionWindow.h"
 #include "ManipulatorWindow.h"
 #include "WindowController.h"
+#include "CreatorWindow.h"
 
 namespace
 {
@@ -337,6 +338,7 @@ void _MainWindow::processMenubar()
 {
     auto selectionWindow = _editorController->getSelectionWindow();
     auto manipulatorWindow = _editorController->getManipulatorWindow();
+    auto creatorWindow = _editorController->getCreatorWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -402,7 +404,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
-            if (ImGui::MenuItem("Creator", "ALT+C", true)) {
+            if (ImGui::MenuItem("Creator", "ALT+C", creatorWindow->isOn())) {
+                creatorWindow->setOn(!creatorWindow->isOn());
             }
             if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
                 manipulatorWindow->setOn(!manipulatorWindow->isOn());
