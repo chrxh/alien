@@ -752,6 +752,20 @@ void _InspectorWindow::showMuscleTableContent()
     AlienImGui::Text("Output:");
     AlienImGui::Text(formatHex(Enums::MuscleOut::SUCCESS) + ": muscle activity was performed");
     AlienImGui::Text(formatHex(Enums::MuscleOut::LIMIT_REACHED) + ": no activity was performed since distance limit is reached");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Muscle::INPUT));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input:");
+    AlienImGui::Text(formatHex(Enums::MuscleIn::DO_NOTHING) + ": do nothing");
+    AlienImGui::Text(formatHex(Enums::MuscleIn::CONTRACT) + ": contract cell connection and produce impulse");
+    AlienImGui::Text(formatHex(Enums::MuscleIn::CONTRACT_RELAX) + ": contract cell connection");
+    AlienImGui::Text(formatHex(Enums::MuscleIn::EXPAND) + ": expand cell connection and produce impulse");
+    AlienImGui::Text(formatHex(Enums::MuscleIn::EXPAND_RELAX) + ": expand cell connection");
 }
 
 float _InspectorWindow::calcWindowWidth() const
