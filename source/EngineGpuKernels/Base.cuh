@@ -313,7 +313,7 @@ inline void copyToDevice(T* target, T* source, int count = 1)
 }
 
 template <typename T>
-void setValueToDevice(T* target, T value)
+void setValueToDevice(T* target, T const& value)
 {
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, &value, sizeof(T), cudaMemcpyHostToDevice));
 }

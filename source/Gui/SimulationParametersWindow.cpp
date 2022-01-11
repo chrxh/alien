@@ -283,7 +283,7 @@ void _SimulationParametersWindow::processBase(
                 .name("Mutation rate")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(0.005f)
+                .max(0.01f)
                 .format("%.5f")
                 .defaultValue(origSimParameters.spotValues.tokenMutationRate)
                 .tooltip(std::string("Probability that a byte in the token memory is changed per time step.")),
