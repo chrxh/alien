@@ -349,6 +349,9 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             if (cell.cellFeature.getType() == Enums::CellFunction::CONSTRUCTOR) {
                 showConstructionTableContent();
             }
+            if (cell.cellFeature.getType() == Enums::CellFunction::MUSCLE) {
+                showMuscleTableContent();
+            }
             ImGui::EndTable();
         }
 
@@ -590,7 +593,6 @@ void _InspectorWindow::showDigestionTableContent()
     AlienImGui::Text("Output:");
     AlienImGui::Text(formatHex(Enums::DigestionOut::NO_TARGET) + ": no target cell found");
     AlienImGui::Text(formatHex(Enums::DigestionOut::STRIKE_SUCCESSFUL) + ": target cell found");
-    ImGui::Spacing();
 }
 
 void _InspectorWindow::showConstructionTableContent()
@@ -739,6 +741,17 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input:");
     AlienImGui::Text("internal data of constructed cell\n(e.g. cell code and cell memory");
+}
+
+void _InspectorWindow::showMuscleTableContent()
+{
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Muscle::OUTPUT));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output:");
+    AlienImGui::Text(formatHex(Enums::MuscleOut::SUCCESS) + ": muscle activity was performed");
+    AlienImGui::Text(formatHex(Enums::MuscleOut::LIMIT_REACHED) + ": no activity was performed since distance limit is reached");
 }
 
 float _InspectorWindow::calcWindowWidth() const

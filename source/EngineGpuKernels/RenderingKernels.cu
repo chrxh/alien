@@ -153,6 +153,20 @@ namespace
             drawDot(imageData, imageSize, pos + float2{0, -1}, color);
         }
     }
+
+    __device__ __inline__ void
+    drawLine(float2 const& start, float2 const& end, float3 const& color, uint64_t* imageData, int2 imageSize, float pixelDistance = 1.5f)
+    {
+        float dist = Math::length(end - start);
+        float2 const v = {static_cast<float>(end.x - start.x) / dist * pixelDistance, static_cast<float>(end.y - start.y) / dist * pixelDistance};
+        float2 pos = start;
+
+        for (float d = 0; d <= dist; d += pixelDistance) {
+            auto const intPos = toInt2(pos);
+            drawDot(imageData, imageSize, pos, color);
+            pos = pos + v;
+        }
+    }
 }
 
 /************************************************************************/
@@ -225,25 +239,58 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             auto color = calcColor(cell, cell->selected);
             auto radius = 1 == cell->selected ? zoom / 2 : zoom / 3;
             drawCircle(imageData, imageSize, cellImagePos, color, radius, true);
+            color = color * min((zoom - 1.0f) / 3, 1.0f);
 
-            if (zoom > 1 - FP_PRECISION) {
-                color = color * min((zoom - 1.0f) / 3, 1.0f);
+            //draw connection lines
+            if (zoom >= 1.0f) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
                     auto topologyCorrection = map.correctionIncrement(cellPos, otherCellPos);
                     if (Math::lengthSquared(topologyCorrection) < FP_PRECISION) {
                         auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                        float dist = Math::length(otherCellImagePos - cellImagePos);
-                        float2 const v = {
-                            static_cast<float>(otherCellImagePos.x - cellImagePos.x) / dist * 1.8f,
-                            static_cast<float>(otherCellImagePos.y - cellImagePos.y) / dist * 1.8f};
-                        float2 pos = cellImagePos;
+                        drawLine(cellImagePos, otherCellImagePos, color, imageData, imageSize);
+                    }
+                }
+            }
 
-                        for (float d = 0; d <= dist; d += 1.8f) {
-                            auto const intPos = toInt2(pos);
-                            drawDot(imageData, imageSize, pos, color);
-                            pos = pos + v;
+            //draw arrows
+            if (zoom >= 5.0f) {
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    auto const otherCell = cell->connections[i].cell;
+                    auto const otherCellPos = otherCell->absPos;
+                    auto topologyCorrection = map.correctionIncrement(cellPos, otherCellPos);
+                    if (Math::lengthSquared(topologyCorrection) > FP_PRECISION) {
+                        continue;
+                    }
+                    if ((cell->branchNumber + 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
+                        auto const arrowEnd =
+                            mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos + Math::normalized(cellPos - otherCellPos) / 3, zoom);
+                        auto direction = Math::normalized(arrowEnd - cellImagePos);
+                        {
+                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
+                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                        }
+                        {
+                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
+                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                        }
+                    }
+                    if ((cell->branchNumber - 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
+                        auto const arrowEnd = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, zoom);
+                        auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
+                        auto direction = Math::normalized(arrowEnd - otherCellImagePos);
+                        {
+                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
+                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                        }
+                        {
+                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
+                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
                         }
                     }
                 }
