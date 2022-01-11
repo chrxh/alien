@@ -162,7 +162,6 @@ namespace
         float2 pos = start;
 
         for (float d = 0; d <= dist; d += pixelDistance) {
-            auto const intPos = toInt2(pos);
             drawDot(imageData, imageSize, pos, color);
             pos = pos + v;
         }
