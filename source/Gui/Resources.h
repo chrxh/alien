@@ -4,7 +4,7 @@ namespace Const
 {
     std::string const ProgramVersion = "3 preview";
 
-    std::string const BasePath = "Resources/";
+    std::string const BasePath = "resources/";
 
     auto const LogFilename = "log.txt";
     auto const AutosaveFile = BasePath + "autosave.sim";
