@@ -42,7 +42,7 @@ The development is driven by the desire to better understand the conditions for 
 * [Reddit](https://www.reddit.com/r/AlienProject)
 
 ## Minimal system requirements
-An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
+An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 ## How to build the sources
 The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
