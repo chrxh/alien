@@ -255,7 +255,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             }
 
             //draw arrows
-            if (zoom >= 5.0f) {
+            if (zoom >= 15.0f) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
@@ -270,12 +270,12 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                         {
                             float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
                             arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
                         }
                         {
                             float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
                             arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
                         }
                     }
                     if ((cell->branchNumber - 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
@@ -285,12 +285,12 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                         {
                             float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
                             arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
                         }
                         {
                             float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
                             arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
                         }
                     }
                 }
