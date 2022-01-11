@@ -24,7 +24,7 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         if (entityArray.at(index) != nullptr) {
-            atomicAdd_block(&numEntities, 1);
+            atomicAdd(&numEntities, 1);
         }
     }
     __syncthreads();

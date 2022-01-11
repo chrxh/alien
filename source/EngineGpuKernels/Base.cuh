@@ -193,31 +193,6 @@ __device__ __inline__  T* atomicExch_block(T** address, T* value)
 }
 */
 
-class BlockLock
-{
-public:
-    __device__ __inline__ void init_block()
-    {
-        if (0 == threadIdx.x) {
-            lock = 0;
-        }
-        __syncthreads();
-    }
-
-    __device__ __inline__ void getLock()
-    {
-        while (1 == atomicExch_block(&lock, 1)) {
-        }
-    }
-
-    __device__ __inline__ bool tryLock() { return 0 == atomicExch_block(&lock, 1); }
-
-    __device__ __inline__ void releaseLock() { atomicExch_block(&lock, 0); }
-
-private:
-    int lock;  //0 = unlocked, 1 = locked
-};
-
 class SystemLock
 {
 public:

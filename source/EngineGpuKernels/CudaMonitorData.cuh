@@ -65,10 +65,12 @@ public:
     __inline__ __device__ void setNumTokens(int value) { *_numTokens = value; }
 
 
+/*
     __inline__ __device__ void incInternalEnergy(float changeValue)
     {
         atomicAdd(_internalEnergy, static_cast<double>(changeValue));
     }
+*/
 
 private:
     int* _numCells;
