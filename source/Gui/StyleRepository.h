@@ -56,9 +56,9 @@ public:
 
     void init();
 
+    ImFont* getIconFont() const;
     ImFont* getMediumFont() const;
     ImFont* getLargeFont() const;
-    ImFont* getHugeFont() const;
     ImFont* getMonospaceFont() const;
 
     float scaleContent(float value) const;
@@ -67,8 +67,8 @@ private:
     StyleRepository() = default;
 
     float _contentScaleFactor = 1.0f;
+    ImFont* _iconFont = nullptr;
     ImFont* _mediumFont = nullptr;
     ImFont* _largeFont = nullptr;
-    ImFont* _hugeFont = nullptr;
     ImFont* _monospaceFont = nullptr;
 };

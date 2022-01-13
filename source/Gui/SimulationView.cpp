@@ -321,13 +321,13 @@ void _SimulationView::updateImageFromSimulation()
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f});
                     auto fontSize = _viewport->getZoomFactor() / 2;
                     drawList->AddText(
-                        StyleRepository::getInstance().getHugeFont(),
+                        StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x, viewPos.y},
                         Const::BranchNumberOverlayShadowColor,
                         std::to_string(overlayElement.branchNumber).c_str());
                     drawList->AddText(
-                        StyleRepository::getInstance().getHugeFont(),
+                        StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x + 1, viewPos.y + 1},
                         Const::BranchNumberOverlayColor,
