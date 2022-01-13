@@ -62,7 +62,7 @@ void _GpuSettingsDialog::process()
         gpuSettings.NUM_THREADS_PER_BLOCK = std::max(gpuSettings.NUM_THREADS_PER_BLOCK, 1);
 
         ImGui::Text("Total threads");
-        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(
             StringFormatter::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());

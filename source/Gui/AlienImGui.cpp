@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
 
 #include "StyleRepository.h"
 
@@ -399,7 +399,7 @@ void AlienImGui::Group(std::string const& text)
 
 bool AlienImGui::BeginToolbarButton(std::string const& text)
 {
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::getInstance().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
     auto color = Const::ToolbarButtonColor;
     float h, s, v;

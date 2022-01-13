@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "ImguiMemoryEditor/imgui_memory_editor.h"
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
 
 #include "EngineInterface/CellComputationCompiler.h"
 #include "EngineInterface/DescriptionHelper.h"

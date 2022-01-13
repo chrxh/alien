@@ -1,7 +1,7 @@
 #include "GettingStartedWindow.h"
 
 #include <imgui.h>
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
 
 #include "GlobalSettings.h"
 #include "StyleRepository.h"

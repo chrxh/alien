@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringFormatter.h"
 #include "EngineInterface/DescriptionHelper.h"
@@ -49,7 +49,7 @@ void _SpatialControlWindow::process()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::Text("World size");
-        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto worldSize = _simController->getWorldSize();
         ImGui::TextUnformatted(
@@ -58,14 +58,14 @@ void _SpatialControlWindow::process()
         ImGui::PopFont();
 
         ImGui::Text("Zoom factor");
-        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Center position");
-        ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
+        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto centerPos = _viewport->getCenterInWorldPos();
         ImGui::TextUnformatted(

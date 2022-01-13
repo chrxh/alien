@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
 
 #include "EngineInterface/SimulationController.h"
 

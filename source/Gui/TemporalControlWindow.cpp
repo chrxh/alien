@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/Definitions.h"
 #include "Base/StringFormatter.h"
@@ -78,7 +78,7 @@ void _TemporalControlWindow::processTpsInfo()
 {
     ImGui::Text("Time steps per second");
 
-    ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
+    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
     ImGui::TextUnformatted(StringFormatter::format(_simController->getTps(), 1).c_str());
     ImGui::PopStyleColor();
@@ -89,7 +89,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 {
     ImGui::Text("Total time steps");
 
-    ImGui::PushFont(StyleRepository::getInstance().getHugeFont());
+    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();

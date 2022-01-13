@@ -2,7 +2,8 @@
 
 #include <imgui.h>
 
-#include "IconFontCppHeaders/IconsFontAwesome5.h"
+#include "Fonts/IconsFontAwesome5.h"
+#include "Fonts/AlienIconFont.h"
 
 #include "GlobalSettings.h"
 #include "StyleRepository.h"
@@ -25,10 +26,33 @@ void _CreatorWindow::process()
     }
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Creator", &_on)) {
-        if (AlienImGui::BeginToolbarButton(ICON_FA_SHAPES)) {
+        if (AlienImGui::BeginToolbarButton(ICON_FA_SUN)) {
         }
         AlienImGui::EndToolbarButton();
+
+        ImGui::SameLine();
+        if (AlienImGui::BeginToolbarButton(ICON_FA_ATOM)) {
+        }
+        AlienImGui::EndToolbarButton();
+
+        ImGui::SameLine();
+        if (AlienImGui::BeginToolbarButton(ICON_RECTANGLE)) {
+        }
+        AlienImGui::EndToolbarButton();
+
+        ImGui::SameLine();
+        if (AlienImGui::BeginToolbarButton(ICON_HEXAGON)) {
+        }
+        AlienImGui::EndToolbarButton();
+
+        ImGui::SameLine();
+        if (AlienImGui::BeginToolbarButton(ICON_DISC)) {
+        }
+        AlienImGui::EndToolbarButton();
+
         AlienImGui::Group("General properties");
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f"), _energy);
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1), _distance);
     }
     ImGui::End();
 }
