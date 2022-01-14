@@ -7,6 +7,7 @@
 #include "StyleRepository.h"
 #include "SimpleLogger.h"
 #include "GlobalSettings.h"
+#include "AlienImGui.h"
 
 _LogWindow::_LogWindow(SimpleLogger const& logger)
     : _logger(logger)
@@ -49,7 +50,7 @@ void _LogWindow::process()
         
         ImGui::Spacing();
         ImGui::Spacing();
-        ImGui::Checkbox("Verbose", &_verbose);
+        AlienImGui::ToggleButton("Verbose", _verbose);
     }
     ImGui::End();
 }

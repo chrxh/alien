@@ -114,7 +114,7 @@ void _GettingStartedWindow::process()
         ImGui::EndChild();
         
         AlienImGui::Separator();
-        ImGui::Checkbox("Show after startup", &_showAfterStartup);
+        AlienImGui::ToggleButton("Show after startup", _showAfterStartup);
 
     }
     ImGui::End();

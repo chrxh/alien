@@ -38,7 +38,7 @@ void _FlowGeneratorWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Flow generator", &_on, ImGuiWindowFlags_None);
 
-    ImGui::Checkbox("##", &flowFieldSettings.active);
+    AlienImGui::ToggleButton(" ", flowFieldSettings.active);
     ImGui::SameLine();
     
     const char* flowTypes[] = {"Radial flow"};

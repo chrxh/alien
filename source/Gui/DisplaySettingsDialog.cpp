@@ -39,7 +39,7 @@ void _DisplaySettingsDialog::process()
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
         auto isFullscreen = !_windowController->isWindowedMode();
 
-        if(ImGui::Checkbox("Full screen", &isFullscreen)) {
+        if(AlienImGui::ToggleButton("Full screen", isFullscreen)) {
             if (isFullscreen) {
                 setFullscreen(_selectionIndex);
             } else {
