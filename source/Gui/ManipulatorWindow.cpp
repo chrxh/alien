@@ -252,7 +252,7 @@ void _ManipulatorWindow::process()
         ImGui::PopStyleVar();
 
         AlienImGui::Separator();
-        if (ImGui::Checkbox("Roll out to cell clusters", &_includeClusters)) {
+        if (AlienImGui::ToggleButton("Roll out to cell clusters", _includeClusters)) {
             _angle = 0;
             _angularVel = 0;
         }

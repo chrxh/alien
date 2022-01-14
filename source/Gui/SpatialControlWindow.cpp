@@ -164,7 +164,7 @@ void _SpatialControlWindow::processResizeDialog()
 
                 ImGui::EndTable();
             }
-            ImGui::Checkbox("Scale content", &_scaleContent);
+            AlienImGui::ToggleButton("Scale content", _scaleContent);
 
             AlienImGui::Separator();
 

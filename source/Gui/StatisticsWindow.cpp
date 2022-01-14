@@ -61,7 +61,7 @@ void _StatisticsWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::Begin("Statistics", &_on, windowFlags);
 
-    ImGui::Checkbox("Real time", &_live);
+    AlienImGui::ToggleButton("Real time", _live);
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
