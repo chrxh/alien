@@ -94,6 +94,7 @@ public:
         MEMBER_DECLARATION(CheckBoxParameters, bool, defaultValue, false);
     };
     static bool Checkbox(CheckBoxParameters const& parameters, bool& value);
+    static bool ToggleButton(std::string const& text, bool& value);
 
     static void Text(std::string const& text);
 
