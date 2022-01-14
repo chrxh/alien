@@ -13,6 +13,7 @@
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 #include "Viewport.h"
+#include "EditorModel.h"
 
 namespace
 {
@@ -26,8 +27,9 @@ namespace
     auto const MaxContentTextWidth = 170.0f;
 }
 
-_CreatorWindow::_CreatorWindow(SimulationController const& simController, Viewport const& viewport)
-    : _simController(simController)
+_CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
+    : _editorModel(editorModel)
+    , _simController(simController)
     , _viewport(viewport)
 {
     _on = GlobalSettings::getInstance().getBoolState("windows.creator.active", true);
@@ -92,6 +94,10 @@ void _CreatorWindow::process()
             if (_mode == CreationMode::CreateCell) {
                 createCell();
             }
+            if (_mode == CreationMode::CreateParticle) {
+                createParticle();
+            }
+            _editorModel->update();
         }
     }
     ImGui::End();
@@ -109,10 +115,7 @@ void _CreatorWindow::setOn(bool value)
 
 void _CreatorWindow::createCell()
 {
-    auto pos = _viewport->getCenterInWorldPos();
-    pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
-    pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
-    auto cell = CellDescription().setPos(pos).setEnergy(_energy).setMaxConnections(_maxConnections).setTokenBranchNumber(_lastBranchNumber);
+    auto cell = CellDescription().setPos(getRandomPos()).setEnergy(_energy).setMaxConnections(_maxConnections).setTokenBranchNumber(_lastBranchNumber);
     auto cluster = ClusterDescription().addCell(cell);
     auto data = DataDescription().addCluster(cluster);
     _simController->addAndSelectSimulationData(data);
@@ -120,4 +123,19 @@ void _CreatorWindow::createCell()
         auto parameters = _simController->getSimulationParameters();
         _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxTokenBranchNumber;
     }
+}
+
+void _CreatorWindow::createParticle()
+{
+    auto particle = ParticleDescription().setPos(getRandomPos()).setEnergy(_energy);
+    auto data = DataDescription().addParticle(particle);
+    _simController->addAndSelectSimulationData(data);
+}
+
+RealVector2D _CreatorWindow::getRandomPos() const
+{
+    auto result = _viewport->getCenterInWorldPos();
+    result.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    result.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    return result;
 }

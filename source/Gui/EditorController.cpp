@@ -20,7 +20,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _editorModel = std::make_shared<_EditorModel>(_simController);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
     _manipulatorWindow = std::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
-    _creatorWindow = std::make_shared<_CreatorWindow>(_simController, _viewport);
+    _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
 }
 
 bool _EditorController::isOn() const
