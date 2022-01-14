@@ -22,6 +22,8 @@ namespace
         {CreationMode::CreateRect, "Create rectangular cell cluster"},
         {CreationMode::CreateHexagon, "Create hexagonal cell cluster"},
         {CreationMode::CreateDisc, "Create disc-shaped cell cluster"}};
+
+    auto const MaxContentTextWidth = 170.0f;
 }
 
 _CreatorWindow::_CreatorWindow(SimulationController const& simController, Viewport const& viewport)
@@ -73,10 +75,17 @@ void _CreatorWindow::process()
         AlienImGui::EndToolbarButton();
 
         AlienImGui::Group(ModeText.at(_mode));
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f"), _energy);
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
+
+        if (_mode == CreationMode::CreateCell) {
+            auto parameters = _simController->getSimulationParameters();
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
+            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Increase branch number").textWidth(MaxContentTextWidth), _increaseBranchNumber);
+        }
 
         if (_mode == CreationMode::CreateRect || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc) {
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1), _distance);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _distance);
         }
 
         if (ImGui::Button("Build")) {
@@ -103,8 +112,12 @@ void _CreatorWindow::createCell()
     auto pos = _viewport->getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
-    auto cell = CellDescription().setPos(pos).setEnergy(_energy);
+    auto cell = CellDescription().setPos(pos).setEnergy(_energy).setMaxConnections(_maxConnections).setTokenBranchNumber(_lastBranchNumber);
     auto cluster = ClusterDescription().addCell(cell);
     auto data = DataDescription().addCluster(cluster);
     _simController->addAndSelectSimulationData(data);
+    if (_increaseBranchNumber) {
+        auto parameters = _simController->getSimulationParameters();
+        _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxTokenBranchNumber;
+    }
 }

@@ -31,6 +31,9 @@ private:
 
     float _energy = 100.0f;
     float _distance = 1.0f;
+    int _maxConnections = 1;
+    bool _increaseBranchNumber = true;
+    int _lastBranchNumber = 0;
 
     CreationMode _mode = CreationMode::CreateCell;
 
