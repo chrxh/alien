@@ -1,6 +1,8 @@
 #include "AlienImGui.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
+
 
 #include "Fonts/IconsFontAwesome5.h"
 
@@ -434,4 +436,40 @@ void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(
         toFloat((rgb >> 16) & 0xff) / 255, toFloat((rgb >> 8) & 0xff) / 255, toFloat((rgb & 0xff)) / 255, h, s, v);
+}
+
+bool AlienImGui::ToggleButton(std::string const& text, bool& value)
+{
+    auto origValue = value;
+    ImVec4* colors = ImGui::GetStyle().Colors;
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    float height = ImGui::GetFrameHeight();
+    float width = height * 1.55f;
+    float radius = height * 0.50f*0.8f;
+    height = height * 0.8f;
+
+    ImGui::InvisibleButton(text.c_str(), ImVec2(width, height));
+    if (ImGui::IsItemClicked()) {
+        value = !value;
+    }
+    ImGuiContext& gg = *GImGui;
+    float ANIM_SPEED = 0.085f;
+    if (gg.LastActiveId == gg.CurrentWindow->GetID(text.c_str())) {
+        float t_anim = ImSaturate(gg.LastActiveIdTimer / ANIM_SPEED);
+    }
+    if (ImGui::IsItemHovered()) {
+        draw_list->AddRectFilled(
+            p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(value ? colors[ImGuiCol_ButtonActive] : ImVec4(0.3f, 0.3f, 0.3f, 1.0f)), height * 0.5f);
+    } else {
+        draw_list->AddRectFilled(
+            p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(value ? colors[ImGuiCol_Button] : ImVec4(0.2f, 0.2f, 0.2f, 1.0f)), height * 0.50f);
+    }
+    draw_list->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(200, 200, 200, 255));
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(text.c_str());
+
+    return value != origValue;
 }

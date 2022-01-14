@@ -2,6 +2,15 @@
 
 #include "Definitions.h"
 
+enum class CreationMode
+{
+    CreateParticle,
+    CreateCell,
+    CreateRect,
+    CreateHexagon,
+    CreateDisc
+};
+
 class _CreatorWindow
 {
 public:
@@ -18,4 +27,6 @@ private:
 
     float _energy = 100.0f;
     float _distance = 1.0f;
+
+    CreationMode _mode = CreationMode::CreateCell;
 };
