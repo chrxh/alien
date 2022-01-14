@@ -16,7 +16,7 @@ enum class CreationMode
 class _CreatorWindow
 {
 public:
-    _CreatorWindow(SimulationController const& simController, Viewport const& viewport);
+    _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport);
     ~_CreatorWindow();
 
     void process();
@@ -26,6 +26,9 @@ public:
 
 private:
     void createCell();
+    void createParticle();
+
+    RealVector2D getRandomPos() const;
 
     bool _on = false;
 
@@ -37,6 +40,7 @@ private:
 
     CreationMode _mode = CreationMode::CreateCell;
 
+    EditorModel _editorModel;
     SimulationController _simController;
     Viewport _viewport;
 };
