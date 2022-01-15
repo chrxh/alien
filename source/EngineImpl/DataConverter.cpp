@@ -16,9 +16,9 @@ DataConverter::DataConverter(
 {
 }
 
-DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens) const
+ClusteredDataDescription DataConverter::convertAccessTOtoClusteredDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens) const
 {
-	DataDescription result;
+	ClusteredDataDescription result;
 
     //cells
     std::vector<ClusterDescription> clusters;
@@ -87,6 +87,54 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO con
     return result;
 }
 
+DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens) const
+{
+    DataDescription result;
+
+    //cells
+    std::vector<CellDescription> cells;
+    for (int i = 0; i < *dataTO.numCells; ++i) {
+        cells.emplace_back(createCellDescription(dataTO, i));
+    }
+    result.addCells(cells);
+
+    //tokens
+    for (int i = 0; i < *dataTO.numTokens; ++i) {
+        TokenAccessTO const& token = dataTO.tokens[i];
+
+        std::string data(_parameters.tokenMemorySize, 0);
+        for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
+            data[i] = token.memory[i];
+        }
+        auto cellDescIndex = token.cellIndex;
+        CellDescription& cell = result.cells.at(cellDescIndex);
+        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data).setSequenceNumber(token.sequenceNumber));
+    }
+    //sort tokens by sequence number
+    if (sortTokens == SortTokens::Yes) {
+        for (auto& cell: result.cells) {
+            std::sort(cell.tokens.begin(), cell.tokens.end(), [](TokenDescription const& left, TokenDescription const& right) {
+                return left.sequenceNumber < right.sequenceNumber;
+            });
+        }
+    }
+
+    //particles
+    std::vector<ParticleDescription> particles;
+    for (int i = 0; i < *dataTO.numParticles; ++i) {
+        ParticleAccessTO const& particle = dataTO.particles[i];
+        particles.emplace_back(ParticleDescription()
+                                   .setId(particle.id)
+                                   .setPos({particle.pos.x, particle.pos.y})
+                                   .setVel({particle.vel.x, particle.vel.y})
+                                   .setEnergy(particle.energy)
+                                   .setMetadata(ParticleMetadata().setColor(particle.metadata.color)));
+    }
+    result.addParticles(particles);
+
+    return result;
+}
+
 OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO) const
 {
     OverlayDescription result;
@@ -113,7 +161,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
     return result;
 }
 
-void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const
+void DataConverter::convertClusteredDataDescriptionToAccessTO(DataAccessTO& result, ClusteredDataDescription const& description) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cluster: description.clusters) {
@@ -126,6 +174,22 @@ void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataD
             if (cell.id != 0) {
                 setConnections(result, cell, cellIndexByIds);
             }
+        }
+    }
+    for (auto const& particle : description.particles) {
+        addParticle(result, particle);
+    }
+}
+
+void DataConverter::convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const
+{
+    std::unordered_map<uint64_t, int> cellIndexByIds;
+    for (auto const& cell : description.cells) {
+        addCell(result, cell, cellIndexByIds);
+    }
+    for (auto const& cell : description.cells) {
+        if (cell.id != 0) {
+            setConnections(result, cell, cellIndexByIds);
         }
     }
     for (auto const& particle : description.particles) {

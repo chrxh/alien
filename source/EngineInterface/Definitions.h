@@ -9,6 +9,7 @@
 
 struct SimulationParameters;
 
+struct ClusteredDataDescription;
 struct DataDescription;
 struct ClusterDescription;
 struct CellDescription;

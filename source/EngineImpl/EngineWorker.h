@@ -49,12 +49,15 @@ public:
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 
+    ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
     DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds);
     OverallStatistics getMonitorData() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
+    void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
     void setSimulationData(DataDescription const& dataToUpdate);
     void removeSelectedEntities(bool includeClusters);
     void changeCell(CellDescription const& changedCell);

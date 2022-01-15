@@ -16,9 +16,11 @@ public:
     DataConverter(SimulationParameters const& parameters, GpuSettings const& gpuConstants);
 
     enum class SortTokens {No, Yes};
-    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens = SortTokens::No)
+    ClusteredDataDescription convertAccessTOtoClusteredDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens = SortTokens::No)
         const;
+    DataDescription convertAccessTOtoDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens = SortTokens::No) const;
     OverlayDescription convertAccessTOtoOverlayDescription(DataAccessTO const& dataTO) const;
+    void convertClusteredDataDescriptionToAccessTO(DataAccessTO& result, ClusteredDataDescription const& description) const;
     void convertDataDescriptionToAccessTO(DataAccessTO& result, DataDescription const& description) const;
     void convertCellDescriptionToAccessTO(DataAccessTO& result, CellDescription const& cell) const;
     void convertParticleDescriptionToAccessTO(DataAccessTO& result, ParticleDescription const& particle) const;

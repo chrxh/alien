@@ -23,7 +23,7 @@ void _SaveSimulationDialog::process()
         sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         sim.settings = _simController->getSettings();
         sim.symbolMap = _simController->getSymbolMap();
-        sim.content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+        sim.content = _simController->getClusteredSimulationData({0, 0}, _simController->getWorldSize());
 
         Serializer serializer = std::make_shared<_Serializer>();
         serializer->serializeSimulationToFile(firstFilename.string(), sim);

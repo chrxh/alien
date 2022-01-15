@@ -229,29 +229,29 @@ struct ParticleDescription
     }
 };
 
-struct DataDescription
+struct ClusteredDataDescription
 {
     std::vector<ClusterDescription> clusters;
     std::vector<ParticleDescription> particles;
 
-    ENGINEINTERFACE_EXPORT DataDescription() = default;
-    DataDescription& addClusters(std::vector<ClusterDescription> const& value)
+    ENGINEINTERFACE_EXPORT ClusteredDataDescription() = default;
+    ClusteredDataDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
         clusters.insert(clusters.end(), value.begin(), value.end());
         return *this;
     }
-    DataDescription& addCluster(ClusterDescription const& value)
+    ClusteredDataDescription& addCluster(ClusterDescription const& value)
     {
         addClusters({value});
         return *this;
     }
 
-    DataDescription& addParticles(std::vector<ParticleDescription> const& value)
+    ClusteredDataDescription& addParticles(std::vector<ParticleDescription> const& value)
     {
         particles.insert(particles.end(), value.begin(), value.end());
         return *this;
     }
-    DataDescription& addParticle(ParticleDescription const& value)
+    ClusteredDataDescription& addParticle(ParticleDescription const& value)
     {
         addParticles({value});
         return *this;
@@ -277,6 +277,63 @@ struct DataDescription
     void shift(RealVector2D const& delta);
 };
 
+struct DataDescription
+{
+    std::vector<CellDescription> cells;
+    std::vector<ParticleDescription> particles;
+
+    explicit DataDescription(ClusteredDataDescription const& clusteredData)
+    {
+        for (auto const& cluster : clusteredData.clusters) {
+            addCells(cluster.cells);
+        }
+        particles = clusteredData.particles;
+    }
+
+    ENGINEINTERFACE_EXPORT DataDescription() = default;
+    DataDescription& addCells(std::vector<CellDescription> const& value)
+    {
+        cells.insert(cells.end(), value.begin(), value.end());
+        return *this;
+    }
+    DataDescription& addCell(CellDescription const& value)
+    {
+        addCells({value});
+        return *this;
+    }
+
+    DataDescription& addParticles(std::vector<ParticleDescription> const& value)
+    {
+        particles.insert(particles.end(), value.begin(), value.end());
+        return *this;
+    }
+    DataDescription& addParticle(ParticleDescription const& value)
+    {
+        addParticles({value});
+        return *this;
+    }
+    void clear()
+    {
+        cells.clear();
+        particles.clear();
+    }
+    bool isEmpty() const
+    {
+        if (!cells.empty()) {
+            return false;
+        }
+        if (!particles.empty()) {
+            return false;
+        }
+        return true;
+    }
+    void setCenter(RealVector2D const& center);
+
+    RealVector2D calcCenter() const;
+    void shift(RealVector2D const& delta);
+};
+
+
 
 struct DescriptionNavigator
 {
@@ -288,7 +345,7 @@ struct DescriptionNavigator
     std::map<uint64_t, int> cellIndicesByCellIds;
     std::map<uint64_t, int> particleIndicesByParticleIds;
 
-	void update(DataDescription const& data)
+	void update(ClusteredDataDescription const& data)
 	{
 		cellIds.clear();
 		particleIds.clear();

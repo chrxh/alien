@@ -40,12 +40,14 @@ public:
         IntVector2D const& imageSize,
         double zoom) override;
 
-    ENGINEIMPL_EXPORT DataDescription
-    getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) override;
+    ENGINEIMPL_EXPORT ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) override;
+    ENGINEIMPL_EXPORT DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) override;
+    ENGINEIMPL_EXPORT ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
     ENGINEIMPL_EXPORT DataDescription getSelectedSimulationData(bool includeClusters) override;
     ENGINEIMPL_EXPORT DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds) override;
 
     ENGINEIMPL_EXPORT void addAndSelectSimulationData(DataDescription const& dataToAdd) override;
+    ENGINEIMPL_EXPORT void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) override;
     ENGINEIMPL_EXPORT void setSimulationData(DataDescription const& dataToUpdate) override;
     ENGINEIMPL_EXPORT void removeSelectedEntities(bool includeClusters) override;
     ENGINEIMPL_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters) override;
