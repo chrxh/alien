@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
 
@@ -10,7 +11,8 @@ enum class CreationMode
     CreateCell,
     CreateRectangle,
     CreateHexagon,
-    CreateDisc
+    CreateDisc,
+    Drawing
 };
 
 class _CreatorWindow
@@ -30,8 +32,10 @@ private:
     void createRectangle();
     void createHexagon();
     void createDisc();
+    void drawing();
 
     RealVector2D getRandomPos() const;
+    void incBranchNumber();
 
     bool _on = false;
 
@@ -39,7 +43,7 @@ private:
     float _cellDistance = 1.0f;
     bool _autoMaxConnections = true;
     int _maxConnections = 4;
-    bool _increaseBranchNumber = true;
+    bool _ascendingBranchNumbers = true;
     int _lastBranchNumber = 0;
 
     //rectangle
@@ -52,6 +56,9 @@ private:
     //disc
     float _outerRadius = 10.0f;
     float _innerRadius = 5.0f;
+
+    //paint
+    DataDescription _drawing;
 
     CreationMode _mode = CreationMode::CreateCell;
 

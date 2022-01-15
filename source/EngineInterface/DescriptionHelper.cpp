@@ -70,7 +70,7 @@ namespace
     }
 }
 
-void DescriptionHelper::reconnectCells(DataDescription& data, float maxdistance)
+void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
@@ -83,7 +83,7 @@ void DescriptionHelper::reconnectCells(DataDescription& data, float maxdistance)
 
     std::unordered_map<uint64_t, int> cache;
     for (auto& cell : data.cells) {
-        auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell.pos, maxdistance);
+        auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell.pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
             auto const& nearbyCell = data.cells.at(nearbyCellIndex);
             if (cell.id != nearbyCell.id && cell.connections.size() < cell.maxConnections && nearbyCell.connections.size() < nearbyCell.maxConnections

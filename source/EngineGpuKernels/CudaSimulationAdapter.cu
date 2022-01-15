@@ -354,6 +354,12 @@ void _CudaSimulationAdapter::colorSelectedEntities(unsigned char color, bool inc
     syncAndCheck();
 }
 
+void _CudaSimulationAdapter::reconnectSelectedEntities()
+{
+    _editKernels->reconnectSelectedEntities(_gpuSettings, *_cudaSimulationData);
+    syncAndCheck();
+}
+
 void _CudaSimulationAdapter::setGpuConstants(GpuSettings const& gpuConstants)
 {
     _gpuSettings = gpuConstants;

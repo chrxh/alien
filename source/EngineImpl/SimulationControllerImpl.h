@@ -51,6 +51,7 @@ public:
     ENGINEIMPL_EXPORT void setSimulationData(DataDescription const& dataToUpdate) override;
     ENGINEIMPL_EXPORT void removeSelectedEntities(bool includeClusters) override;
     ENGINEIMPL_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters) override;
+    ENGINEIMPL_EXPORT void reconnectSelectedEntities() override;
     ENGINEIMPL_EXPORT void changeCell(CellDescription const& changedCell) override;
     ENGINEIMPL_EXPORT void changeParticle(ParticleDescription const& changedParticle) override;
 

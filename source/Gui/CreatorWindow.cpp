@@ -27,7 +27,9 @@ namespace
         {CreationMode::CreateCell, "Create single cell"},
         {CreationMode::CreateRectangle, "Create rectangular cell cluster"},
         {CreationMode::CreateHexagon, "Create hexagonal cell cluster"},
-        {CreationMode::CreateDisc, "Create disc-shaped cell cluster"}};
+        {CreationMode::CreateDisc, "Create disc-shaped cell cluster"},
+        {CreationMode::Drawing, "Draw freehand cell cluster"},
+    };
 
     auto const MaxContentTextWidth = 170.0f;
 }
@@ -48,8 +50,10 @@ _CreatorWindow::~_CreatorWindow()
 void _CreatorWindow::process()
 {
     if (!_on) {
+        _editorModel->setDrawMode(false);
         return;
     }
+
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin("Creator", &_on)) {
         if (AlienImGui::BeginToolbarButton(ICON_FA_SUN)) {
@@ -81,6 +85,12 @@ void _CreatorWindow::process()
         }
         AlienImGui::EndToolbarButton();
 
+        ImGui::SameLine();
+        if (AlienImGui::BeginToolbarButton(ICON_FA_PAINT_BRUSH)) {
+            _mode = CreationMode::Drawing;
+        }
+        AlienImGui::EndToolbarButton();
+
         AlienImGui::Group(ModeText.at(_mode));
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
 
@@ -88,9 +98,8 @@ void _CreatorWindow::process()
         if (_mode == CreationMode::CreateCell) {
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _increaseBranchNumber);
+            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
         }
-
         if (_mode == CreationMode::CreateRectangle) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
@@ -100,10 +109,11 @@ void _CreatorWindow::process()
         }
         if (_mode == CreationMode::CreateDisc) {
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Innter radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
         }
 
-        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc) {
+        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
+            || _mode == CreationMode::Drawing) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
             AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Auto connections").textWidth(MaxContentTextWidth), _autoMaxConnections);
@@ -112,27 +122,42 @@ void _CreatorWindow::process()
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
             ImGui::EndDisabled();
         }
+        if (_mode == CreationMode::Drawing) {
+            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+        }
 
-        if (ImGui::Button("Build")) {
-            if (_mode == CreationMode::CreateCell) {
-                createCell();
+        if (_mode == CreationMode::Drawing) {
+            auto text = _editorModel->isDrawMode() ? "End paint" : "Start paint";
+            if (ImGui::Button(text)) {
+                _editorModel->setDrawMode(!_editorModel->isDrawMode());
             }
-            if (_mode == CreationMode::CreateParticle) {
-                createParticle();
+        } else {
+            _editorModel->setDrawMode(false);
+            if (ImGui::Button("Build")) {
+                if (_mode == CreationMode::CreateCell) {
+                    createCell();
+                }
+                if (_mode == CreationMode::CreateParticle) {
+                    createParticle();
+                }
+                if (_mode == CreationMode::CreateRectangle) {
+                    createRectangle();
+                }
+                if (_mode == CreationMode::CreateHexagon) {
+                    createHexagon();
+                }
+                if (_mode == CreationMode::CreateDisc) {
+                    createDisc();
+                }
+                _editorModel->update();
             }
-            if (_mode == CreationMode::CreateRectangle) {
-                createRectangle();
-            }
-            if (_mode == CreationMode::CreateHexagon) {
-                createHexagon();
-            }
-            if (_mode == CreationMode::CreateDisc) {
-                createDisc();
-            }
-            _editorModel->update();
         }
     }
     ImGui::End();
+
+    if (_editorModel->isDrawMode()) {
+        drawing();
+    }
 }
 
 bool _CreatorWindow::isOn() const
@@ -150,10 +175,7 @@ void _CreatorWindow::createCell()
     auto cell = CellDescription().setPos(getRandomPos()).setEnergy(_energy).setMaxConnections(_maxConnections).setTokenBranchNumber(_lastBranchNumber);
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
-    if (_increaseBranchNumber) {
-        auto parameters = _simController->getSimulationParameters();
-        _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxTokenBranchNumber;
-    }
+    incBranchNumber();
 }
 
 void _CreatorWindow::createParticle()
@@ -270,10 +292,75 @@ void _CreatorWindow::createDisc()
     _simController->addAndSelectSimulationData(data);
 }
 
+void _CreatorWindow::drawing()
+{
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+            auto mousePos = ImGui::GetMousePos();
+            auto pos = _viewport->mapViewToWorldPosition({mousePos.x, mousePos.y});
+            if (!_drawing.isEmpty()) {
+                _simController->removeSelectedEntities(false);
+            }
+
+            auto parameters = _simController->getSimulationParameters();
+            auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+
+            if (_drawing.isEmpty()) {
+                auto cell = CellDescription()
+                                .setId(NumberGenerator::getInstance().getId())
+                                .setPos(pos)
+                                .setEnergy(_energy)
+                                .setMaxConnections(maxConnections)
+                                .setTokenBranchNumber(_lastBranchNumber);
+                _drawing.addCell(cell);
+                incBranchNumber();
+            } else {
+                auto lastCellPos = _drawing.cells.back().pos;
+                auto distance = Math::length(pos - lastCellPos);
+                if (Math::length(pos - lastCellPos) >= _cellDistance) {
+                    for (float l = _cellDistance; l <= distance; l += _cellDistance) {
+                        auto cell = CellDescription()
+                                        .setId(NumberGenerator::getInstance().getId())
+                                        .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
+                                        .setEnergy(_energy)
+                                        .setMaxConnections(maxConnections)
+                                        .setTokenBranchNumber(_lastBranchNumber);
+                        _drawing.addCell(cell);
+                        incBranchNumber();
+                    }
+                }
+            }
+            DescriptionHelper::reconnectCells(_drawing, _cellDistance * 1.1f);
+            if (_autoMaxConnections) {
+                auto origDrawing = _drawing;
+                DescriptionHelper::removeStickiness(_drawing);
+                _simController->addAndSelectSimulationData(_drawing);
+                _drawing = origDrawing;
+            } else {
+                _simController->addAndSelectSimulationData(_drawing);
+            }
+
+            _simController->reconnectSelectedEntities();
+            _editorModel->update();
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            _drawing.clear();
+        }
+    }
+}
+
 RealVector2D _CreatorWindow::getRandomPos() const
 {
     auto result = _viewport->getCenterInWorldPos();
     result.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     result.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     return result;
+}
+
+void _CreatorWindow::incBranchNumber()
+{
+    if (_ascendingBranchNumbers) {
+        auto parameters = _simController->getSimulationParameters();
+        _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxTokenBranchNumber;
+    }
 }

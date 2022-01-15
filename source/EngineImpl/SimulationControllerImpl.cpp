@@ -103,6 +103,11 @@ void _SimulationControllerImpl::colorSelectedEntities(unsigned char color, bool 
     _worker.colorSelectedEntities(color, includeClusters);
 }
 
+void _SimulationControllerImpl::reconnectSelectedEntities()
+{
+    _worker.reconnectSelectedEntities();
+}
+
 void _SimulationControllerImpl::changeCell(CellDescription const& changedCell)
 {
     _worker.changeCell(changedCell);

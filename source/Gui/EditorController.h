@@ -39,6 +39,8 @@ private:
     void rightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
     void rightMouseButtonReleased();
 
+    void drawing();
+
 private:
     EditorModel _editorModel;
     SelectionWindow _selectionWindow;
@@ -58,6 +60,6 @@ private:
         RealVector2D endPos;
     };
     std::optional<SelectionRect> _selectionRect;
-
     std::vector<InspectorWindow> _inspectorWindows;
+    DataDescription _drawing;
 };
