@@ -29,6 +29,7 @@ private:
     void createParticle();
     void createRectangle();
     void createHexagon();
+    void createDisc();
 
     RealVector2D getRandomPos() const;
 
@@ -47,6 +48,10 @@ private:
 
     //hexagon
     int _layers = 10;
+
+    //disc
+    float _outerRadius = 10.0f;
+    float _innerRadius = 5.0f;
 
     CreationMode _mode = CreationMode::CreateCell;
 

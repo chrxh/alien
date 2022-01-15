@@ -61,6 +61,11 @@ namespace
                 }
             }
         }
+        std::sort(result.begin(), result.end(), [&](int index1, int index2) {
+            auto const& cell1 = data.cells.at(index1);
+            auto const& cell2 = data.cells.at(index2);
+            return Math::length(cell1.pos - pos) < Math::length(cell2.pos - pos);
+        });
         return result;
     }
 }
