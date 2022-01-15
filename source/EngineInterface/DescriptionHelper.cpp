@@ -36,15 +36,46 @@ void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D co
     data = result;
 }
 
-void DescriptionHelper::reconnectCells(std::vector<CellDescription>& cells, float maxdistance)
+namespace
+{
+    std::vector<int> getCellIndicesWithinRadius(
+        DataDescription const& data,
+        std::unordered_map<int, std::unordered_map<int, std::vector<int>>> const& cellIndicesBySlot,
+        RealVector2D const& pos,
+        float radius)
+    {
+        std::vector<int> result;
+        IntVector2D upperLeftIntPos{toInt(pos.x - radius - 0.5f), toInt(pos.y - radius - 0.5f)};
+        IntVector2D lowerRightIntPos{toInt(pos.x + radius + 0.5f), toInt(pos.y + radius + 0.5f)};
+        for (int x = upperLeftIntPos.x; x <= lowerRightIntPos.x; ++x) {
+            for (int y = upperLeftIntPos.y; y <= lowerRightIntPos.y; ++y) {
+                if (cellIndicesBySlot.find(x) != cellIndicesBySlot.end()) {
+                    if (cellIndicesBySlot.at(x).find(y) != cellIndicesBySlot.at(x).end()) {
+                        for (auto const& cellIndex : cellIndicesBySlot.at(x).at(y)) {
+                            auto const& cell = data.cells.at(cellIndex);
+                            if (Math::length(cell.pos - pos) <= radius) {
+                                result.emplace_back(cellIndex);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
+
+void DescriptionHelper::reconnectCells(DataDescription& data, float maxdistance)
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
-    for (auto& [index, cell] : cells | boost::adaptors::indexed(0)) {
+    int index = 0;
+    for (auto& cell : data.cells) {
         cell.connections.clear();
         cellIndicesBySlot[toInt(cell.pos.x)][toInt(cell.pos.y)].emplace_back(toInt(index));
+        ++index;
     }
-    for (auto& cell : cells) {
+    for (auto& cell : data.cells) {
         
     }
 }
