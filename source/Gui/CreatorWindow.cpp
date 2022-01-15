@@ -88,6 +88,14 @@ void _CreatorWindow::process()
             AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _increaseBranchNumber);
         }
 
+        if (_mode == CreationMode::CreateRectangle) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
+        }
+        if (_mode == CreationMode::CreateHexagon) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
+        }
+
         if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
@@ -96,8 +104,6 @@ void _CreatorWindow::process()
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
             ImGui::EndDisabled();
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
         }
 
         if (ImGui::Button("Build")) {
@@ -109,6 +115,9 @@ void _CreatorWindow::process()
             }
             if (_mode == CreationMode::CreateRectangle) {
                 createRectangle();
+            }
+            if (_mode == CreationMode::CreateHexagon) {
+                createHexagon();
             }
             _editorModel->update();
         }
@@ -163,6 +172,45 @@ void _CreatorWindow::createRectangle()
     }
     DescriptionHelper::reconnectCells(data, _cellDistance * 1.1f);
     if(_autoMaxConnections) {
+        DescriptionHelper::removeStickiness(data);
+    }
+    data.setCenter(getRandomPos());
+    _simController->addAndSelectSimulationData(data);
+}
+
+void _CreatorWindow::createHexagon()
+{
+    if (_layers <= 0) {
+        return;
+    }
+    DataDescription data;
+    auto parameters = _simController->getSimulationParameters();
+    auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+
+    auto incY = std::sqrt(3.0) * _cellDistance / 2.0;
+    for (int j = 0; j < _layers; ++j) {
+        for (int i = -(_layers - 1); i < _layers - j; ++i) {
+
+            //create cell: upper layer
+            data.addCell(CellDescription()
+                             .setId(NumberGenerator::getInstance().getId())
+                             .setEnergy(_energy)
+                             .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(-j * incY)})
+                             .setMaxConnections(maxConnections));
+
+            //create cell: under layer (except for 0-layer)
+            if (j > 0) {
+                data.addCell(CellDescription()
+                                 .setId(NumberGenerator::getInstance().getId())
+                                 .setEnergy(_energy)
+                                 .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(j * incY)})
+                                 .setMaxConnections(maxConnections));
+
+            }
+        }
+    }
+    DescriptionHelper::reconnectCells(data, _cellDistance * 1.5f);
+    if (_autoMaxConnections) {
         DescriptionHelper::removeStickiness(data);
     }
     data.setCenter(getRandomPos());

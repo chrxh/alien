@@ -28,6 +28,7 @@ private:
     void createCell();
     void createParticle();
     void createRectangle();
+    void createHexagon();
 
     RealVector2D getRandomPos() const;
 
@@ -36,13 +37,16 @@ private:
     float _energy = 100.0f;
     float _cellDistance = 1.0f;
     bool _autoMaxConnections = true;
-    int _maxConnections = 1;
+    int _maxConnections = 4;
     bool _increaseBranchNumber = true;
     int _lastBranchNumber = 0;
 
     //rectangle
     int _rectHorizontalCells = 10;
     int _rectVerticalCells = 10;
+
+    //hexagon
+    int _layers = 10;
 
     CreationMode _mode = CreationMode::CreateCell;
 
