@@ -1,12 +1,14 @@
 #include "DescriptionHelper.h"
 
+#include <boost/range/adaptor/indexed.hpp>
+
 #include "Base/NumberGenerator.h"
 #include "Base/Math.h"
 #include "SpaceCalculator.h"
 
-void DescriptionHelper::duplicate(DataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
+void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
-    DataDescription result;
+    ClusteredDataDescription result;
 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
@@ -34,7 +36,20 @@ void DescriptionHelper::duplicate(DataDescription& data, IntVector2D const& orig
     data = result;
 }
 
-void DescriptionHelper::correctConnections(DataDescription& data, IntVector2D const& worldSize)
+void DescriptionHelper::reconnectCells(std::vector<CellDescription>& cells, float maxdistance)
+{
+    std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
+
+    for (auto& [index, cell] : cells | boost::adaptors::indexed(0)) {
+        cell.connections.clear();
+        cellIndicesBySlot[toInt(cell.pos.x)][toInt(cell.pos.y)].emplace_back(toInt(index));
+    }
+    for (auto& cell : cells) {
+        
+    }
+}
+
+void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize)
 {
 //     SpaceCalculator spaceCalculator(worldSize);
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
@@ -63,7 +78,7 @@ void DescriptionHelper::correctConnections(DataDescription& data, IntVector2D co
     }
 }
 
-void DescriptionHelper::colorize(DataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionHelper::colorize(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
         auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
@@ -114,10 +129,8 @@ std::vector<CellOrParticleDescription> DescriptionHelper::getEntities(
     for (auto const& particle : data.particles) {
         result.emplace_back(particle);
     }
-    for (auto const& cluster : data.clusters) {
-        for (auto const& cell : cluster.cells) {
-            result.emplace_back(cell);
-        }
+    for (auto const& cell : data.cells) {
+        result.emplace_back(cell);
     }
     return result;
 }

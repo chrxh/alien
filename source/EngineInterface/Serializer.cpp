@@ -94,7 +94,7 @@ namespace cereal
         ar(data.id, data.pos, data.vel, data.energy, data.metadata);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, DataDescription& data)
+    inline void serialize(Archive& ar, ClusteredDataDescription& data)
     {
         ar(data.clusters, data.particles);
     }
@@ -181,7 +181,7 @@ bool _Serializer::deserializeSimulationFromFile(std::string const& filename, Des
     }
 }
 
-bool _Serializer::serializeContentToFile(std::string const& filename, DataDescription const& content)
+bool _Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
         std::ofstream stream(filename, std::ios::binary);
@@ -196,7 +196,7 @@ bool _Serializer::serializeContentToFile(std::string const& filename, DataDescri
     }
 }
 
-bool _Serializer::deserializeContentFromFile(std::string const& filename, DataDescription& content)
+bool _Serializer::deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content)
 {
     try {
         std::ifstream stream(filename, std::ios::binary);
@@ -211,7 +211,7 @@ bool _Serializer::deserializeContentFromFile(std::string const& filename, DataDe
     }
 }
 
-void _Serializer::serializeDataDescription(DataDescription const& data, std::ostream& stream) const
+void _Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(data);
@@ -233,7 +233,7 @@ void _Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stre
     boost::property_tree::json_parser::write_json(stream, tree);
 }
 
-void _Serializer::deserializeDataDescription(DataDescription& data, std::istream& stream) const
+void _Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     archive(data);

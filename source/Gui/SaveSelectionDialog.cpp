@@ -18,7 +18,7 @@ void _SaveSelectionDialog::process()
         const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
         auto firstFilename = res.front();
 
-        auto content = _simController->getSelectedSimulationData(_includeClusters);
+        auto content = _simController->getSelectedClusteredSimulationData(_includeClusters);
 
         Serializer serializer = std::make_shared<_Serializer>();
         serializer->serializeContentToFile(firstFilename.string(), content);

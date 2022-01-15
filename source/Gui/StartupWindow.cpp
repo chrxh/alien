@@ -44,7 +44,7 @@ void _StartupWindow::process()
         serializer->deserializeSimulationFromFile(Const::AutosaveFile, deserializedData);
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
-        _simController->setSimulationData(deserializedData.content);
+        _simController->setClusteredSimulationData(deserializedData.content);
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});

@@ -193,7 +193,7 @@ void _SpatialControlWindow::onResizing()
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     auto settings = _simController->getSettings();
     auto symbolMap = _simController->getSymbolMap();
-    auto content = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+    auto content = _simController->getClusteredSimulationData({0, 0}, _simController->getWorldSize());
 
     _simController->closeSimulation();
 
@@ -207,5 +207,5 @@ void _SpatialControlWindow::onResizing()
     if (_scaleContent) {
         DescriptionHelper::duplicate(content, origWorldSize, {_width, _height});
     }
-    _simController->setSimulationData(content);
+    _simController->setClusteredSimulationData(content);
 }

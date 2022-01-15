@@ -50,9 +50,19 @@ std::optional<OverlayDescription> _SimulationControllerImpl::tryDrawVectorGraphi
     return _worker.tryDrawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
+ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+{
+    return _worker.getClusteredSimulationData(rectUpperLeft, rectLowerRight);
+}
+
 DataDescription _SimulationControllerImpl::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
+}
+
+ClusteredDataDescription _SimulationControllerImpl::getSelectedClusteredSimulationData(bool includeClusters)
+{
+    return _worker.getSelectedClusteredSimulationData(includeClusters);
 }
 
 DataDescription _SimulationControllerImpl::getSelectedSimulationData(bool includeClusters)
@@ -68,6 +78,12 @@ DataDescription _SimulationControllerImpl::getInspectedSimulationData(std::vecto
 void _SimulationControllerImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
 {
     _worker.addAndSelectSimulationData(dataToAdd);
+}
+
+void _SimulationControllerImpl::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
+{
+    _worker.setClusteredSimulationData(dataToUpdate);
+    _selectionNeedsUpdate = true;
 }
 
 void _SimulationControllerImpl::setSimulationData(DataDescription const& dataToUpdate)

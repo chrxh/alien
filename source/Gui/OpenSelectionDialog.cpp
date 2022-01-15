@@ -29,11 +29,11 @@ void _OpenSelectionDialog::process()
 
         Serializer serializer = std::make_shared<_Serializer>();
 
-        DataDescription content;
+        ClusteredDataDescription content;
         if (serializer->deserializeContentFromFile(firstFilename.string(), content)) {
             auto center = _viewport->getCenterInWorldPos();
             content.setCenter(center);
-            _simController->addAndSelectSimulationData(content);
+            _simController->addAndSelectSimulationData(DataDescription(content));
             _editorModel->update();
         }
     }

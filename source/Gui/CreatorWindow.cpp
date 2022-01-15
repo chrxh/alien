@@ -116,8 +116,7 @@ void _CreatorWindow::setOn(bool value)
 void _CreatorWindow::createCell()
 {
     auto cell = CellDescription().setPos(getRandomPos()).setEnergy(_energy).setMaxConnections(_maxConnections).setTokenBranchNumber(_lastBranchNumber);
-    auto cluster = ClusterDescription().addCell(cell);
-    auto data = DataDescription().addCluster(cluster);
+    auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
     if (_increaseBranchNumber) {
         auto parameters = _simController->getSimulationParameters();

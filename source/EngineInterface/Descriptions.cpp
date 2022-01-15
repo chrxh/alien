@@ -147,14 +147,14 @@ CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::uno
     THROW_NOT_IMPLEMENTED();
 }
 
-void DataDescription::setCenter(RealVector2D const& center)
+void ClusteredDataDescription::setCenter(RealVector2D const& center)
 {
     auto origCenter = calcCenter();
     auto delta = center - origCenter;
     shift(delta);
 }
 
-RealVector2D DataDescription::calcCenter() const
+RealVector2D ClusteredDataDescription::calcCenter() const
 {
     RealVector2D result;
     int numEntities = 0;
@@ -172,12 +172,43 @@ RealVector2D DataDescription::calcCenter() const
     return result;
 }
 
-void DataDescription::shift(RealVector2D const& delta)
+void ClusteredDataDescription::shift(RealVector2D const& delta)
 {
     for (auto& cluster : clusters) {
         for (auto& cell : cluster.cells) {
             cell.pos += delta;
         }
+    }
+    for (auto& particle : particles) {
+        particle.pos += delta;
+    }
+}
+
+void DataDescription::setCenter(RealVector2D const& center)
+{
+    auto origCenter = calcCenter();
+    auto delta = center - origCenter;
+    shift(delta);
+}
+
+RealVector2D DataDescription::calcCenter() const
+{
+    RealVector2D result;
+    auto numEntities = cells.size() + particles.size();
+    for (auto const& cell : cells) {
+        result += cell.pos;
+    }
+    for (auto const& particle : particles) {
+        result += particle.pos;
+    }
+    result /= numEntities;
+    return result;
+}
+
+void DataDescription::shift(RealVector2D const& delta)
+{
+    for (auto& cell : cells) {
+        cell.pos += delta;
     }
     for (auto& particle : particles) {
         particle.pos += delta;
