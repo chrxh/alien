@@ -75,8 +75,24 @@ void DescriptionHelper::reconnectCells(DataDescription& data, float maxdistance)
         cellIndicesBySlot[toInt(cell.pos.x)][toInt(cell.pos.y)].emplace_back(toInt(index));
         ++index;
     }
+
+    std::unordered_map<uint64_t, int> cache;
     for (auto& cell : data.cells) {
-        
+        auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell.pos, maxdistance);
+        for (auto const& nearbyCellIndex : nearbyCellIndices) {
+            auto const& nearbyCell = data.cells.at(nearbyCellIndex);
+            if (cell.id != nearbyCell.id && cell.connections.size() < cell.maxConnections && nearbyCell.connections.size() < nearbyCell.maxConnections
+                && !cell.isConnectedTo(nearbyCell.id)) {
+                data.addConnection(cell.id, nearbyCell.id, cache);
+            }
+        }
+    }
+}
+
+void DescriptionHelper::removeStickiness(DataDescription& data)
+{
+    for (auto& cell : data.cells) {
+        cell.maxConnections = toInt(cell.connections.size());
     }
 }
 

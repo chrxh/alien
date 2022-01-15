@@ -8,7 +8,7 @@ enum class CreationMode
 {
     CreateParticle,
     CreateCell,
-    CreateRect,
+    CreateRectangle,
     CreateHexagon,
     CreateDisc
 };
@@ -27,16 +27,22 @@ public:
 private:
     void createCell();
     void createParticle();
+    void createRectangle();
 
     RealVector2D getRandomPos() const;
 
     bool _on = false;
 
     float _energy = 100.0f;
-    float _distance = 1.0f;
+    float _cellDistance = 1.0f;
+    bool _autoMaxConnections = true;
     int _maxConnections = 1;
     bool _increaseBranchNumber = true;
     int _lastBranchNumber = 0;
+
+    //rectangle
+    int _rectHorizontalCells = 10;
+    int _rectVerticalCells = 10;
 
     CreationMode _mode = CreationMode::CreateCell;
 

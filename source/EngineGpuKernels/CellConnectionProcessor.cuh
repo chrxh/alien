@@ -204,6 +204,12 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
             addConnectionIntern(data, cell1, cell2, posDelta, Math::length(posDelta));
             addConnectionIntern(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
 
+/*
+            //align connections
+            addConnectionIntern(data, cell1, cell2, posDelta, 1, 0, 6);
+            addConnectionIntern(data, cell2, cell1, posDelta * (-1), 1, 0, 6);
+*/
+
             if (addTokens) {
                 EntityFactory factory;
                 factory.init(&data);

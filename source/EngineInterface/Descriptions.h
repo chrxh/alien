@@ -92,7 +92,7 @@ struct CellDescription
     std::vector<TokenDescription> tokens;
     int tokenUsages;
 
-    ENGINEINTERFACE_EXPORT CellDescription() = default;
+    CellDescription() = default;
     CellDescription& setId(uint64_t value)
     {
         id = value;
@@ -148,15 +148,15 @@ struct CellDescription
         tokens = value;
         return *this;
     }
-    ENGINEINTERFACE_EXPORT CellDescription& addToken(TokenDescription const& value);
-    ENGINEINTERFACE_EXPORT CellDescription& addToken(int index, TokenDescription const& value);
-    ENGINEINTERFACE_EXPORT CellDescription& delToken(int index);
+    CellDescription& addToken(TokenDescription const& value);
+    CellDescription& addToken(int index, TokenDescription const& value);
+    CellDescription& delToken(int index);
     CellDescription& setTokenUsages(int value)
     {
         tokenUsages = value;
         return *this;
     }
-    ENGINEINTERFACE_EXPORT bool isConnectedTo(uint64_t id) const;
+    bool isConnectedTo(uint64_t id) const;
 };
 
 struct ClusterDescription
@@ -165,7 +165,7 @@ struct ClusterDescription
 
     std::vector<CellDescription> cells;
 
-    ENGINEINTERFACE_EXPORT ClusterDescription() = default;
+    ClusterDescription() = default;
 
     ClusterDescription& setId(uint64_t value)
     {
@@ -183,13 +183,7 @@ struct ClusterDescription
         return *this;
     }
 
-    ENGINEINTERFACE_EXPORT ClusterDescription&
-    addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
-
-    ENGINEINTERFACE_EXPORT RealVector2D getClusterPosFromCells() const;
-
-private:
-    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
+    RealVector2D getClusterPosFromCells() const;
 };
 
 struct ParticleDescription
@@ -201,7 +195,7 @@ struct ParticleDescription
     double energy;
     ParticleMetadata metadata;
 
-    ENGINEINTERFACE_EXPORT ParticleDescription() = default;
+    ParticleDescription() = default;
     ParticleDescription& setId(uint64_t value)
     {
         id = value;
@@ -234,7 +228,7 @@ struct ClusteredDataDescription
     std::vector<ClusterDescription> clusters;
     std::vector<ParticleDescription> particles;
 
-    ENGINEINTERFACE_EXPORT ClusteredDataDescription() = default;
+    ClusteredDataDescription() = default;
     ClusteredDataDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
         clusters.insert(clusters.end(), value.begin(), value.end());
@@ -290,7 +284,7 @@ struct DataDescription
         particles = clusteredData.particles;
     }
 
-    ENGINEINTERFACE_EXPORT DataDescription() = default;
+    DataDescription() = default;
     DataDescription& addCells(std::vector<CellDescription> const& value)
     {
         cells.insert(cells.end(), value.begin(), value.end());
@@ -331,6 +325,11 @@ struct DataDescription
 
     RealVector2D calcCenter() const;
     void shift(RealVector2D const& delta);
+
+    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
+
+private:
+    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
 };
 
 

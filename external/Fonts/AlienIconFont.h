@@ -1,8 +1,8 @@
 // File: 'AlienIconFont.ttf' (2924 bytes)
 // Exported using binary_to_compressed_c.cpp
 
-#define ICON_RECTANGLE "\x41"
-#define ICON_HEXAGON "\x42"
+#define ICON_RECTANGLE "\x42"
+#define ICON_HEXAGON "\x41"
 #define ICON_DISC "\x43"
 
 static const unsigned int AlienIconFont_compressed_size = 1587;
