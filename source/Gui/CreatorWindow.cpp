@@ -1,12 +1,15 @@
 #include "CreatorWindow.h"
 
 #include <cstdlib>
+#include <cmath>
+
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
 #include "Fonts/AlienIconFont.h"
 
 #include "Base/NumberGenerator.h"
+#include "Base/Math.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
@@ -95,6 +98,10 @@ void _CreatorWindow::process()
         if (_mode == CreationMode::CreateHexagon) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
         }
+        if (_mode == CreationMode::CreateDisc) {
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Innter radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
+        }
 
         if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc) {
             AlienImGui::InputFloat(
@@ -118,6 +125,9 @@ void _CreatorWindow::process()
             }
             if (_mode == CreationMode::CreateHexagon) {
                 createHexagon();
+            }
+            if (_mode == CreationMode::CreateDisc) {
+                createDisc();
             }
             _editorModel->update();
         }
@@ -158,6 +168,7 @@ void _CreatorWindow::createRectangle()
     if (_rectHorizontalCells <= 0 || _rectVerticalCells <= 0) {
         return;
     }
+
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
     auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
@@ -170,6 +181,7 @@ void _CreatorWindow::createRectangle()
                              .setMaxConnections(maxConnections));
         }
     }
+
     DescriptionHelper::reconnectCells(data, _cellDistance * 1.1f);
     if(_autoMaxConnections) {
         DescriptionHelper::removeStickiness(data);
@@ -183,11 +195,12 @@ void _CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
+
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
     auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
 
-    auto incY = std::sqrt(3.0) * _cellDistance / 2.0;
+    auto incY = sqrt(3.0) * _cellDistance / 2.0;
     for (int j = 0; j < _layers; ++j) {
         for (int i = -(_layers - 1); i < _layers - j; ++i) {
 
@@ -209,7 +222,47 @@ void _CreatorWindow::createHexagon()
             }
         }
     }
+
     DescriptionHelper::reconnectCells(data, _cellDistance * 1.5f);
+    if (_autoMaxConnections) {
+        DescriptionHelper::removeStickiness(data);
+    }
+    data.setCenter(getRandomPos());
+    _simController->addAndSelectSimulationData(data);
+}
+
+void _CreatorWindow::createDisc()
+{
+    if (_innerRadius > _outerRadius || _innerRadius < 0 || _outerRadius <= 0) {
+        return;
+    }
+
+    DataDescription data;
+    auto parameters = _simController->getSimulationParameters();
+    auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+    auto constexpr SmallValue = 0.01f;
+    for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
+        float angleInc =
+            [&] {
+                if (radius > SmallValue) {
+                    auto result = asinf(_cellDistance / (2 * radius)) * 2 * toFloat(radToDeg);
+                    return 360.0f / floorf(360.0f / result);
+                }
+                return 360.0f;
+            }();
+        std::unordered_set<uint64_t> cellIds;
+        for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
+            auto relPos = Math::unitVectorOfAngle(angle) * radius;
+
+            data.addCell(CellDescription()
+                            .setId(NumberGenerator::getInstance().getId())
+                            .setEnergy(_energy)
+                            .setPos(relPos)
+                            .setMaxConnections(maxConnections));
+        }
+    }
+
+    DescriptionHelper::reconnectCells(data, _cellDistance * 1.7f);
     if (_autoMaxConnections) {
         DescriptionHelper::removeStickiness(data);
     }
