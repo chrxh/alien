@@ -32,95 +32,6 @@ bool CellDescription::isConnectedTo(uint64_t id) const
         != connections.end();
 }
 
-ClusterDescription& ClusterDescription::addConnection(
-    uint64_t const& cellId1,
-    uint64_t const& cellId2,
-    std::unordered_map<uint64_t, int>& cache)
-{
-    auto& cell1 = getCellRef(cellId1, cache);
-    auto& cell2 = getCellRef(cellId2, cache);
-
-    auto addConnection = [this, &cache](auto& cell, auto& otherCell) {
-        CHECK(cell.connections.size() < cell.maxConnections);
-
-        auto newAngle = Math::angleOfVector(otherCell.pos - cell.pos);
-
-        if (cell.connections.empty()) {
-            ConnectionDescription newConnection;
-            newConnection.cellId = otherCell.id;
-            newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
-            newConnection.angleFromPrevious = 360.0;
-            cell.connections.emplace_back(newConnection);
-            return;
-        }
-        if (1 == cell.connections.size()) {
-            ConnectionDescription newConnection;
-            newConnection.cellId = otherCell.id;
-            newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
-
-            auto connectedCell = getCellRef(cell.connections.front().cellId, cache);
-            auto connectedCellDelta = connectedCell.pos - cell.pos;
-            auto prevAngle = Math::angleOfVector(connectedCellDelta);
-            auto angleDiff = newAngle - prevAngle;
-            if (angleDiff >= 0) {
-                newConnection.angleFromPrevious = toFloat(angleDiff);
-                cell.connections.begin()->angleFromPrevious = 360.0f - toFloat(angleDiff);
-            } else {
-                newConnection.angleFromPrevious = 360.0f + toFloat(angleDiff);
-                cell.connections.begin()->angleFromPrevious = toFloat(-angleDiff);
-            }
-            cell.connections.emplace_back(newConnection);
-            return;
-        }
-
-        auto firstConnectedCell = getCellRef(cell.connections.front().cellId, cache);
-        auto firstConnectedCellDelta = firstConnectedCell.pos - cell.pos;
-        auto angle = Math::angleOfVector(firstConnectedCellDelta);
-        auto connectionIt = ++cell.connections.begin();
-        while (true) {
-            auto nextAngle = angle + connectionIt->angleFromPrevious;
-
-            if ((angle < newAngle && newAngle <= nextAngle)
-                || (angle < (newAngle + 360.0f) && (newAngle + 360.0f) <= nextAngle)) {
-                break;
-            }
-
-            ++connectionIt;
-            if (connectionIt == cell.connections.end()) {
-                connectionIt = cell.connections.begin();
-            }
-            angle = nextAngle;
-            if (angle > 360.0f) {
-                angle -= 360.0f;
-            }
-        }
-
-        ConnectionDescription newConnection;
-        newConnection.cellId = otherCell.id;
-        newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
-
-        auto angleDiff1 = newAngle - angle;
-        if (angleDiff1 < 0) {
-            angleDiff1 += 360.0f;
-        }
-        auto angleDiff2 = connectionIt->angleFromPrevious;
-
-        auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
-        newConnection.angleFromPrevious = toFloat(angleDiff2 * factor);
-        connectionIt = cell.connections.insert(connectionIt, newConnection);
-        ++connectionIt;
-        if (connectionIt == cell.connections.end()) {
-            connectionIt = cell.connections.begin();
-        }
-        connectionIt->angleFromPrevious = toFloat(angleDiff2 * (1 - factor));
-    };
-
-    addConnection(cell1, cell2);
-    addConnection(cell2, cell1);
-
-    return *this;
-}
-
 RealVector2D ClusterDescription::getClusterPosFromCells() const
 {
     RealVector2D result;
@@ -129,22 +40,6 @@ RealVector2D ClusterDescription::getClusterPosFromCells() const
     }
     result /= cells.size();
     return result;
-}
-
-CellDescription& ClusterDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
-{
-    auto findResult = cache.find(cellId);
-    if (findResult != cache.end()) {
-        return cells.at(findResult->second);
-    }
-    for (int i = 0; i < cells.size(); ++i) {
-        auto& cell = cells.at(i);
-        if (cell.id == cellId) {
-            cache.emplace(cellId, i);
-            return cell;
-        }
-    }
-    THROW_NOT_IMPLEMENTED();
 }
 
 void ClusteredDataDescription::setCenter(RealVector2D const& center)
@@ -213,4 +108,106 @@ void DataDescription::shift(RealVector2D const& delta)
     for (auto& particle : particles) {
         particle.pos += delta;
     }
+}
+
+ENGINEINTERFACE_EXPORT DataDescription&
+DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache)
+{
+    auto& cell1 = getCellRef(cellId1, cache);
+    auto& cell2 = getCellRef(cellId2, cache);
+
+    auto addConnection = [this, &cache](auto& cell, auto& otherCell) {
+        CHECK(cell.connections.size() < cell.maxConnections);
+
+        auto newAngle = Math::angleOfVector(otherCell.pos - cell.pos);
+
+        if (cell.connections.empty()) {
+            ConnectionDescription newConnection;
+            newConnection.cellId = otherCell.id;
+            newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
+            newConnection.angleFromPrevious = 360.0;
+            cell.connections.emplace_back(newConnection);
+            return;
+        }
+        if (1 == cell.connections.size()) {
+            ConnectionDescription newConnection;
+            newConnection.cellId = otherCell.id;
+            newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
+
+            auto connectedCell = getCellRef(cell.connections.front().cellId, cache);
+            auto connectedCellDelta = connectedCell.pos - cell.pos;
+            auto prevAngle = Math::angleOfVector(connectedCellDelta);
+            auto angleDiff = newAngle - prevAngle;
+            if (angleDiff >= 0) {
+                newConnection.angleFromPrevious = toFloat(angleDiff);
+                cell.connections.begin()->angleFromPrevious = 360.0f - toFloat(angleDiff);
+            } else {
+                newConnection.angleFromPrevious = 360.0f + toFloat(angleDiff);
+                cell.connections.begin()->angleFromPrevious = toFloat(-angleDiff);
+            }
+            cell.connections.emplace_back(newConnection);
+            return;
+        }
+
+        auto firstConnectedCell = getCellRef(cell.connections.front().cellId, cache);
+        auto firstConnectedCellDelta = firstConnectedCell.pos - cell.pos;
+        auto angle = Math::angleOfVector(firstConnectedCellDelta);
+        auto connectionIt = ++cell.connections.begin();
+        while (true) {
+            auto nextAngle = angle + connectionIt->angleFromPrevious;
+
+            if ((angle < newAngle && newAngle <= nextAngle) || (angle < (newAngle + 360.0f) && (newAngle + 360.0f) <= nextAngle)) {
+                break;
+            }
+
+            ++connectionIt;
+            if (connectionIt == cell.connections.end()) {
+                connectionIt = cell.connections.begin();
+            }
+            angle = nextAngle;
+            if (angle > 360.0f) {
+                angle -= 360.0f;
+            }
+        }
+
+        ConnectionDescription newConnection;
+        newConnection.cellId = otherCell.id;
+        newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
+
+        auto angleDiff1 = newAngle - angle;
+        if (angleDiff1 < 0) {
+            angleDiff1 += 360.0f;
+        }
+        auto angleDiff2 = connectionIt->angleFromPrevious;
+
+        auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
+        newConnection.angleFromPrevious = toFloat(angleDiff2 * factor);
+        connectionIt = cell.connections.insert(connectionIt, newConnection);
+        ++connectionIt;
+        if (connectionIt == cell.connections.end()) {
+            connectionIt = cell.connections.begin();
+        }
+        connectionIt->angleFromPrevious = toFloat(angleDiff2 * (1 - factor));
+    };
+
+    addConnection(cell1, cell2);
+    addConnection(cell2, cell1);
+
+    return *this;
+}
+
+CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
+{
+    auto findResult = cache.find(cellId);
+    if (findResult != cache.end()) {
+        return cells.at(findResult->second);
+    }
+    for (int i = 0; i < cells.size(); ++i) {
+        auto& cell = cells.at(i);
+        if (cell.id == cellId) {
+            cache.emplace(cellId, i);
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
 }

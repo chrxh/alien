@@ -111,7 +111,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto velDelta = cell->vel - otherCell->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
 
-                if (Math::length(cell->vel) > 0.5f /* && cell->numConnections == 0 && */ && isApproaching) {
+                if (Math::length(cell->vel) > 0.5f && isApproaching) {  //&& cell->numConnections == 0 
                     auto distanceSquared = distance * distance + 0.25;
                     auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared);
                     auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * distanceSquared);
@@ -123,7 +123,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 else {
                     auto force = Math::normalized(posDelta)
                         * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta))
-                        * cudaSimulationParameters.cellRepulsionStrength /*12, 32*/;
+                        * cudaSimulationParameters.cellRepulsionStrength;   ///12, 32
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);
@@ -135,7 +135,19 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         >= SpotCalculator::calc(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
                     && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
                     && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy) {
-                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
+                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
+/*
+                    //create connection only in case branch numbers fit
+                    bool ascending = cell->numConnections > 0
+                        && ((cell->branchNumber - (cell->connections[0].cell->branchNumber + 1)) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0);
+                    if (ascending && (otherCell->branchNumber - (cell->branchNumber + 1)) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
+                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
+                    }
+                    if (!ascending && (cell->branchNumber - (otherCell->branchNumber + 1)) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
+                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
+                    }
+*/
+
                 }
             }
 /*
