@@ -25,10 +25,14 @@ public:
     void addInspectedEntity(CellOrParticleDescription const& entity);
     void setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities);
 
+    void setDrawMode(bool value);
+    bool isDrawMode() const;
+
 private:
     SimulationController _simController;
     SelectionShallowData _selectionShallowData;
 
     std::vector<CellOrParticleDescription> _entitiesToInspect;
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
+    bool _drawMode = false;
 };

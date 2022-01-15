@@ -61,6 +61,7 @@ public:
     ENGINEGPUKERNELS_EXPORT void removeSelection();
     ENGINEGPUKERNELS_EXPORT void updateSelection();
     ENGINEGPUKERNELS_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters);
+    ENGINEGPUKERNELS_EXPORT void reconnectSelectedEntities();
 
     ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
     ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);

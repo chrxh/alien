@@ -118,7 +118,7 @@ __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool incl
     }
 }
 
-__global__ void cudaConnectSelection(SimulationData data, int* result)
+__global__ void cudaConnectSelection(SimulationData data, bool considerWithinSelection, int* result)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
@@ -137,7 +137,7 @@ __global__ void cudaConnectSelection(SimulationData data, int* result)
                 continue;
             }
 
-            if (1 == otherCell->selected) {
+            if (1 == otherCell->selected && !considerWithinSelection) {
                 continue;
             }
 
@@ -265,7 +265,7 @@ __global__ void cudaUpdatePosAndVelForSelection(ShallowUpdateSelectionData updat
     }
 }
 
-__global__ void cudaDisconnectSelection(SimulationData data, int* result)
+__global__ void cudaDisconnectSelectionFromRemainings(SimulationData data, int* result)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 

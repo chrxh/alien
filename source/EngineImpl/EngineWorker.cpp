@@ -476,6 +476,12 @@ void EngineWorker::colorSelectedEntities(unsigned char color, bool includeCluste
     _cudaSimulation->colorSelectedEntities(color, includeClusters);
 }
 
+void EngineWorker::reconnectSelectedEntities()
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->reconnectSelectedEntities();
+}
+
 void EngineWorker::runThreadLoop()
 {
     try {

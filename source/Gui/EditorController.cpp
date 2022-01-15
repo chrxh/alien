@@ -232,7 +232,7 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
 
 void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
-    if (!_simController->isSimulationRunning()) {
+    if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
         auto pos = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
         auto zoom = _viewport->getZoomFactor();
         if (!modifierKeyPressed) {
@@ -255,7 +255,7 @@ void _EditorController::leftMouseButtonHold(
     auto zoom = _viewport->getZoomFactor();
     if (_simController->isSimulationRunning()) {
         _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
-    } else {
+    } else if (!_editorModel->isDrawMode()) {
         auto delta = end - start;
 
         ShallowUpdateSelectionData updateData;
@@ -272,7 +272,7 @@ void _EditorController::leftMouseButtonReleased() {}
 
 void _EditorController::rightMouseButtonPressed(RealVector2D const& viewPos)
 {
-    if (!_simController->isSimulationRunning()) {
+    if (!_simController->isSimulationRunning() && _editorModel->isDrawMode()) {
         SelectionRect rect{viewPos, viewPos};
         _selectionRect = rect;
     }
@@ -280,7 +280,7 @@ void _EditorController::rightMouseButtonPressed(RealVector2D const& viewPos)
 
 void _EditorController::rightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (!_simController->isSimulationRunning()) {
+    if (!_simController->isSimulationRunning() && _editorModel->isDrawMode()) {
         _selectionRect->endPos = viewPos;
         auto startPos = _viewport->mapViewToWorldPosition(_selectionRect->startPos);
         auto endPos = _viewport->mapViewToWorldPosition(_selectionRect->endPos);

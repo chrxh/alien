@@ -90,6 +90,7 @@ public:
     void updateSelection();
     void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData);
     void colorSelectedEntities(unsigned char color, bool includeClusters);
+    void reconnectSelectedEntities();
 
     void runThreadLoop();
     void runSimulation();

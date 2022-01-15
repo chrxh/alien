@@ -64,3 +64,13 @@ void _EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> c
         _inspectedEntityById.emplace(DescriptionHelper::getId(entity), entity);
     }
 }
+
+void _EditorModel::setDrawMode(bool value)
+{
+    _drawMode = value;
+}
+
+bool _EditorModel::isDrawMode() const
+{
+    return _drawMode;
+}
