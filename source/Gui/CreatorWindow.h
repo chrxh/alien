@@ -42,7 +42,7 @@ private:
     float _energy = 100.0f;
     float _cellDistance = 1.0f;
     bool _makeSticky = false;
-    int _maxConnections = 4;
+    int _maxConnections = 6;
     bool _ascendingBranchNumbers = true;
     int _lastBranchNumber = 0;
 
