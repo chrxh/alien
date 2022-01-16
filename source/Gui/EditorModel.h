@@ -28,6 +28,9 @@ public:
     void setDrawMode(bool value);
     bool isDrawMode() const;
 
+    void setDefaultColorCode(int value);
+    int getDefaultColorCode() const;
+
 private:
     SimulationController _simController;
     SelectionShallowData _selectionShallowData;
@@ -35,4 +38,5 @@ private:
     std::vector<CellOrParticleDescription> _entitiesToInspect;
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
     bool _drawMode = false;
+    int _defaultColorCode = 0;
 };

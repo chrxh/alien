@@ -116,8 +116,8 @@ void _CreatorWindow::process()
             || _mode == CreationMode::Drawing) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
-            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Auto connections").textWidth(MaxContentTextWidth), _autoMaxConnections);
-            ImGui::BeginDisabled(_autoMaxConnections);
+            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
+            ImGui::BeginDisabled(!_makeSticky);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
             ImGui::EndDisabled();
@@ -127,7 +127,7 @@ void _CreatorWindow::process()
         }
 
         if (_mode == CreationMode::Drawing) {
-            auto text = _editorModel->isDrawMode() ? "End paint" : "Start paint";
+            auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
             if (ImGui::Button(text)) {
                 _editorModel->setDrawMode(!_editorModel->isDrawMode());
             }
@@ -172,7 +172,12 @@ void _CreatorWindow::setOn(bool value)
 
 void _CreatorWindow::createCell()
 {
-    auto cell = CellDescription().setPos(getRandomPos()).setEnergy(_energy).setMaxConnections(_maxConnections).setTokenBranchNumber(_lastBranchNumber);
+    auto cell = CellDescription()
+                    .setPos(getRandomPos())
+                    .setEnergy(_energy)
+                    .setMaxConnections(_maxConnections)
+                    .setTokenBranchNumber(_lastBranchNumber)
+                    .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
     incBranchNumber();
@@ -193,19 +198,20 @@ void _CreatorWindow::createRectangle()
 
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
     for (int i = 0; i < _rectHorizontalCells; ++i) {
         for (int j = 0; j < _rectVerticalCells; ++j) {
             data.addCell(CellDescription()
                              .setId(NumberGenerator::getInstance().getId())
                              .setPos({toFloat(i) * _cellDistance, toFloat(j) * _cellDistance})
                              .setEnergy(_energy)
-                             .setMaxConnections(maxConnections));
+                             .setMaxConnections(maxConnections)
+                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
         }
     }
 
     DescriptionHelper::reconnectCells(data, _cellDistance * 1.1f);
-    if(_autoMaxConnections) {
+    if (!_makeSticky) {
         DescriptionHelper::removeStickiness(data);
     }
     data.setCenter(getRandomPos());
@@ -220,7 +226,7 @@ void _CreatorWindow::createHexagon()
 
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
 
     auto incY = sqrt(3.0) * _cellDistance / 2.0;
     for (int j = 0; j < _layers; ++j) {
@@ -231,7 +237,8 @@ void _CreatorWindow::createHexagon()
                              .setId(NumberGenerator::getInstance().getId())
                              .setEnergy(_energy)
                              .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(-j * incY)})
-                             .setMaxConnections(maxConnections));
+                             .setMaxConnections(maxConnections)
+                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
@@ -239,14 +246,15 @@ void _CreatorWindow::createHexagon()
                                  .setId(NumberGenerator::getInstance().getId())
                                  .setEnergy(_energy)
                                  .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(j * incY)})
-                                 .setMaxConnections(maxConnections));
+                                 .setMaxConnections(maxConnections)
+                                 .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
 
             }
         }
     }
 
     DescriptionHelper::reconnectCells(data, _cellDistance * 1.5f);
-    if (_autoMaxConnections) {
+    if (!_makeSticky) {
         DescriptionHelper::removeStickiness(data);
     }
     data.setCenter(getRandomPos());
@@ -261,7 +269,7 @@ void _CreatorWindow::createDisc()
 
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc =
@@ -277,15 +285,16 @@ void _CreatorWindow::createDisc()
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
             data.addCell(CellDescription()
-                            .setId(NumberGenerator::getInstance().getId())
-                            .setEnergy(_energy)
-                            .setPos(relPos)
-                            .setMaxConnections(maxConnections));
+                             .setId(NumberGenerator::getInstance().getId())
+                             .setEnergy(_energy)
+                             .setPos(relPos)
+                             .setMaxConnections(maxConnections)
+                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
         }
     }
 
     DescriptionHelper::reconnectCells(data, _cellDistance * 1.7f);
-    if (_autoMaxConnections) {
+    if (!_makeSticky) {
         DescriptionHelper::removeStickiness(data);
     }
     data.setCenter(getRandomPos());
@@ -303,7 +312,7 @@ void _CreatorWindow::drawing()
             }
 
             auto parameters = _simController->getSimulationParameters();
-            auto maxConnections = _autoMaxConnections ? parameters.cellMaxBonds : _maxConnections;
+            auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
 
             if (_drawing.isEmpty()) {
                 auto cell = CellDescription()
@@ -311,7 +320,8 @@ void _CreatorWindow::drawing()
                                 .setPos(pos)
                                 .setEnergy(_energy)
                                 .setMaxConnections(maxConnections)
-                                .setTokenBranchNumber(_lastBranchNumber);
+                                .setTokenBranchNumber(_lastBranchNumber)
+                                .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
                 _drawing.addCell(cell);
                 incBranchNumber();
             } else {
@@ -324,14 +334,15 @@ void _CreatorWindow::drawing()
                                         .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
                                         .setEnergy(_energy)
                                         .setMaxConnections(maxConnections)
-                                        .setTokenBranchNumber(_lastBranchNumber);
+                                        .setTokenBranchNumber(_lastBranchNumber)
+                                        .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
                         _drawing.addCell(cell);
                         incBranchNumber();
                     }
                 }
             }
             DescriptionHelper::reconnectCells(_drawing, _cellDistance * 1.1f);
-            if (_autoMaxConnections) {
+            if (!_makeSticky) {
                 auto origDrawing = _drawing;
                 DescriptionHelper::removeStickiness(_drawing);
                 _simController->addAndSelectSimulationData(_drawing);

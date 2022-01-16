@@ -74,3 +74,13 @@ bool _EditorModel::isDrawMode() const
 {
     return _drawMode;
 }
+
+void _EditorModel::setDefaultColorCode(int value)
+{
+    _defaultColorCode = value;
+}
+
+int _EditorModel::getDefaultColorCode() const
+{
+    return _defaultColorCode;
+}
