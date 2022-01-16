@@ -218,30 +218,37 @@ void _ManipulatorWindow::process()
             AlienImGui::Group("Color");
             if (colorButton("    ##color1", Const::IndividualCellColor1)) {
                 _simController->colorSelectedEntities(0, _includeClusters);
+                _editorModel->setDefaultColorCode(0);
             }
             ImGui::SameLine();
             if (colorButton("    ##color2", Const::IndividualCellColor2)) {
                 _simController->colorSelectedEntities(1, _includeClusters);
+                _editorModel->setDefaultColorCode(1);
             }
             ImGui::SameLine();
             if (colorButton("    ##color3", Const::IndividualCellColor3)) {
                 _simController->colorSelectedEntities(2, _includeClusters);
+                _editorModel->setDefaultColorCode(2);
             }
             ImGui::SameLine();
             if (colorButton("    ##color4", Const::IndividualCellColor4)) {
                 _simController->colorSelectedEntities(3, _includeClusters);
+                _editorModel->setDefaultColorCode(3);
             }
             ImGui::SameLine();
             if (colorButton("    ##color5", Const::IndividualCellColor5)) {
                 _simController->colorSelectedEntities(4, _includeClusters);
+                _editorModel->setDefaultColorCode(4);
             }
             ImGui::SameLine();
             if (colorButton("    ##color6", Const::IndividualCellColor6)) {
                 _simController->colorSelectedEntities(5, _includeClusters);
+                _editorModel->setDefaultColorCode(5);
             }
             ImGui::SameLine();
             if (colorButton("    ##color7", Const::IndividualCellColor7)) {
                 _simController->colorSelectedEntities(6, _includeClusters);
+                _editorModel->setDefaultColorCode(7);
             }
 
             ImGui::EndDisabled();
