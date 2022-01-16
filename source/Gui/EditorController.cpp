@@ -272,7 +272,7 @@ void _EditorController::leftMouseButtonReleased() {}
 
 void _EditorController::rightMouseButtonPressed(RealVector2D const& viewPos)
 {
-    if (!_simController->isSimulationRunning() && _editorModel->isDrawMode()) {
+    if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
         SelectionRect rect{viewPos, viewPos};
         _selectionRect = rect;
     }
@@ -280,7 +280,7 @@ void _EditorController::rightMouseButtonPressed(RealVector2D const& viewPos)
 
 void _EditorController::rightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (!_simController->isSimulationRunning() && _editorModel->isDrawMode()) {
+    if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
         _selectionRect->endPos = viewPos;
         auto startPos = _viewport->mapViewToWorldPosition(_selectionRect->startPos);
         auto endPos = _viewport->mapViewToWorldPosition(_selectionRect->endPos);
