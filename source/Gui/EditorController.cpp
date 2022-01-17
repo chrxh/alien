@@ -138,6 +138,26 @@ void _EditorController::onInspectEntities() const
     _manipulatorWindow->onInspectEntities();
 }
 
+bool _EditorController::isCopyingPossible() const
+{
+    return _manipulatorWindow->isCopyingPossible();
+}
+
+void _EditorController::onCopy()
+{
+    _manipulatorWindow->onCopy();
+}
+
+bool _EditorController::isPastingPossible() const
+{
+    return _manipulatorWindow->isPastingPossible();
+}
+
+void _EditorController::onPaste()
+{
+    _manipulatorWindow->onPaste();
+}
+
 void _EditorController::processSelectionRect()
 {
     if (_selectionRect) {
