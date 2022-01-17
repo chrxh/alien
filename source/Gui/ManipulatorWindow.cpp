@@ -68,7 +68,7 @@ void _ManipulatorWindow::process()
             AlienImGui::EndToolbarButton();
 
             //save button
-            ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+            ImGui::BeginDisabled(!isCopyingPossible());
             ImGui::SameLine();
             if (AlienImGui::BeginToolbarButton(ICON_FA_SAVE)) {
                 _saveSelectionDialog->show(_includeClusters);
@@ -78,22 +78,18 @@ void _ManipulatorWindow::process()
 
             //copy button
             ImGui::SameLine();
-            ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+            ImGui::BeginDisabled(!isCopyingPossible());
             if (AlienImGui::BeginToolbarButton(ICON_FA_COPY)) {
-                _copiedSelection = _simController->getSelectedSimulationData(_includeClusters);
+                onCopy();
             }
             AlienImGui::EndToolbarButton();
             ImGui::EndDisabled();
 
             //paste button
             ImGui::SameLine();
-            ImGui::BeginDisabled(!_copiedSelection);
+            ImGui::BeginDisabled(!isPastingPossible());
             if (AlienImGui::BeginToolbarButton(ICON_FA_PASTE)) {
-                auto data = *_copiedSelection;
-                auto center = _viewport->getCenterInWorldPos();
-                data.setCenter(center);
-                _simController->addAndSelectSimulationData(data);
-                _editorModel->update();
+                onPaste();
             }
             AlienImGui::EndToolbarButton();
             ImGui::EndDisabled();
@@ -290,6 +286,30 @@ void _ManipulatorWindow::onInspectEntities()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(false);
     _editorModel->inspectEntities(DescriptionHelper::getEntities(selectedData));
+}
+
+bool _ManipulatorWindow::isCopyingPossible() const
+{
+    return !_editorModel->isSelectionEmpty();
+}
+
+void _ManipulatorWindow::onCopy()
+{
+    _copiedSelection = _simController->getSelectedSimulationData(_includeClusters);
+}
+
+bool _ManipulatorWindow::isPastingPossible() const
+{
+    return _copiedSelection.has_value();
+}
+
+void _ManipulatorWindow::onPaste()
+{
+    auto data = *_copiedSelection;
+    auto center = _viewport->getCenterInWorldPos();
+    data.setCenter(center);
+    _simController->addAndSelectSimulationData(data);
+    _editorModel->update();
 }
 
 bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)

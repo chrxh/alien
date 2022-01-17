@@ -25,6 +25,11 @@ public:
     bool isInspectionPossible() const;
     void onInspectEntities() const;
 
+    bool isCopyingPossible() const;
+    void onCopy();
+    bool isPastingPossible() const;
+    void onPaste();
+
 private:
     void processSelectionRect();
     void processInspectorWindows();

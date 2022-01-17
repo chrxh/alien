@@ -22,6 +22,11 @@ public:
     bool isInspectionPossible() const;
     void onInspectEntities();
 
+    bool isCopyingPossible() const;
+    void onCopy();
+    bool isPastingPossible() const;
+    void onPaste();
+
 private:
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;

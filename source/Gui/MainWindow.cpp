@@ -410,22 +410,29 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
                 manipulatorWindow->setOn(!manipulatorWindow->isOn());
             }
-            if (ImGui::MenuItem("Mass operations", "ALT+A", manipulatorWindow->isOn())) {
-                manipulatorWindow->setOn(!manipulatorWindow->isOn());
+            if (ImGui::MenuItem("Mass operations", "ALT+A", false)) {
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(
-                _ModeWindow::Mode::Navigation == _modeWindow->getMode()
-                || !_editorController->isInspectionPossible());
+            ImGui::Separator();
+            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->isInspectionPossible());
             if (ImGui::MenuItem("Inspect entities", "ALT+N")) {
                 _editorController->onInspectEntities();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(
-                _ModeWindow::Mode::Navigation == _modeWindow->getMode()
-                || !_editorController->areInspectionWindowsActive());
+            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
+            }
+            ImGui::EndDisabled();
+            ImGui::Separator();
+            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->isCopyingPossible());
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {
+                _editorController->onCopy();
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->isPastingPossible());
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {
+                _editorController->onPaste();
             }
             ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
@@ -531,6 +538,12 @@ void _MainWindow::processMenubar()
     }
     if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
         _editorController->onCloseAllInspectorWindows();
+    }
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
+        _editorController->onCopy();
+    }
+    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
+        _editorController->onPaste();
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
