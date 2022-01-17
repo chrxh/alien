@@ -7,6 +7,7 @@
 
 struct OverlayElementDescription
 {
+    uint64_t id;
     bool cell;  //false = energy particle
     Enums::CellFunction::Type cellType;
     RealVector2D pos;
