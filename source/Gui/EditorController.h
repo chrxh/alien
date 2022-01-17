@@ -31,15 +31,13 @@ private:
 
     void newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities);
 
-    void leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed);
-    void leftMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);
-    void leftMouseButtonReleased();
+    void selectEntities(RealVector2D const& viewPos, bool modifierKeyPressed);
+    void moveSelectedEntities(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);
+    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
 
-    void rightMouseButtonPressed(RealVector2D const& viewPos);
-    void rightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
-    void rightMouseButtonReleased();
-
-    void drawing();
+    void createSelectionRect(RealVector2D const& viewPos);
+    void resizeSelectionRect(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
+    void removeSelectionRect();
 
 private:
     EditorModel _editorModel;

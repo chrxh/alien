@@ -154,10 +154,63 @@ void _CreatorWindow::process()
         }
     }
     ImGui::End();
+}
 
-    if (_editorModel->isDrawMode()) {
-        drawing();
+void _CreatorWindow::onDrawing()
+{
+    auto mousePos = ImGui::GetMousePos();
+    auto pos = _viewport->mapViewToWorldPosition({mousePos.x, mousePos.y});
+    if (!_drawing.isEmpty()) {
+        _simController->removeSelectedEntities(false);
     }
+
+    auto parameters = _simController->getSimulationParameters();
+    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
+
+    if (_drawing.isEmpty()) {
+        auto cell = CellDescription()
+                        .setId(NumberGenerator::getInstance().getId())
+                        .setPos(pos)
+                        .setEnergy(_energy)
+                        .setMaxConnections(maxConnections)
+                        .setTokenBranchNumber(_lastBranchNumber)
+                        .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
+        _drawing.addCell(cell);
+        incBranchNumber();
+    } else {
+        auto lastCellPos = _drawing.cells.back().pos;
+        auto distance = Math::length(pos - lastCellPos);
+        if (Math::length(pos - lastCellPos) >= _cellDistance) {
+            for (float l = _cellDistance; l <= distance; l += _cellDistance) {
+                auto cell = CellDescription()
+                                .setId(NumberGenerator::getInstance().getId())
+                                .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
+                                .setEnergy(_energy)
+                                .setMaxConnections(maxConnections)
+                                .setTokenBranchNumber(_lastBranchNumber)
+                                .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
+                _drawing.addCell(cell);
+                incBranchNumber();
+            }
+        }
+    }
+    DescriptionHelper::reconnectCells(_drawing, _cellDistance * 1.1f);
+    if (!_makeSticky) {
+        auto origDrawing = _drawing;
+        DescriptionHelper::removeStickiness(_drawing);
+        _simController->addAndSelectSimulationData(_drawing);
+        _drawing = origDrawing;
+    } else {
+        _simController->addAndSelectSimulationData(_drawing);
+    }
+
+    _simController->reconnectSelectedEntities();
+    _editorModel->update();
+}
+
+void _CreatorWindow::finishDrawing()
+{
+    _drawing.clear();
 }
 
 bool _CreatorWindow::isOn() const
@@ -305,57 +358,10 @@ void _CreatorWindow::drawing()
 {
     if (!ImGui::GetIO().WantCaptureMouse) {
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            auto mousePos = ImGui::GetMousePos();
-            auto pos = _viewport->mapViewToWorldPosition({mousePos.x, mousePos.y});
-            if (!_drawing.isEmpty()) {
-                _simController->removeSelectedEntities(false);
-            }
-
-            auto parameters = _simController->getSimulationParameters();
-            auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
-
-            if (_drawing.isEmpty()) {
-                auto cell = CellDescription()
-                                .setId(NumberGenerator::getInstance().getId())
-                                .setPos(pos)
-                                .setEnergy(_energy)
-                                .setMaxConnections(maxConnections)
-                                .setTokenBranchNumber(_lastBranchNumber)
-                                .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
-                _drawing.addCell(cell);
-                incBranchNumber();
-            } else {
-                auto lastCellPos = _drawing.cells.back().pos;
-                auto distance = Math::length(pos - lastCellPos);
-                if (Math::length(pos - lastCellPos) >= _cellDistance) {
-                    for (float l = _cellDistance; l <= distance; l += _cellDistance) {
-                        auto cell = CellDescription()
-                                        .setId(NumberGenerator::getInstance().getId())
-                                        .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
-                                        .setEnergy(_energy)
-                                        .setMaxConnections(maxConnections)
-                                        .setTokenBranchNumber(_lastBranchNumber)
-                                        .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
-                        _drawing.addCell(cell);
-                        incBranchNumber();
-                    }
-                }
-            }
-            DescriptionHelper::reconnectCells(_drawing, _cellDistance * 1.1f);
-            if (!_makeSticky) {
-                auto origDrawing = _drawing;
-                DescriptionHelper::removeStickiness(_drawing);
-                _simController->addAndSelectSimulationData(_drawing);
-                _drawing = origDrawing;
-            } else {
-                _simController->addAndSelectSimulationData(_drawing);
-            }
-
-            _simController->reconnectSelectedEntities();
-            _editorModel->update();
+            onDrawing();
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            _drawing.clear();
+            finishDrawing();
         }
     }
 }

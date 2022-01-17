@@ -23,6 +23,9 @@ public:
 
     void process();
 
+    void onDrawing();
+    void finishDrawing();
+
     bool isOn() const;
     void setOn(bool value);
 
