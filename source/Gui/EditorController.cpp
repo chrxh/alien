@@ -54,26 +54,48 @@ void _EditorController::process()
         RealVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePos;
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            leftMouseButtonPressed(mousePos, ImGui::GetIO().KeyCtrl);
+            if (!_simController->isSimulationRunning()) {
+                if (!_editorModel->isDrawMode()) {
+                    selectEntities(mousePos, ImGui::GetIO().KeyCtrl);
+                } else {
+                    _creatorWindow->onDrawing();
+                }
+            }
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            leftMouseButtonHold(mousePos, prevMousePosInt, ImGui::GetIO().KeyShift);
+            if (!_simController->isSimulationRunning()) {
+                if (!_editorModel->isDrawMode()) {
+                    moveSelectedEntities(mousePos, prevMousePosInt, ImGui::GetIO().KeyShift);
+                } else {
+                    _creatorWindow->onDrawing();
+                }
+            } else {
+                applyForces(mousePos, prevMousePosInt);
+            }
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-            rightMouseButtonPressed(mousePos);
+            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
+                createSelectionRect(mousePos);
+            }
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-            rightMouseButtonHold(mousePos, prevMousePosInt);
+            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
+                resizeSelectionRect(mousePos, prevMousePosInt);
+            }
         }
 
         _prevMousePosInt = mousePos;
     }
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        leftMouseButtonReleased();
+        if (_editorModel->isDrawMode()) {
+            _creatorWindow->finishDrawing();
+        }
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-        rightMouseButtonReleased();
+        if (!_simController->isSimulationRunning()) {
+            removeSelectionRect();
+        }
     }
 
     if (_simController->updateSelectionIfNecessary()) {
@@ -230,22 +252,20 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
     }
 }
 
-void _EditorController::leftMouseButtonPressed(RealVector2D const& viewPos, bool modifierKeyPressed)
+void _EditorController::selectEntities(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
-    if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
-        auto pos = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
-        auto zoom = _viewport->getZoomFactor();
-        if (!modifierKeyPressed) {
-            _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
-        } else {
-            _simController->swapSelection(pos, std::max(0.5f, 10.0f / zoom));
-        }
-
-        _editorModel->update();
+    auto pos = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = _viewport->getZoomFactor();
+    if (!modifierKeyPressed) {
+        _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
+    } else {
+        _simController->swapSelection(pos, std::max(0.5f, 10.0f / zoom));
     }
+
+    _editorModel->update();
 }
 
-void _EditorController::leftMouseButtonHold(
+void _EditorController::moveSelectedEntities(
     RealVector2D const& viewPos,
     RealVector2D const& prevViewPos,
     bool modifierKeyPressed)
@@ -253,48 +273,43 @@ void _EditorController::leftMouseButtonHold(
     auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = _viewport->getZoomFactor();
-    if (_simController->isSimulationRunning()) {
-        _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
-    } else if (!_editorModel->isDrawMode()) {
-        auto delta = end - start;
+    auto delta = end - start;
 
-        ShallowUpdateSelectionData updateData;
-        updateData.considerClusters = !modifierKeyPressed;
-        updateData.posDeltaX = delta.x;
-        updateData.posDeltaY = delta.y;
-        _simController->shallowUpdateSelectedEntities(updateData);
-        _editorModel->update();
-
-    }
+    ShallowUpdateSelectionData updateData;
+    updateData.considerClusters = !modifierKeyPressed;
+    updateData.posDeltaX = delta.x;
+    updateData.posDeltaY = delta.y;
+    _simController->shallowUpdateSelectedEntities(updateData);
+    _editorModel->update();
 }
 
-void _EditorController::leftMouseButtonReleased() {}
-
-void _EditorController::rightMouseButtonPressed(RealVector2D const& viewPos)
+void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
-        SelectionRect rect{viewPos, viewPos};
-        _selectionRect = rect;
-    }
+    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
+    auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = _viewport->getZoomFactor();
+    _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
-void _EditorController::rightMouseButtonHold(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::createSelectionRect(RealVector2D const& viewPos)
 {
-    if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
-        _selectionRect->endPos = viewPos;
-        auto startPos = _viewport->mapViewToWorldPosition(_selectionRect->startPos);
-        auto endPos = _viewport->mapViewToWorldPosition(_selectionRect->endPos);
-        auto topLeft = RealVector2D{std::min(startPos.x, endPos.x), std::min(startPos.y, endPos.y)};
-        auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
-
-        _simController->setSelection(topLeft, bottomRight);
-        _editorModel->update();
-    }
+    SelectionRect rect{viewPos, viewPos};
+    _selectionRect = rect;
 }
 
-void _EditorController::rightMouseButtonReleased()
+void _EditorController::resizeSelectionRect(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
 {
-    if (!_simController->isSimulationRunning()) {
-        _selectionRect = std::nullopt;
-    }
+    _selectionRect->endPos = viewPos;
+    auto startPos = _viewport->mapViewToWorldPosition(_selectionRect->startPos);
+    auto endPos = _viewport->mapViewToWorldPosition(_selectionRect->endPos);
+    auto topLeft = RealVector2D{std::min(startPos.x, endPos.x), std::min(startPos.y, endPos.y)};
+    auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
+
+    _simController->setSelection(topLeft, bottomRight);
+    _editorModel->update();
+}
+
+void _EditorController::removeSelectionRect()
+{
+    _selectionRect = std::nullopt;
 }

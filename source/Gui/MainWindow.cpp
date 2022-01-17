@@ -410,6 +410,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
                 manipulatorWindow->setOn(!manipulatorWindow->isOn());
             }
+            if (ImGui::MenuItem("Mass operations", "ALT+A", manipulatorWindow->isOn())) {
+                manipulatorWindow->setOn(!manipulatorWindow->isOn());
+            }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(
                 _ModeWindow::Mode::Navigation == _modeWindow->getMode()
@@ -428,18 +431,6 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
 
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
-            if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
-                _autosaveController->setOn(!_autosaveController->isOn());
-            }
-            if (ImGui::MenuItem("GPU settings", "ALT+C")) {
-                _gpuSettingsDialog->show();
-            }
-            if (ImGui::MenuItem("Display settings", "ALT+V")) {
-                _displaySettingsDialog->show();
-            }
-            AlienImGui::EndMenuButton();
-        }
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
             if (ImGui::MenuItem("Information overlay", "ALT+O", _simulationView->isOverlayActive())) {
                 _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
@@ -460,6 +451,20 @@ void _MainWindow::processMenubar()
             }
             AlienImGui::EndMenuButton();
         }
+
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
+            if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
+                _autosaveController->setOn(!_autosaveController->isOn());
+            }
+            if (ImGui::MenuItem("GPU settings", "ALT+C")) {
+                _gpuSettingsDialog->show();
+            }
+            if (ImGui::MenuItem("Display settings", "ALT+V")) {
+                _displaySettingsDialog->show();
+            }
+            AlienImGui::EndMenuButton();
+        }
+
         if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING "  Help ", _helpMenuToggled, "Help")) {
             if (ImGui::MenuItem("About", "")) {
                 _aboutDialog->show();
