@@ -142,6 +142,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
     for (int i = 0; i < *dataTO.numCells; ++i) {
         auto const& cellTO = dataTO.cells[i];
         OverlayElementDescription element;
+        element.id = cellTO.id;
         element.cell = true;
         element.pos = {cellTO.pos.x, cellTO.pos.y};
         element.cellType = static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType);
@@ -153,6 +154,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
     for (int i = 0; i < *dataTO.numParticles; ++i) {
         auto const& particleTO = dataTO.particles[i];
         OverlayElementDescription element;
+        element.id = particleTO.id;
         element.cell = false;
         element.pos = {particleTO.pos.x, particleTO.pos.y};
         element.selected = particleTO.selected;

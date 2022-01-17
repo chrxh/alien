@@ -177,6 +177,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
             auto& cellTO = dataTO.cells[cellTOIndex];
 
+            cellTO.id = cell->id;
             cellTO.pos = cell->absPos;
             cellTO.cellFunctionType = cell->cellFunctionType;
             cellTO.selected = cell->selected;
@@ -198,6 +199,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto particleTOIndex = atomicAdd(dataTO.numParticles, 1);
             auto& particleTO = dataTO.particles[particleTOIndex];
 
+            particleTO.id = particle->id;
             particleTO.pos = particle->absPos;
             particleTO.selected = particle->selected;
         }

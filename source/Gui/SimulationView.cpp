@@ -288,6 +288,9 @@ void _SimulationView::updateImageFromSimulation()
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         if (overlay) {
+            std::sort(overlay->elements.begin(), overlay->elements.end(), [](OverlayElementDescription const& left, OverlayElementDescription const& right) {
+                return left.id < right.id;
+            });
             _overlay = overlay;
         }
     } else {
@@ -333,6 +336,23 @@ void _SimulationView::updateImageFromSimulation()
                         Const::BranchNumberOverlayColor,
                         std::to_string(overlayElement.branchNumber).c_str());
                 }
+
+/*
+                for (int i = 0; i < 100; ++i) {
+                    drawList->AddText(
+                        StyleRepository::getInstance().getLargeFont(),
+                        50.0f,
+                        {toFloat((100 + i * 6923) % 2000), toFloat((100 + i * 232) % 1000)},
+                        Const::BranchNumberOverlayColor,
+                        "AAAAAAAAAA");
+                    drawList->AddText(
+                        StyleRepository::getInstance().getLargeFont(),
+                        50.0f,
+                        {toFloat((100 + i * 329) % 2000) + 20.0f, toFloat((100 + i * 4237) % 1000)},
+                        Const::BranchNumberOverlayShadowColor,
+                        "AAAAAAAAAA");
+                }
+*/
             }
 
             if (overlayElement.selected == 1) {
