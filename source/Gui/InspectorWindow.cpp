@@ -177,6 +177,10 @@ void _InspectorWindow::processCell(CellDescription cell)
         }
         ImGui::EndTabBar();
 
+        //fill up with zeros
+        cell.cellFeature.constData.append(std::max(0ull, CellComputationCompiler::getMaxBytes(parameters) - cell.cellFeature.constData.size()), 0);
+        origCell.cellFeature.constData.append(std::max(0ull, CellComputationCompiler::getMaxBytes(parameters) - origCell.cellFeature.constData.size()), 0);  
+
         if (hasChanges(cell, origCell)) {
             if (cell.cellFeature != origCell.cellFeature) {
                 cell.metadata.computerSourcecode.clear();
@@ -249,6 +253,9 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Code", nullptr, flags)) {
         auto origSourcecode = [&] {
             if (cell.metadata.computerSourcecode.empty()) {
+                if (_lastCompilationResult) {
+                    _lastCompilationResult->compilationOk = true;
+                }
                 return CellComputationCompiler::decompileSourceCode(
                     cell.cellFeature.constData,
                     _simController->getSymbolMap(),

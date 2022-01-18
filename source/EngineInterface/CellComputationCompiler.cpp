@@ -329,8 +329,9 @@ CompilationResult CellComputationCompiler::compileSourceCode(std::string const& 
             instructionUncoded = InstructionUncoded();
         }
     }
-    if (state == CompilerState::LOOKING_FOR_INSTR_START)
+    if (state == CompilerState::LOOKING_FOR_INSTR_START) {
         result.compilationOk = true;
+    }
     else {
         result.compilationOk = false;
         result.lineOfFirstError = linePos;
