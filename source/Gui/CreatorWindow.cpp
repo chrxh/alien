@@ -35,125 +35,108 @@ namespace
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
-    : _editorModel(editorModel)
+    : _AlienWindow("Creator", "editor.creator", true), _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
 {
-    _on = GlobalSettings::getInstance().getBoolState("windows.creator.active", true);
 }
 
-_CreatorWindow::~_CreatorWindow()
+void _CreatorWindow::processIntern()
 {
-    GlobalSettings::getInstance().setBoolState("windows.creator.active", _on);
-}
+    if (AlienImGui::BeginToolbarButton(ICON_FA_SUN)) {
+        _mode = CreationMode::CreateParticle;
+    }
+    AlienImGui::EndToolbarButton();
 
-void _CreatorWindow::process()
-{
-    if (!_on) {
+    ImGui::SameLine();
+    if (AlienImGui::BeginToolbarButton(ICON_FA_ATOM)) {
+        _mode = CreationMode::CreateCell;
+    }
+    AlienImGui::EndToolbarButton();
+
+    ImGui::SameLine();
+    if (AlienImGui::BeginToolbarButton(ICON_RECTANGLE)) {
+        _mode = CreationMode::CreateRectangle;
+    }
+    AlienImGui::EndToolbarButton();
+
+    ImGui::SameLine();
+    if (AlienImGui::BeginToolbarButton(ICON_HEXAGON)) {
+        _mode = CreationMode::CreateHexagon;
+    }
+    AlienImGui::EndToolbarButton();
+
+    ImGui::SameLine();
+    if (AlienImGui::BeginToolbarButton(ICON_DISC)) {
+        _mode = CreationMode::CreateDisc;
+    }
+    AlienImGui::EndToolbarButton();
+
+    ImGui::SameLine();
+    if (AlienImGui::BeginToolbarButton(ICON_FA_PAINT_BRUSH)) {
+        _mode = CreationMode::Drawing;
+    }
+    AlienImGui::EndToolbarButton();
+
+    AlienImGui::Group(ModeText.at(_mode));
+    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
+
+    auto parameters = _simController->getSimulationParameters();
+    if (_mode == CreationMode::CreateCell) {
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
+        AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+    }
+    if (_mode == CreationMode::CreateRectangle) {
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
+    }
+    if (_mode == CreationMode::CreateHexagon) {
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
+    }
+    if (_mode == CreationMode::CreateDisc) {
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
+    }
+
+    if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc || _mode == CreationMode::Drawing) {
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
+        AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
+        ImGui::BeginDisabled(!_makeSticky);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
+        ImGui::EndDisabled();
+    }
+    if (_mode == CreationMode::Drawing) {
+        AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+    }
+
+    if (_mode == CreationMode::Drawing) {
+        auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
+        if (ImGui::Button(text)) {
+            _editorModel->setDrawMode(!_editorModel->isDrawMode());
+        }
+    } else {
         _editorModel->setDrawMode(false);
-        return;
-    }
-
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    if (ImGui::Begin("Creator", &_on)) {
-        if (AlienImGui::BeginToolbarButton(ICON_FA_SUN)) {
-            _mode = CreationMode::CreateParticle;
-        }
-        AlienImGui::EndToolbarButton();
-
-        ImGui::SameLine();
-        if (AlienImGui::BeginToolbarButton(ICON_FA_ATOM)) {
-            _mode = CreationMode::CreateCell;
-        }
-        AlienImGui::EndToolbarButton();
-
-        ImGui::SameLine();
-        if (AlienImGui::BeginToolbarButton(ICON_RECTANGLE)) {
-            _mode = CreationMode::CreateRectangle;
-        }
-        AlienImGui::EndToolbarButton();
-
-        ImGui::SameLine();
-        if (AlienImGui::BeginToolbarButton(ICON_HEXAGON)) {
-            _mode = CreationMode::CreateHexagon;
-        }
-        AlienImGui::EndToolbarButton();
-
-        ImGui::SameLine();
-        if (AlienImGui::BeginToolbarButton(ICON_DISC)) {
-            _mode = CreationMode::CreateDisc;
-        }
-        AlienImGui::EndToolbarButton();
-
-        ImGui::SameLine();
-        if (AlienImGui::BeginToolbarButton(ICON_FA_PAINT_BRUSH)) {
-            _mode = CreationMode::Drawing;
-        }
-        AlienImGui::EndToolbarButton();
-
-        AlienImGui::Group(ModeText.at(_mode));
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
-
-        auto parameters = _simController->getSimulationParameters();
-        if (_mode == CreationMode::CreateCell) {
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
-        }
-        if (_mode == CreationMode::CreateRectangle) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
-        }
-        if (_mode == CreationMode::CreateHexagon) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
-        }
-        if (_mode == CreationMode::CreateDisc) {
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
-        }
-
-        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
-            || _mode == CreationMode::Drawing) {
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
-            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
-            ImGui::BeginDisabled(!_makeSticky);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-            ImGui::EndDisabled();
-        }
-        if (_mode == CreationMode::Drawing) {
-            AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
-        }
-
-        if (_mode == CreationMode::Drawing) {
-            auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
-            if (ImGui::Button(text)) {
-                _editorModel->setDrawMode(!_editorModel->isDrawMode());
+        if (ImGui::Button("Build")) {
+            if (_mode == CreationMode::CreateCell) {
+                createCell();
             }
-        } else {
-            _editorModel->setDrawMode(false);
-            if (ImGui::Button("Build")) {
-                if (_mode == CreationMode::CreateCell) {
-                    createCell();
-                }
-                if (_mode == CreationMode::CreateParticle) {
-                    createParticle();
-                }
-                if (_mode == CreationMode::CreateRectangle) {
-                    createRectangle();
-                }
-                if (_mode == CreationMode::CreateHexagon) {
-                    createHexagon();
-                }
-                if (_mode == CreationMode::CreateDisc) {
-                    createDisc();
-                }
-                _editorModel->update();
+            if (_mode == CreationMode::CreateParticle) {
+                createParticle();
             }
+            if (_mode == CreationMode::CreateRectangle) {
+                createRectangle();
+            }
+            if (_mode == CreationMode::CreateHexagon) {
+                createHexagon();
+            }
+            if (_mode == CreationMode::CreateDisc) {
+                createDisc();
+            }
+            _editorModel->update();
         }
     }
-    ImGui::End();
 }
 
 void _CreatorWindow::onDrawing()
@@ -211,16 +194,6 @@ void _CreatorWindow::onDrawing()
 void _CreatorWindow::finishDrawing()
 {
     _drawing.clear();
-}
-
-bool _CreatorWindow::isOn() const
-{
-    return _on;
-}
-
-void _CreatorWindow::setOn(bool value)
-{
-    _on = value;
 }
 
 void _CreatorWindow::createCell()

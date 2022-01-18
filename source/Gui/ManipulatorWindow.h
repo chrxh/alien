@@ -4,20 +4,15 @@
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
+#include "AlienWindow.h"
 
-class _ManipulatorWindow
+class _ManipulatorWindow : public _AlienWindow
 {
 public:
     _ManipulatorWindow(
         EditorModel const& editorModel,
         SimulationController const& simController,
         Viewport const& viewport);
-    ~_ManipulatorWindow();
-
-    void process();
-
-    bool isOn() const;
-    void setOn(bool value);
 
     bool isInspectionPossible() const;
     void onInspectEntities();
@@ -28,6 +23,8 @@ public:
     void onPaste();
 
 private:
+    void processIntern() override;
+
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 
@@ -37,7 +34,6 @@ private:
     OpenSelectionDialog _openSelectionDialog;
     SaveSelectionDialog _saveSelectionDialog;
 
-    bool _on = false;
     bool _includeClusters = true;
     float _angle = 0;
     float _angularVel = 0;

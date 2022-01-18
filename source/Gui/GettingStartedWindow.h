@@ -3,20 +3,17 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "AlienWindow.h"
 
-class _GettingStartedWindow
+class _GettingStartedWindow : public _AlienWindow
 {
 public:
     _GettingStartedWindow();
 
-    ~_GettingStartedWindow();
-
-    void process();
-
-    bool isOn() const;
-    void setOn(bool value);
+    virtual ~_GettingStartedWindow();
 
 private:
-    bool _on = false;
+    void processIntern() override;
+
     bool _showAfterStartup = true;
 };

@@ -4,6 +4,7 @@
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
+#include "AlienWindow.h"
 
 enum class CreationMode
 {
@@ -15,21 +16,18 @@ enum class CreationMode
     Drawing
 };
 
-class _CreatorWindow
+class _CreatorWindow : public _AlienWindow
 {
 public:
     _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport);
-    ~_CreatorWindow();
 
-    void process();
 
     void onDrawing();
     void finishDrawing();
 
-    bool isOn() const;
-    void setOn(bool value);
-
 private:
+    void processIntern();
+
     void createCell();
     void createParticle();
     void createRectangle();
@@ -39,8 +37,6 @@ private:
 
     RealVector2D getRandomPos() const;
     void incBranchNumber();
-
-    bool _on = false;
 
     float _energy = 100.0f;
     float _cellDistance = 1.0f;

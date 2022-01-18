@@ -10,57 +10,34 @@
 #include "AlienImGui.h"
 
 _LogWindow::_LogWindow(SimpleLogger const& logger)
-    : _logger(logger)
+    : _AlienWindow("Log", "windows.log", false)
+    , _logger(logger)
 {
-    _on = GlobalSettings::getInstance().getBoolState("windows.log.active", false);
     _verbose = GlobalSettings::getInstance().getBoolState("windows.log.verbose", false);
 }
 
 _LogWindow::~_LogWindow()
 {
-    GlobalSettings::getInstance().setBoolState("windows.log.active", _on);
     GlobalSettings::getInstance().setBoolState("windows.log.verbose", _verbose);
 }
 
-void _LogWindow::process()
+void _LogWindow::processIntern()
 {
-    if (!_on) {
-        return;
-    }
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    if (ImGui::Begin("Log", &_on)) {
+    auto styleRepository = StyleRepository::getInstance();
+    if (ImGui::BeginChild(
+            "##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
 
-        auto styleRepository = StyleRepository::getInstance();
-        if (ImGui::BeginChild(
-                "##",
-                ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(40.0f)),
-                true,
-                ImGuiWindowFlags_HorizontalScrollbar)) {
-            ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
-
-            for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important)
-                     | boost::adaptors::reversed) {
-                ImGui::TextUnformatted(logMessage.c_str());
-            }
-            ImGui::PopStyleColor();
-            ImGui::PopFont();
+        for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important) | boost::adaptors::reversed) {
+            ImGui::TextUnformatted(logMessage.c_str());
         }
-        ImGui::EndChild();
-        
-        ImGui::Spacing();
-        ImGui::Spacing();
-        AlienImGui::ToggleButton("Verbose", _verbose);
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
     }
-    ImGui::End();
-}
+    ImGui::EndChild();
 
-bool _LogWindow::isOn() const
-{
-    return _on;
-}
-
-void _LogWindow::setOn(bool value)
-{
-    _on = value;
+    ImGui::Spacing();
+    ImGui::Spacing();
+    AlienImGui::ToggleButton("Verbose", _verbose);
 }

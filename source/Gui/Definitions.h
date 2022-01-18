@@ -5,6 +5,9 @@
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 
+class _AlienWindow;
+using AlienWindow = std::shared_ptr<_AlienWindow>;
+
 class _SimulationView;
 using SimulationView= std::shared_ptr<_SimulationView>;
 
@@ -31,8 +34,8 @@ using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;
 class _StatisticsWindow;
 using StatisticsWindow = std::shared_ptr<_StatisticsWindow>;
 
-class _ModeWindow;
-using ModeWindow = std::shared_ptr<_ModeWindow>;
+class _ModeController;
+using ModeController = std::shared_ptr<_ModeController>;
 
 class _GpuSettingsDialog;
 using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;

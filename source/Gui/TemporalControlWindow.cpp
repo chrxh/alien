@@ -17,26 +17,14 @@
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationController const& simController,
     StatisticsWindow const& statisticsWindow)
-    : _simController(simController)
+    : _AlienWindow("Temporal control", "windows.temporal control", true)
+    , _simController(simController)
     , _statisticsWindow(statisticsWindow)
 {
-    _on = GlobalSettings::getInstance().getBoolState("windows.temporal control.active", true);
 }
 
-_TemporalControlWindow::~_TemporalControlWindow()
+void _TemporalControlWindow::processIntern()
 {
-    GlobalSettings::getInstance().setBoolState("windows.temporal control.active", _on);
-}
-
-void _TemporalControlWindow::process()
-{
-    if (!_on) {
-        return;
-    }
-
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::Begin("Temporal control", &_on);
-
     processRunButton();
     ImGui::SameLine();
     processPauseButton();
@@ -60,18 +48,6 @@ void _TemporalControlWindow::process()
         processTpsRestriction();
     }
     ImGui::EndChild();
-
-    ImGui::End();
-}
-
-bool _TemporalControlWindow::isOn() const
-{
-    return _on;
-}
-
-void _TemporalControlWindow::setOn(bool value)
-{
-    _on = value;
 }
 
 void _TemporalControlWindow::processTpsInfo()

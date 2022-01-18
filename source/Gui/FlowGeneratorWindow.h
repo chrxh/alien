@@ -3,22 +3,17 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/FlowFieldSettings.h"
 #include "Definitions.h"
+#include "AlienWindow.h"
 
-class _FlowGeneratorWindow
+class _FlowGeneratorWindow : public _AlienWindow
 {
 public:
     _FlowGeneratorWindow(SimulationController const& simController);
-    ~_FlowGeneratorWindow();
-
-    void process();
-
-    bool isOn() const;
-    void setOn(bool value);
 
 private:
+    void processIntern() override;
+
     FlowCenter createFlowCenter();
 
     SimulationController _simController;
-
-    bool _on = false;
 };

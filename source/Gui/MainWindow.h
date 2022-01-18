@@ -42,7 +42,7 @@ private:
     SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
-    ModeWindow _modeWindow;
+    ModeController _modeController;
     GpuSettingsDialog _gpuSettingsDialog;
     Viewport _viewport;
     StartupWindow _startupWindow;

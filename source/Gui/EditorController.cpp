@@ -44,6 +44,9 @@ void _EditorController::process()
         _manipulatorWindow->process();
         _creatorWindow->process();
     }
+    if (!_creatorWindow->isOn()) {
+        _editorModel->setDrawMode(false);
+    }
     
     processSelectionRect();
     processInspectorWindows();
