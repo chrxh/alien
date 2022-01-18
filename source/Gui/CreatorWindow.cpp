@@ -49,7 +49,7 @@ void _CreatorWindow::processIntern()
     AlienImGui::EndToolbarButton();
 
     ImGui::SameLine();
-    if (AlienImGui::BeginToolbarButton(ICON_FA_ATOM)) {
+    if (AlienImGui::BeginToolbarButton(ICON_DOT)) {
         _mode = CreationMode::CreateCell;
     }
     AlienImGui::EndToolbarButton();
