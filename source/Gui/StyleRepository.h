@@ -25,7 +25,7 @@ namespace Const
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
 
-    ImColor const SelectionAreaFillColor = ImColor::HSV(0.33f, 0.0f, 0.0f, 0.6f);
+    ImColor const SelectionAreaFillColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 0.6f);
     ImColor const SelectionAreaBorderColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 1.0f);
 
     ImColor const CellFunctionOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
