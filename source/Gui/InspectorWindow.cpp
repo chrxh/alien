@@ -280,7 +280,7 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
         if (sourcecode != origSourcecode || !_lastCompilationResult) {
             _lastCompilationResult =
                 std::make_shared<CompilationResult>(
-                CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap()));
+                CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap(), _simController->getSimulationParameters()));
             if (_lastCompilationResult->compilationOk) {
                 cell.cellFeature.constData = _lastCompilationResult->compilation;
             }
