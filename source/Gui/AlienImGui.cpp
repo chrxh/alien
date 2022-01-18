@@ -261,6 +261,7 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
         auto height = ImGui::GetWindowHeight();
         ImVec2 windowPos{pos.x, pos.y + height};
         ImGui::SetNextWindowPos(windowPos);
+        ImGui::SetNextWindowFocus();
         if (ImGui::Begin(
                 popup.c_str(),
                 &open,
