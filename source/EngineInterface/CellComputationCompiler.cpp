@@ -301,7 +301,7 @@ namespace
 }
 
 
-CompilationResult CellComputationCompiler::compileSourceCode(std::string const& code, SymbolMap const& symbols)
+CompilationResult CellComputationCompiler::compileSourceCode(std::string const& code, SymbolMap const& symbols, SimulationParameters const& parameters)
 {
     CompilerState state = CompilerState::LOOKING_FOR_INSTR_START;
 
@@ -329,10 +329,9 @@ CompilationResult CellComputationCompiler::compileSourceCode(std::string const& 
             instructionUncoded = InstructionUncoded();
         }
     }
-    if (state == CompilerState::LOOKING_FOR_INSTR_START) {
+    if (state == CompilerState::LOOKING_FOR_INSTR_START && result.compilation.size() <= getMaxBytes(parameters)) {
         result.compilationOk = true;
-    }
-    else {
+    } else {
         result.compilationOk = false;
         result.lineOfFirstError = linePos;
     }

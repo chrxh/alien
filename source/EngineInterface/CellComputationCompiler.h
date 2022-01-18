@@ -17,7 +17,7 @@ struct CompilationResult
 class CellComputationCompiler
 {
 public:
-    static CompilationResult compileSourceCode(std::string const& code, SymbolMap const& symbols);
+    static CompilationResult compileSourceCode(std::string const& code, SymbolMap const& symbols, SimulationParameters const& parameters);
     static std::string
     decompileSourceCode(std::string const& data, SymbolMap const& symbols, SimulationParameters const& parameters);
 
