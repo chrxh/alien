@@ -109,6 +109,9 @@ using InspectorWindow = std::shared_ptr<_InspectorWindow>;
 class _CreatorWindow;
 using CreatorWindow = std::shared_ptr<_CreatorWindow>;
 
+class _MultiplierWindow;
+using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
+
 
 struct GLFWvidmode;
 struct GLFWwindow;

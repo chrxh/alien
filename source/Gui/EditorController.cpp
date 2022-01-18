@@ -12,6 +12,7 @@
 #include "SelectionWindow.h"
 #include "ManipulatorWindow.h"
 #include "CreatorWindow.h"
+#include "MultiplierWindow.h"
 
 _EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
@@ -21,6 +22,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
     _manipulatorWindow = std::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
+    _multiplierWindow = std::make_shared<_MultiplierWindow>(_simController, _viewport);
 }
 
 bool _EditorController::isOn() const
@@ -43,6 +45,7 @@ void _EditorController::process()
         _selectionWindow->process();
         _manipulatorWindow->process();
         _creatorWindow->process();
+        _multiplierWindow->process();
     }
     if (!_creatorWindow->isOn()) {
         _editorModel->setDrawMode(false);
@@ -119,6 +122,11 @@ ManipulatorWindow _EditorController::getManipulatorWindow() const
 CreatorWindow _EditorController::getCreatorWindow() const
 {
     return _creatorWindow;
+}
+
+MultiplierWindow _EditorController::getMultiplierWindow() const
+{
+    return _multiplierWindow;
 }
 
 bool _EditorController::areInspectionWindowsActive() const

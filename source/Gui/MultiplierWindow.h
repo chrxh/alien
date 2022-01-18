@@ -5,6 +5,12 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
+enum class MultiplierMode
+{
+    Grid,
+    Random
+};
+
 class _MultiplierWindow : public _AlienWindow
 {
 public:
@@ -15,4 +21,6 @@ private:
 
     SimulationController _simController;
     Viewport _viewport;
+
+    MultiplierMode _mode = MultiplierMode::Grid;
 };

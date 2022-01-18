@@ -53,6 +53,7 @@
 #include "ManipulatorWindow.h"
 #include "WindowController.h"
 #include "CreatorWindow.h"
+#include "MultiplierWindow.h"
 
 namespace
 {
@@ -339,6 +340,7 @@ void _MainWindow::processMenubar()
     auto selectionWindow = _editorController->getSelectionWindow();
     auto manipulatorWindow = _editorController->getManipulatorWindow();
     auto creatorWindow = _editorController->getCreatorWindow();
+    auto multiplierWindow = _editorController->getMultiplierWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -410,7 +412,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
                 manipulatorWindow->setOn(!manipulatorWindow->isOn());
             }
-            if (ImGui::MenuItem("Multplier", "ALT+A", false)) {
+            if (ImGui::MenuItem("Multiplier", "ALT+A", multiplierWindow->isOn())) {
+                multiplierWindow->setOn(!multiplierWindow->isOn());
             }
             ImGui::EndDisabled();
             ImGui::Separator();
@@ -532,6 +535,9 @@ void _MainWindow::processMenubar()
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
         manipulatorWindow->setOn(!manipulatorWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+        multiplierWindow->setOn(!multiplierWindow->isOn());
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
         _editorController->onInspectEntities();
