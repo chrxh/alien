@@ -14,26 +14,14 @@
 #include "AlienImGui.h"
 
 _SpatialControlWindow::_SpatialControlWindow(SimulationController const& simController, Viewport const& viewport)
-    : _simController(simController)
+    : _AlienWindow("Spatial control", "windows.spatial control", true)
+    , _simController(simController)
     , _viewport(viewport)
 {
-    _on = GlobalSettings::getInstance().getBoolState("windows.spatial control.active", true);
 }
 
-_SpatialControlWindow::~_SpatialControlWindow()
+void _SpatialControlWindow::processIntern()
 {
-    GlobalSettings::getInstance().setBoolState("windows.spatial control.active", _on);
-}
-
-void _SpatialControlWindow::process()
-{
-    if (!_on) {
-        return;
-    }
-
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::Begin("Spatial control", &_on);
-
     processZoomInButton();
     ImGui::SameLine();
     processZoomOutButton();
@@ -77,19 +65,7 @@ void _SpatialControlWindow::process()
     }
     ImGui::EndChild();
 
-    ImGui::End();
-
     processResizeDialog();
-}
-
-bool _SpatialControlWindow::isOn() const
-{
-    return _on;
-}
-
-void _SpatialControlWindow::setOn(bool value)
-{
-    _on = value;
 }
 
 void _SpatialControlWindow::processZoomInButton()

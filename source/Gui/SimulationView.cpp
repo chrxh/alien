@@ -9,7 +9,7 @@
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
 #include "Resources.h"
-#include "ModeWindow.h"
+#include "ModeController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 
@@ -32,7 +32,7 @@ namespace
 
 _SimulationView::_SimulationView(
     SimulationController const& simController,
-    ModeWindow const& modeWindow,
+    ModeController const& modeWindow,
     Viewport const& viewport)
     : _viewport(viewport)
 {
@@ -139,7 +139,7 @@ void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
-    if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
+    if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
         _viewport->zoom(viewPos, _viewport->getZoomSensitivity());
     }
 }
@@ -156,7 +156,7 @@ void _SimulationView::rightMouseButtonPressed()
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
-    if (_modeWindow->getMode() == _ModeWindow::Mode::Navigation) {
+    if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
         _viewport->zoom(viewPos, 1.0f / _viewport->getZoomSensitivity());
     }
 }

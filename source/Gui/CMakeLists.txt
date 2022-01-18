@@ -7,6 +7,8 @@ PUBLIC
     ManipulatorWindow.h
     AlienImGui.cpp
     AlienImGui.h
+    AlienWindow.cpp
+    AlienWindow.h
     AutosaveController.cpp
     AutosaveController.h
     ColorizeDialog.cpp
@@ -37,8 +39,10 @@ PUBLIC
     Main.cpp
     MainWindow.cpp
     MainWindow.h
-    ModeWindow.cpp
-    ModeWindow.h
+    ModeController.cpp
+    ModeController.h
+    MultiplierWindow.cpp
+    MultiplierWindow.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
     OpenGLHelper.cpp

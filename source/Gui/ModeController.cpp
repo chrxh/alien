@@ -1,4 +1,4 @@
-#include "ModeWindow.h"
+#include "ModeController.h"
 
 #include <imgui.h>
 
@@ -6,7 +6,7 @@
 #include "Resources.h"
 #include "EditorController.h"
 
-_ModeWindow::_ModeWindow(EditorController const& editorController)
+_ModeController::_ModeController(EditorController const& editorController)
     : _editorController(editorController)
 {
     _navigationOn = OpenGLHelper::loadTexture(Const::NavigationOnFilename);
@@ -15,7 +15,7 @@ _ModeWindow::_ModeWindow(EditorController const& editorController)
     _actionOff = OpenGLHelper::loadTexture(Const::ActionOffFilename);
 }
 
-void _ModeWindow::process()
+void _ModeController::process()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x /*+ viewport->Size.x - 200*/ + 00, viewport->Pos.y + viewport->Size.y - 100));
@@ -45,12 +45,12 @@ void _ModeWindow::process()
     ImGui::End();
 }
 
-auto _ModeWindow::getMode() const -> Mode
+auto _ModeController::getMode() const -> Mode
 {
     return _mode;
 }
 
-void _ModeWindow::setMode(Mode value)
+void _ModeController::setMode(Mode value)
 {
     _mode = value;
     _editorController->setOn(_mode == Mode::Action);

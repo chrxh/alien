@@ -6,6 +6,7 @@
 
 #include <imgui.h>
 #include <imgui_freetype.h>
+#include <implot.h>
 
 #include "Fonts/DroidSans.h"
 #include "Fonts/Cousine-Regular.h"
@@ -73,6 +74,8 @@ void StyleRepository::init()
     if (_monospaceFont == nullptr) {
         throw std::runtime_error("Could not load font.");
     }
+
+    ImPlot::GetStyle().AntiAliasedLines = true;
 }
 
 ImFont* StyleRepository::getIconFont() const

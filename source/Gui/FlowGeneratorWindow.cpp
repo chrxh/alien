@@ -14,29 +14,18 @@ namespace
 }
 
 _FlowGeneratorWindow::_FlowGeneratorWindow(SimulationController const& simController)
-    : _simController(simController)
+    : _AlienWindow("Flow generator", "windows.flow generator", false)
+    , _simController(simController)
 {
-    _on = GlobalSettings::getInstance().getBoolState("windows.flow generator.active", false);
 }
 
-_FlowGeneratorWindow::~_FlowGeneratorWindow()
+void _FlowGeneratorWindow::processIntern()
 {
-    GlobalSettings::getInstance().setBoolState("windows.flow generator.active", _on);
-}
-
-void _FlowGeneratorWindow::process()
-{
-    if (!_on) {
-        return;
-    }
     auto flowFieldSettings = _simController->getFlowFieldSettings();
     auto origFlowFieldSettings = _simController->getOriginalFlowFieldSettings();
     auto lastFlowFieldSettings = flowFieldSettings;
 
     auto worldSize = _simController->getWorldSize();
-
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::Begin("Flow generator", &_on, ImGuiWindowFlags_None);
 
     AlienImGui::ToggleButton(" ", flowFieldSettings.active);
     ImGui::SameLine();
@@ -135,21 +124,10 @@ void _FlowGeneratorWindow::process()
         ImGui::EndTabBar();
     }
     ImGui::EndDisabled();
-    ImGui::End();
 
     if (flowFieldSettings != lastFlowFieldSettings) {
         _simController->setFlowFieldSettings_async(flowFieldSettings);
     }
-}
-
-bool _FlowGeneratorWindow::isOn() const
-{
-    return _on;
-}
-
-void _FlowGeneratorWindow::setOn(bool value)
-{
-    _on = value;
 }
 
 FlowCenter _FlowGeneratorWindow::createFlowCenter()

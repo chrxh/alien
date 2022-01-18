@@ -17,15 +17,9 @@ namespace
 }
 
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
-    : _simController(simController)
+    : _AlienWindow("Statistics", "windows.statistics", false)
+    , _simController(simController)
 {
-    ImPlot::GetStyle().AntiAliasedLines = true;
-    _on = GlobalSettings::getInstance().getBoolState("windows.statistics.active", false);
-}
-
-_StatisticsWindow::~_StatisticsWindow()
-{
-    GlobalSettings::getInstance().setBoolState("windows.statistics.active", _on);
 }
 
 namespace
@@ -49,18 +43,8 @@ void _StatisticsWindow::reset()
     _longtermStatistics = LongtermStatistics();
 }
 
-void _StatisticsWindow::process()
+void _StatisticsWindow::processIntern()
 {
-    updateData();
-
-    if (!_on) {
-        return;
-    }
-
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::Begin("Statistics", &_on, windowFlags);
-
     AlienImGui::ToggleButton("Real time", _live);
 
     ImGui::SameLine();
@@ -77,19 +61,6 @@ void _StatisticsWindow::process()
     } else {
         processLongtermStatistics();
     }
-
-    ImGui::End();
-//    ImPlot::ShowDemoWindow();
-}
-
-bool _StatisticsWindow::isOn() const
-{
-    return _on;
-}
-
-void _StatisticsWindow::setOn(bool value)
-{
-    _on = value;
 }
 
 void _StatisticsWindow::processLiveStatistics()
@@ -332,7 +303,7 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
     ImGui::PopID();
 }
 
-void _StatisticsWindow::updateData()
+void _StatisticsWindow::processBackground()
 {
     auto newStatistics = _simController->getStatistics();
     _liveStatistics.add(newStatistics);

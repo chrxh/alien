@@ -1,19 +1,18 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/FlowFieldSettings.h"
+
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _FlowGeneratorWindow : public _AlienWindow
+class _MultiplierWindow : public _AlienWindow
 {
 public:
-    _FlowGeneratorWindow(SimulationController const& simController);
+    _MultiplierWindow(SimulationController const& simController, Viewport const& viewport);
 
 private:
     void processIntern() override;
 
-    FlowCenter createFlowCenter();
-
     SimulationController _simController;
+    Viewport _viewport;
 };

@@ -16,7 +16,8 @@ namespace
 }
 
 _SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController)
-    : _simController(simController)
+    : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
+    , _simController(simController)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -24,20 +25,10 @@ _SimulationParametersWindow::_SimulationParametersWindow(SimulationController co
         color.w = 1.0f; //alpha
         _savedPalette[n] = static_cast<ImU32>(ImColor(color));
     }
-    _on = GlobalSettings::getInstance().getBoolState("windows.simulation parameters.active", false);
 }
 
-_SimulationParametersWindow::~_SimulationParametersWindow()
+void _SimulationParametersWindow::processIntern()
 {
-    GlobalSettings::getInstance().setBoolState("windows.simulation parameters.active", _on);
-}
-
-void _SimulationParametersWindow::process()
-{
-    if (!_on) {
-        return;
-    }
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
     auto simParameters = _simController->getSimulationParameters();
     auto origSimParameters = _simController->getOriginalSimulationParameters();
     auto lastSimParameters = simParameters;
@@ -46,51 +37,45 @@ void _SimulationParametersWindow::process()
     auto origSimParametersSpots = _simController->getOriginalSimulationParametersSpots();
     auto lastSimParametersSpots = simParametersSpots;
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    if (ImGui::Begin("Simulation parameters", &_on, windowFlags)) {
+    if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-        if (ImGui::BeginTabBar(
-                "##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-
-            if (simParametersSpots.numSpots < 2) {
-                if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                    int index = simParametersSpots.numSpots;
-                    simParametersSpots.spots[index] = createSpot(simParameters, index);
-                    _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[index], index);
-                    ++simParametersSpots.numSpots;
-                }
-                AlienImGui::Tooltip("Add spot");
+        if (simParametersSpots.numSpots < 2) {
+            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+                int index = simParametersSpots.numSpots;
+                simParametersSpots.spots[index] = createSpot(simParameters, index);
+                _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[index], index);
+                ++simParametersSpots.numSpots;
             }
+            AlienImGui::Tooltip("Add spot");
+        }
 
-            if (ImGui::BeginTabItem("Base", NULL, ImGuiTabItemFlags_None)) {
-                processBase(simParameters, origSimParameters);
+        if (ImGui::BeginTabItem("Base", NULL, ImGuiTabItemFlags_None)) {
+            processBase(simParameters, origSimParameters);
+            ImGui::EndTabItem();
+        }
+
+        for (int tab = 0; tab < simParametersSpots.numSpots; ++tab) {
+            SimulationParametersSpot& spot = simParametersSpots.spots[tab];
+            SimulationParametersSpot const& origSpot = origSimParametersSpots.spots[tab];
+            bool open = true;
+            char name[16];
+            snprintf(name, IM_ARRAYSIZE(name), "Spot %01d", tab + 1);
+            if (ImGui::BeginTabItem(name, &open, ImGuiTabItemFlags_None)) {
+                processSpot(spot, origSpot);
                 ImGui::EndTabItem();
             }
 
-            for (int tab = 0; tab < simParametersSpots.numSpots; ++tab) {
-                SimulationParametersSpot& spot = simParametersSpots.spots[tab];
-                SimulationParametersSpot const& origSpot = origSimParametersSpots.spots[tab];
-                bool open = true;
-                char name[16];
-                snprintf(name, IM_ARRAYSIZE(name), "Spot %01d", tab + 1);
-                if (ImGui::BeginTabItem(name, &open, ImGuiTabItemFlags_None)) {
-                    processSpot(spot, origSpot);
-                    ImGui::EndTabItem();
+            if (!open) {
+                for (int i = tab; i < simParametersSpots.numSpots - 1; ++i) {
+                    simParametersSpots.spots[i] = simParametersSpots.spots[i + 1];
+                    _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[i], i);
                 }
-
-                if (!open) {
-                    for (int i = tab; i < simParametersSpots.numSpots - 1; ++i) {
-                        simParametersSpots.spots[i] = simParametersSpots.spots[i + 1];
-                        _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[i], i);
-                    }
-                    --simParametersSpots.numSpots;
-                }
+                --simParametersSpots.numSpots;
             }
-
-            ImGui::EndTabBar();
         }
+
+        ImGui::EndTabBar();
     }
-    ImGui::End();
 
     if (simParameters != lastSimParameters) {
         _simController->setSimulationParameters_async(simParameters);
@@ -99,16 +84,6 @@ void _SimulationParametersWindow::process()
     if (simParametersSpots != lastSimParametersSpots) {
         _simController->setSimulationParametersSpots_async(simParametersSpots);
     }
-}
-
-bool _SimulationParametersWindow::isOn() const
-{
-    return _on;
-}
-
-void _SimulationParametersWindow::setOn(bool value)
-{
-    _on = value;
 }
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)

@@ -2,10 +2,10 @@
 
 #include "Definitions.h"
 
-class _ModeWindow
+class _ModeController
 {
 public:
-    _ModeWindow(EditorController const& editorController);
+    _ModeController(EditorController const& editorController);
 
     void process();
 

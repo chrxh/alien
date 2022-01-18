@@ -10,7 +10,7 @@ class _SimulationView
 public:
     _SimulationView(
         SimulationController const& simController,
-        ModeWindow const& modeWindow,
+        ModeController const& modeWindow,
         Viewport const& viewport);
     ~_SimulationView();
 
@@ -61,6 +61,6 @@ private:
     std::optional<IntVector2D> _prevMousePosInt;
 
     Viewport _viewport;
-    ModeWindow _modeWindow;
+    ModeController _modeWindow;
     SimulationController _simController;
 };

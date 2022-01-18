@@ -24,7 +24,7 @@
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
-#include "ModeWindow.h"
+#include "ModeController.h"
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
@@ -110,8 +110,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
 
     _editorController =
         std::make_shared<_EditorController>(_simController, _viewport);
-    _modeWindow = std::make_shared<_ModeWindow>(_editorController);
-    _simulationView = std::make_shared<_SimulationView>(_simController, _modeWindow, _viewport);
+    _modeController = std::make_shared<_ModeController>(_editorController);
+    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
@@ -395,12 +395,12 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", _modeWindow->getMode() == _ModeWindow::Mode::Action)) {
-                _modeWindow->setMode(
-                    _modeWindow->getMode() == _ModeWindow::Mode::Action ? _ModeWindow::Mode::Navigation
-                                                                        : _ModeWindow::Mode::Action);
+            if (ImGui::MenuItem("Activate", "ALT+E", _modeController->getMode() == _ModeController::Mode::Action)) {
+                _modeController->setMode(
+                    _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation
+                                                                        : _ModeController::Mode::Action);
             }
-            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode());
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
@@ -410,27 +410,27 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
                 manipulatorWindow->setOn(!manipulatorWindow->isOn());
             }
-            if (ImGui::MenuItem("Mass operations", "ALT+A", false)) {
+            if (ImGui::MenuItem("Multplier", "ALT+A", false)) {
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->isInspectionPossible());
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
             if (ImGui::MenuItem("Inspect entities", "ALT+N")) {
                 _editorController->onInspectEntities();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->areInspectionWindowsActive());
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->isCopyingPossible());
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isCopyingPossible());
             if (ImGui::MenuItem("Copy", "CTRL+C")) {
                 _editorController->onCopy();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(_ModeWindow::Mode::Navigation == _modeWindow->getMode() || !_editorController->isPastingPossible());
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isPastingPossible());
             if (ImGui::MenuItem("Paste", "CTRL+V")) {
                 _editorController->onPaste();
             }
@@ -523,9 +523,9 @@ void _MainWindow::processMenubar()
     }
 
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
-        _modeWindow->setMode(
-            _modeWindow->getMode() == _ModeWindow::Mode::Action ? _ModeWindow::Mode::Navigation
-                                                                : _ModeWindow::Mode::Action);
+        _modeController->setMode(
+            _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation
+                                                                : _ModeController::Mode::Action);
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
         selectionWindow->setOn(!selectionWindow->isOn());
@@ -584,7 +584,7 @@ void _MainWindow::processWindows()
 {
     _temporalControlWindow->process();
     _spatialControlWindow->process();
-    _modeWindow->process();
+    _modeController->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();
     _flowGeneratorWindow->process();
