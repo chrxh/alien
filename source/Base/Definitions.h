@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <map>
 #include <set>
 #include <list>
@@ -93,6 +94,8 @@ struct BASE_EXPORT RealVector2D
     RealVector2D operator-(RealVector2D const& other) const;
     RealVector2D operator/(float divisor) const;
 };
+
+using RealMatrix2D = std::array<std::array<float, 2>, 2>;
 
 struct RealRect
 {

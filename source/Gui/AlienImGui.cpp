@@ -224,7 +224,7 @@ void AlienImGui::Text(std::string const& text)
     ImGui::TextUnformatted(text.c_str());
 }
 
-bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup)
+bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
@@ -261,7 +261,9 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
         auto height = ImGui::GetWindowHeight();
         ImVec2 windowPos{pos.x, pos.y + height};
         ImGui::SetNextWindowPos(windowPos);
-        ImGui::SetNextWindowFocus();
+        if (focus) {
+            ImGui::SetNextWindowFocus();
+        }
         if (ImGui::Begin(
                 popup.c_str(),
                 &open,

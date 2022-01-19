@@ -70,17 +70,18 @@ namespace
     }
 }
 
-DataDescription DescriptionHelper::gridMultiply(DataDescription input, GridMultiplyParameters const& parameters)
+DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters)
 {
     DataDescription result;
     for (int i = 0; i < parameters._horizontalNumber; ++i) {
         for (int j = 0; j < parameters._verticalNumber; ++j) {
-            makeValid(input);
-            result.add(input);
+            auto templateData = input;
+            templateData.shift({i * parameters._horizontalDistance, j * parameters._verticalDistance});
+            templateData.rotate(i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);
 
-            input.shift({0, parameters._verticalDistance});
+            makeValid(templateData);
+            result.add(templateData);
         }
-        input.shift({parameters._horizontalDistance, -parameters._verticalDistance * parameters._verticalNumber});
     }
 
     return result;

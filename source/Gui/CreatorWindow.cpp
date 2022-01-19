@@ -303,7 +303,7 @@ void _CreatorWindow::createDisc()
         float angleInc =
             [&] {
                 if (radius > SmallValue) {
-                    auto result = asinf(_cellDistance / (2 * radius)) * 2 * toFloat(radToDeg);
+                    auto result = asinf(_cellDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
                     return 360.0f / floorf(360.0f / result);
                 }
                 return 360.0f;
