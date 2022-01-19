@@ -285,6 +285,12 @@ struct DataDescription
     }
 
     DataDescription() = default;
+    DataDescription& add(DataDescription const& other)
+    {
+        cells.insert(cells.end(), other.cells.begin(), other.cells.end());
+        particles.insert(particles.end(), other.particles.begin(), other.particles.end());
+        return *this;
+    }
     DataDescription& addCells(std::vector<CellDescription> const& value)
     {
         cells.insert(cells.end(), value.begin(), value.end());

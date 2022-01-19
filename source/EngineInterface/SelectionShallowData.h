@@ -16,6 +16,11 @@ struct SelectionShallowData
     float clusterCenterVelX = 0;
     float clusterCenterVelY = 0;
 
+    bool compareNumbers(SelectionShallowData const& other) const
+    {
+        return numCells == other.numCells && numClusterCells == other.numClusterCells && numParticles == other.numParticles;
+    }
+
     bool operator==(SelectionShallowData const& other) const
     {
         return numCells == other.numCells && numClusterCells == other.numClusterCells

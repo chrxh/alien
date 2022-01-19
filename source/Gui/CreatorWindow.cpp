@@ -111,6 +111,8 @@ void _CreatorWindow::processIntern()
         AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
     }
 
+    AlienImGui::Separator();
+
     if (_mode == CreationMode::Drawing) {
         auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
         if (ImGui::Button(text)) {
