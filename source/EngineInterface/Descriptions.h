@@ -276,61 +276,23 @@ struct DataDescription
     std::vector<CellDescription> cells;
     std::vector<ParticleDescription> particles;
 
-    explicit DataDescription(ClusteredDataDescription const& clusteredData)
-    {
-        for (auto const& cluster : clusteredData.clusters) {
-            addCells(cluster.cells);
-        }
-        particles = clusteredData.particles;
-    }
-
     DataDescription() = default;
-    DataDescription& add(DataDescription const& other)
-    {
-        cells.insert(cells.end(), other.cells.begin(), other.cells.end());
-        particles.insert(particles.end(), other.particles.begin(), other.particles.end());
-        return *this;
-    }
-    DataDescription& addCells(std::vector<CellDescription> const& value)
-    {
-        cells.insert(cells.end(), value.begin(), value.end());
-        return *this;
-    }
-    DataDescription& addCell(CellDescription const& value)
-    {
-        addCells({value});
-        return *this;
-    }
 
-    DataDescription& addParticles(std::vector<ParticleDescription> const& value)
-    {
-        particles.insert(particles.end(), value.begin(), value.end());
-        return *this;
-    }
-    DataDescription& addParticle(ParticleDescription const& value)
-    {
-        addParticles({value});
-        return *this;
-    }
-    void clear()
-    {
-        cells.clear();
-        particles.clear();
-    }
-    bool isEmpty() const
-    {
-        if (!cells.empty()) {
-            return false;
-        }
-        if (!particles.empty()) {
-            return false;
-        }
-        return true;
-    }
+    explicit DataDescription(ClusteredDataDescription const& clusteredData);
+
+    DataDescription& add(DataDescription const& other);
+    DataDescription& addCells(std::vector<CellDescription> const& value);
+    DataDescription& addCell(CellDescription const& value);
+
+    DataDescription& addParticles(std::vector<ParticleDescription> const& value);
+    DataDescription& addParticle(ParticleDescription const& value);
+    void clear();
+    bool isEmpty() const;
     void setCenter(RealVector2D const& center);
 
     RealVector2D calcCenter() const;
     void shift(RealVector2D const& delta);
+    void rotate(float angle);
 
     DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
 

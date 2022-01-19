@@ -98,8 +98,7 @@ public:
 
     static void Text(std::string const& text);
 
-    static bool BeginMenuButton(std::string const& text, bool& toggle,
-                                std::string const& popup);  //return toggle
+    static bool BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus = true);  //return toggle
     static void EndMenuButton();
     static bool ShutdownButton();
     static void ColorButtonWithPicker(

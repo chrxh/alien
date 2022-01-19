@@ -462,7 +462,7 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
 
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings")) {
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings", false)) {
             if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
                 _autosaveController->setOn(!_autosaveController->isOn());
             }

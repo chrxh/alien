@@ -79,6 +79,62 @@ void ClusteredDataDescription::shift(RealVector2D const& delta)
     }
 }
 
+DataDescription::DataDescription(ClusteredDataDescription const& clusteredData)
+{
+    for (auto const& cluster : clusteredData.clusters) {
+        addCells(cluster.cells);
+    }
+    particles = clusteredData.particles;
+}
+
+DataDescription& DataDescription::add(DataDescription const& other)
+{
+    cells.insert(cells.end(), other.cells.begin(), other.cells.end());
+    particles.insert(particles.end(), other.particles.begin(), other.particles.end());
+    return *this;
+}
+
+DataDescription& DataDescription::addCells(std::vector<CellDescription> const& value)
+{
+    cells.insert(cells.end(), value.begin(), value.end());
+    return *this;
+}
+
+DataDescription& DataDescription::addCell(CellDescription const& value)
+{
+    addCells({value});
+    return *this;
+}
+
+DataDescription& DataDescription::addParticles(std::vector<ParticleDescription> const& value)
+{
+    particles.insert(particles.end(), value.begin(), value.end());
+    return *this;
+}
+
+DataDescription& DataDescription::addParticle(ParticleDescription const& value)
+{
+    addParticles({value});
+    return *this;
+}
+
+void DataDescription::clear()
+{
+    cells.clear();
+    particles.clear();
+}
+
+bool DataDescription::isEmpty() const
+{
+    if (!cells.empty()) {
+        return false;
+    }
+    if (!particles.empty()) {
+        return false;
+    }
+    return true;
+}
+
 void DataDescription::setCenter(RealVector2D const& center)
 {
     auto origCenter = calcCenter();
@@ -107,6 +163,24 @@ void DataDescription::shift(RealVector2D const& delta)
     }
     for (auto& particle : particles) {
         particle.pos += delta;
+    }
+}
+
+void DataDescription::rotate(float angle)
+{
+    auto rotationMatrix = Math::calcRotationMatrix(angle);
+    auto center = calcCenter();
+
+    auto rotate = [&](RealVector2D& pos) {
+        auto relPos = pos - center;
+        auto rotatedRelPos = rotationMatrix * relPos;
+        pos = center + rotatedRelPos;
+    };
+    for (auto& cell : cells) {
+        rotate(cell.pos);
+    }
+    for (auto& particle : particles) {
+        rotate(particle.pos);
     }
 }
 
