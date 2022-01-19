@@ -70,6 +70,22 @@ namespace
     }
 }
 
+DataDescription DescriptionHelper::gridMultiply(DataDescription input, GridMultiplyParameters const& parameters)
+{
+    DataDescription result;
+    for (int i = 0; i < parameters._horizontalNumber; ++i) {
+        for (int j = 0; j < parameters._verticalNumber; ++j) {
+            makeValid(input);
+            result.add(input);
+
+            input.shift({0, parameters._verticalDistance});
+        }
+        input.shift({parameters._horizontalDistance, -parameters._verticalDistance * parameters._verticalNumber});
+    }
+
+    return result;
+}
+
 void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
@@ -136,6 +152,23 @@ void DescriptionHelper::colorize(ClusteredDataDescription& data, std::vector<int
         auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
         for (auto& cell : cluster.cells) {
             cell.metadata.color = color;
+        }
+    }
+}
+
+void DescriptionHelper::makeValid(DataDescription& data)
+{
+    auto& numberGen = NumberGenerator::getInstance();
+    std::unordered_map<uint64_t, uint64_t> newByOldIds;
+    for (auto& cell : data.cells) {
+        uint64_t newId = numberGen.getId();
+        newByOldIds.insert_or_assign(cell.id, newId);
+        cell.id = newId;
+    }
+
+    for (auto& cell : data.cells) {
+        for (auto& connection : cell.connections) {
+            connection.cellId = newByOldIds.at(connection.cellId);
         }
     }
 }

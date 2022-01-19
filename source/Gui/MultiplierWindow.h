@@ -1,6 +1,8 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/SelectionShallowData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -26,17 +28,8 @@ private:
 
     MultiplierMode _mode = MultiplierMode::Grid;
 
-    int _horizontalNumber = 10;
-    float _horizontalDistance = 10.0f;
-    float _horizontalAngleInc = 0;
-    float _horizontalVelXinc = 0;
-    float _horizontalVelYinc = 0;
-    float _horizontalAngularVelInc = 0;
+    DescriptionHelper::GridMultiplyParameters _gridParameters;
 
-    int _verticalNumber = 10;
-    float _verticalDistance = 10.0f;
-    float _verticalAngleInc = 0;
-    float _verticalVelXinc = 0;
-    float _verticalVelYinc = 0;
-    float _verticalAngularVelInc = 0;
+    DataDescription _origSelection;
+    std::optional<SelectionShallowData> _selectionDataAfterMultiplication;
 };
