@@ -433,7 +433,8 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .name("Mutation rate")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(0.005f)
+                .max(0.1f)
+                .logarithmic(true)
                 .format("%.5f")
                 .defaultValue(origSpot.values.tokenMutationRate),
             spot.values.tokenMutationRate);
