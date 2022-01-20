@@ -184,6 +184,22 @@ void DataDescription::rotate(float angle)
     }
 }
 
+void DataDescription::accelerate(RealVector2D const& velDelta, float angularVelDelta)
+{
+    auto center = calcCenter();
+
+    auto accelerate = [&](RealVector2D const& pos, RealVector2D& vel) {
+        auto relPos = pos - center;
+        vel += Physics::tangentialVelocity(relPos, velDelta, angularVelDelta);
+    };
+    for (auto& cell : cells) {
+        accelerate(cell.pos, cell.vel);
+    }
+    for (auto& particle : particles) {
+        accelerate(particle.pos, particle.vel);
+    }
+}
+
 ENGINEINTERFACE_EXPORT DataDescription&
 DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache)
 {

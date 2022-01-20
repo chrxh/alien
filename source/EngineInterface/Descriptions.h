@@ -293,6 +293,7 @@ struct DataDescription
     RealVector2D calcCenter() const;
     void shift(RealVector2D const& delta);
     void rotate(float angle);
+    void accelerate(RealVector2D const& velDelta, float angularVelDelta);
 
     DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
 

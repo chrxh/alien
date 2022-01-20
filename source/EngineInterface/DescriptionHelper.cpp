@@ -78,10 +78,34 @@ DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, Gr
             auto templateData = input;
             templateData.shift({i * parameters._horizontalDistance, j * parameters._verticalDistance});
             templateData.rotate(i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);
+            templateData.accelerate(
+                {i * parameters._horizontalVelXinc + j * parameters._verticalVelXinc, i * parameters._horizontalVelYinc + j * parameters._verticalVelYinc},
+                i * parameters._horizontalAngularVelInc + j * parameters._verticalAngularVelInc);
 
             makeValid(templateData);
             result.add(templateData);
         }
+    }
+
+    return result;
+}
+
+DataDescription
+DescriptionHelper::randomMultiply(DataDescription const& input, RandomMultiplyParameters const& parameters, IntVector2D const& worldSize)
+{
+    DataDescription result = input;
+    auto& numberGen = NumberGenerator::getInstance();
+    for (int i = 0; i < parameters._number - 1; ++i) {
+        auto templateData = input;
+        templateData.shift({toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
+        templateData.rotate(toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
+        templateData.accelerate(
+            {toFloat(numberGen.getRandomReal(parameters._minVelX, parameters._maxVelX)),
+             toFloat(numberGen.getRandomReal(parameters._minVelY, parameters._maxVelY))},
+            toFloat(numberGen.getRandomReal(parameters._minAngularVel, parameters._maxAngularVel)));
+
+        makeValid(templateData);
+        result.add(templateData);
     }
 
     return result;
