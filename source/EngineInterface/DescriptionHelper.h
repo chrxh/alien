@@ -25,6 +25,21 @@ public:
     };
     ENGINEINTERFACE_EXPORT static DataDescription gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters);
 
+    struct RandomMultiplyParameters
+    {
+        MEMBER_DECLARATION(RandomMultiplyParameters, int, number, 100);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngle, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngle, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelX, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelX, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelY, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelY, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngularVel, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngularVel, 0);
+    };
+    ENGINEINTERFACE_EXPORT static DataDescription
+    randomMultiply(DataDescription const& input, RandomMultiplyParameters const& parameters, IntVector2D const& worldSize);
+
     ENGINEINTERFACE_EXPORT static void reconnectCells(DataDescription& data, float maxdistance);
     ENGINEINTERFACE_EXPORT static void removeStickiness(DataDescription& data);
     ENGINEINTERFACE_EXPORT static void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);

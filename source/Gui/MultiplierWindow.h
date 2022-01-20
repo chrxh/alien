@@ -21,6 +21,7 @@ public:
 private:
     void processIntern() override;
     void processGridPanel();
+    void processRandomPanel();
 
     EditorModel _editorModel; 
     SimulationController _simController;
@@ -29,6 +30,7 @@ private:
     MultiplierMode _mode = MultiplierMode::Grid;
 
     DescriptionHelper::GridMultiplyParameters _gridParameters;
+    DescriptionHelper::RandomMultiplyParameters _randomParameters;
 
     DataDescription _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;
