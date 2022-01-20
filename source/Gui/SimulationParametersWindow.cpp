@@ -283,7 +283,7 @@ void _SimulationParametersWindow::processBase(
                 .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorPenalty)
                 .tooltip(std::string(
                     "The larger this value is, the less energy a cell can gain from an attack if the attacked cell "
-                    "does not match the adjacent color.")),
+                    "does not match the successive color.")),
             simParameters.spotValues.cellFunctionWeaponColorPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
