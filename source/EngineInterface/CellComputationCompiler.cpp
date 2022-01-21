@@ -465,10 +465,10 @@ std::optional<int> CellComputationCompiler::extractAddress(std::string const& s)
         auto right2 = lastTwoChars(s);
         if (left1 == "[" && left1 != "[[" && right1 == "]" && right2 != "]]") {
             auto address = s.substr(1, s.size() - 2);
-            if (s.substr(0, 2) == "0x") {
-                return static_cast<int>(std::stoul(s.substr(2), nullptr, 16));
+            if (address.substr(0, 2) == "0x") {
+                return static_cast<int>(std::stoul(address.substr(2), nullptr, 16));
             } else {
-                return static_cast<int>(std::stoul(s, nullptr, 10));
+                return static_cast<int>(std::stoul(address, nullptr, 10));
             }
         }
         return std::nullopt;

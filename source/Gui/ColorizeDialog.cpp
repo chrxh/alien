@@ -51,7 +51,7 @@ void _ColorizeDialog::process()
             anySelected |= checkColor;
         }
         ImGui::BeginDisabled(!anySelected);
-        if (ImGui::Button("OK")) {
+        if (AlienImGui::Button("OK")) {
             onColorize();
             ImGui::CloseCurrentPopup();
             _show = false;
@@ -60,7 +60,7 @@ void _ColorizeDialog::process()
 
         ImGui::SameLine();
         ImGui::SetItemDefaultFocus();
-        if (ImGui::Button("Cancel")) {
+        if (AlienImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _show = false;
         }

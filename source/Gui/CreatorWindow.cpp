@@ -43,40 +43,34 @@ _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationControl
 
 void _CreatorWindow::processIntern()
 {
-    if (AlienImGui::BeginToolbarButton(ICON_FA_SUN)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_SUN)) {
         _mode = CreationMode::CreateParticle;
     }
-    AlienImGui::EndToolbarButton();
 
     ImGui::SameLine();
-    if (AlienImGui::BeginToolbarButton(ICON_DOT)) {
+    if (AlienImGui::ToolbarButton(ICON_DOT)) {
         _mode = CreationMode::CreateCell;
     }
-    AlienImGui::EndToolbarButton();
 
     ImGui::SameLine();
-    if (AlienImGui::BeginToolbarButton(ICON_RECTANGLE)) {
+    if (AlienImGui::ToolbarButton(ICON_RECTANGLE)) {
         _mode = CreationMode::CreateRectangle;
     }
-    AlienImGui::EndToolbarButton();
 
     ImGui::SameLine();
-    if (AlienImGui::BeginToolbarButton(ICON_HEXAGON)) {
+    if (AlienImGui::ToolbarButton(ICON_HEXAGON)) {
         _mode = CreationMode::CreateHexagon;
     }
-    AlienImGui::EndToolbarButton();
 
     ImGui::SameLine();
-    if (AlienImGui::BeginToolbarButton(ICON_DISC)) {
+    if (AlienImGui::ToolbarButton(ICON_DISC)) {
         _mode = CreationMode::CreateDisc;
     }
-    AlienImGui::EndToolbarButton();
 
     ImGui::SameLine();
-    if (AlienImGui::BeginToolbarButton(ICON_FA_PAINT_BRUSH)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_PAINT_BRUSH)) {
         _mode = CreationMode::Drawing;
     }
-    AlienImGui::EndToolbarButton();
 
     AlienImGui::Group(ModeText.at(_mode));
     AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
@@ -115,12 +109,12 @@ void _CreatorWindow::processIntern()
 
     if (_mode == CreationMode::Drawing) {
         auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
-        if (ImGui::Button(text)) {
+        if (AlienImGui::Button(text)) {
             _editorModel->setDrawMode(!_editorModel->isDrawMode());
         }
     } else {
         _editorModel->setDrawMode(false);
-        if (ImGui::Button("Build")) {
+        if (AlienImGui::Button("Build")) {
             if (_mode == CreationMode::CreateCell) {
                 createCell();
             }

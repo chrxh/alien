@@ -30,7 +30,7 @@ void StyleRepository::init()
 
     ImGuiIO& io = ImGui::GetIO();
 
-    //default font (small)
+    //default font (small with icons)
     if (io.Fonts->AddFontFromMemoryCompressedTTF(
             DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * _contentScaleFactor)
         == nullptr) {

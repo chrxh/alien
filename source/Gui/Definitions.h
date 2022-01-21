@@ -112,6 +112,8 @@ using CreatorWindow = std::shared_ptr<_CreatorWindow>;
 class _MultiplierWindow;
 using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 
+class _SymbolsWindow;
+using SymbolsWindow = std::shared_ptr<_SymbolsWindow>;
 
 struct GLFWvidmode;
 struct GLFWwindow;

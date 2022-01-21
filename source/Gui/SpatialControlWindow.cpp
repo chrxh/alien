@@ -4,7 +4,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "Base/StringFormatter.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
@@ -41,14 +41,14 @@ void _SpatialControlWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto worldSize = _simController->getWorldSize();
         ImGui::TextUnformatted(
-            (StringFormatter::format(worldSize.x) + " x " + StringFormatter::format(worldSize.y)).c_str());
+            (StringHelper::format(worldSize.x) + " x " + StringHelper::format(worldSize.y)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Zoom factor");
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::TextUnformatted(StringFormatter::format(_viewport->getZoomFactor(), 1).c_str());
+        ImGui::TextUnformatted(StringHelper::format(_viewport->getZoomFactor(), 1).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
@@ -57,7 +57,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto centerPos = _viewport->getCenterInWorldPos();
         ImGui::TextUnformatted(
-            (StringFormatter::format(centerPos.x, 1) + ", " + StringFormatter::format(centerPos.y, 1)).c_str());
+            (StringHelper::format(centerPos.x, 1) + ", " + StringHelper::format(centerPos.y, 1)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
@@ -70,29 +70,26 @@ void _SpatialControlWindow::processIntern()
 
 void _SpatialControlWindow::processZoomInButton()
 {
-    if (AlienImGui::BeginToolbarButton(ICON_FA_SEARCH_PLUS)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_PLUS)) {
         _viewport->setZoomFactor(_viewport->getZoomFactor() * 2);
     }
-    AlienImGui::EndToolbarButton();
 }
 
 void _SpatialControlWindow::processZoomOutButton()
 {
-    if (AlienImGui::BeginToolbarButton(ICON_FA_SEARCH_MINUS)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_MINUS)) {
         _viewport->setZoomFactor(_viewport->getZoomFactor() / 2);
     }
-    AlienImGui::EndToolbarButton();
 }
 
 void _SpatialControlWindow::processResizeButton()
 {
-    if (AlienImGui::BeginToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
         _showResizeDialog = true;
         auto worldSize = _simController->getWorldSize();
         _width = worldSize.x;
         _height = worldSize.y;
     }
-    AlienImGui::EndToolbarButton();
 }
 
 void _SpatialControlWindow::processZoomSensitivitySlider()
@@ -144,7 +141,7 @@ void _SpatialControlWindow::processResizeDialog()
 
             AlienImGui::Separator();
 
-            if (ImGui::Button("OK")) {
+            if (AlienImGui::Button("OK")) {
                 ImGui::CloseCurrentPopup();
                 _showResizeDialog = false;
                 onResizing();
@@ -152,7 +149,7 @@ void _SpatialControlWindow::processResizeDialog()
             ImGui::SetItemDefaultFocus();
 
             ImGui::SameLine();
-            if (ImGui::Button("Cancel")) {
+            if (AlienImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();
                 _showResizeDialog = false;
             }

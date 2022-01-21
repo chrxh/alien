@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "Base/StringFormatter.h"
+#include "Base/StringHelper.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "EditorModel.h"
@@ -18,21 +18,21 @@ void _SelectionWindow::processIntern()
     ImGui::Text("Cells");
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::TextUnformatted(StringFormatter::format(selection.numCells).c_str());
+    ImGui::TextUnformatted(StringHelper::format(selection.numCells).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 
     ImGui::Text("Cells from clusters");
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::TextUnformatted(StringFormatter::format(selection.numClusterCells).c_str());
+    ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 
     ImGui::Text("Energy particles");
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::TextUnformatted(StringFormatter::format(selection.numParticles).c_str());
+    ImGui::TextUnformatted(StringHelper::format(selection.numParticles).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }

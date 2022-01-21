@@ -52,55 +52,49 @@ void _ManipulatorWindow::processIntern()
         }
 
         //load button
-        if (AlienImGui::BeginToolbarButton(ICON_FA_FOLDER_OPEN)) {
+        if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
             _openSelectionDialog->show();
         }
-        AlienImGui::EndToolbarButton();
 
         //save button
         ImGui::BeginDisabled(!isCopyingPossible());
         ImGui::SameLine();
-        if (AlienImGui::BeginToolbarButton(ICON_FA_SAVE)) {
+        if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
             _saveSelectionDialog->show(_includeClusters);
         }
-        AlienImGui::EndToolbarButton();
         ImGui::EndDisabled();
 
         //copy button
         ImGui::SameLine();
         ImGui::BeginDisabled(!isCopyingPossible());
-        if (AlienImGui::BeginToolbarButton(ICON_FA_COPY)) {
+        if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
             onCopy();
         }
-        AlienImGui::EndToolbarButton();
         ImGui::EndDisabled();
 
         //paste button
         ImGui::SameLine();
         ImGui::BeginDisabled(!isPastingPossible());
-        if (AlienImGui::BeginToolbarButton(ICON_FA_PASTE)) {
+        if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
             onPaste();
         }
-        AlienImGui::EndToolbarButton();
         ImGui::EndDisabled();
 
         //delete button
         ImGui::SameLine();
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
-        if (AlienImGui::BeginToolbarButton(ICON_FA_TRASH)) {
+        if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
             _simController->removeSelectedEntities(_includeClusters);
             _editorModel->update();
         }
-        AlienImGui::EndToolbarButton();
         ImGui::EndDisabled();
 
         //inspector button
         ImGui::SameLine();
         ImGui::BeginDisabled(!isInspectionPossible());
-        if (AlienImGui::BeginToolbarButton(ICON_FA_MICROSCOPE)) {
+        if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
             onInspectEntities();
         }
-        AlienImGui::EndToolbarButton();
         ImGui::EndDisabled();
 
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());

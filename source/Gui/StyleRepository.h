@@ -36,6 +36,7 @@ namespace Const
     ImColor const SelectedCellOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
 
     ImColor const ToolbarButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
+    ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToggleButtonColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
 
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);

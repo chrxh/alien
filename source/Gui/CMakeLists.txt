@@ -76,6 +76,8 @@ PUBLIC
     StatisticsWindow.h
     StyleRepository.cpp
     StyleRepository.h
+    SymbolsWindow.cpp
+    SymbolsWindow.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
     UiController.cpp

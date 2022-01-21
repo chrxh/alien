@@ -5,7 +5,7 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/Definitions.h"
-#include "Base/StringFormatter.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "StyleRepository.h"
@@ -56,7 +56,7 @@ void _TemporalControlWindow::processTpsInfo()
 
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
-    ImGui::TextUnformatted(StringFormatter::format(_simController->getTps(), 1).c_str());
+    ImGui::TextUnformatted(StringHelper::format(_simController->getTps(), 1).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -67,7 +67,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::TextUnformatted(StringFormatter::format(_simController->getCurrentTimestep()).c_str());
+    ImGui::TextUnformatted(StringHelper::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -91,41 +91,38 @@ void _TemporalControlWindow::processTpsRestriction()
 void _TemporalControlWindow::processRunButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
-    if (AlienImGui::BeginToolbarButton(ICON_FA_PLAY)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_PLAY)) {
         _history.clear();
         _simController->runSimulation();
     }
-    AlienImGui::EndToolbarButton();
     ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processPauseButton()
 {
     ImGui::BeginDisabled(!_simController->isSimulationRunning());
-    if (AlienImGui::BeginToolbarButton(ICON_FA_PAUSE)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_PAUSE)) {
         _simController->pauseSimulation();
     }
-    AlienImGui::EndToolbarButton();
     ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processStepBackwardButton()
 {
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
-    if (AlienImGui::BeginToolbarButton(ICON_FA_CHEVRON_LEFT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT)) {
         auto const& snapshot = _history.back();
         _simController->setCurrentTimestep(snapshot.timestep);
         _simController->setSimulationData(snapshot.data);
         _history.pop_back();
     }
-    AlienImGui::EndToolbarButton();
     ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processStepForwardButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
-    if (AlienImGui::BeginToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
         Snapshot newSnapshot;
         newSnapshot.timestep = _simController->getCurrentTimestep();
         auto size = _simController->getWorldSize();
@@ -134,30 +131,27 @@ void _TemporalControlWindow::processStepForwardButton()
 
         _simController->calcSingleTimestep();
     }
-    AlienImGui::EndToolbarButton();
     ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processSnapshotButton()
 {
-    if (AlienImGui::BeginToolbarButton(ICON_FA_CAMERA)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_CAMERA)) {
         Snapshot newSnapshot;
         newSnapshot.timestep = _simController->getCurrentTimestep();
         auto size = _simController->getWorldSize();
         newSnapshot.data = _simController->getSimulationData({0, 0}, size);
         _snapshot = newSnapshot;
     }
-    AlienImGui::EndToolbarButton();
 }
 
 void _TemporalControlWindow::processRestoreButton()
 {
     ImGui::BeginDisabled(!_snapshot);
-    if (AlienImGui::BeginToolbarButton(ICON_FA_UNDO)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
         _statisticsWindow->reset();
         _simController->setCurrentTimestep(_snapshot->timestep);
         _simController->setSimulationData(_snapshot->data);
     }
-    AlienImGui::EndToolbarButton();
     ImGui::EndDisabled();
 }

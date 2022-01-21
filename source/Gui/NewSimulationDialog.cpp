@@ -5,6 +5,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "Viewport.h"
 #include "StatisticsWindow.h"
+#include "AlienImGui.h"
 
 _NewSimulationDialog::_NewSimulationDialog(
     SimulationController const& simController,
@@ -55,7 +56,7 @@ void _NewSimulationDialog::process()
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button("OK")) {
+        if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             onNewSimulation();
             _on = false;
@@ -63,7 +64,7 @@ void _NewSimulationDialog::process()
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
-        if (ImGui::Button("Cancel")) {
+        if (AlienImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _on = false;
         }
