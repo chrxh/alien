@@ -1,5 +1,6 @@
 #include "SymbolsWindow.h"
 
+#include <algorithm>
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
