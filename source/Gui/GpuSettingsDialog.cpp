@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "Base/StringFormatter.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
@@ -65,20 +65,20 @@ void _GpuSettingsDialog::process()
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(
-            StringFormatter::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
+            StringHelper::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         AlienImGui::Separator();
 
-        if (ImGui::Button("OK")) {
+        if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             _show = false;
         }
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
-        if (ImGui::Button("Cancel")) {
+        if (AlienImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _show = false;
             gpuSettings = _gpuSettings;

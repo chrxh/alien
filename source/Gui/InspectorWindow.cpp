@@ -8,6 +8,7 @@
 #include "ImguiMemoryEditor/imgui_memory_editor.h"
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/StringHelper.h"
 #include "EngineInterface/CellComputationCompiler.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
@@ -229,16 +230,16 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
 
         AlienImGui::Group("Metadata");
 
-        cell.metadata.name.copy(_cellName, cell.metadata.name.size());
-        _cellName[cell.metadata.name.size()] = 0;
+        StringHelper::copy(_cellName, IM_ARRAYSIZE(_cellName), cell.metadata.name);
+
         AlienImGui::InputText(
             AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth),
             _cellName,
             IM_ARRAYSIZE(_cellName));
         cell.metadata.name = std::string(_cellName);
 
-        cell.metadata.description.copy(_cellDescription, cell.metadata.description.size());
-        _cellDescription[cell.metadata.description.size()] = 0;
+        StringHelper::copy(_cellDescription, IM_ARRAYSIZE(_cellDescription), cell.metadata.description);
+
         AlienImGui::InputTextMultiline(
             AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(MaxCellContentTextWidth).height(0),
             _cellDescription,
@@ -265,8 +266,7 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
             }
             return cell.metadata.computerSourcecode;
         }();
-        origSourcecode.copy(_cellCode, std::min(toInt(origSourcecode.length()), IM_ARRAYSIZE(_cellCode) - 1), 0);
-        _cellCode[origSourcecode.length()] = '\0';
+        StringHelper::copy(_cellCode, IM_ARRAYSIZE(_cellCode), origSourcecode);
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::InputTextMultiline(
             "##source",
@@ -388,8 +388,8 @@ void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
         std::map<int, std::vector<std::string>> addressToSymbolNamesMap;
         auto const& symbolMap = _simController->getSymbolMap();
         for (auto const& [key, value] : symbolMap) {
-            if (auto address = CellComputationCompiler::extractAddress(key)) {
-                addressToSymbolNamesMap[*address].emplace_back(value);
+            if (auto address = CellComputationCompiler::extractAddress(value)) {
+                addressToSymbolNamesMap[*address].emplace_back(key);
             }
         }
         int currentMemoryEditIndex = 0;
@@ -400,7 +400,7 @@ void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
 
         std::optional<int> lastAddress;
         for (auto const& [address, symbolNames] : addressToSymbolNamesMap) {
-            if (lastAddress) {
+            if (lastAddress && address - *lastAddress > 1) {
                 showTokenMemorySection(*lastAddress + 1, address - *lastAddress - 1, currentMemoryEditIndex);
             }
             showTokenMemorySection(address, 1, currentMemoryEditIndex, symbolNames);

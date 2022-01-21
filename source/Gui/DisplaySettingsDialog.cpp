@@ -64,14 +64,14 @@ void _DisplaySettingsDialog::process()
 
         AlienImGui::Separator();
 
-        if (ImGui::Button("OK")) {
+        if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             _show = false;
         }
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
-        if (ImGui::Button("Cancel")) {
+        if (AlienImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _show = false;
             _windowController->setMode(_origMode);

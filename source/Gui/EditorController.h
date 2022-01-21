@@ -19,6 +19,7 @@ public:
     ManipulatorWindow getManipulatorWindow() const;
     CreatorWindow getCreatorWindow() const;
     MultiplierWindow getMultiplierWindow() const;
+    SymbolsWindow getSymbolsWindow() const;
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
@@ -51,6 +52,7 @@ private:
     ManipulatorWindow _manipulatorWindow;
     CreatorWindow _creatorWindow; 
     MultiplierWindow _multiplierWindow; 
+    SymbolsWindow _symbolsWindow;
 
     SimulationController _simController;
     Viewport _viewport;

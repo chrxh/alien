@@ -254,8 +254,7 @@ void _Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& strea
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    std::map<std::string, std::string> result;
     for (auto const& [key, value] : tree) {
-        result.emplace(key.data(), value.data());
+        symbolMap.emplace(key.data(), value.data());
     }
 }

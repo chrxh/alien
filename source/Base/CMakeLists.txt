@@ -13,7 +13,7 @@ add_library(alien_base_lib
     NumberGenerator.h
     Physics.cpp
     Physics.h
-    StringFormatter.cpp
-    StringFormatter.h)
+    StringHelper.cpp
+    StringHelper.h)
 
 target_link_libraries(alien_base_lib Boost::boost)

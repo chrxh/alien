@@ -54,6 +54,7 @@
 #include "WindowController.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
+#include "SymbolsWindow.h"
 
 namespace
 {
@@ -155,7 +156,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
 
 void _MainWindow::mainLoop()
 {
-    bool show_demo_window = true;
     while (!glfwWindowShouldClose(_window) && !_onClose)
     {
         glfwPollEvents();
@@ -164,11 +164,7 @@ void _MainWindow::mainLoop()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-/*
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-        {}
-*/
+//        ImGui::ShowDemoWindow(NULL);
 
         switch (_startupWindow->getState()) {
         case _StartupWindow::State::Unintialized:
@@ -341,6 +337,7 @@ void _MainWindow::processMenubar()
     auto manipulatorWindow = _editorController->getManipulatorWindow();
     auto creatorWindow = _editorController->getCreatorWindow();
     auto multiplierWindow = _editorController->getMultiplierWindow();
+    auto symbolsWindow = _editorController->getSymbolsWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -402,6 +399,7 @@ void _MainWindow::processMenubar()
                     _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation
                                                                         : _ModeController::Mode::Action);
             }
+            ImGui::Separator();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
@@ -425,6 +423,11 @@ void _MainWindow::processMenubar()
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
+            if (ImGui::MenuItem("Symbols", "ALT+B", symbolsWindow->isOn())) {
+                symbolsWindow->setOn(!symbolsWindow->isOn());
             }
             ImGui::EndDisabled();
             ImGui::Separator();
@@ -545,6 +548,9 @@ void _MainWindow::processMenubar()
     if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
         _editorController->onCloseAllInspectorWindows();
     }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
+        symbolsWindow->setOn(!symbolsWindow->isOn());
+    }
     if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
         _editorController->onCopy();
     }
@@ -630,12 +636,12 @@ void _MainWindow::processExitDialog()
             ImGui::Spacing();
             ImGui::Spacing();
 
-            if (ImGui::Button("OK")) {
+            if (AlienImGui::Button("OK")) {
                 ImGui::CloseCurrentPopup();
                 _onClose = true;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Cancel")) {
+            if (AlienImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();
                 _showExitDialog = false;
             }

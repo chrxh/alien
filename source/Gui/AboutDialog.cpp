@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "Resources.h"
+#include "AlienImGui.h"
 
 _AboutDialog::_AboutDialog() {}
 
@@ -25,7 +26,7 @@ void _AboutDialog::process()
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button("OK")) {
+        if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             _show = false;
         }

@@ -1,8 +1,8 @@
-#include "StringFormatter.h"
+#include "StringHelper.h"
 
 #include <algorithm>
 
-std::string StringFormatter::format(uint64_t n)
+std::string StringHelper::format(uint64_t n)
 {
     std::string result;
 
@@ -20,7 +20,7 @@ std::string StringFormatter::format(uint64_t n)
     return result;
 }
 
-std::string StringFormatter::format(float v, int decimals)
+std::string StringHelper::format(float v, int decimals)
 {
     std::string result;
     if (v < 0) {
@@ -33,4 +33,13 @@ std::string StringFormatter::format(float v, int decimals)
         result += std::to_string(static_cast<int>(v) % 10);
     }
     return result;
+}
+
+void StringHelper::copy(char* target, int targetSize, std::string const& source)
+{
+    auto sourceSize = source.size();
+    if (sourceSize < targetSize) {
+        source.copy(target, sourceSize);
+        target[sourceSize] = 0;
+    }
 }

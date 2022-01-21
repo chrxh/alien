@@ -37,7 +37,7 @@ void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -57,7 +57,7 @@ void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -96,7 +96,7 @@ void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -118,7 +118,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -135,7 +135,13 @@ void AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    if (parameters._monospaceFont) {
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+    }
     ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize);
+    if (parameters._monospaceFont) {
+        ImGui::PopFont();
+    }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
 }
@@ -185,7 +191,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == parameters._defaultValue);
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = parameters._defaultValue;
             result = true;
         }
@@ -207,7 +213,7 @@ bool AlienImGui::Checkbox(CheckBoxParameters const& parameters, bool& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == parameters._defaultValue);
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = parameters._defaultValue;
             result = true;
         }
@@ -240,7 +246,7 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
     }
 
     auto pos = ImGui::GetCursorPos();
-    if (ImGui::Button(text.c_str())) {
+    if (AlienImGui::Button(text.c_str())) {
         toggle = !toggle;
     }
     if (ImGui::IsItemHovered()) {
@@ -402,7 +408,7 @@ void AlienImGui::Group(std::string const& text)
     ImGui::Spacing();
 }
 
-bool AlienImGui::BeginToolbarButton(std::string const& text)
+bool AlienImGui::ToolbarButton(std::string const& text)
 {
     ImGui::PushFont(StyleRepository::getInstance().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
@@ -414,14 +420,29 @@ bool AlienImGui::BeginToolbarButton(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonColor);
     auto buttonSize = StyleRepository::getInstance().scaleContent(40.0f);
-    return ImGui::Button(text.c_str(), {buttonSize, buttonSize});
-}
-
-void AlienImGui::EndToolbarButton()
-{
+    auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
     ImGui::PopFont();
+    return result;
+}
+
+bool AlienImGui::Button(std::string const& text)
+{
+/*
+    auto color = Const::ButtonColor;
+    float h, s, v;
+    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.3f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.4f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ButtonColor);
+*/
+    auto result = ImGui::Button(text.c_str());
+/*
+    ImGui::PopStyleColor(4);
+*/
+    return result;
 }
 
 void AlienImGui::Tooltip(std::string const& text)

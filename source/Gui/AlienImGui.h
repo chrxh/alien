@@ -67,6 +67,7 @@ public:
     {
         MEMBER_DECLARATION(InputTextParameters, std::string, name, "");
         MEMBER_DECLARATION(InputTextParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
     };
     static void InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
 
@@ -111,8 +112,8 @@ public:
     static void Separator();
     static void Group(std::string const& text);
 
-    static bool BeginToolbarButton(std::string const& text);
-    static void EndToolbarButton();
+    static bool ToolbarButton(std::string const& text);
+    static bool Button(std::string const& text);
 
     static void Tooltip(std::string const& text);
 

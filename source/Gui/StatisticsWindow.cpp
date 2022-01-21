@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <implot.h>
 
-#include "Base/StringFormatter.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
@@ -49,12 +49,12 @@ void _StatisticsWindow::processIntern()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(60));
     ImGui::SliderFloat("", &_liveStatistics.history, 1, MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::Button("Export");
+    AlienImGui::Button("Export");
 
     if (_live) {
         processLiveStatistics();
@@ -240,7 +240,7 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
                 ImVec2(-10.0f, 10.0f),
                 color,
                 "%s",
-                StringFormatter::format(toInt(valueHistory.back())).c_str());
+                StringHelper::format(toInt(valueHistory.back())).c_str());
         }
 
         ImPlot::PushStyleColor(ImPlotCol_Line, color);
@@ -285,7 +285,7 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
                 ImVec2(-10.0f, 10.0f),
                 ImPlot::GetLastItemColor(),
                 "%s",
-                StringFormatter::format(toInt(valueHistory.back())).c_str());
+                StringHelper::format(toInt(valueHistory.back())).c_str());
         }
         ImPlot::PushStyleColor(ImPlotCol_Line, color);
         ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
