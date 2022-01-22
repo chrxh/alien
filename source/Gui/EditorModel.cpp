@@ -84,3 +84,13 @@ int _EditorModel::getDefaultColorCode() const
 {
     return _defaultColorCode;
 }
+
+void _EditorModel::setRolloutToClusters(bool value)
+{
+    _rolloutToClusters = value;
+}
+
+bool _EditorModel::isRolloutToClusters() const
+{
+    return _rolloutToClusters;
+}

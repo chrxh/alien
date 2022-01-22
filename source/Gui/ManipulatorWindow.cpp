@@ -60,7 +60,7 @@ void _ManipulatorWindow::processIntern()
         ImGui::BeginDisabled(!isCopyingPossible());
         ImGui::SameLine();
         if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
-            _saveSelectionDialog->show(_includeClusters);
+            _saveSelectionDialog->show(_editorModel->isRolloutToClusters());
         }
         ImGui::EndDisabled();
 
@@ -84,7 +84,7 @@ void _ManipulatorWindow::processIntern()
         ImGui::SameLine();
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
-            _simController->removeSelectedEntities(_includeClusters);
+            _simController->removeSelectedEntities(_editorModel->isRolloutToClusters());
             _editorModel->update();
         }
         ImGui::EndDisabled();
@@ -102,7 +102,7 @@ void _ManipulatorWindow::processIntern()
 
         auto const& selectionData = _editorModel->getSelectionShallowData();
 
-        auto centerPosX = _includeClusters ? selectionData.clusterCenterPosX : selectionData.centerPosX;
+        auto centerPosX = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterPosX : selectionData.centerPosX;
         auto origCenterPosX = centerPosX;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -111,7 +111,7 @@ void _ManipulatorWindow::processIntern()
                 .format("%.2f"),
             centerPosX);
 
-        auto centerPosY = _includeClusters ? selectionData.clusterCenterPosY : selectionData.centerPosY;
+        auto centerPosY = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
         auto origCenterPosY = centerPosY;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -120,7 +120,7 @@ void _ManipulatorWindow::processIntern()
                 .format("%.2f"),
             centerPosY);
 
-        auto centerVelX = _includeClusters ? selectionData.clusterCenterVelX : selectionData.centerVelX;
+        auto centerVelX = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
         auto origCenterVelX = centerVelX;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -130,7 +130,7 @@ void _ManipulatorWindow::processIntern()
                 .format("%.2f"),
             centerVelX);
 
-        auto centerVelY = _includeClusters ? selectionData.clusterCenterVelY : selectionData.centerVelY;
+        auto centerVelY = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
         auto origCenterVelY = centerVelY;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -163,7 +163,7 @@ void _ManipulatorWindow::processIntern()
 
         if (centerPosX != origCenterPosX || centerPosY != origCenterPosY) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _includeClusters;
+            updateData.considerClusters = _editorModel->isRolloutToClusters();
             updateData.posDeltaX = centerPosX - origCenterPosX;
             updateData.posDeltaY = centerPosY - origCenterPosY;
             _simController->shallowUpdateSelectedEntities(updateData);
@@ -172,7 +172,7 @@ void _ManipulatorWindow::processIntern()
 
         if (centerVelX != origCenterVelX || centerVelY != origCenterVelY) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _includeClusters;
+            updateData.considerClusters = _editorModel->isRolloutToClusters();
             updateData.velDeltaX = centerVelX - origCenterVelX;
             updateData.velDeltaY = centerVelY - origCenterVelY;
             _simController->shallowUpdateSelectedEntities(updateData);
@@ -181,7 +181,7 @@ void _ManipulatorWindow::processIntern()
 
         if (_angle != origAngle) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _includeClusters;
+            updateData.considerClusters = _editorModel->isRolloutToClusters();
             updateData.angleDelta = _angle - origAngle;
             _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
@@ -189,7 +189,7 @@ void _ManipulatorWindow::processIntern()
 
         if (_angularVel != origAngularVel) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _includeClusters;
+            updateData.considerClusters = _editorModel->isRolloutToClusters();
             updateData.angularVelDelta = _angularVel - origAngularVel;
             _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
@@ -197,37 +197,37 @@ void _ManipulatorWindow::processIntern()
 
         AlienImGui::Group("Color");
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
-            _simController->colorSelectedEntities(0, _includeClusters);
+            _simController->colorSelectedEntities(0, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(0);
         }
         ImGui::SameLine();
         if (colorButton("    ##color2", Const::IndividualCellColor2)) {
-            _simController->colorSelectedEntities(1, _includeClusters);
+            _simController->colorSelectedEntities(1, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(1);
         }
         ImGui::SameLine();
         if (colorButton("    ##color3", Const::IndividualCellColor3)) {
-            _simController->colorSelectedEntities(2, _includeClusters);
+            _simController->colorSelectedEntities(2, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(2);
         }
         ImGui::SameLine();
         if (colorButton("    ##color4", Const::IndividualCellColor4)) {
-            _simController->colorSelectedEntities(3, _includeClusters);
+            _simController->colorSelectedEntities(3, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(3);
         }
         ImGui::SameLine();
         if (colorButton("    ##color5", Const::IndividualCellColor5)) {
-            _simController->colorSelectedEntities(4, _includeClusters);
+            _simController->colorSelectedEntities(4, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(4);
         }
         ImGui::SameLine();
         if (colorButton("    ##color6", Const::IndividualCellColor6)) {
-            _simController->colorSelectedEntities(5, _includeClusters);
+            _simController->colorSelectedEntities(5, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(5);
         }
         ImGui::SameLine();
         if (colorButton("    ##color7", Const::IndividualCellColor7)) {
-            _simController->colorSelectedEntities(6, _includeClusters);
+            _simController->colorSelectedEntities(6, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(7);
         }
 
@@ -239,7 +239,9 @@ void _ManipulatorWindow::processIntern()
     ImGui::PopStyleVar();
 
     AlienImGui::Separator();
-    if (AlienImGui::ToggleButton("Roll out to cell clusters", _includeClusters)) {
+    auto rolloutToClusters = _editorModel->isRolloutToClusters();
+    if (AlienImGui::ToggleButton("Roll out to cell clusters", rolloutToClusters)) {
+        _editorModel->setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
     }
@@ -267,7 +269,7 @@ bool _ManipulatorWindow::isCopyingPossible() const
 
 void _ManipulatorWindow::onCopy()
 {
-    _copiedSelection = _simController->getSelectedSimulationData(_includeClusters);
+    _copiedSelection = _simController->getSelectedSimulationData(_editorModel->isRolloutToClusters());
 }
 
 bool _ManipulatorWindow::isPastingPossible() const

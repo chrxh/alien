@@ -34,7 +34,6 @@ private:
     OpenSelectionDialog _openSelectionDialog;
     SaveSelectionDialog _saveSelectionDialog;
 
-    bool _includeClusters = true;
     float _angle = 0;
     float _angularVel = 0;
     std::optional<SelectionShallowData> _lastSelection;

@@ -315,7 +315,7 @@ void _EditorController::moveSelectedEntities(
     auto delta = end - start;
 
     ShallowUpdateSelectionData updateData;
-    updateData.considerClusters = !modifierKeyPressed;
+    updateData.considerClusters = _editorModel->isRolloutToClusters() && !modifierKeyPressed;
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
     _simController->shallowUpdateSelectedEntities(updateData);
