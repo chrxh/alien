@@ -6,6 +6,7 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
+#include "EngineInterface/CellComputationCompiler.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -30,14 +31,14 @@ void _SymbolsWindow::processIntern()
     if (ImGui::BeginTable(
             "Symbols",
             4,
-            ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable | ImGuiTableFlags_SortMulti
+            ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable
                 | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY,
             ImVec2(0.0f, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(135)))) {
 
-        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.0f);
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.0f);
-        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.0f);
-        ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.0f);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed |ImGuiTableColumnFlags_NoHide, 0.0f);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.0f);
+        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f);
+        ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f);
         ImGui::TableHeadersRow();
 
         int i = 0;
@@ -117,6 +118,7 @@ auto _SymbolsWindow::getEntriesFromSymbolMap() const -> std::vector<Entry>
     for (auto const& [key, value] : symbolMap) {
         Entry entry;
         entry.name = key;
+        entry.type = getSymbolType(value);
         entry.value = value;
         result.emplace_back(entry);
     }
@@ -135,6 +137,11 @@ void _SymbolsWindow::updateSymbolMapFromEntries(std::vector<Entry> const& entrie
 bool _SymbolsWindow::isEditValid() const
 {
     return _symbolName[0] != '\0' && _symbolValue[0] != '\0';
+}
+
+auto _SymbolsWindow::getSymbolType(std::string const& value) const -> SymbolType
+{
+    return CellComputationCompiler::extractAddress(value).has_value() ? SymbolType::Variable : SymbolType::Constant;
 }
 
 void _SymbolsWindow::onClearEditFields()
@@ -157,6 +164,7 @@ void _SymbolsWindow::onAddEntry(std::vector<Entry>& entries, std::string const& 
     Entry newEntry;
     newEntry.name = std::string(_symbolName);
     newEntry.value = std::string(_symbolValue);
+    newEntry.type = getSymbolType(newEntry.value);
     entries.emplace_back(newEntry);
 }
 
