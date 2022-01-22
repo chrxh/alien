@@ -100,8 +100,14 @@ using WindowController = std::shared_ptr<_WindowController>;
 class _SaveSelectionDialog;
 using SaveSelectionDialog = std::shared_ptr<_SaveSelectionDialog>;
 
+class _SaveSymbolsDialog;
+using SaveSymbolsDialog = std::shared_ptr<_SaveSymbolsDialog>;
+
 class _OpenSelectionDialog;
 using OpenSelectionDialog = std::shared_ptr<_OpenSelectionDialog>;
+
+class _OpenSymbolsDialog;
+using OpenSymbolsDialog = std::shared_ptr<_OpenSymbolsDialog>;
 
 class _InspectorWindow;
 using InspectorWindow = std::shared_ptr<_InspectorWindow>;

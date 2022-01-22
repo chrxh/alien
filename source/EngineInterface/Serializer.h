@@ -26,6 +26,9 @@ public:
     ENGINEINTERFACE_EXPORT bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
     ENGINEINTERFACE_EXPORT bool deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content);
 
+    ENGINEINTERFACE_EXPORT bool serializeSymbolsToFile(std::string const& filename, SymbolMap const& symbolMap);
+    ENGINEINTERFACE_EXPORT bool deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap);
+
 private:
     void serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream) const;
     void serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream) const;

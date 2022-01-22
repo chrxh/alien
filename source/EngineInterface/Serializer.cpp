@@ -211,6 +211,36 @@ bool _Serializer::deserializeContentFromFile(std::string const& filename, Cluste
     }
 }
 
+bool _Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap const& symbolMap)
+{
+    try {
+        std::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeSymbolMap(symbolMap, stream);
+        stream.close();
+        return true;
+    } catch (std::exception const& e) {
+        throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
+    }
+}
+
+bool _Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap)
+{
+    try {
+        std::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        deserializeSymbolMap(symbolMap, stream);
+        stream.close();
+        return true;
+    } catch (std::exception const& e) {
+        throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());
+    }
+}
+
 void _Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);

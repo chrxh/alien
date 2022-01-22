@@ -10,8 +10,7 @@
 
 namespace
 {
-    auto const ContentTextInputWidth = 100.0f;
-    auto const ContentTextCheckboxWidth = 220.0f;
+    auto const ContentTextInputWidth = 60.0f;
 }
 
 _NewSimulationDialog::_NewSimulationDialog(

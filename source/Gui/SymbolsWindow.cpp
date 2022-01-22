@@ -11,6 +11,8 @@
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
+#include "OpenSymbolsDialog.h"
+#include "SaveSymbolsDialog.h"
 
 namespace
 {
@@ -21,6 +23,8 @@ _SymbolsWindow::_SymbolsWindow(SimulationController const& simController)
     : _AlienWindow("Symbols", "editor.symbols", false)
     , _simController(simController)
 {
+    _openSymbolsDialog = std::make_shared<_OpenSymbolsDialog>(simController);
+    _saveSymbolsDialog = std::make_shared<_SaveSymbolsDialog>(simController);
     onClearEditFields();
 }
 
@@ -36,11 +40,13 @@ void _SymbolsWindow::processIntern()
     //load button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+        _openSymbolsDialog->show();
     }
 
     //save button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+        _saveSymbolsDialog->show();
     }
 
     //undo button
@@ -135,6 +141,9 @@ void _SymbolsWindow::processIntern()
         }
     }
     updateSymbolMapFromEntries(entries);
+
+    _openSymbolsDialog->process();
+    _saveSymbolsDialog->process();
 }
 
 auto _SymbolsWindow::getEntriesFromSymbolMap(SymbolMap const& symbolMap) const -> std::vector<Entry>
