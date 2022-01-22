@@ -6,6 +6,13 @@
 #include "Viewport.h"
 #include "StatisticsWindow.h"
 #include "AlienImGui.h"
+#include "GlobalSettings.h"
+
+namespace
+{
+    auto const ContentTextInputWidth = 100.0f;
+    auto const ContentTextCheckboxWidth = 220.0f;
+}
 
 _NewSimulationDialog::_NewSimulationDialog(
     SimulationController const& simController,
@@ -14,7 +21,16 @@ _NewSimulationDialog::_NewSimulationDialog(
     : _simController(simController)
     , _viewport(viewport)
     , _statisticsWindow(statisticsWindow)
-{}
+{
+    _adoptSimulationParameters = GlobalSettings::getInstance().getBoolState("dialogs.new simulation.adopt simulation parameters", true);
+    _adoptSymbols = GlobalSettings::getInstance().getBoolState("dialogs.new simulation.adopt symbols", true);
+}
+
+_NewSimulationDialog::~_NewSimulationDialog()
+{
+    GlobalSettings::getInstance().setBoolState("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
+    GlobalSettings::getInstance().setBoolState("dialogs.new simulation.adopt symbols", _adoptSymbols);
+}
 
 void _NewSimulationDialog::process()
 {
@@ -24,38 +40,14 @@ void _NewSimulationDialog::process()
     ImGui::OpenPopup("New simulation");
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal("New simulation", NULL, 0)) {
-        if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
 
-            //width
-            ImGui::TableNextRow();
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adopt symbols").textWidth(0), _adoptSymbols);
 
-            ImGui::TableSetColumnIndex(0);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-            ImGui::InputInt("##width", &_width);
-            ImGui::PopItemWidth();
-
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("Width");
-
-            //height
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-            ImGui::InputInt("##height", &_height);
-            ImGui::PopItemWidth();
-
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("Height");
-
-            ImGui::EndTable();
-        }
-
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-        ImGui::Spacing();
-
+        AlienImGui::Separator();
         if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             onNewSimulation();
@@ -89,12 +81,19 @@ void _NewSimulationDialog::onNewSimulation()
 
     _statisticsWindow->reset();
 
-    auto symbolMap = _simController->getSymbolMap();
+    SymbolMap symbolMap;
+    if (_adoptSymbols) {
+        symbolMap = _simController->getSymbolMap();
+    } else {
+        symbolMap = SymbolMapHelper::getDefaultSymbolMap();
+    }
 
     Settings settings;
     settings.generalSettings.worldSizeX = _width;
     settings.generalSettings.worldSizeY = _height;
-    settings.simulationParameters = _simController->getSimulationParameters();
+    if (_adoptSimulationParameters) {
+        settings.simulationParameters = _simController->getSimulationParameters();
+    }
     settings.flowFieldSettings.centers[0].posX = toFloat(_width) / 2;
     settings.flowFieldSettings.centers[0].posY = toFloat(_height) / 2;
 

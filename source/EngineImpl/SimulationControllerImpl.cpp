@@ -10,8 +10,9 @@ void _SimulationControllerImpl::initCuda()
 void _SimulationControllerImpl::newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap)
 {
     _settings = settings;
-    _origSettings = _settings;
+    _origSettings = settings;
     _symbolMap = symbolMap;
+    _origSymbolMap = symbolMap;
     _worker.newSimulation(timestep, settings, _gpuSettings);
     _origGpuSettings = _gpuSettings;
 
@@ -301,6 +302,11 @@ Settings _SimulationControllerImpl::getSettings() const
 SymbolMap const& _SimulationControllerImpl::getSymbolMap() const
 {
     return _symbolMap;
+}
+
+SymbolMap const& _SimulationControllerImpl::getOriginalSymbolMap() const
+{
+    return _origSymbolMap;
 }
 
 void _SimulationControllerImpl::setSymbolMap(SymbolMap const& symbolMap)

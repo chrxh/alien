@@ -226,7 +226,7 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
                 .min(0),
             cell.tokenBranchNumber);
         AlienImGui::Checkbox(
-            AlienImGui::CheckBoxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
+            AlienImGui::CheckboxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
 
         AlienImGui::Group("Metadata");
 

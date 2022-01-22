@@ -79,7 +79,7 @@ void _CreatorWindow::processIntern()
     if (_mode == CreationMode::CreateCell) {
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-        AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
     }
     if (_mode == CreationMode::CreateRectangle) {
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
@@ -95,14 +95,14 @@ void _CreatorWindow::processIntern()
 
     if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc || _mode == CreationMode::Drawing) {
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
-        AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
         ImGui::BeginDisabled(!_makeSticky);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
         ImGui::EndDisabled();
     }
     if (_mode == CreationMode::Drawing) {
-        AlienImGui::Checkbox(AlienImGui::CheckBoxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
     }
 
     AlienImGui::Separator();

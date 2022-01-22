@@ -99,6 +99,7 @@ public:
     ENGINEIMPL_EXPORT IntVector2D getWorldSize() const override;
     ENGINEIMPL_EXPORT Settings getSettings() const override;
     ENGINEIMPL_EXPORT SymbolMap const& getSymbolMap() const override;
+    ENGINEIMPL_EXPORT SymbolMap const& getOriginalSymbolMap() const override;
     ENGINEIMPL_EXPORT void setSymbolMap(SymbolMap const& symbolMap) override;
     ENGINEIMPL_EXPORT OverallStatistics getStatistics() const override;
 
@@ -115,6 +116,7 @@ private:
     GpuSettings _gpuSettings; 
     GpuSettings _origGpuSettings;
     SymbolMap _symbolMap;
+    SymbolMap _origSymbolMap;
 
     EngineWorker _worker;
     std::thread* _thread = nullptr;
