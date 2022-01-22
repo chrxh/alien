@@ -10,6 +10,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type not specified, using Debug" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Default CUDA target architectures
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  set(CMAKE_CUDA_ARCHITECTURES 52)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
@@ -39,6 +44,7 @@ endif()
 add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
 
 add_executable(alien)
+add_executable(tests)
 
 find_package(CUDAToolkit)
 find_package(Boost REQUIRED)
@@ -49,12 +55,14 @@ find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
+find_package(gtest CONFIG REQUIRED)
 
 add_subdirectory(external/ImFileDialog)
 add_subdirectory(source/Base)
 add_subdirectory(source/EngineGpuKernels)
 add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
+add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
 
 # Copy resources to the build location
