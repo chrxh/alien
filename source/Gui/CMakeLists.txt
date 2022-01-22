@@ -51,11 +51,15 @@ PUBLIC
     OpenSelectionDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
+    OpenSymbolsDialog.cpp
+    OpenSymbolsDialog.h
     Resources.h
     SaveSelectionDialog.cpp
     SaveSelectionDialog.h
     SaveSimulationDialog.cpp
     SaveSimulationDialog.h
+    SaveSymbolsDialog.cpp
+    SaveSymbolsDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
     Shader.cpp

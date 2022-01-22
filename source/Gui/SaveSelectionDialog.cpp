@@ -15,7 +15,7 @@ void _SaveSelectionDialog::process()
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {
-        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
+        std::vector<std::filesystem::path> const& res = ifd::FileDialog::Instance().GetResults();
         auto firstFilename = res.front();
 
         auto content = _simController->getSelectedClusteredSimulationData(_includeClusters);

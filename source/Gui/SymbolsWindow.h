@@ -40,6 +40,8 @@ private:
     char _symbolValue[256];
 
     SimulationController _simController;
+    OpenSymbolsDialog _openSymbolsDialog;
+    SaveSymbolsDialog _saveSymbolsDialog;
 
     enum class Mode
     {
