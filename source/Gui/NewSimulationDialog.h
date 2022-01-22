@@ -12,6 +12,8 @@ public:
         Viewport const& viewport,
         StatisticsWindow const& statisticsWindow);
 
+    ~_NewSimulationDialog();
+
     void process();
 
     void show();
@@ -24,6 +26,8 @@ private:
     StatisticsWindow _statisticsWindow;
 
     bool _on = false;
+    bool _adoptSimulationParameters = true;
+    bool _adoptSymbols = true;
     int _width = 0;
     int _height = 0;
 };

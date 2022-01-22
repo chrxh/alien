@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/SymbolMap.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -21,9 +22,10 @@ private:
         SymbolType type;
         std::string value;
     };
-    std::vector<Entry> getEntriesFromSymbolMap() const;
+    std::vector<Entry> getEntriesFromSymbolMap(SymbolMap const& symbolMap) const;
     void updateSymbolMapFromEntries(std::vector<Entry> const& entries);
 
+    bool hasSymbolMapChanged() const;
     bool isEditValid() const;
     SymbolType getSymbolType(std::string const& value) const;
 

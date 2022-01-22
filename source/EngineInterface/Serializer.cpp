@@ -252,6 +252,7 @@ void _Serializer::deserializeTimestepAndSettings(uint64_t& timestep, Settings& s
 
 void _Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream)
 {
+    symbolMap.clear();
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     for (auto const& [key, value] : tree) {

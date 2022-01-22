@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto const ContentTextWidth = 60.0f;
+    auto const ContentTextInputWidth = 60.0f;
 }
 
 _SymbolsWindow::_SymbolsWindow(SimulationController const& simController)
@@ -26,7 +26,32 @@ _SymbolsWindow::_SymbolsWindow(SimulationController const& simController)
 
 void _SymbolsWindow::processIntern()
 {
-    auto entries = getEntriesFromSymbolMap();
+    auto entries = getEntriesFromSymbolMap(_simController->getSymbolMap());
+
+    //new button
+    if (AlienImGui::ToolbarButton(ICON_FA_ERASER)) {
+        entries.clear();
+    }
+
+    //load button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+    }
+
+    //save button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+    }
+
+    //undo button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!hasSymbolMapChanged());
+    if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
+        entries = getEntriesFromSymbolMap(_simController->getOriginalSymbolMap());
+    }
+    ImGui::EndDisabled();
+
+    AlienImGui::Separator();
 
     if (ImGui::BeginTable(
             "Symbols",
@@ -35,7 +60,8 @@ void _SymbolsWindow::processIntern()
                 | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY,
             ImVec2(0.0f, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(135)))) {
 
-        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed |ImGuiTableColumnFlags_NoHide, 0.0f);
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.0f);
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f);
         ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 0.0f);
@@ -83,9 +109,9 @@ void _SymbolsWindow::processIntern()
         AlienImGui::Group("Edit symbol");
     }
     AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name("Name").textWidth(ContentTextWidth).monospaceFont(true), _symbolName, IM_ARRAYSIZE(_symbolName));
+        AlienImGui::InputTextParameters().name("Name").textWidth(ContentTextInputWidth).monospaceFont(true), _symbolName, IM_ARRAYSIZE(_symbolName));
     AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name("Value").textWidth(ContentTextWidth).monospaceFont(true), _symbolValue, IM_ARRAYSIZE(_symbolValue));
+        AlienImGui::InputTextParameters().name("Value").textWidth(ContentTextInputWidth).monospaceFont(true), _symbolValue, IM_ARRAYSIZE(_symbolValue));
     AlienImGui::Separator();
     if (_mode == Mode::Create) {
         ImGui::BeginDisabled(!isEditValid());
@@ -111,10 +137,9 @@ void _SymbolsWindow::processIntern()
     updateSymbolMapFromEntries(entries);
 }
 
-auto _SymbolsWindow::getEntriesFromSymbolMap() const -> std::vector<Entry>
+auto _SymbolsWindow::getEntriesFromSymbolMap(SymbolMap const& symbolMap) const -> std::vector<Entry>
 {
     std::vector<Entry> result;
-    auto symbolMap = _simController->getSymbolMap();
     for (auto const& [key, value] : symbolMap) {
         Entry entry;
         entry.name = key;
@@ -132,6 +157,11 @@ void _SymbolsWindow::updateSymbolMapFromEntries(std::vector<Entry> const& entrie
         symbolMap.insert_or_assign(entry.name, entry.value);
     }
     _simController->setSymbolMap(symbolMap);
+}
+
+bool _SymbolsWindow::hasSymbolMapChanged() const
+{
+    return _simController->getSymbolMap() != _simController->getOriginalSymbolMap();
 }
 
 bool _SymbolsWindow::isEditValid() const

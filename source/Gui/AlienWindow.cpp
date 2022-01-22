@@ -24,11 +24,15 @@ void _AlienWindow::process()
     if (!_on) {
         return;
     }
+    ImGui::PushID(_title.c_str());
+
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin(_title.c_str(), &_on)) {
         processIntern();
     }
     ImGui::End();
+
+    ImGui::PopID();
 }
 
 bool _AlienWindow::isOn() const

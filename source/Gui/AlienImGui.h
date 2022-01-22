@@ -88,13 +88,13 @@ public:
     };
     static bool Combo(ComboParameters& parameters, int& value);
 
-    struct CheckBoxParameters
+    struct CheckboxParameters
     {
-        MEMBER_DECLARATION(CheckBoxParameters, std::string, name, "");
-        MEMBER_DECLARATION(CheckBoxParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(CheckBoxParameters, bool, defaultValue, false);
+        MEMBER_DECLARATION(CheckboxParameters, std::string, name, "");
+        MEMBER_DECLARATION(CheckboxParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(CheckboxParameters, bool, defaultValue, false);
     };
-    static bool Checkbox(CheckBoxParameters const& parameters, bool& value);
+    static bool Checkbox(CheckboxParameters const& parameters, bool& value);
     static bool ToggleButton(std::string const& text, bool& value);
 
     static void Text(std::string const& text);

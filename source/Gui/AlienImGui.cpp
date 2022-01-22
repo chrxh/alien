@@ -204,11 +204,13 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     return result;
 }
 
-bool AlienImGui::Checkbox(CheckBoxParameters const& parameters, bool& value)
+bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
 {
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
     ImGui::SameLine();
-    ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - parameters._textWidth, 0.0f));
+    if (parameters._textWidth != 0) {
+        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - parameters._textWidth, 0.0f));
+    }
 
     ImGui::SameLine();
     if (parameters._defaultValue) {

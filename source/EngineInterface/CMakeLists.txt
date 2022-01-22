@@ -32,6 +32,7 @@ add_library(alien_engine_interface_lib
     SimulationParametersSpotValues.h
     SpaceCalculator.cpp
     SpaceCalculator.h
+    SymbolMap.cpp
     SymbolMap.h
     ZoomLevels.h)
 
