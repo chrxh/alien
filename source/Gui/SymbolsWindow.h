@@ -25,6 +25,7 @@ private:
     void updateSymbolMapFromEntries(std::vector<Entry> const& entries);
 
     bool isEditValid() const;
+    SymbolType getSymbolType(std::string const& value) const;
 
     void onClearEditFields();
     void onEditEntry(Entry const& entry);
