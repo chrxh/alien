@@ -31,6 +31,9 @@ public:
     void setDefaultColorCode(int value);
     int getDefaultColorCode() const;
 
+    void setRolloutToClusters(bool value);
+    bool isRolloutToClusters() const;
+
 private:
     SimulationController _simController;
     SelectionShallowData _selectionShallowData;
@@ -39,4 +42,5 @@ private:
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
     bool _drawMode = false;
     int _defaultColorCode = 0;
+    bool _rolloutToClusters = true;
 };
