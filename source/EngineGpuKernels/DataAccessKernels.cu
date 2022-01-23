@@ -282,7 +282,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData, bool createIds)
+__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -292,7 +292,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, b
 
     auto particlePartition = calcPartition(*dataTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto particle = factory.createParticleFromTO(dataTO.particles[index], createIds);
+        auto particle = factory.createParticleFromTO(dataTO.particles[index]);
         if (selectNewData) {
             particle->selected = 1;
         }
@@ -301,7 +301,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, b
     auto cellPartition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     auto cellTargetArray = data.entities.cells.getArray() + data.entities.cells.getNumOrigEntries();
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(index, dataTO.cells[index], cellTargetArray, &dataTO, createIds);
+        auto cell = factory.createCellFromTO(index, dataTO.cells[index], cellTargetArray, &dataTO);
         if (selectNewData) {
             cell->selected = 1;
         }
