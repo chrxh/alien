@@ -23,7 +23,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
 __global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO);
 __global__ void cudaGetTokenData(SimulationData data, DataAccessTO dataTO);
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access);
-__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData);
+__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData, bool createIds);
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO);
 __global__ void cudaClearDataTO(DataAccessTO dataTO);
 __global__ void cudaSaveNumEntries(SimulationData data);
