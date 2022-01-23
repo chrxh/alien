@@ -29,7 +29,8 @@ __global__ void processingStep2(SimulationData data)
 __global__ void processingStep3(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.applyAndCheckForces(data);
+    cellProcessor.checkForces(data);
+    cellProcessor.updateVelocities(data);
     cellProcessor.clearTag(data);
 
     ParticleProcessor particleProcessor;
@@ -40,7 +41,7 @@ __global__ void processingStep3(SimulationData data)
 __global__ void processingStep4(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcForces(data);
+    cellProcessor.calcConnectionForces(data);
 
     TokenProcessor tokenProcessor;
     tokenProcessor.movement(data);  //changes cell energy without lock
@@ -49,13 +50,14 @@ __global__ void processingStep4(SimulationData data)
 __global__ void processingStep5(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcPositionsAndCheckBindings(data);
+    cellProcessor.verletUpdatePositions(data);
+    cellProcessor.checkConnections(data);
 }
 
 __global__ void processingStep6(SimulationData data, SimulationResult result)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcForces(data);
+    cellProcessor.calcConnectionForces(data);
 
     TokenProcessor tokenProcessor;
     tokenProcessor.executeReadonlyCellFunctions(data, result);
@@ -64,7 +66,7 @@ __global__ void processingStep6(SimulationData data, SimulationResult result)
 __global__ void processingStep7(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcVelocities(data);
+    cellProcessor.verletUpdateVelocities(data);
 }
 
 __global__ void processingStep8(SimulationData data, SimulationResult result)
