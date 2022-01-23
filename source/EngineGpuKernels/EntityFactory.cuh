@@ -16,8 +16,8 @@ class EntityFactory
 {
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ Particle* createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds);
-    __inline__ __device__ Cell* createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO, bool createIds);
+    __inline__ __device__ Particle* createParticleFromTO(ParticleAccessTO const& particleTO);
+    __inline__ __device__ Cell* createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO);
     __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
     __inline__ __device__ Token* createTokenFromTO(TokenAccessTO const& tokenTO, Cell* cellArray);
     __inline__ __device__ void changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle);
@@ -45,13 +45,14 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
     _map.init(data->size);
 }
 
-__inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds)
+__inline__ __device__ Particle*
+EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO)
 {
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
     
-    particle->id = createIds ? _data->numberGen.createNewId_kernel() : particleTO.id;
+    particle->id = _data->numberGen.createNewId_kernel();
     particle->absPos = particleTO.pos;
     _map.mapPosCorrection(particle->absPos);
     particle->vel = particleTO.vel;
@@ -63,13 +64,13 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
 }
 
 __inline__ __device__ Cell*
-EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO, bool createIds)
+EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO)
 {
     Cell** cellPointer = _data->entities.cellPointers.getNewElement();
     Cell* cell = cellTargetArray + targetIndex;
     *cellPointer = cell;
 
-    cell->id = createIds ? _data->numberGen.createNewId_kernel() : cellTO.id;
+    cell->id = _data->numberGen.createNewId_kernel();
     cell->absPos = cellTO.pos;
     _map.mapPosCorrection(cell->absPos);
     cell->vel = cellTO.vel;

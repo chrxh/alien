@@ -1,8 +1,5 @@
 target_sources(tests
 PUBLIC
-    CellComputationTests.cpp
-    IntegrationTestFramework.cpp
-    IntegrationTestFramework.h
     Testsuite.cpp)
 
 target_link_libraries(tests alien_base_lib)

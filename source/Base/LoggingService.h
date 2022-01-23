@@ -31,7 +31,4 @@ private:
     std::mutex _mutex;
 };
 
-inline void log(Priority priority, std::string const& message)
-{
-    LoggingService::getInstance().log(priority, message);
-}
+void log(Priority priority, std::string const& message);

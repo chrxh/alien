@@ -6,27 +6,6 @@
 #include "Base/Math.h"
 #include "SpaceCalculator.h"
 
-DataDescription DescriptionHelper::createRect(CreateRectParameters const& parameters)
-{
-    DataDescription result;
-    for (int i = 0; i < parameters._width; ++i) {
-        for (int j = 0; j < parameters._height; ++j) {
-            result.addCell(CellDescription()
-                             .setId(NumberGenerator::getInstance().getId())
-                             .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
-                             .setEnergy(parameters._energy)
-                             .setMaxConnections(parameters._maxConnection)
-                             .setMetadata(CellMetadata().setColor(parameters._color)));
-        }
-    }
-    reconnectCells(result, parameters._cellDistance * 1.1f);
-    if (parameters._removeStickiness) {
-        removeStickiness(result);
-    }
-    result.setCenter(parameters._center);
-    return result;
-}
-
 void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
     ClusteredDataDescription result;
