@@ -18,7 +18,7 @@ public:
     void getInspectedData(GpuSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, DataAccessTO const& dataTO);
     void getOverlayData(GpuSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, DataAccessTO const& dataTO);
 
-    void addData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& dataTO, bool selectData);
+    void addData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& dataTO, bool selectData, bool createIds);
     void clearData(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:

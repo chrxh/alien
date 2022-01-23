@@ -275,7 +275,7 @@ void _CudaSimulationAdapter::addAndSelectSimulationData(DataAccessTO const& data
 {
     copyDataTOtoDevice(dataTO);
     _editKernels->removeSelection(_gpuSettings, *_cudaSimulationData);
-    _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true);
+    _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true, true);
     syncAndCheck();
 }
 
@@ -283,7 +283,7 @@ void _CudaSimulationAdapter::setSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
     _dataAccessKernels->clearData(_gpuSettings, *_cudaSimulationData);
-    _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, false);
+    _dataAccessKernels->addData(_gpuSettings, *_cudaSimulationData, *_cudaAccessTO, false, false);
     syncAndCheck();
 }
 
