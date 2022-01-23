@@ -80,5 +80,7 @@ add_library(alien_engine_gpu_kernels_lib
     Token.cuh
     TokenProcessor.cuh)
 
+target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)
+
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
 set_property(TARGET alien_engine_gpu_kernels_lib PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)

@@ -218,25 +218,17 @@ void _CreatorWindow::createRectangle()
         return;
     }
 
-    DataDescription data;
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
-    for (int i = 0; i < _rectHorizontalCells; ++i) {
-        for (int j = 0; j < _rectVerticalCells; ++j) {
-            data.addCell(CellDescription()
-                             .setId(NumberGenerator::getInstance().getId())
-                             .setPos({toFloat(i) * _cellDistance, toFloat(j) * _cellDistance})
-                             .setEnergy(_energy)
-                             .setMaxConnections(maxConnections)
-                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
-        }
-    }
+    auto data = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters()
+                                                  .width(_rectHorizontalCells)
+                                                  .height(_rectVerticalCells)
+                                                  .cellDistance(_cellDistance)
+                                                  .energy(_energy)
+                                                  .removeStickiness(!_makeSticky)
+                                                  .maxConnection(!_makeSticky ? parameters.cellMaxBonds : _maxConnections)
+                                                  .color(_editorModel->getDefaultColorCode())
+                                                  .center(getRandomPos()));
 
-    DescriptionHelper::reconnectCells(data, _cellDistance * 1.1f);
-    if (!_makeSticky) {
-        DescriptionHelper::removeStickiness(data);
-    }
-    data.setCenter(getRandomPos());
     _simController->addAndSelectSimulationData(data);
 }
 

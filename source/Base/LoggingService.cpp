@@ -39,8 +39,3 @@ void LoggingService::unregisterCallBack(LoggingCallBack* callback)
 
     _callbacks.erase(end, _callbacks.end());
 }
-
-void log(Priority priority, std::string const& message)
-{
-    LoggingService::getInstance().log(priority, message);
-}
