@@ -495,18 +495,18 @@ namespace
 void _InspectorWindow::showScannerTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUTPUT));
+    AlienImGui::Text(formatHex(Enums::Scanner_Output));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::ScannerOut::SUCCESS) + ": cell scanned");
-    AlienImGui::Text(formatHex(Enums::ScannerOut::FINISHED) + ": scanning process completed");
+    AlienImGui::Text(formatHex(Enums::ScannerOut_Success) + ": cell scanned");
+    AlienImGui::Text(formatHex(Enums::ScannerOut_Finished) + ": scanning process completed");
     ImGui::Spacing();
 
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::INOUT_CELL_NUMBER));
+    AlienImGui::Text(formatHex(Enums::Scanner_InOutCellNumber));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: number of the cell to be scanned");
@@ -516,7 +516,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_ENERGY));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutEnergy));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: energy of scanned cell");
@@ -525,7 +525,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_ANGLE));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutAngle));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: relative angle of scanned cell");
@@ -534,7 +534,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_DISTANCE));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutDistance));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: relative distance of scanned cell");
@@ -543,7 +543,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_MAX_CONNECTIONS));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutCellMaxConnections));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: max connections of scanned cell");
@@ -552,7 +552,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_BRANCH_NO));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutCellBranchNumber));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: branch number of scanned cell");
@@ -561,7 +561,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_METADATA));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutCellMetadata));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: color of scanned cell");
@@ -570,7 +570,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner::OUT_CELL_FUNCTION));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutCellFunction));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: specialization of scanned cell");
@@ -586,8 +586,8 @@ void _InspectorWindow::showScannerTableContent()
 
     ImGui::TableSetColumnIndex(0);
     AlienImGui::Text(
-        formatHex(Enums::Scanner::OUT_CELL_FUNCTION_DATA) + " - "
-        + formatHex(Enums::Scanner::OUT_CELL_FUNCTION_DATA + 48 + 16 + 1));
+        formatHex(Enums::Scanner_OutCellFunctionData) + " - "
+        + formatHex(Enums::Scanner_OutCellFunctionData + 48 + 16 + 1));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output:\ninternal data of scanned cell\n(e.g. cell code and cell memory");
@@ -596,12 +596,12 @@ void _InspectorWindow::showScannerTableContent()
 void _InspectorWindow::showDigestionTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Digestion::OUTPUT));
+    AlienImGui::Text(formatHex(Enums::Digestion_Output));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::DigestionOut::NO_TARGET) + ": no target cell found");
-    AlienImGui::Text(formatHex(Enums::DigestionOut::STRIKE_SUCCESSFUL) + ": target cell found");
+    AlienImGui::Text(formatHex(Enums::DigestionOut_NoTarget) + ": no target cell found");
+    AlienImGui::Text(formatHex(Enums::DigestionOut_StrikeSuccessful) + ": target cell found");
 }
 
 void _InspectorWindow::showConstructionTableContent()
@@ -712,7 +712,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellBranchNum));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellBranchNumber));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: branch number of constructed cell");
@@ -755,26 +755,26 @@ void _InspectorWindow::showConstructionTableContent()
 void _InspectorWindow::showMuscleTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Muscle::OUTPUT));
+    AlienImGui::Text(formatHex(Enums::Muscle_Output));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::MuscleOut::SUCCESS) + ": muscle activity was performed");
-    AlienImGui::Text(formatHex(Enums::MuscleOut::LIMIT_REACHED) + ": no activity was performed since distance limit is reached");
+    AlienImGui::Text(formatHex(Enums::MuscleOut_Success) + ": muscle activity was performed");
+    AlienImGui::Text(formatHex(Enums::MuscleOut_LimitReached) + ": no activity was performed since distance limit is reached");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Muscle::INPUT));
+    AlienImGui::Text(formatHex(Enums::Muscle_Input));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input:");
-    AlienImGui::Text(formatHex(Enums::MuscleIn::DO_NOTHING) + ": do nothing");
-    AlienImGui::Text(formatHex(Enums::MuscleIn::CONTRACT) + ": contract cell connection and produce impulse");
-    AlienImGui::Text(formatHex(Enums::MuscleIn::CONTRACT_RELAX) + ": contract cell connection");
-    AlienImGui::Text(formatHex(Enums::MuscleIn::EXPAND) + ": expand cell connection and produce impulse");
-    AlienImGui::Text(formatHex(Enums::MuscleIn::EXPAND_RELAX) + ": expand cell connection");
+    AlienImGui::Text(formatHex(Enums::MuscleIn_DoNothing) + ": do nothing");
+    AlienImGui::Text(formatHex(Enums::MuscleIn_Contract) + ": contract cell connection and produce impulse");
+    AlienImGui::Text(formatHex(Enums::MuscleIn_ContractRelax) + ": contract cell connection");
+    AlienImGui::Text(formatHex(Enums::MuscleIn_Expand) + ": expand cell connection and produce impulse");
+    AlienImGui::Text(formatHex(Enums::MuscleIn_ExpandRelax) + ": expand cell connection");
 }
 
 float _InspectorWindow::calcWindowWidth() const

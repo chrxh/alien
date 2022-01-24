@@ -46,7 +46,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("CONSTR_IN_DIST", "[" + std::to_string(Enums::Constr_InDist) + "]");
     result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Constr_InCellMaxConnections) + "]");
     result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO", "0");  //artificial entry (has no symbol in enum)
-    result.emplace("CONSTR_IN_CELL_BRANCH_NO", "[" + std::to_string(Enums::Constr_InCellBranchNum) + "]");
+    result.emplace("CONSTR_IN_CELL_BRANCH_NUMBER", "[" + std::to_string(Enums::Constr_InCellBranchNumber) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION", "[" + std::to_string(Enums::Constr_InCellFunction) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
     result.emplace("CONSTR_IN_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
@@ -56,45 +56,45 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("CONSTR_IN_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Constr_InCellFunctionData) + "]");
 
     //scanner
-    result.emplace("SCANNER_OUT", "[" + std::to_string(Enums::Scanner::OUTPUT) + "]");
-    result.emplace("SCANNER_OUT::SUCCESS", std::to_string(Enums::ScannerOut::SUCCESS));
-    result.emplace("SCANNER_OUT::FINISHED", std::to_string(Enums::ScannerOut::FINISHED));
+    result.emplace("SCANNER_OUT", "[" + std::to_string(Enums::Scanner_Output) + "]");
+    result.emplace("SCANNER_OUT::SUCCESS", std::to_string(Enums::ScannerOut_Success));
+    result.emplace("SCANNER_OUT::FINISHED", std::to_string(Enums::ScannerOut_Finished));
     //    meta->addEntry("SCANNER_IN","[11]");
-    result.emplace("SCANNER_INOUT_CELL_NUMBER", "[" + std::to_string(Enums::Scanner::INOUT_CELL_NUMBER) + "]");
-    result.emplace("SCANNER_OUT_ENERGY", "[" + std::to_string(Enums::Scanner::OUT_ENERGY) + "]");
-    result.emplace("SCANNER_OUT_ANGLE", "[" + std::to_string(Enums::Scanner::OUT_ANGLE) + "]");
-    result.emplace("SCANNER_OUT_DISTANCE", "[" + std::to_string(Enums::Scanner::OUT_DISTANCE) + "]");
-    result.emplace("SCANNER_OUT_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Scanner::OUT_CELL_MAX_CONNECTIONS) + "]");
-    result.emplace("SCANNER_OUT_CELL_BRANCH_NO", "[" + std::to_string(Enums::Scanner::OUT_CELL_BRANCH_NO) + "]");
-    result.emplace("SCANNER_OUT_CELL_FUNCTION", "[" + std::to_string(Enums::Scanner::OUT_CELL_FUNCTION) + "]");
+    result.emplace("SCANNER_INOUT_CELL_NUMBER", "[" + std::to_string(Enums::Scanner_InOutCellNumber) + "]");
+    result.emplace("SCANNER_OUT_ENERGY", "[" + std::to_string(Enums::Scanner_OutEnergy) + "]");
+    result.emplace("SCANNER_OUT_ANGLE", "[" + std::to_string(Enums::Scanner_OutAngle) + "]");
+    result.emplace("SCANNER_OUT_DISTANCE", "[" + std::to_string(Enums::Scanner_OutDistance) + "]");
+    result.emplace("SCANNER_OUT_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Scanner_OutCellMaxConnections) + "]");
+    result.emplace("SCANNER_OUT_CELL_BRANCH_NUMBER", "[" + std::to_string(Enums::Scanner_OutCellBranchNumber) + "]");
+    result.emplace("SCANNER_OUT_CELL_FUNCTION", "[" + std::to_string(Enums::Scanner_OutCellFunction) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::PROP", std::to_string(Enums::CellFunction_Propulsion));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction_Sensor));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Scanner::OUT_CELL_FUNCTION_DATA) + "]");
+    result.emplace("SCANNER_OUT_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Scanner_OutCellFunctionData) + "]");
 
     //weapon
-    result.emplace("WEAPON_OUT", "[" + std::to_string(Enums::Digestion::OUTPUT) + "]");
-    result.emplace("WEAPON_OUT::NO_TARGET", std::to_string(Enums::DigestionOut::NO_TARGET));
-    result.emplace("WEAPON_OUT::STRIKE_SUCCESSFUL", std::to_string(Enums::DigestionOut::STRIKE_SUCCESSFUL));
+    result.emplace("WEAPON_OUT", "[" + std::to_string(Enums::Digestion_Output) + "]");
+    result.emplace("WEAPON_OUT::NO_TARGET", std::to_string(Enums::DigestionOut_NoTarget));
+    result.emplace("WEAPON_OUT::STRIKE_SUCCESSFUL", std::to_string(Enums::DigestionOut_StrikeSuccessful));
 
     //sensor
-    result.emplace("SENSOR_OUT", "[" + std::to_string(Enums::Sensor::OUTPUT) + "]");
-    result.emplace("SENSOR_OUT::NOTHING_FOUND", std::to_string(Enums::SensorOut::NOTHING_FOUND));
-    result.emplace("SENSOR_OUT::CLUSTER_FOUND", std::to_string(Enums::SensorOut::CLUSTER_FOUND));
-    result.emplace("SENSOR_IN", "[" + std::to_string(Enums::Sensor::INPUT) + "]");
-    result.emplace("SENSOR_IN::DO_NOTHING", std::to_string(Enums::SensorIn::DO_NOTHING));
-    result.emplace("SENSOR_IN::SEARCH_VICINITY", std::to_string(Enums::SensorIn::SEARCH_VICINITY));
-    result.emplace("SENSOR_IN::SEARCH_BY_ANGLE", std::to_string(Enums::SensorIn::SEARCH_BY_ANGLE));
-    result.emplace("SENSOR_IN::SEARCH_FROM_CENTER", std::to_string(Enums::SensorIn::SEARCH_FROM_CENTER));
-    result.emplace("SENSOR_IN::SEARCH_TOWARD_CENTER", std::to_string(Enums::SensorIn::SEARCH_TOWARD_CENTER));
-    result.emplace("SENSOR_INOUT_ANGLE", "[" + std::to_string(Enums::Sensor::INOUT_ANGLE) + "]");
-    result.emplace("SENSOR_IN_MIN_MASS", "[" + std::to_string(Enums::Sensor::IN_MIN_MASS) + "]");
-    result.emplace("SENSOR_IN_MAX_MASS", "[" + std::to_string(Enums::Sensor::IN_MAX_MASS) + "]");
-    result.emplace("SENSOR_OUT_MASS", "[" + std::to_string(Enums::Sensor::OUT_MASS) + "]");
-    result.emplace("SENSOR_OUT_DISTANCE", "[" + std::to_string(Enums::Sensor::OUT_DISTANCE) + "]");
+    result.emplace("SENSOR_OUT", "[" + std::to_string(Enums::Sensor_Output) + "]");
+    result.emplace("SENSOR_OUT::NOTHING_FOUND", std::to_string(Enums::SensorOut_NothingFound));
+    result.emplace("SENSOR_OUT::CLUSTER_FOUND", std::to_string(Enums::SensorOut_ClusterFound));
+    result.emplace("SENSOR_IN", "[" + std::to_string(Enums::Sensor_Input) + "]");
+    result.emplace("SENSOR_IN::DO_NOTHING", std::to_string(Enums::SensorIn_DoNothing));
+    result.emplace("SENSOR_IN::SEARCH_VICINITY", std::to_string(Enums::SensorIn_SearchVicinity));
+    result.emplace("SENSOR_IN::SEARCH_BY_ANGLE", std::to_string(Enums::SensorIn_SearchByAngle));
+    result.emplace("SENSOR_IN::SEARCH_FROM_CENTER", std::to_string(Enums::SensorIn_SearchFromCenter));
+    result.emplace("SENSOR_IN::SEARCH_TOWARD_CENTER", std::to_string(Enums::SensorIn_SearchTowardCenter));
+    result.emplace("SENSOR_INOUT_ANGLE", "[" + std::to_string(Enums::Sensor_InOutAngle) + "]");
+    result.emplace("SENSOR_IN_MIN_MASS", "[" + std::to_string(Enums::Sensor_InMinMass) + "]");
+    result.emplace("SENSOR_IN_MAX_MASS", "[" + std::to_string(Enums::Sensor_InMaxMass) + "]");
+    result.emplace("SENSOR_OUT_MASS", "[" + std::to_string(Enums::Sensor_OutMass) + "]");
+    result.emplace("SENSOR_OUT_DISTANCE", "[" + std::to_string(Enums::Sensor_OutDistance) + "]");
 
     //communicator
     result.emplace("COMMUNICATOR_IN", "[" + std::to_string(Enums::Communicator_Input) + "]");

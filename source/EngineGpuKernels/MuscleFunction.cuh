@@ -25,17 +25,17 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
     auto const& sourceCell = token->sourceCell;
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
-    auto command = static_cast<unsigned char>(tokenMem[Enums::Muscle::INPUT]) % Enums::MuscleIn::_COUNTER;
+    auto command = static_cast<unsigned char>(tokenMem[Enums::Muscle_Input]) % Enums::MuscleIn_Count;
 
-    if (Enums::MuscleIn::DO_NOTHING == command) {
-        tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::SUCCESS;
+    if (Enums::MuscleIn_DoNothing == command) {
+        tokenMem[Enums::Muscle_Output] = Enums::MuscleOut_Success;
         return;
     }
 
     auto index = getConnectionIndex(cell, sourceCell);
     auto& connection = cell->connections[index];
     auto factor =
-        (Enums::MuscleIn::CONTRACT == command || Enums::MuscleIn::CONTRACT_RELAX == command) ? (1.0f / 1.2f) : 1.2f;
+        (Enums::MuscleIn_Contract == command || Enums::MuscleIn_ContractRelax == command) ? (1.0f / 1.2f) : 1.2f;
     auto origDistance = connection.distance;
     auto distance = origDistance * factor;
 
@@ -49,12 +49,12 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
             auto otherIndex = getConnectionIndex(connectingCell, cell);
             connectingCell->connections[otherIndex].distance *= factor;
         } else {
-            tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::LIMIT_REACHED;
+            tokenMem[Enums::Muscle_Output] = Enums::MuscleOut_LimitReached;
             sourceCell->releaseLock();
             return;
         }
 
-        if (Enums::MuscleIn::CONTRACT == command || Enums::MuscleIn::EXPAND == command) {
+        if (Enums::MuscleIn_Contract == command || Enums::MuscleIn_Expand == command) {
             auto velInc = cell->absPos - sourceCell->absPos;
             data.cellMap.mapDisplacementCorrection(velInc);
             Math::normalize(velInc);
@@ -64,7 +64,7 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
         sourceCell->releaseLock();
     }
 
-    tokenMem[Enums::Muscle::OUTPUT] = Enums::MuscleOut::SUCCESS;
+    tokenMem[Enums::Muscle_Output] = Enums::MuscleOut_Success;
     result.incMuscleActivity();
 }
 

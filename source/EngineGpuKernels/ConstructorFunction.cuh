@@ -154,7 +154,7 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token* toke
     data.angle = memory[Enums::Constr_InOutAngle];
     data.distance = memory[Enums::Constr_InDist];
     data.maxConnections = memory[Enums::Constr_InCellMaxConnections];
-    data.branchNumber = memory[Enums::Constr_InCellBranchNum];
+    data.branchNumber = memory[Enums::Constr_InCellBranchNumber];
     data.metaData = memory[Enums::Constr_InCellMetadata];
     data.cellFunctionType = memory[Enums::Constr_InCellFunction];
 }

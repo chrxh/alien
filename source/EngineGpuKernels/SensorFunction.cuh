@@ -49,20 +49,20 @@ __inline__ __device__ void SensorFunction::processing_block(Token* token)
 
     __shared__ int command;
     if (0 == threadIdx.x) {
-        command = static_cast<unsigned char>(tokenMem[Enums::Sensor::INPUT]) % Enums::SensorIn::_COUNTER;
+        command = static_cast<unsigned char>(tokenMem[Enums::Sensor_Input]) % Enums::SensorIn::_COUNTER;
     }
     __syncthreads();
 
-    if (Enums::SensorIn::DO_NOTHING == command) {
-        tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::NOTHING_FOUND;
+    if (Enums::SensorIn_DoNothing == command) {
+        tokenMem[Enums::Sensor_Output] = Enums::SensorOut_NothingFound;
         return;
     }
 
     __shared__ int minMass;
     __shared__ int maxMass;
     if (0 == threadIdx.x) {
-        minMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MIN_MASS]);
-        maxMass = static_cast<unsigned char>(tokenMem[Enums::Sensor::IN_MAX_MASS]);
+        minMass = static_cast<unsigned char>(tokenMem[Enums::Sensor_InMinMass]);
+        maxMass = static_cast<unsigned char>(tokenMem[Enums::Sensor_InMaxMass]);
         if (0 == maxMass) {
             maxMass = 16000;  //large value => no max mass check
         }
@@ -70,13 +70,13 @@ __inline__ __device__ void SensorFunction::processing_block(Token* token)
     __syncthreads();
 
     __shared__ Cell* scanCell;
-    if (Enums::SensorIn::SEARCH_VICINITY == command) {
+    if (Enums::SensorIn_SearchVicinity == command) {
         searchVicinity(token, minMass, maxMass, scanCell);
     }
-    else if (Enums::SensorIn::SEARCH_BY_ANGLE == command) {
+    else if (Enums::SensorIn_SearchByAngle == command) {
         searchByAngle(token, minMass, maxMass, scanCell);
     }
-    else if (Enums::SensorIn::SEARCH_FROM_CENTER == command) {
+    else if (Enums::SensorIn_SearchFromCenter == command) {
         searchFromCenter(token, minMass, maxMass, scanCell);
     }
     else {
@@ -86,7 +86,7 @@ __inline__ __device__ void SensorFunction::processing_block(Token* token)
 
     if (!scanCell) {
         if (0 == threadIdx.x) {
-            tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::NOTHING_FOUND;
+            tokenMem[Enums::Sensor_Output] = Enums::SensorOut_NothingFound;
         }
         __syncthreads();
 
@@ -97,10 +97,10 @@ __inline__ __device__ void SensorFunction::processing_block(Token* token)
         auto const& cell = token->cell;
         auto const& sourceCell = token->sourceCell;
         auto const angleAndDistance = getAngleAndDistance(cell, sourceCell, scanCell);
-        tokenMem[Enums::Sensor::OUTPUT] = Enums::SensorOut::CLUSTER_FOUND;
-        tokenMem[Enums::Sensor::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(angleAndDistance.distance);
-        tokenMem[Enums::Sensor::INOUT_ANGLE] = QuantityConverter::convertAngleToData(angleAndDistance.angle);
-        tokenMem[Enums::Sensor::OUT_MASS] = QuantityConverter::convertURealToData(scanCell->cluster->numCellPointers);
+        tokenMem[Enums::Sensor_Output] = Enums::SensorOut_ClusterFound;
+        tokenMem[Enums::Sensor_OutDistance] = QuantityConverter::convertDistanceToData(angleAndDistance.distance);
+        tokenMem[Enums::Sensor_InOutAngle] = QuantityConverter::convertAngleToData(angleAndDistance.angle);
+        tokenMem[Enums::Sensor_OutMass] = QuantityConverter::convertURealToData(scanCell->cluster->numCellPointers);
         scanCell->cluster->unfreeze(30);
     }
     __syncthreads();
@@ -123,7 +123,7 @@ SensorFunction::searchByAngle(Token* token, int const& minSize, int const& maxSi
 
     __shared__ float angle;
     if (0 == threadIdx.x) {
-        auto const relAngle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Sensor::INOUT_ANGLE]);
+        auto const relAngle = QuantityConverter::convertDataToAngle(tokenMem[Enums::Sensor_InOutAngle]);
         angle = Math::angleOfVector(sourceCell->relPos - cell->relPos) + _cluster->angle + relAngle;
     }
     __syncthreads();
