@@ -26,7 +26,7 @@ __inline__ __device__ void DigestionFunction::processing(Token* token, Simulatio
 {
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
-    tokenMem[Enums::Digestion::OUTPUT] = Enums::DigestionOut::NO_TARGET;
+    tokenMem[Enums::Digestion_Output] = Enums::DigestionOut_NoTarget;
 
     Cell* otherCells[18];
     int numOtherCells;
@@ -88,14 +88,14 @@ __inline__ __device__ void DigestionFunction::processing(Token* token, Simulatio
                     otherCell->energy -= energyToTransfer;
                     token->energy += energyToTransfer / 2;
                     cell->energy += energyToTransfer / 2;
-                    token->memory[Enums::Digestion::OUTPUT] = Enums::DigestionOut::STRIKE_SUCCESSFUL;
+                    token->memory[Enums::Digestion_Output] = Enums::DigestionOut_StrikeSuccessful;
                     result.incSuccessfulAttack();
                 }
             }
             otherCell->releaseLock();
         }
     }
-    if (Enums::DigestionOut::NO_TARGET == token->memory[Enums::Digestion::OUTPUT]) {
+    if (Enums::DigestionOut_NoTarget == token->memory[Enums::Digestion_Output]) {
         result.incFailedAttack();
     }
     auto cellFunctionWeaponEnergyCost =

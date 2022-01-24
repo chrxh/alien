@@ -112,7 +112,7 @@ namespace Enums
         Constr_InOutAngle = 15,
         Constr_InDist = 16,
         Constr_InCellMaxConnections = 17,  //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
-        Constr_InCellBranchNum = 18,
+        Constr_InCellBranchNumber = 18,
         Constr_InCellMetadata = 19,
         Constr_InCellFunction = 39,
         Constr_InCellFunctionData = 40
@@ -154,111 +154,111 @@ namespace Enums
         ConstrInUniformDist_Count
     };
 
-    struct Prop {
-        enum Type {
-            OUTPUT = 5,
-            INPUT = 8,
-            IN_ANGLE = 9,
-            IN_POWER = 10
-        };
+    using Prop = int;
+    enum Prop_
+    {
+        Prop_Output = 5,
+        Prop_Input = 8,
+        Prop_InAngle = 9,
+        Prop_InPower = 10
     };
-    struct PropOut {
-        enum Type {
-            SUCCESS,
-            ERROR_NO_ENERGY
-        };
+    using PropOut = int;
+    enum PropOut_
+    {
+        PropOut_Success,
+        PropOut_ErrorNoEnergy
     };
-    struct PropIn {
-        enum Type {
-            DO_NOTHING,
-            BY_ANGLE,
-            DAMP_ROTATION,
-            _COUNTER
-        };
-    };
-
-    struct Scanner {
-        enum Type {
-            OUTPUT = 5,
-            INOUT_CELL_NUMBER = 12,
-            OUT_ENERGY = 14,
-            OUT_ANGLE = 15,
-            OUT_DISTANCE = 16,
-            OUT_CELL_MAX_CONNECTIONS = 17,
-            OUT_CELL_BRANCH_NO = 18,
-            OUT_CELL_METADATA = 19,
-            OUT_CELL_FUNCTION = 39,
-            OUT_CELL_FUNCTION_DATA = 40
-        };
-    };
-    struct ScannerOut {
-        enum Type {
-            SUCCESS,
-            FINISHED
-        };
+    using PropIn = int;
+    enum PropIn_
+    {
+        PropIn_DoNothing,
+        PropIn_ByAngle,
+        PropIn_DampRotation,
+        PropIn_Count
     };
 
-    struct Sensor {
-        enum Type {
-            OUTPUT = 5,
-            INPUT = 20,
-            INOUT_ANGLE = 21,
-            IN_MIN_MASS = 22,
-            IN_MAX_MASS = 23,
-            OUT_MASS = 24,
-            OUT_DISTANCE = 25
-        };
+    using Scanner = int;
+    enum Scanner_
+    {
+        Scanner_Output = 5,
+        Scanner_InOutCellNumber = 12,
+        Scanner_OutEnergy = 14,
+        Scanner_OutAngle = 15,
+        Scanner_OutDistance = 16,
+        Scanner_OutCellMaxConnections = 17,
+        Scanner_OutCellBranchNumber = 18,
+        Scanner_OutCellMetadata = 19,
+        Scanner_OutCellFunction = 39,
+        Scanner_OutCellFunctionData = 40
     };
-    struct SensorIn {
-        enum Type {
-            DO_NOTHING,
-            SEARCH_VICINITY,
-            SEARCH_BY_ANGLE,
-            SEARCH_FROM_CENTER,
-            SEARCH_TOWARD_CENTER,
-            _COUNTER
-        };
-    };
-    struct SensorOut {
-        enum Type {
-            NOTHING_FOUND,
-            CLUSTER_FOUND
-        };
+    using ScannerOut = int;
+    enum ScannerOut_
+    {
+        ScannerOut_Success,
+        ScannerOut_Finished
     };
 
-    struct Digestion {
-        enum Type {
-            OUTPUT = 5,
-        };
+    using Sensor = int;
+    enum Sensor_
+    {
+        Sensor_Output = 5,
+        Sensor_Input = 20,
+        Sensor_InOutAngle = 21,
+        Sensor_InMinMass = 22,
+        Sensor_InMaxMass = 23,
+        Sensor_OutMass = 24,
+        Sensor_OutDistance = 25
     };
-    struct DigestionOut {
-        enum Type {
-            NO_TARGET,
-            STRIKE_SUCCESSFUL
-        };
+    using SensorIn = int;
+    enum SensorIn_
+    {
+        SensorIn_DoNothing,
+        SensorIn_SearchVicinity,
+        SensorIn_SearchByAngle,
+        SensorIn_SearchFromCenter,
+        SensorIn_SearchTowardCenter,
+        SensorIn_Count
+    };
+    using SensorOut = int;
+    enum SensorOut_
+    {
+        SensorOut_NothingFound,
+        SensorOut_ClusterFound
     };
 
-    struct Muscle {
-        enum Type {
-            OUTPUT = 5,
-            INPUT = 36,
-        };
+    using Digestion = int;
+    enum Digestion_
+    {
+        Digestion_Output = 5,
     };
-    struct MuscleOut {
-        enum Type {
-            SUCCESS,
-            LIMIT_REACHED
-        };
+    using DigestionOut = int;
+    enum DigestionOut_
+    {
+        DigestionOut_NoTarget,
+        DigestionOut_StrikeSuccessful
     };
-    struct MuscleIn {
-        enum Type {
-            DO_NOTHING,
-            CONTRACT,
-            CONTRACT_RELAX,
-            EXPAND,
-            EXPAND_RELAX,
-            _COUNTER
-        };
+
+    using Muscle = int;
+    enum Muscle_
+    {
+        Muscle_Output = 5,
+        Muscle_Input = 36,
+    };
+    using MuscleOut = int;
+    enum MuscleOut_
+    {
+        MuscleOut_Success,
+        MuscleOut_LimitReached
+    };
+    using MuscleIn = int;
+    enum MuscleIn_
+    {
+        MuscleIn_DoNothing,
+        MuscleIn_Contract,
+        MuscleIn_ContractRelax,
+        MuscleIn_Expand,
+        MuscleIn_ExpandRelax,
+        MuscleIn_Count
     };
 }
 

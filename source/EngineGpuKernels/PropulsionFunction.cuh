@@ -27,13 +27,13 @@ __inline__ __device__ void PropulsionFunction::processing(Token* token, Simulati
     auto const& command = static_cast<unsigned char>(tokenMem[Enums::Prop::INPUT]) % Enums::PropIn::_COUNTER;
 
     if (Enums::PropIn::DO_NOTHING == command) {
-        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
+        tokenMem[Enums::Prop_Output] = Enums::PropOut_Success;
         return;
     }
     float power = convertDataToThrustPower(tokenMem[Enums::Prop::IN_POWER]);
     auto energyCost = power / 100;
     if (token->energy < energyCost + cudaSimulationParameters.tokenMinEnergy) {
-        tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::ERROR_NO_ENERGY;
+        tokenMem[Enums::Prop_Output] = Enums::PropOut::ERROR_NO_ENERGY;
         return;
     }
 
@@ -65,7 +65,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token* token, Simulati
 
     token->energy -= energyCost;
 */
-    tokenMem[Enums::Prop::OUTPUT] = Enums::PropOut::SUCCESS;
+    tokenMem[Enums::Prop_Output] = Enums::PropOut_Success;
 }
 
 __inline__ __device__ float PropulsionFunction::convertDataToThrustPower(unsigned char data)

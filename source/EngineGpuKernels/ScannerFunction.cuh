@@ -35,28 +35,28 @@ private:
 __device__ __inline__ void ScannerFunction::processing(Token* token, SimulationData& data)
 {
     auto& tokenMem = token->memory;
-    unsigned int n = static_cast<unsigned char>(tokenMem[Enums::Scanner::INOUT_CELL_NUMBER]);
+    unsigned int n = static_cast<unsigned char>(tokenMem[Enums::Scanner_InOutCellNumber]);
     auto cell = token->cell;
 
     auto lookupResult = spiralLookupAlgorithm(n + 1, cell, token->sourceCell, data);
 
     //restart?
     if (lookupResult.finish) {
-        tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = 0;
+        tokenMem[Enums::Scanner_InOutCellNumber] = 0;
         lookupResult.prevPrevCell = lookupResult.prevCell;
         lookupResult.prevCell = lookupResult.cell;
-        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::FINISHED;
+        tokenMem[Enums::Scanner_Output] = Enums::ScannerOut_Finished;
     }
 
     //no restart? => increase cell number
     else {
-        tokenMem[Enums::Scanner::INOUT_CELL_NUMBER] = n + 1;
-        tokenMem[Enums::Scanner::OUTPUT] = Enums::ScannerOut::SUCCESS;
+        tokenMem[Enums::Scanner_InOutCellNumber] = n + 1;
+        tokenMem[Enums::Scanner_Output] = Enums::ScannerOut_Success;
     }
 
     //start cell
     if (n == 0) {
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = 0;
+        tokenMem[Enums::Scanner_OutDistance] = 0;
     }
 
     //further cell
@@ -64,7 +64,7 @@ __device__ __inline__ void ScannerFunction::processing(Token* token, SimulationD
         //distance from cell n-1 to cell n-2
         auto prevCellToPrevPrevCellIndex = getConnectionIndex(lookupResult.prevCell, lookupResult.prevPrevCell);
         auto distance = lookupResult.prevCell->connections[prevCellToPrevPrevCellIndex].distance;
-        tokenMem[Enums::Scanner::OUT_DISTANCE] = QuantityConverter::convertDistanceToData(distance);
+        tokenMem[Enums::Scanner_OutDistance] = QuantityConverter::convertDistanceToData(distance);
 
         if (!lookupResult.finish) {
             auto prevCellToCellIndex = getConnectionIndex(lookupResult.prevCell, lookupResult.cell);
@@ -86,25 +86,25 @@ __device__ __inline__ void ScannerFunction::processing(Token* token, SimulationD
                     angle += connection.angleFromPrevious;
                 }
             }
-            tokenMem[Enums::Scanner::OUT_ANGLE] = QuantityConverter::convertAngleToData(angle - 180.0f);
+            tokenMem[Enums::Scanner_OutAngle] = QuantityConverter::convertAngleToData(angle - 180.0f);
         }
     }
 
     //scan cell
     int cellEnergy = min(static_cast<int>(floorf(lookupResult.prevCell->energy)), 255);
-    tokenMem[Enums::Scanner::OUT_ENERGY] = cellEnergy;
-    tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = lookupResult.prevCell->maxConnections;
-    tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = lookupResult.prevCell->branchNumber;
-    tokenMem[Enums::Scanner::OUT_CELL_METADATA] = lookupResult.prevCell->metadata.color;
-    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
-    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = lookupResult.prevCell->numStaticBytes;
+    tokenMem[Enums::Scanner_OutEnergy] = cellEnergy;
+    tokenMem[Enums::Scanner_OutCellMaxConnections] = lookupResult.prevCell->maxConnections;
+    tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->branchNumber;
+    tokenMem[Enums::Scanner_OutCellMetadata] = lookupResult.prevCell->metadata.color;
+    tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
+    tokenMem[Enums::Scanner_OutCellFunctionData] = lookupResult.prevCell->numStaticBytes;
     for (int i = 0; i < lookupResult.prevCell->numStaticBytes; ++i) {
-        tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA + 1 + i] = lookupResult.prevCell->staticData[i];
+        tokenMem[Enums::Scanner_OutCellFunctionData + 1 + i] = lookupResult.prevCell->staticData[i];
     }
     int mutableDataIndex = lookupResult.prevCell->numStaticBytes + 1;
-    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA + mutableDataIndex] = lookupResult.prevCell->numMutableBytes;
+    tokenMem[Enums::Scanner_OutCellFunctionData + mutableDataIndex] = lookupResult.prevCell->numMutableBytes;
     for (int i = 0; i < lookupResult.prevCell->numMutableBytes; ++i) {
-        tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA + mutableDataIndex + 1 + i] = lookupResult.prevCell->mutableData[i];
+        tokenMem[Enums::Scanner_OutCellFunctionData + mutableDataIndex + 1 + i] = lookupResult.prevCell->mutableData[i];
     }
 }
 
