@@ -16,15 +16,15 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("BRANCH_NUMBER", "[0]");
 
     //energy guidance system
-    result.emplace("ENERGY_GUIDANCE_IN", "[" + std::to_string(Enums::EnergyGuidance::INPUT) + "]");
-    result.emplace("ENERGY_GUIDANCE_IN::DEACTIVATED", std::to_string(Enums::EnergyGuidanceIn::DEACTIVATED));
-    result.emplace("ENERGY_GUIDANCE_IN::BALANCE_CELL", std::to_string(Enums::EnergyGuidanceIn::BALANCE_CELL));
-    result.emplace("ENERGY_GUIDANCE_IN::BALANCE_TOKEN", std::to_string(Enums::EnergyGuidanceIn::BALANCE_TOKEN));
-    result.emplace("ENERGY_GUIDANCE_IN::BALANCE_BOTH", std::to_string(Enums::EnergyGuidanceIn::BALANCE_BOTH));
-    result.emplace("ENERGY_GUIDANCE_IN::HARVEST_CELL", std::to_string(Enums::EnergyGuidanceIn::HARVEST_CELL));
-    result.emplace("ENERGY_GUIDANCE_IN::HARVEST_TOKEN", std::to_string(Enums::EnergyGuidanceIn::HARVEST_TOKEN));
-    result.emplace("ENERGY_GUIDANCE_IN_VALUE_CELL", "[" + std::to_string(Enums::EnergyGuidance::IN_VALUE_CELL) + "]");
-    result.emplace("ENERGY_GUIDANCE_IN_VALUE_TOKEN", "[" + std::to_string(Enums::EnergyGuidance::IN_VALUE_TOKEN) + "]");
+    result.emplace("ENERGY_GUIDANCE_IN", "[" + std::to_string(Enums::EnergyGuidance_Input) + "]");
+    result.emplace("ENERGY_GUIDANCE_IN::DEACTIVATED", std::to_string(Enums::EnergyGuidanceIn_Deactivated));
+    result.emplace("ENERGY_GUIDANCE_IN::BALANCE_CELL", std::to_string(Enums::EnergyGuidanceIn_BalanceCell));
+    result.emplace("ENERGY_GUIDANCE_IN::BALANCE_TOKEN", std::to_string(Enums::EnergyGuidanceIn_BalanceToken));
+    result.emplace("ENERGY_GUIDANCE_IN::BALANCE_BOTH", std::to_string(Enums::EnergyGuidanceIn_BalanceBoth));
+    result.emplace("ENERGY_GUIDANCE_IN::HARVEST_CELL", std::to_string(Enums::EnergyGuidanceIn_HarvestCell));
+    result.emplace("ENERGY_GUIDANCE_IN::HARVEST_TOKEN", std::to_string(Enums::EnergyGuidanceIn_HarvestToken));
+    result.emplace("ENERGY_GUIDANCE_IN_VALUE_CELL", "[" + std::to_string(Enums::EnergyGuidance_InValueCell) + "]");
+    result.emplace("ENERGY_GUIDANCE_IN_VALUE_TOKEN", "[" + std::to_string(Enums::EnergyGuidance_InValueToken) + "]");
 
     //constructor
     result.emplace("CONSTR_OUT", "[" + std::to_string(Enums::Constr::OUTPUT) + "]");
@@ -97,22 +97,22 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SENSOR_OUT_DISTANCE", "[" + std::to_string(Enums::Sensor::OUT_DISTANCE) + "]");
 
     //communicator
-    result.emplace("COMMUNICATOR_IN", "[" + std::to_string(Enums::Communicator::INPUT) + "]");
-    result.emplace("COMMUNICATOR_IN::DO_NOTHING", std::to_string(Enums::CommunicatorIn::DO_NOTHING));
-    result.emplace("COMMUNICATOR_IN::SET_LISTENING_CHANNEL", std::to_string(Enums::CommunicatorIn::SET_LISTENING_CHANNEL));
-    result.emplace("COMMUNICATOR_IN::SEND_MESSAGE", std::to_string(Enums::CommunicatorIn::SEND_MESSAGE));
-    result.emplace("COMMUNICATOR_IN::RECEIVE_MESSAGE", std::to_string(Enums::CommunicatorIn::RECEIVE_MESSAGE));
-    result.emplace("COMMUNICATOR_IN_CHANNEL", "[" + std::to_string(Enums::Communicator::IN_CHANNEL) + "]");
-    result.emplace("COMMUNICATOR_IN_MESSAGE", "[" + std::to_string(Enums::Communicator::IN_MESSAGE) + "]");
-    result.emplace("COMMUNICATOR_IN_ANGLE", "[" + std::to_string(Enums::Communicator::IN_ANGLE) + "]");
-    result.emplace("COMMUNICATOR_IN_DISTANCE", "[" + std::to_string(Enums::Communicator::IN_DISTANCE) + "]");
-    result.emplace("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "[" + std::to_string(Enums::Communicator::OUT_SENT_NUM_MESSAGE) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "[" + std::to_string(Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO", std::to_string(Enums::CommunicatorOutReceivedNewMessage::NO));
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES", std::to_string(Enums::CommunicatorOutReceivedNewMessage::YES));
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "[" + std::to_string(Enums::Communicator::OUT_RECEIVED_MESSAGE) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_ANGLE", "[" + std::to_string(Enums::Communicator::OUT_RECEIVED_ANGLE) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "[" + std::to_string(Enums::Communicator::OUT_RECEIVED_DISTANCE) + "]");
+    result.emplace("COMMUNICATOR_IN", "[" + std::to_string(Enums::Communicator_Input) + "]");
+    result.emplace("COMMUNICATOR_IN::DO_NOTHING", std::to_string(Enums::CommunicatorIn_DoNothing));
+    result.emplace("COMMUNICATOR_IN::SET_LISTENING_CHANNEL", std::to_string(Enums::CommunicatorIn_SetListeningChannel));
+    result.emplace("COMMUNICATOR_IN::SEND_MESSAGE", std::to_string(Enums::CommunicatorIn_SendMessage));
+    result.emplace("COMMUNICATOR_IN::RECEIVE_MESSAGE", std::to_string(Enums::CommunicatorIn_ReceiveMessage));
+    result.emplace("COMMUNICATOR_IN_CHANNEL", "[" + std::to_string(Enums::Communicator_InChannel) + "]");
+    result.emplace("COMMUNICATOR_IN_MESSAGE", "[" + std::to_string(Enums::Communicator_InMessage) + "]");
+    result.emplace("COMMUNICATOR_IN_ANGLE", "[" + std::to_string(Enums::Communicator_InAngle) + "]");
+    result.emplace("COMMUNICATOR_IN_DISTANCE", "[" + std::to_string(Enums::Communicator_InDistance) + "]");
+    result.emplace("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "[" + std::to_string(Enums::Communicator_OutSentNumMessage) + "]");
+    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "[" + std::to_string(Enums::Communicator_OutReceivedNewMessage) + "]");
+    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO", std::to_string(Enums::CommunicatorOutReceivedNewMessage_No));
+    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES", std::to_string(Enums::CommunicatorOutReceivedNewMessage_Yes));
+    result.emplace("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "[" + std::to_string(Enums::Communicator_OutReceivedMessage) + "]");
+    result.emplace("COMMUNICATOR_OUT_RECEIVED_ANGLE", "[" + std::to_string(Enums::Communicator_OutReceivedAngle) + "]");
+    result.emplace("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "[" + std::to_string(Enums::Communicator_OutReceivedDistance) + "]");
 
     return result;
 }

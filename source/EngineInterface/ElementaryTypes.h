@@ -13,64 +13,64 @@ namespace Enums
     using CellFunction = int;
     enum CellFunction_
     {
-        CellFunction_Computation = 0,
-        CellFunction_Propulsion = 1,
-        CellFunction_Scanner = 2,
-        CellFunction_Digestion = 3,
-        CellFunction_Constructor = 4,
-        CellFunction_Sensor = 5,
-        CellFunction_Muscle = 6,
-        CellFunction_Count = 7
+        CellFunction_Computation,
+        CellFunction_Propulsion,
+        CellFunction_Scanner,
+        CellFunction_Digestion,
+        CellFunction_Constructor,
+        CellFunction_Sensor,
+        CellFunction_Muscle,
+        CellFunction_Count
     };
 
-    struct EnergyGuidance {
-        enum Type {
-            INPUT = 1,
-            IN_VALUE_CELL = 2,
-            IN_VALUE_TOKEN = 3
-        };
+    using EnergyGuidance = int;
+    enum EnergyGuidance_
+    {
+        EnergyGuidance_Input = 1,
+        EnergyGuidance_InValueCell = 2,
+        EnergyGuidance_InValueToken = 3
     };
 
-    struct EnergyGuidanceIn {
-        enum Type {
-            DEACTIVATED,
-            BALANCE_CELL,
-            BALANCE_TOKEN,
-            BALANCE_BOTH,
-            HARVEST_CELL,
-            HARVEST_TOKEN,
-            _COUNTER
-        };
+    using EnergyGuidanceIn = int;
+    enum EnergyGuidanceIn_
+    {
+        EnergyGuidanceIn_Deactivated,
+        EnergyGuidanceIn_BalanceCell,
+        EnergyGuidanceIn_BalanceToken,
+        EnergyGuidanceIn_BalanceBoth,
+        EnergyGuidanceIn_HarvestCell,
+        EnergyGuidanceIn_HarvestToken,
+        EnergyGuidanceIn_Count
     };
 
-    struct Communicator {
-        enum Type {
-            INPUT = 26,
-            IN_CHANNEL = 27,
-            IN_MESSAGE = 28,
-            IN_ANGLE = 29,
-            IN_DISTANCE = 30,
-            OUT_SENT_NUM_MESSAGE = 31,
-            OUT_RECEIVED_NEW_MESSAGE = 32,
-            OUT_RECEIVED_MESSAGE = 33,
-            OUT_RECEIVED_ANGLE = 34,
-            OUT_RECEIVED_DISTANCE = 35,
-        };
+    using Communicator = int;
+    enum Communicator_
+    {
+        Communicator_Input = 26,
+        Communicator_InChannel = 27,
+        Communicator_InMessage = 28,
+        Communicator_InAngle = 29,
+        Communicator_InDistance = 30,
+        Communicator_OutSentNumMessage = 31,
+        Communicator_OutReceivedNewMessage = 32,
+        Communicator_OutReceivedMessage = 33,
+        Communicator_OutReceivedAngle = 34,
+        Communicator_OutReceivedDistance = 35,
     };
-    struct CommunicatorIn {
-        enum Type {
-            DO_NOTHING,
-            SET_LISTENING_CHANNEL,
-            SEND_MESSAGE,
-            RECEIVE_MESSAGE,
-            _COUNTER
-        };
+    using CommunicatorIn = int;
+    enum CommunicatorIn_
+    {
+        CommunicatorIn_DoNothing,
+        CommunicatorIn_SetListeningChannel,
+        CommunicatorIn_SendMessage,
+        CommunicatorIn_ReceiveMessage,
+        CommunicatorIn_Count
     };
-    struct CommunicatorOutReceivedNewMessage {
-        enum Type {
-            NO,
-            YES
-        };
+    using CommunicatorOutReceivedNewMessage = int;
+    enum CommunicatorOutReceivedNewMessage_
+    {
+        CommunicatorOutReceivedNewMessage_No,
+        CommunicatorOutReceivedNewMessage_Yes
     };
 
     struct ComputationOperation {
