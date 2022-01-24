@@ -607,48 +607,48 @@ void _InspectorWindow::showDigestionTableContent()
 void _InspectorWindow::showConstructionTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::OUTPUT));
+    AlienImGui::Text(formatHex(Enums::Constr_Output));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::ConstrOut::SUCCESS) + ": construction of new cell was successful");
-    AlienImGui::Text(formatHex(Enums::ConstrOut::ERROR_NO_ENERGY) + ": error - not enough energy");
-    AlienImGui::Text(formatHex(Enums::ConstrOut::ERROR_CONNECTION) + ": error - no free connection");
-    AlienImGui::Text(formatHex(Enums::ConstrOut::ERROR_LOCK) + ": error - construction blocked by other processes");
-    AlienImGui::Text(formatHex(Enums::ConstrOut::ERROR_DIST) + ": error - no free connection");
+    AlienImGui::Text(formatHex(Enums::ConstrOut_Success) + ": construction of new cell was successful");
+    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorNoEnergy) + ": error - not enough energy");
+    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorConnection) + ": error - no free connection");
+    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorLock) + ": error - construction blocked by other processes");
+    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorDist) + ": error - no free connection");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::INPUT));
+    AlienImGui::Text(formatHex(Enums::Constr_Input));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: main command");
-    AlienImGui::Text(formatHex(Enums::ConstrIn::DO_NOTHING) + ": do nothing");
-    AlienImGui::Text(formatHex(Enums::ConstrIn::CONSTRUCT) + ": try construct cell");
+    AlienImGui::Text(formatHex(Enums::ConstrIn_DoNothing) + ": do nothing");
+    AlienImGui::Text(formatHex(Enums::ConstrIn_Construct) + ": try construct cell");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_OPTION));
+    AlienImGui::Text(formatHex(Enums::Constr_InOption));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: options");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::STANDARD) + ": standard construction process");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::CREATE_EMPTY_TOKEN) + ": construct cell and token with empty memory");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::CREATE_DUP_TOKEN) + ": construct cell and token with copied memory");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::FINISH_NO_SEP) + ": construct cell and finish construction process without separation");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::FINISH_WITH_SEP) + ": construct cell and finish construction process with separation");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP) + ": construct cell with empty token and finish construction process with separation");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP) + ": construct cell with copied token and finish construction process with separation");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_Standard) + ": standard construction process");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_CreateEmptyToken) + ": construct cell and token with empty memory");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_CreateDupToken) + ": construct cell and token with copied memory");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishNoSep) + ": construct cell and finish construction process without separation");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishWithSep) + ": construct cell and finish construction process with separation");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishWithEmptyTokenSep) + ": construct cell with empty token and finish construction process with separation");
+    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishWithDupTokenSep) + ": construct cell with copied token and finish construction process with separation");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_ANGLE_ALIGNMENT));
+    AlienImGui::Text(formatHex(Enums::Constr_InAngleAlignment));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: align relative angle");
@@ -664,23 +664,23 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_UNIFORM_DIST));
+    AlienImGui::Text(formatHex(Enums::Constr_InUniformDist));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: uniform distances");
     AlienImGui::Text(
-        formatHex(Enums::ConstrInUniformDist::NO)
+        formatHex(Enums::ConstrInUniformDist_No)
         + ": if constructed cell is connected to a nearby cell then\n    the spatial distance is taken as reference distance");
     AlienImGui::Text(
-        formatHex(Enums::ConstrInUniformDist::YES)
+        formatHex(Enums::ConstrInUniformDist_Yes)
         + ": if constructed cell is connected to a nearby cell then\n    the reference distance will be equal to the given\n    input distance at address"
-        + formatHex(Enums::Constr::IN_DIST));
+        + formatHex(Enums::Constr_InDist));
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::INOUT_ANGLE));
+    AlienImGui::Text(formatHex(Enums::Constr_InOutAngle));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: angle");
@@ -690,7 +690,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_DIST));
+    AlienImGui::Text(formatHex(Enums::Constr_InDist));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: distance");
@@ -700,7 +700,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_CELL_MAX_CONNECTIONS));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellMaxConnections));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: max connections of constructed cell");
@@ -712,7 +712,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_CELL_BRANCH_NO));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellBranchNum));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: branch number of constructed cell");
@@ -721,7 +721,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_CELL_METADATA));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellMetadata));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: color of constructed cell");
@@ -730,7 +730,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_CELL_FUNCTION));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellFunction));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: specialization of constructed cell");
@@ -745,7 +745,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr::IN_CELL_FUNCTION_DATA) + " - " + formatHex(Enums::Constr::IN_CELL_FUNCTION_DATA + 48 + 16 + 1));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellFunctionData) + " - " + formatHex(Enums::Constr_InCellFunctionData + 48 + 16 + 1));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input:");

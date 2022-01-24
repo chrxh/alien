@@ -27,33 +27,33 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("ENERGY_GUIDANCE_IN_VALUE_TOKEN", "[" + std::to_string(Enums::EnergyGuidance_InValueToken) + "]");
 
     //constructor
-    result.emplace("CONSTR_OUT", "[" + std::to_string(Enums::Constr::OUTPUT) + "]");
-    result.emplace("CONSTR_OUT::SUCCESS", std::to_string(Enums::ConstrOut::SUCCESS));
-    result.emplace("CONSTR_OUT::ERROR_NO_ENERGY", std::to_string(Enums::ConstrOut::ERROR_NO_ENERGY));
-    result.emplace("CONSTR_OUT::ERROR_CONNECTION", std::to_string(Enums::ConstrOut::ERROR_CONNECTION));
-    result.emplace("CONSTR_OUT::ERROR_DIST", std::to_string(Enums::ConstrOut::ERROR_DIST));
-    result.emplace("CONSTR_IN", "[" + std::to_string(Enums::Constr::INPUT) + "]");
-    result.emplace("CONSTR_IN::DO_NOTHING", std::to_string(Enums::ConstrIn::DO_NOTHING));
-    result.emplace("CONSTR_IN_OPTION", "[" + std::to_string(Enums::Constr::IN_OPTION) + "]");
-    result.emplace("CONSTR_IN_OPTION::STANDARD", std::to_string(Enums::ConstrInOption::STANDARD));
-    result.emplace("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN", std::to_string(Enums::ConstrInOption::CREATE_EMPTY_TOKEN));
-    result.emplace("CONSTR_IN_OPTION::CREATE_DUP_TOKEN", std::to_string(Enums::ConstrInOption::CREATE_DUP_TOKEN));
-    result.emplace("CONSTR_IN_OPTION::FINISH_NO_SEP", std::to_string(Enums::ConstrInOption::FINISH_NO_SEP));
-    result.emplace("CONSTR_IN_OPTION::FINISH_WITH_SEP", std::to_string(Enums::ConstrInOption::FINISH_WITH_SEP));
-    result.emplace("CONSTR_IN_OPTION::FINISH_WITH_EMPTY_TOKEN_SEP", std::to_string(Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP));
-    result.emplace("CONSTR_IN_OPTION::FINISH_WITH_DUP_TOKEN_SEP", std::to_string(Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP));
-    result.emplace("CONSTR_INOUT_ANGLE", "[" + std::to_string(Enums::Constr::INOUT_ANGLE) + "]");
-    result.emplace("CONSTR_IN_DIST", "[" + std::to_string(Enums::Constr::IN_DIST) + "]");
-    result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Constr::IN_CELL_MAX_CONNECTIONS) + "]");
-    result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO", "0");  //artificial entry (has no symbol in enum class)
-    result.emplace("CONSTR_IN_CELL_BRANCH_NO", "[" + std::to_string(Enums::Constr::IN_CELL_BRANCH_NO) + "]");
-    result.emplace("CONSTR_IN_CELL_FUNCTION", "[" + std::to_string(Enums::Constr::IN_CELL_FUNCTION) + "]");
+    result.emplace("CONSTR_OUT", "[" + std::to_string(Enums::Constr_Output) + "]");
+    result.emplace("CONSTR_OUT::SUCCESS", std::to_string(Enums::ConstrOut_Success));
+    result.emplace("CONSTR_OUT::ERROR_NO_ENERGY", std::to_string(Enums::ConstrOut_ErrorNoEnergy));
+    result.emplace("CONSTR_OUT::ERROR_CONNECTION", std::to_string(Enums::ConstrOut_ErrorConnection));
+    result.emplace("CONSTR_OUT::ERROR_DIST", std::to_string(Enums::ConstrOut_ErrorDist));
+    result.emplace("CONSTR_IN", "[" + std::to_string(Enums::Constr_Input) + "]");
+    result.emplace("CONSTR_IN::DO_NOTHING", std::to_string(Enums::ConstrIn_DoNothing));
+    result.emplace("CONSTR_IN_OPTION", "[" + std::to_string(Enums::Constr_InOption) + "]");
+    result.emplace("CONSTR_IN_OPTION::STANDARD", std::to_string(Enums::ConstrInOption_Standard));
+    result.emplace("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN", std::to_string(Enums::ConstrInOption_CreateEmptyToken));
+    result.emplace("CONSTR_IN_OPTION::CREATE_DUP_TOKEN", std::to_string(Enums::ConstrInOption_CreateDupToken));
+    result.emplace("CONSTR_IN_OPTION::FINISH_NO_SEP", std::to_string(Enums::ConstrInOption_FinishNoSep));
+    result.emplace("CONSTR_IN_OPTION::FINISH_WITH_SEP", std::to_string(Enums::ConstrInOption_FinishWithSep));
+    result.emplace("CONSTR_IN_OPTION::FINISH_WITH_EMPTY_TOKEN_SEP", std::to_string(Enums::ConstrInOption_FinishWithEmptyTokenSep));
+    result.emplace("CONSTR_IN_OPTION::FINISH_WITH_DUP_TOKEN_SEP", std::to_string(Enums::ConstrInOption_FinishWithDupTokenSep));
+    result.emplace("CONSTR_INOUT_ANGLE", "[" + std::to_string(Enums::Constr_InOutAngle) + "]");
+    result.emplace("CONSTR_IN_DIST", "[" + std::to_string(Enums::Constr_InDist) + "]");
+    result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Constr_InCellMaxConnections) + "]");
+    result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO", "0");  //artificial entry (has no symbol in enum)
+    result.emplace("CONSTR_IN_CELL_BRANCH_NO", "[" + std::to_string(Enums::Constr_InCellBranchNum) + "]");
+    result.emplace("CONSTR_IN_CELL_FUNCTION", "[" + std::to_string(Enums::Constr_InCellFunction) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
     result.emplace("CONSTR_IN_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("CONSTR_IN_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("CONSTR_IN_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
     result.emplace("CONSTR_IN_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction_Sensor));
-    result.emplace("CONSTR_IN_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Constr::IN_CELL_FUNCTION_DATA) + "]");
+    result.emplace("CONSTR_IN_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Constr_InCellFunctionData) + "]");
 
     //scanner
     result.emplace("SCANNER_OUT", "[" + std::to_string(Enums::Scanner::OUTPUT) + "]");
