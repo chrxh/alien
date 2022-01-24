@@ -3,7 +3,6 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Definitions.h"
-#include "DllExport.h"
 
 enum class ParserTask
 {

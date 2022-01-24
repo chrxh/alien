@@ -1,15 +1,13 @@
 #pragma once
 
-#include "DllExport.h"
-
 struct GpuSettings
 {
-    int NUM_THREADS_PER_BLOCK = 64;
-    int NUM_BLOCKS = 1024;
+    int numThreadsPerBlock = 64;
+    int numBlocks = 1024;
 
     bool operator==(GpuSettings const& other) const
     {
-        return NUM_THREADS_PER_BLOCK == other.NUM_THREADS_PER_BLOCK && NUM_BLOCKS == other.NUM_BLOCKS;
+        return numThreadsPerBlock == other.numThreadsPerBlock && numBlocks == other.numBlocks;
     }
 
     bool operator!=(GpuSettings const& other) const { return !operator==(other); }

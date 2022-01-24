@@ -3,16 +3,14 @@ add_library(alien_engine_interface_lib
     ShallowUpdateSelectionData.h
     CellComputationCompiler.cpp
     CellComputationCompiler.h
+    CellInstruction.h
     Colors.h
     Definitions.h
     DescriptionHelper.cpp
     DescriptionHelper.h
     Descriptions.cpp
     Descriptions.h
-    DllExport.h
-    ElementaryTypes.h
-    #EngineInterfaceSettings.cpp
-    #EngineInterfaceSettings.h
+    Enums.h
     FlowFieldSettings.h
     GeneralSettings.h
     GpuSettings.h

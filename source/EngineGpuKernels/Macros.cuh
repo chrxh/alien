@@ -8,7 +8,7 @@
 
 #include "Base/Exceptions.h"
 
-#define KERNEL_CALL(func, ...) func<<<gpuSettings.NUM_BLOCKS, gpuSettings.NUM_THREADS_PER_BLOCK>>>(__VA_ARGS__);
+#define KERNEL_CALL(func, ...) func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__);
 #define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
 
 template< typename T >

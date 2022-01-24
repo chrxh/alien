@@ -5,15 +5,15 @@
 class NumberGenerator
 {
 public:
-    BASE_EXPORT static NumberGenerator& getInstance();
+    static NumberGenerator& getInstance();
 
-	BASE_EXPORT uint32_t getRandomInt();
-    BASE_EXPORT uint32_t getRandomInt(uint32_t range);
-    BASE_EXPORT uint32_t getRandomInt(uint32_t min, uint32_t max);
-    BASE_EXPORT double getRandomReal();
-    BASE_EXPORT double getRandomReal(double min, double max);
+	uint32_t getRandomInt();
+    uint32_t getRandomInt(uint32_t range);
+    uint32_t getRandomInt(uint32_t min, uint32_t max);
+    double getRandomReal();
+    double getRandomReal(double min, double max);
 
-	BASE_EXPORT uint64_t getId();
+	uint64_t getId();
 
 public:
     NumberGenerator(NumberGenerator const&) = delete;

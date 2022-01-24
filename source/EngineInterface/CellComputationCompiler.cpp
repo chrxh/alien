@@ -176,7 +176,7 @@ namespace
 
     bool resolveInstructionAndReturnSuccess(
         SymbolMap const& symbols,
-        InstructionCoded& instructionCoded,
+        CellInstruction& instructionCoded,
         InstructionUncoded instructionUncoded)
     {
         try {
@@ -308,7 +308,7 @@ CompilationResult CellComputationCompiler::compileSourceCode(std::string const& 
     CompilationResult result;
     int linePos = 0;
     InstructionUncoded instructionUncoded;
-    InstructionCoded instructionCoded;
+    CellInstruction instructionCoded;
     for (int bytePos = 0; bytePos < code.length(); ++bytePos) {
         auto currentSymbol = code[bytePos];
 
@@ -372,7 +372,7 @@ std::string CellComputationCompiler::decompileSourceCode(
     for (int instructionPointer = 0; instructionPointer < dataSize;) {
 
         //decode instruction data
-        InstructionCoded instruction;
+        CellInstruction instruction;
         readInstruction(data, instructionPointer, instruction);
 
         //write spacing
@@ -483,7 +483,7 @@ int CellComputationCompiler::getMaxBytes(SimulationParameters const& parameters)
     return parameters.cellFunctionComputerMaxInstructions * 3;
 }
 
-void CellComputationCompiler::writeInstruction(std::string& data, InstructionCoded const& instructionCoded)
+void CellComputationCompiler::writeInstruction(std::string& data, CellInstruction const& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/MEMMEM/CMEM - 2 Bit][MEM/MEMMEM/CMEM/CONST - 2 Bit]
     data.push_back(
@@ -496,7 +496,7 @@ void CellComputationCompiler::writeInstruction(std::string& data, InstructionCod
 void CellComputationCompiler::readInstruction(
     std::string const& data,
     int& instructionPointer,
-    InstructionCoded& instructionCoded)
+    CellInstruction& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
     instructionCoded.operation = static_cast<Enums::ComputationOperation>((data[instructionPointer] >> 4) & 0xF);

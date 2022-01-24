@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/ElementaryTypes.h"
+#include "EngineInterface/Enums.h"
 
 struct OverlayElementDescription
 {

@@ -25,7 +25,6 @@ add_library(alien_engine_gpu_kernels_lib
     Definitions.cuh
     Definitions.h
     DigestionFunction.cuh
-    DllExport.h
     DynamicMemory.cuh
     EditKernels.cu
     EditKernels.cuh

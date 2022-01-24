@@ -4,7 +4,7 @@
 #include "AccessTOs.cuh"
 #include "Map.cuh"
 #include "Math.cuh"
-#include "EngineInterface/ElementaryTypes.h"
+#include "EngineInterface/Enums.h"
 #include "Particle.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"

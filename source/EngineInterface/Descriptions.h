@@ -6,7 +6,6 @@
 
 #include "Definitions.h"
 #include "Metadata.h"
-#include "DllExport.h"
 
 struct CellFeatureDescription
 {

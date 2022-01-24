@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Definitions.h"
-#include "DllExport.h"
 
 namespace Const
 {
@@ -13,11 +12,11 @@ namespace Const
 class Math
 {
 public:
-    BASE_EXPORT static float length(RealVector2D const& v);
-    BASE_EXPORT static float angleOfVector(RealVector2D const& v);
-    BASE_EXPORT static RealVector2D rotateQuarterCounterClockwise(RealVector2D v);
-    BASE_EXPORT static RealVector2D unitVectorOfAngle(double angleInDeg);
-    BASE_EXPORT static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise
+    static float length(RealVector2D const& v);
+    static float angleOfVector(RealVector2D const& v);
+    static RealVector2D rotateQuarterCounterClockwise(RealVector2D v);
+    static RealVector2D unitVectorOfAngle(double angleInDeg);
+    static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise
 };
 
-BASE_EXPORT RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v);
+RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v);
