@@ -85,23 +85,23 @@ __inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
     }
     __syncthreads();
 
-    if (Enums::CommunicatorIn::DO_NOTHING == command) {
+    if (Enums::CommunicatorIn_DoNothing == command) {
         return;
     }
 
-    if (Enums::CommunicatorIn::SET_LISTENING_CHANNEL == command) {
+    if (Enums::CommunicatorIn_SetListeningChannel == command) {
         if (0 == threadIdx.x) {
             token->cell->getLock();
-            setListeningChannel(token->cell, token->memory[Enums::Communicator::IN_CHANNEL]);
+            setListeningChannel(token->cell, token->memory[Enums::Communicator_InChannel]);
             token->cell->releaseLock();
         }
     }
 
-    if (Enums::CommunicatorIn::SEND_MESSAGE == command) {
+    if (Enums::CommunicatorIn_SendMessage == command) {
         sendMessage_block(token);
     }
 
-    if (Enums::CommunicatorIn::RECEIVE_MESSAGE == command) {
+    if (Enums::CommunicatorIn_ReceiveMessage == command) {
         if (0 == threadIdx.x) {
             token->cell->getLock();
             receiveMessage(token);
@@ -114,7 +114,7 @@ __inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
 __inline__ __device__ Enums::CommunicatorIn::Type CommunicatorFunction::getCommand(Token * token)
 {
     return static_cast<Enums::CommunicatorIn::Type>(
-        static_cast<unsigned char>(token->memory[Enums::Communicator::INPUT]) % Enums::CommunicatorIn::_COUNTER);
+        static_cast<unsigned char>(token->memory[Enums::Communicator_Input]) % Enums::CommunicatorIn::_COUNTER);
 }
 
 __inline__ __device__ void CommunicatorFunction::setListeningChannel(Cell* cell, unsigned char channel) const
@@ -171,10 +171,10 @@ __inline__ __device__ void CommunicatorFunction::sendMessage_block(Token * token
 {
     __shared__ MessageData messageDataToSend;
     if (0 == threadIdx.x) {
-        messageDataToSend.channel = token->memory[Enums::Communicator::IN_CHANNEL];
-        messageDataToSend.message = token->memory[Enums::Communicator::IN_MESSAGE];
-        messageDataToSend.angle = token->memory[Enums::Communicator::IN_ANGLE];
-        messageDataToSend.distance = token->memory[Enums::Communicator::IN_DISTANCE];
+        messageDataToSend.channel = token->memory[Enums::Communicator_InChannel];
+        messageDataToSend.message = token->memory[Enums::Communicator_InMessage];
+        messageDataToSend.angle = token->memory[Enums::Communicator_InAngle];
+        messageDataToSend.distance = token->memory[Enums::Communicator_InDistance];
     }
     __syncthreads();
 
@@ -183,7 +183,7 @@ __inline__ __device__ void CommunicatorFunction::sendMessage_block(Token * token
 
     __syncthreads();
     if (0 == threadIdx.x) {
-        token->memory[Enums::Communicator::OUT_SENT_NUM_MESSAGE] = QuantityConverter::convertIntToData(numMessages);
+        token->memory[Enums::Communicator_OutSentNumMessage] = QuantityConverter::convertIntToData(numMessages);
     }
     __syncthreads();
 }
@@ -196,13 +196,13 @@ __inline__ __device__ void CommunicatorFunction::receiveMessage(Token * token) c
         auto const receivedMessageAngle = calcReceivedMessageAngle(cell, token->sourceCell);
         setAngle(cell, receivedMessageAngle);
 
-        token->memory[Enums::Communicator::OUT_RECEIVED_ANGLE] = receivedMessageAngle;
-        token->memory[Enums::Communicator::OUT_RECEIVED_DISTANCE] = getDistance(cell);
-        token->memory[Enums::Communicator::OUT_RECEIVED_MESSAGE] = getMessage(cell);
-        token->memory[Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE] = Enums::CommunicatorOutReceivedNewMessage::YES;
+        token->memory[Enums::Communicator_OutReceivedAngle] = receivedMessageAngle;
+        token->memory[Enums::Communicator_OutReceivedDistance] = getDistance(cell);
+        token->memory[Enums::Communicator_OutReceivedMessage] = getMessage(cell);
+        token->memory[Enums::Communicator_OutReceivedNewMessage] = Enums::CommunicatorOutReceivedNewMessage_Yes;
     }
     else {
-        token->memory[Enums::Communicator::OUT_RECEIVED_NEW_MESSAGE] = Enums::CommunicatorOutReceivedNewMessage::NO;
+        token->memory[Enums::Communicator_OutReceivedNewMessage] = Enums::CommunicatorOutReceivedNewMessage_No;
     }
 }
 
