@@ -1,6 +1,7 @@
 #pragma once
 
-#include "EngineInterface/ElementaryTypes.h"
+#include "EngineInterface/Enums.h"
+#include "EngineInterface/CellInstruction.h"
 
 #include "SimulationData.cuh"
 #include "Cell.cuh"
@@ -14,7 +15,7 @@ public:
 
 private:
     __inline__ __device__ static void
-        readInstruction(char const* data, int& instructionPointer, InstructionCoded& instructionCoded);
+        readInstruction(char const* data, int& instructionPointer, CellInstruction& instructionCoded);
 
     __inline__ __device__ static uint8_t convertToAddress(int8_t addr, uint32_t size);
 
@@ -39,7 +40,7 @@ __inline__ __device__ void ComputationFunction::processing(Token* token)
     for (int instructionPointer = 0; instructionPointer < numStaticBytes; ) {
 
         //decode instruction
-        InstructionCoded instruction;
+        CellInstruction instruction;
         readInstruction(cell->staticData, instructionPointer, instruction);
 
         //operand 1: pointer to mem
@@ -152,7 +153,7 @@ __inline__ __device__ void ComputationFunction::processing(Token* token)
 }
 
 __inline__ __device__ void
-    ComputationFunction::readInstruction(char const* data, int& instructionPointer, InstructionCoded& instructionCoded)
+    ComputationFunction::readInstruction(char const* data, int& instructionPointer, CellInstruction& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
     instructionCoded.operation = (data[instructionPointer] >> 4) & 0xF;

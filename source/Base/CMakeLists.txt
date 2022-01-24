@@ -2,7 +2,6 @@
 add_library(alien_base_lib
     Definitions.cpp
     Definitions.h
-    DllExport.h
     Exceptions.h
     JsonParser.h
     LoggingService.cpp

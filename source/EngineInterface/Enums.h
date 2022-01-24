@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 namespace Enums
 {
     using Branching = int;
@@ -261,11 +259,3 @@ namespace Enums
         MuscleIn_Count
     };
 }
-
-struct InstructionCoded {
-    Enums::ComputationOperation operation;
-    Enums::ComputationOpType opType1;
-    Enums::ComputationOpType opType2;
-    uint8_t operand1;
-    uint8_t operand2;
-};

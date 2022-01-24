@@ -18,65 +18,63 @@
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 
 #include "Definitions.cuh"
-#include "DllExport.h"
 
 class _CudaSimulationAdapter
 {
 public:
-    ENGINEGPUKERNELS_EXPORT static void initCuda();
+    static void initCuda();
 
-    ENGINEGPUKERNELS_EXPORT
     _CudaSimulationAdapter(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
-    ENGINEGPUKERNELS_EXPORT ~_CudaSimulationAdapter();
+    ~_CudaSimulationAdapter();
 
-    ENGINEGPUKERNELS_EXPORT void* registerImageResource(GLuint image);
+    void* registerImageResource(GLuint image);
 
-    ENGINEGPUKERNELS_EXPORT void calcTimestep();
+    void calcTimestep();
 
-    ENGINEGPUKERNELS_EXPORT void drawVectorGraphics(
+    void drawVectorGraphics(
         float2 const& rectUpperLeft,
         float2 const& rectLowerRight,
         void* cudaResource,
         int2 const& imageSize,
         double zoom);
-    ENGINEGPUKERNELS_EXPORT void
+    void
     getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void getInspectedSimulationData(
+    void getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO);
+    void getInspectedSimulationData(
         std::vector<uint64_t> entityIds,
         DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void
+    void
     getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void addAndSelectSimulationData(DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void setSimulationData(DataAccessTO const& dataTO);
-    ENGINEGPUKERNELS_EXPORT void removeSelectedEntities(bool includeClusters);
-    ENGINEGPUKERNELS_EXPORT void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
+    void addAndSelectSimulationData(DataAccessTO const& dataTO);
+    void setSimulationData(DataAccessTO const& dataTO);
+    void removeSelectedEntities(bool includeClusters);
+    void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
 
-    ENGINEGPUKERNELS_EXPORT void applyForce(ApplyForceData const& applyData);
-    ENGINEGPUKERNELS_EXPORT void switchSelection(PointSelectionData const& switchData);
-    ENGINEGPUKERNELS_EXPORT void swapSelection(PointSelectionData const& selectionData);
-    ENGINEGPUKERNELS_EXPORT void setSelection(AreaSelectionData const& selectionData);
-    ENGINEGPUKERNELS_EXPORT SelectionShallowData getSelectionShallowData();
-    ENGINEGPUKERNELS_EXPORT void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData);
-    ENGINEGPUKERNELS_EXPORT void removeSelection();
-    ENGINEGPUKERNELS_EXPORT void updateSelection();
-    ENGINEGPUKERNELS_EXPORT void colorSelectedEntities(unsigned char color, bool includeClusters);
-    ENGINEGPUKERNELS_EXPORT void reconnectSelectedEntities();
+    void applyForce(ApplyForceData const& applyData);
+    void switchSelection(PointSelectionData const& switchData);
+    void swapSelection(PointSelectionData const& selectionData);
+    void setSelection(AreaSelectionData const& selectionData);
+    SelectionShallowData getSelectionShallowData();
+    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData);
+    void removeSelection();
+    void updateSelection();
+    void colorSelectedEntities(unsigned char color, bool includeClusters);
+    void reconnectSelectedEntities();
 
-    ENGINEGPUKERNELS_EXPORT void setGpuConstants(GpuSettings const& cudaConstants);
-    ENGINEGPUKERNELS_EXPORT void setSimulationParameters(SimulationParameters const& parameters);
-    ENGINEGPUKERNELS_EXPORT void setSimulationParametersSpots(SimulationParametersSpots const& spots);
-    ENGINEGPUKERNELS_EXPORT void setFlowFieldSettings(FlowFieldSettings const& settings);
+    void setGpuConstants(GpuSettings const& cudaConstants);
+    void setSimulationParameters(SimulationParameters const& parameters);
+    void setSimulationParametersSpots(SimulationParametersSpots const& spots);
+    void setFlowFieldSettings(FlowFieldSettings const& settings);
 
-    ENGINEGPUKERNELS_EXPORT ArraySizes getArraySizes() const;
+    ArraySizes getArraySizes() const;
 
-    ENGINEGPUKERNELS_EXPORT OverallStatistics getMonitorData();
-    ENGINEGPUKERNELS_EXPORT uint64_t getCurrentTimestep() const;
-    ENGINEGPUKERNELS_EXPORT void setCurrentTimestep(uint64_t timestep);
+    OverallStatistics getMonitorData();
+    uint64_t getCurrentTimestep() const;
+    void setCurrentTimestep(uint64_t timestep);
 
-    ENGINEGPUKERNELS_EXPORT void clear();
+    void clear();
 
-    ENGINEGPUKERNELS_EXPORT void resizeArraysIfNecessary(ArraySizes const& additionals);
+    void resizeArraysIfNecessary(ArraySizes const& additionals);
 
 private:
     void syncAndCheck();

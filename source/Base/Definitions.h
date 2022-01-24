@@ -11,7 +11,6 @@
 #include <optional>
 #include <memory>
 
-#include "DllExport.h"
 #include "Exceptions.h"
 
 using std::int32_t;
@@ -50,7 +49,7 @@ inline int toInt(T const& value)
         return *this; \
     }
 
-struct BASE_EXPORT IntVector2D
+struct IntVector2D
 {
     int x = 0;
     int y = 0;
@@ -61,7 +60,7 @@ struct BASE_EXPORT IntVector2D
     void operator-=(IntVector2D const& vec);
 };
 
-struct BASE_EXPORT RealVector2D
+struct RealVector2D
 {
     float x = 0.0f;
     float y = 0.0f;

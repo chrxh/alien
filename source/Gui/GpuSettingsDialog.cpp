@@ -42,30 +42,30 @@ void _GpuSettingsDialog::process()
             AlienImGui::InputIntParameters()
                 .name("Blocks")
                 .textWidth(MaxContentTextWidth)
-                .defaultValue(origGpuSettings.NUM_BLOCKS)
+                .defaultValue(origGpuSettings.numBlocks)
                 .tooltip(std::string("Number of GPU thread blocks.")),
-            gpuSettings.NUM_BLOCKS);
+            gpuSettings.numBlocks);
 
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Threads per Block")
                 .textWidth(MaxContentTextWidth)
-                .defaultValue(origGpuSettings.NUM_THREADS_PER_BLOCK)
+                .defaultValue(origGpuSettings.numThreadsPerBlock)
                 .tooltip(std::string("Number of GPU threads per blocks.")),
-            gpuSettings.NUM_THREADS_PER_BLOCK);
+            gpuSettings.numThreadsPerBlock);
 
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
 
-        gpuSettings.NUM_BLOCKS = std::max(gpuSettings.NUM_BLOCKS, 1);
-        gpuSettings.NUM_THREADS_PER_BLOCK = std::max(gpuSettings.NUM_THREADS_PER_BLOCK, 1);
+        gpuSettings.numBlocks = std::max(gpuSettings.numBlocks, 1);
+        gpuSettings.numThreadsPerBlock = std::max(gpuSettings.numThreadsPerBlock, 1);
 
         ImGui::Text("Total threads");
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(
-            StringHelper::format(gpuSettings.NUM_BLOCKS * gpuSettings.NUM_THREADS_PER_BLOCK).c_str());
+            StringHelper::format(gpuSettings.numBlocks * gpuSettings.numThreadsPerBlock).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 

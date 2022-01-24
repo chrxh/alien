@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/ElementaryTypes.h"
+#include "EngineInterface/Enums.h"
 
 #include "Cell.cuh"
 #include "ConstantMemory.cuh"

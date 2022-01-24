@@ -5,7 +5,6 @@ add_library(alien_engine_impl_lib
     DataConverter.cpp
     DataConverter.h
     Definitions.h
-    DllExport.h
     EngineWorker.cpp
     EngineWorker.h
     SimulationControllerImpl.cpp

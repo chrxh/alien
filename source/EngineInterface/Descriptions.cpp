@@ -200,7 +200,7 @@ void DataDescription::accelerate(RealVector2D const& velDelta, float angularVelD
     }
 }
 
-ENGINEINTERFACE_EXPORT DataDescription&
+DataDescription&
 DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);

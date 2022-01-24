@@ -1,8 +1,11 @@
 #pragma once
 
+#include "EngineInterface/CellInstruction.h"
+
 #include "Definitions.h"
 #include "SymbolMap.h"
 #include "SimulationParameters.h"
+
 
 struct CompilationResult
 {
@@ -25,10 +28,10 @@ public:
     static int getMaxBytes(SimulationParameters const& parameters);
 
 private:
-    static void writeInstruction(std::string& data, InstructionCoded const& instructionCoded);
+    static void writeInstruction(std::string& data, CellInstruction const& instructionCoded);
     static void readInstruction(
         std::string const& data,
         int& instructionPointer,
-        InstructionCoded& instructionCoded);
+        CellInstruction& instructionCoded);
     static uint8_t convertToAddress(int8_t addr, uint32_t size);
 };
