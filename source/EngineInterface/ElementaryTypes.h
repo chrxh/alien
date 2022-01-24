@@ -102,57 +102,56 @@ namespace Enums
         ComputationOpType_Constant
     };
 
-    struct Constr {
-        enum Type {
-            OUTPUT = 5,
-            INPUT = 6,
-            IN_OPTION = 7,
-            IN_ANGLE_ALIGNMENT = 38,  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
-            IN_UNIFORM_DIST = 13,
-            INOUT_ANGLE = 15,
-            IN_DIST = 16,
-            IN_CELL_MAX_CONNECTIONS = 17,              //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
-            IN_CELL_BRANCH_NO = 18,
-            IN_CELL_METADATA = 19,
-            IN_CELL_FUNCTION = 39,
-            IN_CELL_FUNCTION_DATA = 40
-        };
+    using Constr = int;
+    enum Constr_ {
+        Constr_Output = 5,
+        Constr_Input = 6,
+        Constr_InOption = 7,
+        Constr_InAngleAlignment = 38,  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
+        Constr_InUniformDist = 13,
+        Constr_InOutAngle = 15,
+        Constr_InDist = 16,
+        Constr_InCellMaxConnections = 17,  //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
+        Constr_InCellBranchNum = 18,
+        Constr_InCellMetadata = 19,
+        Constr_InCellFunction = 39,
+        Constr_InCellFunctionData = 40
     };
-    struct ConstrOut {
-        enum Type {
-            SUCCESS,
-            ERROR_NO_ENERGY,
-            ERROR_CONNECTION,
-            ERROR_LOCK,
-            ERROR_DIST
-        };
+    using ConstrOut = int;
+    enum ConstrOut_
+    {
+        ConstrOut_Success,
+        ConstrOut_ErrorNoEnergy,
+        ConstrOut_ErrorConnection,
+        ConstrOut_ErrorLock,
+        ConstrOut_ErrorDist
     };
-    struct ConstrIn {
-        enum Type {
-            DO_NOTHING,
-            CONSTRUCT,
-            _COUNTER
-        };
+    using ConstrIn = int;
+    enum ConstrIn_
+    {
+        ConstrIn_DoNothing,
+        ConstrIn_Construct,
+        ConstrIn_Count
     };
-    struct ConstrInOption {
-        enum Type {
-            STANDARD,
-            CREATE_EMPTY_TOKEN,
-            CREATE_DUP_TOKEN,
-            FINISH_NO_SEP,
-            FINISH_WITH_SEP,
-            FINISH_WITH_EMPTY_TOKEN_SEP,
-            FINISH_WITH_DUP_TOKEN_SEP,
-            _COUNTER
-        };
+    using ConstrInOption = int;
+    enum ConstrInOption_
+    {
+        ConstrInOption_Standard,
+        ConstrInOption_CreateEmptyToken,
+        ConstrInOption_CreateDupToken,
+        ConstrInOption_FinishNoSep,
+        ConstrInOption_FinishWithSep,
+        ConstrInOption_FinishWithEmptyTokenSep,
+        ConstrInOption_FinishWithDupTokenSep,
+        ConstrInOption_Count
     };
 
-    struct ConstrInUniformDist {
-        enum Type {
-            NO,
-            YES,
-            _COUNTER
-        };
+    using ConstrInUniformDist = int;
+    enum ConstrInUniformDist_
+    {
+        ConstrInUniformDist_No,
+        ConstrInUniformDist_Yes,
+        ConstrInUniformDist_Count
     };
 
     struct Prop {

@@ -15,7 +15,7 @@ public:
 private:
     struct ConstructionData
     {
-        Enums::ConstrIn::Type constrIn;
+        Enums::ConstrIn constrIn;
         bool isConstructToken;
         bool isDuplicateTokenMemory;
         bool isFinishConstruction;
@@ -102,8 +102,8 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, Simulat
     ConstructionData constructionData;
     readConstructionData(token, constructionData);
 
-    if (Enums::ConstrIn::DO_NOTHING == constructionData.constrIn) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
+    if (Enums::ConstrIn_DoNothing == constructionData.constrIn) {
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_Success;
         return;
     }
 
@@ -111,7 +111,7 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, Simulat
 
     if (firstCellOfConstructionSite) {
         if (!firstCellOfConstructionSite->tryLock()) {
-            token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
+            token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorLock;
             return;
         }
 
@@ -125,42 +125,38 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, Simulat
 __inline__ __device__ void ConstructorFunction::readConstructionData(Token* token, ConstructionData& data)
 {
     auto const& memory = token->memory;
-    data.constrIn = static_cast<Enums::ConstrIn::Type>(
-        static_cast<unsigned char>(token->memory[Enums::Constr::INPUT]) % Enums::ConstrIn::_COUNTER);
+    data.constrIn = static_cast<unsigned char>(token->memory[Enums::Constr_Input]) % Enums::ConstrIn_Count;
 
-    auto option = static_cast<Enums::ConstrInOption::Type>(
-        static_cast<unsigned char>(token->memory[Enums::Constr::IN_OPTION]) % Enums::ConstrInOption::_COUNTER);
+    auto option = static_cast<unsigned char>(token->memory[Enums::Constr_InOption]) % Enums::ConstrInOption_Count;
 
-    data.isConstructToken = Enums::ConstrInOption::CREATE_EMPTY_TOKEN == option
-        || Enums::ConstrInOption::CREATE_DUP_TOKEN == option
-        || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
-        || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
-    data.isDuplicateTokenMemory = (Enums::ConstrInOption::CREATE_DUP_TOKEN == option
-                                   || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option)
+    data.isConstructToken = Enums::ConstrInOption_CreateEmptyToken == option
+        || Enums::ConstrInOption_CreateDupToken == option
+        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
+        || Enums::ConstrInOption_FinishWithDupTokenSep == option;
+    data.isDuplicateTokenMemory = (Enums::ConstrInOption_CreateDupToken == option
+                                   || Enums::ConstrInOption_FinishWithDupTokenSep == option)
         && !cudaSimulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy;
-    data.isFinishConstruction = Enums::ConstrInOption::FINISH_NO_SEP == option
-        || Enums::ConstrInOption::FINISH_WITH_SEP == option
-        || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
-        || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
-    data.isSeparateConstruction = Enums::ConstrInOption::FINISH_WITH_SEP == option
-        || Enums::ConstrInOption::FINISH_WITH_EMPTY_TOKEN_SEP == option
-        || Enums::ConstrInOption::FINISH_WITH_DUP_TOKEN_SEP == option;
+    data.isFinishConstruction = Enums::ConstrInOption_FinishNoSep == option
+        || Enums::ConstrInOption_FinishWithSep == option
+        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
+        || Enums::ConstrInOption_FinishWithDupTokenSep == option;
+    data.isSeparateConstruction = Enums::ConstrInOption_FinishWithSep == option
+        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
+        || Enums::ConstrInOption_FinishWithDupTokenSep == option;
 
-    data.angleAlignment = static_cast<unsigned char>(memory[Enums::Constr::IN_ANGLE_ALIGNMENT]);
+    data.angleAlignment = static_cast<unsigned char>(memory[Enums::Constr_InAngleAlignment]);
 
-    data.uniformDist = static_cast<Enums::ConstrInUniformDist::Type>(
-                           static_cast<unsigned char>(token->memory[Enums::Constr::IN_UNIFORM_DIST])
-                           % Enums::ConstrInUniformDist::_COUNTER)
-            == Enums::ConstrInUniformDist::YES
+    data.uniformDist =
+        (static_cast<unsigned char>(token->memory[Enums::Constr_InUniformDist]) % Enums::ConstrInUniformDist_Count) == Enums::ConstrInUniformDist_Yes
         ? true
         : false;
 
-    data.angle = memory[Enums::Constr::INOUT_ANGLE];
-    data.distance = memory[Enums::Constr::IN_DIST];
-    data.maxConnections = memory[Enums::Constr::IN_CELL_MAX_CONNECTIONS];
-    data.branchNumber = memory[Enums::Constr::IN_CELL_BRANCH_NO];
-    data.metaData = memory[Enums::Constr::IN_CELL_METADATA];
-    data.cellFunctionType = memory[Enums::Constr::IN_CELL_FUNCTION];
+    data.angle = memory[Enums::Constr_InOutAngle];
+    data.distance = memory[Enums::Constr_InDist];
+    data.maxConnections = memory[Enums::Constr_InCellMaxConnections];
+    data.branchNumber = memory[Enums::Constr_InCellBranchNum];
+    data.metaData = memory[Enums::Constr_InCellMetadata];
+    data.cellFunctionType = memory[Enums::Constr_InCellFunction];
 }
 
 __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(Token* token)
@@ -186,13 +182,13 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(
     auto const adaptMaxConnections = isAdaptMaxConnections(constructionData);
 
     if (!isConnectable(cell->numConnections, cell->maxConnections, adaptMaxConnections)) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorConnection;
         return;
     }
 
     auto const anglesForNewConnection = calcAnglesForNewConnection(data, cell, QuantityConverter::convertDataToAngle(constructionData.angle));
 
-    auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr::IN_DIST]);
+    auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr_InDist]);
     auto const relPosOfNewCellDelta = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell)
         * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
     float2 posOfNewCell = /*separation
@@ -203,7 +199,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(
     auto energyForNewEntities = adaptEnergies(token, constructionData);
 
     if (!energyForNewEntities.energyAvailable) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorNoEnergy;
         return;
     }
 
@@ -211,7 +207,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(
     constructCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
 
     if (!newCell->tryLock()) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorLock;
         return;
     }
 
@@ -235,8 +231,8 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(
 
     newCell->releaseLock();
 
-    token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
-    token->memory[Enums::Constr::INOUT_ANGLE] = 0;
+    token->memory[Enums::Constr_Output] = Enums::ConstrOut_Success;
+    token->memory[Enums::Constr_InOutAngle] = 0;
     result.incCreatedCell();
 }
 
@@ -257,18 +253,18 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
         || cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance - desiredDistance < 0) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_DIST;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorDist;
         return;
     }
     auto adaptMaxConnections = isAdaptMaxConnections(constructionData);
     if (AdaptMaxConnections::No == adaptMaxConnections && 1 == constructionData.maxConnections) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_CONNECTION;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorConnection;
         return;
     }
 
     auto energyForNewEntities = adaptEnergies(token, constructionData);
     if (!energyForNewEntities.energyAvailable) {
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_NO_ENERGY;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorNoEnergy;
         return;
     }
 
@@ -280,7 +276,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     if (!newCell->tryLock()) {
         cell->energy +=
             energyForNewEntities.token;  //token could not be constructed anymore => transfer energy back to cell
-        token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::ERROR_LOCK;
+        token->memory[Enums::Constr_Output] = Enums::ConstrOut_ErrorLock;
         return;
     }
 
@@ -383,7 +379,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
 
     newCell->releaseLock();
 
-    token->memory[Enums::Constr::OUTPUT] = Enums::ConstrOut::SUCCESS;
+    token->memory[Enums::Constr_Output] = Enums::ConstrOut_Success;
     result.incCreatedCell();
 }
 
@@ -407,21 +403,21 @@ __inline__ __device__ void ConstructorFunction::constructCell(
         % cudaSimulationParameters.cellMaxTokenBranchNumber;
     result->tokenBlocked = true;
     result->cellFunctionType = constructionData.cellFunctionType;
-    result->numStaticBytes = static_cast<unsigned char>(token->memory[Enums::Constr::IN_CELL_FUNCTION_DATA])
+    result->numStaticBytes = static_cast<unsigned char>(token->memory[Enums::Constr_InCellFunctionData])
         % (MAX_CELL_STATIC_BYTES + 1);
     auto offset = result->numStaticBytes + 1;
     result->numMutableBytes =
         static_cast<unsigned char>(
-            token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset) % MAX_TOKEN_MEM_SIZE])
+            token->memory[(Enums::Constr_InCellFunctionData + offset) % MAX_TOKEN_MEM_SIZE])
         % (MAX_CELL_MUTABLE_BYTES + 1);
     result->metadata.color = constructionData.metaData;
 
     for (int i = 0; i < result->numStaticBytes; ++i) {
-        result->staticData[i] = token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + i + 1) % MAX_TOKEN_MEM_SIZE];
+        result->staticData[i] = token->memory[(Enums::Constr_InCellFunctionData + i + 1) % MAX_TOKEN_MEM_SIZE];
     }
     for (int i = 0; i <= result->numMutableBytes; ++i) {
         result->mutableData[i] =
-            token->memory[(Enums::Constr::IN_CELL_FUNCTION_DATA + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
+            token->memory[(Enums::Constr_InCellFunctionData + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
     }
 }
 
@@ -541,7 +537,7 @@ __inline__ __device__ void ConstructorFunction::mutateToken(Token* token, Simula
         token->memory[index] = data.numberGen.random(255);
     }
     if (data.numberGen.random() < 0.01) {
-        token->memory[Enums::Constr::IN_CELL_METADATA] = data.numberGen.random(255);
+        token->memory[Enums::Constr_InCellMetadata] = data.numberGen.random(255);
     }
 }
 */
@@ -553,8 +549,8 @@ __inline__ __device__ void ConstructorFunction::mutateConstructionData(
     ConstructionData& constructionData)
 {
     if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellPropertyMutationProb) {
-        constructionData.constrIn = static_cast<Enums::ConstrIn::Type>(
-            static_cast<unsigned char>(data.numberGen.random(255)) % Enums::ConstrIn::_COUNTER);
+        constructionData.constrIn = static_cast<Enums::ConstrIn>(
+            static_cast<unsigned char>(data.numberGen.random(255)) % Enums::ConstrIn_Count);
     }
     if (data.numberGen.random() < cudaSimulationParameters.cellFunctionConstructorCellStructureMutationProb) {
         constructionData.angle = data.numberGen.random(255);
