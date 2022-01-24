@@ -4,23 +4,23 @@
 
 namespace Enums
 {
-    struct Branching {
-        enum Type {
-            TOKEN_BRANCH_NUMBER = 0
-        };
+    using Branching = int;
+    enum Branching_
+    {
+        Branching_TokenBranchNumber = 0
     };
 
-    struct CellFunction {
-        enum Type {
-            COMPUTATION,
-            PROPULSION,
-            SCANNER,
-            DIGESTION,
-            CONSTRUCTOR,
-            SENSOR,
-            MUSCLE,
-            _COUNTER
-        };
+    using CellFunction = int;
+    enum CellFunction_
+    {
+        CellFunction_Computation = 0,
+        CellFunction_Propulsion = 1,
+        CellFunction_Scanner = 2,
+        CellFunction_Digestion = 3,
+        CellFunction_Constructor = 4,
+        CellFunction_Sensor = 5,
+        CellFunction_Muscle = 6,
+        CellFunction_Count = 7
     };
 
     struct EnergyGuidance {

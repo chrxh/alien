@@ -13,11 +13,11 @@ struct CellFeatureDescription
 	std::string volatileData;
     std::string constData;
 
-    Enums::CellFunction::Type getType() const
+    Enums::CellFunction getType() const
     {
-        return static_cast<Enums::CellFunction::Type>(static_cast<unsigned char>(_type) % Enums::CellFunction::_COUNTER);
+        return _type % Enums::CellFunction_Count;
     }
-	CellFeatureDescription& setType(Enums::CellFunction::Type value) { _type = value; return *this; }
+	CellFeatureDescription& setType(Enums::CellFunction value) { _type = value; return *this; }
     CellFeatureDescription& setVolatileData(std::string const& value)
     {
         volatileData = value;
@@ -36,7 +36,7 @@ struct CellFeatureDescription
 	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
 
 private:
-    Enums::CellFunction::Type _type = Enums::CellFunction::COMPUTATION;
+    Enums::CellFunction _type = Enums::CellFunction_Computation;
 };
 
 struct TokenDescription

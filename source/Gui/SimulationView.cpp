@@ -19,14 +19,14 @@ namespace
     auto const MotionBlurZooming = 0.5f;
     auto const ZoomFactorForOverlay = 16.0f;
 
-    std::unordered_map<Enums::CellFunction::Type, std::string> cellFunctionToStringMap = {
-        {Enums::CellFunction::COMPUTATION, "Computation"},
-        {Enums::CellFunction::PROPULSION, "Propulsion"},
-        {Enums::CellFunction::SCANNER, "Scanner"},
-        {Enums::CellFunction::DIGESTION, "Digestion"},
-        {Enums::CellFunction::CONSTRUCTOR, "Construction"},
-        {Enums::CellFunction::SENSOR, "Sensor"},
-        {Enums::CellFunction::MUSCLE, "Muscle"},
+    std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
+        {Enums::CellFunction_Computation, "Computation"},
+        {Enums::CellFunction_Propulsion, "Propulsion"},
+        {Enums::CellFunction_Scanner, "Scanner"},
+        {Enums::CellFunction_Digestion, "Digestion"},
+        {Enums::CellFunction_Constructor, "Construction"},
+        {Enums::CellFunction_Sensor, "Sensor"},
+        {Enums::CellFunction_Muscle, "Muscle"},
     };
 }
 

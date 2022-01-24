@@ -9,7 +9,7 @@ struct OverlayElementDescription
 {
     uint64_t id;
     bool cell;  //false = energy particle
-    Enums::CellFunction::Type cellType;
+    Enums::CellFunction cellType;
     RealVector2D pos;
     int branchNumber;
     int selected;

@@ -160,7 +160,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
         showCellGeneralTab(cell);
-        if (cell.cellFeature.getType() == Enums::CellFunction::COMPUTATION) {
+        if (cell.cellFeature.getType() == Enums::CellFunction_Computation) {
             showCellCodeTab(cell);
             showCellMemoryTab(cell);
         } else {
@@ -204,7 +204,7 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
                               .name("Specialization")
                               .values(CellFunctions)
                               .textWidth(MaxCellContentTextWidth), type);
-        cell.cellFeature.setType(static_cast<Enums::CellFunction::Type>(type));
+        cell.cellFeature.setType(static_cast<Enums::CellFunction>(type));
 
         auto energy = toFloat(cell.energy);
         AlienImGui::InputFloat(
@@ -349,16 +349,16 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             ImGui::TableSetupColumn("Semantic", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
             ImGui::TableNextRow();
-            if (cell.cellFeature.getType() == Enums::CellFunction::SCANNER) {
+            if (cell.cellFeature.getType() == Enums::CellFunction_Scanner) {
                 showScannerTableContent();
             }
-            if (cell.cellFeature.getType() == Enums::CellFunction::DIGESTION) {
+            if (cell.cellFeature.getType() == Enums::CellFunction_Digestion) {
                 showDigestionTableContent();
             }
-            if (cell.cellFeature.getType() == Enums::CellFunction::CONSTRUCTOR) {
+            if (cell.cellFeature.getType() == Enums::CellFunction_Constructor) {
                 showConstructionTableContent();
             }
-            if (cell.cellFeature.getType() == Enums::CellFunction::MUSCLE) {
+            if (cell.cellFeature.getType() == Enums::CellFunction_Muscle) {
                 showMuscleTableContent();
             }
             ImGui::EndTable();
@@ -574,12 +574,12 @@ void _InspectorWindow::showScannerTableContent()
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: specialization of scanned cell");
-    AlienImGui::Text(formatHex(Enums::CellFunction::COMPUTATION) + ": Computation");
-    AlienImGui::Text(formatHex(Enums::CellFunction::SCANNER) + ": Scanner");
-    AlienImGui::Text(formatHex(Enums::CellFunction::DIGESTION) + ": Digestion");
-    AlienImGui::Text(formatHex(Enums::CellFunction::CONSTRUCTOR) + ": Construction");
-    AlienImGui::Text(formatHex(Enums::CellFunction::SENSOR) + ": Sensor");
-    AlienImGui::Text(formatHex(Enums::CellFunction::MUSCLE) + ": Muscle");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Computation) + ": Computation");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Scanner) + ": Scanner");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Digestion) + ": Digestion");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Constructor) + ": Construction");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Sensor) + ": Sensor");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Muscle) + ": Muscle");
     ImGui::Spacing();
 
     ImGui::TableNextRow();
@@ -734,12 +734,12 @@ void _InspectorWindow::showConstructionTableContent()
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: specialization of constructed cell");
-    AlienImGui::Text(formatHex(Enums::CellFunction::COMPUTATION) + ": Computation");
-    AlienImGui::Text(formatHex(Enums::CellFunction::SCANNER) + ": Scanner");
-    AlienImGui::Text(formatHex(Enums::CellFunction::DIGESTION) + ": Digestion");
-    AlienImGui::Text(formatHex(Enums::CellFunction::CONSTRUCTOR) + ": Construction");
-    AlienImGui::Text(formatHex(Enums::CellFunction::SENSOR) + ": Sensor");
-    AlienImGui::Text(formatHex(Enums::CellFunction::MUSCLE) + ": Muscle");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Computation) + ": Computation");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Scanner) + ": Scanner");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Digestion) + ": Digestion");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Constructor) + ": Construction");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Sensor) + ": Sensor");
+    AlienImGui::Text(formatHex(Enums::CellFunction_Muscle) + ": Muscle");
 
     ImGui::Spacing();
     ImGui::TableNextRow();

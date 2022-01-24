@@ -145,7 +145,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
         element.id = cellTO.id;
         element.cell = true;
         element.pos = {cellTO.pos.x, cellTO.pos.y};
-        element.cellType = static_cast<Enums::CellFunction::Type>(static_cast<unsigned int>(cellTO.cellFunctionType) % Enums::CellFunction::_COUNTER);
+        element.cellType = static_cast<Enums::CellFunction>(static_cast<unsigned int>(cellTO.cellFunctionType) % Enums::CellFunction_Count);
         element.selected = cellTO.selected;
         element.branchNumber = cellTO.branchNumber;
         result.elements.emplace_back(element);
@@ -333,7 +333,7 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     result.metadata = metadata;
 
     auto feature = CellFeatureDescription()
-                       .setType(static_cast<Enums::CellFunction::Type>(cellTO.cellFunctionType))
+                       .setType(static_cast<Enums::CellFunction>(cellTO.cellFunctionType))
                        .setConstData(convertToString(cellTO.staticData, cellTO.numStaticBytes))
                        .setVolatileData(convertToString(cellTO.mutableData, cellTO.numMutableBytes));
     result.cellFeature = feature;

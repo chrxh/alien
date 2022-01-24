@@ -48,11 +48,11 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO", "0");  //artificial entry (has no symbol in enum class)
     result.emplace("CONSTR_IN_CELL_BRANCH_NO", "[" + std::to_string(Enums::Constr::IN_CELL_BRANCH_NO) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION", "[" + std::to_string(Enums::Constr::IN_CELL_FUNCTION) + "]");
-    result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction::COMPUTATION));
-    result.emplace("CONSTR_IN_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction::SCANNER));
-    result.emplace("CONSTR_IN_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction::DIGESTION));
-    result.emplace("CONSTR_IN_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction::CONSTRUCTOR));
-    result.emplace("CONSTR_IN_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction::SENSOR));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction_Sensor));
     result.emplace("CONSTR_IN_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Constr::IN_CELL_FUNCTION_DATA) + "]");
 
     //scanner
@@ -67,12 +67,12 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SCANNER_OUT_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Scanner::OUT_CELL_MAX_CONNECTIONS) + "]");
     result.emplace("SCANNER_OUT_CELL_BRANCH_NO", "[" + std::to_string(Enums::Scanner::OUT_CELL_BRANCH_NO) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION", "[" + std::to_string(Enums::Scanner::OUT_CELL_FUNCTION) + "]");
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction::COMPUTATION));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::PROP", std::to_string(Enums::CellFunction::PROPULSION));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction::SCANNER));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction::DIGESTION));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction::CONSTRUCTOR));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction::SENSOR));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::PROP", std::to_string(Enums::CellFunction_Propulsion));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction_Sensor));
     result.emplace("SCANNER_OUT_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Scanner::OUT_CELL_FUNCTION_DATA) + "]");
 
     //weapon
