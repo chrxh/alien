@@ -41,7 +41,7 @@ namespace cereal
     template <class Archive>
     inline void load(Archive& ar, CellFeatureDescription& data)
     {
-        Enums::CellFunction::Type type;
+        Enums::CellFunction type;
         ar(type, data.volatileData, data.constData);
         data.setType(type);
     }

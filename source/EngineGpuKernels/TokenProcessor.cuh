@@ -68,7 +68,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
                     continue;
                 }
 
-                token->memory[Enums::Branching::TOKEN_BRANCH_NUMBER] = connectedCell->branchNumber;
+                token->memory[Enums::Branching_TokenBranchNumber] = connectedCell->branchNumber;
                 if (0 == numMovedTokens) {
                     token->sourceCell = token->cell;
                     token->cell = connectedCell;
@@ -108,10 +108,10 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
             if (cell->tryLock()) {
-                if (Enums::CellFunction::SCANNER == cellFunctionType) {
+                if (Enums::CellFunction_Scanner == cellFunctionType) {
                     ScannerFunction::processing(token, data);
                 }
-                if (Enums::CellFunction::DIGESTION == cellFunctionType) {
+                if (Enums::CellFunction_Digestion == cellFunctionType) {
                     DigestionFunction::processing(token, data, result);
                 }
                 cell->releaseLock();
@@ -140,16 +140,16 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
                 if (cell->tryLock()) {
 
                     EnergyGuidance::processing(data, token);
-                    if (Enums::CellFunction::COMPUTATION == cellFunctionType) {
+                    if (Enums::CellFunction_Computation== cellFunctionType) {
                         ComputationFunction::processing(token);
                     }
-                    if (Enums::CellFunction::CONSTRUCTOR == cellFunctionType) {
+                    if (Enums::CellFunction_Constructor == cellFunctionType) {
                         ConstructorFunction::processing(token, data, result);
                     }
-                    if (Enums::CellFunction::PROPULSION == cellFunctionType) {
+                    if (Enums::CellFunction_Propulsion == cellFunctionType) {
                         PropulsionFunction::processing(token, data);
                     }
-                    if (Enums::CellFunction::MUSCLE == cellFunctionType) {
+                    if (Enums::CellFunction_Muscle == cellFunctionType) {
                         MuscleFunction::processing(token, data, result);
                     }
 

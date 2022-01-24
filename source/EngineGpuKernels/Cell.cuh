@@ -84,10 +84,9 @@ struct Cell
         atomicExch(&locked, 0);
     }
 
-    __inline__ __device__ Enums::CellFunction::Type getCellFunctionType() const
+    __inline__ __device__ Enums::CellFunction getCellFunctionType() const
     {
-        return static_cast<Enums::CellFunction::Type>(
-            static_cast<unsigned int>(cellFunctionType) % Enums::CellFunction::_COUNTER);
+        return static_cast<unsigned int>(cellFunctionType) % Enums::CellFunction_Count;
     }
 };
 

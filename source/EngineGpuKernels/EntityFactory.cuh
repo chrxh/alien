@@ -87,11 +87,11 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->cellFunctionType = cellTO.cellFunctionType;
 
     switch (cell->cellFunctionType) {
-    case Enums::CellFunction::COMPUTATION: {
+    case Enums::CellFunction_Computation: {
         cell->numStaticBytes = cellTO.numStaticBytes;
         cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
     } break;
-    case Enums::CellFunction::SENSOR: {
+    case Enums::CellFunction_Sensor: {
         cell->numStaticBytes = 0;
         cell->numMutableBytes = 5;
     } break;
@@ -151,11 +151,11 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     cell->cellFunctionType = cellTO.cellFunctionType;
 
     switch (cell->cellFunctionType) {
-    case Enums::CellFunction::COMPUTATION: {
+    case Enums::CellFunction_Computation: {
         cell->numStaticBytes = cellTO.numStaticBytes;
         cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
     } break;
-    case Enums::CellFunction::SENSOR: {
+    case Enums::CellFunction_Sensor: {
         cell->numStaticBytes = 0;
         cell->numMutableBytes = 5;
     } break;
@@ -265,13 +265,13 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->metadata.nameLen = 0;
     cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
-    cell->cellFunctionType = _data->numberGen.random(static_cast<int>(Enums::CellFunction::_COUNTER) - 1);
+    cell->cellFunctionType = _data->numberGen.random(Enums::CellFunction_Count - 1);
     switch (cell->cellFunctionType) {
-    case Enums::CellFunction::COMPUTATION: {
+    case Enums::CellFunction_Computation: {
         cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
         cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
     } break;
-    case Enums::CellFunction::SENSOR: {
+    case Enums::CellFunction_Sensor: {
         cell->numStaticBytes = 0;
         cell->numMutableBytes = 5;
     } break;

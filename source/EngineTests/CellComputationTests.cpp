@@ -43,7 +43,7 @@ std::string CellComputationTests::runSimpleCellComputer(std::string const& progr
     origFirstCell.tokenBranchNumber = 0;
     auto& origSecondCell = origData.cells.at(1);
     origSecondCell.tokenBranchNumber = 1;
-    origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction::COMPUTATION).setConstData(compiledProgram.compilation);
+    origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction_Computation).setConstData(compiledProgram.compilation);
     origFirstCell.addToken(createSimpleToken());
 
     _simController->setSimulationData(origData);

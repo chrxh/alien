@@ -96,7 +96,7 @@ __device__ __inline__ void ScannerFunction::processing(Token* token, SimulationD
     tokenMem[Enums::Scanner::OUT_CELL_MAX_CONNECTIONS] = lookupResult.prevCell->maxConnections;
     tokenMem[Enums::Scanner::OUT_CELL_BRANCH_NO] = lookupResult.prevCell->branchNumber;
     tokenMem[Enums::Scanner::OUT_CELL_METADATA] = lookupResult.prevCell->metadata.color;
-    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = lookupResult.prevCell->getCellFunctionType();
+    tokenMem[Enums::Scanner::OUT_CELL_FUNCTION] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
     tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA] = lookupResult.prevCell->numStaticBytes;
     for (int i = 0; i < lookupResult.prevCell->numStaticBytes; ++i) {
         tokenMem[Enums::Scanner::OUT_CELL_FUNCTION_DATA + 1 + i] = lookupResult.prevCell->staticData[i];
