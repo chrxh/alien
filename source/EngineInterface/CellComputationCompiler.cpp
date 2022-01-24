@@ -186,62 +186,62 @@ namespace
 
             //prepare data for instruction coding
             if (instructionUncoded.name == "mov")
-                instructionCoded.operation = Enums::ComputationOperation::MOV;
+                instructionCoded.operation = Enums::ComputationOperation_Mov;
             else if (instructionUncoded.name == "add")
-                instructionCoded.operation = Enums::ComputationOperation::ADD;
+                instructionCoded.operation = Enums::ComputationOperation_Add;
             else if (instructionUncoded.name == "sub")
-                instructionCoded.operation = Enums::ComputationOperation::SUB;
+                instructionCoded.operation = Enums::ComputationOperation_Sub;
             else if (instructionUncoded.name == "mul")
-                instructionCoded.operation = Enums::ComputationOperation::MUL;
+                instructionCoded.operation = Enums::ComputationOperation_Mul;
             else if (instructionUncoded.name == "div")
-                instructionCoded.operation = Enums::ComputationOperation::DIV;
+                instructionCoded.operation = Enums::ComputationOperation_Div;
             else if (instructionUncoded.name == "xor")
-                instructionCoded.operation = Enums::ComputationOperation::XOR;
+                instructionCoded.operation = Enums::ComputationOperation_Xor;
             else if (instructionUncoded.name == "or")
-                instructionCoded.operation = Enums::ComputationOperation::OR;
+                instructionCoded.operation = Enums::ComputationOperation_Or;
             else if (instructionUncoded.name == "and")
-                instructionCoded.operation = Enums::ComputationOperation::AND;
+                instructionCoded.operation = Enums::ComputationOperation_And;
             else if (instructionUncoded.name == "if") {
                 if (instructionUncoded.comp == ">")
-                    instructionCoded.operation = Enums::ComputationOperation::IFG;
+                    instructionCoded.operation = Enums::ComputationOperation_Ifg;
                 else if ((instructionUncoded.comp == ">=") || (instructionUncoded.comp == "=>"))
-                    instructionCoded.operation = Enums::ComputationOperation::IFGE;
+                    instructionCoded.operation = Enums::ComputationOperation_Ifge;
                 else if ((instructionUncoded.comp == "=") || (instructionUncoded.comp == "=="))
-                    instructionCoded.operation = Enums::ComputationOperation::IFE;
+                    instructionCoded.operation = Enums::ComputationOperation_Ife;
                 else if (instructionUncoded.comp == "!=")
-                    instructionCoded.operation = Enums::ComputationOperation::IFNE;
+                    instructionCoded.operation = Enums::ComputationOperation_Ifne;
                 else if ((instructionUncoded.comp == "<=") || (instructionUncoded.comp == "=<"))
-                    instructionCoded.operation = Enums::ComputationOperation::IFLE;
+                    instructionCoded.operation = Enums::ComputationOperation_Ifle;
                 else if (instructionUncoded.comp == "<")
-                    instructionCoded.operation = Enums::ComputationOperation::IFL;
+                    instructionCoded.operation = Enums::ComputationOperation_Ifl;
                 else {
                     return false;
                 }
             } else if (instructionUncoded.name == "else")
-                instructionCoded.operation = Enums::ComputationOperation::ELSE;
+                instructionCoded.operation = Enums::ComputationOperation_Else;
             else if (instructionUncoded.name == "endif")
-                instructionCoded.operation = Enums::ComputationOperation::ENDIF;
+                instructionCoded.operation = Enums::ComputationOperation_Endif;
             else {
                 return false;
             }
 
-            if (instructionCoded.operation != Enums::ComputationOperation::ELSE
-                && instructionCoded.operation != Enums::ComputationOperation::ENDIF) {
+            if (instructionCoded.operation != Enums::ComputationOperation_Else
+                && instructionCoded.operation != Enums::ComputationOperation_Endif) {
                 {
                     auto left1 = instructionUncoded.operand1.substr(0, 1);
                     auto left2 = instructionUncoded.operand1.substr(0, 2);
                     auto right1 = lastChar(instructionUncoded.operand1);
                     auto right2 = lastTwoChars(instructionUncoded.operand1);
                     if (left2 == "[[" && right2 == "]]") {
-                        instructionCoded.opType1 = Enums::ComputationOpType::MEMMEM;
+                        instructionCoded.opType1 = Enums::ComputationOpType_MemMem;
                         instructionUncoded.operand1 =
                             instructionUncoded.operand1.substr(2, instructionUncoded.operand1.size() - 4);
                     } else if (left1 == "[" && right1 == "]") {
-                        instructionCoded.opType1 = Enums::ComputationOpType::MEM;
+                        instructionCoded.opType1 = Enums::ComputationOpType_Mem;
                         instructionUncoded.operand1 =
                             instructionUncoded.operand1.substr(1, instructionUncoded.operand1.size() - 2);
                     } else if (left1 == "(" && right1 == ")") {
-                        instructionCoded.opType1 = Enums::ComputationOpType::CMEM;
+                        instructionCoded.opType1 = Enums::ComputationOpType_Cmem;
                         instructionUncoded.operand1 =
                             instructionUncoded.operand1.substr(1, instructionUncoded.operand1.size() - 2);
                     } else {
@@ -254,19 +254,19 @@ namespace
                     auto right1 = lastChar(instructionUncoded.operand2);
                     auto right2 = lastTwoChars(instructionUncoded.operand2);
                     if (left2 == "[[" && right2 == "]]") {
-                        instructionCoded.opType2 = Enums::ComputationOpType::MEMMEM;
+                        instructionCoded.opType2 = Enums::ComputationOpType_MemMem;
                         instructionUncoded.operand2 =
                             instructionUncoded.operand2.substr(2, instructionUncoded.operand2.size() - 4);
                     } else if (left1 == "[" && right1 == "]") {
-                        instructionCoded.opType2 = Enums::ComputationOpType::MEM;
+                        instructionCoded.opType2 = Enums::ComputationOpType_Mem;
                         instructionUncoded.operand2 =
                             instructionUncoded.operand2.substr(1, instructionUncoded.operand2.size() - 2);
                     } else if (left1 == "(" && right1 == ")") {
-                        instructionCoded.opType2 = Enums::ComputationOpType::CMEM;
+                        instructionCoded.opType2 = Enums::ComputationOpType_Cmem;
                         instructionUncoded.operand2 =
                             instructionUncoded.operand2.substr(1, instructionUncoded.operand2.size() - 2);
                     } else {
-                        instructionCoded.opType2 = Enums::ComputationOpType::CONSTANT;
+                        instructionCoded.opType2 = Enums::ComputationOpType_Constant;
                     }
                 }
                 {
@@ -380,33 +380,33 @@ std::string CellComputationCompiler::decompileSourceCode(
             text += "  ";
 
         //write operation
-        if (instruction.operation == Enums::ComputationOperation::MOV)
+        if (instruction.operation == Enums::ComputationOperation_Mov)
             text += "mov";
-        if (instruction.operation == Enums::ComputationOperation::ADD)
+        if (instruction.operation == Enums::ComputationOperation_Add)
             text += "add";
-        if (instruction.operation == Enums::ComputationOperation::SUB)
+        if (instruction.operation == Enums::ComputationOperation_Sub)
             text += "sub";
-        if (instruction.operation == Enums::ComputationOperation::MUL)
+        if (instruction.operation == Enums::ComputationOperation_Mul)
             text += "mul";
-        if (instruction.operation == Enums::ComputationOperation::DIV)
+        if (instruction.operation == Enums::ComputationOperation_Div)
             text += "div";
-        if (instruction.operation == Enums::ComputationOperation::XOR)
+        if (instruction.operation == Enums::ComputationOperation_Xor)
             text += "xor";
-        if (instruction.operation == Enums::ComputationOperation::OR)
+        if (instruction.operation == Enums::ComputationOperation_Or)
             text += "or";
-        if (instruction.operation == Enums::ComputationOperation::AND)
+        if (instruction.operation == Enums::ComputationOperation_And)
             text += "and";
-        if ((instruction.operation >= Enums::ComputationOperation::IFG)
-            && (instruction.operation <= Enums::ComputationOperation::IFL)) {
+        if ((instruction.operation >= Enums::ComputationOperation_Ifg)
+            && (instruction.operation <= Enums::ComputationOperation_Ifl)) {
             text += "if";
             ++nestingLevel;
         }
-        if (instruction.operation == Enums::ComputationOperation::ELSE) {
+        if (instruction.operation == Enums::ComputationOperation_Else) {
             if (nestingLevel > 0)
                 text = text.substr(0, text.size() - 2);
             text += "else";
         }
-        if (instruction.operation == Enums::ComputationOperation::ENDIF) {
+        if (instruction.operation == Enums::ComputationOperation_Endif) {
             if (nestingLevel > 0) {
                 text = text.substr(0, text.size() - 2);
                 --nestingLevel;
@@ -415,40 +415,40 @@ std::string CellComputationCompiler::decompileSourceCode(
         }
 
         //write operands
-        if (instruction.opType1 == Enums::ComputationOpType::MEM)
+        if (instruction.opType1 == Enums::ComputationOpType_Mem)
             textOp1 = "[" + toHexString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]";
-        if (instruction.opType1 == Enums::ComputationOpType::MEMMEM)
+        if (instruction.opType1 == Enums::ComputationOpType_MemMem)
             textOp1 = "[[" + toHexString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]]";
-        if (instruction.opType1 == Enums::ComputationOpType::CMEM)
+        if (instruction.opType1 == Enums::ComputationOpType_Cmem)
             textOp1 = "("
                 + toHexString(convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize))
                 + ")";
-        if (instruction.opType2 == Enums::ComputationOpType::MEM)
+        if (instruction.opType2 == Enums::ComputationOpType_Mem)
             textOp2 = "[" + toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]";
-        if (instruction.opType2 == Enums::ComputationOpType::MEMMEM)
+        if (instruction.opType2 == Enums::ComputationOpType_MemMem)
             textOp2 = "[[" + toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]]";
-        if (instruction.opType2 == Enums::ComputationOpType::CMEM)
+        if (instruction.opType2 == Enums::ComputationOpType_Cmem)
             textOp2 = "("
                 + toHexString(convertToAddress(instruction.operand2, parameters.cellFunctionComputerCellMemorySize))
                 + ")";
-        if (instruction.opType2 == Enums::ComputationOpType::CONSTANT)
+        if (instruction.opType2 == Enums::ComputationOpType_Constant)
             textOp2 = toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize));
 
         //write separation/comparator
-        if (instruction.operation <= Enums::ComputationOperation::AND) {
+        if (instruction.operation <= Enums::ComputationOperation_And) {
             text += " " + textOp1 + ", " + textOp2;
         }
-        if (instruction.operation == Enums::ComputationOperation::IFG)
+        if (instruction.operation == Enums::ComputationOperation_Ifg)
             text += " " + textOp1 + " > " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation::IFGE)
+        if (instruction.operation == Enums::ComputationOperation_Ifge)
             text += " " + textOp1 + " >= " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation::IFE)
+        if (instruction.operation == Enums::ComputationOperation_Ife)
             text += " " + textOp1 + " = " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation::IFNE)
+        if (instruction.operation == Enums::ComputationOperation_Ifne)
             text += " " + textOp1 + " != " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation::IFLE)
+        if (instruction.operation == Enums::ComputationOperation_Ifle)
             text += " " + textOp1 + " <= " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation::IFL)
+        if (instruction.operation == Enums::ComputationOperation_Ifl)
             text += " " + textOp1 + " < " + textOp2;
         if (instructionPointer < dataSize)
             text += "\n";
@@ -499,9 +499,9 @@ void CellComputationCompiler::readInstruction(
     InstructionCoded& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
-    instructionCoded.operation = static_cast<Enums::ComputationOperation::Type>((data[instructionPointer] >> 4) & 0xF);
-    instructionCoded.opType1 = static_cast<Enums::ComputationOpType::Type>(((data[instructionPointer] >> 2) & 0x3) % 3);
-    instructionCoded.opType2 = static_cast<Enums::ComputationOpType::Type>(data[instructionPointer] & 0x3);
+    instructionCoded.operation = static_cast<Enums::ComputationOperation>((data[instructionPointer] >> 4) & 0xF);
+    instructionCoded.opType1 = static_cast<Enums::ComputationOpType>(((data[instructionPointer] >> 2) & 0x3) % 3);
+    instructionCoded.opType2 = static_cast<Enums::ComputationOpType>(data[instructionPointer] & 0x3);
     instructionCoded.operand1 = data[instructionPointer + 1];  //readInteger(_code,instructionPointer + 1);
     instructionCoded.operand2 = data[instructionPointer + 2];  //readInteger(_code,instructionPointer + 2);
 

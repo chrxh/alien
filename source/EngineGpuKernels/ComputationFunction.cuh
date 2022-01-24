@@ -45,25 +45,25 @@ __inline__ __device__ void ComputationFunction::processing(Token* token)
         //operand 1: pointer to mem
         uint8_t opPointer1 = 0;
         MemoryType memType = MemoryType::Token;
-        if (instruction.opType1 == Enums::ComputationOpType::MEM)
+        if (instruction.opType1 == Enums::ComputationOpType_Mem)
             opPointer1 = convertToAddress(instruction.operand1, cudaSimulationParameters.tokenMemorySize);
-        if (instruction.opType1 == Enums::ComputationOpType::MEMMEM) {
+        if (instruction.opType1 == Enums::ComputationOpType_MemMem) {
             instruction.operand1 = token->memory[convertToAddress(instruction.operand1, cudaSimulationParameters.tokenMemorySize)];
             opPointer1 = convertToAddress(instruction.operand1, cudaSimulationParameters.tokenMemorySize);
         }
-        if (instruction.opType1 == Enums::ComputationOpType::CMEM) {
+        if (instruction.opType1 == Enums::ComputationOpType_Cmem) {
             opPointer1 = convertToAddress(instruction.operand1, cudaSimulationParameters.cellFunctionComputerCellMemorySize);
             memType = MemoryType::Cell;
         }
 
         //operand 2: loading value
-        if (instruction.opType2 == Enums::ComputationOpType::MEM)
+        if (instruction.opType2 == Enums::ComputationOpType_Mem)
             instruction.operand2 = token->memory[convertToAddress(instruction.operand2, cudaSimulationParameters.tokenMemorySize)];
-        if (instruction.opType2 == Enums::ComputationOpType::MEMMEM) {
+        if (instruction.opType2 == Enums::ComputationOpType_MemMem) {
             instruction.operand2 = token->memory[convertToAddress(instruction.operand2, cudaSimulationParameters.tokenMemorySize)];
             instruction.operand2 = token->memory[convertToAddress(instruction.operand2, cudaSimulationParameters.tokenMemorySize)];
         }
-        if (instruction.opType2 == Enums::ComputationOpType::CMEM)
+        if (instruction.opType2 == Enums::ComputationOpType_Cmem)
             instruction.operand2 = cell->mutableData[convertToAddress(instruction.operand2, cudaSimulationParameters.cellFunctionComputerCellMemorySize)];
 
         //execute instruction
@@ -72,66 +72,66 @@ __inline__ __device__ void ComputationFunction::processing(Token* token)
             if (!condTable[k])
                 execute = false;
         if (execute) {
-            if (instruction.operation == Enums::ComputationOperation::MOV)
+            if (instruction.operation == Enums::ComputationOperation_Mov)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, instruction.operand2, memType);
-            if (instruction.operation == Enums::ComputationOperation::ADD)
+            if (instruction.operation == Enums::ComputationOperation_Add)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) + instruction.operand2, memType);
-            if (instruction.operation == Enums::ComputationOperation::SUB)
+            if (instruction.operation == Enums::ComputationOperation_Sub)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) - instruction.operand2, memType);
-            if (instruction.operation == Enums::ComputationOperation::MUL)
+            if (instruction.operation == Enums::ComputationOperation_Mul)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) * instruction.operand2, memType);
-            if (instruction.operation == Enums::ComputationOperation::DIV) {
+            if (instruction.operation == Enums::ComputationOperation_Div) {
                 if (instruction.operand2 > 0)
                     setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) / instruction.operand2, memType);
                 else
                     setMemoryByte(token->memory, cell->mutableData, opPointer1, 0, memType);
             }
-            if (instruction.operation == Enums::ComputationOperation::XOR)
+            if (instruction.operation == Enums::ComputationOperation_Xor)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) ^ instruction.operand2, memType);
-            if (instruction.operation == Enums::ComputationOperation::OR)
+            if (instruction.operation == Enums::ComputationOperation_Or)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) | instruction.operand2, memType);
-            if (instruction.operation == Enums::ComputationOperation::AND)
+            if (instruction.operation == Enums::ComputationOperation_And)
                 setMemoryByte(token->memory, cell->mutableData, opPointer1, getMemoryByte(token->memory, cell->mutableData, opPointer1, memType) & instruction.operand2, memType);
         }
 
         //if instructions
         instruction.operand1 = getMemoryByte(token->memory, cell->mutableData, opPointer1, memType);
-        if (instruction.operation == Enums::ComputationOperation::IFG) {
+        if (instruction.operation == Enums::ComputationOperation_Ifg) {
             if (instruction.operand1 > instruction.operand2)
                 condTable[condPointer] = true;
             else
                 condTable[condPointer] = false;
             condPointer++;
         }
-        if (instruction.operation == Enums::ComputationOperation::IFGE) {
+        if (instruction.operation == Enums::ComputationOperation_Ifge) {
             if (instruction.operand1 >= instruction.operand2)
                 condTable[condPointer] = true;
             else
                 condTable[condPointer] = false;
             condPointer++;
         }
-        if (instruction.operation == Enums::ComputationOperation::IFE) {
+        if (instruction.operation == Enums::ComputationOperation_Ife) {
             if (instruction.operand1 == instruction.operand2)
                 condTable[condPointer] = true;
             else
                 condTable[condPointer] = false;
             condPointer++;
         }
-        if (instruction.operation == Enums::ComputationOperation::IFNE) {
+        if (instruction.operation == Enums::ComputationOperation_Ifne) {
             if (instruction.operand1 != instruction.operand2)
                 condTable[condPointer] = true;
             else
                 condTable[condPointer] = false;
             condPointer++;
         }
-        if (instruction.operation == Enums::ComputationOperation::IFLE) {
+        if (instruction.operation == Enums::ComputationOperation_Ifle) {
             if (instruction.operand1 <= instruction.operand2)
                 condTable[condPointer] = true;
             else
                 condTable[condPointer] = false;
             condPointer++;
         }
-        if (instruction.operation == Enums::ComputationOperation::IFL) {
+        if (instruction.operation == Enums::ComputationOperation_Ifl) {
             if (instruction.operand1 < instruction.operand2)
                 condTable[condPointer] = true;
             else
@@ -139,12 +139,12 @@ __inline__ __device__ void ComputationFunction::processing(Token* token)
             condPointer++;
         }
 
-        if (instruction.operation == Enums::ComputationOperation::ELSE) {
+        if (instruction.operation == Enums::ComputationOperation_Else) {
             if (condPointer > 0)
                 condTable[condPointer - 1] = !condTable[condPointer - 1];
         }
 
-        if (instruction.operation == Enums::ComputationOperation::ENDIF) {
+        if (instruction.operation == Enums::ComputationOperation_Endif) {
             if (condPointer > 0)
                 condPointer--;
         }
@@ -155,12 +155,9 @@ __inline__ __device__ void
     ComputationFunction::readInstruction(char const* data, int& instructionPointer, InstructionCoded& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
-    instructionCoded.operation =
-        static_cast<Enums::ComputationOperation::Type>((data[instructionPointer] >> 4) & 0xF);
-    instructionCoded.opType1 =
-        static_cast<Enums::ComputationOpType::Type>(((data[instructionPointer] >> 2) & 0x3) % 3);
-    instructionCoded.opType2 =
-        static_cast<Enums::ComputationOpType::Type>(data[instructionPointer] & 0x3);
+    instructionCoded.operation = (data[instructionPointer] >> 4) & 0xF;
+    instructionCoded.opType1 = ((data[instructionPointer] >> 2) & 0x3) % 3;
+    instructionCoded.opType2 = data[instructionPointer] & 0x3;
     instructionCoded.operand1 = data[instructionPointer + 1];
     instructionCoded.operand2 = data[instructionPointer + 2];
 

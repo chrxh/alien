@@ -73,15 +73,33 @@ namespace Enums
         CommunicatorOutReceivedNewMessage_Yes
     };
 
-    struct ComputationOperation {
-        enum Type {
-            MOV, ADD, SUB, MUL, DIV, XOR, OR, AND, IFG, IFGE, IFE, IFNE, IFLE, IFL, ELSE, ENDIF
-        };
+    using ComputationOperation = int;
+    enum ComputationOperation_
+    {
+        ComputationOperation_Mov,
+        ComputationOperation_Add,
+        ComputationOperation_Sub,
+        ComputationOperation_Mul,
+        ComputationOperation_Div,
+        ComputationOperation_Xor,
+        ComputationOperation_Or,
+        ComputationOperation_And,
+        ComputationOperation_Ifg,
+        ComputationOperation_Ifge,
+        ComputationOperation_Ife,
+        ComputationOperation_Ifne,
+        ComputationOperation_Ifle,
+        ComputationOperation_Ifl,
+        ComputationOperation_Else,
+        ComputationOperation_Endif
     };
-    struct ComputationOpType {
-        enum Type {
-            MEM, MEMMEM, CMEM, CONSTANT
-        };
+    using ComputationOpType = int;
+    enum ComputationOpType_
+    {
+        ComputationOpType_Mem,
+        ComputationOpType_MemMem,
+        ComputationOpType_Cmem,
+        ComputationOpType_Constant
     };
 
     struct Constr {
@@ -246,9 +264,9 @@ namespace Enums
 }
 
 struct InstructionCoded {
-    Enums::ComputationOperation::Type operation;
-    Enums::ComputationOpType::Type opType1;
-    Enums::ComputationOpType::Type opType2;
+    Enums::ComputationOperation operation;
+    Enums::ComputationOpType opType1;
+    Enums::ComputationOpType opType2;
     uint8_t operand1;
     uint8_t operand2;
 };
