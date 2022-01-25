@@ -27,8 +27,6 @@ include_directories(
     source
     external)
 
-add_compile_definitions(ALIEN_STATIC)
-
 if (MSVC)
     # Suppress `warning C4005: 'FOO': macro redefinition`
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-wd4005>)
