@@ -7,11 +7,11 @@ add_library(alien_engine_gpu_kernels_lib
     Cell.cuh
     CellFunctionData.cuh
     CellProcessor.cuh
-    CommunicatorFunction.cuh
-    ComputationFunction.cuh
+    CommunicatorProcessor.cuh
+    CellComputationProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
-    ConstructorFunction.cuh
+    ConstructionProcessor.cuh
     CudaMemoryManager.cuh
     CudaMonitorData.cuh
     CudaSimulationAdapter.cu
@@ -24,8 +24,7 @@ add_library(alien_engine_gpu_kernels_lib
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
-    DigestionFunction.cuh
-    DynamicMemory.cuh
+    DigestionProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
     EditKernelsLauncher.cu
@@ -51,12 +50,12 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernelsLauncher.cuh
     MonitorKernels.cu
     MonitorKernels.cuh
-    MuscleFunction.cuh
+    MuscleProcessor.cuh
     Operation.cuh
     Particle.cuh
     ParticleProcessor.cuh
     Physics.cuh
-    PropulsionFunction.cuh
+    PropulsionProcessor.cuh
     QuantityConverter.cuh
     RenderingData.cu
     RenderingData.cuh
@@ -64,9 +63,9 @@ add_library(alien_engine_gpu_kernels_lib
     RenderingKernels.cuh
     RenderingKernelsLauncher.cu
     RenderingKernelsLauncher.cuh
-    ScannerFunction.cuh
+    ScannerProcessor.cuh
     SelectionResult.cuh
-    SensorFunction.cuh
+    SensorProcessor.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu
@@ -76,6 +75,7 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationResult.cuh
     SpotCalculator.cuh
     Swap.cuh
+    TempMemory.cuh
     Token.cuh
     TokenProcessor.cuh)
 
