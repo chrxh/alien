@@ -3,6 +3,7 @@ PUBLIC
     CellComputationTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    SensorTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(tests alien_base_lib)
