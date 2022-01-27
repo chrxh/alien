@@ -3,10 +3,10 @@
 #include "SimulationData.cuh"
 #include "QuantityConverter.cuh"
 
-class PropulsionFunction
+class PropulsionProcessor
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data);
+    __inline__ __device__ static void process(Token* token, SimulationData& data);
 
 private:
     __inline__ __device__ static float convertDataToThrustPower(unsigned char data);
@@ -17,7 +17,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void PropulsionFunction::processing(Token* token, SimulationData& data)
+__inline__ __device__ void PropulsionProcessor::process(Token* token, SimulationData& data)
 {
     auto& tokenMem = token->memory;
 
@@ -68,7 +68,7 @@ __inline__ __device__ void PropulsionFunction::processing(Token* token, Simulati
     tokenMem[Enums::Prop_Output] = Enums::PropOut_Success;
 }
 
-__inline__ __device__ float PropulsionFunction::convertDataToThrustPower(unsigned char data)
+__inline__ __device__ float PropulsionProcessor::convertDataToThrustPower(unsigned char data)
 {
     return 1.0f / 1000.0f*(static_cast<float>(data) + 10.0f);
 }

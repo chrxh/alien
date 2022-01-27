@@ -292,3 +292,8 @@ void setValueToDevice(T* target, T const& value)
 {
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(target, &value, sizeof(T), cudaMemcpyHostToDevice));
 }
+
+__device__ __inline__ int calcMod(char value, int count)
+{
+    return static_cast<unsigned char>(value) % count;
+}

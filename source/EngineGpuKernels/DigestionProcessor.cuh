@@ -6,10 +6,10 @@
 #include "SimulationData.cuh"
 #include "Token.cuh"
 
-class DigestionFunction
+class DigestionProcessor
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
 
 private:
     __inline__ __device__ static bool isHomogene(Cell* cell);
@@ -22,7 +22,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void DigestionFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
+__inline__ __device__ void DigestionProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
@@ -119,7 +119,7 @@ __inline__ __device__ void DigestionFunction::processing(Token* token, Simulatio
     }
 }
 
-__inline__ __device__ bool DigestionFunction::isHomogene(Cell* cell)
+__inline__ __device__ bool DigestionProcessor::isHomogene(Cell* cell)
 {
     int color = cell->metadata.color;
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -137,7 +137,7 @@ __inline__ __device__ bool DigestionFunction::isHomogene(Cell* cell)
     return true;
 }
 
-__inline__ __device__ float DigestionFunction::calcOpenAngle(Cell* cell, float2 direction)
+__inline__ __device__ float DigestionProcessor::calcOpenAngle(Cell* cell, float2 direction)
 {
     if (0 == cell->numConnections) {
         return 0.0f;
@@ -177,7 +177,7 @@ __inline__ __device__ float DigestionFunction::calcOpenAngle(Cell* cell, float2 
     return Math::subtractAngle(largerAngle, smallerAngle);
 }
 
-__inline__ __device__ bool DigestionFunction::isConnectedConnected(Cell* cell, Cell* otherCell)
+__inline__ __device__ bool DigestionProcessor::isConnectedConnected(Cell* cell, Cell* otherCell)
 {
     if (cell == otherCell) {
         return true;

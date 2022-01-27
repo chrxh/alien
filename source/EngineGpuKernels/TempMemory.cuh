@@ -5,8 +5,9 @@
 #include <cuda/helper_cuda.h>
 
 #include "CudaMemoryManager.cuh"
+#include "Array.cuh"
 
-class DynamicMemory
+class TempMemory
 {
 private:
     uint64_t _size;
@@ -14,7 +15,7 @@ private:
     unsigned char** _data;
 
 public:
-    DynamicMemory()
+    TempMemory()
         : _size(0)
     {}
 
@@ -65,7 +66,7 @@ public:
         int oldIndex = atomicAdd(_bytesOccupied, newBytesToOccupy);
         if (oldIndex + newBytesToOccupy - 1 >= _size) {
             atomicAdd(_bytesOccupied, -newBytesToOccupy);
-            printf("Not enough dynamic memory!\n");
+            printf("Not enough temporary memory!\n");
             ABORT();
         }
         return reinterpret_cast<T*>(&(*_data)[oldIndex]);
@@ -80,10 +81,9 @@ public:
 
     __device__ __inline__ void reset() { *_bytesOccupied = 0; }
 
-    __device__ __inline__ void swapContent(DynamicMemory& other)
+    __device__ __inline__ void swapContent(TempMemory& other)
     {
         swap(*_bytesOccupied, *other._bytesOccupied);
         swap(*_data, *other._data);
     }
-
 };

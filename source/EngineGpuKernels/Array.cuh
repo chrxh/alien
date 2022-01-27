@@ -12,7 +12,7 @@ namespace Const
     constexpr float ArrayFillLevelFactor = 2.0f / 3.0f;
 }
 
-template <class T>
+template <typename T>
 class Array
 {
 private:
@@ -175,5 +175,60 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_size, &newSize, sizeof(int), cudaMemcpyHostToDevice));
+    }
+};
+
+template <typename T>
+class TempArray
+{
+private:
+    int* _size;
+    int* _numEntries;
+
+public:
+    T** _data;
+
+    TempArray() {}
+
+    __host__ __inline__ void init()
+    {
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, _size);
+        CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
+
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(int)));
+    }
+
+    __host__ __inline__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_numEntries);
+        CudaMemoryManager::getInstance().freeMemory(_size);
+        CudaMemoryManager::getInstance().freeMemory(_data);
+    }
+
+    __device__ __inline__ void setMemory(T* data, int size) const
+    {
+        *_data = data;
+        *_size = size;
+        *_numEntries = 0;
+    }
+    __device__ __inline__ int getSize() const { return *_size; }
+    __device__ __inline__ int getNumEntries() const { return *_numEntries; }
+    __device__ __inline__ void setNumEntries(int value) const { *_numEntries = value; }
+
+    __device__ __inline__ T& at(int index) { return (*_data)[index]; }
+    __device__ __inline__ T const& at(int index) const { return (*_data)[index]; }
+
+    __device__ __inline__ bool tryAddEntry(T const& entry)
+    {
+        auto index = atomicAdd(_numEntries, 1);
+        if (index < *_size) {
+            (*_data)[index] = entry;
+            return true;
+        } else {
+            atomicSub(_numEntries, 1);
+            return false;
+        }
     }
 };

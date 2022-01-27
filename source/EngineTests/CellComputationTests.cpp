@@ -14,12 +14,12 @@ public:
         : IntegrationTestFramework({10, 10})
     {}
 
-    virtual ~CellComputationTests() = default;
+    ~CellComputationTests() = default;
 
     std::string runSimpleCellComputer(std::string const& program) const;
 
 protected:
-    virtual void SetUp();
+    void SetUp() override;
 };
 
 
@@ -58,14 +58,14 @@ std::string CellComputationTests::runSimpleCellComputer(std::string const& progr
     return token.data;
 }
 
-TEST_F(CellComputationTests, testDereferencing1)
+TEST_F(CellComputationTests, dereferencing1)
 {
     std::string program = "mov [1], 3";
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(3, data.at(1));
 }
 
-TEST_F(CellComputationTests, testDereferencing2)
+TEST_F(CellComputationTests, dereferencing2)
 {
     std::string program = "mov [1], 3\n"
                      "mov [[1]], 5";
@@ -73,7 +73,7 @@ TEST_F(CellComputationTests, testDereferencing2)
     EXPECT_EQ(5, data.at(3));
 }
 
-TEST_F(CellComputationTests, testDereferencing3)
+TEST_F(CellComputationTests, dereferencing3)
 {
     std::string program = "mov [1], 3\n"
                      "mov [2], 5\n"
@@ -82,7 +82,7 @@ TEST_F(CellComputationTests, testDereferencing3)
     EXPECT_EQ(5, data.at(3));
 }
 
-TEST_F(CellComputationTests, testDereferencing4)
+TEST_F(CellComputationTests, dereferencing4)
 {
     std::string program = "mov [1], 3\n"
                      "mov [2], 5\n"
@@ -92,7 +92,7 @@ TEST_F(CellComputationTests, testDereferencing4)
     EXPECT_EQ(7, data.at(3));
 }
 
-TEST_F(CellComputationTests, testArithmetic)
+TEST_F(CellComputationTests, arithmetics)
 {
     std::string program = "mov [1], 1\n"
                      "mov [2], 5\n"
@@ -104,7 +104,7 @@ TEST_F(CellComputationTests, testArithmetic)
     EXPECT_EQ(6, data.at(1));
 }
 
-TEST_F(CellComputationTests, testBitwiseOperators)
+TEST_F(CellComputationTests, bitwiseOperators)
 {
     std::string program = "mov [1], 1\n"
                      "mov [2], 5\n"
@@ -118,7 +118,7 @@ TEST_F(CellComputationTests, testBitwiseOperators)
     EXPECT_EQ(2, data.at(3));
 }
 
-TEST_F(CellComputationTests, testConditionGT1)
+TEST_F(CellComputationTests, conditionGT1)
 {
     std::string program = "mov [1], 2\n"
                      "if [1] < 3\n"
@@ -130,7 +130,7 @@ TEST_F(CellComputationTests, testConditionGT1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionGT2)
+TEST_F(CellComputationTests, conditionGT2)
 {
     std::string program = "mov [1], 3\n"
                      "if [1] < 3\n"
@@ -142,7 +142,7 @@ TEST_F(CellComputationTests, testConditionGT2)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionGT3)
+TEST_F(CellComputationTests, conditionGT3)
 {
     std::string program = "mov [1], 4\n"
                      "if [1] < 3\n"
@@ -154,7 +154,7 @@ TEST_F(CellComputationTests, testConditionGT3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionGE1)
+TEST_F(CellComputationTests, conditionGE1)
 {
     std::string program = "mov [1], 3\n"
                      "if [1] <= 3\n"
@@ -166,7 +166,7 @@ TEST_F(CellComputationTests, testConditionGE1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionGE2)
+TEST_F(CellComputationTests, conditionGE2)
 {
     std::string program = "mov [1], 4\n"
                      "if [1] <= 3\n"
@@ -178,7 +178,7 @@ TEST_F(CellComputationTests, testConditionGE2)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionGE3)
+TEST_F(CellComputationTests, conditionGE3)
 {
     std::string program = "mov [1], 2\n"
                      "if [1] <= 3\n"
@@ -190,7 +190,7 @@ TEST_F(CellComputationTests, testConditionGE3)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionEQ1)
+TEST_F(CellComputationTests, conditionEQ1)
 {
     std::string program = "mov [1], 3\n"
                      "if [1] = 3\n"
@@ -202,7 +202,7 @@ TEST_F(CellComputationTests, testConditionEQ1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionEQ2)
+TEST_F(CellComputationTests, conditionEQ2)
 {
     std::string program = "mov [1], 4\n"
                      "if [1] = 3\n"
@@ -214,7 +214,7 @@ TEST_F(CellComputationTests, testConditionEQ2)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionEQ3)
+TEST_F(CellComputationTests, conditionEQ3)
 {
     std::string program = "mov [1], 2\n"
                      "if [1] = 3\n"
@@ -226,7 +226,7 @@ TEST_F(CellComputationTests, testConditionEQ3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionNEQ1)
+TEST_F(CellComputationTests, conditionNEQ1)
 {
     std::string program = "mov [1], 3\n"
                      "if [1] != 3\n"
@@ -238,7 +238,7 @@ TEST_F(CellComputationTests, testConditionNEQ1)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionNEQ2)
+TEST_F(CellComputationTests, conditionNEQ2)
 {
     std::string program = "mov [1], 4\n"
                      "if [1] != 3\n"
@@ -250,7 +250,7 @@ TEST_F(CellComputationTests, testConditionNEQ2)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionNEQ3)
+TEST_F(CellComputationTests, conditionNEQ3)
 {
     std::string program = "mov [1], 2\n"
                      "if [1] != 3\n"
@@ -262,7 +262,7 @@ TEST_F(CellComputationTests, testConditionNEQ3)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionLE1)
+TEST_F(CellComputationTests, conditionLE1)
 {
     std::string program = "mov [1], 3\n"
                      "if [1] >= 3\n"
@@ -274,7 +274,7 @@ TEST_F(CellComputationTests, testConditionLE1)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionLE2)
+TEST_F(CellComputationTests, conditionLE2)
 {
     std::string program = "mov [1], 4\n"
                      "if [1] >= 3\n"
@@ -286,7 +286,7 @@ TEST_F(CellComputationTests, testConditionLE2)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionLE3)
+TEST_F(CellComputationTests, conditionLE3)
 {
     std::string program = "mov [1], 2\n"
                      "if [1] >= 3\n"
@@ -298,7 +298,7 @@ TEST_F(CellComputationTests, testConditionLE3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionLT1)
+TEST_F(CellComputationTests, conditionLT1)
 {
     std::string program = "mov [1], 3\n"
                      "if [1] > 3\n"
@@ -310,7 +310,7 @@ TEST_F(CellComputationTests, testConditionLT1)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionLT2)
+TEST_F(CellComputationTests, conditionLT2)
 {
     std::string program = "mov [1], 4\n"
                      "if [1] > 3\n"
@@ -322,7 +322,7 @@ TEST_F(CellComputationTests, testConditionLT2)
     EXPECT_EQ(1, data.at(2));
 }
 
-TEST_F(CellComputationTests, testConditionLT3)
+TEST_F(CellComputationTests, conditionLT3)
 {
     std::string program = "mov [1], 2\n"
                      "if [1] > 3\n"
@@ -334,7 +334,7 @@ TEST_F(CellComputationTests, testConditionLT3)
     EXPECT_EQ(2, data.at(2));
 }
 
-TEST_F(CellComputationTests, testInstructionAfterConditionClause)
+TEST_F(CellComputationTests, instructionAfterConditionClause)
 {
     std::string program = "if [1] != 3\n"
                      "mov [2], 1\n"
@@ -346,7 +346,7 @@ TEST_F(CellComputationTests, testInstructionAfterConditionClause)
     EXPECT_EQ(6, data.at(5));
 }
 
-TEST_F(CellComputationTests, testNegativeNumbers1)
+TEST_F(CellComputationTests, negativeNumbers1)
 {
     std::string program = "mov [1], 1\n"
                      "sub [1], 2";
@@ -354,14 +354,14 @@ TEST_F(CellComputationTests, testNegativeNumbers1)
     EXPECT_EQ(-1, static_cast<int>(data.at(1)));
 }
 
-TEST_F(CellComputationTests, testNegativeNumbers2)
+TEST_F(CellComputationTests, negativeNumbers2)
 {
     std::string program = "mov [1], -1";
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(-1, static_cast<int>(data.at(1)));
 }
 
-TEST_F(CellComputationTests, testNegativeNumbers3)
+TEST_F(CellComputationTests, negativeNumbers3)
 {
     std::string program = "mov [1], 1\n"
                      "sub [1], -1";
@@ -369,14 +369,14 @@ TEST_F(CellComputationTests, testNegativeNumbers3)
     EXPECT_EQ(2, static_cast<int>(data.at(1)));
 }
 
-TEST_F(CellComputationTests, testNegativeNumbers4)
+TEST_F(CellComputationTests, negativeNumbers4)
 {
     std::string program = "mov [-1], 1";
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(1, data.at(255));
 }
 
-TEST_F(CellComputationTests, testOverflow1)
+TEST_F(CellComputationTests, overflow1)
 {
     std::string program = "mov [1], 127\n"
                      "add [1], 1\n";
@@ -384,7 +384,7 @@ TEST_F(CellComputationTests, testOverflow1)
     EXPECT_EQ(static_cast<char>(-128), data.at(1));
 }
 
-TEST_F(CellComputationTests, testOverflow2)
+TEST_F(CellComputationTests, overflow2)
 {
     std::string program = "mov [1], 255\n"
                      "add [1], 1\n";
@@ -392,7 +392,7 @@ TEST_F(CellComputationTests, testOverflow2)
     EXPECT_EQ(0, data.at(1));
 }
 
-TEST_F(CellComputationTests, testOverflow3)
+TEST_F(CellComputationTests, overflow3)
 {
     std::string program = "mov [1], 55\n"
                      "mul [1], 43\n";
@@ -400,7 +400,7 @@ TEST_F(CellComputationTests, testOverflow3)
     EXPECT_EQ(61, data.at(1));  //55 * 43 = 2365 = 61 (mod 256)
 }
 
-TEST_F(CellComputationTests, testOverflow4)
+TEST_F(CellComputationTests, overflow4)
 {
     std::string program = "mov [1], 55\n"
                      "mul [1], 45\n";
@@ -408,7 +408,7 @@ TEST_F(CellComputationTests, testOverflow4)
     EXPECT_EQ(static_cast<char>(-85), data.at(1));  //55 * 45 = 2475 = 171 (mod 256)
 }
 
-TEST_F(CellComputationTests, testOverflow5)
+TEST_F(CellComputationTests, overflow5)
 {
     std::string program = "mov [1], 55\n"
                      "mul [1], -45\n";
@@ -416,7 +416,7 @@ TEST_F(CellComputationTests, testOverflow5)
     EXPECT_EQ(85, data.at(1));  //55 * (-45) = -2475 = -171 (mod 256)
 }
 
-TEST_F(CellComputationTests, testDivisionByZero)
+TEST_F(CellComputationTests, divisionByZero)
 {
     std::string program = "mov [1], 55\n"
                      "div [1], 0\n";

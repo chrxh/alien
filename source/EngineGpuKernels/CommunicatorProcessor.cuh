@@ -5,7 +5,7 @@
 #include "Cell.cuh"
 #include "ConstantMemory.cuh"
 
-class CommunicatorFunction
+class CommunicatorProcessor
 {
 public:
     __inline__ __device__ void init_block(SimulationData* data);
@@ -70,12 +70,12 @@ namespace {
     };
 }
 
-__inline__ __device__ void CommunicatorFunction::init_block(SimulationData * data)
+__inline__ __device__ void CommunicatorProcessor::init_block(SimulationData * data)
 {
     _data = data;
 }
 
-__inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
+__inline__ __device__ void CommunicatorProcessor::processing_block(Token * token)
 {
     __syncthreads();
 
@@ -111,63 +111,63 @@ __inline__ __device__ void CommunicatorFunction::processing_block(Token * token)
     __syncthreads();
 }
 
-__inline__ __device__ Enums::CommunicatorIn::Type CommunicatorFunction::getCommand(Token * token)
+__inline__ __device__ Enums::CommunicatorIn::Type CommunicatorProcessor::getCommand(Token * token)
 {
     return static_cast<Enums::CommunicatorIn::Type>(
         static_cast<unsigned char>(token->memory[Enums::Communicator_Input]) % Enums::CommunicatorIn::_COUNTER);
 }
 
-__inline__ __device__ void CommunicatorFunction::setListeningChannel(Cell* cell, unsigned char channel) const
+__inline__ __device__ void CommunicatorProcessor::setListeningChannel(Cell* cell, unsigned char channel) const
 {
     cell->staticData[StaticDataInternal::Channel] = channel;
 }
 
-__inline__ __device__ unsigned char CommunicatorFunction::getListeningChannel(Cell * cell) const
+__inline__ __device__ unsigned char CommunicatorProcessor::getListeningChannel(Cell * cell) const
 {
     return cell->staticData[StaticDataInternal::Channel];
 }
 
-__inline__ __device__ void CommunicatorFunction::setAngle(Cell * cell, unsigned char angle) const
+__inline__ __device__ void CommunicatorProcessor::setAngle(Cell * cell, unsigned char angle) const
 {
     cell->staticData[StaticDataInternal::OriginAngle] = angle;
 }
 
-__inline__ __device__ unsigned char CommunicatorFunction::getAngle(Cell * cell) const
+__inline__ __device__ unsigned char CommunicatorProcessor::getAngle(Cell * cell) const
 {
     return cell->staticData[StaticDataInternal::OriginAngle];
 }
 
-__inline__ __device__ void CommunicatorFunction::setDistance(Cell * cell, unsigned char distance) const
+__inline__ __device__ void CommunicatorProcessor::setDistance(Cell * cell, unsigned char distance) const
 {
     cell->staticData[StaticDataInternal::OriginDistance] = distance;
 }
 
-__inline__ __device__ unsigned char CommunicatorFunction::getDistance(Cell * cell) const
+__inline__ __device__ unsigned char CommunicatorProcessor::getDistance(Cell * cell) const
 {
     return cell->staticData[StaticDataInternal::OriginDistance];
 }
 
-__inline__ __device__ void CommunicatorFunction::setMessage(Cell * cell, unsigned char message) const
+__inline__ __device__ void CommunicatorProcessor::setMessage(Cell * cell, unsigned char message) const
 {
     cell->staticData[StaticDataInternal::MessageCode] = message;
 }
 
-__inline__ __device__ unsigned char CommunicatorFunction::getMessage(Cell * cell) const
+__inline__ __device__ unsigned char CommunicatorProcessor::getMessage(Cell * cell) const
 {
     return cell->staticData[StaticDataInternal::MessageCode];
 }
 
-__inline__ __device__ void CommunicatorFunction::setNewMessageReceived(Cell * cell, bool value) const
+__inline__ __device__ void CommunicatorProcessor::setNewMessageReceived(Cell * cell, bool value) const
 {
     cell->staticData[StaticDataInternal::NewMessageReceived] = value;
 }
 
-__inline__ __device__ bool CommunicatorFunction::getNewMessageReceived(Cell * cell) const
+__inline__ __device__ bool CommunicatorProcessor::getNewMessageReceived(Cell * cell) const
 {
     return cell->staticData[StaticDataInternal::NewMessageReceived];
 }
 
-__inline__ __device__ void CommunicatorFunction::sendMessage_block(Token * token) const
+__inline__ __device__ void CommunicatorProcessor::sendMessage_block(Token * token) const
 {
     __shared__ MessageData messageDataToSend;
     if (0 == threadIdx.x) {
@@ -188,7 +188,7 @@ __inline__ __device__ void CommunicatorFunction::sendMessage_block(Token * token
     __syncthreads();
 }
 
-__inline__ __device__ void CommunicatorFunction::receiveMessage(Token * token) const
+__inline__ __device__ void CommunicatorProcessor::receiveMessage(Token * token) const
 {
     auto const& cell = token->cell;
     if (getNewMessageReceived(cell)) {
@@ -206,18 +206,18 @@ __inline__ __device__ void CommunicatorFunction::receiveMessage(Token * token) c
     }
 }
 
-__inline__ __device__ void CommunicatorFunction::sendMessageToNearbyCommunicators(MessageData const & messageDataToSend, 
+__inline__ __device__ void CommunicatorProcessor::sendMessageToNearbyCommunicators(MessageData const & messageDataToSend, 
     Cell * senderCell, Cell * senderPreviousCell, int & numMessages) const
 { 
     __shared__ List<Cluster*> clusterList;
     _data->cellFunctionData.mapSectionCollector.getClusters_block(senderCell->absPos,
-        cudaSimulationParameters.cellFunctionCommunicatorRange, _data->cellMap, &_data->dynamicMemory, clusterList);
+        cudaSimulationParameters.cellFunctionCommunicatorRange, _data->cellMap, &_data->tempMemory, clusterList);
 
     __shared__ Cluster** clusters;
 
     if (0 == threadIdx.x) {
         numMessages = 0;
-        clusters = clusterList.asArray(&_data->dynamicMemory);
+        clusters = clusterList.asArray(&_data->tempMemory);
     }
     __syncthreads();
 
@@ -240,7 +240,7 @@ __inline__ __device__ void CommunicatorFunction::sendMessageToNearbyCommunicator
     }
 }
 
-__inline__ __device__ bool CommunicatorFunction::sendMessageToCommunicatorAndReturnSuccess(
+__inline__ __device__ bool CommunicatorProcessor::sendMessageToCommunicatorAndReturnSuccess(
     MessageData const& messageDataToSend, Cell* senderCell, Cell* senderPreviousCell, Cell* receiverCell) const
 {
     receiverCell->getLock();
@@ -264,7 +264,7 @@ __inline__ __device__ bool CommunicatorFunction::sendMessageToCommunicatorAndRet
     return true;
 }
 
-__inline__ __device__ float2 CommunicatorFunction::calcDisplacementOfObjectFromSender(
+__inline__ __device__ float2 CommunicatorProcessor::calcDisplacementOfObjectFromSender(
     MessageData const& messageDataToSend, Cell* senderCell, Cell* senderPreviousCell) const
 {
     auto displacementFromSender = senderPreviousCell->absPos - senderCell->absPos;
@@ -275,7 +275,7 @@ __inline__ __device__ float2 CommunicatorFunction::calcDisplacementOfObjectFromS
     return displacementFromSender;
 }
 
-__inline__ __device__ unsigned char CommunicatorFunction::calcReceivedMessageAngle(Cell * receiverCell, Cell * receiverPreviousCell) const
+__inline__ __device__ unsigned char CommunicatorProcessor::calcReceivedMessageAngle(Cell * receiverCell, Cell * receiverPreviousCell) const
 {
     auto const displacement = receiverPreviousCell->absPos - receiverCell->absPos;
     auto const localAngle = Math::angleOfVector(displacement);

@@ -12,22 +12,27 @@ void SimulationData::init(int2 const& universeSize)
     cellMap.init(size);
     particleMap.init(size);
 
-    dynamicMemory.init();
+    tempMemory.init();
     numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
     CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
     CudaMemoryManager::getInstance().acquireMemory<Operation*>(1, operations);
+
+    sensorOperations.init();
 }
 
 __device__ void SimulationData::prepareForNextTimestep()
 {
     cellMap.reset();
     particleMap.reset();
-    dynamicMemory.reset();
+    tempMemory.reset();
 
     *numOperations = 0;
-    *operations = dynamicMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
+    *operations = tempMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
     entities.saveNumEntries();
+
+    auto maxSensorOperations = entities.cellPointers.getNumEntries() / 2;
+    sensorOperations.setMemory(tempMemory.getArray<SensorOperation>(maxSensorOperations), maxSensorOperations);
 }
 
 bool SimulationData::shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
@@ -78,7 +83,7 @@ void SimulationData::resizeRemainings()
 
     //heuristic
     int upperBoundDynamicMemory = (sizeof(Operation) + 200) * (cellArraySize + 1000);
-    dynamicMemory.resize(upperBoundDynamicMemory);
+    tempMemory.resize(upperBoundDynamicMemory);
 }
 
 bool SimulationData::isEmpty()
@@ -105,10 +110,11 @@ void SimulationData::free()
     cellMap.free();
     particleMap.free();
     numberGen.free();
-    dynamicMemory.free();
+    tempMemory.free();
 
     CudaMemoryManager::getInstance().freeMemory(numOperations);
     CudaMemoryManager::getInstance().freeMemory(operations);
+    sensorOperations.free();
 }
 
 template <typename Entity>

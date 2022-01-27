@@ -9,10 +9,10 @@
 #include "Token.cuh"
 #include "Cell.cuh"
 
-class ScannerFunction
+class ScannerProcessor
 {
 public:
-    __device__ __inline__ static void processing(Token* token, SimulationData& data);
+    __device__ __inline__ static void process(Token* token, SimulationData& data);
 
 private:
     struct SpiralLookupResult
@@ -32,7 +32,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ void ScannerFunction::processing(Token* token, SimulationData& data)
+__device__ __inline__ void ScannerProcessor::process(Token* token, SimulationData& data)
 {
     auto& tokenMem = token->memory;
     unsigned int n = static_cast<unsigned char>(tokenMem[Enums::Scanner_InOutCellNumber]);
@@ -108,11 +108,11 @@ __device__ __inline__ void ScannerFunction::processing(Token* token, SimulationD
     }
 }
 
-__device__ __inline__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cell* cell, Cell* sourceCell, SimulationData& data) -> SpiralLookupResult
+__device__ __inline__ auto ScannerProcessor::spiralLookupAlgorithm(int depth, Cell* cell, Cell* sourceCell, SimulationData& data) -> SpiralLookupResult
 {
     SpiralLookupResult result;
 
-    auto visitedCellData = data.dynamicMemory.getArray<Cell*>(256 * 2);
+    auto visitedCellData = data.tempMemory.getArray<Cell*>(256 * 2);
     HashSet<Cell*, HashFunctor<Cell*>> visitedCell(depth * 2, visitedCellData);
 
     result.cell = cell;
@@ -176,7 +176,7 @@ __device__ __inline__ auto ScannerFunction::spiralLookupAlgorithm(int depth, Cel
     return result;
 }
 
-__device__ __inline__ int ScannerFunction::getConnectionIndex(Cell* cell, Cell* otherCell)
+__device__ __inline__ int ScannerProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
 {
     for (int i = 0; i < cell->numConnections; ++i) {
         if (cell->connections[i].cell == otherCell) {

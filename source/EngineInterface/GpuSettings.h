@@ -2,8 +2,8 @@
 
 struct GpuSettings
 {
-    int numThreadsPerBlock = 64;
-    int numBlocks = 1024;
+    int numThreadsPerBlock = 32;
+    int numBlocks = 2048;
 
     bool operator==(GpuSettings const& other) const
     {
