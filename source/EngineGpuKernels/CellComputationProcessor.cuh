@@ -8,10 +8,10 @@
 #include "Token.cuh"
 #include "AccessTOs.cuh"
 
-class ComputationFunction
+class CellComputationProcessor
 {
 public:
-    __inline__ __device__ static void processing(Token* token);
+    __inline__ __device__ static void process(Token* token);
 
 private:
     __inline__ __device__ static void
@@ -31,7 +31,7 @@ private:
 
 };
 
-__inline__ __device__ void ComputationFunction::processing(Token* token)
+__inline__ __device__ void CellComputationProcessor::process(Token* token)
 {
     auto cell = token->cell;
     bool condTable[MAX_CELL_STATIC_BYTES / 3 + 1];
@@ -153,7 +153,7 @@ __inline__ __device__ void ComputationFunction::processing(Token* token)
 }
 
 __inline__ __device__ void
-    ComputationFunction::readInstruction(char const* data, int& instructionPointer, CellInstruction& instructionCoded)
+    CellComputationProcessor::readInstruction(char const* data, int& instructionPointer, CellInstruction& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
     instructionCoded.operation = (data[instructionPointer] >> 4) & 0xF;
@@ -165,14 +165,14 @@ __inline__ __device__ void
     instructionPointer += 3;
 }
 
-__inline__ __device__ uint8_t ComputationFunction::convertToAddress(int8_t addr, uint32_t size)
+__inline__ __device__ uint8_t CellComputationProcessor::convertToAddress(int8_t addr, uint32_t size)
 {
     auto t = static_cast<uint32_t>(static_cast<uint8_t>(addr));
     return ((t % size) + size) % size;
 }
 
 __inline__ __device__ int8_t
-ComputationFunction::getMemoryByte(char const* tokenMemory, char const* cellMemory, unsigned char pointer, MemoryType type)
+CellComputationProcessor::getMemoryByte(char const* tokenMemory, char const* cellMemory, unsigned char pointer, MemoryType type)
 {
     if (type == MemoryType::Token) {
         return tokenMemory[pointer];
@@ -184,7 +184,7 @@ ComputationFunction::getMemoryByte(char const* tokenMemory, char const* cellMemo
 }
 
 __inline__ __device__ void
-ComputationFunction::setMemoryByte(char* tokenMemory, char* cellMemory, unsigned char pointer, char value, MemoryType type)
+CellComputationProcessor::setMemoryByte(char* tokenMemory, char* cellMemory, unsigned char pointer, char value, MemoryType type)
 {
     if (type == MemoryType::Token) {
         tokenMemory[pointer] = value;

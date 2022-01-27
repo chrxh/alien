@@ -7,7 +7,7 @@ template <typename Key, typename Value, typename Hash = HashFunctor<Key>>
 class HashMap
 {
 public:
-    __device__ __inline__ void init_block(int size, DynamicMemory& arrays)
+    __device__ __inline__ void init_block(int size, TempMemory& arrays)
     {
         __shared__ Entry* entries;
         if (0 == threadIdx.x) {

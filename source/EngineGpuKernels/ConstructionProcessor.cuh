@@ -7,10 +7,10 @@
 #include "CellConnectionProcessor.cuh"
 #include "SimulationResult.cuh"
 
-class ConstructorFunction
+class ConstructionProcessor
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
 
 private:
     struct ConstructionData
@@ -95,7 +95,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ConstructorFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
+__inline__ __device__ void ConstructionProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
     //    mutateToken(token, data);
 
@@ -122,7 +122,7 @@ __inline__ __device__ void ConstructorFunction::processing(Token* token, Simulat
     }
 }
 
-__inline__ __device__ void ConstructorFunction::readConstructionData(Token* token, ConstructionData& data)
+__inline__ __device__ void ConstructionProcessor::readConstructionData(Token* token, ConstructionData& data)
 {
     auto const& memory = token->memory;
     data.constrIn = static_cast<unsigned char>(token->memory[Enums::Constr_Input]) % Enums::ConstrIn_Count;
@@ -159,7 +159,7 @@ __inline__ __device__ void ConstructorFunction::readConstructionData(Token* toke
     data.cellFunctionType = memory[Enums::Constr_InCellFunction];
 }
 
-__inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(Token* token)
+__inline__ __device__ Cell* ConstructionProcessor::getFirstCellOfConstructionSite(Token* token)
 {
     Cell* result = nullptr;
     auto const& cell = token->cell;
@@ -172,7 +172,7 @@ __inline__ __device__ Cell* ConstructorFunction::getFirstCellOfConstructionSite(
     return result;
 }
 
-__inline__ __device__ void ConstructorFunction::startNewConstruction(
+__inline__ __device__ void ConstructionProcessor::startNewConstruction(
     Token* token,
     SimulationData& data,
     SimulationResult& result,
@@ -236,7 +236,7 @@ __inline__ __device__ void ConstructorFunction::startNewConstruction(
     result.incCreatedCell();
 }
 
-__inline__ __device__ void ConstructorFunction::continueConstruction(
+__inline__ __device__ void ConstructionProcessor::continueConstruction(
     Token* token,
     SimulationData& data,
     SimulationResult& result,
@@ -383,7 +383,7 @@ __inline__ __device__ void ConstructorFunction::continueConstruction(
     result.incCreatedCell();
 }
 
-__inline__ __device__ void ConstructorFunction::constructCell(
+__inline__ __device__ void ConstructionProcessor::constructCell(
     SimulationData& data,
     Token* token,
     float2 const& posOfNewCell,
@@ -421,19 +421,19 @@ __inline__ __device__ void ConstructorFunction::constructCell(
     }
 }
 
-__inline__ __device__ auto ConstructorFunction::isAdaptMaxConnections(ConstructionData const& data)
+__inline__ __device__ auto ConstructionProcessor::isAdaptMaxConnections(ConstructionData const& data)
     -> AdaptMaxConnections
 {
     return 0 == getMaxConnections(data) ? AdaptMaxConnections::Yes : AdaptMaxConnections::No;
 }
 
-__inline__ __device__ int ConstructorFunction::getMaxConnections(ConstructionData const& data)
+__inline__ __device__ int ConstructionProcessor::getMaxConnections(ConstructionData const& data)
 {
     return static_cast<unsigned char>(data.maxConnections) % (cudaSimulationParameters.cellMaxBonds + 1);
 }
 
 __inline__ __device__ bool
-ConstructorFunction::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
+ConstructionProcessor::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
 {
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
         if (numConnections >= cudaSimulationParameters.cellMaxBonds) {
@@ -448,7 +448,7 @@ ConstructorFunction::isConnectable(int numConnections, int maxConnections, Adapt
     return true;
 }
 
-__inline__ __device__ auto ConstructorFunction::calcAnglesForNewConnection(
+__inline__ __device__ auto ConstructionProcessor::calcAnglesForNewConnection(
     SimulationData& data,
     Cell* cell,
     float angleDeviation)
@@ -483,7 +483,7 @@ __inline__ __device__ auto ConstructorFunction::calcAnglesForNewConnection(
     return AnglesForNewConnection{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
-__inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, ConstructionData const& data)
+__inline__ __device__ auto ConstructionProcessor::adaptEnergies(Token* token, ConstructionData const& data)
     -> EnergyForNewEntities
 {
     auto const& cell = token->cell;
@@ -508,7 +508,7 @@ __inline__ __device__ auto ConstructorFunction::adaptEnergies(Token* token, Cons
     return result;
 }
 
-__inline__ __device__ Token* ConstructorFunction::constructToken(
+__inline__ __device__ Token* ConstructionProcessor::constructToken(
     SimulationData& data,
     Cell* cell,
     Token* token,

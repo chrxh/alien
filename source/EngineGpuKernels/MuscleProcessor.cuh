@@ -7,10 +7,10 @@
 #include "SimulationData.cuh"
 #include "Token.cuh"
 
-class MuscleFunction
+class MuscleProcessor
 {
 public:
-    __inline__ __device__ static void processing(Token* token, SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
 
 private:
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
@@ -20,7 +20,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void MuscleFunction::processing(Token* token, SimulationData& data, SimulationResult& result)
+__inline__ __device__ void MuscleProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
     auto const& sourceCell = token->sourceCell;
     auto const& cell = token->cell;
@@ -68,7 +68,7 @@ __inline__ __device__ void MuscleFunction::processing(Token* token, SimulationDa
     result.incMuscleActivity();
 }
 
-__inline__ __device__ int MuscleFunction::getConnectionIndex(Cell* cell, Cell* otherCell)
+__inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
 {
     for (int i = 0; i < cell->numConnections; ++i) {
         if (cell->connections[i].cell == otherCell) {

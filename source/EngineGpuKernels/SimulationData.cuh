@@ -22,10 +22,13 @@ struct SimulationData
     Entities entities;
     Entities entitiesForCleanup;
 
+    //#TODO use TempArray
     unsigned int* numOperations;
-    Operation** operations;  //uses dynamic memory
+    Operation** operations;  
 
-    DynamicMemory dynamicMemory;
+    TempArray<SensorOperation> sensorOperations;
+
+    TempMemory tempMemory;
     CudaNumberGenerator numberGen;
 
     void init(int2 const& universeSize);

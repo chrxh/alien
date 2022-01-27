@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DynamicMemory.cuh"
+#include "TempMemory.cuh"
 
 template <typename Value>
 class List
@@ -13,7 +13,7 @@ public:
         _numElements = 0;
     }
 
-    __device__ __inline__ void pushBack(Value const& value, DynamicMemory* dynamicMemory)
+    __device__ __inline__ void pushBack(Value const& value, TempMemory* dynamicMemory)
     {
         atomicAdd(&_numElements, 1);
         auto newEntry = dynamicMemory->getArray<ListEntry>(1);
@@ -32,7 +32,7 @@ public:
         }
     }
 
-    __device__ __inline__ Value* asArray(DynamicMemory* dynamicMemory) const
+    __device__ __inline__ Value* asArray(TempMemory* dynamicMemory) const
     {
         Value* result = dynamicMemory->getArray<Value>(_numElements);
         auto index = 0;

@@ -54,3 +54,8 @@ struct Operation
     Type type;
     OperationData data;
 };
+
+struct SensorOperation
+{
+    Token* token;
+};

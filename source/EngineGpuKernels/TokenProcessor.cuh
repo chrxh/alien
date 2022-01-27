@@ -8,21 +8,21 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "EnergyGuidance.cuh"
-#include "ComputationFunction.cuh"
-#include "ConstructorFunction.cuh"
-#include "ScannerFunction.cuh"
-#include "DigestionFunction.cuh"
-#include "PropulsionFunction.cuh"
-#include "MuscleFunction.cuh"
+#include "CellComputationProcessor.cuh"
+#include "ConstructionProcessor.cuh"
+#include "ScannerProcessor.cuh"
+#include "DigestionProcessor.cuh"
+#include "PropulsionProcessor.cuh"
+#include "MuscleProcessor.cuh"
+#include "SensorProcessor.cuh"
 
 class TokenProcessor
 {
 public:
-    __inline__ __device__ void movement(SimulationData& data);  //prerequisite: clearTag, need numTokenPointers because it might be changed
+    __inline__ __device__ void movement(SimulationData& data);  //prerequisite: cell tags = 0
 
-    __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);
-    __inline__ __device__ void
-    executeModifyingCellFunctions(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);  //energy values are allowed to change
+    __inline__ __device__ void executeModifyingCellFunctions(SimulationData& data, SimulationResult& result);
     __inline__ __device__ void deleteTokenIfCellDeleted(SimulationData& data);
 };
 
@@ -109,10 +109,13 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
             auto cellFunctionType = cell->getCellFunctionType();
             if (cell->tryLock()) {
                 if (Enums::CellFunction_Scanner == cellFunctionType) {
-                    ScannerFunction::processing(token, data);
+                    ScannerProcessor::process(token, data);
                 }
                 if (Enums::CellFunction_Digestion == cellFunctionType) {
-                    DigestionFunction::processing(token, data, result);
+                    DigestionProcessor::process(token, data, result);
+                }
+                if (Enums::CellFunction_Sensor == cellFunctionType) {
+                    SensorProcessor::schedule(token, data);
                 }
                 cell->releaseLock();
             }
@@ -141,16 +144,16 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
 
                     EnergyGuidance::processing(data, token);
                     if (Enums::CellFunction_Computation== cellFunctionType) {
-                        ComputationFunction::processing(token);
+                        CellComputationProcessor::process(token);
                     }
                     if (Enums::CellFunction_Constructor == cellFunctionType) {
-                        ConstructorFunction::processing(token, data, result);
+                        ConstructionProcessor::process(token, data, result);
                     }
                     if (Enums::CellFunction_Propulsion == cellFunctionType) {
-                        PropulsionFunction::processing(token, data);
+                        PropulsionProcessor::process(token, data);
                     }
                     if (Enums::CellFunction_Muscle == cellFunctionType) {
-                        MuscleFunction::processing(token, data, result);
+                        MuscleProcessor::process(token, data, result);
                     }
 
                     //                    success = true;
