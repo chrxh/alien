@@ -19,6 +19,7 @@ public:
     struct SensorParameters
     {
         MEMBER_DECLARATION(SensorParameters, RealVector2D, center, RealVector2D());
+        MEMBER_DECLARATION(SensorParameters, int, minDensity, 0);
     };
     std::string runSensor(DataDescription& world, SensorParameters const& parameters) const;
 
@@ -40,6 +41,7 @@ std::string SensorTests::runSensor(DataDescription& world, SensorParameters cons
     origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction_Sensor);
     auto token = createSimpleToken();
     token.data[Enums::Sensor_Input] = Enums::SensorIn_SearchVicinity;
+    token.data[Enums::Sensor_InMinMass] = parameters._minDensity;
     origFirstCell.addToken(token);
     world.add(sensorData);
 
@@ -76,8 +78,8 @@ TEST_F(SensorTests, nothingFound)
 TEST_F(SensorTests, massAtFront)
 {
     DataDescription world;
-    addMass(world, 10, 10, {200, 100});
-    auto result = runSensor(world, SensorParameters().center({100,100}));
+    addMass(world, 10, 10, {100, 0});
+    auto result = runSensor(world, SensorParameters().center({0, 0}));
 
     EXPECT_EQ(Enums::SensorOut_ClusterFound, result[Enums::Sensor_Output]);
     EXPECT_LE(100 - 10, result[Enums::Sensor_OutDistance]);
@@ -97,4 +99,32 @@ TEST_F(SensorTests, massAtBottom)
     EXPECT_GE(100 + 10, result[Enums::Sensor_OutDistance]);
     auto angle = static_cast<char>(result[Enums::Sensor_InOutAngle]);
     EXPECT_TRUE(angle < 64 + 10 && angle > 64 - 10);
+}
+
+TEST_F(SensorTests, twoMasses1)
+{
+    DataDescription world;
+    addMass(world, 3, 3, {50, 0});
+    addMass(world, 10, 10, {0, 100});
+    auto result = runSensor(world, SensorParameters().center({0, 0}).minDensity(10));
+
+    EXPECT_EQ(Enums::SensorOut_ClusterFound, result[Enums::Sensor_Output]);
+    EXPECT_LE(100 - 10, result[Enums::Sensor_OutDistance]);
+    EXPECT_GE(100 + 10, result[Enums::Sensor_OutDistance]);
+    auto angle = static_cast<char>(result[Enums::Sensor_InOutAngle]);
+    EXPECT_TRUE(angle < 64 + 10 && angle > 64 - 10);
+}
+
+TEST_F(SensorTests, twoMasses2)
+{
+    DataDescription world;
+    addMass(world, 10, 10, {50, 0});
+    addMass(world, 3, 3, {0, 100});
+    auto result = runSensor(world, SensorParameters().center({0, 0}).minDensity(10));
+
+    EXPECT_EQ(Enums::SensorOut_ClusterFound, result[Enums::Sensor_Output]);
+    EXPECT_LE(50 - 10, result[Enums::Sensor_OutDistance]);
+    EXPECT_GE(50 + 10, result[Enums::Sensor_OutDistance]);
+    auto angle = static_cast<char>(result[Enums::Sensor_InOutAngle]);
+    EXPECT_TRUE(angle < 10 && angle > -10);
 }
