@@ -25,14 +25,6 @@ public:
         }
     }
 
-    __device__ __inline__ void createMap(Array<Cell*> cells)
-    {
-        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            addCell(cells.at(index)->absPos);
-        }
-    }
-
     __device__ __inline__ uint32_t getDensity(float2 const& pos)
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
@@ -42,14 +34,15 @@ public:
         return 0;
     }
 
-private:
     __device__ __inline__ void addCell(float2 const& pos)
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            atomicAdd(&_densityMap[index], uint64_t(1));
+            alienAtomicAdd(&_densityMap[index], uint64_t(1));
         }
     }
+
+private:
 
     int _slotSize;
     int2 _densityMapSize;

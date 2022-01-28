@@ -15,21 +15,17 @@ __global__ void processingStep1(SimulationData data)
     cellProcessor.clearTag(data);
     cellProcessor.updateMap(data);
     cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
-
-    //#TODO move to CellProcessor
-    data.cellFunctionData.densityMap.clear();
+    cellProcessor.clearDensityMap(data);
 }
 
 __global__ void processingStep2(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.collisions(data);
+    cellProcessor.fillDensityMap(data);
 
     ParticleProcessor particleProcessor;
     particleProcessor.updateMap(data);
-
-    //#TODO move to CellProcessor
-    data.cellFunctionData.densityMap.createMap(data.entities.cellPointers);
 }
 
 __global__ void processingStep3(SimulationData data)

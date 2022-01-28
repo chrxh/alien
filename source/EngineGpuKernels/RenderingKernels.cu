@@ -10,14 +10,7 @@ namespace
     __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int index, float3 const& colorToAdd)
     {
         uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0 | toUInt64(colorToAdd.z * 255.0f) << 32;
-
-        // CUDA headers use "unsigned long long" for 64bit types, which
-        // may not be struturally equivalent to std::uint64_t
-        //
-        // Due to this, we need an ugly type casting workaround here
-        //
-        static_assert(sizeof(unsigned long long) == sizeof(uint64_t));
-        atomicAdd(reinterpret_cast<unsigned long long*>(&imageData[index]), rawColorToAdd);
+        alienAtomicAdd(&imageData[index], rawColorToAdd);
     }
 
     __device__ __inline__ float3 colorToFloat3(unsigned int value)
