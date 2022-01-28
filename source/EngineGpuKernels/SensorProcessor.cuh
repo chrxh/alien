@@ -13,7 +13,6 @@ public:
 
 private:
     __device__ __inline__ static void searchVicinity(Token* token, SimulationData& data);
-    __device__ __inline__ static unsigned char calcDensity(float2 const& pos, SimulationData& data);
 };
 
 /************************************************************************/
@@ -40,8 +39,11 @@ __device__ __inline__ void SensorProcessor::processVicinitySearches(SimulationDa
 
 __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, SimulationData& data)
 {
-    int minDensity = token->memory[Enums::Sensor_InMinMass];
+    int minDensity = 1 + token->memory[Enums::Sensor_InMinMass];
     int maxDensity = token->memory[Enums::Sensor_InMaxMass];
+    if (maxDensity == 0) {
+        maxDensity = 255;
+    }
 
     auto originDelta = token->sourceCell->absPos - token->cell->absPos;
     data.cellMap.mapDisplacementCorrection(originDelta);
@@ -53,52 +55,46 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
     }
     __syncthreads();
 
-    auto const partition = calcPartition(64 * 64, threadIdx.x, blockDim.x);
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        int indexX = index % 64;
-        int indexY = index / 64;
-        float dx = -256.0f + toFloat(indexX) * 8;
-        float dy = -256.0f + toFloat(indexY) * 8;
-        auto radiusSquared = dx * dx + dy * dy;
-        if (radiusSquared < 256.0f * 256.0f && radiusSquared >= 3.0f * 3.0f) {
+    auto const partition = calcPartition(32, threadIdx.x, blockDim.x);
+    for (float radius = 12.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange; radius += 8.0f) {
+        for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
+            float angle = 360.0f / 32 * angleIndex;
 
-            auto scanPos = token->cell->absPos + float2{dx, dy};
-            auto scannedCell = data.cellMap.getFirst(scanPos);
-            if (scannedCell) {
-                auto density = calcDensity(scanPos, data);
-                if (density >= minDensity && density <= maxDensity) {
-                    auto radius = static_cast<uint32_t>(sqrt(radiusSquared));
-                    auto resultAngle = Math::angleOfVector(float2{dx, dy});
-                    auto relAngle = Math::subtractAngle(resultAngle, originAngle);
-                    uint32_t angle = static_cast<uint32_t>(QuantityConverter::convertAngleToData(relAngle));
-                    uint32_t combined = radius << 16 | density << 8 | angle;
-                    atomicMin(&result, combined);
-                }
+            auto delta = Math::unitVectorOfAngle(angle) * radius;
+            auto scanPos = token->cell->absPos + delta;
+            data.cellMap.mapPosCorrection(scanPos);
+            auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos));
+            if (density >= minDensity && density <= maxDensity) {
+                auto relAngle = Math::subtractAngle(angle, originAngle);
+                uint32_t angle = static_cast<uint32_t>(QuantityConverter::convertAngleToData(relAngle + 180.0f));
+                uint32_t combined = density << 8 | angle;
+                atomicExch(&result, combined);
             }
+        }
+        __syncthreads();
+
+        if (threadIdx.x == 0) {
+            if (result != 0xffffffff) {
+                token->memory[Enums::Sensor_Output] = Enums::SensorOut_ClusterFound;
+                token->memory[Enums::Sensor_OutMass] = static_cast<unsigned char>((result >> 8) & 0xff);
+                auto radiusInt = static_cast<uint32_t>(radius);
+                if (radiusInt > 255) {
+                    radiusInt = 255;
+                }
+                token->memory[Enums::Sensor_OutDistance] = static_cast<unsigned char>(radiusInt);
+                token->memory[Enums::Sensor_InOutAngle] = static_cast<unsigned char>(result & 0xff);
+            }
+        }
+        if (result != 0xffffffff) {
+            break;
         }
     }
     __syncthreads();
+
     if (threadIdx.x == 0) {
         if (result == 0xffffffff) {
             token->memory[Enums::Sensor_Output] = Enums::SensorOut_NothingFound;
-        } else {
-            token->memory[Enums::Sensor_Output] = Enums::SensorOut_ClusterFound;
-            token->memory[Enums::Sensor_OutMass] = static_cast<unsigned char>((result >> 8) & 0xff);
-            token->memory[Enums::Sensor_OutDistance] = static_cast<unsigned char>((result >> 16) & 0xff);
-            token->memory[Enums::Sensor_InOutAngle] = static_cast<unsigned char>(result & 0xff);
         }
     }
 }
 
-__device__ __inline__ unsigned char SensorProcessor::calcDensity(float2 const& pos, SimulationData& data)
-{
-    int numCells = 0;
-    for (float dx = -6.0f; dx <= 6.01f; dx += 2.0f) {
-        for (float dy = -6.0f; dy <= -6.01f; dy += 1.0f) {
-            if (data.cellMap.getFirst(pos + float2{dx, dy})) {
-                ++numCells;
-            }
-        }
-    }
-    return static_cast<unsigned char>(numCells * 255 / 100);
-}

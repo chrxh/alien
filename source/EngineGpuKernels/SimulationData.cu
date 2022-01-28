@@ -2,13 +2,13 @@
 
 #include "Token.cuh"
 
-void SimulationData::init(int2 const& universeSize)
+void SimulationData::init(int2 const& worldSize)
 {
-    size = universeSize;
+    size = worldSize;
 
     entities.init();
     entitiesForCleanup.init();
-    cellFunctionData.init(universeSize);
+    cellFunctionData.init(worldSize);
     cellMap.init(size);
     particleMap.init(size);
 

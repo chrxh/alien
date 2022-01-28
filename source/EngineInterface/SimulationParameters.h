@@ -34,7 +34,7 @@ struct SimulationParameters
     float cellFunctionConstructorCellDataMutationProb = 0.002f;
     float cellFunctionConstructorCellPropertyMutationProb = 0.002f;
     float cellFunctionConstructorCellStructureMutationProb = 0.002f;
-    float cellFunctionSensorRange = 50.0f;
+    float cellFunctionSensorRange = 255.0f;
     float cellFunctionCommunicatorRange = 50.0f;
 
     int tokenMemorySize = 256;
