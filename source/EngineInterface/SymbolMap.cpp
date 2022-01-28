@@ -68,7 +68,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SCANNER_OUT_CELL_BRANCH_NUMBER", "[" + std::to_string(Enums::Scanner_OutCellBranchNumber) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION", "[" + std::to_string(Enums::Scanner_OutCellFunction) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::PROP", std::to_string(Enums::CellFunction_Propulsion));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::PROP", std::to_string(Enums::CellFunction_Communication));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));

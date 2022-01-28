@@ -12,7 +12,7 @@ namespace Enums
     enum CellFunction_
     {
         CellFunction_Computation,
-        CellFunction_Propulsion,
+        CellFunction_Communication,
         CellFunction_Scanner,
         CellFunction_Digestion,
         CellFunction_Constructor,
@@ -150,29 +150,6 @@ namespace Enums
         ConstrInUniformDist_No,
         ConstrInUniformDist_Yes,
         ConstrInUniformDist_Count
-    };
-
-    using Prop = int;
-    enum Prop_
-    {
-        Prop_Output = 5,
-        Prop_Input = 8,
-        Prop_InAngle = 9,
-        Prop_InPower = 10
-    };
-    using PropOut = int;
-    enum PropOut_
-    {
-        PropOut_Success,
-        PropOut_ErrorNoEnergy
-    };
-    using PropIn = int;
-    enum PropIn_
-    {
-        PropIn_DoNothing,
-        PropIn_ByAngle,
-        PropIn_DampRotation,
-        PropIn_Count
     };
 
     using Scanner = int;
