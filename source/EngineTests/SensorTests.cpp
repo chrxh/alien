@@ -41,7 +41,7 @@ std::string SensorTests::runSensor(DataDescription& world, SensorParameters cons
     origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction_Sensor);
     auto token = createSimpleToken();
     token.data[Enums::Sensor_Input] = Enums::SensorIn_SearchVicinity;
-    token.data[Enums::Sensor_InMinMass] = parameters._minDensity;
+    token.data[Enums::Sensor_InMinDensity] = parameters._minDensity;
     origFirstCell.addToken(token);
     world.add(sensorData);
 

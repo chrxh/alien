@@ -790,9 +790,9 @@ void _InspectorWindow::addToken(CellDescription& cell)
 {
     auto const& parameters = _simController->getSimulationParameters();
 
-    cell.addToken(TokenDescription()
-                      .setEnergy(parameters.tokenMinEnergy * 2)
-                      .setData(std::string(parameters.tokenMemorySize, 0)));
+    auto data = std::string(parameters.tokenMemorySize, 0);
+    data[Enums::Branching_TokenBranchNumber] = static_cast<unsigned char>(cell.tokenBranchNumber);
+    cell.addToken(TokenDescription().setEnergy(parameters.tokenMinEnergy * 2).setData(data));
 }
 
 void _InspectorWindow::delToken(CellDescription& cell, int index)

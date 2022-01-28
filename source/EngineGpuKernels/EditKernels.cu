@@ -70,26 +70,37 @@ __global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataT
     }
 }
 
-__global__ void cudaRemoveSelectedCells(SimulationData data, bool includeClusters)
+__global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters)
 {
-    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.entities.cellPointers.at(index);
-        if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
-            cell = nullptr;
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = data.entities.cellPointers.at(index);
+            if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+                cell = nullptr;
+            }
         }
     }
-}
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.tokenPointers.getNumEntries());
 
-__global__ void cudaRemoveSelectedParticles(SimulationData data)
-{
-    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& token = data.entities.tokenPointers.at(index);
+            auto const& cell = token->cell; 
+            if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+                token = nullptr;
+            }
+        }
+    }
+    {
+        auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& particle = data.entities.particlePointers.at(index);
-        if (particle->selected == 1) {
-            particle = nullptr;
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& particle = data.entities.particlePointers.at(index);
+            if (particle->selected == 1) {
+                particle = nullptr;
+            }
         }
     }
 }
