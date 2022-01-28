@@ -113,7 +113,7 @@ public:
                 reinterpret_cast<unsigned long long int>(nullptr),
                 reinterpret_cast<unsigned long long int>(entity)));
             if (old != nullptr) {
-                atomicExch(&_map[mapEntry + 1], entity);
+                alienAtomicExch(&_map[mapEntry + 1], entity);
             }
             entrySubarray[index] = mapEntry;
         }

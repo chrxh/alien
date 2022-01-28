@@ -171,27 +171,31 @@ isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 co
 }
 
 template <typename T>
-__device__ __inline__ T* atomicExch(T** address, T* value)
+__device__ __inline__ T* alienAtomicExch(T** address, T* value)
 {
+    static_assert(sizeof(unsigned long long) == sizeof(T*));
     return reinterpret_cast<T*>(atomicExch(
         reinterpret_cast<unsigned long long int*>(address), reinterpret_cast<unsigned long long int>(value)));
 }
 
 template <typename T>
-__device__ __inline__ T atomicRead(T* const& address)
+__device__ __inline__ T alienAtomicRead(T* const& address)
 {
     return atomicAdd(address, 0);
         
 }
 
-/*
-template<typename T>
-__device__ __inline__  T* atomicExch_block(T** address, T* value)
+template <typename T>
+__device__ __inline__ void alienAtomicAdd(T* address, T const& value)
 {
-    return reinterpret_cast<T*>(atomicExch_block(reinterpret_cast<unsigned long long int*>(address),
-        reinterpret_cast<unsigned long long int>(value)));
+    // CUDA headers use "unsigned long long" for 64bit types, which
+    // may not be struturally equivalent to std::uint64_t
+    //
+    // Due to this, we need an ugly type casting workaround here
+    //
+    static_assert(sizeof(unsigned long long) == sizeof(T));
+    atomicAdd(reinterpret_cast<unsigned long long*>(address), value);
 }
-*/
 
 class SystemLock
 {

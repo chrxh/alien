@@ -17,6 +17,9 @@ public:
     __inline__ __device__ void init(SimulationData& data);
     __inline__ __device__ void clearTag(SimulationData& data);
     __inline__ __device__ void updateMap(SimulationData& data);
+    __inline__ __device__ void clearDensityMap(SimulationData& data);
+    __inline__ __device__ void fillDensityMap(SimulationData& data);
+
     __inline__ __device__ void collisions(SimulationData& data);    //prerequisite: clearTag
     __inline__ __device__ void checkForces(SimulationData& data);
     __inline__ __device__ void updateVelocities(SimulationData& data);    //prerequisite: tag from collisions
@@ -70,6 +73,19 @@ __inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
     auto const partition = calcPartition(data.entities.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
     Cell** cellPointers = &data.entities.cellPointers.at(partition.startIndex);
     data.cellMap.set_block(partition.numElements(), cellPointers);
+}
+
+__inline__ __device__ void CellProcessor::clearDensityMap(SimulationData& data)
+{
+    data.cellFunctionData.densityMap.clear();
+}
+
+__inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        data.cellFunctionData.densityMap.addCell(data.entities.cellPointers.at(index)->absPos);
+    }
 }
 
 __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
