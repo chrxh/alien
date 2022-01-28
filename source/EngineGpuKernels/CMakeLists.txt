@@ -7,7 +7,7 @@ add_library(alien_engine_gpu_kernels_lib
     Cell.cuh
     CellFunctionData.cuh
     CellProcessor.cuh
-    CommunicatorProcessor.cuh
+    CommunicationProcessor.cuh
     CellComputationProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
@@ -56,7 +56,6 @@ add_library(alien_engine_gpu_kernels_lib
     Particle.cuh
     ParticleProcessor.cuh
     Physics.cuh
-    PropulsionProcessor.cuh
     QuantityConverter.cuh
     RenderingData.cu
     RenderingData.cuh

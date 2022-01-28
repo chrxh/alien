@@ -24,7 +24,7 @@ namespace
     auto const MaxCellContentTextWidth = 120.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
     auto const CellFunctions =
-        std::vector{"Computation"s, "Propulsion"s, "Scanner"s, "Digestion"s, "Construction"s, "Sensor"s, "Muscle"s};
+        std::vector{"Computation"s, "Communication"s, "Scanner"s, "Digestion"s, "Construction"s, "Sensor"s, "Muscle"s};
 }
 
 _InspectorWindow::_InspectorWindow(
