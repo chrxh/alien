@@ -80,7 +80,7 @@ __inline__ __device__ bool operator==(int2 const& p, int2 const& q)
 __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 {
     angle *= DEG_TO_RAD;
-    return{ sinf(angle), -cos(angle) };
+    return{ sinf(angle), -cosf(angle) };
 }
 
 __inline__ __device__ float Math::angleOfVector(float2 const & v)

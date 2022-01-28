@@ -76,14 +76,14 @@ TEST_F(SensorTests, nothingFound)
 TEST_F(SensorTests, massAtFront)
 {
     DataDescription world;
-    addMass(world, 10, 10, {100, 0});
-    auto result = runSensor(world, SensorParameters().center({0,0}));
+    addMass(world, 10, 10, {200, 100});
+    auto result = runSensor(world, SensorParameters().center({100,100}));
 
     EXPECT_EQ(Enums::SensorOut_ClusterFound, result[Enums::Sensor_Output]);
     EXPECT_LE(100 - 10, result[Enums::Sensor_OutDistance]);
     EXPECT_GE(100 + 10, result[Enums::Sensor_OutDistance]);
-    EXPECT_LE(128 - 10, static_cast<unsigned char>(result[Enums::Sensor_InOutAngle]));
-    EXPECT_GE(128 + 10, static_cast<unsigned char>(result[Enums::Sensor_InOutAngle]));
+    auto angle = static_cast<char>(result[Enums::Sensor_InOutAngle]);
+    EXPECT_TRUE(angle < 10 && angle > -10);
 }
 
 TEST_F(SensorTests, massAtBottom)
@@ -95,6 +95,6 @@ TEST_F(SensorTests, massAtBottom)
     EXPECT_EQ(Enums::SensorOut_ClusterFound, result[Enums::Sensor_Output]);
     EXPECT_LE(100 - 10, result[Enums::Sensor_OutDistance]);
     EXPECT_GE(100 + 10, result[Enums::Sensor_OutDistance]);
-    EXPECT_LE(192 - 10, static_cast<unsigned char>(result[Enums::Sensor_InOutAngle]));
-    EXPECT_GE(192 + 10, static_cast<unsigned char>(result[Enums::Sensor_InOutAngle]));
+    auto angle = static_cast<char>(result[Enums::Sensor_InOutAngle]);
+    EXPECT_TRUE(angle < 64 + 10 && angle > 64 - 10);
 }

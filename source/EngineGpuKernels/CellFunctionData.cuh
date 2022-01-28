@@ -1,18 +1,15 @@
 #pragma once
 
-#include "MapSectionCollector.cuh"
+#include "DensityMap.cuh"
 
 struct CellFunctionData
 {
-    MapSectionCollector mapSectionCollector;
+    DensityMap densityMap;
 
-    __host__ __inline__ void init(int2 const& universeSize)
+    __host__ __inline__ void init(int2 const& worldSize)
     {
-        mapSectionCollector.init(universeSize, 50);
+        densityMap.init(worldSize, 8);
     }
 
-    __host__ __inline__ void free()
-    {
-        mapSectionCollector.free();
-    }
+    __host__ __inline__ void free() { densityMap.free(); }
 };

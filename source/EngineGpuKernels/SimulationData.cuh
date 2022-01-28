@@ -31,7 +31,7 @@ struct SimulationData
     TempMemory tempMemory;
     CudaNumberGenerator numberGen;
 
-    void init(int2 const& universeSize);
+    void init(int2 const& worldSize);
     bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens);
     void resizeEntitiesForCleanup(int additionalCells, int additionalParticles, int additionalTokens);
     void resizeRemainings();

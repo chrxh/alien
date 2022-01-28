@@ -24,6 +24,7 @@ add_library(alien_engine_gpu_kernels_lib
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
+    DensityMap.cuh
     DigestionProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
