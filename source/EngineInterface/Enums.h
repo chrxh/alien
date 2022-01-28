@@ -202,8 +202,8 @@ namespace Enums
         Sensor_Output = 5,
         Sensor_Input = 20,
         Sensor_InOutAngle = 21,
-        Sensor_InMinMass = 22,
-        Sensor_InMaxMass = 23,
+        Sensor_InMinDensity = 22,
+        Sensor_InMaxDensity = 23,
         Sensor_OutMass = 24,
         Sensor_OutDistance = 25
     };

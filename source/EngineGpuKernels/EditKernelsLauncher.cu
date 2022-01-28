@@ -136,8 +136,7 @@ void _EditKernelsLauncher::removeSelectedEntities(GpuSettings const& gpuSettings
         cudaDeviceSynchronize();
     } while (1 == copyToHost(_cudaRemoveResult));
 
-    KERNEL_CALL(cudaRemoveSelectedCells, data, includeClusters);
-    KERNEL_CALL(cudaRemoveSelectedParticles, data);
+    KERNEL_CALL(cudaRemoveSelectedEntities, data, includeClusters);
     cudaDeviceSynchronize();
     
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);

@@ -91,8 +91,8 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SENSOR_IN::SEARCH_FROM_CENTER", std::to_string(Enums::SensorIn_SearchFromCenter));
     result.emplace("SENSOR_IN::SEARCH_TOWARD_CENTER", std::to_string(Enums::SensorIn_SearchTowardCenter));
     result.emplace("SENSOR_INOUT_ANGLE", "[" + std::to_string(Enums::Sensor_InOutAngle) + "]");
-    result.emplace("SENSOR_IN_MIN_MASS", "[" + std::to_string(Enums::Sensor_InMinMass) + "]");
-    result.emplace("SENSOR_IN_MAX_MASS", "[" + std::to_string(Enums::Sensor_InMaxMass) + "]");
+    result.emplace("SENSOR_IN_MIN_DENSITY", "[" + std::to_string(Enums::Sensor_InMinDensity) + "]");
+    result.emplace("SENSOR_IN_MAX_DENSITY", "[" + std::to_string(Enums::Sensor_InMaxDensity) + "]");
     result.emplace("SENSOR_OUT_MASS", "[" + std::to_string(Enums::Sensor_OutMass) + "]");
     result.emplace("SENSOR_OUT_DISTANCE", "[" + std::to_string(Enums::Sensor_OutDistance) + "]");
 

@@ -39,8 +39,8 @@ __device__ __inline__ void SensorProcessor::processVicinitySearches(SimulationDa
 
 __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, SimulationData& data)
 {
-    int minDensity = 1 + token->memory[Enums::Sensor_InMinMass];
-    int maxDensity = token->memory[Enums::Sensor_InMaxMass];
+    int minDensity = 1 + token->memory[Enums::Sensor_InMinDensity];
+    int maxDensity = token->memory[Enums::Sensor_InMaxDensity];
     if (maxDensity == 0) {
         maxDensity = 255;
     }

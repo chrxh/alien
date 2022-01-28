@@ -22,8 +22,7 @@ __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color,
 __global__ void cudaPrepareForUpdate(SimulationData data);
 __global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO);  //assumes that *changeDataTO.numCells == 1
 __global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataTO); //assumes that *changeDataTO.numParticles == 1
-__global__ void cudaRemoveSelectedCells(SimulationData data, bool includeClusters);
-__global__ void cudaRemoveSelectedParticles(SimulationData data);
+__global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters, int* retry);
 __global__ void cudaConnectSelection(SimulationData data, bool considerWithinSelection, int* result);
 __global__ void cudaUpdateMapForConnection(SimulationData data);
