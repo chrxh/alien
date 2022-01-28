@@ -47,7 +47,7 @@ private:
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            atomicAdd(&_densityMap[index], 1);
+            atomicAdd(&_densityMap[index], uint64_t(1));
         }
     }
 
