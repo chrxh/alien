@@ -3,10 +3,10 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _OpenSelectionDialog
+class _OpenPatternDialog
 {
 public:
-    _OpenSelectionDialog(
+    _OpenPatternDialog(
         EditorModel const& editorModel,
         SimulationController const& simController,
         Viewport const& viewport);

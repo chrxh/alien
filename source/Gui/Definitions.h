@@ -97,14 +97,14 @@ using ManipulatorWindow = std::shared_ptr<_ManipulatorWindow>;
 class _WindowController;
 using WindowController = std::shared_ptr<_WindowController>;
 
-class _SaveSelectionDialog;
-using SaveSelectionDialog = std::shared_ptr<_SaveSelectionDialog>;
+class _SavePatternDialog;
+using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;
 
 class _SaveSymbolsDialog;
 using SaveSymbolsDialog = std::shared_ptr<_SaveSymbolsDialog>;
 
-class _OpenSelectionDialog;
-using OpenSelectionDialog = std::shared_ptr<_OpenSelectionDialog>;
+class _OpenPatternDialog;
+using OpenPatternDialog = std::shared_ptr<_OpenPatternDialog>;
 
 class _OpenSymbolsDialog;
 using OpenSymbolsDialog = std::shared_ptr<_OpenSymbolsDialog>;

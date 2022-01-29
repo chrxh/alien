@@ -1,4 +1,4 @@
-#include "OpenSelectionDialog.h"
+#include "OpenPatternDialog.h"
 
 #include <imgui.h>
 
@@ -9,7 +9,7 @@
 #include "Viewport.h"
 #include "EditorModel.h"
 
-_OpenSelectionDialog::_OpenSelectionDialog(
+_OpenPatternDialog::_OpenPatternDialog(
     EditorModel const& editorModel,
     SimulationController const& simController,
     Viewport const& viewport)
@@ -18,9 +18,9 @@ _OpenSelectionDialog::_OpenSelectionDialog(
     , _viewport(viewport)
 {}
 
-void _OpenSelectionDialog::process()
+void _OpenPatternDialog::process()
 {
-    if (!ifd::FileDialog::Instance().IsDone("OpenSelectionDialog")) {
+    if (!ifd::FileDialog::Instance().IsDone("OpenPatternDialog")) {
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {
@@ -40,8 +40,8 @@ void _OpenSelectionDialog::process()
     ifd::FileDialog::Instance().Close();
 }
 
-void _OpenSelectionDialog::show()
+void _OpenPatternDialog::show()
 {
     ifd::FileDialog::Instance().Open(
-        "OpenSelectionDialog", "Open selection", "Selection file (*.sim){.sim},.*", false);
+        "OpenPatternDialog", "Open pattern", "Pattern file (*.sim){.sim},.*", false);
 }

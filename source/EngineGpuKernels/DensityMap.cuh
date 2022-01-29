@@ -25,20 +25,21 @@ public:
         }
     }
 
-    __device__ __inline__ uint32_t getDensity(float2 const& pos)
+    __device__ __inline__ uint32_t getDensity(float2 const& pos, int color)
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return _densityMap[index];
+            return (_densityMap[index] >> (color * 8)) & 0xff;
         }
         return 0;
     }
 
-    __device__ __inline__ void addCell(float2 const& pos)
+    __device__ __inline__ void addCell(Cell* cell)
     {
-        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(cell->absPos.x) / _slotSize + toInt(cell->absPos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            alienAtomicAdd(&_densityMap[index], uint64_t(1));
+            auto color = calcMod(cell->metadata.color, 7);
+            alienAtomicAdd(&_densityMap[index], uint64_t(1) << (color * 8));
         }
     }
 
