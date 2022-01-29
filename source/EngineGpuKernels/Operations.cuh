@@ -32,7 +32,7 @@ struct DelCellAndConnectionOperations
     int cellIndex;
 };
 
-union OperationData
+union StructureOperationData
 {
     AddConnectionOperation addConnectionOperation;
     DelConnectionsOperation delConnectionsOperation;
@@ -41,7 +41,7 @@ union OperationData
     DelCellAndConnectionOperations delCellAndConnectionOperation;
 };
 
-struct Operation
+struct StructuralOperation
 {
     enum class Type
     {
@@ -52,7 +52,7 @@ struct Operation
         DelCellAndConnections,
     };
     Type type;
-    OperationData data;
+    StructureOperationData data;
 };
 
 struct SensorOperation

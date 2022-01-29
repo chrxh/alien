@@ -14,9 +14,9 @@ void _RenderingKernelsLauncher::drawImage(
 {
     uint64_t* targetImage = renderingData.imageData;
 
-    KERNEL_CALL(cudaDrawBackground, targetImage, imageSize, data.size, zoom, rectUpperLeft, rectLowerRight);
-    KERNEL_CALL(cudaDrawCells, data.size, rectUpperLeft, rectLowerRight, data.entities.cellPointers, targetImage, imageSize, zoom);
-    KERNEL_CALL(cudaDrawTokens, data.size, rectUpperLeft, rectLowerRight, data.entities.tokenPointers, targetImage, imageSize, zoom);
-    KERNEL_CALL(cudaDrawParticles, data.size, rectUpperLeft, rectLowerRight, data.entities.particlePointers, targetImage, imageSize, zoom);
+    KERNEL_CALL(cudaDrawBackground, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);
+    KERNEL_CALL(cudaDrawCells, data.worldSize, rectUpperLeft, rectLowerRight, data.entities.cellPointers, targetImage, imageSize, zoom);
+    KERNEL_CALL(cudaDrawTokens, data.worldSize, rectUpperLeft, rectLowerRight, data.entities.tokenPointers, targetImage, imageSize, zoom);
+    KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.entities.particlePointers, targetImage, imageSize, zoom);
     KERNEL_CALL_1_1(cudaDrawFlowCenters, targetImage, rectUpperLeft, imageSize, zoom);
 }

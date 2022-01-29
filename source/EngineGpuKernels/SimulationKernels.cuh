@@ -11,7 +11,7 @@
 #include "ParticleProcessor.cuh"
 #include "TokenProcessor.cuh"
 #include "GarbageCollectorKernels.cuh"
-#include "Operation.cuh"
+#include "Operations.cuh"
 #include "DebugKernels.cuh"
 #include "SimulationResult.cuh" 
 
