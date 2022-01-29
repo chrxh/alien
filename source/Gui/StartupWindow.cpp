@@ -8,6 +8,7 @@
 #include "OpenGLHelper.h"
 #include "Resources.h"
 #include "Viewport.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -102,12 +103,21 @@ void _StartupWindow::activate()
 
 void _StartupWindow::processWindow()
 {
-    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(1212, 776));
+    auto center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(_logo.width + 30.0f, _logo.height + 30.0f));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
     ImGui::Begin("##startup", NULL, windowFlags);
-    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(1182, 746));
+    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width, _logo.height));
     ImGui::End();
+
+    auto styleRep = StyleRepository::getInstance();
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+    ImColor textColor = Const::ProgrammVersionColor;
+    textColor.Value.w = ImGui::GetStyle().Alpha;
+    drawList->AddText(
+        styleRep.getMediumFont(), 20, {center.x - 90, center.y + 220}, textColor, ("Version " + Const::ProgramVersion).c_str());
 }
