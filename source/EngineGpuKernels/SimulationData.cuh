@@ -8,12 +8,12 @@
 #include "EngineInterface/GpuSettings.h"
 #include "Entities.cuh"
 #include "Map.cuh"
-#include "Operation.cuh"
+#include "Operations.cuh"
 #include "Token.cuh"
 
 struct SimulationData
 {
-    int2 size;
+    int2 worldSize;
 
     CellMap cellMap;
     ParticleMap particleMap;
@@ -22,10 +22,7 @@ struct SimulationData
     Entities entities;
     Entities entitiesForCleanup;
 
-    //#TODO use TempArray
-    unsigned int* numOperations;
-    Operation** operations;  
-
+    TempArray<StructuralOperation> structuralOperations;
     TempArray<SensorOperation> sensorOperations;
 
     TempMemory tempMemory;
@@ -40,7 +37,6 @@ struct SimulationData
     void free();
 
     __device__ void prepareForNextTimestep();
-    __device__ int getMaxOperations() { return entities.cellPointers.getNumEntries(); }
     __device__ bool shouldResize();
 
 private:

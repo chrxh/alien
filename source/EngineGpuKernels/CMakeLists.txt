@@ -52,7 +52,7 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernels.cu
     MonitorKernels.cuh
     MuscleProcessor.cuh
-    Operation.cuh
+    Operations.cuh
     Particle.cuh
     ParticleProcessor.cuh
     Physics.cuh

@@ -42,7 +42,7 @@ private:
 __inline__ __device__ void EntityFactory::init(SimulationData* data)
 {
     _data = data;
-    _map.init(data->size);
+    _map.init(data->worldSize);
 }
 
 __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds)

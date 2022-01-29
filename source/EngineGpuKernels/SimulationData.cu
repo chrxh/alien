@@ -2,22 +2,20 @@
 
 #include "Token.cuh"
 
-void SimulationData::init(int2 const& worldSize)
+void SimulationData::init(int2 const& worldSize_)
 {
-    size = worldSize;
+    worldSize = worldSize_;
 
     entities.init();
     entitiesForCleanup.init();
     cellFunctionData.init(worldSize);
-    cellMap.init(size);
-    particleMap.init(size);
+    cellMap.init(worldSize);
+    particleMap.init(worldSize);
 
     tempMemory.init();
     numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
-    CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, numOperations);
-    CudaMemoryManager::getInstance().acquireMemory<Operation*>(1, operations);
-
+    structuralOperations.init();
     sensorOperations.init();
 }
 
@@ -27,12 +25,13 @@ __device__ void SimulationData::prepareForNextTimestep()
     particleMap.reset();
     tempMemory.reset();
 
-    *numOperations = 0;
-    *operations = tempMemory.getArray<Operation>(entities.cellPointers.getNumEntries());
-    entities.saveNumEntries();
+    auto maxStructureOperations = entities.cellPointers.getNumEntries() / 2;
+    structuralOperations.setMemory(tempMemory.getArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
     auto maxSensorOperations = entities.cellPointers.getNumEntries() / 2;
     sensorOperations.setMemory(tempMemory.getArray<SensorOperation>(maxSensorOperations), maxSensorOperations);
+
+    entities.saveNumEntries();
 }
 
 bool SimulationData::shouldResize(int additionalCells, int additionalParticles, int additionalTokens)
@@ -82,7 +81,7 @@ void SimulationData::resizeRemainings()
     particleMap.resize(cellArraySize);
 
     //heuristic
-    int upperBoundDynamicMemory = (sizeof(Operation) + 200) * (cellArraySize + 1000);
+    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + 200) * (cellArraySize + 1000);
     tempMemory.resize(upperBoundDynamicMemory);
 }
 
@@ -112,8 +111,7 @@ void SimulationData::free()
     numberGen.free();
     tempMemory.free();
 
-    CudaMemoryManager::getInstance().freeMemory(numOperations);
-    CudaMemoryManager::getInstance().freeMemory(operations);
+    structuralOperations.free();
     sensorOperations.free();
 }
 
