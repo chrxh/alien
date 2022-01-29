@@ -67,7 +67,7 @@ __global__ void processingStep6(SimulationData data, SimulationResult result)
 
 __global__ void processingStep7(SimulationData data)
 {
-    SensorProcessor::processVicinitySearches(data);
+    SensorProcessor::processScheduledOperation(data);
 
     CellProcessor cellProcessor;
     cellProcessor.verletUpdateVelocities(data);
