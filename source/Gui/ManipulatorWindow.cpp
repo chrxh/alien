@@ -33,7 +33,7 @@ _ManipulatorWindow::_ManipulatorWindow(
     , _viewport(viewport)
 {
     _savePatternDialog = std::make_shared<_SavePatternDialog>(simController);
-    _openPatternDialog = std::make_shared<_OpenSelectionDialog>(editorModel, simController, viewport);
+    _openPatternDialog = std::make_shared<_OpenPatternDialog>(editorModel, simController, viewport);
 }
 
 void _ManipulatorWindow::processIntern()

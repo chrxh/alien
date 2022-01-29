@@ -28,7 +28,6 @@ _MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationC
 
 void _MultiplierWindow::processIntern()
 {
-    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
     if (AlienImGui::ToolbarButton(ICON_GRID)) {
         _mode = MultiplierMode::Grid;
     }
@@ -37,6 +36,8 @@ void _MultiplierWindow::processIntern()
     if (AlienImGui::ToolbarButton(ICON_RANDOM)) {
         _mode = MultiplierMode::Random;
     }
+
+    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
 
     AlienImGui::Group(ModeText.at(_mode));
     if (_mode == MultiplierMode::Grid) {
@@ -48,7 +49,8 @@ void _MultiplierWindow::processIntern()
     ImGui::EndDisabled();
 
     AlienImGui::Separator();
-    ImGui::BeginDisabled(_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
+    ImGui::BeginDisabled(
+        _editorModel->isSelectionEmpty() || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData())));
     if (AlienImGui::Button("Build")) {
         _origSelection = _simController->getSelectedSimulationData(true);
         auto multiplicationResult = [&] {
@@ -66,7 +68,9 @@ void _MultiplierWindow::processIntern()
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!_selectionDataAfterMultiplication || !_selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
+    ImGui::BeginDisabled(
+        _editorModel->isSelectionEmpty() || !_selectionDataAfterMultiplication
+        || !_selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
     if (AlienImGui::Button("Undo")) {
         _simController->removeSelectedEntities(true);
         _simController->addAndSelectSimulationData(_origSelection);
