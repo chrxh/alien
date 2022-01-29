@@ -3,15 +3,15 @@
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Serializer.h"
 #include "ImFileDialog.h"
-#include "SaveSelectionDialog.h"
+#include "SavePatternDialog.h"
 
-_SaveSelectionDialog::_SaveSelectionDialog(SimulationController const& simController)
+_SavePatternDialog::_SavePatternDialog(SimulationController const& simController)
     : _simController(simController)
 {}
 
-void _SaveSelectionDialog::process()
+void _SavePatternDialog::process()
 {
-    if (!ifd::FileDialog::Instance().IsDone("SaveSelectionDialog")) {
+    if (!ifd::FileDialog::Instance().IsDone("SavePatternDialog")) {
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {
@@ -26,8 +26,8 @@ void _SaveSelectionDialog::process()
     ifd::FileDialog::Instance().Close();
 }
 
-void _SaveSelectionDialog::show(bool includeClusters)
+void _SavePatternDialog::show(bool includeClusters)
 {
     _includeClusters = includeClusters;
-    ifd::FileDialog::Instance().Save("SaveSelectionDialog", "Save selection", "Selection file (*.sim){.sim},.*");
+    ifd::FileDialog::Instance().Save("SavePatternDialog", "Save pattern", "Pattern file (*.sim){.sim},.*");
 }

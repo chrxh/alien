@@ -3,10 +3,10 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _SaveSelectionDialog
+class _SavePatternDialog
 {
 public:
-    _SaveSelectionDialog(SimulationController const& simController);
+    _SavePatternDialog(SimulationController const& simController);
 
     void process();
 

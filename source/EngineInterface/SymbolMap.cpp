@@ -59,7 +59,6 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SCANNER_OUT", "[" + std::to_string(Enums::Scanner_Output) + "]");
     result.emplace("SCANNER_OUT::SUCCESS", std::to_string(Enums::ScannerOut_Success));
     result.emplace("SCANNER_OUT::FINISHED", std::to_string(Enums::ScannerOut_Finished));
-    //    meta->addEntry("SCANNER_IN","[11]");
     result.emplace("SCANNER_INOUT_CELL_NUMBER", "[" + std::to_string(Enums::Scanner_InOutCellNumber) + "]");
     result.emplace("SCANNER_OUT_ENERGY", "[" + std::to_string(Enums::Scanner_OutEnergy) + "]");
     result.emplace("SCANNER_OUT_ANGLE", "[" + std::to_string(Enums::Scanner_OutAngle) + "]");
@@ -91,6 +90,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SENSOR_INOUT_ANGLE", "[" + std::to_string(Enums::Sensor_InOutAngle) + "]");
     result.emplace("SENSOR_IN_MIN_DENSITY", "[" + std::to_string(Enums::Sensor_InMinDensity) + "]");
     result.emplace("SENSOR_IN_MAX_DENSITY", "[" + std::to_string(Enums::Sensor_InMaxDensity) + "]");
+    result.emplace("SENSOR_IN_COLOR", "[" + std::to_string(Enums::Sensor_InColor) + "]");
     result.emplace("SENSOR_OUT_MASS", "[" + std::to_string(Enums::Sensor_OutMass) + "]");
     result.emplace("SENSOR_OUT_DISTANCE", "[" + std::to_string(Enums::Sensor_OutDistance) + "]");
 

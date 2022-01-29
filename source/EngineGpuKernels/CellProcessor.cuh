@@ -84,7 +84,7 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.cellFunctionData.densityMap.addCell(data.entities.cellPointers.at(index)->absPos);
+        data.cellFunctionData.densityMap.addCell(data.entities.cellPointers.at(index));
     }
 }
 

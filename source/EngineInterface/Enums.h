@@ -181,6 +181,7 @@ namespace Enums
         Sensor_InOutAngle = 21,
         Sensor_InMinDensity = 22,
         Sensor_InMaxDensity = 23,
+        Sensor_InColor = 8,
         Sensor_OutMass = 24,
         Sensor_OutDistance = 25
     };

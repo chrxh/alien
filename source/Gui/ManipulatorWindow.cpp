@@ -14,8 +14,8 @@
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "Viewport.h"
-#include "SaveSelectionDialog.h"
-#include "OpenSelectionDialog.h"
+#include "SavePatternDialog.h"
+#include "OpenPatternDialog.h"
 
 namespace
 {
@@ -32,8 +32,8 @@ _ManipulatorWindow::_ManipulatorWindow(
     , _simController(simController)
     , _viewport(viewport)
 {
-    _saveSelectionDialog = std::make_shared<_SaveSelectionDialog>(simController);
-    _openSelectionDialog = std::make_shared<_OpenSelectionDialog>(editorModel, simController, viewport);
+    _savePatternDialog = std::make_shared<_SavePatternDialog>(simController);
+    _openPatternDialog = std::make_shared<_OpenSelectionDialog>(editorModel, simController, viewport);
 }
 
 void _ManipulatorWindow::processIntern()
@@ -53,14 +53,14 @@ void _ManipulatorWindow::processIntern()
 
         //load button
         if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
-            _openSelectionDialog->show();
+            _openPatternDialog->show();
         }
 
         //save button
         ImGui::BeginDisabled(!isCopyingPossible());
         ImGui::SameLine();
         if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
-            _saveSelectionDialog->show(_editorModel->isRolloutToClusters());
+            _savePatternDialog->show(_editorModel->isRolloutToClusters());
         }
         ImGui::EndDisabled();
 
@@ -246,8 +246,8 @@ void _ManipulatorWindow::processIntern()
         _angularVel = 0;
     }
 
-    _saveSelectionDialog->process();
-    _openSelectionDialog->process();
+    _savePatternDialog->process();
+    _openPatternDialog->process();
 }
 
 bool _ManipulatorWindow::isInspectionPossible() const

@@ -49,6 +49,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
 {
     __shared__ int minDensity;
     __shared__ int maxDensity;
+    __shared__ int color;
     __shared__ float originAngle;
     __shared__ uint32_t result;
 
@@ -58,6 +59,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
         if (maxDensity == 0) {
             maxDensity = 255;
         }
+        color = calcMod(token->memory[Enums::Sensor_InColor], 7);
 
         auto originDelta = token->cell->absPos - token->sourceCell->absPos;
         data.cellMap.mapDisplacementCorrection(originDelta);
@@ -75,7 +77,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
             auto delta = Math::unitVectorOfAngle(angle) * radius;
             auto scanPos = token->cell->absPos + delta;
             data.cellMap.mapPosCorrection(scanPos);
-            auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos));
+            auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos, color));
             if (density >= minDensity && density <= maxDensity) {
                 auto relAngle = Math::subtractAngle(angle, originAngle);
                 uint32_t angle = static_cast<uint32_t>(QuantityConverter::convertAngleToData(relAngle));
@@ -114,6 +116,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
 {
     __shared__ int minDensity;
     __shared__ int maxDensity;
+    __shared__ int color;
     __shared__ float2 searchDelta;
     __shared__ uint32_t result;
 
@@ -123,6 +126,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
         if (maxDensity == 0) {
             maxDensity = 255;
         }
+        color = calcMod(token->memory[Enums::Sensor_InColor], 7);
 
         searchDelta = token->cell->absPos - token->sourceCell->absPos;
         data.cellMap.mapDisplacementCorrection(searchDelta);
@@ -139,7 +143,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
         auto distance = 12.0f + cudaSimulationParameters.cellFunctionSensorRange / 64 * distanceIndex;
         auto scanPos = token->cell->absPos + searchDelta * distance;
         data.cellMap.mapPosCorrection(scanPos);
-        auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos));
+        auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos, color));
         if (density >= minDensity && density <= maxDensity) {
             uint32_t combined = static_cast<uint32_t>(distance) << 8 | static_cast<uint32_t>(density);
             atomicMin(&result, combined);

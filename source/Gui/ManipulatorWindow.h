@@ -31,8 +31,8 @@ private:
     EditorModel _editorModel;
     SimulationController _simController;
     Viewport _viewport;
-    OpenSelectionDialog _openSelectionDialog;
-    SaveSelectionDialog _saveSelectionDialog;
+    OpenPatternDialog _openPatternDialog;
+    SavePatternDialog _savePatternDialog;
 
     float _angle = 0;
     float _angularVel = 0;
