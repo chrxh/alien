@@ -115,7 +115,7 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
                     DigestionProcessor::process(token, data, result);
                 }
                 if (Enums::CellFunction_Sensor == cellFunctionType) {
-                    SensorProcessor::schedule(token, data);
+                    SensorProcessor::scheduleOperation(token, data);
                 }
                 cell->releaseLock();
             }

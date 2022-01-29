@@ -190,8 +190,6 @@ namespace Enums
         SensorIn_DoNothing,
         SensorIn_SearchVicinity,
         SensorIn_SearchByAngle,
-        SensorIn_SearchFromCenter,
-        SensorIn_SearchTowardCenter,
         SensorIn_Count
     };
     using SensorOut = int;
