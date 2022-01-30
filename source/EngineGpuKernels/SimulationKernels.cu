@@ -82,13 +82,13 @@ __global__ void processingStep8(SimulationData data, SimulationResult result)
 __global__ void processingStep9(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcAveragedVelocities(data);
+    cellProcessor.calcFriction(data);
 }
 
 __global__ void processingStep10(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.applyAveragedVelocities(data);
+    cellProcessor.applyFriction(data);
     cellProcessor.decay(data);
 }
 
