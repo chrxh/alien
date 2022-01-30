@@ -29,8 +29,8 @@ public:
     __inline__ __device__ void verletUpdatePositions(SimulationData& data);
     __inline__ __device__ void verletUpdateVelocities(SimulationData& data);
 
-    __inline__ __device__ void calcAveragedVelocities(SimulationData& data);
-    __inline__ __device__ void applyAveragedVelocities(SimulationData& data);
+    __inline__ __device__ void calcFriction(SimulationData& data);
+    __inline__ __device__ void applyFriction(SimulationData& data);
 
     __inline__ __device__ void radiation(SimulationData& data);
     __inline__ __device__ void decay(SimulationData& data);
@@ -359,7 +359,7 @@ __inline__ __device__ void CellProcessor::verletUpdateVelocities(SimulationData&
     }
 }
 
-__inline__ __device__ void CellProcessor::calcAveragedVelocities(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcFriction(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
     auto const partition =
@@ -368,16 +368,18 @@ __inline__ __device__ void CellProcessor::calcAveragedVelocities(SimulationData&
     constexpr float innerFriction = 0.2f;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+
+        auto friction = SpotCalculator::calc(&SimulationParametersSpotValues::friction, data, cell->absPos);
         auto averagedVel = cell->vel * innerFriction;
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
             averagedVel = averagedVel + connectingCell->vel * innerFriction;
         }
-        cell->temp1 = cell->vel * (1.0f - innerFriction) + averagedVel / (cell->numConnections + 1);
+        cell->temp1 = (cell->vel * (1.0f - innerFriction) + averagedVel / (cell->numConnections + 1)) * (1.0f - friction);
     }
 }
 
-__inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData& data)
+__inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 {
     auto& cells = data.entities.cellPointers;
     auto const partition =
@@ -387,7 +389,7 @@ __inline__ __device__ void CellProcessor::applyAveragedVelocities(SimulationData
         auto& cell = cells.at(index);
 
         auto friction = SpotCalculator::calc(&SimulationParametersSpotValues::friction, data, cell->absPos);
-        cell->vel = cell->temp1 * (1.0f - friction);
+        cell->vel = cell->temp1;
     }
 }
 
