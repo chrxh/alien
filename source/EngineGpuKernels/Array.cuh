@@ -58,7 +58,7 @@ public:
     __host__ __inline__ void free()
     {
         T* data = nullptr;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+        cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost);
 
         CudaMemoryManager::getInstance().freeMemory(data);
         CudaMemoryManager::getInstance().freeMemory(_data);
