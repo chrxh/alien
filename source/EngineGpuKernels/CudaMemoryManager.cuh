@@ -40,7 +40,7 @@ public:
         }
         auto findResult = _pointerToSizeMap.find(reinterpret_cast<void*>(memory));
         if (findResult != _pointerToSizeMap.end()) {
-            CHECK_FOR_CUDA_ERROR(cudaFree(memory));
+            cudaFree(memory);
             _bytes -= sizeof(T) * findResult->second;
             _pointerToSizeMap.erase(findResult->first);
         }

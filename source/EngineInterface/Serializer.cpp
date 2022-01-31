@@ -15,6 +15,8 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
 
+#include <imgui/stb_compression.h>
+
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "Parser.h"
@@ -111,12 +113,15 @@ bool _Serializer::serializeSimulationToFile(std::string const& filename, Deseria
         auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
 
         {
-            std::ofstream stream(filename, std::ios::binary);
-            if (!stream) {
+            std::stringstream stringStream;
+            serializeDataDescription(data.content, stringStream);
+
+            std::ofstream fileStream(filename, std::ios::binary);
+            if (!fileStream) {
                 return false;
             }
-            serializeDataDescription(data.content, stream);
-            stream.close();
+            compress(stringStream.str(), fileStream);
+            fileStream.close();
         }
         {
             std::ofstream stream(settingsFilename, std::ios::binary);
@@ -155,7 +160,12 @@ bool _Serializer::deserializeSimulationFromFile(std::string const& filename, Des
             if (!stream) {
                 return false;
             }
-            deserializeDataDescription(data.content, stream);
+            std::string compressedData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+
+            std::stringstream stringStream;
+            decompress(std::move(compressedData), stringStream);
+            stringStream.seekg(0, std::ios::beg);
+            deserializeDataDescription(data.content, stringStream);
             stream.close();
 
         }
@@ -184,12 +194,16 @@ bool _Serializer::deserializeSimulationFromFile(std::string const& filename, Des
 bool _Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
-        std::ofstream stream(filename, std::ios::binary);
-        if (!stream) {
+        std::stringstream stringStream;
+        serializeDataDescription(content, stringStream);
+
+        std::ofstream fileStream(filename, std::ios::binary);
+        if (!fileStream) {
             return false;
         }
-        serializeDataDescription(content, stream);
-        stream.close();
+        compress(stringStream.str(), fileStream);
+        fileStream.close();
+
         return true;
     } catch (std::exception const& e) {
         throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
@@ -288,4 +302,27 @@ void _Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& strea
     for (auto const& [key, value] : tree) {
         symbolMap.emplace(key.data(), value.data());
     }
+}
+
+void _Serializer::compress(std::string&& uncompressedData, std::ostream& stream)
+{
+    int maxlen = uncompressedData.size() + 512 + (uncompressedData.size() >> 2) + sizeof(int);  // total guess
+    char* compressedData = new char[maxlen];
+    auto compressedDataLength =
+        stb_compress(reinterpret_cast<stb_uchar*>(compressedData), reinterpret_cast<stb_uchar*>(uncompressedData.data()), uncompressedData.size());
+
+    stream.write(compressedData, compressedDataLength);
+    delete[] compressedData;
+}
+
+void _Serializer::decompress(std::string&& compressedData, std::ostream& stream)
+{
+    const unsigned int decompressedSize = stb_decompress_length(reinterpret_cast<unsigned char const*>(compressedData.c_str()));
+    char* decompressedData = new char[decompressedSize];
+    stb_decompress(
+        reinterpret_cast<unsigned char*>(decompressedData),
+        reinterpret_cast<unsigned char const*>(compressedData.c_str()),
+        static_cast<unsigned int>(compressedData.size()));
+    stream.write(decompressedData, decompressedSize);
+    delete[] decompressedData;
 }
