@@ -98,6 +98,11 @@ void _SimulationControllerImpl::removeSelectedEntities(bool includeClusters)
     _selectionNeedsUpdate = true;
 }
 
+void _SimulationControllerImpl::relaxSelectedEntities(bool includeClusters)
+{
+    _worker.relaxSelectedEntities(includeClusters);
+}
+
 void _SimulationControllerImpl::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
     _worker.colorSelectedEntities(color, includeClusters);

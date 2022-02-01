@@ -59,6 +59,7 @@ public:
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
     void setSimulationData(DataDescription const& dataToUpdate);
     void removeSelectedEntities(bool includeClusters);
+    void relaxSelectedEntities(bool includeClusters);
     void changeCell(CellDescription const& changedCell);
     void changeParticle(ParticleDescription const& changedParticle);
 

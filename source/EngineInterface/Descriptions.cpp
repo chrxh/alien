@@ -200,6 +200,15 @@ void DataDescription::accelerate(RealVector2D const& velDelta, float angularVelD
     }
 }
 
+std::unordered_set<uint64_t> DataDescription::getCellIds() const
+{
+    std::unordered_set<uint64_t> result;
+    for (auto const& cell : cells) {
+        result.insert(cell.id);
+    }
+    return result;
+}
+
 DataDescription&
 DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache)
 {

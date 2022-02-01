@@ -50,6 +50,7 @@ public:
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) override;
     void setSimulationData(DataDescription const& dataToUpdate) override;
     void removeSelectedEntities(bool includeClusters) override;
+    void relaxSelectedEntities(bool includeClusters) override;
     void colorSelectedEntities(unsigned char color, bool includeClusters) override;
     void reconnectSelectedEntities() override;
     void changeCell(CellDescription const& changedCell) override;

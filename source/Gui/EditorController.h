@@ -16,7 +16,7 @@ public:
     void process();
 
     SelectionWindow getSelectionWindow() const;
-    ManipulatorWindow getManipulatorWindow() const;
+    PatternEditorWindow getPatternEditorWindow() const;
     CreatorWindow getCreatorWindow() const;
     MultiplierWindow getMultiplierWindow() const;
     SymbolsWindow getSymbolsWindow() const;
@@ -49,7 +49,7 @@ private:
 private:
     EditorModel _editorModel;
     SelectionWindow _selectionWindow;
-    ManipulatorWindow _manipulatorWindow;
+    PatternEditorWindow _patternEditorWindow;
     CreatorWindow _creatorWindow; 
     MultiplierWindow _multiplierWindow; 
     SymbolsWindow _symbolsWindow;

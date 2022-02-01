@@ -294,6 +294,8 @@ struct DataDescription
     void rotate(float angle);
     void accelerate(RealVector2D const& velDelta, float angularVelDelta);
 
+    std::unordered_set<uint64_t> getCellIds() const;
+
     DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
 
 private:

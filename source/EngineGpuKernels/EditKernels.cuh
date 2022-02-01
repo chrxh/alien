@@ -24,12 +24,14 @@ __global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO); 
 __global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataTO); //assumes that *changeDataTO.numParticles == 1
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters, int* retry);
-__global__ void cudaConnectSelection(SimulationData data, bool considerWithinSelection, int* result);
+__global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);
+__global__ void cudaScheduleConnectSelection(SimulationData data, bool considerWithinSelection, int* result);
 __global__ void cudaUpdateMapForConnection(SimulationData data);
 __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center);
 __global__ void cudaCalcAccumulatedCenter(ShallowUpdateSelectionData updateData, SimulationData data, float2* center, int* numEntities);
 __global__ void cudaUpdatePosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);
-__global__ void cudaDisconnectSelectionFromRemainings(SimulationData data, int* result);
+__global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData data, int* result);
+__global__ void cudaPrepareConnectionChanges(SimulationData data);
 __global__ void cudaProcessConnectionChanges(SimulationData data);
 __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result);
 __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data);

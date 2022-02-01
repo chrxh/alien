@@ -50,7 +50,7 @@
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
 #include "SelectionWindow.h"
-#include "ManipulatorWindow.h"
+#include "PatternEditorWindow.h"
 #include "WindowController.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
@@ -334,7 +334,7 @@ void _MainWindow::renderSimulation()
 void _MainWindow::processMenubar()
 {
     auto selectionWindow = _editorController->getSelectionWindow();
-    auto manipulatorWindow = _editorController->getManipulatorWindow();
+    auto patternEditorWindow = _editorController->getPatternEditorWindow();
     auto creatorWindow = _editorController->getCreatorWindow();
     auto multiplierWindow = _editorController->getMultiplierWindow();
     auto symbolsWindow = _editorController->getSymbolsWindow();
@@ -407,8 +407,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Creator", "ALT+C", creatorWindow->isOn())) {
                 creatorWindow->setOn(!creatorWindow->isOn());
             }
-            if (ImGui::MenuItem("Manipulator", "ALT+M", manipulatorWindow->isOn())) {
-                manipulatorWindow->setOn(!manipulatorWindow->isOn());
+            if (ImGui::MenuItem("Pattern editor", "ALT+M", patternEditorWindow->isOn())) {
+                patternEditorWindow->setOn(!patternEditorWindow->isOn());
             }
             if (ImGui::MenuItem("Multiplier", "ALT+A", multiplierWindow->isOn())) {
                 multiplierWindow->setOn(!multiplierWindow->isOn());
@@ -537,7 +537,7 @@ void _MainWindow::processMenubar()
         selectionWindow->setOn(!selectionWindow->isOn());
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
-        manipulatorWindow->setOn(!manipulatorWindow->isOn());
+        patternEditorWindow->setOn(!patternEditorWindow->isOn());
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
         multiplierWindow->setOn(!multiplierWindow->isOn());

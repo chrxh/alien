@@ -91,8 +91,8 @@ using EditorController = std::shared_ptr<_EditorController>;
 class _SelectionWindow;
 using SelectionWindow = std::shared_ptr<_SelectionWindow>;
 
-class _ManipulatorWindow;
-using ManipulatorWindow = std::shared_ptr<_ManipulatorWindow>;
+class _PatternEditorWindow;
+using PatternEditorWindow = std::shared_ptr<_PatternEditorWindow>;
 
 class _WindowController;
 using WindowController = std::shared_ptr<_WindowController>;

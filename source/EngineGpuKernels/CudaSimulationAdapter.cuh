@@ -37,6 +37,7 @@ public:
     void addAndSelectSimulationData(DataAccessTO const& dataTO);
     void setSimulationData(DataAccessTO const& dataTO);
     void removeSelectedEntities(bool includeClusters);
+    void relaxSelectedEntities(bool includeClusters);
     void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
 
     void applyForce(ApplyForceData const& applyData);

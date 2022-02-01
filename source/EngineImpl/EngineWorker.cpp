@@ -300,6 +300,13 @@ void EngineWorker::removeSelectedEntities(bool includeClusters)
     updateMonitorDataIntern();
 }
 
+void EngineWorker::relaxSelectedEntities(bool includeClusters)
+{
+    EngineWorkerGuard access(this);
+
+    _cudaSimulation->relaxSelectedEntities(includeClusters);
+}
+
 void EngineWorker::changeCell(CellDescription const& changedCell)
 {
     EngineWorkerGuard access(this);
