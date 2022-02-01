@@ -5,10 +5,11 @@ add_library(alien_engine_gpu_kernels_lib
     Base.cuh
     CellConnectionProcessor.cuh
     Cell.cuh
+    CellComputationProcessor.cuh
     CellFunctionData.cuh
     CellProcessor.cuh
+    ClusterProcessor.cuh
     CommunicationProcessor.cuh
-    CellComputationProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
     ConstructionProcessor.cuh
