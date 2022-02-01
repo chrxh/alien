@@ -184,6 +184,7 @@ class TempArray
 private:
     int* _size;
     int* _numEntries;
+    int* _numOrigEntries;
 
 public:
     T** _data;
@@ -193,15 +194,18 @@ public:
     __host__ __inline__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
+        CudaMemoryManager::getInstance().acquireMemory<int>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _size);
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
 
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(int)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(int)));
     }
 
     __host__ __inline__ void free()
     {
+        CudaMemoryManager::getInstance().freeMemory(_numOrigEntries);
         CudaMemoryManager::getInstance().freeMemory(_numEntries);
         CudaMemoryManager::getInstance().freeMemory(_size);
         CudaMemoryManager::getInstance().freeMemory(_data);
@@ -212,10 +216,12 @@ public:
         *_data = data;
         *_size = size;
         *_numEntries = 0;
+        *_numOrigEntries = 0;
     }
     __device__ __inline__ int getSize() const { return *_size; }
+    __device__ __inline__ int saveNumEntries() const { return *_numOrigEntries = *_numEntries; }
     __device__ __inline__ int getNumEntries() const { return *_numEntries; }
-    __device__ __inline__ void setNumEntries(int value) const { *_numEntries = value; }
+    __device__ __inline__ int getNumOrigEntries() const { return *_numOrigEntries; }
 
     __device__ __inline__ T& at(int index) { return (*_data)[index]; }
     __device__ __inline__ T const& at(int index) const { return (*_data)[index]; }

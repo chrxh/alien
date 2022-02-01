@@ -640,8 +640,7 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
         _isTimeout = !worker->_conditionForAccess.wait_for(uniqueLock, *maxDuration, [&] { return _accessFlag.load() == 2; });
         checkForException(worker->_exceptionData);
     } else {
-        std::cv_status status = worker->_conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000));
-        if (std::cv_status::timeout == status) {
+        if (!worker->_conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000), [&] { return _accessFlag.load() == 2; })) {
             checkForException(worker->_exceptionData);
             throw std::runtime_error("GPU Timeout");
         }

@@ -43,6 +43,7 @@ void _SimulationKernelsLauncher::calcTimestep(
     KERNEL_CALL(processingStep11, simulationData);
     KERNEL_CALL(processingStep12, simulationData);
     KERNEL_CALL(processingStep13, simulationData);
+    KERNEL_CALL(processingStep14, simulationData);
 
     _garbageCollector->cleanupAfterTimestep(gpuSettings, simulationData);
 }

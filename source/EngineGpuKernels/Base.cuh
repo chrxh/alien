@@ -236,8 +236,9 @@ public:
         _lockState2 = atomicExch(_lock2, 1);
         if (0 != _lockState1 || 0 != _lockState2) {
             releaseLock();
-            return false;
+             return false;
         }
+        __threadfence();
         return true;
     }
 
@@ -245,6 +246,7 @@ public:
 
     __device__ __inline__ void releaseLock()
     {
+        __threadfence();
         if (0 == _lockState1) {
             atomicExch(_lock1, 0);
         }

@@ -100,7 +100,7 @@ CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cel
 
 __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumEntries());
+    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.structuralOperations.at(index);
@@ -112,6 +112,7 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
         }
         if (StructuralOperation::Type::DelCellAndConnections == operation.type) {
             delConnectionsIntern(operation.data.delConnectionsOperation.cell);
+
             scheduleDelCell(
                 data,
                 operation.data.delCellAndConnectionOperation.cell,
@@ -167,7 +168,6 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
     if (lock.tryLock()) {
-        __threadfence();
 
         bool alreadyConnected = false;
         for (int i = 0; i < cell1->numConnections; ++i) {
@@ -210,7 +210,6 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
             }
         }
 
-        __threadfence();
         lock.releaseLock();
     }
 }
@@ -331,13 +330,12 @@ __inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* c
 
 __inline__ __device__ void CellConnectionProcessor::delConnectionIntern(Cell* cell1, Cell* cell2)
 {
-    if (cell1->tryLock()) {
-        if (cell2->tryLock()) {
-            delConnectionOneWay(cell1, cell2);
-            delConnectionOneWay(cell2, cell1);
-            cell2->releaseLock();
-        }
-        cell1->releaseLock();
+    SystemDoubleLock lock;
+    lock.init(&cell1->locked, &cell2->locked);
+    if (lock.tryLock()) {
+        delConnectionOneWay(cell1, cell2);
+        delConnectionOneWay(cell2, cell1);
+        lock.releaseLock();
     }
 }
 
