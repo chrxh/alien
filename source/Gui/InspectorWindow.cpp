@@ -361,6 +361,9 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             if (cell.cellFeature.getType() == Enums::CellFunction_Muscle) {
                 showMuscleTableContent();
             }
+            if (cell.cellFeature.getType() == Enums::CellFunction_Sensor) {
+                showSensorTableContent();
+            }
             ImGui::EndTable();
         }
 
@@ -561,7 +564,7 @@ void _InspectorWindow::showScannerTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutCellMetadata));
+    AlienImGui::Text(formatHex(Enums::Scanner_OutCellColor));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: color of scanned cell");
@@ -601,7 +604,7 @@ void _InspectorWindow::showDigestionTableContent()
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output:");
     AlienImGui::Text(formatHex(Enums::DigestionOut_NoTarget) + ": no target cell found");
-    AlienImGui::Text(formatHex(Enums::DigestionOut_StrikeSuccessful) + ": target cell found");
+    AlienImGui::Text(formatHex(Enums::DigestionOut_Success) + ": target cell found");
 }
 
 void _InspectorWindow::showConstructionTableContent()
@@ -721,7 +724,7 @@ void _InspectorWindow::showConstructionTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellMetadata));
+    AlienImGui::Text(formatHex(Enums::Constr_InCellColor));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: color of constructed cell");
@@ -775,6 +778,84 @@ void _InspectorWindow::showMuscleTableContent()
     AlienImGui::Text(formatHex(Enums::MuscleIn_ContractRelax) + ": contract cell connection");
     AlienImGui::Text(formatHex(Enums::MuscleIn_Expand) + ": expand cell connection and produce impulse");
     AlienImGui::Text(formatHex(Enums::MuscleIn_ExpandRelax) + ": expand cell connection");
+}
+
+void _InspectorWindow::showSensorTableContent()
+{
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_Output));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output:");
+    AlienImGui::Text(formatHex(Enums::SensorOut_NothingFound) + ": nothing found");
+    AlienImGui::Text(formatHex(Enums::SensorOut_ClusterFound) + ": mass concentration found");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_Input));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input:");
+    AlienImGui::Text(formatHex(Enums::SensorIn_DoNothing) + ": do nothing");
+    AlienImGui::Text(formatHex(Enums::SensorIn_SearchVicinity) + ": search vicinity for mass concentration");
+    AlienImGui::Text(formatHex(Enums::SensorIn_SearchByAngle) + ": search in specific direction for mass concentration");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_InOutAngle));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input: angle to specify the search direction");
+    AlienImGui::Text("Output: angle where mass concentration has been found");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_InMinDensity));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input: minimum mass density of the mass concentration to be detected");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_InMaxDensity));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input: maximum mass density of the mass concentration to be detected, 0 = no upper limit");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_InColor));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input: color of the mass density to be detected");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_OutMass));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: detected mass concentration");
+
+    ImGui::Spacing();
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Sensor_OutDistance));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Output: distance of detected mass concentration");
 }
 
 float _InspectorWindow::calcWindowWidth() const

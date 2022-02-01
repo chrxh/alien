@@ -111,7 +111,7 @@ namespace Enums
         Constr_InDist = 16,
         Constr_InCellMaxConnections = 17,  //0: automatically; >0: max connections (not greater than MAX_CELL_CONNECTIONS)
         Constr_InCellBranchNumber = 18,
-        Constr_InCellMetadata = 19,
+        Constr_InCellColor = 19,
         Constr_InCellFunction = 39,
         Constr_InCellFunctionData = 40
     };
@@ -162,7 +162,7 @@ namespace Enums
         Scanner_OutDistance = 16,
         Scanner_OutCellMaxConnections = 17,
         Scanner_OutCellBranchNumber = 18,
-        Scanner_OutCellMetadata = 19,
+        Scanner_OutCellColor = 19,
         Scanner_OutCellFunction = 39,
         Scanner_OutCellFunctionData = 40
     };
@@ -209,7 +209,7 @@ namespace Enums
     enum DigestionOut_
     {
         DigestionOut_NoTarget,
-        DigestionOut_StrikeSuccessful
+        DigestionOut_Success
     };
 
     using Muscle = int;

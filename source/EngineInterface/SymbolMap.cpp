@@ -31,9 +31,11 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("CONSTR_OUT::SUCCESS", std::to_string(Enums::ConstrOut_Success));
     result.emplace("CONSTR_OUT::ERROR_NO_ENERGY", std::to_string(Enums::ConstrOut_ErrorNoEnergy));
     result.emplace("CONSTR_OUT::ERROR_CONNECTION", std::to_string(Enums::ConstrOut_ErrorConnection));
+    result.emplace("CONSTR_OUT::ERROR_LOCK", std::to_string(Enums::ConstrOut_ErrorLock));
     result.emplace("CONSTR_OUT::ERROR_DIST", std::to_string(Enums::ConstrOut_ErrorDist));
     result.emplace("CONSTR_IN", "[" + std::to_string(Enums::Constr_Input) + "]");
     result.emplace("CONSTR_IN::DO_NOTHING", std::to_string(Enums::ConstrIn_DoNothing));
+    result.emplace("CONSTR_IN::CONSTRUCT", std::to_string(Enums::ConstrIn_Construct));
     result.emplace("CONSTR_IN_OPTION", "[" + std::to_string(Enums::Constr_InOption) + "]");
     result.emplace("CONSTR_IN_OPTION::STANDARD", std::to_string(Enums::ConstrInOption_Standard));
     result.emplace("CONSTR_IN_OPTION::CREATE_EMPTY_TOKEN", std::to_string(Enums::ConstrInOption_CreateEmptyToken));
@@ -42,17 +44,24 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("CONSTR_IN_OPTION::FINISH_WITH_SEP", std::to_string(Enums::ConstrInOption_FinishWithSep));
     result.emplace("CONSTR_IN_OPTION::FINISH_WITH_EMPTY_TOKEN_SEP", std::to_string(Enums::ConstrInOption_FinishWithEmptyTokenSep));
     result.emplace("CONSTR_IN_OPTION::FINISH_WITH_DUP_TOKEN_SEP", std::to_string(Enums::ConstrInOption_FinishWithDupTokenSep));
+    result.emplace("CONSTR_IN_ANGLE_ALIGNMENT", "[" + std::to_string(Enums::Constr_InAngleAlignment) + "]");
+    result.emplace("CONSTR_IN_UNIFORM_DIST", "[" + std::to_string(Enums::Constr_InUniformDist) + "]");
+    result.emplace("CONSTR_IN_UNIFORM_DIST::NO", std::to_string(Enums::ConstrInUniformDist_No));
+    result.emplace("CONSTR_IN_UNIFORM_DIST::YES", std::to_string(Enums::ConstrInUniformDist_Yes));
     result.emplace("CONSTR_INOUT_ANGLE", "[" + std::to_string(Enums::Constr_InOutAngle) + "]");
     result.emplace("CONSTR_IN_DIST", "[" + std::to_string(Enums::Constr_InDist) + "]");
     result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Constr_InCellMaxConnections) + "]");
     result.emplace("CONSTR_IN_CELL_MAX_CONNECTIONS::AUTO", "0");  //artificial entry (has no symbol in enum)
     result.emplace("CONSTR_IN_CELL_BRANCH_NUMBER", "[" + std::to_string(Enums::Constr_InCellBranchNumber) + "]");
+    result.emplace("CONSTR_IN_CELL_COLOR", "[" + std::to_string(Enums::Constr_InCellColor) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION", "[" + std::to_string(Enums::Constr_InCellFunction) + "]");
-    result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTATION", std::to_string(Enums::CellFunction_Computation));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::COMMUNICATION", std::to_string(Enums::CellFunction_Communication));
     result.emplace("CONSTR_IN_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("CONSTR_IN_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("CONSTR_IN_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
     result.emplace("CONSTR_IN_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction_Sensor));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::MUSCLE", std::to_string(Enums::CellFunction_Muscle));
     result.emplace("CONSTR_IN_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Constr_InCellFunctionData) + "]");
 
     //scanner
@@ -65,19 +74,21 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SCANNER_OUT_DISTANCE", "[" + std::to_string(Enums::Scanner_OutDistance) + "]");
     result.emplace("SCANNER_OUT_CELL_MAX_CONNECTIONS", "[" + std::to_string(Enums::Scanner_OutCellMaxConnections) + "]");
     result.emplace("SCANNER_OUT_CELL_BRANCH_NUMBER", "[" + std::to_string(Enums::Scanner_OutCellBranchNumber) + "]");
+    result.emplace("SCANNER_OUT_CELL_COLOR", "[" + std::to_string(Enums::Scanner_OutCellColor) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION", "[" + std::to_string(Enums::Scanner_OutCellFunction) + "]");
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTER", std::to_string(Enums::CellFunction_Computation));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::PROP", std::to_string(Enums::CellFunction_Communication));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTATION", std::to_string(Enums::CellFunction_Computation));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::COMMUNICATION", std::to_string(Enums::CellFunction_Communication));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::SENSOR", std::to_string(Enums::CellFunction_Sensor));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::MUSCLE", std::to_string(Enums::CellFunction_Muscle));
     result.emplace("SCANNER_OUT_CELL_FUNCTION_DATA", "[" + std::to_string(Enums::Scanner_OutCellFunctionData) + "]");
 
-    //weapon
-    result.emplace("WEAPON_OUT", "[" + std::to_string(Enums::Digestion_Output) + "]");
-    result.emplace("WEAPON_OUT::NO_TARGET", std::to_string(Enums::DigestionOut_NoTarget));
-    result.emplace("WEAPON_OUT::STRIKE_SUCCESSFUL", std::to_string(Enums::DigestionOut_StrikeSuccessful));
+    //digestion
+    result.emplace("DIGESTION_OUT", "[" + std::to_string(Enums::Digestion_Output) + "]");
+    result.emplace("DIGESTION_OUT::NO_TARGET", std::to_string(Enums::DigestionOut_NoTarget));
+    result.emplace("DIGESTION_OUT::SUCCESS", std::to_string(Enums::DigestionOut_Success));
 
     //sensor
     result.emplace("SENSOR_OUT", "[" + std::to_string(Enums::Sensor_Output) + "]");
