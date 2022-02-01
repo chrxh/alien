@@ -8,7 +8,6 @@
 
 #include "Base/Exceptions.h"
 
-#define KERNEL_CALL(func, ...) func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__);
 #define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
 
 template< typename T >
@@ -48,3 +47,8 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define CUDA_THROW_NOT_IMPLEMENTED() \
     printf("not implemented"); \
     asm("trap;");
+
+#define KERNEL_CALL(func, ...) \
+    func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());

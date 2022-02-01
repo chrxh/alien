@@ -57,6 +57,15 @@ struct Cell
     float2 temp2;
     float2 temp3;
 
+    //cluster data
+    int clusterIndex;
+    int clusterBoundaries;    //1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    float2 clusterPos;
+    float2 clusterVel;
+    float clusterAngularMomentum;
+    float clusterAngularMass;
+    int numCellsInCluster;
+
     __device__ __inline__ bool isDeleted() const { return energy == 0; }
 
     __device__ __inline__ void setDeleted()

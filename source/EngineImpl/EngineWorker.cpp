@@ -497,8 +497,11 @@ void EngineWorker::runThreadLoop()
             if (_isShutdown.load()) {
                 return;
             }
-            while (_requireAccess.load()) {
+            if (_requireAccess.load() == 1) {
+                _requireAccess.store(2);
                 _conditionForAccess.notify_all();
+                while (_requireAccess.load() != 0) {
+                }
             }
 
             if (_isSimulationRunning.load()) {
@@ -511,9 +514,11 @@ void EngineWorker::runThreadLoop()
                                              std::chrono::steady_clock::now() - *startTimestepTime)
                                              .count();
 
-                        _conditionForAccess.notify_all();
-                        //                    std::this_thread::sleep_for(std::chrono::microseconds(1));
-                    } while (actualDuration < desiredDuration || _requireAccess.load());
+                        if (_requireAccess.load() == 1) {
+                            _requireAccess.store(2);
+                            _conditionForAccess.notify_all();
+                        }
+                    } while (actualDuration < desiredDuration || _requireAccess.load() != 0);
                 }
 
                 auto timepoint = std::chrono::steady_clock::now();
@@ -554,8 +559,8 @@ void EngineWorker::runSimulation()
 
 void EngineWorker::pauseSimulation()
 {
+    EngineWorkerGuard access(this);
     _isSimulationRunning.store(false);
-    _conditionForWorkerLoop.notify_all();
 }
 
 bool EngineWorker::isSimulationRunning() const
@@ -629,11 +634,10 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
         return;
     }
     std::mutex mutex;
-    _accessFlag.store(true);
+    _accessFlag.store(1);
     std::unique_lock<std::mutex> uniqueLock(mutex);
     if (maxDuration) {
-        std::cv_status status = worker->_conditionForAccess.wait_for(uniqueLock, *maxDuration);
-        _isTimeout = std::cv_status::timeout == status;
+        _isTimeout = !worker->_conditionForAccess.wait_for(uniqueLock, *maxDuration, [&] { return _accessFlag.load() == 2; });
         checkForException(worker->_exceptionData);
     } else {
         std::cv_status status = worker->_conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000));
@@ -647,7 +651,7 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
 
 EngineWorkerGuard::~EngineWorkerGuard()
 {
-    _accessFlag.store(false);
+    _accessFlag.store(0);
     _conditionForWorkerLoop.notify_all();
 }
 

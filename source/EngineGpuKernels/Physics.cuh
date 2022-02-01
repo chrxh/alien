@@ -15,7 +15,7 @@ class Physics
 {
 public:
 
-	__inline__ __device__ static float angularMomentum(float2 const& positionFromCenter, float2 const& velocityOfCenter);
+	__inline__ __device__ static float angularMomentum(float2 const& positionFromCenter, float2 const& velocityAroundCenter);
 	__inline__ __device__ static float angularVelocity(float angularMomentum, float angularMass);
     __inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
     __inline__ __device__ static float2 transformVelocity(float massOld, float massNew, float2 const& velOld);
@@ -187,9 +187,9 @@ __inline__ __device__ float2 Physics::tangentialVelocity(float2 const& r, float2
 	return { vel.x - angularVel*r.y * static_cast<float>(DEG_TO_RAD), vel.y + angularVel*r.x * static_cast<float>(DEG_TO_RAD) };
 }
 
-__inline__ __device__ float Physics::angularMomentum(float2 const & positionFromCenter, float2 const & velocityOfCenter)
+__inline__ __device__ float Physics::angularMomentum(float2 const & positionFromCenter, float2 const & velocityAroundCenter)
 {
-	return positionFromCenter.x*velocityOfCenter.y - positionFromCenter.y*velocityOfCenter.x;
+	return positionFromCenter.x*velocityAroundCenter.y - positionFromCenter.y*velocityAroundCenter.x;
 }
 
 __inline__ __device__ float Physics::angularVelocity(float angularMomentum, float angularMass)
