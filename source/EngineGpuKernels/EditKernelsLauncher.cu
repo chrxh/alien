@@ -11,6 +11,7 @@ _EditKernelsLauncher::_EditKernelsLauncher()
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaUpdateResult);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaRemoveResult);
     CudaMemoryManager::getInstance().acquireMemory<float2>(1, _cudaCenter);
+    CudaMemoryManager::getInstance().acquireMemory<float2>(1, _cudaVelocity);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaNumEntities);
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
 }
@@ -22,6 +23,7 @@ _EditKernelsLauncher::~_EditKernelsLauncher()
     CudaMemoryManager::getInstance().freeMemory(_cudaUpdateResult);
     CudaMemoryManager::getInstance().freeMemory(_cudaRemoveResult);
     CudaMemoryManager::getInstance().freeMemory(_cudaCenter);
+    CudaMemoryManager::getInstance().freeMemory(_cudaVelocity);
     CudaMemoryManager::getInstance().freeMemory(_cudaNumEntities);
 }
 
@@ -84,19 +86,19 @@ void _EditKernelsLauncher::shallowUpdateSelectedEntities(
 
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
-            KERNEL_CALL(cudaPrepareConnectionChanges, data);
+            KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
             KERNEL_CALL(cudaProcessConnectionChanges, data);
             cudaDeviceSynchronize();
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
     }
 
     if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velDeltaX != 0 || updateData.velDeltaY != 0) {
-        KERNEL_CALL(cudaUpdatePosAndVelForSelection, updateData, data);
+        KERNEL_CALL(cudaIncrementPosAndVelForSelection, updateData, data);
     }
     if (updateData.angleDelta != 0 || updateData.angularVelDelta != 0) {
         setValueToDevice(_cudaCenter, float2{0, 0});
         setValueToDevice(_cudaNumEntities, 0);
-        KERNEL_CALL(cudaCalcAccumulatedCenter, updateData, data, _cudaCenter, _cudaNumEntities);
+        KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, _cudaCenter, nullptr, _cudaNumEntities, updateData.considerClusters);
         cudaDeviceSynchronize();
 
         auto numEntities = copyToHost(_cudaNumEntities);
@@ -118,7 +120,7 @@ void _EditKernelsLauncher::shallowUpdateSelectedEntities(
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaUpdateMapForConnection, data);
             KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
-            KERNEL_CALL(cudaPrepareConnectionChanges, data);
+            KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
             KERNEL_CALL(cudaProcessConnectionChanges, data);
 
             KERNEL_CALL(cudaCleanupCellMap, data);
@@ -149,6 +151,20 @@ void _EditKernelsLauncher::relaxSelectedEntities(GpuSettings const& gpuSettings,
     KERNEL_CALL(cudaRelaxSelectedEntities, data, includeClusters);
 }
 
+void _EditKernelsLauncher::uniformVelocitiesForSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+{
+    setValueToDevice(_cudaVelocity, float2{0, 0});
+    setValueToDevice(_cudaNumEntities, 0);
+    KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, nullptr, _cudaVelocity, _cudaNumEntities, includeClusters);
+    cudaDeviceSynchronize();
+
+    auto numEntities = copyToHost(_cudaNumEntities);
+    if (numEntities != 0) {
+        auto velocity = copyToHost(_cudaVelocity) / numEntities;
+        KERNEL_CALL(cudaSetVelocityForSelection, data, velocity, includeClusters);
+    }
+}
+
 void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data)
 {
     int counter = 10;
@@ -157,7 +173,7 @@ void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSetti
 
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
-        KERNEL_CALL(cudaPrepareConnectionChanges, data);
+        KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
         KERNEL_CALL(cudaProcessConnectionChanges, data);
         cudaDeviceSynchronize();
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
@@ -171,7 +187,7 @@ void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSetti
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaUpdateMapForConnection, data);
         KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
-        KERNEL_CALL(cudaPrepareConnectionChanges, data);
+        KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
         KERNEL_CALL(cudaProcessConnectionChanges, data);
 
         KERNEL_CALL(cudaCleanupCellMap, data);

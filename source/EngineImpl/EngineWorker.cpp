@@ -307,6 +307,13 @@ void EngineWorker::relaxSelectedEntities(bool includeClusters)
     _cudaSimulation->relaxSelectedEntities(includeClusters);
 }
 
+void EngineWorker::uniformVelocitiesForSelectedEntities(bool includeClusters)
+{
+    EngineWorkerGuard access(this);
+
+    _cudaSimulation->uniformVelocitiesForSelectedEntities(includeClusters);
+}
+
 void EngineWorker::changeCell(CellDescription const& changedCell)
 {
     EngineWorkerGuard access(this);

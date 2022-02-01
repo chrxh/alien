@@ -38,6 +38,7 @@ public:
     void setSimulationData(DataAccessTO const& dataTO);
     void removeSelectedEntities(bool includeClusters);
     void relaxSelectedEntities(bool includeClusters);
+    void uniformVelocitiesForSelectedEntities(bool includeClusters);
     void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
 
     void applyForce(ApplyForceData const& applyData);

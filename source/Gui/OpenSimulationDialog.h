@@ -8,6 +8,7 @@ class _OpenSimulationDialog
 public:
     _OpenSimulationDialog(
         SimulationController const& simController,
+        TemporalControlWindow const& temporalControlWindow,
         StatisticsWindow const& statisticsWindow,
         Viewport const& viewport);
 
@@ -17,6 +18,7 @@ public:
 
 private:
     SimulationController _simController;
+    TemporalControlWindow _temporalControlWindow;
     StatisticsWindow _statisticsWindow;
     Viewport _viewport;
 };

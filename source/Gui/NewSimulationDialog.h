@@ -9,6 +9,7 @@ class _NewSimulationDialog
 public:
     _NewSimulationDialog(
         SimulationController const& simController,
+        TemporalControlWindow const& temporalControlWindow,
         Viewport const& viewport,
         StatisticsWindow const& statisticsWindow);
 
@@ -22,6 +23,7 @@ private:
     void onNewSimulation();
 
     SimulationController _simController;
+    TemporalControlWindow _temporalControlWindow;
     Viewport _viewport;
     StatisticsWindow _statisticsWindow;
 

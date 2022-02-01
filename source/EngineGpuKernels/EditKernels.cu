@@ -280,16 +280,22 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
     }
 }
 
-__global__ void cudaCalcAccumulatedCenter(ShallowUpdateSelectionData updateData, SimulationData data, float2* center, int* numEntities)
+__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, float2* center, float2* velocity, int* numEntities, bool includeClusters)
 {
     {
         auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = data.entities.cellPointers.at(index);
-            if ((updateData.considerClusters && cell->selected != 0) || (!updateData.considerClusters && cell->selected == 1)) {
-                atomicAdd(&center->x, cell->absPos.x);
-                atomicAdd(&center->y, cell->absPos.y);
+            if (isSelected(cell, includeClusters)) {
+                if (center) {
+                    atomicAdd(&center->x, cell->absPos.x);
+                    atomicAdd(&center->y, cell->absPos.y);
+                }
+                if (velocity) {
+                    atomicAdd(&velocity->x, cell->vel.x);
+                    atomicAdd(&velocity->y, cell->vel.y);
+                }
                 atomicAdd(numEntities, 1);
             }
         }
@@ -300,20 +306,26 @@ __global__ void cudaCalcAccumulatedCenter(ShallowUpdateSelectionData updateData,
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& particle = data.entities.particlePointers.at(index);
             if (particle->selected != 0) {
-                atomicAdd(&center->x, particle->absPos.x);
-                atomicAdd(&center->y, particle->absPos.y);
+                if (center) {
+                    atomicAdd(&center->x, particle->absPos.x);
+                    atomicAdd(&center->y, particle->absPos.y);
+                }
+                if (velocity) {
+                    atomicAdd(&velocity->x, particle->vel.x);
+                    atomicAdd(&velocity->y, particle->vel.y);
+                }
                 atomicAdd(numEntities, 1);
             }
         }
     }
 }
 
-__global__ void cudaUpdatePosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
+__global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
 {
     auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if ((0 != cell->selected && updateData.considerClusters) || (1 == cell->selected && !updateData.considerClusters)) {
+        if (isSelected(cell, updateData.considerClusters)) {
             cell->absPos = cell->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
             cell->vel = cell->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
         }
@@ -325,6 +337,25 @@ __global__ void cudaUpdatePosAndVelForSelection(ShallowUpdateSelectionData updat
         if (0 != particle->selected) {
             particle->absPos = particle->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
             particle->vel = particle->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
+        }
+    }
+}
+
+__global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters)
+{
+    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (isSelected(cell, includeClusters)) {
+            cell->vel = velocity;
+        }
+    }
+
+    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        auto const& particle = data.entities.particlePointers.at(index);
+        if (0 != particle->selected) {
+            particle->vel = velocity;
         }
     }
 }

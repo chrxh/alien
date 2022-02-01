@@ -315,12 +315,17 @@ cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, A
 __global__ void
 cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom)
 {
+    MapInfo map;
+    map.init(universeSize);
+
     auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
+        auto particlePos = particle->absPos;
+        map.mapPosCorrection(particlePos);
 
-        auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particle->absPos, zoom);
+        auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particlePos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
             auto const color = calcColor(particle, 0 != particle->selected);
             auto radius = 1 == particle->selected ? zoom / 2 : zoom / 3;

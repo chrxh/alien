@@ -25,6 +25,7 @@ public:
         ShallowUpdateSelectionData const& updateData);
     void removeSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void relaxSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
+    void uniformVelocitiesForSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data);
     void changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& changeDataTO);
     void colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
@@ -42,5 +43,6 @@ private:
     int* _cudaUpdateResult;
     int* _cudaRemoveResult;
     float2* _cudaCenter;
+    float2* _cudaVelocity;
     int* _cudaNumEntities;
 };

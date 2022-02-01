@@ -11,6 +11,8 @@ class _TemporalControlWindow : public _AlienWindow
 public:
     _TemporalControlWindow(SimulationController const& simController, StatisticsWindow const& statisticsWindow);
 
+    void onSnapshot();
+
 private:
     void processIntern();
 
