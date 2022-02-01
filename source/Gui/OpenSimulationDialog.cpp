@@ -7,12 +7,15 @@
 #include "EngineInterface/SimulationController.h"
 #include "StatisticsWindow.h"
 #include "Viewport.h"
+#include "TemporalControlWindow.h"
 
 _OpenSimulationDialog::_OpenSimulationDialog(
     SimulationController const& simController,
+    TemporalControlWindow const& temporalControlWindow,
     StatisticsWindow const& statisticsWindow,
     Viewport const& viewport)
     : _simController(simController)
+    , _temporalControlWindow(temporalControlWindow)
     , _statisticsWindow(statisticsWindow)
     , _viewport(viewport)
 {}
@@ -40,6 +43,7 @@ void _OpenSimulationDialog::process()
                 {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
                  toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
             _viewport->setZoomFactor(2.0f);
+            _temporalControlWindow->onSnapshot();
         }
     }
     ifd::FileDialog::Instance().Close();

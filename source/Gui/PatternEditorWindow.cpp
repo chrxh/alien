@@ -233,7 +233,9 @@ void _PatternEditorWindow::processIntern()
         }
 
         AlienImGui::Group("Further actions");
-        ImGui::Button("Generate rigid body velocities");
+        if (ImGui::Button("Set uniform velocities")) {
+            _simController->uniformVelocitiesForSelectedEntities(_editorModel->isRolloutToClusters());
+        }
         if (ImGui::Button("Release tensions")) {
             _simController->relaxSelectedEntities(_editorModel->isRolloutToClusters());
         }

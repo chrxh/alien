@@ -33,42 +33,42 @@ public:
     __inline__ __device__ static float alignAngle(float angle, int alignment);
 };
 
-__inline__ __device__ float2 operator+(float2 const& p, float2 const& q)
+__inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
 {
     return{ p.x + q.x, p.y + q.y };
 }
 
-__inline__ __device__ float2 operator-(float2 const& p, float2 const& q)
+__inline__ __device__ __host__ float2 operator-(float2 const& p, float2 const& q)
 {
     return{ p.x - q.x, p.y - q.y };
 }
 
-__inline__ __device__ float2 operator-(float2 const& p, int2 const& q)
+__inline__ __device__ __host__ float2 operator-(float2 const& p, int2 const& q)
 {
     return{ p.x - q.x, p.y - q.y };
 }
 
-__inline__ __device__ int2 operator-(int2 const& p, int2 const& q)
+__inline__ __device__ __host__ int2 operator-(int2 const& p, int2 const& q)
 {
     return{ p.x - q.x, p.y - q.y };
 }
 
-__inline__ __device__ float2 operator*(float2 const& p, float m)
+__inline__ __device__ __host__ float2 operator*(float2 const& p, float m)
 {
     return{ p.x * m, p.y * m };
 }
 
-__inline__ __device__ float3 operator*(float3 const& p, float m)
+__inline__ __device__ __host__ float3 operator*(float3 const& p, float m)
 {
     return {p.x * m, p.y * m, p.z * m};
 }
 
-__inline__ __device__ float2 operator/(float2 const& p, float m)
+__inline__ __device__ __host__ float2 operator/(float2 const& p, float m)
 {
     return{ p.x / m, p.y / m };
 }
 
-__inline__ __device__ bool operator==(int2 const& p, int2 const& q)
+__inline__ __device__ __host__ bool operator==(int2 const& p, int2 const& q)
 {
     return p.x == q.x && p.y == q.y;
 }

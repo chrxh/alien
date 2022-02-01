@@ -120,14 +120,14 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
-    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _viewport, _statisticsWindow);
     _startupWindow = std::make_shared<_StartupWindow>(_simController, _viewport);
     _flowGeneratorWindow = std::make_shared<_FlowGeneratorWindow>(_simController);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _colorizeDialog = std::make_shared<_ColorizeDialog>(_simController);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
-    _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _statisticsWindow, _viewport);
+    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
+    _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
     _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
 

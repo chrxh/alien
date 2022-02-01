@@ -5,6 +5,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "Viewport.h"
 #include "StatisticsWindow.h"
+#include "TemporalControlWindow.h"
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 
@@ -15,9 +16,11 @@ namespace
 
 _NewSimulationDialog::_NewSimulationDialog(
     SimulationController const& simController,
+    TemporalControlWindow const& temporalControlWindow,
     Viewport const& viewport,
     StatisticsWindow const& statisticsWindow)
     : _simController(simController)
+    , _temporalControlWindow(temporalControlWindow)
     , _viewport(viewport)
     , _statisticsWindow(statisticsWindow)
 {
@@ -99,4 +102,5 @@ void _NewSimulationDialog::onNewSimulation()
     _simController->newSimulation(0, settings, symbolMap);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     _viewport->setZoomFactor(4.0f);
+    _temporalControlWindow->onSnapshot();
 }

@@ -20,7 +20,15 @@ _TemporalControlWindow::_TemporalControlWindow(
     : _AlienWindow("Temporal control", "windows.temporal control", true)
     , _simController(simController)
     , _statisticsWindow(statisticsWindow)
+{}
+
+void _TemporalControlWindow::onSnapshot()
 {
+    Snapshot newSnapshot;
+    newSnapshot.timestep = _simController->getCurrentTimestep();
+    auto size = _simController->getWorldSize();
+    newSnapshot.data = _simController->getSimulationData({0, 0}, size);
+    _snapshot = newSnapshot;
 }
 
 void _TemporalControlWindow::processIntern()
@@ -137,11 +145,7 @@ void _TemporalControlWindow::processStepForwardButton()
 void _TemporalControlWindow::processSnapshotButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CAMERA)) {
-        Snapshot newSnapshot;
-        newSnapshot.timestep = _simController->getCurrentTimestep();
-        auto size = _simController->getWorldSize();
-        newSnapshot.data = _simController->getSimulationData({0, 0}, size);
-        _snapshot = newSnapshot;
+        onSnapshot();
     }
 }
 

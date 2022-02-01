@@ -103,6 +103,11 @@ void _SimulationControllerImpl::relaxSelectedEntities(bool includeClusters)
     _worker.relaxSelectedEntities(includeClusters);
 }
 
+void _SimulationControllerImpl::uniformVelocitiesForSelectedEntities(bool includeClusters)
+{
+    _worker.uniformVelocitiesForSelectedEntities(includeClusters);
+}
+
 void _SimulationControllerImpl::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
     _worker.colorSelectedEntities(color, includeClusters);

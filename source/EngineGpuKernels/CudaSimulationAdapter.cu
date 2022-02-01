@@ -299,6 +299,12 @@ void _CudaSimulationAdapter::relaxSelectedEntities(bool includeClusters)
     syncAndCheck();
 }
 
+void _CudaSimulationAdapter::uniformVelocitiesForSelectedEntities(bool includeClusters)
+{
+    _editKernels->uniformVelocitiesForSelectedEntities(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    syncAndCheck();
+}
+
 void _CudaSimulationAdapter::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);

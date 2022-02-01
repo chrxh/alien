@@ -36,6 +36,7 @@ public:
     virtual void setSimulationData(DataDescription const& dataToUpdate) = 0;
     virtual void removeSelectedEntities(bool includeClusters) = 0;
     virtual void relaxSelectedEntities(bool includeClusters) = 0;
+    virtual void uniformVelocitiesForSelectedEntities(bool includeClusters) = 0;
     virtual void colorSelectedEntities(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedEntities() = 0;
     virtual void changeCell(CellDescription const& changedCell) = 0;
