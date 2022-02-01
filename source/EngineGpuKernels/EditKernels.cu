@@ -144,12 +144,38 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.entities.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
-            for (int i = 0; i < cell->numConnections; ++i) {
+            auto const numConnections = cell->numConnections;
+            for (int i = 0; i < numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
                 if (isSelected(connectedCell, includeClusters)) {
                     auto delta = connectedCell->absPos - cell->absPos;
                     data.cellMap.mapDisplacementCorrection(delta);
                     cell->connections[i].distance = Math::length(delta);
+                }
+            }
+
+            if (numConnections > 1) {
+                for (int i = 0; i < numConnections; ++i) {
+                    auto prevConnectedCell = cell->connections[(i + numConnections - 1) % numConnections].cell;
+                    auto connectedCell = cell->connections[i].cell;
+                    if (isSelected(connectedCell, includeClusters) && isSelected(prevConnectedCell, includeClusters)) {
+                        auto prevDisplacement = prevConnectedCell->absPos - cell->absPos;
+                        data.cellMap.mapDisplacementCorrection(prevDisplacement);
+                        auto prevAngle = Math::angleOfVector(prevDisplacement);
+
+                        auto displacement = connectedCell->absPos - cell->absPos;
+                        data.cellMap.mapDisplacementCorrection(displacement);
+                        auto angle = Math::angleOfVector(displacement);
+
+                        auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
+                        auto angleDiff = actualAngleFromPrevious - cell->connections[i].angleFromPrevious;
+
+                        auto nextAngleFromPrevious = cell->connections[(i + 1) % numConnections].angleFromPrevious;
+                        if (nextAngleFromPrevious - angleDiff >= 0) {
+                            cell->connections[i].angleFromPrevious = actualAngleFromPrevious;
+                            cell->connections[(i + 1) % numConnections].angleFromPrevious = nextAngleFromPrevious - angleDiff;
+                        }
+                    }
                 }
             }
         }
