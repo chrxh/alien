@@ -88,7 +88,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                     otherCell->energy -= energyToTransfer;
                     token->energy += energyToTransfer / 2;
                     cell->energy += energyToTransfer / 2;
-                    token->memory[Enums::Digestion_Output] = Enums::DigestionOut_StrikeSuccessful;
+                    token->memory[Enums::Digestion_Output] = Enums::DigestionOut_Success;
                     result.incSuccessfulAttack();
                 }
             }

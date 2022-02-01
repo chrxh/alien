@@ -155,7 +155,7 @@ __inline__ __device__ void ConstructionProcessor::readConstructionData(Token* to
     data.distance = memory[Enums::Constr_InDist];
     data.maxConnections = memory[Enums::Constr_InCellMaxConnections];
     data.branchNumber = memory[Enums::Constr_InCellBranchNumber];
-    data.metaData = memory[Enums::Constr_InCellMetadata];
+    data.metaData = memory[Enums::Constr_InCellColor];
     data.cellFunctionType = memory[Enums::Constr_InCellFunction];
 }
 

@@ -95,7 +95,7 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
     tokenMem[Enums::Scanner_OutEnergy] = cellEnergy;
     tokenMem[Enums::Scanner_OutCellMaxConnections] = lookupResult.prevCell->maxConnections;
     tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->branchNumber;
-    tokenMem[Enums::Scanner_OutCellMetadata] = lookupResult.prevCell->metadata.color;
+    tokenMem[Enums::Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
     tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
     tokenMem[Enums::Scanner_OutCellFunctionData] = lookupResult.prevCell->numStaticBytes;
     for (int i = 0; i < lookupResult.prevCell->numStaticBytes; ++i) {

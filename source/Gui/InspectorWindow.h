@@ -46,6 +46,7 @@ private:
     void showDigestionTableContent();
     void showConstructionTableContent();
     void showMuscleTableContent();
+    void showSensorTableContent();
 
     float calcWindowWidth() const;
     void addToken(CellDescription& cell);
