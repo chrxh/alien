@@ -94,10 +94,15 @@ __global__ void processingStep10(SimulationData data)
 
 __global__ void processingStep11(SimulationData data)
 {
-    CellConnectionProcessor::processConnectionsOperations(data);
+    data.structuralOperations.saveNumEntries();
 }
 
 __global__ void processingStep12(SimulationData data)
+{
+    CellConnectionProcessor::processConnectionsOperations(data);
+}
+
+__global__ void processingStep13(SimulationData data)
 {
     ParticleProcessor particleProcessor;
     particleProcessor.transformation(data);
@@ -105,7 +110,7 @@ __global__ void processingStep12(SimulationData data)
     CellConnectionProcessor::processDelCellOperations(data);
 }
 
-__global__ void processingStep13(SimulationData data)
+__global__ void processingStep14(SimulationData data)
 {
     TokenProcessor tokenProcessor;
     tokenProcessor.deleteTokenIfCellDeleted(data);
