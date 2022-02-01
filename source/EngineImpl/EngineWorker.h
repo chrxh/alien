@@ -39,7 +39,7 @@ class EngineWorker
 public:
     void initCuda();
 
-    void newSimulation(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
+    void newSimulation(uint64_t timestep, Settings const& settings);
     void clear();
 
     void registerImageResource(void* image);
@@ -138,7 +138,6 @@ private:
   
     //settings
     Settings _settings;
-    GpuSettings _gpuConstants;
 
     //monitor data
     std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;

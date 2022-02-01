@@ -12,4 +12,5 @@ struct Settings
     SimulationParameters simulationParameters;
     SimulationParametersSpots simulationParametersSpots;
     FlowFieldSettings flowFieldSettings;
+    GpuSettings gpuSettings;
 };

@@ -158,6 +158,8 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
         auto r = cellPos - clusterPos;
 
         auto angularVel = Physics::angularVelocity(cluster->clusterAngularMomentum, cluster->clusterAngularMass);
-        cell->vel = cell->vel * 0.0f + Physics::tangentialVelocity(r, clusterVel, angularVel) * 1.0f;
+
+        auto rigidity = SpotCalculator::calc(&SimulationParametersSpotValues::rigidity, data, cell->absPos);
+        cell->vel = cell->vel * (1.0f - rigidity) + Physics::tangentialVelocity(r, clusterVel, angularVel) * rigidity;
     }
 }

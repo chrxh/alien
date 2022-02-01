@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/FlowFieldSettings.h"
+#include "EngineInterface/Settings.h"
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
@@ -12,13 +11,11 @@ class _SimulationKernelsLauncher
 public:
     _SimulationKernelsLauncher();
 
-    void calcTimestep(
-        GpuSettings const& gpuSettings,
-        FlowFieldSettings const& flowFieldSettings,
-        SimulationData const& simulationData,
-        SimulationResult const& result);
+    void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationResult const& result);
 
 private:
+    bool isRigidityUpdateEnabled(Settings const& settings) const;
+
     GarbageCollectorKernelsLauncher _garbageCollector;
     int _counter = 0;
 };

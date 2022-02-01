@@ -12,8 +12,6 @@
 
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/Settings.h"
-#include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 
@@ -24,27 +22,18 @@ class _CudaSimulationAdapter
 public:
     static void initCuda();
 
-    _CudaSimulationAdapter(uint64_t timestep, Settings const& settings, GpuSettings const& gpuSettings);
+    _CudaSimulationAdapter(uint64_t timestep, Settings const& settings);
     ~_CudaSimulationAdapter();
 
     void* registerImageResource(GLuint image);
 
     void calcTimestep();
 
-    void drawVectorGraphics(
-        float2 const& rectUpperLeft,
-        float2 const& rectLowerRight,
-        void* cudaResource,
-        int2 const& imageSize,
-        double zoom);
-    void
-    getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
+    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO);
-    void getInspectedSimulationData(
-        std::vector<uint64_t> entityIds,
-        DataAccessTO const& dataTO);
-    void
-    getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
+    void getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO);
+    void getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
     void addAndSelectSimulationData(DataAccessTO const& dataTO);
     void setSimulationData(DataAccessTO const& dataTO);
     void removeSelectedEntities(bool includeClusters);
@@ -84,8 +73,7 @@ private:
     void resizeArrays(ArraySizes const& additionals);
 
     std::atomic<uint64_t> _currentTimestep;
-    GpuSettings _gpuSettings;
-    FlowFieldSettings _flowFieldSettings;
+    Settings _settings;
 
     std::shared_ptr<SimulationData> _cudaSimulationData;
     std::shared_ptr<RenderingData> _cudaRenderingData;
