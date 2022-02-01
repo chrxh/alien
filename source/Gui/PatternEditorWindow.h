@@ -6,10 +6,10 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _ManipulatorWindow : public _AlienWindow
+class _PatternEditorWindow : public _AlienWindow
 {
 public:
-    _ManipulatorWindow(
+    _PatternEditorWindow(
         EditorModel const& editorModel,
         SimulationController const& simController,
         Viewport const& viewport);

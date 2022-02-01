@@ -1,4 +1,4 @@
-#include "ManipulatorWindow.h"
+#include "PatternEditorWindow.h"
 
 #include <imgui.h>
 
@@ -23,11 +23,11 @@ namespace
     auto const MaxContentTextWidth = 120.0f;
 }
 
-_ManipulatorWindow::_ManipulatorWindow(
+_PatternEditorWindow::_PatternEditorWindow(
     EditorModel const& editorModel,
     SimulationController const& simController,
     Viewport const& viewport)
-    : _AlienWindow("Manipulator", "editor.manipulator", true)
+    : _AlienWindow("Pattern editor", "editor.pattern editor", true)
     , _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
@@ -36,66 +36,67 @@ _ManipulatorWindow::_ManipulatorWindow(
     _openPatternDialog = std::make_shared<_OpenPatternDialog>(editorModel, simController, viewport);
 }
 
-void _ManipulatorWindow::processIntern()
+void _PatternEditorWindow::processIntern()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
+
+    auto selection = _editorModel->getSelectionShallowData();
+    if (hasSelectionChanged(selection)) {
+        _angle = 0;
+        _angularVel = 0;
+    }
+
+    //load button
+    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+        _openPatternDialog->show();
+    }
+
+    //save button
+    ImGui::BeginDisabled(!isCopyingPossible());
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+        _savePatternDialog->show(_editorModel->isRolloutToClusters());
+    }
+    ImGui::EndDisabled();
+
+    //copy button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isCopyingPossible());
+    if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
+        onCopy();
+    }
+    ImGui::EndDisabled();
+
+    //paste button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isPastingPossible());
+    if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
+        onPaste();
+    }
+    ImGui::EndDisabled();
+
+    //delete button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+        _simController->removeSelectedEntities(_editorModel->isRolloutToClusters());
+        _editorModel->update();
+    }
+    ImGui::EndDisabled();
+
+    //inspector button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isInspectionPossible());
+    if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
+        onInspectEntities();
+    }
+    ImGui::EndDisabled();
+
     if (ImGui::BeginChild(
-            "##",
-            ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(50.0f)),
-            false,
-            ImGuiWindowFlags_HorizontalScrollbar)) {
-
-        auto selection = _editorModel->getSelectionShallowData();
-        if (hasSelectionChanged(selection)) {
-            _angle = 0;
-            _angularVel = 0;
-        }
-
-        //load button
-        if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
-            _openPatternDialog->show();
-        }
-
-        //save button
-        ImGui::BeginDisabled(!isCopyingPossible());
-        ImGui::SameLine();
-        if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
-            _savePatternDialog->show(_editorModel->isRolloutToClusters());
-        }
-        ImGui::EndDisabled();
-
-        //copy button
-        ImGui::SameLine();
-        ImGui::BeginDisabled(!isCopyingPossible());
-        if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-            onCopy();
-        }
-        ImGui::EndDisabled();
-
-        //paste button
-        ImGui::SameLine();
-        ImGui::BeginDisabled(!isPastingPossible());
-        if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
-            onPaste();
-        }
-        ImGui::EndDisabled();
-
-        //delete button
-        ImGui::SameLine();
-        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
-        if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
-            _simController->removeSelectedEntities(_editorModel->isRolloutToClusters());
-            _editorModel->update();
-        }
-        ImGui::EndDisabled();
-
-        //inspector button
-        ImGui::SameLine();
-        ImGui::BeginDisabled(!isInspectionPossible());
-        if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
-            onInspectEntities();
-        }
-        ImGui::EndDisabled();
+        "##",
+        ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(50.0f)),
+        false,
+        ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         AlienImGui::Group("Center position and velocity");
@@ -231,6 +232,13 @@ void _ManipulatorWindow::processIntern()
             _editorModel->setDefaultColorCode(7);
         }
 
+        AlienImGui::Group("Miscellaneous");
+        ImGui::Button("Generate rigid body velocities");
+        if (ImGui::Button("Release tensions")) {
+            _simController->relaxSelectedEntities(_editorModel->isRolloutToClusters());
+        }
+        ImGui::Button("Generate ascending branch numbers");
+
         ImGui::EndDisabled();
 
         _lastSelection = selection;
@@ -250,34 +258,34 @@ void _ManipulatorWindow::processIntern()
     _openPatternDialog->process();
 }
 
-bool _ManipulatorWindow::isInspectionPossible() const
+bool _PatternEditorWindow::isInspectionPossible() const
 {
     auto selection = _editorModel->getSelectionShallowData();
     return !_editorModel->isSelectionEmpty() && selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd;
 }
 
-void _ManipulatorWindow::onInspectEntities()
+void _PatternEditorWindow::onInspectEntities()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(false);
     _editorModel->inspectEntities(DescriptionHelper::getEntities(selectedData));
 }
 
-bool _ManipulatorWindow::isCopyingPossible() const
+bool _PatternEditorWindow::isCopyingPossible() const
 {
     return !_editorModel->isSelectionEmpty();
 }
 
-void _ManipulatorWindow::onCopy()
+void _PatternEditorWindow::onCopy()
 {
     _copiedSelection = _simController->getSelectedSimulationData(_editorModel->isRolloutToClusters());
 }
 
-bool _ManipulatorWindow::isPastingPossible() const
+bool _PatternEditorWindow::isPastingPossible() const
 {
     return _copiedSelection.has_value();
 }
 
-void _ManipulatorWindow::onPaste()
+void _PatternEditorWindow::onPaste()
 {
     auto data = *_copiedSelection;
     auto center = _viewport->getCenterInWorldPos();
@@ -286,7 +294,7 @@ void _ManipulatorWindow::onPaste()
     _editorModel->update();
 }
 
-bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)
+bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
 {
     float h, s, v;
     AlienImGui::convertRGBtoHSV(cellColor, h, s,v);
@@ -299,7 +307,7 @@ bool _ManipulatorWindow::colorButton(std::string id, uint32_t cellColor)
     return result;
 }
 
-bool _ManipulatorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
+bool _PatternEditorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
 {
     if(!_lastSelection) {
         return false;

@@ -31,7 +31,7 @@ namespace
         {CreationMode::Drawing, "Draw freehand cell cluster"},
     };
 
-    auto const MaxContentTextWidth = 170.0f;
+    auto const MaxContentTextWidth = 180.0f;
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
@@ -72,67 +72,73 @@ void _CreatorWindow::processIntern()
         _mode = CreationMode::Drawing;
     }
 
-    AlienImGui::Group(ModeText.at(_mode));
-    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-    auto parameters = _simController->getSimulationParameters();
-    if (_mode == CreationMode::CreateCell) {
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
-    }
-    if (_mode == CreationMode::CreateRectangle) {
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
-    }
-    if (_mode == CreationMode::CreateHexagon) {
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
-    }
-    if (_mode == CreationMode::CreateDisc) {
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
-    }
+        AlienImGui::Group(ModeText.at(_mode));
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
 
-    if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc || _mode == CreationMode::Drawing) {
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
-        ImGui::BeginDisabled(!_makeSticky);
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-        ImGui::EndDisabled();
-    }
-    if (_mode == CreationMode::Drawing) {
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
-    }
-
-    AlienImGui::Separator();
-
-    if (_mode == CreationMode::Drawing) {
-        auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
-        if (AlienImGui::Button(text)) {
-            _editorModel->setDrawMode(!_editorModel->isDrawMode());
+        auto parameters = _simController->getSimulationParameters();
+        if (_mode == CreationMode::CreateCell) {
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
         }
-    } else {
-        _editorModel->setDrawMode(false);
-        if (AlienImGui::Button("Build")) {
-            if (_mode == CreationMode::CreateCell) {
-                createCell();
+        if (_mode == CreationMode::CreateRectangle) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
+        }
+        if (_mode == CreationMode::CreateHexagon) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
+        }
+        if (_mode == CreationMode::CreateDisc) {
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
+        }
+
+        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
+            || _mode == CreationMode::Drawing) {
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
+            ImGui::BeginDisabled(!_makeSticky);
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
+            ImGui::EndDisabled();
+        }
+        if (_mode == CreationMode::Drawing) {
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+        }
+
+        AlienImGui::Separator();
+
+        if (_mode == CreationMode::Drawing) {
+            auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
+            if (AlienImGui::Button(text)) {
+                _editorModel->setDrawMode(!_editorModel->isDrawMode());
             }
-            if (_mode == CreationMode::CreateParticle) {
-                createParticle();
+        } else {
+            _editorModel->setDrawMode(false);
+            if (AlienImGui::Button("Build")) {
+                if (_mode == CreationMode::CreateCell) {
+                    createCell();
+                }
+                if (_mode == CreationMode::CreateParticle) {
+                    createParticle();
+                }
+                if (_mode == CreationMode::CreateRectangle) {
+                    createRectangle();
+                }
+                if (_mode == CreationMode::CreateHexagon) {
+                    createHexagon();
+                }
+                if (_mode == CreationMode::CreateDisc) {
+                    createDisc();
+                }
+                _editorModel->update();
             }
-            if (_mode == CreationMode::CreateRectangle) {
-                createRectangle();
-            }
-            if (_mode == CreationMode::CreateHexagon) {
-                createHexagon();
-            }
-            if (_mode == CreationMode::CreateDisc) {
-                createDisc();
-            }
-            _editorModel->update();
         }
     }
+    ImGui::EndChild();
 }
 
 void _CreatorWindow::onDrawing()

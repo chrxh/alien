@@ -70,6 +70,14 @@ __global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataT
     }
 }
 
+namespace
+{
+    __inline__ __device__ bool isSelected(Cell* cell, bool includeClusters)
+    {
+        return (includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1);
+    }
+}
+
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters)
 {
     {
@@ -77,7 +85,7 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = data.entities.cellPointers.at(index);
-            if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+            if (isSelected(cell, includeClusters)) {
                 cell = nullptr;
             }
         }
@@ -88,7 +96,7 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& token = data.entities.tokenPointers.at(index);
             auto const& cell = token->cell; 
-            if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+            if (isSelected(cell, includeClusters)) {
                 token = nullptr;
             }
         }
@@ -111,7 +119,7 @@ __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool incl
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.entities.cellPointers.at(index);
-        if ((includeClusters && cell->selected != 0) || (!includeClusters && cell->selected == 1)) {
+        if (isSelected(cell, includeClusters)) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
                 if ((includeClusters && connectedCell->selected == 0) || (!includeClusters && connectedCell->selected != 1)) {
@@ -129,7 +137,26 @@ __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool incl
     }
 }
 
-__global__ void cudaConnectSelection(SimulationData data, bool considerWithinSelection, int* result)
+__global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        if (isSelected(cell, includeClusters)) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                if (isSelected(connectedCell, includeClusters)) {
+                    auto delta = connectedCell->absPos - cell->absPos;
+                    data.cellMap.mapDisplacementCorrection(delta);
+                    cell->connections[i].distance = Math::length(delta);
+                }
+            }
+        }
+    }
+}
+
+__global__ void cudaScheduleConnectSelection(SimulationData data, bool considerWithinSelection, int* result)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
@@ -276,7 +303,7 @@ __global__ void cudaUpdatePosAndVelForSelection(ShallowUpdateSelectionData updat
     }
 }
 
-__global__ void cudaDisconnectSelectionFromRemainings(SimulationData data, int* result)
+__global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData data, int* result)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
@@ -294,6 +321,11 @@ __global__ void cudaDisconnectSelectionFromRemainings(SimulationData data, int* 
             }
         }
     }
+}
+
+__global__ void cudaPrepareConnectionChanges(SimulationData data)
+{
+    data.structuralOperations.saveNumEntries();
 }
 
 __global__ void cudaProcessConnectionChanges(SimulationData data)

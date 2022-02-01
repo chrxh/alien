@@ -3,8 +3,6 @@ target_sources(alien
 PUBLIC
     AboutDialog.cpp
     AboutDialog.h
-    ManipulatorWindow.cpp
-    ManipulatorWindow.h
     AlienImGui.cpp
     AlienImGui.h
     AlienWindow.cpp
@@ -53,6 +51,8 @@ PUBLIC
     OpenSimulationDialog.h
     OpenSymbolsDialog.cpp
     OpenSymbolsDialog.h
+    PatternEditorWindow.cpp
+    PatternEditorWindow.h
     Resources.h
     SavePatternDialog.cpp
     SavePatternDialog.h

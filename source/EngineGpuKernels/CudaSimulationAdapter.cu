@@ -293,6 +293,12 @@ void _CudaSimulationAdapter::removeSelectedEntities(bool includeClusters)
     syncAndCheck();
 }
 
+void _CudaSimulationAdapter::relaxSelectedEntities(bool includeClusters)
+{
+    _editKernels->relaxSelectedEntities(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    syncAndCheck();
+}
+
 void _CudaSimulationAdapter::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);

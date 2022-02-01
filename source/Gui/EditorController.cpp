@@ -10,7 +10,7 @@
 #include "StyleRepository.h"
 #include "EditorModel.h"
 #include "SelectionWindow.h"
-#include "ManipulatorWindow.h"
+#include "PatternEditorWindow.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
 #include "SymbolsWindow.h"
@@ -21,7 +21,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
 {
     _editorModel = std::make_shared<_EditorModel>(_simController);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
-    _manipulatorWindow = std::make_shared<_ManipulatorWindow>(_editorModel, _simController, _viewport);
+    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
     _symbolsWindow = std::make_shared<_SymbolsWindow>(_simController);
@@ -45,7 +45,7 @@ void _EditorController::process()
 
     if (!_simController->isSimulationRunning()) {
         _selectionWindow->process();
-        _manipulatorWindow->process();
+        _patternEditorWindow->process();
         _creatorWindow->process();
         _multiplierWindow->process();
         _symbolsWindow->process();
@@ -117,9 +117,9 @@ SelectionWindow _EditorController::getSelectionWindow() const
     return _selectionWindow;
 }
 
-ManipulatorWindow _EditorController::getManipulatorWindow() const
+PatternEditorWindow _EditorController::getPatternEditorWindow() const
 {
-    return _manipulatorWindow;
+    return _patternEditorWindow;
 }
 
 CreatorWindow _EditorController::getCreatorWindow() const
@@ -149,32 +149,32 @@ void _EditorController::onCloseAllInspectorWindows()
 
 bool _EditorController::isInspectionPossible() const
 {
-    return _manipulatorWindow->isInspectionPossible();
+    return _patternEditorWindow->isInspectionPossible();
 }
 
 void _EditorController::onInspectEntities() const
 {
-    _manipulatorWindow->onInspectEntities();
+    _patternEditorWindow->onInspectEntities();
 }
 
 bool _EditorController::isCopyingPossible() const
 {
-    return _manipulatorWindow->isCopyingPossible();
+    return _patternEditorWindow->isCopyingPossible();
 }
 
 void _EditorController::onCopy()
 {
-    _manipulatorWindow->onCopy();
+    _patternEditorWindow->onCopy();
 }
 
 bool _EditorController::isPastingPossible() const
 {
-    return _manipulatorWindow->isPastingPossible();
+    return _patternEditorWindow->isPastingPossible();
 }
 
 void _EditorController::onPaste()
 {
-    _manipulatorWindow->onPaste();
+    _patternEditorWindow->onPaste();
 }
 
 void _EditorController::processSelectionRect()

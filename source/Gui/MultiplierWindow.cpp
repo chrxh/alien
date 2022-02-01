@@ -37,46 +37,51 @@ void _MultiplierWindow::processIntern()
         _mode = MultiplierMode::Random;
     }
 
-    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-    AlienImGui::Group(ModeText.at(_mode));
-    if (_mode == MultiplierMode::Grid) {
-        processGridPanel();
-    }
-    if (_mode == MultiplierMode::Random) {
-        processRandomPanel();
-    }
-    ImGui::EndDisabled();
+        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
 
-    AlienImGui::Separator();
-    ImGui::BeginDisabled(
-        _editorModel->isSelectionEmpty() || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData())));
-    if (AlienImGui::Button("Build")) {
-        _origSelection = _simController->getSelectedSimulationData(true);
-        auto multiplicationResult = [&] {
-            if (_mode == MultiplierMode::Grid) {
-                return DescriptionHelper::gridMultiply(_origSelection, _gridParameters);
-            }
-            return DescriptionHelper::randomMultiply(_origSelection, _randomParameters, _simController->getWorldSize());
-        }();
-        _simController->removeSelectedEntities(true);
-        _simController->addAndSelectSimulationData(multiplicationResult);
+        AlienImGui::Group(ModeText.at(_mode));
+        if (_mode == MultiplierMode::Grid) {
+            processGridPanel();
+        }
+        if (_mode == MultiplierMode::Random) {
+            processRandomPanel();
+        }
+        ImGui::EndDisabled();
 
-        _editorModel->update();
-        _selectionDataAfterMultiplication = _editorModel->getSelectionShallowData();
-    }
-    ImGui::EndDisabled();
+        AlienImGui::Separator();
+        ImGui::BeginDisabled(
+            _editorModel->isSelectionEmpty()
+            || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData())));
+        if (AlienImGui::Button("Build")) {
+            _origSelection = _simController->getSelectedSimulationData(true);
+            auto multiplicationResult = [&] {
+                if (_mode == MultiplierMode::Grid) {
+                    return DescriptionHelper::gridMultiply(_origSelection, _gridParameters);
+                }
+                return DescriptionHelper::randomMultiply(_origSelection, _randomParameters, _simController->getWorldSize());
+            }();
+            _simController->removeSelectedEntities(true);
+            _simController->addAndSelectSimulationData(multiplicationResult);
 
-    ImGui::SameLine();
-    ImGui::BeginDisabled(
-        _editorModel->isSelectionEmpty() || !_selectionDataAfterMultiplication
-        || !_selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
-    if (AlienImGui::Button("Undo")) {
-        _simController->removeSelectedEntities(true);
-        _simController->addAndSelectSimulationData(_origSelection);
-        _selectionDataAfterMultiplication = std::nullopt;
+            _editorModel->update();
+            _selectionDataAfterMultiplication = _editorModel->getSelectionShallowData();
+        }
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled(
+            _editorModel->isSelectionEmpty() || !_selectionDataAfterMultiplication
+            || !_selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
+        if (AlienImGui::Button("Undo")) {
+            _simController->removeSelectedEntities(true);
+            _simController->addAndSelectSimulationData(_origSelection);
+            _selectionDataAfterMultiplication = std::nullopt;
+        }
+        ImGui::EndDisabled();
     }
-    ImGui::EndDisabled();
+    ImGui::EndChild();
 }
 
 void _MultiplierWindow::processGridPanel()
