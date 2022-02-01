@@ -12,38 +12,38 @@ _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 void _SimulationKernelsLauncher::calcTimestep(
     GpuSettings const& gpuSettings,
     FlowFieldSettings const& flowFieldSettings,
-    SimulationData const& simulationData,
+    SimulationData const& data,
     SimulationResult const& result)
 {
-    KERNEL_CALL_1_1(prepareForNextTimestep, simulationData, result);
+    KERNEL_CALL_1_1(cudaPrepareNextTimestep, data, result);
     if (flowFieldSettings.active) {
-        KERNEL_CALL(cudaApplyFlowFieldSettings, simulationData);
+        KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
-    KERNEL_CALL(processingStep1, simulationData);
-    KERNEL_CALL(processingStep2, simulationData);
-    KERNEL_CALL(processingStep3, simulationData);
-    KERNEL_CALL(processingStep4, simulationData);
-    KERNEL_CALL(processingStep5, simulationData);
-    KERNEL_CALL(processingStep6, simulationData, result);
-    KERNEL_CALL(processingStep7, simulationData);
-    KERNEL_CALL(processingStep8, simulationData, result);
-    KERNEL_CALL(processingStep9, simulationData);
-    KERNEL_CALL(processingStep10, simulationData);
+    KERNEL_CALL(cudaNextTimestep_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_substep2, data);
+    KERNEL_CALL(cudaNextTimestep_substep3, data);
+    KERNEL_CALL(cudaNextTimestep_substep4, data);
+    KERNEL_CALL(cudaNextTimestep_substep5, data);
+    KERNEL_CALL(cudaNextTimestep_substep6, data, result);
+    KERNEL_CALL(cudaNextTimestep_substep7, data);
+    KERNEL_CALL(cudaNextTimestep_substep8, data, result);
+    KERNEL_CALL(cudaNextTimestep_substep9, data);
+    KERNEL_CALL(cudaNextTimestep_substep10, data);
     if (++_counter == 3) {
-        KERNEL_CALL(cudaInitClusterData, simulationData);
-        KERNEL_CALL(cudaFindClusterIteration, simulationData);
-        KERNEL_CALL(cudaFindClusterIteration, simulationData);
-        KERNEL_CALL(cudaFindClusterIteration, simulationData);
-        KERNEL_CALL(cudaFindClusterBoundaries, simulationData);
-        KERNEL_CALL(cudaAccumulateClusterPosAndVel, simulationData);
-        KERNEL_CALL(cudaAccumulateClusterAngularProp, simulationData);
-        KERNEL_CALL(cudaApplyClusterData, simulationData);
+        KERNEL_CALL(cudaInitClusterData, data);
+        KERNEL_CALL(cudaFindClusterIteration, data);  //3 iterations give a good approximation
+        KERNEL_CALL(cudaFindClusterIteration, data);
+        KERNEL_CALL(cudaFindClusterIteration, data);
+        KERNEL_CALL(cudaFindClusterBoundaries, data);
+        KERNEL_CALL(cudaAccumulateClusterPosAndVel, data);
+        KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
+        KERNEL_CALL(cudaApplyClusterData, data);
         _counter = 0;
     }
-    KERNEL_CALL(processingStep11, simulationData);
-    KERNEL_CALL(processingStep12, simulationData);
-    KERNEL_CALL(processingStep13, simulationData);
-    KERNEL_CALL(processingStep14, simulationData);
+    KERNEL_CALL_1_1(cudaNextTimestep_substep11, data);
+    KERNEL_CALL(cudaNextTimestep_substep12, data);
+    KERNEL_CALL(cudaNextTimestep_substep13, data);
+    KERNEL_CALL(cudaNextTimestep_substep14, data);
 
-    _garbageCollector->cleanupAfterTimestep(gpuSettings, simulationData);
+    _garbageCollector->cleanupAfterTimestep(gpuSettings, data);
 }
