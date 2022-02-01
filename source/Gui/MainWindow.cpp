@@ -404,7 +404,7 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
-            if (ImGui::MenuItem("Creator", "ALT+C", creatorWindow->isOn())) {
+            if (ImGui::MenuItem("Creator", "ALT+R", creatorWindow->isOn())) {
                 creatorWindow->setOn(!creatorWindow->isOn());
             }
             if (ImGui::MenuItem("Pattern editor", "ALT+M", patternEditorWindow->isOn())) {
@@ -538,6 +538,9 @@ void _MainWindow::processMenubar()
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
         patternEditorWindow->setOn(!patternEditorWindow->isOn());
+    }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+        creatorWindow->setOn(!creatorWindow->isOn());
     }
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
         multiplierWindow->setOn(!multiplierWindow->isOn());

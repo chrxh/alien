@@ -232,7 +232,7 @@ void _PatternEditorWindow::processIntern()
             _editorModel->setDefaultColorCode(7);
         }
 
-        AlienImGui::Group("Miscellaneous");
+        AlienImGui::Group("Further actions");
         ImGui::Button("Generate rigid body velocities");
         if (ImGui::Button("Release tensions")) {
             _simController->relaxSelectedEntities(_editorModel->isRolloutToClusters());
