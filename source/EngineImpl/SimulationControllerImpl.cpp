@@ -13,8 +13,7 @@ void _SimulationControllerImpl::newSimulation(uint64_t timestep, Settings const&
     _origSettings = settings;
     _symbolMap = symbolMap;
     _origSymbolMap = symbolMap;
-    _worker.newSimulation(timestep, settings, _gpuSettings);
-    _origGpuSettings = _gpuSettings;
+    _worker.newSimulation(timestep, settings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
@@ -200,17 +199,17 @@ void _SimulationControllerImpl::setSimulationParametersSpots_async(SimulationPar
 
 GpuSettings _SimulationControllerImpl::getGpuSettings() const
 {
-    return _gpuSettings;
+    return _settings.gpuSettings;
 }
 
 GpuSettings _SimulationControllerImpl::getOriginalGpuSettings() const
 {
-    return _origGpuSettings;
+    return _origSettings.gpuSettings;
 }
 
 void _SimulationControllerImpl::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
-    _gpuSettings = gpuSettings;
+    _settings.gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);
 }
 

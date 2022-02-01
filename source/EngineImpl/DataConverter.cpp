@@ -8,13 +8,9 @@
 #include "EngineInterface/Descriptions.h"
 
 
-DataConverter::DataConverter(
-    SimulationParameters const& parameters,
-    GpuSettings const& gpuConstants)
+DataConverter::DataConverter(SimulationParameters const& parameters)
     : _parameters(parameters)
-    , _gpuConstants(gpuConstants)
-{
-}
+{}
 
 ClusteredDataDescription DataConverter::convertAccessTOtoClusteredDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens) const
 {

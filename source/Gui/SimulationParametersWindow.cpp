@@ -133,6 +133,16 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.friction);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
+                .name("Rigidity")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .format("%.2f")
+                .defaultValue(origSimParameters.spotValues.rigidity)
+                .tooltip(std::string("Controls the rigidity of connected cells.\nA higher value will cause connected cells to move more uniformly.")),
+            simParameters.spotValues.rigidity);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
                 .name("Radiation strength")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
@@ -369,6 +379,15 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .defaultValue(origSpot.values.friction)
                 .format("%.4f"),
             spot.values.friction);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Rigidity")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1)
+                .defaultValue(origSpot.values.rigidity)
+                .format("%.2f"),
+            spot.values.rigidity);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Radiation strength")

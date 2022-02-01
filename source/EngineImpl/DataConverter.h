@@ -13,7 +13,7 @@
 class DataConverter
 {
 public:
-    DataConverter(SimulationParameters const& parameters, GpuSettings const& gpuConstants);
+    DataConverter(SimulationParameters const& parameters);
 
     enum class SortTokens {No, Yes};
     ClusteredDataDescription convertAccessTOtoClusteredDataDescription(DataAccessTO const& dataTO, SortTokens sortTokens = SortTokens::No)

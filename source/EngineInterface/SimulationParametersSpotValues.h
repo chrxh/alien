@@ -3,6 +3,7 @@
 struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
+    float rigidity = 0.0f;
     float radiationFactor = 0.0002f;
     float cellMaxForce = 0.8f;
     float cellMinEnergy = 50.0f;
@@ -18,7 +19,7 @@ struct SimulationParametersSpotValues
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
-        return friction == other.friction && radiationFactor == other.radiationFactor
+        return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor
             && cellMaxForce == other.cellMaxForce && cellMinEnergy == other.cellMinEnergy
             && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
             && tokenMutationRate == other.tokenMutationRate

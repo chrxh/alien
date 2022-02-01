@@ -113,8 +113,6 @@ private:
 
     Settings _origSettings;
     Settings _settings;
-    GpuSettings _gpuSettings; 
-    GpuSettings _origGpuSettings;
     SymbolMap _symbolMap;
     SymbolMap _origSymbolMap;
 
