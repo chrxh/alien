@@ -20,5 +20,6 @@ public:
 
 private:
     GarbageCollectorKernelsLauncher _garbageCollector;
+    int _counter = 0;
 };
 

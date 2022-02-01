@@ -30,3 +30,10 @@ __global__ void processingStep11(SimulationData data);
 __global__ void processingStep12(SimulationData data);
 __global__ void processingStep13(SimulationData data);
 
+
+__global__ void cudaInitClusterData(SimulationData data);
+__global__ void cudaFindClusterIteration(SimulationData data);
+__global__ void cudaFindClusterBoundaries(SimulationData data);
+__global__ void cudaAccumulateClusterPosAndVel(SimulationData data);
+__global__ void cudaAccumulateClusterAngularProp(SimulationData data);
+__global__ void cudaApplyClusterData(SimulationData data);

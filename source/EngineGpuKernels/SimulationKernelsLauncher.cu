@@ -19,7 +19,6 @@ void _SimulationKernelsLauncher::calcTimestep(
     if (flowFieldSettings.active) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, simulationData);
     }
-
     KERNEL_CALL(processingStep1, simulationData);
     KERNEL_CALL(processingStep2, simulationData);
     KERNEL_CALL(processingStep3, simulationData);
@@ -30,6 +29,17 @@ void _SimulationKernelsLauncher::calcTimestep(
     KERNEL_CALL(processingStep8, simulationData, result);
     KERNEL_CALL(processingStep9, simulationData);
     KERNEL_CALL(processingStep10, simulationData);
+    if (++_counter == 3) {
+        KERNEL_CALL(cudaInitClusterData, simulationData);
+        KERNEL_CALL(cudaFindClusterIteration, simulationData);
+        KERNEL_CALL(cudaFindClusterIteration, simulationData);
+        KERNEL_CALL(cudaFindClusterIteration, simulationData);
+        KERNEL_CALL(cudaFindClusterBoundaries, simulationData);
+        KERNEL_CALL(cudaAccumulateClusterPosAndVel, simulationData);
+        KERNEL_CALL(cudaAccumulateClusterAngularProp, simulationData);
+        KERNEL_CALL(cudaApplyClusterData, simulationData);
+        _counter = 0;
+    }
     KERNEL_CALL(processingStep11, simulationData);
     KERNEL_CALL(processingStep12, simulationData);
     KERNEL_CALL(processingStep13, simulationData);

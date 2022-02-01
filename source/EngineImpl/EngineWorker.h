@@ -110,7 +110,7 @@ private:
 
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
-    std::atomic<bool> _requireAccess{false};
+    std::atomic<int> _requireAccess{0}; // 1=require access, 2=access granted
     ExceptionData _exceptionData;
 
     //async jobs
@@ -168,7 +168,7 @@ public:
 private:
     void checkForException(ExceptionData const& exceptionData);
 
-    std::atomic<bool>& _accessFlag;
+    std::atomic<int>& _accessFlag;
     std::condition_variable& _conditionForWorkerLoop;
 
     bool _isTimeout = false;

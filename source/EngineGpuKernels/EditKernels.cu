@@ -425,7 +425,9 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
 
         if (0 != cell->selected) {
             auto currentCell = cell;
-            for (int i = 0; i < 10; ++i) {
+
+            //heuristics to cover connected cells
+            for (int i = 0; i < 30; ++i) {
                 bool found = false;
                 for (int j = 0; j < currentCell->numConnections; ++j) {
                     auto candidateCell = currentCell->connections[j].cell;
