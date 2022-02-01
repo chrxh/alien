@@ -1,11 +1,11 @@
 <h1 align="center">
-<a href="https://alien-project.org" target="_blank">ALiEn - Explore the world of artificial life</a>
+<a href="https://alien-project.org" target="_blank">ALIEN - Explore the world of artificial life</a>
 </h1>
 
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
-<b>Artificial Life Environment (ALiEn)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, actuators, weapons, constructors, etc.) whose executions are orchestrated by a signaling system. The bodies can be thought of as agents or digital organisms operating in a common environment.
+<b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, actuators, weapons, constructors, etc.) whose executions are orchestrated by a signaling system. The bodies can be thought of as agents or digital organisms operating in a common environment.
 <br/>
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 
@@ -61,7 +61,7 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release -j8
 ```
-If everything goes well, the alien executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
+If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).
@@ -99,4 +99,4 @@ Please visit [alien-project.org](https://alien-project.org/documentation/index.h
 </h1>
 
 ## License
-alien is licensed under the [GPLv3](LICENSE).
+ALIEN is licensed under the [GPLv3](LICENSE).
