@@ -12,13 +12,14 @@ public:
     _SpatialControlWindow(SimulationController const& simController, Viewport const& viewport);
 
 private:
-    void processIntern();
+    void processIntern() override;
+
     void processZoomInButton();
     void processZoomOutButton();
     void processResizeButton();
-    void processZoomSensitivitySlider();
 
     void processResizeDialog();
+    void processCenterOnSelection();
 
     void onResizing();
 
@@ -27,6 +28,7 @@ private:
 
     bool _showResizeDialog = false;
     bool _scaleContent = false;
+    bool _centerSelection = false;
     int _width = 0;
     int _height = 0;
 };

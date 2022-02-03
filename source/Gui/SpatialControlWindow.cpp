@@ -61,11 +61,20 @@ void _SpatialControlWindow::processIntern()
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
-        processZoomSensitivitySlider();
+        AlienImGui::Separator();
+        AlienImGui::ToggleButton("Center selection", _centerSelection);
+        ImGui::Spacing();
+        ImGui::Spacing();
+        float sensitivity = _viewport->getZoomSensitivity();
+        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.15f).textWidth(130).format(""), sensitivity)) {
+            _viewport->setZoomSensitivity(sensitivity);
+        }
     }
     ImGui::EndChild();
 
     processResizeDialog();
+
+    processCenterOnSelection();
 }
 
 void _SpatialControlWindow::processZoomInButton()
@@ -90,18 +99,6 @@ void _SpatialControlWindow::processResizeButton()
         _width = worldSize.x;
         _height = worldSize.y;
     }
-}
-
-void _SpatialControlWindow::processZoomSensitivitySlider()
-{
-    ImGui::Text("Zoom sensitivity");
-
-    float sensitivity = _viewport->getZoomSensitivity();
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    if (ImGui::SliderFloat("", &sensitivity, 1.0f, 1.15f, "")) {
-        _viewport->setZoomSensitivity(sensitivity);
-    }
-    ImGui::PopItemWidth();
 }
 
 void _SpatialControlWindow::processResizeDialog()
@@ -157,6 +154,16 @@ void _SpatialControlWindow::processResizeDialog()
             ImGui::EndPopup();
             _width = std::max(1, _width);
             _height = std::max(1, _height);
+        }
+    }
+}
+
+void _SpatialControlWindow::processCenterOnSelection()
+{
+    if (_centerSelection && _simController->isSimulationRunning()) {
+        auto shallowData = _simController->getSelectionShallowData();
+        if (shallowData.numCells > 0 || shallowData.numParticles > 0) {
+            _viewport->setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
         }
     }
 }

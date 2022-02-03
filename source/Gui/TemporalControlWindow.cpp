@@ -51,8 +51,7 @@ void _TemporalControlWindow::processIntern()
         processTpsInfo();
         processTotalTimestepsInfo();
 
-        ImGui::Spacing();
-        ImGui::Spacing();
+        AlienImGui::Separator();
         processTpsRestriction();
     }
     ImGui::EndChild();

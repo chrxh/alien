@@ -23,11 +23,11 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
+bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
 {
     auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
-    ImGui::SliderFloat(
+    auto result = ImGui::SliderFloat(
         ("##" + parameters._name).c_str(),
         &value,
         parameters._min,
@@ -47,6 +47,7 @@ void AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+    return result;
 }
 
 void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
