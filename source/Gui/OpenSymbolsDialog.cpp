@@ -5,10 +5,22 @@
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 #include "ImFileDialog.h"
+#include "GlobalSettings.h"
 
 _OpenSymbolsDialog::_OpenSymbolsDialog(SimulationController const& simController)
     : _simController(simController)
-{}
+{
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("dialogs.open symbols.starting path", path.string());
+}
+
+_OpenSymbolsDialog::~_OpenSymbolsDialog()
+{
+    GlobalSettings::getInstance().setStringState("dialogs.open symbols.starting path", _startingPath);
+}
 
 void _OpenSymbolsDialog::process()
 {
@@ -16,8 +28,9 @@ void _OpenSymbolsDialog::process()
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {
-        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-        auto firstFilename = res.front();
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
 
         Serializer serializer = std::make_shared<_Serializer>();
 
@@ -31,5 +44,5 @@ void _OpenSymbolsDialog::process()
 
 void _OpenSymbolsDialog::show()
 {
-    ifd::FileDialog::Instance().Open("OpenSymbolsDialog", "Open symbols", "Symbols file (*.json){.json},.*", false);
+    ifd::FileDialog::Instance().Open("OpenSymbolsDialog", "Open symbols", "Symbols file (*.json){.json},.*", false, _startingPath);
 }

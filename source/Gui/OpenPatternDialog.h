@@ -10,6 +10,7 @@ public:
         EditorModel const& editorModel,
         SimulationController const& simController,
         Viewport const& viewport);
+    ~_OpenPatternDialog();
 
     void process();
 
@@ -19,4 +20,6 @@ private:
     EditorModel _editorModel;
     SimulationController _simController;
     Viewport _viewport;
+
+    std::string _startingPath;
 };

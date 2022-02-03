@@ -93,6 +93,9 @@ RealRect _SimulationScrollbar::calcSliderbarRect(RealRect const& scrollbarRect) 
         Orientation::Horizontal == _orientation ? ImVec2{4 + sliderBarStartPos, 4} : ImVec2{4, 4 + sliderBarStartPos};
     auto sliderBarSize = Orientation::Horizontal == _orientation ? ImVec2{sliderBarEndPos - sliderBarStartPos - 8, 10}
                                                                  : ImVec2{10, sliderBarEndPos - sliderBarStartPos - 8};
+
+    sliderBarSize = {std::max(10.0f, sliderBarSize.x), std::max(10.0f, sliderBarSize.y)};
+
     return {
         {sliderBarPos.x, sliderBarPos.y}, {sliderBarPos.x + sliderBarSize.x - 1, sliderBarPos.y + sliderBarSize.y - 1}};
 }

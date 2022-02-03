@@ -7,6 +7,7 @@ class _SaveSymbolsDialog
 {
 public:
     _SaveSymbolsDialog(SimulationController const& simController);
+    ~_SaveSymbolsDialog();
 
     void process();
 
@@ -14,4 +15,6 @@ public:
 
 private:
     SimulationController _simController;
+
+    std::string _startingPath;
 };
