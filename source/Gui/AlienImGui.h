@@ -19,7 +19,7 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void SliderFloat(SliderFloatParameters const& parameters, float& value);
+    static bool SliderFloat(SliderFloatParameters const& parameters, float& value);
 
     struct SliderIntParameters
     {
