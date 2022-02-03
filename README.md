@@ -64,7 +64,7 @@ cmake --build . --config Release -j8
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 
 ## Installer
-An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer-v3.0.0-(preview).zip).
+An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer.zip).
 It is updated from the develop branch on a weekly basis. 
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
