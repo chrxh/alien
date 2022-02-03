@@ -8,6 +8,7 @@ class _OpenSymbolsDialog
 {
 public:
     _OpenSymbolsDialog(SimulationController const& simController);
+    ~_OpenSymbolsDialog();
 
     void process();
 
@@ -15,4 +16,6 @@ public:
 
 private:
     SimulationController _simController;
+
+    std::string _startingPath;
 };

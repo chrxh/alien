@@ -8,6 +8,7 @@
 #include "StatisticsWindow.h"
 #include "Viewport.h"
 #include "TemporalControlWindow.h"
+#include "GlobalSettings.h"
 
 _OpenSimulationDialog::_OpenSimulationDialog(
     SimulationController const& simController,
@@ -18,7 +19,18 @@ _OpenSimulationDialog::_OpenSimulationDialog(
     , _temporalControlWindow(temporalControlWindow)
     , _statisticsWindow(statisticsWindow)
     , _viewport(viewport)
-{}
+{
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("dialogs.open simulation.starting path", path.string());
+}
+
+_OpenSimulationDialog::~_OpenSimulationDialog()
+{
+    GlobalSettings::getInstance().setStringState("dialogs.open simulation.starting path", _startingPath);
+}
 
 void _OpenSimulationDialog::process()
 {
@@ -26,9 +38,9 @@ void _OpenSimulationDialog::process()
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {
-        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-        auto firstFilename = res.front();
-
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
         Serializer serializer = std::make_shared<_Serializer>();
 
         DeserializedSimulation deserializedData;
@@ -51,6 +63,5 @@ void _OpenSimulationDialog::process()
 
 void _OpenSimulationDialog::show()
 {
-    ifd::FileDialog::Instance().Open(
-        "SimulationOpenDialog", "Open simulation", "Simulation file (*.sim){.sim},.*", false);
+    ifd::FileDialog::Instance().Open("SimulationOpenDialog", "Open simulation", "Simulation file (*.sim){.sim},.*", false, _startingPath);
 }

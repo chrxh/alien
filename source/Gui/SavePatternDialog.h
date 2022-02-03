@@ -7,6 +7,7 @@ class _SavePatternDialog
 {
 public:
     _SavePatternDialog(SimulationController const& simController);
+    ~_SavePatternDialog();
 
     void process();
 
@@ -14,4 +15,5 @@ public:
 private:
     SimulationController _simController;
     bool _includeClusters = true;
+    std::string _startingPath;
 };

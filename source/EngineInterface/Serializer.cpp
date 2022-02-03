@@ -217,8 +217,14 @@ bool _Serializer::deserializeContentFromFile(std::string const& filename, Cluste
         if (!stream) {
             return false;
         }
-        deserializeDataDescription(content, stream);
+        std::string compressedData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+
+        std::stringstream stringStream;
+        decompress(std::move(compressedData), stringStream);
+        stringStream.seekg(0, std::ios::beg);
+        deserializeDataDescription(content, stringStream);
         stream.close();
+
         return true;
     } catch (std::exception const& e) {
         throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());

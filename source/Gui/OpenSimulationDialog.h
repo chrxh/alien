@@ -11,6 +11,7 @@ public:
         TemporalControlWindow const& temporalControlWindow,
         StatisticsWindow const& statisticsWindow,
         Viewport const& viewport);
+    ~_OpenSimulationDialog();
 
     void process();
 
@@ -21,5 +22,7 @@ private:
     TemporalControlWindow _temporalControlWindow;
     StatisticsWindow _statisticsWindow;
     Viewport _viewport;
+
+    std::string _startingPath;
 };
 

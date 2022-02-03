@@ -8,6 +8,7 @@
 #include "StatisticsWindow.h"
 #include "Viewport.h"
 #include "EditorModel.h"
+#include "GlobalSettings.h"
 
 _OpenPatternDialog::_OpenPatternDialog(
     EditorModel const& editorModel,
@@ -16,7 +17,18 @@ _OpenPatternDialog::_OpenPatternDialog(
     : _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
-{}
+{
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("dialogs.open pattern.starting path", path.string());
+}
+
+_OpenPatternDialog::~_OpenPatternDialog()
+{
+    GlobalSettings::getInstance().setStringState("dialogs.open pattern.starting path", _startingPath);
+}
 
 void _OpenPatternDialog::process()
 {
@@ -24,8 +36,9 @@ void _OpenPatternDialog::process()
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {
-        const std::vector<std::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-        auto firstFilename = res.front();
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
 
         Serializer serializer = std::make_shared<_Serializer>();
 
@@ -42,6 +55,5 @@ void _OpenPatternDialog::process()
 
 void _OpenPatternDialog::show()
 {
-    ifd::FileDialog::Instance().Open(
-        "OpenPatternDialog", "Open pattern", "Pattern file (*.sim){.sim},.*", false);
+    ifd::FileDialog::Instance().Open("OpenPatternDialog", "Open pattern", "Pattern file (*.sim){.sim},.*", false, _startingPath);
 }
