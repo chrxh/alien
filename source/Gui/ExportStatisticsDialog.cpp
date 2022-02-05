@@ -41,7 +41,7 @@ void _ExportStatisticsDialog::process()
 void _ExportStatisticsDialog::show(LongtermStatistics const& longtermStatistics)
 {
     _statistics = longtermStatistics;
-    ifd::FileDialog::Instance().Save("ExportStatisticsDialog", "Export statistics", "Statistics file (*.csv){.csv},.*", _startingPath);
+    ifd::FileDialog::Instance().Save("ExportStatisticsDialog", "Export statistics", "Comma-separated values (*.csv){.csv},.*", _startingPath);
 }
 
 void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
