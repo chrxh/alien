@@ -13,6 +13,7 @@ void Entities::init()
     particles.init();
     particlePointers.init();
     dynamicMemory.init();
+    dynamicMemory.resize(MAX_STRING_BYTES_PER_CELL);
 }
 
 void Entities::free()
