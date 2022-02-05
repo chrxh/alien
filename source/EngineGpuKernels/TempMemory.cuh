@@ -30,13 +30,11 @@ public:
 
     __host__ __inline__ void resize(uint64_t size)
     {
-/*
         if (_size > 0) {
             unsigned char* data = nullptr;
             CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
             CudaMemoryManager::getInstance().freeMemory(data);
         }
-*/
 
         _size = size;
         unsigned char* data = nullptr;
@@ -99,18 +97,5 @@ public:
     {
         swap(*_bytesOccupied, *other._bytesOccupied);
         swap(*_data, *other._data);
-    }
-
-    __host__ __inline__ void swapContent_host(TempMemory& other)
-    {
-        auto numBytes = getNumBytes_host();
-        auto otherNumBytes = other.getNumBytes_host();
-        setNumBytes_host(otherNumBytes);
-        other.setNumBytes_host(numBytes);
-
-        auto data = getData_host();
-        auto otherData = other.getData_host();
-        setData_host(otherData);
-        other.setData_host(data);
     }
 };

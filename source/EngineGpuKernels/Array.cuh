@@ -108,18 +108,6 @@ public:
         swap(*_numEntries, *other._numEntries);
         swap(*_data, *other._data);
     }
-    __host__ __inline__ void swapContent_host(Array& other)
-    {
-        auto numEntries = getNumEntries_host();
-        auto otherNumEntries = other.getNumEntries_host();
-        setNumEntries_host(otherNumEntries);
-        other.setNumEntries_host(numEntries);
-
-        auto data = getArray_host();
-        auto otherData = other.getArray_host();
-        setArray_host(otherData);
-        other.setArray_host(data);
-    }
 
     __device__ __inline__ void reset() { *_numEntries = 0; }
 

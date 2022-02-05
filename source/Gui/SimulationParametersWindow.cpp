@@ -410,8 +410,8 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloatParameters()
                 .name("Minimum energy")
                 .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(100.0f)
+                .min(10.0f)
+                .max(200.0f)
                 .defaultValue(origSpot.values.cellMinEnergy),
             spot.values.cellMinEnergy);
 

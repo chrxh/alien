@@ -509,12 +509,8 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
 
         _cudaSimulationData->resizeRemainings();
 
-/*
         _garbageCollectorKernels->swapArrays(_settings.gpuSettings, *_cudaSimulationData);
         syncAndCheck();
-*/
-
-        _cudaSimulationData->swap();  //#TODO garbageCollector -> use swap arrays
     } else {
         _cudaSimulationData->resizeRemainings();
     }
@@ -529,7 +525,7 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
-    CudaMemoryManager::getInstance().acquireMemory<char>(cellArraySize * STRING_BYTES_PER_CELL, _cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_STRING_BYTES_PER_CELL, _cudaAccessTO->stringBytes);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 

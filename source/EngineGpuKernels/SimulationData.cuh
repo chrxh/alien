@@ -33,7 +33,6 @@ struct SimulationData
     void resizeEntitiesForCleanup(int additionalCells, int additionalParticles, int additionalTokens);
     void resizeRemainings();
     bool isEmpty();
-    void swap();
     void free();
 
     __device__ void prepareForNextTimestep();

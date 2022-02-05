@@ -72,7 +72,7 @@ DataAccessTO _AccessDataTOCache::getNewDataTO()
         result.cells = new CellAccessTO[_arraySizes->cellArraySize];
         result.particles = new ParticleAccessTO[_arraySizes->particleArraySize];
         result.tokens = new TokenAccessTO[_arraySizes->tokenArraySize];
-        result.stringBytes = new char[_arraySizes->cellArraySize * STRING_BYTES_PER_CELL];
+        result.stringBytes = new char[MAX_STRING_BYTES_PER_CELL];
         return result;
     } catch (std::bad_alloc const&) {
         throw BugReportException("There is not sufficient CPU memory available.");
