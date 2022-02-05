@@ -5,10 +5,10 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _StartupWindow
+class _StartupController
 {
 public:
-    _StartupWindow(SimulationController const& simController, Viewport const& viewport);
+    _StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow, Viewport const& viewport);
 
     void process();
     enum class State
@@ -27,6 +27,7 @@ private:
     void processWindow();
 
     SimulationController _simController;
+    TemporalControlWindow _temporalControlWindow;
     Viewport _viewport;
 
     State _state = State::Unintialized;

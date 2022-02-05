@@ -34,7 +34,7 @@
 #include "GpuSettingsDialog.h"
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
-#include "StartupWindow.h"
+#include "StartupController.h"
 #include "FlowGeneratorWindow.h"
 #include "AlienImGui.h"
 #include "AboutDialog.h"
@@ -120,7 +120,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
-    _startupWindow = std::make_shared<_StartupWindow>(_simController, _viewport);
+    _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
     _flowGeneratorWindow = std::make_shared<_FlowGeneratorWindow>(_simController);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _colorizeDialog = std::make_shared<_ColorizeDialog>(_simController);
@@ -166,20 +166,20 @@ void _MainWindow::mainLoop()
 
 //        ImGui::ShowDemoWindow(NULL);
 
-        switch (_startupWindow->getState()) {
-        case _StartupWindow::State::Unintialized:
+        switch (_startupController->getState()) {
+        case _StartupController::State::Unintialized:
             processUninitialized();
             break;
-        case _StartupWindow::State::RequestLoading:
+        case _StartupController::State::RequestLoading:
             processRequestLoading();
             break;
-        case _StartupWindow::State::LoadingSimulation:
+        case _StartupController::State::LoadingSimulation:
             processLoadingSimulation();
             break;
-        case _StartupWindow::State::LoadingControls:
+        case _StartupController::State::LoadingControls:
             processLoadingControls();
             break;
-        case _StartupWindow::State::FinishedLoading:
+        case _StartupController::State::FinishedLoading:
             processFinishedLoading();
             break;
         default:
@@ -241,7 +241,7 @@ char const* _MainWindow::initGlfw()
 
 void _MainWindow::processUninitialized()
 {
-    _startupWindow->process();
+    _startupController->process();
 
     // render content
     ImGui::Render();
@@ -258,13 +258,13 @@ void _MainWindow::processUninitialized()
 
 void _MainWindow::processRequestLoading()
 {
-    _startupWindow->process();
+    _startupController->process();
     renderSimulation();
 }
 
 void _MainWindow::processLoadingSimulation()
 {
-    _startupWindow->process();
+    _startupController->process();
     renderSimulation();
 }
 
@@ -280,7 +280,7 @@ void _MainWindow::processLoadingControls()
 
     _uiController->process();
     _simulationView->processControls();
-    _startupWindow->process();
+    _startupController->process();
 
     ImGui::PopStyleVar(2);
 

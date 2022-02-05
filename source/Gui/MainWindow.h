@@ -45,7 +45,7 @@ private:
     ModeController _modeController;
     GpuSettingsDialog _gpuSettingsDialog;
     Viewport _viewport;
-    StartupWindow _startupWindow;
+    StartupController _startupController;
     FlowGeneratorWindow _flowGeneratorWindow;
     LogWindow _logWindow;
     NewSimulationDialog _newSimulationDialog;

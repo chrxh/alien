@@ -74,8 +74,8 @@ PUBLIC
     SimulationView.h
     SpatialControlWindow.cpp
     SpatialControlWindow.h
-    StartupWindow.cpp
-    StartupWindow.h
+    StartupController.cpp
+    StartupController.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp

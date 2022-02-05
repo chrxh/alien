@@ -43,8 +43,8 @@ using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;
 class _NewSimulationDialog;
 using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 
-class _StartupWindow;
-using StartupWindow = std::shared_ptr<_StartupWindow>;
+class _StartupController;
+using StartupController = std::shared_ptr<_StartupController>;
 
 class _FlowGeneratorWindow;
 using FlowGeneratorWindow = std::shared_ptr<_FlowGeneratorWindow>;
