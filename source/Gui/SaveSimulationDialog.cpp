@@ -6,6 +6,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Serializer.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 _SaveSimulationDialog::_SaveSimulationDialog(SimulationController const& simController)
     : _simController(simController)
@@ -38,7 +39,9 @@ void _SaveSimulationDialog::process()
         sim.symbolMap = _simController->getSymbolMap();
         sim.content = _simController->getClusteredSimulationData();
 
-        Serializer::serializeSimulationToFile(firstFilename.string(), sim);
+        if (!Serializer::serializeSimulationToFile(firstFilename.string(), sim)) {
+            MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
+        }
     }
     ifd::FileDialog::Instance().Close();
 }

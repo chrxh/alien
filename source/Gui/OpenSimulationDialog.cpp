@@ -9,6 +9,7 @@
 #include "Viewport.h"
 #include "TemporalControlWindow.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 _OpenSimulationDialog::_OpenSimulationDialog(
     SimulationController const& simController,
@@ -55,6 +56,8 @@ void _OpenSimulationDialog::process()
                  toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
             _viewport->setZoomFactor(2.0f);
             _temporalControlWindow->onSnapshot();
+        } else {
+            MessageDialog::getInstance().show("Open simulation", "The selected file could not be opened.");
         }
     }
     ifd::FileDialog::Instance().Close();

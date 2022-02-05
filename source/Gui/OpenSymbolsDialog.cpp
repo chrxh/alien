@@ -6,6 +6,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "ImFileDialog.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 _OpenSymbolsDialog::_OpenSymbolsDialog(SimulationController const& simController)
     : _simController(simController)
@@ -35,6 +36,8 @@ void _OpenSymbolsDialog::process()
         SymbolMap symbolMap;
         if (Serializer::deserializeSymbolsFromFile(firstFilename.string(), symbolMap)) {
             _simController->setSymbolMap(symbolMap);
+        } else {
+            MessageDialog::getInstance().show("Open symbols", "The selected file could not be opened.");
         }
     }
     ifd::FileDialog::Instance().Close();

@@ -5,6 +5,7 @@
 #include "ImFileDialog.h"
 #include "SavePatternDialog.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 _SavePatternDialog::_SavePatternDialog(SimulationController const& simController)
     : _simController(simController)
@@ -33,7 +34,9 @@ void _SavePatternDialog::process()
 
         auto content = _simController->getSelectedClusteredSimulationData(_includeClusters);
 
-        Serializer::serializeContentToFile(firstFilename.string(), content);
+        if (!Serializer::serializeContentToFile(firstFilename.string(), content)) {
+            MessageDialog::getInstance().show("Save pattern", "The selected pattern could not be saved to the specified file.");
+        }
     }
     ifd::FileDialog::Instance().Close();
 }
