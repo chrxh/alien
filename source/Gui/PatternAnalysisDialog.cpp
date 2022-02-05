@@ -11,6 +11,7 @@
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 
 _PatternAnalysisDialog::_PatternAnalysisDialog(SimulationController const& simController)
@@ -70,7 +71,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
         file << "cluster " << index << ": " << partitionClassData.numberOfElements << " exemplars" << std::endl;
 
         std::stringstream clusterNameStream;
-        clusterNameStream << "cluster" << std::setfill('0') << std::setw(7) << index << ".sim";
+        clusterNameStream << "cluster" << std::setfill('0') << std::setw(6) << index << ".sim";
 
         std::filesystem::path clusterFilename(filename);
         clusterFilename.remove_filename();
@@ -82,13 +83,13 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
         Serializer::serializeContentToFile(clusterFilename.string(), pattern);
     }
 
-/*
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Analysis result");
-    msgBox.setText(
-        QString("%1 repetitive active clusters found. Summary saved to %2/result.txt.").arg(partitionData.size()).arg(QString::fromStdString(_folder)));
-    msgBox.exec();
-*/
+    std::stringstream messageStream;
+    messageStream << partitionData.size() << " repetitive active clusters found. A summary is saved to " << filename << "." << std::endl;
+    if (!partitionData.empty()) {
+        messageStream << "Representative clusters are save from `cluster" << std::setfill('0') << std::setw(6) << 0 << ".sim` to `cluster" << std::setfill('0')
+                      << std::setw(6) << partitionData.size() - 1 << ".sim`.";
+    }
+    MessageDialog::getInstance().show("Analysis result", messageStream.str());
 }
 
 auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>

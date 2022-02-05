@@ -56,6 +56,7 @@
 #include "MultiplierWindow.h"
 #include "SymbolsWindow.h"
 #include "PatternAnalysisDialog.h"
+#include "MessageDialog.h"
 
 namespace
 {
@@ -593,6 +594,7 @@ void _MainWindow::processDialogs()
     _gpuSettingsDialog->process();
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
+    MessageDialog::getInstance().process();
     processExitDialog();
 }
 
