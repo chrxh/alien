@@ -9,17 +9,13 @@
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
-
-namespace
-{
-    float const MaxLiveHistory = 120.0f; //in seconds
-    float const LongtermTimestepDelta = 1000.0f;
-}
+#include "ExportStatisticsDialog.h"
 
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     : _AlienWindow("Statistics", "windows.statistics", false)
     , _simController(simController)
 {
+    _exportStatisticsDialog = std::make_shared<_ExportStatisticsDialog>();
 }
 
 namespace
@@ -45,16 +41,20 @@ void _StatisticsWindow::reset()
 
 void _StatisticsWindow::processIntern()
 {
+    _exportStatisticsDialog->process();
+
     AlienImGui::ToggleButton("Real time", _live);
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(60));
-    ImGui::SliderFloat("", &_liveStatistics.history, 1, MaxLiveHistory, "%.1f s");
+    ImGui::SliderFloat("", &_liveStatistics.history, 1, LiveStatistics::MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    AlienImGui::Button("Export");
+    if (AlienImGui::Button("Export")) {
+        _exportStatisticsDialog->show(_longtermStatistics);
+    }
 
     if (_live) {
         processLiveStatistics();
@@ -309,49 +309,4 @@ void _StatisticsWindow::processBackground()
     _liveStatistics.add(newStatistics);
 
     _longtermStatistics.add(newStatistics);
-}
-
-void _StatisticsWindow::LiveStatistics::truncate()
-{
-    if (!timepointsHistory.empty()
-        && timepointsHistory.back() - timepointsHistory.front() > (MaxLiveHistory + 1.0f)) {
-        timepointsHistory.erase(timepointsHistory.begin());
-        numCellsHistory.erase(numCellsHistory.begin());
-        numParticlesHistory.erase(numParticlesHistory.begin());
-        numTokensHistory.erase(numTokensHistory.begin());
-        numCreatedCellsHistory.erase(numCreatedCellsHistory.begin());
-        numSuccessfulAttacksHistory.erase(numSuccessfulAttacksHistory.begin());
-        numFailedAttacksHistory.erase(numFailedAttacksHistory.begin());
-        numMuscleActivitiesHistory.erase(numMuscleActivitiesHistory.begin());
-    }
-}
-
-void _StatisticsWindow::LiveStatistics::add(OverallStatistics const& newStatistics)
-{
-    truncate();
-
-    timepoint += ImGui::GetIO().DeltaTime;
-    timepointsHistory.emplace_back(timepoint);
-    numCellsHistory.emplace_back(toFloat(newStatistics.numCells));
-    numParticlesHistory.emplace_back(toFloat(newStatistics.numParticles));
-    numTokensHistory.emplace_back(toFloat(newStatistics.numTokens));
-    numCreatedCellsHistory.emplace_back(toFloat(newStatistics.numCreatedCells));
-    numSuccessfulAttacksHistory.emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-    numFailedAttacksHistory.emplace_back(toFloat(newStatistics.numFailedAttacks));
-    numMuscleActivitiesHistory.emplace_back(toFloat(newStatistics.numMuscleActivities));
-}
-
-void _StatisticsWindow::LongtermStatistics::add(OverallStatistics const& newStatistics)
-{
-    if (timestepHistory.empty()
-        || newStatistics.timeStep - timestepHistory.back() > LongtermTimestepDelta) {
-        timestepHistory.emplace_back(toFloat(newStatistics.timeStep));
-        numCellsHistory.emplace_back(toFloat(newStatistics.numCells));
-        numParticlesHistory.emplace_back(toFloat(newStatistics.numParticles));
-        numTokensHistory.emplace_back(toFloat(newStatistics.numTokens));
-        numCreatedCellsHistory.emplace_back(toFloat(newStatistics.numCreatedCells));
-        numSuccessfulAttacksHistory.emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-        numFailedAttacksHistory.emplace_back(toFloat(newStatistics.numFailedAttacks));
-        numMuscleActivitiesHistory.emplace_back(toFloat(newStatistics.numMuscleActivities));
-    }
 }

@@ -20,6 +20,8 @@ PUBLIC
     EditorController.h
     EditorModel.cpp
     EditorModel.h
+    ExportStatisticsDialog.cpp
+    ExportStatisticsDialog.h
     FileLogger.cpp
     FileLogger.h
     FlowGeneratorWindow.cpp
@@ -80,6 +82,8 @@ PUBLIC
     SpatialControlWindow.h
     StartupController.cpp
     StartupController.h
+    StatisticsHistory.cpp
+    StatisticsHistory.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp

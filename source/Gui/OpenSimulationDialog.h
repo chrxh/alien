@@ -14,7 +14,6 @@ public:
     ~_OpenSimulationDialog();
 
     void process();
-
     void show();
 
 private:
