@@ -37,6 +37,8 @@ PUBLIC
     Main.cpp
     MainWindow.cpp
     MainWindow.h
+    MessageDialog.cpp
+    MessageDialog.h
     ModeController.cpp
     ModeController.h
     MultiplierWindow.cpp
