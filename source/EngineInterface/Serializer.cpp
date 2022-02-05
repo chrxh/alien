@@ -1,8 +1,8 @@
 #include "Serializer.h"
 
 #include <sstream>
-#include <regex>
 #include <stdexcept>
+#include <filesystem>
 
 #include <optional>
 #include <cereal/archives/portable_binary.hpp>
@@ -105,12 +105,12 @@ namespace cereal
 bool _Serializer::serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
-        std::regex fileEndingExpr("\\.\\w+$");
-        if (!std::regex_search(filename, fileEndingExpr)) {
-            return false;
-        }
-        auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
-        auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
+
+        std::filesystem::path settingsFilename(filename);
+        settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
+
+        std::filesystem::path symbolsFilename(filename);
+        symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
 
         {
             std::stringstream stringStream;
@@ -124,7 +124,7 @@ bool _Serializer::serializeSimulationToFile(std::string const& filename, Deseria
             fileStream.close();
         }
         {
-            std::ofstream stream(settingsFilename, std::ios::binary);
+            std::ofstream stream(settingsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
@@ -132,7 +132,7 @@ bool _Serializer::serializeSimulationToFile(std::string const& filename, Deseria
             stream.close();
         }
         {
-            std::ofstream stream(symbolsFilename, std::ios::binary);
+            std::ofstream stream(symbolsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
@@ -148,12 +148,11 @@ bool _Serializer::serializeSimulationToFile(std::string const& filename, Deseria
 bool _Serializer::deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data)
 {
     try {
-        std::regex fileEndingExpr("\\.\\w+$");
-        if (!std::regex_search(filename, fileEndingExpr)) {
-            return false;
-        }
-        auto settingsFilename = std::regex_replace(filename, fileEndingExpr, ".settings.json");
-        auto symbolsFilename = std::regex_replace(filename, fileEndingExpr, ".symbols.json");
+        std::filesystem::path settingsFilename(filename);
+        settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
+
+        std::filesystem::path symbolsFilename(filename);
+        symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
 
         {
             std::ifstream stream(filename, std::ios::binary);
@@ -170,7 +169,7 @@ bool _Serializer::deserializeSimulationFromFile(std::string const& filename, Des
 
         }
         {
-            std::ifstream stream(settingsFilename, std::ios::binary);
+            std::ifstream stream(settingsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
@@ -178,7 +177,7 @@ bool _Serializer::deserializeSimulationFromFile(std::string const& filename, Des
             stream.close();
         }
         {
-            std::ifstream stream(symbolsFilename, std::ios::binary);
+            std::ifstream stream(symbolsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
