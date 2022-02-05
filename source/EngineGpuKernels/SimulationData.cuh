@@ -22,10 +22,10 @@ struct SimulationData
     Entities entities;
     Entities entitiesForCleanup;
 
+    RawMemory processMemory;
     TempArray<StructuralOperation> structuralOperations;
     TempArray<SensorOperation> sensorOperations;
 
-    TempMemory tempMemory;
     CudaNumberGenerator numberGen;
 
     void init(int2 const& worldSize);

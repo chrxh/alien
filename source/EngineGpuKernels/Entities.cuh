@@ -4,7 +4,7 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "TempMemory.cuh"
+#include "RawMemory.cuh"
 
 struct Entities
 {
@@ -16,7 +16,7 @@ struct Entities
     Array<Token> tokens;
     Array<Particle> particles;
 
-    TempMemory dynamicMemory;
+    RawMemory stringBytes;
 
     void init();
     void free();

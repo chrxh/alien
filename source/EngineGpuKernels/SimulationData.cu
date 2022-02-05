@@ -13,7 +13,7 @@ void SimulationData::init(int2 const& worldSize_)
     cellMap.init(worldSize);
     particleMap.init(worldSize);
 
-    tempMemory.init();
+    processMemory.init();
     numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
 
     structuralOperations.init();
@@ -24,13 +24,13 @@ __device__ void SimulationData::prepareForNextTimestep()
 {
     cellMap.reset();
     particleMap.reset();
-    tempMemory.reset();
+    processMemory.reset();
 
     auto maxStructureOperations = entities.cellPointers.getNumEntries() / 2;
-    structuralOperations.setMemory(tempMemory.getArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
+    structuralOperations.setMemory(processMemory.getArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
     auto maxSensorOperations = entities.cellPointers.getNumEntries() / 2;
-    sensorOperations.setMemory(tempMemory.getArray<SensorOperation>(maxSensorOperations), maxSensorOperations);
+    sensorOperations.setMemory(processMemory.getArray<SensorOperation>(maxSensorOperations), maxSensorOperations);
 
     entities.saveNumEntries();
 }
@@ -83,7 +83,7 @@ void SimulationData::resizeRemainings()
 
     //heuristic
     int upperBoundDynamicMemory = (sizeof(StructuralOperation) + 200) * (cellArraySize + 1000);
-    tempMemory.resize(upperBoundDynamicMemory);
+    processMemory.resize(upperBoundDynamicMemory);
 }
 
 bool SimulationData::isEmpty()
@@ -100,7 +100,7 @@ void SimulationData::free()
     cellMap.free();
     particleMap.free();
     numberGen.free();
-    tempMemory.free();
+    processMemory.free();
 
     structuralOperations.free();
     sensorOperations.free();

@@ -58,6 +58,7 @@ add_library(alien_engine_gpu_kernels_lib
     ParticleProcessor.cuh
     Physics.cuh
     QuantityConverter.cuh
+    RawMemory.cuh
     RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu
@@ -76,7 +77,6 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationResult.cuh
     SpotCalculator.cuh
     Swap.cuh
-    TempMemory.cuh
     Token.cuh
     TokenProcessor.cuh)
 

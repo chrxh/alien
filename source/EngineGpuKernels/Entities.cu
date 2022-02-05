@@ -12,8 +12,8 @@ void Entities::init()
     tokens.init();
     particles.init();
     particlePointers.init();
-    dynamicMemory.init();
-    dynamicMemory.resize(MAX_STRING_BYTES_PER_CELL);
+    stringBytes.init();
+    stringBytes.resize(MAX_STRING_BYTES);
 }
 
 void Entities::free()
@@ -24,5 +24,5 @@ void Entities::free()
     tokens.free();
     particles.free();
     particlePointers.free();
-    dynamicMemory.free();
+    stringBytes.free();
 }
