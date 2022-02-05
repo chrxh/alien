@@ -25,6 +25,7 @@ public:
 private:
     void processIntern() override;
 
+    void onGenerateBranchNumbers();
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 

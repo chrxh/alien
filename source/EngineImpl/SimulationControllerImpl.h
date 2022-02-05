@@ -40,7 +40,7 @@ public:
         IntVector2D const& imageSize,
         double zoom) override;
 
-    ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) override;
+    ClusteredDataDescription getClusteredSimulationData() override;
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) override;
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
     DataDescription getSelectedSimulationData(bool includeClusters) override;

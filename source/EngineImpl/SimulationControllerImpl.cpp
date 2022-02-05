@@ -50,9 +50,10 @@ std::optional<OverlayDescription> _SimulationControllerImpl::tryDrawVectorGraphi
     return _worker.tryDrawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
-ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData()
 {
-    return _worker.getClusteredSimulationData(rectUpperLeft, rectLowerRight);
+    auto size = getWorldSize();
+    return _worker.getClusteredSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
 DataDescription _SimulationControllerImpl::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)

@@ -41,10 +41,9 @@ void _OpenSimulationDialog::process()
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
-        Serializer serializer = std::make_shared<_Serializer>();
 
         DeserializedSimulation deserializedData;
-        if (serializer->deserializeSimulationFromFile(firstFilename.string(), deserializedData)) {
+        if (Serializer::deserializeSimulationFromFile(firstFilename.string(), deserializedData)) {
             _simController->closeSimulation();
             _statisticsWindow->reset();
 

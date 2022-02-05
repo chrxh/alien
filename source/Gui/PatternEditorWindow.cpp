@@ -231,16 +231,20 @@ void _PatternEditorWindow::processIntern()
             _simController->colorSelectedEntities(6, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(7);
         }
-
         AlienImGui::Group("Further actions");
         if (ImGui::Button("Set uniform velocities")) {
             _simController->uniformVelocitiesForSelectedEntities(_editorModel->isRolloutToClusters());
         }
+        ImGui::EndDisabled();
+
+        ImGui::BeginDisabled(_editorModel->isCellSelectionEmpty());
+
         if (ImGui::Button("Release tensions")) {
             _simController->relaxSelectedEntities(_editorModel->isRolloutToClusters());
         }
-        ImGui::Button("Generate ascending branch numbers");
-
+        if (ImGui::Button("Generate ascending branch numbers")) {
+            onGenerateBranchNumbers();
+        }
         ImGui::EndDisabled();
 
         _lastSelection = selection;
@@ -294,6 +298,19 @@ void _PatternEditorWindow::onPaste()
     data.setCenter(center);
     _simController->addAndSelectSimulationData(data);
     _editorModel->update();
+}
+
+void _PatternEditorWindow::onGenerateBranchNumbers()
+{
+    auto dataWithClusters = _simController->getSelectedSimulationData(true);
+    auto dataWithoutClusters = _simController->getSelectedSimulationData(false);
+    std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
+
+    auto parameters = _simController->getSimulationParameters();
+    DescriptionHelper::generateBranchNumbers(dataWithClusters, cellIds, parameters.cellMaxTokenBranchNumber);
+
+    _simController->removeSelectedEntities(true);
+    _simController->addAndSelectSimulationData(dataWithClusters);
 }
 
 bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)

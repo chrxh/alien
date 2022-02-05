@@ -41,10 +41,8 @@ void _StartupController::process()
     }
 
     if (_state == State::RequestLoading) {
-        Serializer serializer = std::make_shared<_Serializer>();
-
         DeserializedSimulation deserializedData;
-        serializer->deserializeSimulationFromFile(Const::AutosaveFile, deserializedData);
+        Serializer::deserializeSimulationFromFile(Const::AutosaveFile, deserializedData);
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
         _simController->setClusteredSimulationData(deserializedData.content);

@@ -121,6 +121,9 @@ using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 class _SymbolsWindow;
 using SymbolsWindow = std::shared_ptr<_SymbolsWindow>;
 
+class _PatternAnalysisDialog;
+using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

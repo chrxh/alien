@@ -51,6 +51,8 @@ PUBLIC
     OpenSimulationDialog.h
     OpenSymbolsDialog.cpp
     OpenSymbolsDialog.h
+    PatternAnalysisDialog.cpp
+    PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
     Resources.h

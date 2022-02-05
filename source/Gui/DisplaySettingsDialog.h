@@ -10,7 +10,6 @@ public:
     ~_DisplaySettingsDialog();
 
     void process();
-
     void show();
 
 private:

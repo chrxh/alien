@@ -214,6 +214,57 @@ void DescriptionHelper::colorize(ClusteredDataDescription& data, std::vector<int
     }
 }
 
+void DescriptionHelper::generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
+{
+    std::unordered_map<uint64_t, int> idToIndexMap;
+    for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
+        idToIndexMap.emplace(cell.id, toInt(index));
+    }
+
+    std::set<uint64_t> visitedCellIds(cellIds.begin(), cellIds.end());
+    std::vector<std::vector<uint64_t>> cellIdPaths;
+    for (auto const& cellId : cellIds) {
+        cellIdPaths.emplace_back(std::vector<uint64_t>{cellId});
+    }
+
+    int origNumVisitedCells = 0;
+    do {
+
+        //set branch numbers an last cell on path
+        for (auto const& cellIdPath : cellIdPaths) {
+            if (cellIdPath.empty()) {
+                continue;
+            }
+            auto const& lastCellId = cellIdPath.back();
+
+            auto& cell = data.cells.at(idToIndexMap.at(lastCellId));
+            cell.setTokenBranchNumber((cellIdPath.size() - 1) % maxBranchNumbers);
+        }
+
+        //modify paths
+        origNumVisitedCells = visitedCellIds.size();
+        for (auto& cellIdPath : cellIdPaths) {
+            auto found = false;
+            while (!found && !cellIdPath.empty()) {
+                auto const& lastCellId = cellIdPath.back();
+                auto& cell = data.cells.at(idToIndexMap.at(lastCellId));
+                for (auto const& connection : cell.connections) {
+                    auto connectingCellId = connection.cellId;
+                    if (visitedCellIds.find(connectingCellId) == visitedCellIds.end()) {
+                        cellIdPath.emplace_back(connectingCellId);
+                        visitedCellIds.insert(connectingCellId);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    cellIdPath.pop_back();
+                }
+            }
+        }
+    } while (origNumVisitedCells != visitedCellIds.size());
+}
+
 void DescriptionHelper::makeValid(DataDescription& data)
 {
     auto& numberGen = NumberGenerator::getInstance();

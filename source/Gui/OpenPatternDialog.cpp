@@ -40,10 +40,8 @@ void _OpenPatternDialog::process()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        Serializer serializer = std::make_shared<_Serializer>();
-
         ClusteredDataDescription content;
-        if (serializer->deserializeContentFromFile(firstFilename.string(), content)) {
+        if (Serializer::deserializeContentFromFile(firstFilename.string(), content)) {
             auto center = _viewport->getCenterInWorldPos();
             content.setCenter(center);
             _simController->addAndSelectSimulationData(DataDescription(content));

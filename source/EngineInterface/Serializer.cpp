@@ -102,7 +102,7 @@ namespace cereal
     }
 }
 
-bool _Serializer::serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data)
+bool Serializer::serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
 
@@ -145,7 +145,7 @@ bool _Serializer::serializeSimulationToFile(std::string const& filename, Deseria
     }
 }
 
-bool _Serializer::deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data)
+bool Serializer::deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data)
 {
     try {
         std::filesystem::path settingsFilename(filename);
@@ -190,7 +190,7 @@ bool _Serializer::deserializeSimulationFromFile(std::string const& filename, Des
     }
 }
 
-bool _Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
+bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
         std::stringstream stringStream;
@@ -209,7 +209,7 @@ bool _Serializer::serializeContentToFile(std::string const& filename, ClusteredD
     }
 }
 
-bool _Serializer::deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content)
+bool Serializer::deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content)
 {
     try {
         std::ifstream stream(filename, std::ios::binary);
@@ -230,7 +230,7 @@ bool _Serializer::deserializeContentFromFile(std::string const& filename, Cluste
     }
 }
 
-bool _Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap const& symbolMap)
+bool Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap const& symbolMap)
 {
     try {
         std::ofstream stream(filename, std::ios::binary);
@@ -245,7 +245,7 @@ bool _Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap 
     }
 }
 
-bool _Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap)
+bool Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap)
 {
     try {
         std::ifstream stream(filename, std::ios::binary);
@@ -260,19 +260,18 @@ bool _Serializer::deserializeSymbolsFromFile(std::string const& filename, Symbol
     }
 }
 
-void _Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream) const
+void Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(data);
 }
 
-void _Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream)
-    const
+void Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream)
 {
     boost::property_tree::json_parser::write_json(stream, Parser::encode(timestep, generalSettings));
 }
 
-void _Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stream) const
+void Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stream)
 {
     boost::property_tree::ptree tree;
     for (auto const& [key, value] : symbols) {
@@ -282,7 +281,7 @@ void _Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stre
     boost::property_tree::json_parser::write_json(stream, tree);
 }
 
-void _Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream) const
+void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     archive(data);
@@ -292,14 +291,14 @@ void _Serializer::deserializeDataDescription(ClusteredDataDescription& data, std
     }
 }
 
-void _Serializer::deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream) const
+void Serializer::deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     std::tie(timestep, settings) = Parser::decodeTimestepAndSettings(tree);
 }
 
-void _Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream)
+void Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream)
 {
     symbolMap.clear();
     boost::property_tree::ptree tree;
@@ -309,7 +308,7 @@ void _Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& strea
     }
 }
 
-void _Serializer::compress(std::string&& uncompressedData, std::ostream& stream)
+void Serializer::compress(std::string&& uncompressedData, std::ostream& stream)
 {
     int maxlen = uncompressedData.size() + 512 + (uncompressedData.size() >> 2) + sizeof(int);  // total guess
     char* compressedData = new char[maxlen];
@@ -320,7 +319,7 @@ void _Serializer::compress(std::string&& uncompressedData, std::ostream& stream)
     delete[] compressedData;
 }
 
-void _Serializer::decompress(std::string&& compressedData, std::ostream& stream)
+void Serializer::decompress(std::string&& compressedData, std::ostream& stream)
 {
     const unsigned int decompressedSize = stb_decompress_length(reinterpret_cast<unsigned char const*>(compressedData.c_str()));
     char* decompressedData = new char[decompressedSize];

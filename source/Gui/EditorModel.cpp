@@ -25,6 +25,11 @@ bool _EditorModel::isSelectionEmpty() const
         && 0 == _selectionShallowData.numParticles;
 }
 
+bool _EditorModel::isCellSelectionEmpty() const
+{
+    return 0 == _selectionShallowData.numCells;
+}
+
 void _EditorModel::clear()
 {
     _selectionShallowData = SelectionShallowData();

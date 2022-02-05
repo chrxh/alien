@@ -1,10 +1,10 @@
 #include "SaveSimulationDialog.h"
 
 #include <imgui.h>
+#include <ImFileDialog.h>
 
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Serializer.h"
-#include "ImFileDialog.h"
 #include "GlobalSettings.h"
 
 _SaveSimulationDialog::_SaveSimulationDialog(SimulationController const& simController)
@@ -36,10 +36,9 @@ void _SaveSimulationDialog::process()
         sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         sim.settings = _simController->getSettings();
         sim.symbolMap = _simController->getSymbolMap();
-        sim.content = _simController->getClusteredSimulationData({0, 0}, _simController->getWorldSize());
+        sim.content = _simController->getClusteredSimulationData();
 
-        Serializer serializer = std::make_shared<_Serializer>();
-        serializer->serializeSimulationToFile(firstFilename.string(), sim);
+        Serializer::serializeSimulationToFile(firstFilename.string(), sim);
     }
     ifd::FileDialog::Instance().Close();
 }

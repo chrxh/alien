@@ -55,6 +55,7 @@
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
 #include "SymbolsWindow.h"
+#include "PatternAnalysisDialog.h"
 
 namespace
 {
@@ -130,6 +131,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
     _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
+    _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -294,16 +296,7 @@ void _MainWindow::processFinishedLoading()
 
     processMenubar();
     processDialogs();
-
-/*
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.55f, 0.4f, 0.3f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.55f, 0.4f, 0.5f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.55f, 0.4f, 0.7f));
-*/
     processWindows();
-/*
-    ImGui::PopStyleColor(3);
-*/
     processControllers();
     _uiController->process();
     _simulationView->processControls();
@@ -462,6 +455,10 @@ void _MainWindow::processMenubar()
                 _colorizeDialog->show();
                 _toolsMenuToggled = false;
             }
+            if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
+                _patternAnalysisDialog->show();
+                _toolsMenuToggled = false;
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -581,6 +578,9 @@ void _MainWindow::processMenubar()
     if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
         _colorizeDialog->show();
     }
+    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
+        _patternAnalysisDialog->show();
+    }
 }
 
 void _MainWindow::processDialogs()
@@ -592,6 +592,7 @@ void _MainWindow::processDialogs()
     _colorizeDialog->process();
     _gpuSettingsDialog->process();
     _displaySettingsDialog->process(); 
+    _patternAnalysisDialog->process();
     processExitDialog();
 }
 

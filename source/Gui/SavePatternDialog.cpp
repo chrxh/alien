@@ -33,8 +33,7 @@ void _SavePatternDialog::process()
 
         auto content = _simController->getSelectedClusteredSimulationData(_includeClusters);
 
-        Serializer serializer = std::make_shared<_Serializer>();
-        serializer->serializeContentToFile(firstFilename.string(), content);
+        Serializer::serializeContentToFile(firstFilename.string(), content);
     }
     ifd::FileDialog::Instance().Close();
 }
