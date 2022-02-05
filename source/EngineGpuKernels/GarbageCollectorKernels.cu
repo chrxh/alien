@@ -12,6 +12,7 @@ __global__ void cudaPrepareArraysForCleanup(SimulationData data)
     data.entitiesForCleanup.particles.reset();
     data.entitiesForCleanup.cells.reset();
     data.entitiesForCleanup.tokens.reset();
+    data.entitiesForCleanup.dynamicMemory.reset();
 }
 
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
@@ -79,6 +80,62 @@ __global__ void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newT
     }
 }
 
+namespace
+{
+    __device__ void copyString(char*& string, int numBytes, TempMemory& stringBytes)
+    {
+        if (numBytes > 0) {
+            char* newString = stringBytes.getArray<char>(numBytes);
+            for (int i = 0; i < numBytes; ++i) {
+                newString[i] = string[i];
+            }
+            string = newString;
+        }
+    }
+}
+
+__global__ void cudaCleanupStringBytes(Array<Cell*> cellPointers, TempMemory stringBytes)
+{
+    auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cellPointers.at(index);
+
+/*
+        if (cell->metadata.sourceCodeLen > 0) {
+            printf("num: %d\n", cell->metadata.sourceCodeLen);
+            for (int i = 0; i < cell->metadata.sourceCodeLen; ++i) {
+                printf("%c", cell->metadata.sourceCode[i]);
+            }
+            printf("+\n");
+        }
+*/
+        copyString(cell->metadata.name, cell->metadata.nameLen, stringBytes);
+        copyString(cell->metadata.description, cell->metadata.descriptionLen, stringBytes);
+        copyString(cell->metadata.sourceCode, cell->metadata.sourceCodeLen, stringBytes);
+    }
+}
+
+__global__ void cudaCleanupStringBytes2(Array<Cell*> cellPointers)
+{
+    auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cellPointers.at(index);
+        if(!cell) {
+            printf("OHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
+        }
+        if (cell->metadata.sourceCodeLen > 0) {
+//            printf("num: %d\n", cell->metadata.sourceCodeLen);
+            for (int i = 0; i < cell->metadata.sourceCodeLen; ++i) {
+                cell->metadata.sourceCode[i] = cell->metadata.sourceCode[i] +1;
+//                printf("%c|", cell->metadata.sourceCode[i]);
+            }
+//            printf("+\n");
+        }
+    }
+}
+
 __global__ void cudaCleanupCellMap(SimulationData data)
 {
     data.cellMap.cleanup_system();
@@ -101,6 +158,7 @@ __global__ void cudaSwapArrays(SimulationData data)
     data.entities.cells.swapContent(data.entitiesForCleanup.cells);
     data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
     data.entities.particles.swapContent(data.entitiesForCleanup.particles);
+    data.entities.dynamicMemory.swapContent(data.entitiesForCleanup.dynamicMemory);
 }
 
 
@@ -135,51 +193,3 @@ __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
         *result = false;
     }
 }
-
-/*
-__global__ void cleanupMetadata(Array<Cluster*> clusterPointers, DynamicMemory strings)
-{
-    auto const clusterBlock = calcPartition(clusterPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    for (int clusterIndex = clusterBlock.startIndex; clusterIndex <= clusterBlock.endIndex; ++clusterIndex) {
-        auto& cluster = clusterPointers.at(clusterIndex);
-
-        if (0 == threadIdx.x) {
-            auto const len = cluster->metadata.nameLen;
-            auto newName = strings.getArray<char>(len);
-            for(int i = 0; i < len; ++i) {
-                newName[i] = cluster->metadata.name[i];
-            }
-            cluster->metadata.name = newName;
-        }
-
-        auto const cellBlock = calcPartition(cluster->numCellPointers, threadIdx.x, blockDim.x);
-        for (int cellIndex = cellBlock.startIndex; cellIndex <= cellBlock.endIndex; ++cellIndex) {
-            auto& cell = cluster->cellPointers[cellIndex];
-            {
-                auto const len = cell->metadata.nameLen;
-                auto newName = strings.getArray<char>(len);
-                for (int i = 0; i < len; ++i) {
-                    newName[i] = cell->metadata.name[i];
-                }
-                cell->metadata.name = newName;
-            }
-            {
-                auto const len = cell->metadata.descriptionLen;
-                auto newDescription = strings.getArray<char>(len);
-                for (int i = 0; i < len; ++i) {
-                    newDescription[i] = cell->metadata.description[i];
-                }
-                cell->metadata.description = newDescription;
-            }
-            {
-                auto const len = cell->metadata.sourceCodeLen;
-                auto newSourceCode = strings.getArray<char>(len);
-                for (int i = 0; i < len; ++i) {
-                    newSourceCode[i] = cell->metadata.sourceCode[i];
-                }
-                cell->metadata.sourceCode = newSourceCode;
-            }
-        }
-    }
-}
-*/

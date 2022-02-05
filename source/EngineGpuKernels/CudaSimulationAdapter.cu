@@ -147,7 +147,6 @@ _CudaSimulationAdapter::_CudaSimulationAdapter(uint64_t timestep, Settings const
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
-    CudaMemoryManager::getInstance().acquireMemory<char>(Const::MetadataMemorySize, _cudaAccessTO->stringBytes);
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000, 10000});
@@ -504,11 +503,18 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
+        printf("RESIZE\n");
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, *_cudaSimulationData);
         syncAndCheck();
 
         _cudaSimulationData->resizeRemainings();
-        _cudaSimulationData->swap();
+
+/*
+        _garbageCollectorKernels->swapArrays(_settings.gpuSettings, *_cudaSimulationData);
+        syncAndCheck();
+*/
+
+        _cudaSimulationData->swap();  //#TODO garbageCollector -> use swap arrays
     } else {
         _cudaSimulationData->resizeRemainings();
     }
@@ -516,12 +522,14 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
     auto cellArraySize = _cudaSimulationData->entities.cells.getSize_host();
     auto tokenArraySize = _cudaSimulationData->entities.tokens.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
+    CudaMemoryManager::getInstance().acquireMemory<char>(cellArraySize * STRING_BYTES_PER_CELL, _cudaAccessTO->stringBytes);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 

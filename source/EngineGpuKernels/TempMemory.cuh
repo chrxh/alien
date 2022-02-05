@@ -30,17 +30,21 @@ public:
 
     __host__ __inline__ void resize(uint64_t size)
     {
+/*
         if (_size > 0) {
             unsigned char* data = nullptr;
             CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
             CudaMemoryManager::getInstance().freeMemory(data);
         }
+*/
 
         _size = size;
         unsigned char* data = nullptr;
         CudaMemoryManager::getInstance().acquireMemory<unsigned char>(size, data);
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(unsigned char*), cudaMemcpyHostToDevice));
     }
+
+    uint64_t getSize() const { return _size; }
 
     __host__ __inline__ void free()
     {
@@ -72,12 +76,22 @@ public:
         return reinterpret_cast<T*>(&(*_data)[oldIndex]);
     }
 
+    __host__ __inline__ unsigned char* getData_host() const
+    {
+        unsigned char* data;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(unsigned char*), cudaMemcpyDeviceToHost));
+        return data;
+    }
+    __host__ __inline__ void setData_host(unsigned char* data) const { CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(unsigned char*), cudaMemcpyHostToDevice)); }
+
+
     __device__ __inline__ int getNumBytes() { return *_bytesOccupied; }
     __host__ __inline__ int getNumBytes_host() {
         int result;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _bytesOccupied, sizeof(int), cudaMemcpyDeviceToHost));
         return result;
     }
+    __host__ __inline__ void setNumBytes_host(int value) { checkCudaErrors(cudaMemcpy(_bytesOccupied, &value, sizeof(int), cudaMemcpyHostToDevice)); }
 
     __device__ __inline__ void reset() { *_bytesOccupied = 0; }
 
@@ -85,5 +99,18 @@ public:
     {
         swap(*_bytesOccupied, *other._bytesOccupied);
         swap(*_data, *other._data);
+    }
+
+    __host__ __inline__ void swapContent_host(TempMemory& other)
+    {
+        auto numBytes = getNumBytes_host();
+        auto otherNumBytes = other.getNumBytes_host();
+        setNumBytes_host(otherNumBytes);
+        other.setNumBytes_host(numBytes);
+
+        auto data = getData_host();
+        auto otherData = other.getData_host();
+        setData_host(otherData);
+        other.setData_host(data);
     }
 };
