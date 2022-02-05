@@ -13,7 +13,6 @@ void Entities::init()
     particles.init();
     particlePointers.init();
     dynamicMemory.init();
-    dynamicMemory.resize(Const::MetadataMemorySize);
 }
 
 void Entities::free()

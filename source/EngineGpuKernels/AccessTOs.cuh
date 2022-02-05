@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
+#define STRING_BYTES_PER_CELL 100
 #define MAX_TOKEN_MEM_SIZE 256
 #define MAX_CELL_BONDS 6
 #define MAX_CELL_STATIC_BYTES 48

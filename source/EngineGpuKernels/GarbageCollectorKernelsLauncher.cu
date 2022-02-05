@@ -47,19 +47,30 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterDataManipulation(GpuSettings 
     KERNEL_CALL(cudaCleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
     KERNEL_CALL(cudaCleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
     KERNEL_CALL(cudaCleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
+    KERNEL_CALL_1_1(cudaCleanupStringBytes, data.entities.cellPointers, data.entitiesForCleanup.dynamicMemory);
     KERNEL_CALL_1_1(cudaSwapArrays, data);
+    printf("CLEAN1\n");
 }
 
-void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings, SimulationData const& simulationData)
+void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings, SimulationData const& data)
 {
-    KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, simulationData);
-    KERNEL_CALL(cudaCleanupPointerArray<Particle*>, simulationData.entities.particlePointers, simulationData.entitiesForCleanup.particlePointers);
-    KERNEL_CALL(cudaCleanupPointerArray<Cell*>, simulationData.entities.cellPointers, simulationData.entitiesForCleanup.cellPointers);
-    KERNEL_CALL(cudaCleanupPointerArray<Token*>, simulationData.entities.tokenPointers, simulationData.entitiesForCleanup.tokenPointers);
+    KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
+    KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.entities.particlePointers, data.entitiesForCleanup.particlePointers);
+    KERNEL_CALL(cudaCleanupPointerArray<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
+    KERNEL_CALL(cudaCleanupPointerArray<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
 
-    KERNEL_CALL_1_1(cudaPrepareArraysForCleanup, simulationData);
-    KERNEL_CALL(cudaCleanupParticles, simulationData.entitiesForCleanup.particlePointers, simulationData.entitiesForCleanup.particles);
-    KERNEL_CALL(cudaCleanupCellsStep1, simulationData.entitiesForCleanup.cellPointers, simulationData.entitiesForCleanup.cells);
-    KERNEL_CALL(cudaCleanupCellsStep2, simulationData.entitiesForCleanup.tokenPointers, simulationData.entitiesForCleanup.cells);
-    KERNEL_CALL(cudaCleanupTokens, simulationData.entitiesForCleanup.tokenPointers, simulationData.entitiesForCleanup.tokens);
+    KERNEL_CALL_1_1(cudaPrepareArraysForCleanup, data);
+    KERNEL_CALL(cudaCleanupParticles, data.entitiesForCleanup.particlePointers, data.entitiesForCleanup.particles);
+    KERNEL_CALL(cudaCleanupCellsStep1, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.cells);
+    KERNEL_CALL(cudaCleanupCellsStep2, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.cells);
+    KERNEL_CALL(cudaCleanupTokens, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.tokens);
+    printf("CLEAN2\n");
+    KERNEL_CALL_1_1(cudaCleanupStringBytes, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.dynamicMemory);
+    printf("CLEAN3\n");
+}
+
+void _GarbageCollectorKernelsLauncher::swapArrays(GpuSettings const& gpuSettings, SimulationData const& data)
+{
+    KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
+    KERNEL_CALL_1_1(cudaSwapArrays, data);
 }

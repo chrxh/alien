@@ -1,6 +1,7 @@
 ﻿#include "SimulationData.cuh"
 
 #include "Token.cuh"
+#include "GarbageCollectorKernels.cuh"
 
 void SimulationData::init(int2 const& worldSize_)
 {
@@ -65,6 +66,10 @@ void SimulationData::resizeEntitiesForCleanup(int additionalCells, int additiona
     resizeTargetIntern(entities.particlePointers, entitiesForCleanup.particlePointers, cellAndParticleArraySizeInc * 10);
     resizeTargetIntern(entities.tokens, entitiesForCleanup.tokens, tokenArraySizeInc);
     resizeTargetIntern(entities.tokenPointers, entitiesForCleanup.tokenPointers, tokenArraySizeInc * 10);
+    printf("SIZE: %d, OLD: %llu \n", entitiesForCleanup.cells.getSize_host(), entitiesForCleanup.dynamicMemory.getSize());
+    KERNEL_CALL_1_1(cudaCleanupStringBytes2, entities.cellPointers);
+    entitiesForCleanup.dynamicMemory.resize(entitiesForCleanup.cells.getSize_host() * STRING_BYTES_PER_CELL);
+    KERNEL_CALL_1_1(cudaCleanupStringBytes2, entities.cellPointers);
 }
 
 void SimulationData::resizeRemainings()
@@ -79,6 +84,9 @@ void SimulationData::resizeRemainings()
     auto cellArraySize = entities.cells.getSize_host();
     cellMap.resize(cellArraySize);
     particleMap.resize(cellArraySize);
+
+    printf("SIZE2: %llu \n", entitiesForCleanup.dynamicMemory.getSize());
+    entities.dynamicMemory.resize(entitiesForCleanup.dynamicMemory.getSize() * STRING_BYTES_PER_CELL);
 
     //heuristic
     int upperBoundDynamicMemory = (sizeof(StructuralOperation) + 200) * (cellArraySize + 1000);
@@ -96,9 +104,11 @@ void SimulationData::swap()
     entities.cells.swapContent_host(entitiesForCleanup.cells);
     entities.cellPointers.swapContent_host(entitiesForCleanup.cellPointers);
     entities.particles.swapContent_host(entitiesForCleanup.particles);
+
     entities.particlePointers.swapContent_host(entitiesForCleanup.particlePointers);
     entities.tokens.swapContent_host(entitiesForCleanup.tokens);
     entities.tokenPointers.swapContent_host(entitiesForCleanup.tokenPointers);
+    entities.dynamicMemory.swapContent_host(entitiesForCleanup.dynamicMemory);
 }
 
 void SimulationData::free()
