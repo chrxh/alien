@@ -124,6 +124,10 @@ using SymbolsWindow = std::shared_ptr<_SymbolsWindow>;
 class _PatternAnalysisDialog;
 using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
 
+class _ExportStatisticsDialog;
+using ExportStatisticsDialog = std::shared_ptr<_ExportStatisticsDialog>;
+
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

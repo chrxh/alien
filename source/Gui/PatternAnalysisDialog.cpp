@@ -86,6 +86,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
 
         Serializer::serializeContentToFile(clusterFilename.string(), pattern);
     }
+    file.close();
 
     std::stringstream messageStream;
     messageStream << partitionData.size() << " repetitive active clusters found. A summary is saved to " << filename << "." << std::endl;
