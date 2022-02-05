@@ -349,7 +349,7 @@ __global__ void cudaClearData(SimulationData data)
     data.entities.cells.reset();
     data.entities.tokens.reset();
     data.entities.particles.reset();
-    data.entities.dynamicMemory.reset();
+    data.entities.stringBytes.reset();
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)

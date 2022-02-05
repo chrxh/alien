@@ -7,7 +7,7 @@
 #include "CudaMemoryManager.cuh"
 #include "Array.cuh"
 
-class TempMemory
+class RawMemory
 {
 private:
     uint64_t _size;
@@ -15,7 +15,7 @@ private:
     unsigned char** _data;
 
 public:
-    TempMemory()
+    RawMemory()
         : _size(0)
     {}
 
@@ -93,7 +93,7 @@ public:
 
     __device__ __inline__ void reset() { *_bytesOccupied = 0; }
 
-    __device__ __inline__ void swapContent(TempMemory& other)
+    __device__ __inline__ void swapContent(RawMemory& other)
     {
         swap(*_bytesOccupied, *other._bytesOccupied);
         swap(*_data, *other._data);

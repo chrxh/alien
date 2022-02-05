@@ -52,8 +52,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Pa
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells);
 __global__ void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells);
 __global__ void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken);
-__global__ void cudaCleanupStringBytes(Array<Cell*> cellPointers, TempMemory stringBytes);
-__global__ void cudaCleanupStringBytes2(Array<Cell*> cellPointers);
+__global__ void cudaCleanupStringBytes(Array<Cell*> cellPointers, RawMemory stringBytes);
 __global__ void cudaCleanupCellMap(SimulationData data);
 __global__ void cudaCleanupParticleMap(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);

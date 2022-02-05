@@ -503,7 +503,6 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
     _cudaSimulationData->resizeEntitiesForCleanup(
         additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        printf("RESIZE\n");
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, *_cudaSimulationData);
         syncAndCheck();
 
@@ -525,7 +524,7 @@ void _CudaSimulationAdapter::resizeArrays(ArraySizes const& additionals)
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
     CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
-    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_STRING_BYTES_PER_CELL, _cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_STRING_BYTES, _cudaAccessTO->stringBytes);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 

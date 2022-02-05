@@ -20,7 +20,6 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& g
     KERNEL_CALL(cudaCleanupPointerArray<Cell*>, data.entities.cellPointers, data.entitiesForCleanup.cellPointers);
     KERNEL_CALL(cudaCleanupPointerArray<Token*>, data.entities.tokenPointers, data.entitiesForCleanup.tokenPointers);
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
-    cudaDeviceSynchronize();
 
     KERNEL_CALL_1_1(cudaCheckIfCleanupIsNecessary, data, _cudaBool);
     cudaDeviceSynchronize();
@@ -47,9 +46,8 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterDataManipulation(GpuSettings 
     KERNEL_CALL(cudaCleanupCellsStep1, data.entities.cellPointers, data.entitiesForCleanup.cells);
     KERNEL_CALL(cudaCleanupCellsStep2, data.entities.tokenPointers, data.entitiesForCleanup.cells);
     KERNEL_CALL(cudaCleanupTokens, data.entities.tokenPointers, data.entitiesForCleanup.tokens);
-    KERNEL_CALL_1_1(cudaCleanupStringBytes, data.entities.cellPointers, data.entitiesForCleanup.dynamicMemory);
+    KERNEL_CALL(cudaCleanupStringBytes, data.entities.cellPointers, data.entitiesForCleanup.stringBytes);
     KERNEL_CALL_1_1(cudaSwapArrays, data);
-    printf("CLEAN1\n");
 }
 
 void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings, SimulationData const& data)
@@ -64,9 +62,7 @@ void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings
     KERNEL_CALL(cudaCleanupCellsStep1, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.cells);
     KERNEL_CALL(cudaCleanupCellsStep2, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.cells);
     KERNEL_CALL(cudaCleanupTokens, data.entitiesForCleanup.tokenPointers, data.entitiesForCleanup.tokens);
-    printf("CLEAN2\n");
-    KERNEL_CALL_1_1(cudaCleanupStringBytes, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.dynamicMemory);
-    printf("CLEAN3\n");
+    KERNEL_CALL(cudaCleanupStringBytes, data.entitiesForCleanup.cellPointers, data.entitiesForCleanup.stringBytes);
 }
 
 void _GarbageCollectorKernelsLauncher::swapArrays(GpuSettings const& gpuSettings, SimulationData const& data)
