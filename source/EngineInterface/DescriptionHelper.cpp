@@ -39,6 +39,9 @@ void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D co
                 if (clusterPos.x < size.x && clusterPos.y < size.y) {
                     for (auto& cell : cluster.cells) {
                         cell.pos = RealVector2D{cell.pos.x + incX, cell.pos.y + incY};
+                        if (incX > 0 || incY > 0) {
+                            removeMetadata(cell);
+                        }
                     }
                     makeValid(cluster);
                     result.addCluster(cluster);
@@ -94,9 +97,17 @@ namespace
 DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters)
 {
     DataDescription result;
+    auto clone = input;
+    auto cloneWithoutMetadata = input;
+    removeMetadata(cloneWithoutMetadata);
     for (int i = 0; i < parameters._horizontalNumber; ++i) {
         for (int j = 0; j < parameters._verticalNumber; ++j) {
-            auto templateData = input;
+            auto templateData = [&] {
+                if (i == 0 && j == 0) {
+                    return clone;
+                }
+                return cloneWithoutMetadata;
+            }();
             templateData.shift({i * parameters._horizontalDistance, j * parameters._verticalDistance});
             templateData.rotate(i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);
             templateData.accelerate(
@@ -118,6 +129,7 @@ DescriptionHelper::randomMultiply(DataDescription const& input, RandomMultiplyPa
     auto& numberGen = NumberGenerator::getInstance();
     for (int i = 0; i < parameters._number - 1; ++i) {
         auto templateData = input;
+        removeMetadata(templateData);
         templateData.shift({toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
         templateData.rotate(toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
         templateData.accelerate(
@@ -235,6 +247,20 @@ void DescriptionHelper::makeValid(ClusterDescription& cluster)
             connection.cellId = newByOldIds.at(connection.cellId);
         }
     }
+}
+
+void DescriptionHelper::removeMetadata(DataDescription& data)
+{
+    for(auto& cell : data.cells) {
+        removeMetadata(cell);
+    }
+}
+
+void DescriptionHelper::removeMetadata(CellDescription& cell)
+{
+    cell.metadata.computerSourcecode.clear();
+    cell.metadata.description.clear();
+    cell.metadata.name.clear();
 }
 
 uint64_t DescriptionHelper::getId(CellOrParticleDescription const& entity)
