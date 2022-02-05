@@ -65,4 +65,6 @@ public:
 private:
     static void makeValid(DataDescription& data);
     static void makeValid(ClusterDescription& cluster);
+    static void removeMetadata(DataDescription& data);
+    static void removeMetadata(CellDescription& cell);
 };
