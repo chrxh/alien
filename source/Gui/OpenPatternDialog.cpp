@@ -9,6 +9,7 @@
 #include "Viewport.h"
 #include "EditorModel.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 _OpenPatternDialog::_OpenPatternDialog(
     EditorModel const& editorModel,
@@ -46,6 +47,8 @@ void _OpenPatternDialog::process()
             content.setCenter(center);
             _simController->addAndSelectSimulationData(DataDescription(content));
             _editorModel->update();
+        } else {
+            MessageDialog::getInstance().show("Open pattern", "The selected file could not be opened.");
         }
     }
     ifd::FileDialog::Instance().Close();

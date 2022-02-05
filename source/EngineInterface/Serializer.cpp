@@ -141,7 +141,7 @@ bool Serializer::serializeSimulationToFile(std::string const& filename, Deserial
         }
         return true;
     } catch (std::exception const& e) {
-        throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
+        return false;
     }
 }
 
@@ -186,7 +186,7 @@ bool Serializer::deserializeSimulationFromFile(std::string const& filename, Dese
         }
         return true;
     } catch (std::exception const& e) {
-        throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());
+        return false;
     }
 }
 
@@ -205,7 +205,7 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
 
         return true;
     } catch (std::exception const& e) {
-        throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
+        return false;
     }
 }
 
@@ -226,7 +226,7 @@ bool Serializer::deserializeContentFromFile(std::string const& filename, Cluster
 
         return true;
     } catch (std::exception const& e) {
-        throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());
+        return false;
     }
 }
 
@@ -241,7 +241,7 @@ bool Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap c
         stream.close();
         return true;
     } catch (std::exception const& e) {
-        throw std::runtime_error(std::string("An error occurred while serializing simulation data: ") + e.what());
+        return false;
     }
 }
 
@@ -256,7 +256,7 @@ bool Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolM
         stream.close();
         return true;
     } catch (std::exception const& e) {
-        throw std::runtime_error("An error occurred while loading the file " + filename + ": " + e.what());
+        return false;
     }
 }
 

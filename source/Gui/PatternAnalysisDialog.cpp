@@ -55,6 +55,10 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
 
     std::ofstream file;
     file.open(filename, std::ios_base::out);
+    if (!file) {
+        MessageDialog::getInstance().show("Pattern analysis", "The analysis result could not be saved to the specified file.");
+        return;
+    }
 
     int sum = 0;
     std::vector<PartitionClassData> partitionData;

@@ -6,6 +6,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "ImFileDialog.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 
 _SaveSymbolsDialog::_SaveSymbolsDialog(SimulationController const& simController)
     : _simController(simController)
@@ -32,7 +33,9 @@ void _SaveSymbolsDialog::process()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        Serializer::serializeSymbolsToFile(firstFilename.string(), _simController->getSymbolMap());
+        if (!Serializer::serializeSymbolsToFile(firstFilename.string(), _simController->getSymbolMap())) {
+            MessageDialog::getInstance().show("Save symbols", "The symbols could not be saved to the specified file.");
+        }
     }
     ifd::FileDialog::Instance().Close();
 }
