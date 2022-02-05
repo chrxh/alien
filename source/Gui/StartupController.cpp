@@ -1,4 +1,4 @@
-#include "StartupWindow.h"
+#include "StartupController.h"
 
 #include <imgui.h>
 
@@ -9,6 +9,7 @@
 #include "Resources.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
+#include "TemporalControlWindow.h"
 
 namespace
 {
@@ -17,15 +18,16 @@ namespace
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 }
 
-_StartupWindow::_StartupWindow(SimulationController const& simController, Viewport const& viewport)
+_StartupController::_StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow, Viewport const& viewport)
     : _simController(simController)
+    , _temporalControlWindow(temporalControlWindow)
     , _viewport(viewport)
 {
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _startupTimepoint = std::chrono::steady_clock::now();
 }
 
-void _StartupWindow::process()
+void _StartupController::process()
 {
     if (_state == State::Unintialized) {
         processWindow();
@@ -50,6 +52,7 @@ void _StartupWindow::process()
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
         _viewport->setZoomFactor(2.0f);
+        _temporalControlWindow->onSnapshot();
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();
         _state = State::LoadingSimulation;
@@ -91,17 +94,17 @@ void _StartupWindow::process()
     }
 }
 
-auto _StartupWindow::getState() -> State
+auto _StartupController::getState() -> State
 {
     return _state;
 }
 
-void _StartupWindow::activate()
+void _StartupController::activate()
 {
     _state = State::RequestLoading;
 }
 
-void _StartupWindow::processWindow()
+void _StartupController::processWindow()
 {
     auto center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
