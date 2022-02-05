@@ -55,8 +55,6 @@ void _AutosaveController::onSave()
     sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     sim.settings = _simController->getSettings();
     sim.symbolMap = _simController->getSymbolMap();
-    sim.content = _simController->getClusteredSimulationData(
-        {-1000, -1000}, {_simController->getWorldSize().x + 1000, _simController->getWorldSize().y + 1000});
-    Serializer serializer = std::make_shared<_Serializer>();
-    serializer->serializeSimulationToFile(Const::AutosaveFile, sim);
+    sim.content = _simController->getClusteredSimulationData();
+    Serializer::serializeSimulationToFile(Const::AutosaveFile, sim);
 }

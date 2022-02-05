@@ -302,49 +302,4 @@ private:
     CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
 };
 
-
-
-struct DescriptionNavigator
-{
-	std::unordered_set<uint64_t> cellIds;
-    std::unordered_set<uint64_t> particleIds;
-    std::map<uint64_t, uint64_t> clusterIdsByCellIds;
-    std::map<uint64_t, int> clusterIndicesByClusterIds;
-    std::map<uint64_t, int> clusterIndicesByCellIds;
-    std::map<uint64_t, int> cellIndicesByCellIds;
-    std::map<uint64_t, int> particleIndicesByParticleIds;
-
-	void update(ClusteredDataDescription const& data)
-	{
-		cellIds.clear();
-		particleIds.clear();
-		clusterIdsByCellIds.clear();
-		clusterIndicesByCellIds.clear();
-		clusterIndicesByClusterIds.clear();
-		cellIndicesByCellIds.clear();
-		particleIndicesByParticleIds.clear();
-
-		int clusterIndex = 0;
-		for (auto const &cluster : data.clusters) {
-			clusterIndicesByClusterIds.insert_or_assign(cluster.id, clusterIndex);
-			int cellIndex = 0;
-			for (auto const &cell : cluster.cells) {
-				clusterIdsByCellIds.insert_or_assign(cell.id, cluster.id);
-				clusterIndicesByCellIds.insert_or_assign(cell.id, clusterIndex);
-				cellIndicesByCellIds.insert_or_assign(cell.id, cellIndex);
-				cellIds.insert(cell.id);
-				++cellIndex;
-			}
-			++clusterIndex;
-		}
-
-		int particleIndex = 0;
-		for (auto const &particle : data.particles) {
-			particleIndicesByParticleIds.insert_or_assign(particle.id, particleIndex);
-			particleIds.insert(particle.id);
-			++particleIndex;
-		}
-	}
-};
-
 using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;

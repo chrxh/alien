@@ -91,7 +91,7 @@ void _ColorizeDialog::onColorize()
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     auto settings = _simController->getSettings();
     auto symbolMap = _simController->getSymbolMap();
-    auto content = _simController->getClusteredSimulationData({0, 0}, _simController->getWorldSize());
+    auto content = _simController->getClusteredSimulationData();
 
     std::vector<int> colorCodes;
     for (int i = 0; i < 7; ++i) {

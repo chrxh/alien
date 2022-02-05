@@ -32,10 +32,8 @@ void _OpenSymbolsDialog::process()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        Serializer serializer = std::make_shared<_Serializer>();
-
         SymbolMap symbolMap;
-        if (serializer->deserializeSymbolsFromFile(firstFilename.string(), symbolMap)) {
+        if (Serializer::deserializeSymbolsFromFile(firstFilename.string(), symbolMap)) {
             _simController->setSymbolMap(symbolMap);
         }
     }

@@ -173,7 +173,7 @@ void _SpatialControlWindow::onResizing()
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     auto settings = _simController->getSettings();
     auto symbolMap = _simController->getSymbolMap();
-    auto content = _simController->getClusteredSimulationData({0, 0}, _simController->getWorldSize());
+    auto content = _simController->getClusteredSimulationData();
 
     _simController->closeSimulation();
 

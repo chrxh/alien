@@ -58,6 +58,8 @@ public:
 
     static void colorize(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
 
+    static void generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
+
     static uint64_t getId(CellOrParticleDescription const& entity);
     static RealVector2D getPos(CellOrParticleDescription const& entity);
     static std::vector<CellOrParticleDescription> getEntities(DataDescription const& data);

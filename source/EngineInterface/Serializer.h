@@ -17,27 +17,27 @@ struct DeserializedSimulation
     ClusteredDataDescription content;
 };
 
-class _Serializer
+class Serializer
 {
 public:
-    bool serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data);
-    bool deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data);
+    static bool serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data);
+    static bool deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data);
 
-    bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
-    bool deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content);
+    static bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
+    static bool deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content);
 
-    bool serializeSymbolsToFile(std::string const& filename, SymbolMap const& symbolMap);
-    bool deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap);
+    static bool serializeSymbolsToFile(std::string const& filename, SymbolMap const& symbolMap);
+    static bool deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap);
 
 private:
-    void serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream) const;
-    void serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream) const;
-    void serializeSymbolMap(SymbolMap const symbols, std::ostream& stream) const;
+    static void serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream);
+    static void serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream);
+    static void serializeSymbolMap(SymbolMap const symbols, std::ostream& stream);
 
-    void deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream) const;
-    void deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream) const;
-    void deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream);
+    static void deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream);
+    static void deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream);
+    static void deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream);
 
-    void compress(std::string&& uncompressedData, std::ostream& stream);
-    void decompress(std::string&& compressedData, std::ostream& stream);
+    static void compress(std::string&& uncompressedData, std::ostream& stream);
+    static void decompress(std::string&& compressedData, std::ostream& stream);
 };

@@ -25,7 +25,7 @@ public:
     virtual std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
 
-    virtual ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) = 0;
+    virtual ClusteredDataDescription getClusteredSimulationData() = 0;
     virtual DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) = 0;
     virtual ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) = 0;
     virtual DataDescription getSelectedSimulationData(bool includeClusters) = 0;

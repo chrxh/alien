@@ -15,6 +15,7 @@ public:
     void update();
 
     bool isSelectionEmpty() const;
+    bool isCellSelectionEmpty() const;
     void clear();
 
     std::vector<CellOrParticleDescription> fetchEntitiesToInspect();

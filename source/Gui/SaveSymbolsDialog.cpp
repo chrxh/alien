@@ -32,8 +32,7 @@ void _SaveSymbolsDialog::process()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        Serializer serializer = std::make_shared<_Serializer>();
-        serializer->serializeSymbolsToFile(firstFilename.string(), _simController->getSymbolMap());
+        Serializer::serializeSymbolsToFile(firstFilename.string(), _simController->getSymbolMap());
     }
     ifd::FileDialog::Instance().Close();
 }

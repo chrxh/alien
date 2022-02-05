@@ -57,6 +57,7 @@ private:
     OpenSimulationDialog _openSimulationDialog; 
     SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
+    PatternAnalysisDialog _patternAnalysisDialog;
     EditorController _editorController; 
 
     bool _onClose = false;
