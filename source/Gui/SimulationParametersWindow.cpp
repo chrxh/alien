@@ -104,7 +104,7 @@ void _SimulationParametersWindow::processIntern()
     auto timestepsPerEpoch = _simulationParametersChanger->getTimestepsPerEpoch();
     if(AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
-                .name("Epoch step length")
+                .name("Epoch time steps")
                 .defaultValue(_simulationParametersChanger->getOriginalTimestepsPerEpoch())
                 .textWidth(MaxContentTextWidth)
                 .tooltip("Duration in time steps after which a change is applied."),
