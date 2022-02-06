@@ -12,6 +12,7 @@ public:
     uint32_t getRandomInt(uint32_t min, uint32_t max);
     double getRandomReal();
     double getRandomReal(double min, double max);
+    float getRandomFloat(float min, float max);
 
 	uint64_t getId();
 

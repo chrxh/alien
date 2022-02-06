@@ -59,6 +59,11 @@ double NumberGenerator::getRandomReal(double min, double max)
 	return static_cast<double>(getLargeRandomInt(static_cast<int>((max - min) * 1000)) / 1000.0 + min);
 }
 
+float NumberGenerator::getRandomFloat(float min, float max)
+{
+    return toFloat(getRandomReal(min, max));
+}
+
 double NumberGenerator::getRandomReal()
 {
     return static_cast<double>(getNumberFromArray()) / RandMax;

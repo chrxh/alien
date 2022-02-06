@@ -88,12 +88,12 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
     ImGui::TextUnformatted(parameters._name.c_str());
 }
 
-void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
+bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    ImGui::InputInt(("##" + parameters._name).c_str(), &value);
+    auto result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
@@ -108,6 +108,7 @@ void AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+    return result;
 }
 
 void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)

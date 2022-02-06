@@ -50,7 +50,7 @@ public:
         MEMBER_DECLARATION(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputInt(InputIntParameters const& parameters, int& value);
+    static bool InputInt(InputIntParameters const& parameters, int& value);
 
     struct InputFloatParameters
     {

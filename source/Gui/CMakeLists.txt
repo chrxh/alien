@@ -72,6 +72,10 @@ PUBLIC
     Shader.h
     SimpleLogger.cpp
     SimpleLogger.h
+    SimulationParametersCalculator.cpp
+    SimulationParametersCalculator.h
+    SimulationParametersChanger.cpp
+    SimulationParametersChanger.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
     SimulationScrollbar.cpp
