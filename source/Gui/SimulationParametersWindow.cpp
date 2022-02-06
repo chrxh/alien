@@ -9,6 +9,7 @@
 #include "AlienImGui.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "SimulationParametersChanger.h"
 
 namespace
 {
@@ -25,6 +26,15 @@ _SimulationParametersWindow::_SimulationParametersWindow(SimulationController co
         color.w = 1.0f; //alpha
         _savedPalette[n] = static_cast<ImU32>(ImColor(color));
     }
+
+    auto timestepsPerEpoch = GlobalSettings::getInstance().getIntState("windows.simulation parameters.time steps per epoch", 10000);
+
+    _simulationParametersChanger = std::make_shared<_SimulationParametersChanger>(simController, timestepsPerEpoch);
+}
+
+_SimulationParametersWindow::~_SimulationParametersWindow()
+{
+    GlobalSettings::getInstance().setIntState("windows.simulation parameters.time steps per epoch", _simulationParametersChanger->getTimestepsPerEpoch());
 }
 
 void _SimulationParametersWindow::processIntern()
@@ -37,45 +47,71 @@ void _SimulationParametersWindow::processIntern()
     auto origSimParametersSpots = _simController->getOriginalSimulationParametersSpots();
     auto lastSimParametersSpots = simParametersSpots;
 
-    if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(78)), false)) {
 
-        if (simParametersSpots.numSpots < 2) {
-            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                int index = simParametersSpots.numSpots;
-                simParametersSpots.spots[index] = createSpot(simParameters, index);
-                _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[index], index);
-                ++simParametersSpots.numSpots;
+        if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+
+            if (simParametersSpots.numSpots < 2) {
+                if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+                    int index = simParametersSpots.numSpots;
+                    simParametersSpots.spots[index] = createSpot(simParameters, index);
+                    _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[index], index);
+                    ++simParametersSpots.numSpots;
+                }
+                AlienImGui::Tooltip("Add spot");
             }
-            AlienImGui::Tooltip("Add spot");
-        }
 
-        if (ImGui::BeginTabItem("Base", NULL, ImGuiTabItemFlags_None)) {
-            processBase(simParameters, origSimParameters);
-            ImGui::EndTabItem();
-        }
-
-        for (int tab = 0; tab < simParametersSpots.numSpots; ++tab) {
-            SimulationParametersSpot& spot = simParametersSpots.spots[tab];
-            SimulationParametersSpot const& origSpot = origSimParametersSpots.spots[tab];
-            bool open = true;
-            char name[16];
-            snprintf(name, IM_ARRAYSIZE(name), "Spot %01d", tab + 1);
-            if (ImGui::BeginTabItem(name, &open, ImGuiTabItemFlags_None)) {
-                processSpot(spot, origSpot);
+            if (ImGui::BeginTabItem("Base", NULL, ImGuiTabItemFlags_None)) {
+                processBase(simParameters, origSimParameters);
                 ImGui::EndTabItem();
             }
 
-            if (!open) {
-                for (int i = tab; i < simParametersSpots.numSpots - 1; ++i) {
-                    simParametersSpots.spots[i] = simParametersSpots.spots[i + 1];
-                    _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[i], i);
+            for (int tab = 0; tab < simParametersSpots.numSpots; ++tab) {
+                SimulationParametersSpot& spot = simParametersSpots.spots[tab];
+                SimulationParametersSpot const& origSpot = origSimParametersSpots.spots[tab];
+                bool open = true;
+                std::string name = "Spot " + std::to_string(tab+1);
+                if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
+                    processSpot(spot, origSpot);
+                    ImGui::EndTabItem();
                 }
-                --simParametersSpots.numSpots;
-            }
-        }
 
-        ImGui::EndTabBar();
+                if (!open) {
+                    for (int i = tab; i < simParametersSpots.numSpots - 1; ++i) {
+                        simParametersSpots.spots[i] = simParametersSpots.spots[i + 1];
+                        _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[i], i);
+                    }
+                    --simParametersSpots.numSpots;
+                }
+            }
+
+            ImGui::EndTabBar();
+        }
     }
+    ImGui::EndChild();
+
+    AlienImGui::Separator();
+    if (AlienImGui::ToggleButton("Change automatically", _changeAutomatically)) {
+        if (_changeAutomatically) {
+            _simulationParametersChanger->activate();
+        } else {
+            _simulationParametersChanger->deactivate();
+        }
+    }
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::BeginDisabled(!_changeAutomatically);
+    auto timestepsPerEpoch = _simulationParametersChanger->getTimestepsPerEpoch();
+    if(AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
+                .name("Epoch step length")
+                .defaultValue(_simulationParametersChanger->getOriginalTimestepsPerEpoch())
+                .textWidth(MaxContentTextWidth)
+                .tooltip("Duration in time steps after which a change is applied."),
+        timestepsPerEpoch)) {
+        _simulationParametersChanger->setTimestepsPerEpoch(timestepsPerEpoch);
+    }
+    ImGui::EndDisabled();
 
     if (simParameters != lastSimParameters) {
         _simController->setSimulationParameters_async(simParameters);
@@ -84,6 +120,11 @@ void _SimulationParametersWindow::processIntern()
     if (simParametersSpots != lastSimParametersSpots) {
         _simController->setSimulationParametersSpots_async(simParametersSpots);
     }
+}
+
+void _SimulationParametersWindow::processBackground()
+{
+    _simulationParametersChanger->process();
 }
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
