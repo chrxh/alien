@@ -179,10 +179,13 @@ void _InspectorWindow::processCell(CellDescription cell)
         ImGui::EndTabBar();
 
         //fill up with zeros
-        cell.cellFeature.constData.append(
-            std::max(std::basic_string<char>::size_type(0), CellComputationCompiler::getMaxBytes(parameters) - cell.cellFeature.constData.size()), 0);
-        origCell.cellFeature.constData.append(
-            std::max(std::basic_string<char>::size_type(0), CellComputationCompiler::getMaxBytes(parameters) - origCell.cellFeature.constData.size()), 0);  
+        auto constDataMaxSize = CellComputationCompiler::getMaxBytes(parameters);
+        if (constDataMaxSize > cell.cellFeature.constData.size()) {
+            cell.cellFeature.constData.append(constDataMaxSize - cell.cellFeature.constData.size(), 0);
+        }
+        if (constDataMaxSize > origCell.cellFeature.constData.size()) {
+            origCell.cellFeature.constData.append(constDataMaxSize - origCell.cellFeature.constData.size(), 0);
+        }
 
         if (hasChanges(cell, origCell)) {
             if (cell.cellFeature != origCell.cellFeature) {
