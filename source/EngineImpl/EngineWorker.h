@@ -99,6 +99,7 @@ public:
     bool isSimulationRunning() const;
 
 private:
+    void checkAndAllowAccess();
     DataAccessTO provideTO(); 
     void updateMonitorDataIntern();
     void processJobs();
@@ -106,7 +107,7 @@ private:
     CudaSimulationAdapter _cudaSimulation;
 
     //sync
-    mutable std::mutex _mutexForLoop;
+    mutable std::mutex _mutexForAccess;
     std::condition_variable _conditionForWorkerLoop;
     std::condition_variable _conditionForAccess;
 
@@ -169,8 +170,7 @@ public:
 private:
     void checkForException(ExceptionData const& exceptionData);
 
-    std::atomic<int>& _accessFlag;
-    std::condition_variable& _conditionForWorkerLoop;
+    EngineWorker* _worker;
 
     bool _isTimeout = false;
 };

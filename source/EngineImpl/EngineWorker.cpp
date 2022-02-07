@@ -360,7 +360,10 @@ void EngineWorker::endShutdown()
 {
     _isSimulationRunning = false;
     _isShutdown = false;
-    _requireAccess = false;
+    {
+        std::unique_lock<std::mutex> uniqueLock(_mutexForAccess);
+        _requireAccess = 0;
+    }
 
     _cudaSimulation.reset();
 }
@@ -498,24 +501,21 @@ void EngineWorker::reconnectSelectedEntities()
 void EngineWorker::runThreadLoop()
 {
     try {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForLoop);
+        std::mutex mutexForLoop;
+        std::unique_lock<std::mutex> lockForLoop(mutexForLoop);
+
         std::optional<std::chrono::steady_clock::time_point> startTimestepTime;
         while (true) {
             if (!_isSimulationRunning.load()) {
 
                 //sleep...
                 _tps.store(0);
-                _conditionForWorkerLoop.wait(uniqueLock);
+                _conditionForWorkerLoop.wait(lockForLoop);
             }
             if (_isShutdown.load()) {
                 return;
             }
-            if (_requireAccess.load() == 1) {
-                _requireAccess.store(2);
-                _conditionForAccess.notify_all();
-                while (_requireAccess.load() != 0) {
-                }
-            }
+            checkAndAllowAccess();
 
             if (_isSimulationRunning.load()) {
                 if (startTimestepTime && _tpsRestriction.load() > 0) {
@@ -527,11 +527,9 @@ void EngineWorker::runThreadLoop()
                                              std::chrono::steady_clock::now() - *startTimestepTime)
                                              .count();
 
-                        if (_requireAccess.load() == 1) {
-                            _requireAccess.store(2);
-                            _conditionForAccess.notify_all();
-                        }
-                    } while (actualDuration < desiredDuration || _requireAccess.load() != 0);
+                        checkAndAllowAccess();
+
+                    } while (actualDuration < desiredDuration);
                 }
 
                 auto timepoint = std::chrono::steady_clock::now();
@@ -579,6 +577,27 @@ void EngineWorker::pauseSimulation()
 bool EngineWorker::isSimulationRunning() const
 {
     return _isSimulationRunning.load();
+}
+
+void EngineWorker::checkAndAllowAccess()
+{
+    std::unique_lock<std::mutex> lock(_mutexForAccess);
+    if (_requireAccess == 1) {
+        lock.unlock();
+
+        int requireAccess;
+        do {
+            lock.lock();
+            requireAccess = _requireAccess;
+            if (_requireAccess == 1) {
+                _requireAccess = 2;
+            }
+            lock.unlock();
+
+            _conditionForAccess.notify_all();
+        } while (requireAccess != 0);
+        lock.lock();
+    }
 }
 
 DataAccessTO EngineWorker::provideTO()
@@ -640,31 +659,34 @@ void EngineWorker::processJobs()
 }
 
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
-    : _accessFlag(worker->_requireAccess)
-    , _conditionForWorkerLoop(worker->_conditionForWorkerLoop)
+    : _worker(worker)
 {
     if (!worker->_isSimulationRunning.load()) {
         return;
     }
-    std::mutex mutex;
-    _accessFlag.store(1);
-    std::unique_lock<std::mutex> uniqueLock(mutex);
+    std::unique_lock<std::mutex> uniqueLock(worker->_mutexForAccess);
+    worker->_requireAccess = 1;
     if (maxDuration) {
-        _isTimeout = !worker->_conditionForAccess.wait_for(uniqueLock, *maxDuration, [&] { return _accessFlag.load() == 2; });
+        _isTimeout = !worker->_conditionForAccess.wait_for(uniqueLock, *maxDuration, [&] { return worker->_requireAccess == 2; });
         checkForException(worker->_exceptionData);
     } else {
-        if (!worker->_conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000), [&] { return _accessFlag.load() == 2; })) {
+        if (!worker->_conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000), [&] { return worker->_requireAccess == 2; })) {
             checkForException(worker->_exceptionData);
             throw std::runtime_error("GPU Timeout");
         }
     }
+    uniqueLock.unlock();
+
     worker->_conditionForWorkerLoop.notify_all();
 }
 
 EngineWorkerGuard::~EngineWorkerGuard()
 {
-    _accessFlag.store(0);
-    _conditionForWorkerLoop.notify_all();
+    {
+        std::unique_lock<std::mutex> uniqueLock(_worker->_mutexForAccess);
+        _worker->_requireAccess = 0;
+    }
+    _worker->_conditionForWorkerLoop.notify_all();
 }
 
 bool EngineWorkerGuard::isTimeout() const
