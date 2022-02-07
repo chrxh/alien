@@ -93,7 +93,7 @@ Please visit [alien-project.org](https://alien-project.org/documentation/index.h
 <img src="img/screenshot4.png" width=100%>
 </h1>
 
-#### Visual editor and scripting environment (under development, screenshot is from previous version)
+#### Pattern editor and scripting environment
 <h1 align="center">
 <img src="img/screenshot5.png" width=100%>
 </h1>
