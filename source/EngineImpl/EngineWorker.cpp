@@ -59,6 +59,7 @@ void EngineWorker::tryDrawVectorGraphics(
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
+
     if (!access.isTimeout()) {
         _cudaSimulation->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y},
@@ -361,10 +362,9 @@ void EngineWorker::endShutdown()
 {
     _isSimulationRunning = false;
     _isShutdown = false;
-    {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForAccess);
-        _requireAccess = 0;
-    }
+    _mutexForAccess.lock();
+    _requireAccess = 0;
+    _mutexForAccess.unlock();
 
     _cudaSimulation.reset();
 }
@@ -516,7 +516,6 @@ void EngineWorker::runThreadLoop()
             if (_isShutdown.load()) {
                 return;
             }
-            checkAndAllowAccess();
 
             if (_isSimulationRunning.load()) {
                 if (startTimestepTime && _tpsRestriction.load() > 0) {
@@ -527,8 +526,6 @@ void EngineWorker::runThreadLoop()
                         desiredDuration = (0 != tpsRestriction) ? 1000000 / tpsRestriction : 0;
                         actualDuration = _lastDurationOvershot
                             + std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - *startTimestepTime).count();
-
-                        checkAndAllowAccess();
 
                     } while (actualDuration < desiredDuration);
                     _lastDurationOvershot = actualDuration - desiredDuration;
@@ -552,7 +549,11 @@ void EngineWorker::runThreadLoop()
                 }
 
                 startTimestepTime = std::chrono::steady_clock::now();
+                
+                _mutexForAccess.lock();
                 _cudaSimulation->calcTimestep();
+                _mutexForAccess.unlock();
+
                 updateMonitorDataIntern();
                 ++_timestepsSinceTimepoint;
             }
@@ -579,27 +580,6 @@ void EngineWorker::pauseSimulation()
 bool EngineWorker::isSimulationRunning() const
 {
     return _isSimulationRunning.load();
-}
-
-void EngineWorker::checkAndAllowAccess()
-{
-    std::unique_lock<std::mutex> lock(_mutexForAccess);
-    if (_requireAccess == 1) {
-        lock.unlock();
-
-        int requireAccess;
-        do {
-            lock.lock();
-            requireAccess = _requireAccess;
-            if (_requireAccess == 1) {
-                _requireAccess = 2;
-            }
-            lock.unlock();
-
-            _conditionForAccess.notify_all();
-        } while (requireAccess != 0);
-        lock.lock();
-    }
 }
 
 DataAccessTO EngineWorker::provideTO()
@@ -663,32 +643,18 @@ void EngineWorker::processJobs()
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
     : _worker(worker)
 {
-    if (!worker->_isSimulationRunning.load()) {
-        return;
+    _isTimeout = !_worker->_mutexForAccess.try_lock_for(maxDuration ? *maxDuration : std::chrono::milliseconds(5000));
+    checkForException(worker->_exceptionData);
+    if (_isTimeout && !maxDuration) {
+        throw std::runtime_error("GPU Timeout");
     }
-    std::unique_lock<std::mutex> uniqueLock(worker->_mutexForAccess);
-    worker->_requireAccess = 1;
-    if (maxDuration) {
-        _isTimeout = !worker->_conditionForAccess.wait_for(uniqueLock, *maxDuration, [&] { return worker->_requireAccess == 2; });
-        checkForException(worker->_exceptionData);
-    } else {
-        if (!worker->_conditionForAccess.wait_for(uniqueLock, std::chrono::milliseconds(5000), [&] { return worker->_requireAccess == 2; })) {
-            checkForException(worker->_exceptionData);
-            throw std::runtime_error("GPU Timeout");
-        }
-    }
-    uniqueLock.unlock();
-
-    worker->_conditionForWorkerLoop.notify_all();
 }
 
 EngineWorkerGuard::~EngineWorkerGuard()
 {
-    {
-        std::unique_lock<std::mutex> uniqueLock(_worker->_mutexForAccess);
-        _worker->_requireAccess = 0;
+    if(!_isTimeout) {
+        _worker->_mutexForAccess.unlock();
     }
-    _worker->_conditionForWorkerLoop.notify_all();
 }
 
 bool EngineWorkerGuard::isTimeout() const
