@@ -157,6 +157,8 @@ private:
     //internals
     void* _cudaResource;
     AccessDataTOCache _dataTOCache;
+
+    long long int _lastDurationOvershot = 0;
 };
 
 class EngineWorkerGuard
