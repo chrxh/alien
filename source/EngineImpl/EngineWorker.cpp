@@ -1,6 +1,7 @@
 #include "EngineWorker.h"
 
 #include <chrono>
+#include <thread>
 
 #include "EngineGpuKernels/AccessTOs.cuh"
 #include "EngineGpuKernels/CudaSimulationAdapter.cuh"
@@ -520,16 +521,17 @@ void EngineWorker::runThreadLoop()
             if (_isSimulationRunning.load()) {
                 if (startTimestepTime && _tpsRestriction.load() > 0) {
                     long long int actualDuration, desiredDuration;
+                    _lastDurationOvershot = std::min(_lastDurationOvershot, desiredDuration);
                     do {
                         auto tpsRestriction = _tpsRestriction.load();
                         desiredDuration = (0 != tpsRestriction) ? 1000000 / tpsRestriction : 0;
-                        actualDuration = std::chrono::duration_cast<std::chrono::microseconds>(
-                                             std::chrono::steady_clock::now() - *startTimestepTime)
-                                             .count();
+                        actualDuration = _lastDurationOvershot
+                            + std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - *startTimestepTime).count();
 
                         checkAndAllowAccess();
 
                     } while (actualDuration < desiredDuration);
+                    _lastDurationOvershot = actualDuration - desiredDuration;
                 }
 
                 auto timepoint = std::chrono::steady_clock::now();
