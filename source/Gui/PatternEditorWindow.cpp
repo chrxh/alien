@@ -261,7 +261,7 @@ void _PatternEditorWindow::processIntern()
     }
     ImGui::SameLine();
     AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell clusters of the selected cell.\n"
-                           "If this option is disabled, the changes will be applied only to the selected cells.\n"
+                           "If this option is disabled, the changes will be applied only to the selected cells. In this case, cell connections with neighboring cells are recalculated.\n"
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
 
     _savePatternDialog->process();
