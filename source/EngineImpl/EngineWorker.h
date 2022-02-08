@@ -110,7 +110,7 @@ private:
     CudaSimulationAdapter _cudaSimulation;
 
     //sync
-    mutable std::timed_mutex _mutexForAccess;
+    mutable std::timed_mutex _mutexForCudaAccess;
     std::condition_variable _conditionForWorkerLoop;
 
     std::atomic<bool> _isSimulationRunning{false};
@@ -140,6 +140,7 @@ private:
     int _timestepsSinceMeasurement = 0;
     std::optional<std::chrono::steady_clock::time_point> _measureTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
+    std::optional<std::chrono::microseconds> _slowDownOvershot;
   
     //settings
     Settings _settings;
