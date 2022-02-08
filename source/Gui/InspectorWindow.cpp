@@ -299,7 +299,7 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
 void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
+        auto const& parameters = _simController->getSimulationParameters();
         if (ImGui::BeginChild(
                 "##1",
                 ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(90)),
@@ -378,7 +378,7 @@ void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
 {
     bool open = true;
     if (ImGui::BeginTabItem(("Token " + std::to_string(tokenIndex + 1)).c_str(), &open, ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
+        auto const& parameters = _simController->getSimulationParameters();
 
         AlienImGui::Group("Properties");
         auto& token = cell.tokens.at(tokenIndex);
@@ -450,7 +450,7 @@ void _InspectorWindow::showTokenMemorySection(
     AlienImGui::Text(text);
     ImGui::PopFont();
 
-    auto parameters = _simController->getSimulationParameters();
+    auto const& parameters = _simController->getSimulationParameters();
     if (address + numBytes < parameters.tokenMemorySize) {
         AlienImGui::Separator();
     }
@@ -470,6 +470,33 @@ void _InspectorWindow::showCompilationResult(CompilationResult const& compilatio
         AlienImGui::Text("Error at line " + std::to_string(compilationResult.lineOfFirstError));
         ImGui::PopStyleColor();
     }
+    ImGui::SameLine();
+    auto const& parameters = _simController->getSimulationParameters();
+    AlienImGui::HelpMarker(
+        "A cell code consists of maximal " + std::to_string(parameters.cellFunctionComputerMaxInstructions)
+        + " instructions. The following instructions are allowed:\n\n"
+        ICON_FA_CARET_RIGHT " mov op1, op2  (means op1 = op2)\n" 
+        ICON_FA_CARET_RIGHT " add op1, op2  (means op1 = op1 + op2)\n" 
+        ICON_FA_CARET_RIGHT " sub op1, op2  (means op1 = op1 - op2)\n" 
+        ICON_FA_CARET_RIGHT " mul op1, op2  (means op1 = op1 * op2)\n" 
+        ICON_FA_CARET_RIGHT " div op1, op2  (means op1 = op1 / op2)\n" 
+        ICON_FA_CARET_RIGHT " xor op1, op2  (means op1 = op1 ^ op2)\n" 
+        ICON_FA_CARET_RIGHT " or op1, op2  (means op1 = op1 | op2)\n" 
+        ICON_FA_CARET_RIGHT " and op1, op2  (means op1 = op1 & op2)\n" 
+        ICON_FA_CARET_RIGHT " if op1 > op2  (means if (op1 > op2))\n" 
+        ICON_FA_CARET_RIGHT " if op1 >= op2  (means if (op1 >= op2))\n" 
+        ICON_FA_CARET_RIGHT " if op1 = op2  (means if (op1 == op2))\n" 
+        ICON_FA_CARET_RIGHT " if op1 != op2  (means if (op1 != op2))\n" 
+        ICON_FA_CARET_RIGHT " if op1 <= op2  (means if (op1 <= op2))\n" 
+        ICON_FA_CARET_RIGHT " if op1 < op2  (means if (op1 < op2))\n" 
+        ICON_FA_CARET_RIGHT " else\n" 
+        ICON_FA_CARET_RIGHT " endif\n\n"
+          "op1 can be (x denotes an address between 0 and 255)\n" 
+        ICON_FA_CARET_RIGHT " a reference to a token memory byte with notation [x] \n" 
+        ICON_FA_CARET_RIGHT " a reference to a reference to a token memory byte with notation [[x]]\n" 
+        ICON_FA_CARET_RIGHT " a reference to a cell memory byte with notation (x)\n\n"
+          "op2 can be a type such as op1 or a constant between -127 and 128.\n\n"
+          "In all above instructions the calculations/comparisons are performed on signed integers in the range -127 to 128.\n");
 }
 
 void _InspectorWindow::processParticle(ParticleDescription particle)
