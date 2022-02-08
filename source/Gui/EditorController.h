@@ -39,7 +39,7 @@ private:
     void newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities);
 
     void selectEntities(RealVector2D const& viewPos, bool modifierKeyPressed);
-    void moveSelectedEntities(RealVector2D const& viewPos, RealVector2D const& prevViewPos, bool modifierKeyPressed);
+    void moveSelectedEntities(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
     void applyForces(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
 
     void createSelectionRect(RealVector2D const& viewPos);

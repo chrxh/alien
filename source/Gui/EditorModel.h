@@ -32,6 +32,8 @@ public:
     void setDefaultColorCode(int value);
     int getDefaultColorCode() const;
 
+    void setForceNoRollout(bool value);
+
     void setRolloutToClusters(bool value);
     bool isRolloutToClusters() const;
 
@@ -44,4 +46,5 @@ private:
     bool _drawMode = false;
     int _defaultColorCode = 0;
     bool _rolloutToClusters = true;
+    bool _forceNoRollout = false;;
 };

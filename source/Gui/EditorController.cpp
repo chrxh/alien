@@ -57,6 +57,7 @@ void _EditorController::process()
     processSelectionRect();
     processInspectorWindows();
 
+    _editorModel->setForceNoRollout(ImGui::GetIO().KeyShift);
     if (!ImGui::GetIO().WantCaptureMouse) {
         auto mousePosImVec = ImGui::GetMousePos();
         RealVector2D mousePos{mousePosImVec.x, mousePosImVec.y};
@@ -74,7 +75,7 @@ void _EditorController::process()
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             if (!_simController->isSimulationRunning()) {
                 if (!_editorModel->isDrawMode()) {
-                    moveSelectedEntities(mousePos, prevMousePosInt, ImGui::GetIO().KeyShift);
+                    moveSelectedEntities(mousePos, prevMousePosInt);
                 } else {
                     _creatorWindow->onDrawing();
                 }
@@ -306,8 +307,7 @@ void _EditorController::selectEntities(RealVector2D const& viewPos, bool modifie
 
 void _EditorController::moveSelectedEntities(
     RealVector2D const& viewPos,
-    RealVector2D const& prevViewPos,
-    bool modifierKeyPressed)
+    RealVector2D const& prevViewPos)
 {
     auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
@@ -315,7 +315,7 @@ void _EditorController::moveSelectedEntities(
     auto delta = end - start;
 
     ShallowUpdateSelectionData updateData;
-    updateData.considerClusters = _editorModel->isRolloutToClusters() && !modifierKeyPressed;
+    updateData.considerClusters = _editorModel->isRolloutToClusters();
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
     _simController->shallowUpdateSelectedEntities(updateData);
