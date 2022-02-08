@@ -103,6 +103,10 @@ private:
     void updateMonitorDataIntern();
     void processJobs();
 
+    void highPrecisionWaiting(std::chrono::microseconds const& duration) const;
+    void measureTPS();
+    void slowdownTPS();
+
     CudaSimulationAdapter _cudaSimulation;
 
     //sync
@@ -111,7 +115,6 @@ private:
 
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
-    std::atomic<int> _requireAccess{0}; // 1=require access, 2=access granted
     ExceptionData _exceptionData;
 
     //async jobs
@@ -134,8 +137,9 @@ private:
     //time step measurements
     std::atomic<int> _tpsRestriction{0};  //0 = no restriction
     std::atomic<float> _tps;
-    std::optional<std::chrono::steady_clock::time_point> _timepoint;
-    int _timestepsSinceTimepoint = 0;
+    int _timestepsSinceMeasurement = 0;
+    std::optional<std::chrono::steady_clock::time_point> _measureTimepoint;
+    std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
   
     //settings
     Settings _settings;
@@ -155,8 +159,6 @@ private:
     //internals
     void* _cudaResource;
     AccessDataTOCache _dataTOCache;
-
-    long long int _lastDurationOvershot = 0;
 };
 
 class EngineWorkerGuard
