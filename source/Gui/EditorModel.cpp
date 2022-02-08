@@ -90,12 +90,19 @@ int _EditorModel::getDefaultColorCode() const
     return _defaultColorCode;
 }
 
+void _EditorModel::setForceNoRollout(bool value)
+{
+    _forceNoRollout = value;
+}
+
 void _EditorModel::setRolloutToClusters(bool value)
 {
-    _rolloutToClusters = value;
+    if (!_forceNoRollout) {
+        _rolloutToClusters = value;
+    }
 }
 
 bool _EditorModel::isRolloutToClusters() const
 {
-    return _rolloutToClusters;
+    return _rolloutToClusters && !_forceNoRollout;
 }
