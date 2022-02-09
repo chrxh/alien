@@ -282,7 +282,7 @@ void _PatternEditorWindow::onInspectEntities()
 
 bool _PatternEditorWindow::isCopyingPossible() const
 {
-    return !_editorModel->isSelectionEmpty();
+    return !_editorModel->isSelectionEmpty() && !_editorModel->areEntitiesInspected();
 }
 
 void _PatternEditorWindow::onCopy()
@@ -292,7 +292,7 @@ void _PatternEditorWindow::onCopy()
 
 bool _PatternEditorWindow::isPastingPossible() const
 {
-    return _copiedSelection.has_value();
+    return _copiedSelection.has_value() && !_editorModel->areEntitiesInspected();
 }
 
 void _PatternEditorWindow::onPaste()

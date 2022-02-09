@@ -25,6 +25,7 @@ public:
     CellOrParticleDescription getInspectedEntity(uint64_t id) const;
     void addInspectedEntity(CellOrParticleDescription const& entity);
     void setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities);
+    bool areEntitiesInspected() const;
 
     void setDrawMode(bool value);
     bool isDrawMode() const;

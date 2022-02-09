@@ -49,6 +49,12 @@ void _SymbolsWindow::processIntern()
         _saveSymbolsDialog->show();
     }
 
+    //default button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_HAMMER)) {
+        entries = getEntriesFromSymbolMap(SymbolMapHelper::getDefaultSymbolMap());
+    }
+
     //undo button
     ImGui::SameLine();
     ImGui::BeginDisabled(!hasSymbolMapChanged());
@@ -57,6 +63,7 @@ void _SymbolsWindow::processIntern()
     }
     ImGui::EndDisabled();
 
+   
     AlienImGui::Separator();
 
     if (ImGui::BeginTable(

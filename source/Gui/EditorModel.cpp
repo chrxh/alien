@@ -70,6 +70,11 @@ void _EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> c
     }
 }
 
+bool _EditorModel::areEntitiesInspected() const
+{
+    return !_inspectedEntityById.empty();
+}
+
 void _EditorModel::setDrawMode(bool value)
 {
     _drawMode = value;

@@ -123,5 +123,16 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("COMMUNICATOR_OUT_RECEIVED_ANGLE", "[" + std::to_string(Enums::Communicator_OutReceivedAngle) + "]");
     result.emplace("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "[" + std::to_string(Enums::Communicator_OutReceivedDistance) + "]");
 
+    //muscle
+    result.emplace("MUSCLE_IN", "[" + std::to_string(Enums::Muscle_Input) + "]");
+    result.emplace("MUSCLE_IN::DO_NOTHING", std::to_string(Enums::MuscleIn_DoNothing));
+    result.emplace("MUSCLE_IN::CONTRACT", std::to_string(Enums::MuscleIn_Contract));
+    result.emplace("MUSCLE_IN::CONTRACT_RELAX", std::to_string(Enums::MuscleIn_ContractRelax));
+    result.emplace("MUSCLE_IN::EXPAND", std::to_string(Enums::MuscleIn_Expand));
+    result.emplace("MUSCLE_IN::EXPAND_RELAX", std::to_string(Enums::MuscleIn_ExpandRelax));
+    result.emplace("MUSCLE_OUT", "[" + std::to_string(Enums::Muscle_Output) + "]");
+    result.emplace("MUSCLE_OUT::SUCCESS", std::to_string(Enums::MuscleOut_Success));
+    result.emplace("MUSCLE_OUT::LIMIT_REACHED", std::to_string(Enums::MuscleOut_LimitReached));
+    
     return result;
 }
