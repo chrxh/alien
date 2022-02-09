@@ -40,7 +40,8 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
         auto cell = token->cell;
         atomicAdd(&cell->tokenUsages, 1);
 
-        int numMovedTokens = 0;
+        int numNextTokenCells = 0;
+        Cell* nextTokenCells[MAX_CELL_BONDS];
         EntityFactory factory;
         factory.init(&data);
 
@@ -54,9 +55,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
 
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
-                if (((tokenBranchNumber + 1 - connectedCell->branchNumber)
-                     % cudaSimulationParameters.cellMaxTokenBranchNumber)
-                    != 0) {
+                if (((tokenBranchNumber + 1 - connectedCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber) != 0) {
                     continue;
                 }
                 if (connectedCell->tokenBlocked) {
@@ -67,29 +66,37 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
                 if (tokenIndex >= cudaSimulationParameters.cellMaxToken) {
                     continue;
                 }
+                nextTokenCells[numNextTokenCells++] = connectedCell;
+            }
+
+            token->energy = numNextTokenCells > 0 ? token->energy / numNextTokenCells : token->energy;
+
+            for (int i = 0; i < numNextTokenCells; ++i) {
+                auto const& connectedCell = nextTokenCells[i];
+
+                SystemDoubleLock lock;
+                lock.init(&cell->locked, &connectedCell->locked);
+                if (lock.tryLock()) {
+                    auto averageEnergy = (cell->energy + connectedCell->energy) / 2;
+                    cell->energy = averageEnergy;
+                    connectedCell->energy = averageEnergy;
+                    lock.releaseLock();
+                }
 
                 token->memory[Enums::Branching_TokenBranchNumber] = connectedCell->branchNumber;
-                if (0 == numMovedTokens) {
+                if (0 == i) {
                     token->sourceCell = token->cell;
                     token->cell = connectedCell;
-                    ++numMovedTokens;
-
                     
                     if (data.numberGen.random() < tokenMutationRate) {
                         token->memory[data.numberGen.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen.random(255);
                     }
                 } else {
-                    auto origEnergy = atomicAdd(&connectedCell->energy, -token->energy); 
-                    if (origEnergy > cellMinEnergy + token->energy) {
-                        factory.duplicateToken(connectedCell, token);
-                        ++numMovedTokens;
-                    } else {
-                        atomicAdd(&connectedCell->energy, token->energy); 
-                    }
+                    factory.duplicateToken(connectedCell, token);
                 }
             }
         }
-        if (0 == numMovedTokens) {
+        if (0 == numNextTokenCells) {
             atomicAdd(&cell->energy, token->energy);
             token = nullptr;
         }
