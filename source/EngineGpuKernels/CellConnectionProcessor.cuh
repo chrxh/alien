@@ -255,60 +255,61 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
         return;
     }
 
-    auto lastConnectedCellDelta = cell1->connections[0].cell->absPos - cell1->absPos;
-    data.cellMap.mapDisplacementCorrection(lastConnectedCellDelta);
-    float angle = Math::angleOfVector(lastConnectedCellDelta);
-
-    int i = 1;
-    while (true) {
-        auto nextAngle = angle + cell1->connections[i].angleFromPrevious;
-
-        if ((angle < newAngle && newAngle <= nextAngle)
-            || (angle < (newAngle + 360.0f) && (newAngle + 360.0f) <= nextAngle)) {
+    //find appropriate index for new connection
+    int index = 0;
+    float prevAngle = 0;
+    float nextAngle = 0;
+    for (; index < cell1->numConnections; ++index) {
+        auto prevIndex = (index + cell1->numConnections - 1) % cell1->numConnections;
+        prevAngle = Math::angleOfVector(data.cellMap.getMapDisplacementCorrection(cell1->connections[prevIndex].cell->absPos - cell1->absPos));
+        nextAngle = Math::angleOfVector(data.cellMap.getMapDisplacementCorrection(cell1->connections[index].cell->absPos - cell1->absPos));
+        if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
             break;
-        }
-
-        ++i;
-        if (i == cell1->numConnections) {
-            i = 0;
-        }
-        angle = nextAngle;
-        if (angle > 360.0f) {
-            angle -= 360.0f;
         }
     }
 
+    //create connection object
     CellConnection newConnection;
     newConnection.cell = cell2;
     newConnection.distance = desiredDistance;
-
-    auto angleDiff1 = newAngle - angle;
-    if (angleDiff1 < 0) {
-        angleDiff1 += 360.0f;
-    }
-    auto angleDiff2 = cell1->connections[i].angleFromPrevious;
-    if (angleDiff1 > angleDiff2) {
-        angleDiff1 = angleDiff2;
-    }
-
-    auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
-    if (0 == desiredAngleOnCell1) {
-        newConnection.angleFromPrevious = angleDiff2 * factor;
-    } else {
-        if (desiredAngleOnCell1 > angleDiff2) {
-            desiredAngleOnCell1 = angleDiff2;
+    newConnection.angleFromPrevious = 0;
+    auto refAngle = cell1->connections[index].angleFromPrevious;
+    if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
+        auto angleDiff1 = Math::subtractAngle(newAngle, prevAngle);
+        auto angleDiff2 = Math::subtractAngle(nextAngle, prevAngle);
+        auto factor = angleDiff2 != 0 ? angleDiff1 / angleDiff2 : 0.5f;
+        if (0 == desiredAngleOnCell1) {
+            newConnection.angleFromPrevious = refAngle * factor;
+        } else {
+            newConnection.angleFromPrevious = desiredAngleOnCell1;
         }
-        newConnection.angleFromPrevious = desiredAngleOnCell1;
+        newConnection.angleFromPrevious = min(newConnection.angleFromPrevious, refAngle);
+        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % 7);
     }
-    newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % 7);
 
-    for (int j = cell1->numConnections; j > i; --j) {
+    //add connection
+    for (int j = cell1->numConnections; j > index; --j) {
         cell1->connections[j] = cell1->connections[j - 1];
     }
-    cell1->connections[i] = newConnection;
+    cell1->connections[index] = newConnection;
     ++cell1->numConnections;
 
-    cell1->connections[(++i) % cell1->numConnections].angleFromPrevious = angleDiff2 - newConnection.angleFromPrevious;
+
+    //adjust reference angle of next connection
+    auto nextAngleFromPrevious = refAngle - newConnection.angleFromPrevious;
+    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % 7);
+    auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
+
+    auto nextIndex = (index + 1) % cell1->numConnections;
+    auto nextNextIndex = (index + 2) % cell1->numConnections;
+    auto nextNextAngleFromPrevious = cell1->connections[nextNextIndex].angleFromPrevious;
+    if (nextNextAngleFromPrevious - angleDiff >= 0.0f && nextNextAngleFromPrevious - angleDiff <= 360.0f) {
+        cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPreviousAligned;
+        cell1->connections[nextNextIndex].angleFromPrevious = nextNextAngleFromPrevious - angleDiff;
+    } else {
+        cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPrevious;
+    }
+
 }
 
 __inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* cell)
