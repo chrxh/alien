@@ -38,7 +38,7 @@ __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.entities.particlePointers.at(particleIndex);
         particle->absPos = particle->absPos + particle->vel;
-        data.particleMap.mapPosCorrection(particle->absPos);
+        data.particleMap.correctPosition(particle->absPos);
     }
 }
 

@@ -62,7 +62,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
         color = calcMod(token->memory[Enums::Sensor_InColor], 7);
 
         auto originDelta = token->cell->absPos - token->sourceCell->absPos;
-        data.cellMap.mapDisplacementCorrection(originDelta);
+        data.cellMap.correctDirection(originDelta);
         originAngle = Math::angleOfVector(originDelta);
 
         result = 0xffffffff;
@@ -76,7 +76,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
 
             auto delta = Math::unitVectorOfAngle(angle) * radius;
             auto scanPos = token->cell->absPos + delta;
-            data.cellMap.mapPosCorrection(scanPos);
+            data.cellMap.correctPosition(scanPos);
             auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos, color));
             if (density >= minDensity && density <= maxDensity) {
                 auto relAngle = Math::subtractAngle(angle, originAngle);
@@ -129,7 +129,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
         color = calcMod(token->memory[Enums::Sensor_InColor], 7);
 
         searchDelta = token->cell->absPos - token->sourceCell->absPos;
-        data.cellMap.mapDisplacementCorrection(searchDelta);
+        data.cellMap.correctDirection(searchDelta);
         auto angle = QuantityConverter::convertDataToAngle(token->memory[Enums::Sensor_InOutAngle]);
         Math::normalize(searchDelta);
         searchDelta = Math::rotateClockwise(searchDelta, angle);
@@ -142,7 +142,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
     for (int distanceIndex = partition.startIndex; distanceIndex <= partition.endIndex; ++distanceIndex) {
         auto distance = 12.0f + cudaSimulationParameters.cellFunctionSensorRange / 64 * distanceIndex;
         auto scanPos = token->cell->absPos + searchDelta * distance;
-        data.cellMap.mapPosCorrection(scanPos);
+        data.cellMap.correctPosition(scanPos);
         auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos, color));
         if (density >= minDensity && density <= maxDensity) {
             uint32_t combined = static_cast<uint32_t>(distance) << 8 | static_cast<uint32_t>(density);

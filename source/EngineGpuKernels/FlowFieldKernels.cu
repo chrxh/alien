@@ -6,12 +6,12 @@
 
 namespace
 {
-    __device__ float getHeight(float2 const& pos, MapInfo const& mapInfo)
+    __device__ float getHeight(float2 const& pos, BaseMap const& mapInfo)
     {
         float result = 0;
         for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
             auto& radialFlow = cudaFlowFieldSettings.centers[i];
-            auto dist = mapInfo.mapDistance(pos, float2{radialFlow.posX, radialFlow.posY});
+            auto dist = mapInfo.getDistance(pos, float2{radialFlow.posX, radialFlow.posY});
             if (dist > radialFlow.radius) {
                 dist = radialFlow.radius;
             }
@@ -24,7 +24,7 @@ namespace
         return result;
     }
 
-    __device__ float2 calcVelocity(float2 const& pos, MapInfo const& mapInfo)
+    __device__ float2 calcVelocity(float2 const& pos, BaseMap const& mapInfo)
     {
         auto baseValue = getHeight(pos, mapInfo);
         auto downValue = getHeight(pos + float2{0, 1}, mapInfo);

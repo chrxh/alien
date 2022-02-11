@@ -15,7 +15,7 @@ public:
             return cudaSimulationParameters.spotValues.*value;
         }
         if (1 == cudaSimulationParametersSpots.numSpots) {
-            auto distance = data.cellMap.mapDistance(
+            auto distance = data.cellMap.getDistance(
                 pos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
             auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
             auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
@@ -26,9 +26,9 @@ public:
                 factor);
         }
         if (2 == cudaSimulationParametersSpots.numSpots) {
-            auto distance1 = data.cellMap.mapDistance(
+            auto distance1 = data.cellMap.getDistance(
                 pos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-            auto distance2 = data.cellMap.mapDistance(
+            auto distance2 = data.cellMap.getDistance(
                 pos, {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
 
             auto coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;

@@ -52,7 +52,7 @@ void _AutosaveController::process()
 void _AutosaveController::onSave()
 {
     DeserializedSimulation sim;
-    sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+    sim.timestep = _simController->getCurrentTimestep();
     sim.settings = _simController->getSettings();
     sim.symbolMap = _simController->getSymbolMap();
     sim.content = _simController->getClusteredSimulationData();

@@ -170,7 +170,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     int2 outsideRectLowerRight{
         imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
 
-    MapInfo map;
+    BaseMap map;
     map.init(worldSize);
     auto spaceColor = colorToFloat3(Const::SpaceColor);
     auto spotColor1 = colorToFloat3(cudaSimulationParametersSpots.spots[0].color);
@@ -188,7 +188,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
             }
             if (1 == cudaSimulationParametersSpots.numSpots) {
                 float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-                auto distance = map.mapDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
+                auto distance = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
                 auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
                 auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
                 auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
@@ -197,8 +197,8 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
             }
             if (2 == cudaSimulationParametersSpots.numSpots) {
                 float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-                auto distance1 = map.mapDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-                auto distance2 = map.mapDistance(worldPos, {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
+                auto distance1 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
+                auto distance2 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
 
                 auto coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
                 auto fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
@@ -218,14 +218,14 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
 {
     auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    MapInfo map;
+    BaseMap map;
     map.init(universeSize);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
         auto cellPos = cell->absPos;
-        map.mapPosCorrection(cellPos);
+        map.correctPosition(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
             auto color = calcColor(cell, cell->selected);
@@ -238,7 +238,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
-                    auto topologyCorrection = map.correctionIncrement(cellPos, otherCellPos);
+                    auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     if (Math::lengthSquared(topologyCorrection) < FP_PRECISION) {
                         auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
                         drawLine(cellImagePos, otherCellImagePos, color, imageData, imageSize);
@@ -251,7 +251,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
-                    auto topologyCorrection = map.correctionIncrement(cellPos, otherCellPos);
+                    auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     if (Math::lengthSquared(topologyCorrection) > FP_PRECISION) {
                         continue;
                     }
@@ -294,7 +294,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
 __global__ void
 cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Token*> tokens, uint64_t* imageData, int2 imageSize, float zoom)
 {
-    MapInfo map;
+    BaseMap map;
     map.init(universeSize);
 
     auto partition = calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -303,7 +303,7 @@ cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, A
         auto const& cell = token->cell;
 
         auto cellPos = cell->absPos;
-        map.mapPosCorrection(cellPos);
+        map.correctPosition(cellPos);
         auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
         if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
             auto const color = calcColor(false);
@@ -315,7 +315,7 @@ cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, A
 __global__ void
 cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom)
 {
-    MapInfo map;
+    BaseMap map;
     map.init(universeSize);
 
     auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -323,7 +323,7 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto particlePos = particle->absPos;
-        map.mapPosCorrection(particlePos);
+        map.correctPosition(particlePos);
 
         auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particlePos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {

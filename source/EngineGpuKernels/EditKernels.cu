@@ -149,7 +149,7 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
                 auto connectedCell = cell->connections[i].cell;
                 if (isSelected(connectedCell, includeClusters)) {
                     auto delta = connectedCell->absPos - cell->absPos;
-                    data.cellMap.mapDisplacementCorrection(delta);
+                    data.cellMap.correctDirection(delta);
                     cell->connections[i].distance = Math::length(delta);
                 }
             }
@@ -160,11 +160,11 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
                     auto connectedCell = cell->connections[i].cell;
                     if (isSelected(connectedCell, includeClusters) && isSelected(prevConnectedCell, includeClusters)) {
                         auto prevDisplacement = prevConnectedCell->absPos - cell->absPos;
-                        data.cellMap.mapDisplacementCorrection(prevDisplacement);
+                        data.cellMap.correctDirection(prevDisplacement);
                         auto prevAngle = Math::angleOfVector(prevDisplacement);
 
                         auto displacement = connectedCell->absPos - cell->absPos;
-                        data.cellMap.mapDisplacementCorrection(displacement);
+                        data.cellMap.correctDirection(displacement);
                         auto angle = Math::angleOfVector(displacement);
 
                         auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
@@ -206,7 +206,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
             }
 
             auto posDelta = cell->absPos - otherCell->absPos;
-            data.cellMap.mapDisplacementCorrection(posDelta);
+            data.cellMap.correctDirection(posDelta);
 
             bool alreadyConnected = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -248,11 +248,11 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
             auto const& cell = data.entities.cellPointers.at(index);
             if ((updateData.considerClusters && cell->selected != 0) || (!updateData.considerClusters && cell->selected == 1)) {
                 auto relPos = cell->absPos - center;
-                data.cellMap.mapDisplacementCorrection(relPos);
+                data.cellMap.correctDirection(relPos);
 
                 if (updateData.angleDelta != 0) {
                     cell->absPos = Math::applyMatrix(relPos, rotationMatrix) + center;
-                    data.cellMap.mapPosCorrection(cell->absPos);
+                    data.cellMap.correctPosition(cell->absPos);
                 }
 
                 if (updateData.angularVelDelta != 0) {
@@ -272,9 +272,9 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
             auto const& particle = data.entities.particlePointers.at(index);
             if (particle->selected != 0) {
                 auto relPos = particle->absPos - center;
-                data.cellMap.mapDisplacementCorrection(relPos);
+                data.cellMap.correctDirection(relPos);
                 particle->absPos = Math::applyMatrix(relPos, rotationMatrix) + center;
-                data.cellMap.mapPosCorrection(particle->absPos);
+                data.cellMap.correctPosition(particle->absPos);
             }
         }
     }
@@ -371,7 +371,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
                 auto const& connectedCell = cell->connections[i].cell;
 
                 if (1 != connectedCell->selected
-                    && data.cellMap.mapDistance(cell->absPos, connectedCell->absPos) > cudaSimulationParameters.cellMaxBindingDistance) {
+                    && data.cellMap.getDistance(cell->absPos, connectedCell->absPos) > cudaSimulationParameters.cellMaxBindingDistance) {
                     CellConnectionProcessor::scheduleDelConnection(data, cell, connectedCell);
                     atomicExch(result, 1);
                 }
@@ -396,7 +396,7 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if (1 == cell->selected && data.cellMap.mapDistance(pointData.pos, cell->absPos) < pointData.radius) {
+        if (1 == cell->selected && data.cellMap.getDistance(pointData.pos, cell->absPos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -405,7 +405,7 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
-        if (1 == particle->selected && data.cellMap.mapDistance(pointData.pos, particle->absPos) < pointData.radius) {
+        if (1 == particle->selected && data.cellMap.getDistance(pointData.pos, particle->absPos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -417,7 +417,7 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if (data.cellMap.mapDistance(pos, cell->absPos) < radius) {
+        if (data.cellMap.getDistance(pos, cell->absPos) < radius) {
             cell->selected = 1;
         } else {
             cell->selected = 0;
@@ -428,7 +428,7 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
-        if (data.particleMap.mapDistance(pos, particle->absPos) < radius) {
+        if (data.particleMap.getDistance(pos, particle->absPos) < radius) {
             particle->selected = 1;
         } else {
             particle->selected = 0;
@@ -487,7 +487,7 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
     auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
-        if (data.cellMap.mapDistance(pos, cell->absPos) < radius) {
+        if (data.cellMap.getDistance(pos, cell->absPos) < radius) {
             if (cell->selected == 0) {
                 cell->selected = 1;
             } else if (cell->selected == 1) {
@@ -499,7 +499,7 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
     auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
-        if (data.particleMap.mapDistance(pos, particle->absPos) < radius) {
+        if (data.particleMap.getDistance(pos, particle->absPos) < radius) {
             particle->selected = 1 - particle->selected;
         }
     }

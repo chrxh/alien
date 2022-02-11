@@ -56,7 +56,7 @@ __inline__ __device__ void MuscleProcessor::process(Token* token, SimulationData
 
         if (Enums::MuscleIn_Contract == command || Enums::MuscleIn_Expand == command) {
             auto velInc = cell->absPos - sourceCell->absPos;
-            data.cellMap.mapDisplacementCorrection(velInc);
+            data.cellMap.correctDirection(velInc);
             Math::normalize(velInc);
             cell->vel = cell->vel + velInc * (origDistance - distance) * 0.5f;
         }

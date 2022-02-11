@@ -150,7 +150,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(
     int angleAlignment)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
-    data.cellMap.mapDisplacementCorrection(posDelta);
+    data.cellMap.correctDirection(posDelta);
     addConnectionIntern(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment);
     addConnectionIntern(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment);
 }
@@ -180,7 +180,7 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
         if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
             && cell2->numConnections < cell2->maxConnections) {
             auto posDelta = cell2->absPos - cell1->absPos;
-            data.cellMap.mapDisplacementCorrection(posDelta);
+            data.cellMap.correctDirection(posDelta);
             addConnectionIntern(data, cell1, cell2, posDelta, Math::length(posDelta));
             addConnectionIntern(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
 
@@ -238,7 +238,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
         cell1->connections[1].distance = desiredDistance;
 
         auto connectedCellDelta = cell1->connections[0].cell->absPos - cell1->absPos;
-        data.cellMap.mapDisplacementCorrection(connectedCellDelta);
+        data.cellMap.correctDirection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
         auto angleDiff = newAngle - prevAngle;
         if (0 != desiredAngleOnCell1) {
@@ -261,8 +261,8 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
     float nextAngle = 0;
     for (; index < cell1->numConnections; ++index) {
         auto prevIndex = (index + cell1->numConnections - 1) % cell1->numConnections;
-        prevAngle = Math::angleOfVector(data.cellMap.getMapDisplacementCorrection(cell1->connections[prevIndex].cell->absPos - cell1->absPos));
-        nextAngle = Math::angleOfVector(data.cellMap.getMapDisplacementCorrection(cell1->connections[index].cell->absPos - cell1->absPos));
+        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->connections[prevIndex].cell->absPos - cell1->absPos));
+        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->connections[index].cell->absPos - cell1->absPos));
         if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
             break;
         }

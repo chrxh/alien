@@ -42,7 +42,7 @@ public:
     {
         MEMBER_DECLARATION(RandomMultiplyParameters, int, number, 100);
         MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngle, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngle, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngle, 360.0f);
         MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelX, 0);
         MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelX, 0);
         MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelY, 0);

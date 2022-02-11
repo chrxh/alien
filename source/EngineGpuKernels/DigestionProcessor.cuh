@@ -108,7 +108,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                 (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                 (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
         float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
-        data.cellMap.mapPosCorrection(particlePos);
+        data.cellMap.correctPosition(particlePos);
 
         particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
         auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);

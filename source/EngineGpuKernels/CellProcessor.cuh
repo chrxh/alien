@@ -107,7 +107,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             }
 
             auto posDelta = cell->absPos - otherCell->absPos;
-            data.cellMap.mapDisplacementCorrection(posDelta);
+            data.cellMap.correctDirection(posDelta);
 
             auto distance = Math::length(posDelta);
             if (distance >= cudaSimulationParameters.cellMaxCollisionDistance
@@ -248,14 +248,14 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
         }
         float2 force{0, 0};
         float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->absPos - cell->absPos;
-        data.cellMap.mapDisplacementCorrection(prevDisplacement);
+        data.cellMap.correctDirection(prevDisplacement);
         auto cellBindingForce = SpotCalculator::calc(
             &SimulationParametersSpotValues::cellBindingForce, data, cell->absPos);
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
 
             auto displacement = connectingCell->absPos - cell->absPos;
-            data.cellMap.mapDisplacementCorrection(displacement);
+            data.cellMap.correctDirection(displacement);
 
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
@@ -315,7 +315,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto connectingCell = cell->connections[i].cell;
 
             auto displacement = connectingCell->absPos - cell->absPos;
-            data.cellMap.mapDisplacementCorrection(displacement);
+            data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
                 scheduleForDestruction = true;
@@ -339,7 +339,7 @@ __inline__ __device__ void CellProcessor::verletUpdatePositions(SimulationData& 
 
         cell->absPos = cell->absPos + cell->vel * cudaSimulationParameters.timestepSize
             + cell->temp1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
-        data.cellMap.mapPosCorrection(cell->absPos);
+        data.cellMap.correctPosition(cell->absPos);
         cell->temp2 = cell->temp1;  //forces
         cell->temp1 = {0, 0};
     }
@@ -412,7 +412,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                         (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                         (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
                 float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
-                data.cellMap.mapPosCorrection(particlePos);
+                data.cellMap.correctPosition(particlePos);
 
                 auto cellEnergy = cell->energy;
                 particlePos = particlePos - particleVel;  //because particle will still be moved in current time step

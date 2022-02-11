@@ -170,7 +170,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto& cell = cells.at(index);
 
             auto pos = cell->absPos;
-            data.cellMap.mapPosCorrection(pos);
+            data.cellMap.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
@@ -192,7 +192,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto& particle = particles.at(index);
 
             auto pos = particle->absPos;
-            data.particleMap.mapPosCorrection(pos);
+            data.particleMap.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
@@ -217,7 +217,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
         auto& cell = cells.at(index);
 
         auto pos = cell->absPos;
-        data.cellMap.mapPosCorrection(pos);
+        data.cellMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             cell->tag = -1;
             continue;
@@ -273,7 +273,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = data.entities.particlePointers.at(particleIndex);
         auto pos = particle->absPos;
-        data.particleMap.mapPosCorrection(pos);
+        data.particleMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
