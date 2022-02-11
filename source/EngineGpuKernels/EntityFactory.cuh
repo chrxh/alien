@@ -31,7 +31,7 @@ private:
     __inline__ __device__ void
     copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes);
 
-    MapInfo _map;
+    BaseMap _map;
     SimulationData* _data;
 };
 
@@ -53,7 +53,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     
     particle->id = createIds ? _data->numberGen.createNewId_kernel() : particleTO.id;
     particle->absPos = particleTO.pos;
-    _map.mapPosCorrection(particle->absPos);
+    _map.correctPosition(particle->absPos);
     particle->vel = particleTO.vel;
     particle->energy = particleTO.energy;
     particle->locked = 0;
@@ -71,7 +71,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
 
     cell->id = createIds ? _data->numberGen.createNewId_kernel() : cellTO.id;
     cell->absPos = cellTO.pos;
-    _map.mapPosCorrection(cell->absPos);
+    _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->branchNumber = cellTO.branchNumber;
     cell->tokenBlocked = cellTO.tokenBlocked;
@@ -142,7 +142,7 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
 {
     cell->id = cellTO.id;
     cell->absPos = cellTO.pos;
-    _map.mapPosCorrection(cell->absPos);
+    _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->branchNumber = cellTO.branchNumber;
     cell->tokenBlocked = cellTO.tokenBlocked;

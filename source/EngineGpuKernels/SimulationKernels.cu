@@ -55,6 +55,8 @@ __global__ void cudaNextTimestep_substep5(SimulationData data)
     CellProcessor cellProcessor;
     cellProcessor.verletUpdatePositions(data);
     cellProcessor.checkConnections(data);
+
+    data.entities.tokenPointers.saveNumEntries();
 }
 
 __global__ void cudaNextTimestep_substep6(SimulationData data, SimulationResult result)

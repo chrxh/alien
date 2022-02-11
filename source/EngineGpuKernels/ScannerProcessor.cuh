@@ -122,7 +122,7 @@ __device__ __inline__ auto ScannerProcessor::spiralLookupAlgorithm(int depth, Ce
         visitedCell.insert(result.cell);
 
         auto posDelta = result.prevCell->absPos - result.cell->absPos;
-        data.cellMap.mapDisplacementCorrection(posDelta);
+        data.cellMap.correctDirection(posDelta);
         auto originAngle = Math::angleOfVector(posDelta);
 
         auto nextCellFound = false;
@@ -134,7 +134,7 @@ __device__ __inline__ auto ScannerProcessor::spiralLookupAlgorithm(int depth, Ce
 
                 //calc angle from nextCandidateCell
                 auto nextPosDelta = nextCandidateCell->absPos - cell->absPos;
-                data.cellMap.mapDisplacementCorrection(nextPosDelta);
+                data.cellMap.correctDirection(nextPosDelta);
                 auto angle = Math::angleOfVector(nextPosDelta);
 
                 //another cell already found? => compare angles

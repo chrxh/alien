@@ -245,7 +245,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
 {
     auto cell = token->cell;
     auto posDelta = firstConstructedCell->absPos - cell->absPos;
-    data.cellMap.mapDisplacementCorrection(posDelta);
+    data.cellMap.correctDirection(posDelta);
 
     auto desiredDistance = QuantityConverter::convertDataToDistance(constructionData.distance);
     posDelta =
@@ -355,7 +355,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
         }
 
         auto otherPosDelta = otherCell->absPos - newCell->absPos;
-        data.cellMap.mapDisplacementCorrection(otherPosDelta);
+        data.cellMap.correctDirection(otherPosDelta);
         Math::normalize(otherPosDelta);
         if (Math::dot(posDelta, otherPosDelta) < 0.1) {
             continue;
@@ -396,7 +396,7 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     result = factory.createCell();
     result->energy = energyOfNewCell;
     result->absPos = posOfNewCell;
-    data.cellMap.mapPosCorrection(result->absPos);
+    data.cellMap.correctPosition(result->absPos);
     result->maxConnections = getMaxConnections(constructionData);
     result->numConnections = 0;
     result->branchNumber = static_cast<unsigned char>(constructionData.branchNumber)
@@ -458,7 +458,7 @@ __inline__ __device__ auto ConstructionProcessor::calcAnglesForNewConnection(
         return AnglesForNewConnection{0, 0};
     }
     auto displacement = cell->connections[0].cell->absPos - cell->absPos;
-    data.cellMap.mapDisplacementCorrection(displacement);
+    data.cellMap.correctDirection(displacement);
     auto angle = Math::angleOfVector(displacement);
     int index = 0;
     float largestAngleGap = 0;

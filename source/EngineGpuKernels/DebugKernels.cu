@@ -12,7 +12,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 auto connectingCell = cell->connections[i].cell;
 
                 auto displacement = connectingCell->absPos - cell->absPos;
-                data.cellMap.mapDisplacementCorrection(displacement);
+                data.cellMap.correctDirection(displacement);
                 auto actualDistance = Math::length(displacement);
                 if (actualDistance > 14) {
                     printf("distance too large at %d\n", location);

@@ -6,43 +6,43 @@
 #include "Math.cuh"
 #include "cuda_runtime_api.h"
 
-class MapInfo
+class BaseMap
 {
 public:
     __inline__ __host__ __device__ void init(int2 const& size) { _size = size; }
 
-    __inline__ __host__ __device__ void mapPosCorrection(int2& pos) const
+    __inline__ __host__ __device__ void correctPosition(int2& pos) const
     {
         pos = {((pos.x % _size.x) + _size.x) % _size.x, ((pos.y % _size.y) + _size.y) % _size.y};
     }
 
-    __inline__ __host__ __device__ void mapPosCorrection(float2& pos) const
+    __inline__ __host__ __device__ void correctPosition(float2& pos) const
     {
         int2 intPart{floorInt(pos.x), floorInt(pos.y)};
         float2 fracPart = {pos.x - intPart.x, pos.y - intPart.y};
-        mapPosCorrection(intPart);
+        correctPosition(intPart);
         pos = {static_cast<float>(intPart.x) + fracPart.x, static_cast<float>(intPart.y) + fracPart.y};
     }
 
-    __inline__ __device__ void mapDisplacementCorrection(float2& disp) const
+    __inline__ __device__ void correctDirection(float2& disp) const
     {
         disp.x = remainderf(disp.x, _size.x);
         disp.y = remainderf(disp.y, _size.y);
     }
 
-    __inline__ __device__ float2 getMapDisplacementCorrection(float2 const& disp) const
+    __inline__ __device__ float2 getCorrectedDirection(float2 const& disp) const
     {
         return {remainderf(disp.x, _size.x), remainderf(disp.y, _size.y)};
     }
 
-    __inline__ __device__ float mapDistance(float2 const& p, float2 const& q) const
+    __inline__ __device__ float getDistance(float2 const& p, float2 const& q) const
     {
         float2 d = {p.x - q.x, p.y - q.y};
-        mapDisplacementCorrection(d);
+        correctDirection(d);
         return sqrt(d.x * d.x + d.y * d.y);
     }
 
-    __inline__ __device__ float2 correctionIncrement(float2 pos1, float2 pos2) const
+    __inline__ __device__ float2 getCorrectionIncrement(float2 pos1, float2 pos2) const
     {
         float2 result{0.0f, 0.0f};
         if (pos2.x - pos1.x > _size.x / 2) {
@@ -67,17 +67,17 @@ protected:
 };
 
 template <typename T>
-class BasicMap : public MapInfo
+class BasicMap : public BaseMap
 {
 public:
 };
 
-class CellMap : public MapInfo
+class CellMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)
     {
-        MapInfo::init(size);
+        BaseMap::init(size);
         CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y * 2, _map);
         _mapEntries.init();
 
@@ -111,7 +111,7 @@ public:
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& entity = entities[index];
             int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
-            mapPosCorrection(posInt);
+            correctPosition(posInt);
             auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
             auto old = reinterpret_cast<Cell*>(atomicCAS(
                 reinterpret_cast<unsigned long long int*>(&_map[mapEntry]),
@@ -133,7 +133,7 @@ public:
         for (int dx = -1; dx <= 1; ++dx) {
             for (int dy = -1; dy <= 1; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
-                mapPosCorrection(scanPos);
+                correctPosition(scanPos);
 
                 auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
                 if (cells[numCells] = _map[mapEntry]) {
@@ -154,7 +154,7 @@ public:
         for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
             for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
-                mapPosCorrection(scanPos);
+                correctPosition(scanPos);
 
                 auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
                 auto cell1 = _map[mapEntry];
@@ -175,7 +175,7 @@ public:
     __device__ __inline__ Cell* getFirst(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        mapPosCorrection(posInt);
+        correctPosition(posInt);
         auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
         return _map[mapEntry];
     }
@@ -196,12 +196,12 @@ private:
     Array<int> _mapEntries;
 };
 
-class ParticleMap : public MapInfo
+class ParticleMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)
     {
-        MapInfo::init(size);
+        BaseMap::init(size);
         CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, _map);
         _mapEntries.init();
 
@@ -235,7 +235,7 @@ public:
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& entity = entities[index];
             int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
-            mapPosCorrection(posInt);
+            correctPosition(posInt);
             auto mapEntry = posInt.x + posInt.y * _size.x;
             _map[mapEntry] = entity;
             entrySubarray[index] = mapEntry;
@@ -246,7 +246,7 @@ public:
     __device__ __inline__ Particle* get(float2 const& pos) const
     {
         int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
-        mapPosCorrection(posInt);
+        correctPosition(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
         return _map[mapEntry];
     }
