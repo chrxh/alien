@@ -16,6 +16,7 @@ public:
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
     __inline__ __device__ static void angleCorrection(float& angle);
     __inline__ __device__ static void angleCorrection(int& angle);
+    __inline__ __device__ static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
     __inline__ __device__ static void rotateQuarterClockwise(float2& v);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);  //0 DEG corresponds to (0,-1)
@@ -142,6 +143,18 @@ __inline__ __device__ float2 Math::applyMatrix(float2 const & vec, Matrix const 
 __inline__ __device__ void Math::angleCorrection(int &angle)
 {
     angle = ((angle % 360) + 360) % 360;
+}
+
+__inline__ __device__ bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate)
+{
+    if (angleBetweenCandidate < angle1) {
+        angleBetweenCandidate += 360.0f;
+        angle2 += 360.0f;
+    }
+    if (angle2 < angleBetweenCandidate) {
+        angle2 += 360.0f;
+    }
+    return angle2 - angle1 <= 360.0f;
 }
 
 __inline__ __device__ void Math::angleCorrection(float &angle)

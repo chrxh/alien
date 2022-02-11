@@ -30,6 +30,11 @@ public:
         disp.y = remainderf(disp.y, _size.y);
     }
 
+    __inline__ __device__ float2 getMapDisplacementCorrection(float2 const& disp) const
+    {
+        return {remainderf(disp.x, _size.x), remainderf(disp.y, _size.y)};
+    }
+
     __inline__ __device__ float mapDistance(float2 const& p, float2 const& q) const
     {
         float2 d = {p.x - q.x, p.y - q.y};
