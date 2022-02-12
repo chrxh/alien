@@ -26,7 +26,8 @@ struct SimulationData
     TempArray<StructuralOperation> structuralOperations;
     TempArray<SensorOperation> sensorOperations;
 
-    CudaNumberGenerator numberGen;
+    CudaNumberGenerator numberGen1;
+    CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
     void init(int2 const& worldSize);
     bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens);

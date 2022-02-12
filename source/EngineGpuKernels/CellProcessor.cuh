@@ -95,14 +95,14 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.entities.cellPointers.at(index);
         auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
-        if (data.numberGen.random() < 0.001f && data.numberGen.random() < mutationRate * 1000) {
-            auto address = data.numberGen.random(MAX_CELL_STATIC_BYTES + 1);
+        if (data.numberGen2.random() < 0.001f && data.numberGen1.random() < mutationRate * 1000) {
+            auto address = data.numberGen1.random(MAX_CELL_STATIC_BYTES + 1);
             if (address < MAX_CELL_STATIC_BYTES) {
-                cell->staticData[address] = data.numberGen.random(255);
+                cell->staticData[address] = data.numberGen1.random(255);
             } else if (address == MAX_CELL_STATIC_BYTES) {
-                cell->metadata.color = data.numberGen.random(6);
+                cell->metadata.color = data.numberGen1.random(6);
             } else {
-                cell->branchNumber = data.numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber);
+                cell->branchNumber = data.numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber);
             }
         }
 
@@ -231,7 +231,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         auto& cell = cells.at(index);
 
         if (Math::length(cell->temp1) > SpotCalculator::calc(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
-            if (data.numberGen.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+            if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
             }
         }
@@ -422,7 +422,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (data.numberGen.random() < cudaSimulationParameters.radiationProb) {
+        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
             auto radiationFactor =
                 SpotCalculator::calc(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
@@ -430,8 +430,8 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                 auto& pos = cell->absPos;
                 float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
                     + float2{
-                        (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                        (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+                        (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                        (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
                 float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
                 data.cellMap.correctPosition(particlePos);
 
@@ -439,7 +439,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                 particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
                 float radiationEnergy = powf(cellEnergy, cudaSimulationParameters.radiationExponent) * radiationFactor;
                 radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
-                radiationEnergy = 2 * radiationEnergy * data.numberGen.random();
+                radiationEnergy = 2 * radiationEnergy * data.numberGen1.random();
                 if (cellEnergy > 1) {
                     if (radiationEnergy > cellEnergy - 1) {
                         radiationEnergy = cellEnergy - 1;
@@ -467,7 +467,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         bool destroyDueToTokenUsage = false;
         if (cell->tokenUsages > cudaSimulationParameters.cellMinTokenUsages) {
-            if (_data->numberGen.random() < cudaSimulationParameters.cellTokenUsageDecayProb) {
+            if (_data->numberGen1.random() < cudaSimulationParameters.cellTokenUsageDecayProb) {
                 destroyDueToTokenUsage = true;
             }
         }

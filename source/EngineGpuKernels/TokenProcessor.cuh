@@ -107,8 +107,8 @@ __inline__ __device__ void TokenProcessor::applyMutation(SimulationData& data)
         auto& token = tokens.at(index);
         auto const& cell = token->cell;
         auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::tokenMutationRate, data, cell->absPos);
-        if (data.numberGen.random() < mutationRate) {
-            token->memory[data.numberGen.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen.random(255);
+        if (data.numberGen1.random() < mutationRate) {
+            token->memory[data.numberGen1.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen1.random(255);
         }
     }
 }

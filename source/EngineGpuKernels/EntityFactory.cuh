@@ -51,7 +51,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
     
-    particle->id = createIds ? _data->numberGen.createNewId_kernel() : particleTO.id;
+    particle->id = createIds ? _data->numberGen1.createNewId_kernel() : particleTO.id;
     particle->absPos = particleTO.pos;
     _map.correctPosition(particle->absPos);
     particle->vel = particleTO.vel;
@@ -69,7 +69,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     Cell* cell = cellTargetArray + targetIndex;
     *cellPointer = cell;
 
-    cell->id = createIds ? _data->numberGen.createNewId_kernel() : cellTO.id;
+    cell->id = createIds ? _data->numberGen1.createNewId_kernel() : cellTO.id;
     cell->absPos = cellTO.pos;
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
@@ -234,7 +234,7 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     Particle** particlePointer = _data->entities.particlePointers.getNewElement();
     Particle* particle = _data->entities.particles.getNewElement();
     *particlePointer = particle;
-    particle->id = _data->numberGen.createNewId_kernel();
+    particle->id = _data->numberGen1.createNewId_kernel();
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
@@ -250,12 +250,12 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     auto cellPointers = _data->entities.cellPointers.getNewElement();
     *cellPointers = cell;
 
-    cell->id = _data->numberGen.createNewId_kernel();
+    cell->id = _data->numberGen1.createNewId_kernel();
     cell->absPos = pos;
     cell->vel = vel;
     cell->energy = energy;
-    cell->maxConnections = _data->numberGen.random(MAX_CELL_BONDS);
-    cell->branchNumber = _data->numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
+    cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
+    cell->branchNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
     cell->numConnections = 0;
     cell->tokenBlocked = false;
     cell->locked = 0;
@@ -265,7 +265,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->metadata.nameLen = 0;
     cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
-    cell->cellFunctionType = _data->numberGen.random(Enums::CellFunction_Count - 1);
+    cell->cellFunctionType = _data->numberGen1.random(Enums::CellFunction_Count - 1);
     switch (cell->cellFunctionType) {
     case Enums::CellFunction_Computation: {
         cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
@@ -281,10 +281,10 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     }
     }
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-        cell->staticData[i] = _data->numberGen.random(255);
+        cell->staticData[i] = _data->numberGen1.random(255);
     }
     for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-        cell->mutableData[i] = _data->numberGen.random(255);
+        cell->mutableData[i] = _data->numberGen1.random(255);
     }
     cell->tokenUsages = 0;
     return cell;
@@ -296,7 +296,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     auto cellPointer = _data->entities.cellPointers.getNewElement();
     *cellPointer = result;
     result->tokenUsages = 0;
-    result->id = _data->numberGen.createNewId_kernel();
+    result->id = _data->numberGen1.createNewId_kernel();
     result->selected = 0;
     result->locked = 0;
     result->temp3 = {0, 0};
