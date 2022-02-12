@@ -35,10 +35,14 @@ __global__ void cudaNextTimestep_substep3(SimulationData data)
     cellProcessor.checkForces(data);
     cellProcessor.updateVelocities(data);
     cellProcessor.clearTag(data);
+    cellProcessor.applyMutation(data);
 
     ParticleProcessor particleProcessor;
     particleProcessor.movement(data);
     particleProcessor.collision(data);
+
+    TokenProcessor tokenProcessor;
+    tokenProcessor.applyMutation(data);
 }
 
 __global__ void cudaNextTimestep_substep4(SimulationData data)

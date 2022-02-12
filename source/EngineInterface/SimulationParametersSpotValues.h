@@ -13,6 +13,7 @@ struct SimulationParametersSpotValues
     float cellMaxBindingEnergy = 500000.0f;
 
     float tokenMutationRate = 0.0005f;
+    float cellMutationRate = 0;
     float cellFunctionWeaponEnergyCost = 0.2f;
     float cellFunctionWeaponColorPenalty = 0.0f;
     float cellFunctionWeaponGeometryDeviationExponent = 0.0f;
@@ -22,7 +23,7 @@ struct SimulationParametersSpotValues
         return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor
             && cellMaxForce == other.cellMaxForce && cellMinEnergy == other.cellMinEnergy
             && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
-            && tokenMutationRate == other.tokenMutationRate
+            && tokenMutationRate == other.tokenMutationRate && cellMutationRate == other.cellMutationRate
             && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
             && cellFunctionWeaponColorPenalty == other.cellFunctionWeaponColorPenalty
             && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent

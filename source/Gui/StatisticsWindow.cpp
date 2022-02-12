@@ -288,7 +288,6 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
                 StringHelper::format(toInt(valueHistory.back())).c_str());
         }
         ImPlot::PushStyleColor(ImPlotCol_Line, color);
-        ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
         ImPlot::PlotLine(
             "##", _longtermStatistics.timestepHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
         ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);

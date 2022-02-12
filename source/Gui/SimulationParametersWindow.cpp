@@ -303,21 +303,34 @@ void _SimulationParametersWindow::processBase(
                 .tooltip(std::string("Maximum number of connections a cell can establish with others.")),
             simParameters.cellMaxBonds);
 
-        AlienImGui::Group("Cell functions");
+        AlienImGui::Group("Mutation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Mutation rate")
+                .name("Cell mutation rate")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(0.001f)
+                .logarithmic(true)
+                .format("%.7f")
+                .defaultValue(origSimParameters.spotValues.cellMutationRate)
+                .tooltip(std::string("Probability that a byte or property of a cell is changed per time step.")),
+            simParameters.spotValues.cellMutationRate);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Token mutation rate")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(0.1f)
                 .logarithmic(true)
                 .format("%.5f")
                 .defaultValue(origSimParameters.spotValues.tokenMutationRate)
-                .tooltip(std::string("Probability that a byte in the token memory is changed per time step.")),
+                .tooltip(std::string("Probability that a memory byte of a token is changed per time step.")),
             simParameters.spotValues.tokenMutationRate);
+
+        AlienImGui::Group("Cell specialization");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Weapon energy cost")
+                .name("Digestion energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(4.0f)
@@ -327,7 +340,7 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Weapon color penalty")
+                .name("Digestion color penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
@@ -338,7 +351,7 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFunctionWeaponColorPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Weapon geometry penalty")
+                .name("Digestion geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
@@ -487,10 +500,20 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
         }
 
-        AlienImGui::Group("Cell functions");
+        AlienImGui::Group("Mutation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Mutation rate")
+                .name("Cell mutation rate")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(0.001f)
+                .logarithmic(true)
+                .format("%.7f")
+                .defaultValue(origSpot.values.cellMutationRate),
+            spot.values.cellMutationRate);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Token mutation rate")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(0.1f)
@@ -498,9 +521,11 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .format("%.5f")
                 .defaultValue(origSpot.values.tokenMutationRate),
             spot.values.tokenMutationRate);
+
+        AlienImGui::Group("Cell specialization");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Weapon energy cost")
+                .name("Digestion energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(4.0f)
@@ -508,7 +533,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Weapon color penalty")
+                .name("Digestion color penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
@@ -516,7 +541,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellFunctionWeaponColorPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Weapon geometry penalty")
+                .name("Digestion geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
