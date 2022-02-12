@@ -14,7 +14,8 @@ void SimulationData::init(int2 const& worldSize_)
     particleMap.init(worldSize);
 
     processMemory.init();
-    numberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
+    numberGen1.init(40312357);   //some array size for random numbers (~ 40 MB)
+    numberGen2.init(1536941);  //some array size for random numbers (~ 1.5 MB)
 
     structuralOperations.init();
     sensorOperations.init();
@@ -99,7 +100,8 @@ void SimulationData::free()
     cellFunctionData.free();
     cellMap.free();
     particleMap.free();
-    numberGen.free();
+    numberGen1.free();
+    numberGen2.free();
     processMemory.free();
 
     structuralOperations.free();

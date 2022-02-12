@@ -105,8 +105,8 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
         auto& pos = cell->absPos;
         float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
             + float2{
-                (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                (data.numberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
         float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
         data.cellMap.correctPosition(particlePos);
 
