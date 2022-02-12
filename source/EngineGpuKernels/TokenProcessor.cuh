@@ -21,6 +21,7 @@ class TokenProcessor
 public:
     __inline__ __device__ void movement(SimulationData& data);  //prerequisite: cell tags = 0
 
+    __inline__ __device__ void applyMutation(SimulationData& data);
     __inline__ __device__ void executeReadonlyCellFunctions(SimulationData& data, SimulationResult& result);  //energy values are allowed to change
     __inline__ __device__ void executeModifyingCellFunctions(SimulationData& data, SimulationResult& result);
     __inline__ __device__ void deleteTokenIfCellDeleted(SimulationData& data);
@@ -50,8 +51,6 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
 
             auto cellMinEnergy =
                 SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
-            auto tokenMutationRate =
-                SpotCalculator::calc(&SimulationParametersSpotValues::tokenMutationRate, data, cell->absPos);
 
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
@@ -87,10 +86,6 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
                 if (0 == i) {
                     token->sourceCell = token->cell;
                     token->cell = connectedCell;
-                    
-                    if (data.numberGen.random() < tokenMutationRate) {
-                        token->memory[data.numberGen.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen.random(255);
-                    }
                 } else {
                     factory.duplicateToken(connectedCell, token);
                 }
@@ -99,6 +94,21 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
         if (0 == numNextTokenCells) {
             atomicAdd(&cell->energy, token->energy);
             token = nullptr;
+        }
+    }
+}
+
+__inline__ __device__ void TokenProcessor::applyMutation(SimulationData& data)
+{
+    auto& tokens = data.entities.tokenPointers;
+    auto const partition = calcAllThreadsPartition(tokens.getNumOrigEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& token = tokens.at(index);
+        auto const& cell = token->cell;
+        auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::tokenMutationRate, data, cell->absPos);
+        if (data.numberGen.random() < mutationRate) {
+            token->memory[data.numberGen.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen.random(255);
         }
     }
 }

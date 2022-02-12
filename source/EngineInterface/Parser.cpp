@@ -42,99 +42,38 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
     auto& simPar = settings.simulationParameters;
     auto& defaultPar = defaultSettings.simulationParameters;
     JsonParser::encodeDecode(tree, simPar.timestepSize, defaultPar.timestepSize, "simulation parameters.time step size", ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.spotValues.friction, defaultPar.spotValues.friction, "simulation parameters.friction", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.spotValues.friction, defaultPar.spotValues.friction, "simulation parameters.friction", ParserTask);
     JsonParser::encodeDecode(tree, simPar.spotValues.rigidity, defaultPar.spotValues.rigidity, "simulation parameters.rigidity", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.cellBindingForce,
-        defaultPar.spotValues.cellBindingForce,
-        "simulation parameters.cell.binding force",
-        ParserTask);
+        tree, simPar.spotValues.cellBindingForce, defaultPar.spotValues.cellBindingForce, "simulation parameters.cell.binding force", ParserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxVel, defaultPar.cellMaxVel, "simulation parameters.cell.max velocity", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellMaxBindingDistance,
-        defaultPar.cellMaxBindingDistance,
-        "simulation parameters.cell.max binding distance",
-        ParserTask);
+        tree, simPar.cellMaxBindingDistance, defaultPar.cellMaxBindingDistance, "simulation parameters.cell.max binding distance", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.cellRepulsionStrength, defaultPar.cellRepulsionStrength, "simulation parameters.cell.repulsion strength", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellRepulsionStrength,
-        defaultPar.cellRepulsionStrength,
-        "simulation parameters.cell.repulsion strength",
-        ParserTask);
+        tree, simPar.spotValues.tokenMutationRate, defaultPar.spotValues.tokenMutationRate, "simulation parameters.token.mutation rate", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.tokenMutationRate,
-        defaultPar.spotValues.tokenMutationRate,
-        "simulation parameters.token.mutation rate",
-        ParserTask);
+        tree, simPar.spotValues.cellMutationRate, defaultPar.spotValues.cellMutationRate, "simulation parameters.cell.mutation rate", ParserTask);
 
+    JsonParser::encodeDecode(tree, simPar.cellMinDistance, defaultPar.cellMinDistance, "simulation parameters.cell.min distance", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.cellMaxCollisionDistance, defaultPar.cellMaxCollisionDistance, "simulation parameters.cell.max distance", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.spotValues.cellMaxForce, defaultPar.spotValues.cellMaxForce, "simulation parameters.cell.max force", ParserTask);
     JsonParser::encodeDecode(
-        tree, simPar.cellMinDistance, defaultPar.cellMinDistance, "simulation parameters.cell.min distance", ParserTask);
+        tree, simPar.cellMaxForceDecayProb, defaultPar.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.cellMinTokenUsages, defaultPar.cellMinTokenUsages, "simulation parameters.cell.min token usages", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellMaxCollisionDistance,
-        defaultPar.cellMaxCollisionDistance,
-        "simulation parameters.cell.max distance",
-        ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.cellMaxForce,
-        defaultPar.spotValues.cellMaxForce,
-        "simulation parameters.cell.max force",
-        ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.cellMaxForceDecayProb,
-        defaultPar.cellMaxForceDecayProb,
-        "simulation parameters.cell.max force decay probability",
-        ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.cellMinTokenUsages,
-        defaultPar.cellMinTokenUsages,
-        "simulation parameters.cell.min token usages",
-        ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.cellTokenUsageDecayProb,
-        defaultPar.cellTokenUsageDecayProb,
-        "simulation parameters.cell.token usage decay probability",
-        ParserTask);
+        tree, simPar.cellTokenUsageDecayProb, defaultPar.cellTokenUsageDecayProb, "simulation parameters.cell.token usage decay probability", ParserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", ParserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxToken, defaultPar.cellMaxToken, "simulation parameters.cell.max token", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellMaxTokenBranchNumber,
-        defaultPar.cellMaxTokenBranchNumber,
-        "simulation parameters.cell.max token branch number",
-        ParserTask);
+        tree, simPar.cellMaxTokenBranchNumber, defaultPar.cellMaxTokenBranchNumber, "simulation parameters.cell.max token branch number", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.spotValues.cellMinEnergy, defaultPar.spotValues.cellMinEnergy, "simulation parameters.cell.min energy", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.cellMinEnergy,
-        defaultPar.spotValues.cellMinEnergy,
-        "simulation parameters.cell.min energy",
-        ParserTask);
+        tree, simPar.cellTransformationProb, defaultPar.cellTransformationProb, "simulation parameters.cell.transformation probability", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellTransformationProb,
-        defaultPar.cellTransformationProb,
-        "simulation parameters.cell.transformation probability",
-        ParserTask);
+        tree, simPar.spotValues.cellFusionVelocity, defaultPar.spotValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.cellFusionVelocity,
-        defaultPar.spotValues.cellFusionVelocity,
-        "simulation parameters.cell.fusion velocity",
-        ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.cellMaxBindingEnergy,
-        simPar.spotValues.cellMaxBindingEnergy,
-        "simulation parameters.cell.max binding energy",
-        ParserTask);
+        tree, simPar.spotValues.cellMaxBindingEnergy, simPar.spotValues.cellMaxBindingEnergy, "simulation parameters.cell.max binding energy", ParserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.cellFunctionComputerMaxInstructions,
@@ -148,11 +87,7 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         "simulation parameters.cell.function.computer.memory size",
         ParserTask);
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellFunctionWeaponStrength,
-        defaultPar.cellFunctionWeaponStrength,
-        "simulation parameters.cell.function.weapon.strength",
-        ParserTask);
+        tree, simPar.cellFunctionWeaponStrength, defaultPar.cellFunctionWeaponStrength, "simulation parameters.cell.function.weapon.strength", ParserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.spotValues.cellFunctionWeaponEnergyCost,
@@ -201,48 +136,22 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         defaultPar.cellFunctionConstructorTokenDataMutationProb,
         "simulation parameters.cell.function.constructor.offspring.token suppress memory copy",
         ParserTask);
-    /*
-    settings.simulationParameters.cellFunctionConstructorTokenDataMutationProb =
-        tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.token data");
-    settings.simulationParameters.cellFunctionConstructorCellDataMutationProb =
-        tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.cell data");
-    settings.simulationParameters.cellFunctionConstructorCellPropertyMutationProb =
-        tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.cell property");
-    settings.simulationParameters.cellFunctionConstructorCellStructureMutationProb =
-        tree.get<float>("simulation parameters.cell.function.constructor.mutation probability.cell structure");
-*/
     JsonParser::encodeDecode(
-        tree,
-        simPar.cellFunctionSensorRange,
-        defaultPar.cellFunctionSensorRange,
-        "simulation parameters.cell.function.sensor.range",
-        ParserTask);
+        tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", ParserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.cellFunctionCommunicatorRange,
         defaultPar.cellFunctionCommunicatorRange,
         "simulation parameters.cell.function.communicator.range",
         ParserTask);
+    JsonParser::encodeDecode(tree, simPar.tokenMemorySize, defaultPar.tokenMemorySize, "simulation parameters.token.memory size", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.tokenMinEnergy, defaultPar.tokenMinEnergy, "simulation parameters.token.min energy", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.radiationExponent, defaultPar.radiationExponent, "simulation parameters.radiation.exponent", ParserTask);
     JsonParser::encodeDecode(
-        tree, simPar.tokenMemorySize, defaultPar.tokenMemorySize, "simulation parameters.token.memory size", ParserTask);
+        tree, simPar.spotValues.radiationFactor, defaultPar.spotValues.radiationFactor, "simulation parameters.radiation.factor", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", ParserTask);
     JsonParser::encodeDecode(
-        tree, simPar.tokenMinEnergy, defaultPar.tokenMinEnergy, "simulation parameters.token.min energy", ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.radiationExponent, defaultPar.radiationExponent, "simulation parameters.radiation.exponent", ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.spotValues.radiationFactor,
-        defaultPar.spotValues.radiationFactor,
-        "simulation parameters.radiation.factor",
-        ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        simPar.radiationVelocityMultiplier,
-        defaultPar.radiationVelocityMultiplier,
-        "simulation parameters.radiation.velocity multiplier",
-        ParserTask);
+        tree, simPar.radiationVelocityMultiplier, defaultPar.radiationVelocityMultiplier, "simulation parameters.radiation.velocity multiplier", ParserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.radiationVelocityPerturbation,
@@ -265,31 +174,15 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         JsonParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.friction, defaultSpot.values.friction, base + "friction", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.rigidity, defaultSpot.values.rigidity, "rigidity", ParserTask);
-        JsonParser::encodeDecode(
-            tree, spot.values.radiationFactor, defaultSpot.values.radiationFactor, base + "radiation.factor", ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.radiationFactor, defaultSpot.values.radiationFactor, base + "radiation.factor", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", ParserTask);
 
-        JsonParser::encodeDecode(
-            tree, spot.values.cellBindingForce, defaultSpot.values.cellBindingForce, base + "cell.binding force", ParserTask);
-        JsonParser::encodeDecode(
-            tree,
-            spot.values.cellFusionVelocity,
-            defaultSpot.values.cellFusionVelocity,
-            base + "cell.fusion velocity",
-            ParserTask);
-        JsonParser::encodeDecode(
-            tree,
-            spot.values.cellMaxBindingEnergy,
-            defaultSpot.values.cellMaxBindingEnergy,
-            base + "cell.max binding energy",
-            ParserTask);
-        JsonParser::encodeDecode(
-            tree,
-            spot.values.tokenMutationRate,
-            defaultSpot.values.tokenMutationRate,
-            base + "token.mutation rate",
-            ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.cellBindingForce, defaultSpot.values.cellBindingForce, base + "cell.binding force", ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.cellFusionVelocity, defaultSpot.values.cellFusionVelocity, base + "cell.fusion velocity", ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.cellMaxBindingEnergy, defaultSpot.values.cellMaxBindingEnergy, base + "cell.max binding energy", ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.cellMutationRate, defaultSpot.values.cellMutationRate, base + "cell.mutation rate", ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.tokenMutationRate, defaultSpot.values.tokenMutationRate, base + "token.mutation rate", ParserTask);
         JsonParser::encodeDecode(
             tree,
             spot.values.cellFunctionWeaponEnergyCost,
@@ -311,14 +204,8 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
     }
 
     //flow field settings
-    JsonParser::encodeDecode(
-        tree, settings.flowFieldSettings.active, defaultSettings.flowFieldSettings.active, "flow field.active", ParserTask);
-    JsonParser::encodeDecode(
-        tree,
-        settings.flowFieldSettings.numCenters,
-        defaultSettings.flowFieldSettings.numCenters,
-        "flow field.num centers",
-        ParserTask);
+    JsonParser::encodeDecode(tree, settings.flowFieldSettings.active, defaultSettings.flowFieldSettings.active, "flow field.active", ParserTask);
+    JsonParser::encodeDecode(tree, settings.flowFieldSettings.numCenters, defaultSettings.flowFieldSettings.numCenters, "flow field.num centers", ParserTask);
     for (int i = 0; i < 2; ++i) {
         std::string node = "flow field.center" + std::to_string(i) + ".";
         auto& radialData = settings.flowFieldSettings.centers[i];

@@ -26,7 +26,10 @@ protected:
 void CellComputationTests::SetUp()
 {
     auto parameters = _simController->getSimulationParameters();
-    parameters.radiationProb = 0;  //exclude radiation
+    //exclude radiation and mutations
+    parameters.radiationProb = 0;  
+    parameters.spotValues.tokenMutationRate = 0;
+    parameters.spotValues.cellMutationRate = 0;
     _simController->setSimulationParameters_async(parameters);
 }
 

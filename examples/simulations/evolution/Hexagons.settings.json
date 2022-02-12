@@ -1,22 +1,24 @@
 {
     "general": {
-        "time step": "105396548",
+        "time step": "443109",
         "world size": {
-            "x": "1200",
-            "y": "1000"
+            "x": "1000",
+            "y": "500"
         }
     },
     "simulation parameters": {
         "time step size": "1.000000",
-        "friction": "0.001000",
+        "friction": "0.000300",
+        "rigidity": "0.000000",
         "cell": {
-            "binding force": "1.000000",
+            "binding force": "0.552000",
             "max velocity": "2.000000",
             "max binding distance": "2.600000",
-            "repulsion strength": "0.080000",
+            "repulsion strength": "0.143000",
+            "mutation rate": "0.000003",
             "min distance": "0.300000",
             "max distance": "1.300000",
-            "max force": "0.367000",
+            "max force": "2.800000",
             "max force decay probability": "0.200000",
             "min token usages": "40000",
             "token usage decay probability": "0.000002",
@@ -25,7 +27,7 @@
             "max token branch number": "6",
             "min energy": "50.000000",
             "transformation probability": "0.200000",
-            "fusion velocity": "0.206000",
+            "fusion velocity": "0.300000",
             "max binding energy": "500000.000000",
             "function": {
                 "computer": {
@@ -34,9 +36,9 @@
                 },
                 "weapon": {
                     "strength": "0.100000",
-                    "energy cost": "0.900000",
-                    "geometry deviation exponent": "0.222000",
-                    "color penalty": "0.525000"
+                    "energy cost": "0.000000",
+                    "geometry deviation exponent": "0.000000",
+                    "color penalty": "0.000000"
                 },
                 "constructor": {
                     "offspring": {
@@ -55,99 +57,102 @@
             }
         },
         "token": {
-            "mutation rate": "0.001810",
+            "mutation rate": "0.000000",
             "memory size": "256",
             "min energy": "3.000000"
         },
         "radiation": {
             "exponent": "1.000000",
-            "factor": "0.000200",
+            "factor": "0.000060",
             "probability": "0.030000",
             "velocity multiplier": "1.000000",
             "velocity perturbation": "0.500000"
         },
         "spots": {
-            "num spots": "2",
+            "num spots": "0",
             "0": {
-                "color": "4281544458",
+                "color": "0",
                 "pos": {
-                    "x": "224.199997",
-                    "y": "424.200012"
+                    "x": "0.000000",
+                    "y": "0.000000"
                 },
-                "core radius": "128.800003",
-                "fadeout radius": "287.899994",
-                "friction": "0.001700",
+                "core radius": "100.000000",
+                "fadeout radius": "100.000000",
+                "friction": "0.001000",
                 "radiation": {
                     "factor": "0.000200"
                 },
                 "cell": {
-                    "max force": "0.367000",
+                    "max force": "0.800000",
                     "min energy": "50.000000",
                     "binding force": "1.000000",
-                    "fusion velocity": "0.206000",
+                    "fusion velocity": "0.400000",
                     "max binding energy": "500000.000000",
+                    "mutation rate": "0.000000",
                     "function": {
                         "weapon": {
-                            "energy cost": "0.900000",
-                            "color penalty": "0.525000",
-                            "geometry deviation exponent": "0.222000"
+                            "energy cost": "0.200000",
+                            "color penalty": "0.000000",
+                            "geometry deviation exponent": "0.000000"
                         }
                     }
                 },
                 "token": {
-                    "mutation rate": "0.001810"
+                    "mutation rate": "0.000500"
                 }
             },
             "1": {
-                "color": "4281535013",
+                "color": "0",
                 "pos": {
-                    "x": "824.200012",
-                    "y": "823.200012"
+                    "x": "0.000000",
+                    "y": "0.000000"
                 },
-                "core radius": "75.800003",
-                "fadeout radius": "447.000000",
+                "core radius": "100.000000",
+                "fadeout radius": "100.000000",
                 "friction": "0.001000",
                 "radiation": {
-                    "factor": "0.000780"
+                    "factor": "0.000200"
                 },
                 "cell": {
-                    "max force": "0.367000",
+                    "max force": "0.800000",
                     "min energy": "50.000000",
                     "binding force": "1.000000",
-                    "fusion velocity": "0.206000",
+                    "fusion velocity": "0.400000",
                     "max binding energy": "500000.000000",
+                    "mutation rate": "0.000000",
                     "function": {
                         "weapon": {
-                            "energy cost": "0.900000",
-                            "color penalty": "0.525000",
-                            "geometry deviation exponent": "0.222000"
+                            "energy cost": "0.200000",
+                            "color penalty": "0.000000",
+                            "geometry deviation exponent": "0.000000"
                         }
                     }
                 },
                 "token": {
-                    "mutation rate": "0.001810"
+                    "mutation rate": "0.000500"
                 }
             }
         }
     },
+    "rigidity": "0.000000",
     "flow field": {
-        "active": "true",
-        "num centers": "2",
+        "active": "false",
+        "num centers": "1",
         "center0": {
             "pos": {
-                "x": "965.000000",
-                "y": "814.000000"
+                "x": "500.000000",
+                "y": "250.000000"
             },
-            "radius": "529.000000",
-            "strength": "0.016000"
+            "radius": "200.000000",
+            "strength": "0.010000"
         },
         "center1": {
             "pos": {
-                "x": "329.000000",
-                "y": "186.000000"
+                "x": "0.000000",
+                "y": "0.000000"
             },
-            "radius": "461.000000",
-            "strength": "0.014000"
+            "radius": "200.000000",
+            "strength": "0.010000"
         }
     }
 }

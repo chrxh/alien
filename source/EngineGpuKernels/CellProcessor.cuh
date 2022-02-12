@@ -19,6 +19,7 @@ public:
     __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void clearDensityMap(SimulationData& data);
     __inline__ __device__ void fillDensityMap(SimulationData& data);
+    __inline__ __device__ void applyMutation(SimulationData& data);
 
     __inline__ __device__ void collisions(SimulationData& data);    //prerequisite: clearTag
     __inline__ __device__ void checkForces(SimulationData& data);
@@ -85,6 +86,26 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         data.cellFunctionData.densityMap.addCell(data.entities.cellPointers.at(index));
+    }
+}
+
+__inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
+{
+    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.entities.cellPointers.at(index);
+        auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
+        if (data.numberGen.random() < 0.001f && data.numberGen.random() < mutationRate * 1000) {
+            auto address = data.numberGen.random(MAX_CELL_STATIC_BYTES + 1);
+            if (address < MAX_CELL_STATIC_BYTES) {
+                cell->staticData[address] = data.numberGen.random(255);
+            } else if (address == MAX_CELL_STATIC_BYTES) {
+                cell->metadata.color = data.numberGen.random(6);
+            } else {
+                cell->branchNumber = data.numberGen.random(cudaSimulationParameters.cellMaxTokenBranchNumber);
+            }
+        }
+
     }
 }
 
