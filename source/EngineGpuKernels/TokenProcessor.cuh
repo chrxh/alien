@@ -154,16 +154,14 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
         auto& cell = token->cell;
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
-            //IMPORTANT:
-            //loop would lead to time out problems on GeForce 10-series
-/*
-            bool success = false;
-            do {
-*/
+
+            //modifying cell functions need a lock since they should be executed consecutively on a cell
+            //make a certain number of attempts
+            for (int i = 0; i < 100; ++i) {
                 if (cell->tryLock()) {
 
                     EnergyGuidance::processing(data, token);
-                    if (Enums::CellFunction_Computation== cellFunctionType) {
+                    if (Enums::CellFunction_Computation == cellFunctionType) {
                         CellComputationProcessor::process(token);
                     }
                     if (Enums::CellFunction_Constructor == cellFunctionType) {
@@ -176,10 +174,10 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
                         MuscleProcessor::process(token, data, result);
                     }
 
-                    //                    success = true;
                     cell->releaseLock();
+                    break;
                 }
-/*            } while (!success);*/
+            }
         }
     }
 }
