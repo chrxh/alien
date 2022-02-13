@@ -92,8 +92,11 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
             }
         }
         if (0 == numNextTokenCells) {
-            atomicAdd(&cell->energy, token->energy);
-            token = nullptr;
+            if (cell->tryLock()) {
+                cell->energy += token->energy;
+                token = nullptr;
+                cell->releaseLock();
+            }
         }
     }
 }
