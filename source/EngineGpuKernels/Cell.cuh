@@ -5,6 +5,7 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 #include "AccessTOs.cuh"
+#include "ConstantMemory.cuh"
 
 struct CellMetadata
 {
@@ -96,6 +97,24 @@ struct Cell
     __inline__ __device__ Enums::CellFunction getCellFunctionType() const
     {
         return static_cast<unsigned int>(cellFunctionType) % Enums::CellFunction_Count;
+    }
+
+    __inline__ __device__ void initMemorySizes()
+    {
+        switch (getCellFunctionType()) {
+        case Enums::CellFunction_Computation: {
+            numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
+            numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
+        } break;
+        case Enums::CellFunction_Sensor: {
+            numStaticBytes = 0;
+            numMutableBytes = 5;
+        } break;
+        default: {
+            numStaticBytes = 0;
+            numMutableBytes = 0;
+        }
+        }
     }
 };
 

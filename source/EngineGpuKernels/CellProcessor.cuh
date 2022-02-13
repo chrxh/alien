@@ -96,11 +96,14 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
         auto& cell = data.entities.cellPointers.at(index);
         auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
         if (data.numberGen2.random() < 0.001f && data.numberGen1.random() < mutationRate * 1000) {
-            auto address = data.numberGen1.random(MAX_CELL_STATIC_BYTES + 1);
+            auto address = data.numberGen1.random(MAX_CELL_STATIC_BYTES + 2);
             if (address < MAX_CELL_STATIC_BYTES) {
                 cell->staticData[address] = data.numberGen1.random(255);
             } else if (address == MAX_CELL_STATIC_BYTES) {
                 cell->metadata.color = data.numberGen1.random(6);
+            } else if (address == MAX_CELL_STATIC_BYTES + 1) {
+                cell->cellFunctionType = data.numberGen1.random(Enums::CellFunction_Count - 1);
+                cell->initMemorySizes();
             } else {
                 cell->branchNumber = data.numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber);
             }
