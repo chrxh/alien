@@ -85,21 +85,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     }
     cell->energy = cellTO.energy;
     cell->cellFunctionType = cellTO.cellFunctionType;
-
-    switch (cell->cellFunctionType) {
-    case Enums::CellFunction_Computation: {
-        cell->numStaticBytes = cellTO.numStaticBytes;
-        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
-    } break;
-    case Enums::CellFunction_Sensor: {
-        cell->numStaticBytes = 0;
-        cell->numMutableBytes = 5;
-    } break;
-    default: {
-        cell->numStaticBytes = 0;
-        cell->numMutableBytes = 0;
-    }
-    }
+    cell->initMemorySizes();
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = cellTO.staticData[i];
     }
@@ -266,20 +252,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
     cell->cellFunctionType = _data->numberGen1.random(Enums::CellFunction_Count - 1);
-    switch (cell->cellFunctionType) {
-    case Enums::CellFunction_Computation: {
-        cell->numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
-        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
-    } break;
-    case Enums::CellFunction_Sensor: {
-        cell->numStaticBytes = 0;
-        cell->numMutableBytes = 5;
-    } break;
-    default: {
-        cell->numStaticBytes = 0;
-        cell->numMutableBytes = 0;
-    }
-    }
+    cell->initMemorySizes();
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = _data->numberGen1.random(255);
     }
