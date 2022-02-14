@@ -38,7 +38,8 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
             if (!isConnectedConnected(cell, otherCell)) {
                 auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
 
-                auto cellFunctionWeaponGeometryDeviationExponent = SpotCalculator::calc(
+                auto cellFunctionWeaponGeometryDeviationExponent =
+                    SpotCalculator::calcParameter(
                     &SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
 
                 if (abs(cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
@@ -52,7 +53,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                         * powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
                 }
 
-                auto cellFunctionWeaponColorPenalty = SpotCalculator::calc(
+                auto cellFunctionWeaponColorPenalty = SpotCalculator::calcParameter(
                     &SimulationParametersSpotValues::cellFunctionWeaponColorPenalty, data, cell->absPos);
 
                 auto homogene = isHomogene(cell);
@@ -99,7 +100,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
         result.incFailedAttack();
     }
     auto cellFunctionWeaponEnergyCost =
-        SpotCalculator::calc(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
+        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
     if (cellFunctionWeaponEnergyCost > 0) {
         auto const cellEnergy = cell->energy;
         auto& pos = cell->absPos;

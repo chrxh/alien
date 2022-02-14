@@ -50,7 +50,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
             auto tokenBranchNumber = token->getTokenBranchNumber();
 
             auto cellMinEnergy =
-                SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+                SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
 
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
@@ -109,7 +109,7 @@ __inline__ __device__ void TokenProcessor::applyMutation(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
         auto const& cell = token->cell;
-        auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::tokenMutationRate, data, cell->absPos);
+        auto mutationRate = SpotCalculator::calcParameter(&SimulationParametersSpotValues::tokenMutationRate, data, cell->absPos);
         if (data.numberGen1.random() < mutationRate) {
             token->memory[data.numberGen1.random(MAX_TOKEN_MEM_SIZE - 1)] = data.numberGen1.random(255);
         }

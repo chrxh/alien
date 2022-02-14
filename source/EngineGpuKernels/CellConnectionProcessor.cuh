@@ -195,7 +195,7 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
                 factory.init(&data);
 
                 auto cellMinEnergy =
-                    SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell1->absPos);
+                    SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell1->absPos);
                 auto newTokenEnergy = cudaSimulationParameters.tokenMinEnergy * 1.5f;
                 if (cell1->energy > cellMinEnergy + newTokenEnergy) {
                     auto token = factory.createToken(cell1, cell2);
