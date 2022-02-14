@@ -94,7 +94,7 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.entities.cellPointers.at(index);
-        auto mutationRate = SpotCalculator::calc(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
+        auto mutationRate = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
         if (data.numberGen2.random() < 0.001f && data.numberGen1.random() < mutationRate * 1000) {
             auto address = data.numberGen1.random(MAX_CELL_STATIC_BYTES + 2);
             if (address < MAX_CELL_STATIC_BYTES) {
@@ -177,7 +177,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                     && Math::length(velDelta)
-                        >= SpotCalculator::calc(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
+                        >= SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
                     && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
                     && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy) {
                         CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
@@ -233,7 +233,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        if (Math::length(cell->temp1) > SpotCalculator::calc(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
+        if (Math::length(cell->temp1) > SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
             }
@@ -273,7 +273,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
         float2 force{0, 0};
         float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->absPos - cell->absPos;
         data.cellMap.correctDirection(prevDisplacement);
-        auto cellBindingForce = SpotCalculator::calc(
+        auto cellBindingForce = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellBindingForce, data, cell->absPos);
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
@@ -393,7 +393,7 @@ __inline__ __device__ void CellProcessor::calcFriction(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        auto friction = SpotCalculator::calc(&SimulationParametersSpotValues::friction, data, cell->absPos);
+        auto friction = SpotCalculator::calcParameter(&SimulationParametersSpotValues::friction, data, cell->absPos);
         auto averagedVel = cell->vel * innerFriction;
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
@@ -412,7 +412,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        auto friction = SpotCalculator::calc(&SimulationParametersSpotValues::friction, data, cell->absPos);
+        auto friction = SpotCalculator::calcParameter(&SimulationParametersSpotValues::friction, data, cell->absPos);
         cell->vel = cell->temp1;
     }
 }
@@ -427,7 +427,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         auto& cell = cells.at(index);
         if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
             auto radiationFactor =
-                SpotCalculator::calc(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
+                SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
 
                 auto& pos = cell->absPos;
@@ -475,9 +475,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             }
         }
 
-        auto cellMinEnergy = SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
         auto cellMaxBindingEnergy =
-            SpotCalculator::calc(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
+            SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
         if (cell->energy < cellMinEnergy || destroyDueToTokenUsage) {
             CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
         } else if (cell->energy > cellMaxBindingEnergy) {

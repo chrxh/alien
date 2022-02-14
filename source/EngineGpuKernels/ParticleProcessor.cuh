@@ -96,8 +96,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.entities.particlePointers.at(particleIndex)) {
             
-            auto cellMinEnergy =
-                SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, particle->absPos);
+            auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, particle->absPos);
             if (particle->energy >= cellMinEnergy) {
                 EntityFactory factory;
                 factory.init(&data);

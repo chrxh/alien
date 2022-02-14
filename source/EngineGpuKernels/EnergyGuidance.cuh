@@ -17,7 +17,7 @@ public:
         float valueToken = static_cast<uint8_t>(token->memory[Enums::EnergyGuidance_InValueToken]);
         const float amount = 10.0;
 
-        auto cellMinEnergy = SpotCalculator::calc(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
 
         if (Enums::EnergyGuidanceIn_Deactivated == cmd) {
             return;

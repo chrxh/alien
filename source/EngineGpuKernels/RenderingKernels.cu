@@ -1,5 +1,7 @@
 ﻿#include "RenderingKernels.cuh"
 
+#include "SpotCalculator.cuh"
+
 namespace
 {
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
@@ -16,24 +18,6 @@ namespace
     __device__ __inline__ float3 colorToFloat3(unsigned int value)
     {
         return float3{toFloat(value & 0xff) / 255, toFloat((value >> 8) & 0xff) / 255, toFloat((value >> 16) & 0xff) / 255};
-    }
-
-    __device__ __inline__ float3 mix(float3 const& a, float3 const& b, float factor)
-    {
-        return float3{a.x * factor + b.x * (1 - factor), a.y * factor + b.y * (1 - factor), a.z * factor + b.z * (1 - factor)};
-    }
-
-    __device__ __inline__ float3 mix(float3 const& a, float3 const& b, float3 const& c, float factor1, float factor2)
-    {
-        float weight1 = factor1 * factor2;
-        float weight2 = 1 - factor1;
-        float weight3 = 1 - factor2;
-        float sum = weight1 + weight2 + weight3;
-        weight1 /= sum;
-        weight2 /= sum;
-        weight3 /= sum;
-        return float3{
-            a.x * weight1 + b.x * weight2 + c.x * weight3, a.y * weight1 + b.y * weight2 + c.y * weight3, a.z * weight1 + b.z * weight2 + c.z * weight3};
     }
 
     __device__ __inline__ float2 mapUniversePosToVectorImagePos(float2 const& rectUpperLeft, float2 const& pos, float zoom)
@@ -172,7 +156,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
     BaseMap map;
     map.init(worldSize);
-    auto spaceColor = colorToFloat3(Const::SpaceColor);
+    auto baseColor = colorToFloat3(Const::SpaceColor);
     auto spotColor1 = colorToFloat3(cudaSimulationParametersSpots.spots[0].color);
     auto spotColor2 = colorToFloat3(cudaSimulationParametersSpots.spots[1].color);
 
@@ -183,33 +167,9 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         if (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x || y >= outsideRectLowerRight.y) {
             imageData[index] = 0;
         } else {
-            if (0 == cudaSimulationParametersSpots.numSpots) {
-                drawPixel(imageData, index, spaceColor);
-            }
-            if (1 == cudaSimulationParametersSpots.numSpots) {
-                float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-                auto distance = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-                auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
-                auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
-                auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
-                auto resultingColor = mix(spaceColor, spotColor1, factor);
-                drawPixel(imageData, index, resultingColor);
-            }
-            if (2 == cudaSimulationParametersSpots.numSpots) {
-                float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-                auto distance1 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-                auto distance2 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
-
-                auto coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
-                auto fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
-                auto factor1 = distance1 < coreRadius1 ? 0.0f : min(1.0f, (distance1 - coreRadius1) / fadeoutRadius1);
-                auto coreRadius2 = cudaSimulationParametersSpots.spots[1].coreRadius;
-                auto fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
-                auto factor2 = distance2 < coreRadius2 ? 0.0f : min(1.0f, (distance2 - coreRadius2) / fadeoutRadius2);
-
-                auto resultingColor = mix(spaceColor, spotColor1, spotColor2, factor1, factor2);
-                drawPixel(imageData, index, resultingColor);
-            }
+            float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
+            auto color = SpotCalculator::calcColor(map, worldPos, baseColor, spotColor1, spotColor2);
+            drawPixel(imageData, index, color);
         }
     }
 }
