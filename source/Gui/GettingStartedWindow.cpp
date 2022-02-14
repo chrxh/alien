@@ -22,7 +22,7 @@ void _GettingStartedWindow::processIntern()
 {
     ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
-    ImGui::Text("What is Artificial Life Environment (ALiEn)?");
+    ImGui::Text("What is (A)rtificial (LI)fe (EN)vironment?");
     ImGui::PopStyleColor();
     ImGui::PopFont();
     AlienImGui::Separator();
@@ -33,7 +33,7 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("Abstract");
         ImGui::PopStyleColor();
 
-        ImGui::Text("ALiEn is an artificial life simulation program based on a specialized physics and rendering "
+        ImGui::Text("ALIEN is an artificial life simulation program based on a specialized physics and rendering "
                     "engine with extensive world building features. It is a high-performance simulation tool in "
                     "the sense that it not only uses OpenGL for rendering, but also utilizes the CUDA API to run "
                     "simulations on thousands of GPU threads.");
@@ -52,7 +52,7 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("First steps");
         ImGui::PopStyleColor();
 
-        ImGui::Text("The easiest way to get to know the alien simulator is to load and run an existing simulation "
+        ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation "
                     "file. You find various demos in examples/simulations/* demonstrating capabilities of the "
                     "engine ranging from physics examples, self-deploying structures, replicators to small "
                     "ecosystems. To this end, go to Simulation " ICON_FA_ARROW_RIGHT
