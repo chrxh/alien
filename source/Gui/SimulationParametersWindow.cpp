@@ -403,15 +403,47 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .defaultValue(origSpot.posY)
                 .format("%.1f"),
             spot.posY);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Core radius")
+        int shape = static_cast<int>(spot.shape);
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Shape")
+                .values({"Circular", "Rectangular"})
                 .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(maxRadius)
-                .defaultValue(origSpot.coreRadius)
-                .format("%.1f"),
-            spot.coreRadius);
+                .defaultValue(static_cast<int>(origSpot.shape)),
+            shape);
+        spot.shape = static_cast<SpotShape>(shape);
+        if (spot.shape == SpotShape::Circular) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Core radius")
+                    .textWidth(MaxContentTextWidth)
+                    .min(0)
+                    .max(maxRadius)
+                    .defaultValue(origSpot.coreRadius)
+                    .format("%.1f"),
+                spot.coreRadius);
+        }
+        if (spot.shape == SpotShape::Rectangular) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Core width")
+                    .textWidth(MaxContentTextWidth)
+                    .min(0)
+                    .max(maxRadius*2)
+                    .defaultValue(origSpot.width)
+                    .format("%.1f"),
+                spot.width);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Core height")
+                    .textWidth(MaxContentTextWidth)
+                    .min(0)
+                    .max(maxRadius * 2)
+                    .defaultValue(origSpot.height)
+                    .format("%.1f"),
+                spot.height);
+        }
+
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Fade-out radius")

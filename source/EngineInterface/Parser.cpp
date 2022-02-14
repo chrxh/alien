@@ -19,6 +19,12 @@ std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
     return std::make_pair(timestep, settings);
 }
 
+namespace
+{
+    std::unordered_map<SpotShape, std::string> shapeStringMap = {{SpotShape::Circular, "Circular"}, {SpotShape::Rectangular, "Rectangular"}};
+    std::unordered_map<std::string, SpotShape> shapeEnumMap = {{"Circular", SpotShape::Circular}, {"Rectangular", SpotShape::Rectangular}};
+}
+
 void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask ParserTask)
 {
     Settings defaultSettings;
@@ -170,6 +176,13 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         JsonParser::encodeDecode(tree, spot.color, defaultSpot.color, base + "color", ParserTask);
         JsonParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", ParserTask);
         JsonParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", ParserTask);
+
+        auto shapeString = shapeStringMap.at(spot.shape);
+        JsonParser::encodeDecode(tree, shapeString, shapeStringMap.at(defaultSpot.shape), base + "shape", ParserTask);
+        spot.shape = shapeEnumMap.at(shapeString);
+
+        JsonParser::encodeDecode(tree, spot.width, defaultSpot.width, base + "core width", ParserTask);
+        JsonParser::encodeDecode(tree, spot.height, defaultSpot.height, base + "core height", ParserTask);
         JsonParser::encodeDecode(tree, spot.coreRadius, defaultSpot.coreRadius, base + "core radius", ParserTask);
         JsonParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.friction, defaultSpot.values.friction, base + "friction", ParserTask);

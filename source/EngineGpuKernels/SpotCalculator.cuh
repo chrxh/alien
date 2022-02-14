@@ -29,26 +29,53 @@ private:
     __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T const& spotValue1, T const& spotValue2)
     {
         if (1 == cudaSimulationParametersSpots.numSpots) {
-            auto distance = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-            auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
-            auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
-            auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
-            return mix(baseValue, spotValue1, factor);
-        }
-        if (2 == cudaSimulationParametersSpots.numSpots) {
-            auto distance1 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-            auto distance2 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
+            float2 spotPos = {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY};
+            auto delta = spotPos - worldPos;
+            map.correctDirection(delta);
+            auto weight = calcWeight(delta, 0);
+            return mix(baseValue, spotValue1, weight);
+        } else if (2 == cudaSimulationParametersSpots.numSpots) {
+            float2 spotPos1 = {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY};
+            float2 spotPos2 = {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY};
 
-            auto coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
-            auto fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
-            auto factor1 = distance1 < coreRadius1 ? 0.0f : min(1.0f, (distance1 - coreRadius1) / fadeoutRadius1);
-            auto coreRadius2 = cudaSimulationParametersSpots.spots[1].coreRadius;
-            auto fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
-            auto factor2 = distance2 < coreRadius2 ? 0.0f : min(1.0f, (distance2 - coreRadius2) / fadeoutRadius2);
+            auto delta1 = spotPos1 - worldPos;
+            map.correctDirection(delta1);
+            auto delta2 = spotPos2 - worldPos;
+            map.correctDirection(delta2);
 
-            return mix(baseValue, spotValue1, spotValue2, factor1, factor2);
+            auto weight1 = calcWeight(delta1, 0);
+            auto weight2 = calcWeight(delta2, 1);
+
+            return mix(baseValue, spotValue1, spotValue2, weight1, weight2);
         }
         return baseValue;
+    }
+
+    __device__ __inline__ static float calcWeight(float2 const& delta, int const& spotIndex)
+    {
+        if (cudaSimulationParametersSpots.spots[spotIndex].shape == SpotShape::Rectangular) {
+            return calcWeightForRectSpot(delta, spotIndex);
+        }
+        return calcWeightForCircularSpot(delta, spotIndex);
+    }
+
+    __device__ __inline__ static float calcWeightForCircularSpot(float2 const& delta, int const& spotIndex)
+    {
+        auto distance = Math::length(delta);
+        auto coreRadius = cudaSimulationParametersSpots.spots[spotIndex].coreRadius;
+        auto fadeoutRadius = cudaSimulationParametersSpots.spots[spotIndex].fadeoutRadius + 1;
+        return distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
+    }
+
+    __device__ __inline__ static float calcWeightForRectSpot(float2 const& delta, int const& spotIndex)
+    {
+        auto const& spot = cudaSimulationParametersSpots.spots[spotIndex];
+        float result = 0;
+        if (abs(delta.x) > spot.width / 2 || abs(delta.y) > spot.height / 2) {
+            float2 distanceFromRect = {max(0.0f, abs(delta.x) - spot.width / 2), max(0.0f, abs(delta.y) - spot.height / 2)};
+            result = min(1.0f, Math::length(distanceFromRect) / (spot.fadeoutRadius + 1));
+        }
+        return result;
     }
 
     __device__ __inline__ static float mix(float const& a, float const& b, float factor) { return a * factor + b * (1 - factor); }
