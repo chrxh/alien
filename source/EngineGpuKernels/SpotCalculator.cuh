@@ -8,54 +8,32 @@
 class SpotCalculator
 {
 public:
-    __device__ __inline__ static float calcParameter(float SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& pos)
+    __device__ __inline__ static float calcParameter(float SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
     {
-        if (0 == cudaSimulationParametersSpots.numSpots) {
-            return cudaSimulationParameters.spotValues.*value;
-        }
-        if (1 == cudaSimulationParametersSpots.numSpots) {
-            auto distance = data.cellMap.getDistance(
-                pos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-            auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
-            auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
-            auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
-            return mix(
-                cudaSimulationParameters.spotValues.*value,
-                cudaSimulationParametersSpots.spots[0].values.*value,
-                factor);
-        }
-        if (2 == cudaSimulationParametersSpots.numSpots) {
-            auto distance1 = data.cellMap.getDistance(
-                pos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
-            auto distance2 = data.cellMap.getDistance(
-                pos, {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY});
-
-            auto coreRadius1 = cudaSimulationParametersSpots.spots[0].coreRadius;
-            auto fadeoutRadius1 = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
-            auto factor1 = distance1 < coreRadius1 ? 0.0f : min(1.0f, (distance1 - coreRadius1) / fadeoutRadius1);
-            auto coreRadius2 = cudaSimulationParametersSpots.spots[1].coreRadius;
-            auto fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
-            auto factor2 = distance2 < coreRadius2 ? 0.0f : min(1.0f, (distance2 - coreRadius2) / fadeoutRadius2);
-
-            return mix(
-                cudaSimulationParameters.spotValues.*value,
-                cudaSimulationParametersSpots.spots[0].values.*value,
-                cudaSimulationParametersSpots.spots[1].values.*value,
-                factor1,
-                factor2);
-        }
-        return 0;
+        return calcResultingValue(
+            data.cellMap,
+            worldPos,
+            cudaSimulationParameters.spotValues.*value,
+            cudaSimulationParametersSpots.spots[0].values.*value,
+            cudaSimulationParametersSpots.spots[1].values.*value);
     }
 
     __device__ __inline__ static float3
     calcColor(BaseMap const& map, float2 const& worldPos, float3 const& baseColor, float3 const& spotColor1, float3 const& spotColor2)
+    {
+        return calcResultingValue(map, worldPos, baseColor, spotColor1, spotColor2);
+    }
+
+private:
+    template<typename T>
+    __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T const& spotValue1, T const& spotValue2)
     {
         if (1 == cudaSimulationParametersSpots.numSpots) {
             auto distance = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
             auto coreRadius = cudaSimulationParametersSpots.spots[0].coreRadius;
             auto fadeoutRadius = cudaSimulationParametersSpots.spots[0].fadeoutRadius + 1;
             auto factor = distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
-            return mix(baseColor, spotColor1, factor);
+            return mix(baseValue, spotValue1, factor);
         }
         if (2 == cudaSimulationParametersSpots.numSpots) {
             auto distance1 = map.getDistance(worldPos, {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY});
@@ -68,12 +46,11 @@ public:
             auto fadeoutRadius2 = cudaSimulationParametersSpots.spots[1].fadeoutRadius + 1;
             auto factor2 = distance2 < coreRadius2 ? 0.0f : min(1.0f, (distance2 - coreRadius2) / fadeoutRadius2);
 
-            return mix(baseColor, spotColor1, spotColor2, factor1, factor2);
+            return mix(baseValue, spotValue1, spotValue2, factor1, factor2);
         }
-        return baseColor;
+        return baseValue;
     }
 
-private:
     __device__ __inline__ static float mix(float const& a, float const& b, float factor) { return a * factor + b * (1 - factor); }
 
     __device__ __inline__ static float3 mix(float3 const& a, float3 const& b, float factor)
