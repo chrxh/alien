@@ -384,6 +384,15 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         ImGui::SameLine();
         ImGui::Text("Background color");
 
+        int shape = static_cast<int>(spot.shape);
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Shape")
+                .values({"Circular", "Rectangular"})
+                .textWidth(MaxContentTextWidth)
+                .defaultValue(static_cast<int>(origSpot.shape)),
+            shape);
+        spot.shape = static_cast<SpotShape>(shape);
         auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -403,15 +412,6 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .defaultValue(origSpot.posY)
                 .format("%.1f"),
             spot.posY);
-        int shape = static_cast<int>(spot.shape);
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                .name("Shape")
-                .values({"Circular", "Rectangular"})
-                .textWidth(MaxContentTextWidth)
-                .defaultValue(static_cast<int>(origSpot.shape)),
-            shape);
-        spot.shape = static_cast<SpotShape>(shape);
         if (spot.shape == SpotShape::Circular) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -429,7 +429,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Core width")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
-                    .max(maxRadius*2)
+                    .max(worldSize.x)
                     .defaultValue(origSpot.width)
                     .format("%.1f"),
                 spot.width);
@@ -438,7 +438,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Core height")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
-                    .max(maxRadius * 2)
+                    .max(worldSize.y)
                     .defaultValue(origSpot.height)
                     .format("%.1f"),
                 spot.height);
