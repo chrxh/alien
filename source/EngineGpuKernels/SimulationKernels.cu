@@ -51,7 +51,7 @@ __global__ void cudaNextTimestep_substep4(SimulationData data)
     cellProcessor.calcConnectionForces(data);
 
     TokenProcessor tokenProcessor;
-    tokenProcessor.movement(data);  //changes cell energy without lock
+    tokenProcessor.movement(data);
 }
 
 __global__ void cudaNextTimestep_substep5(SimulationData data)

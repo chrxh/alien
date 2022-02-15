@@ -12,7 +12,7 @@ struct SimulationParametersSpotValues
     float cellFusionVelocity = 0.4f;
     float cellMaxBindingEnergy = 500000.0f;
 
-    float tokenMutationRate = 0.0005f;
+    float tokenMutationRate = 0;
     float cellMutationRate = 0;
     float cellFunctionWeaponEnergyCost = 0.2f;
     float cellFunctionWeaponColorPenalty = 0.0f;

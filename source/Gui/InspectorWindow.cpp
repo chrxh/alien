@@ -340,7 +340,7 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Const::InfoTextColor));
         AlienImGui::Text("This is a pure information tab.");
         ImGui::SameLine();
-        AlienImGui::HelpMarker("The following table shows where the cell obtains their input and output from the token memory.");
+        AlienImGui::HelpMarker("The following table shows where the cell obtains their input and output from the token memory. Please check the symbol editor for the corresponding variables and constants.");
         ImGui::PopStyleColor();
         
         if (ImGui::BeginTable(
