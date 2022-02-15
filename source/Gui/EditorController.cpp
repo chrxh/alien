@@ -276,8 +276,8 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
     auto viewSize = _viewport->getViewSize();
-    auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 2.8f;
-    auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 2.4f;
+    auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 3.8f;
+    auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
 
     for (auto const& entity : newEntities) {
         auto id = DescriptionHelper::getId(entity);
@@ -285,8 +285,8 @@ void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescripti
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
-        windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 200.0f) + 40.0f;
-        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 200.0f) + 40.0f;
+        windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
+        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 300.0f) + 40.0f;
         _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(
             _simController, _viewport, _editorModel, id, RealVector2D{windowPosX, windowPosY}));
     }

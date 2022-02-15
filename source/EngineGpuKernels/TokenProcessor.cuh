@@ -92,10 +92,14 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
             }
         }
         if (0 == numNextTokenCells) {
-            if (cell->tryLock()) {
-                cell->energy += token->energy;
-                token = nullptr;
-                cell->releaseLock();
+            //transferring energy needs a lock => make a certain number of attempts
+            for (int i = 0; i < 100; ++i) {
+                if (cell->tryLock()) {
+                    cell->energy += token->energy;
+                    token = nullptr;
+                    cell->releaseLock();
+                    break;
+                }
             }
         }
     }

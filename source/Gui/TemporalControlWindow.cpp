@@ -155,6 +155,7 @@ void _TemporalControlWindow::processRestoreButton()
         _statisticsWindow->reset();
         _simController->setCurrentTimestep(_snapshot->timestep);
         _simController->setSimulationData(_snapshot->data);
+        _history.clear();
     }
     ImGui::EndDisabled();
 }
