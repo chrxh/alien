@@ -62,7 +62,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::PopFont();
 
         AlienImGui::Separator();
-        AlienImGui::ToggleButton("Center selection", _centerSelection);
+        AlienImGui::ToggleButton("Autotracking on selection", _centerSelection);
         ImGui::Spacing();
         ImGui::Spacing();
         float sensitivity = _viewport->getZoomSensitivity();

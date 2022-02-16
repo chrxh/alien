@@ -245,6 +245,9 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Generate ascending branch numbers")) {
             onGenerateBranchNumbers();
         }
+        if (ImGui::Button("Remove stickiness")) {
+            onRemoveStickiness();
+        }
         ImGui::EndDisabled();
 
         _lastSelection = selection;
@@ -315,6 +318,11 @@ void _PatternEditorWindow::onGenerateBranchNumbers()
 
     _simController->removeSelectedEntities(true);
     _simController->addAndSelectSimulationData(dataWithClusters);
+}
+
+void _PatternEditorWindow::onRemoveStickiness()
+{
+    _simController->removeStickiness(_editorModel->isRolloutToClusters());
 }
 
 bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
