@@ -109,6 +109,11 @@ void _SimulationControllerImpl::uniformVelocitiesForSelectedEntities(bool includ
     _worker.uniformVelocitiesForSelectedEntities(includeClusters);
 }
 
+void _SimulationControllerImpl::removeStickiness(bool includeClusters)
+{
+    _worker.removeStickiness(includeClusters);
+}
+
 void _SimulationControllerImpl::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
     _worker.colorSelectedEntities(color, includeClusters);

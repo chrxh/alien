@@ -165,6 +165,11 @@ void _EditKernelsLauncher::uniformVelocitiesForSelectedEntities(GpuSettings cons
     }
 }
 
+void _EditKernelsLauncher::removeStickiness(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+{
+    KERNEL_CALL(cudaRemoveStickiness, data, includeClusters);
+}
+
 void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data)
 {
     int counter = 10;

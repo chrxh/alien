@@ -343,19 +343,30 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
 
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    auto const cellPartition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.entities.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
             cell->vel = velocity;
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    auto const particlePartition = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.entities.particlePointers.at(index);
         if (0 != particle->selected) {
             particle->vel = velocity;
+        }
+    }
+}
+
+__global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (isSelected(cell, includeClusters)) {
+            cell->maxConnections = cell->numConnections;
         }
     }
 }
