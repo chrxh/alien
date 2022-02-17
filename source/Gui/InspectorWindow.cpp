@@ -355,6 +355,9 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             if (cell.cellFeature.getType() == Enums::CellFunction_Scanner) {
                 showScannerTableContent();
             }
+            if (cell.cellFeature.getType() == Enums::CellFunction_Communication) {
+                showCommunicationTableContent();
+            }
             if (cell.cellFeature.getType() == Enums::CellFunction_Digestion) {
                 showDigestionTableContent();
             }
@@ -626,6 +629,12 @@ void _InspectorWindow::showScannerTableContent()
     AlienImGui::Text("Output:\ninternal data of scanned cell\n(e.g. cell code and cell memory");
 }
 
+void _InspectorWindow::showCommunicationTableContent()
+{
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Not yet implemented");
+}
+
 void _InspectorWindow::showDigestionTableContent()
 {
     ImGui::TableSetColumnIndex(0);
@@ -635,6 +644,14 @@ void _InspectorWindow::showDigestionTableContent()
     AlienImGui::Text("Output:");
     AlienImGui::Text(formatHex(Enums::DigestionOut_NoTarget) + ": no target cell found");
     AlienImGui::Text(formatHex(Enums::DigestionOut_Success) + ": target cell found");
+
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    AlienImGui::Text(formatHex(Enums::Digestion_InColor));
+
+    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Text("Input: target color (number from 0-6)");
 }
 
 void _InspectorWindow::showConstructionTableContent()
@@ -867,7 +884,7 @@ void _InspectorWindow::showSensorTableContent()
     AlienImGui::Text(formatHex(Enums::Sensor_InColor));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: color of the mass density to be detected");
+    AlienImGui::Text("Input: color (number from 0-6) of the mass density to be detected");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
