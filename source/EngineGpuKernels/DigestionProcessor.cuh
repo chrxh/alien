@@ -27,13 +27,13 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
     tokenMem[Enums::Digestion_Output] = Enums::DigestionOut_NoTarget;
+    auto color = calcMod(token->memory[Enums::Digestion_InColor], 7);
 
     Cell* otherCells[18];
     int numOtherCells;
     data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.6f);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-
         if (otherCell->tryLock()) {
             if (!isConnectedConnected(cell, otherCell)) {
                 auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
@@ -49,18 +49,24 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                     auto deviation =
                         1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
 
-                    energyToTransfer = energyToTransfer
-                        * powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
+                    energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
+                }
+
+                auto otherCellColor = calcMod(otherCell->metadata.color, 7);
+                if (otherCellColor != color) {
+                    auto cellFunctionWeaponColorTargetMismatchPenalty =
+                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorTargetMismatchPenalty, data, cell->absPos);
+
+                    energyToTransfer *= (1.0f - cellFunctionWeaponColorTargetMismatchPenalty);
                 }
 
                 auto cellFunctionWeaponColorPenalty = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionWeaponColorPenalty, data, cell->absPos);
+                    &SimulationParametersSpotValues::cellFunctionWeaponColorUnfittingPenalty, data, cell->absPos);
 
                 auto homogene = isHomogene(cell);
                 auto otherHomogene = isHomogene(otherCell);
                 if (!homogene /* && otherHomogene*/) {
-                    energyToTransfer =
-                        energyToTransfer * (1.0f - cellFunctionWeaponColorPenalty);
+                    energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
                 }
                 auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
                     color1 = color1 % 7;
@@ -71,19 +77,20 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                     return false;
                 };
                 if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
-                    energyToTransfer = energyToTransfer * (1.0f - cellFunctionWeaponColorPenalty);
+                    energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
                 }
+
                 if (otherCell->numConnections > cell->numConnections + 1) {
-                    energyToTransfer = 0;
+                    energyToTransfer *= 0.66f * 0.66f;
                 }
                 if (otherCell->numConnections == cell->numConnections + 1) {
-                    energyToTransfer *= 0.2f;
+                    energyToTransfer *= 0.66f;
                 }
                 if (otherCell->numConnections == cell->numConnections - 1) {
-                    energyToTransfer *= 2.0f;
+                    energyToTransfer *= 1.5f;
                 }
                 if (otherCell->numConnections < cell->numConnections - 1) {
-                    energyToTransfer *= 4.0f;
+                    energyToTransfer *= 1.5f * 1.5f;
                 }
                 if (otherCell->energy > energyToTransfer) {
                     otherCell->energy -= energyToTransfer;

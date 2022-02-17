@@ -15,7 +15,9 @@ struct SimulationParametersSpotValues
     float tokenMutationRate = 0;
     float cellMutationRate = 0;
     float cellFunctionWeaponEnergyCost = 0.2f;
-    float cellFunctionWeaponColorPenalty = 0.0f;
+    float cellFunctionWeaponColorTargetMismatchPenalty = 0.0f;
+    float cellFunctionWeaponColorUnfittingPenalty = 0.0f;
+    float cellFunctionWeaponConnectionUnfittingPenalty = 0.0f;
     float cellFunctionWeaponGeometryDeviationExponent = 0.0f;
 
     bool operator==(SimulationParametersSpotValues const& other) const
@@ -25,7 +27,8 @@ struct SimulationParametersSpotValues
             && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
             && tokenMutationRate == other.tokenMutationRate && cellMutationRate == other.cellMutationRate
             && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
-            && cellFunctionWeaponColorPenalty == other.cellFunctionWeaponColorPenalty
+            && cellFunctionWeaponColorUnfittingPenalty == other.cellFunctionWeaponColorUnfittingPenalty
+            && cellFunctionWeaponColorTargetMismatchPenalty == other.cellFunctionWeaponColorTargetMismatchPenalty
             && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy;
     }

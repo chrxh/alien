@@ -108,8 +108,14 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         ParserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.spotValues.cellFunctionWeaponColorPenalty,
-        defaultPar.spotValues.cellFunctionWeaponColorPenalty,
+        simPar.spotValues.cellFunctionWeaponColorTargetMismatchPenalty,
+        defaultPar.spotValues.cellFunctionWeaponColorTargetMismatchPenalty,
+        "simulation parameters.cell.function.weapon.target color mismatch penalty",
+        ParserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionWeaponColorUnfittingPenalty,
+        defaultPar.spotValues.cellFunctionWeaponColorUnfittingPenalty,
         "simulation parameters.cell.function.weapon.color penalty",
         ParserTask);
     JsonParser::encodeDecode(
@@ -204,8 +210,14 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
             ParserTask);
         JsonParser::encodeDecode(
             tree,
-            spot.values.cellFunctionWeaponColorPenalty,
-            defaultSpot.values.cellFunctionWeaponColorPenalty,
+            spot.values.cellFunctionWeaponColorTargetMismatchPenalty,
+            defaultSpot.values.cellFunctionWeaponColorTargetMismatchPenalty,
+            base + "cell.function.weapon.target color mismatch penalty",
+            ParserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionWeaponColorUnfittingPenalty,
+            defaultSpot.values.cellFunctionWeaponColorUnfittingPenalty,
             base + "cell.function.weapon.color penalty",
             ParserTask);
         JsonParser::encodeDecode(

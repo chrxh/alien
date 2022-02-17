@@ -85,7 +85,8 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     }
     cell->energy = cellTO.energy;
     cell->cellFunctionType = cellTO.cellFunctionType;
-    cell->initMemorySizes();
+    cell->numStaticBytes = cellTO.numStaticBytes;
+    cell->numMutableBytes = cellTO.numMutableBytes;
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = cellTO.staticData[i];
     }
