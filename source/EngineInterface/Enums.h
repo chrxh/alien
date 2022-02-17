@@ -204,6 +204,7 @@ namespace Enums
     enum Digestion_
     {
         Digestion_Output = 5,
+        Digestion_InColor = 8
     };
     using DigestionOut = int;
     enum DigestionOut_

@@ -13,7 +13,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 240.0f;
+    auto const MaxContentTextWidth = 260.0f;
 }
 
 _SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController)
@@ -327,10 +327,10 @@ void _SimulationParametersWindow::processBase(
                 .tooltip(std::string("Probability that a memory byte of a token is changed per time step.")),
             simParameters.spotValues.tokenMutationRate);
 
-        AlienImGui::Group("Cell specialization");
+        AlienImGui::Group("Cell specialization: Digestion function");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Digestion energy cost")
+                .name("Energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(4.0f)
@@ -340,18 +340,27 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Digestion color penalty")
+                .name("Target color mismatch penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorPenalty)
-                .tooltip(std::string(
-                    "The larger this value is, the less energy a cell can gain from an attack if the attacked cell "
-                    "does not match the successive color.")),
-            simParameters.spotValues.cellFunctionWeaponColorPenalty);
+                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty)
+                .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell "
+                                     "does not match the target color.")),
+            simParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Digestion geometry penalty")
+                .name("Unfitting color penalty")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorUnfittingPenalty)
+                .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell does not have the successive "
+                                     "color of the attacker cell.")),
+            simParameters.spotValues.cellFunctionWeaponColorUnfittingPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
@@ -554,10 +563,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .defaultValue(origSpot.values.tokenMutationRate),
             spot.values.tokenMutationRate);
 
-        AlienImGui::Group("Cell specialization");
+        AlienImGui::Group("Cell specialization: Digestion function");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Digestion energy cost")
+                .name("Energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(4.0f)
@@ -565,15 +574,23 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Digestion color penalty")
+                .name("Target color mismatch penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponColorPenalty),
-            spot.values.cellFunctionWeaponColorPenalty);
+                .defaultValue(origSpot.values.cellFunctionWeaponColorTargetMismatchPenalty),
+            spot.values.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Digestion geometry penalty")
+                .name("Unfitting color penalty")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origSpot.values.cellFunctionWeaponColorUnfittingPenalty),
+            spot.values.cellFunctionWeaponColorUnfittingPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
