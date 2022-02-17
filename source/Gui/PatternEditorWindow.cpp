@@ -242,7 +242,7 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Release tensions")) {
             _simController->relaxSelectedEntities(_editorModel->isRolloutToClusters());
         }
-        if (ImGui::Button("Generate ascending branch numbers")) {
+        if (ImGui::Button("Generate token pathways")) {
             onGenerateBranchNumbers();
         }
         if (ImGui::Button("Remove stickiness")) {

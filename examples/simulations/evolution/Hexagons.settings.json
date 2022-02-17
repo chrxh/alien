@@ -1,6 +1,6 @@
 {
     "general": {
-        "time step": "443109",
+        "time step": "0",
         "world size": {
             "x": "1000",
             "y": "500"
@@ -11,14 +11,14 @@
         "friction": "0.000300",
         "rigidity": "0.000000",
         "cell": {
-            "binding force": "0.552000",
+            "binding force": "1.000000",
             "max velocity": "2.000000",
             "max binding distance": "2.600000",
-            "repulsion strength": "0.143000",
-            "mutation rate": "0.000003",
+            "repulsion strength": "0.080000",
+            "mutation rate": "0.000001",
             "min distance": "0.300000",
             "max distance": "1.300000",
-            "max force": "2.800000",
+            "max force": "0.367000",
             "max force decay probability": "0.200000",
             "min token usages": "40000",
             "token usage decay probability": "0.000002",
@@ -27,7 +27,7 @@
             "max token branch number": "6",
             "min energy": "50.000000",
             "transformation probability": "0.200000",
-            "fusion velocity": "0.300000",
+            "fusion velocity": "0.206000",
             "max binding energy": "500000.000000",
             "function": {
                 "computer": {
@@ -38,6 +38,7 @@
                     "strength": "0.100000",
                     "energy cost": "0.000000",
                     "geometry deviation exponent": "0.000000",
+                    "target color mismatch penalty": "0.000000",
                     "color penalty": "0.000000"
                 },
                 "constructor": {
@@ -49,21 +50,21 @@
                     }
                 },
                 "sensor": {
-                    "range": "255.000000"
+                    "range": "50.000000"
                 },
                 "communicator": {
-                    "range": "255.000000"
+                    "range": "50.000000"
                 }
             }
         },
         "token": {
-            "mutation rate": "0.000000",
+            "mutation rate": "0.000090",
             "memory size": "256",
             "min energy": "3.000000"
         },
         "radiation": {
             "exponent": "1.000000",
-            "factor": "0.000060",
+            "factor": "0.000050",
             "probability": "0.030000",
             "velocity multiplier": "1.000000",
             "velocity perturbation": "0.500000"
@@ -76,6 +77,9 @@
                     "x": "0.000000",
                     "y": "0.000000"
                 },
+                "shape": "Circular",
+                "core width": "100.000000",
+                "core height": "200.000000",
                 "core radius": "100.000000",
                 "fadeout radius": "100.000000",
                 "friction": "0.001000",
@@ -92,13 +96,14 @@
                     "function": {
                         "weapon": {
                             "energy cost": "0.200000",
+                            "target color mismatch penalty": "0.000000",
                             "color penalty": "0.000000",
                             "geometry deviation exponent": "0.000000"
                         }
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000500"
+                    "mutation rate": "0.000000"
                 }
             },
             "1": {
@@ -107,6 +112,9 @@
                     "x": "0.000000",
                     "y": "0.000000"
                 },
+                "shape": "Circular",
+                "core width": "100.000000",
+                "core height": "200.000000",
                 "core radius": "100.000000",
                 "fadeout radius": "100.000000",
                 "friction": "0.001000",
@@ -123,13 +131,14 @@
                     "function": {
                         "weapon": {
                             "energy cost": "0.200000",
+                            "target color mismatch penalty": "0.000000",
                             "color penalty": "0.000000",
                             "geometry deviation exponent": "0.000000"
                         }
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000500"
+                    "mutation rate": "0.000000"
                 }
             }
         }
