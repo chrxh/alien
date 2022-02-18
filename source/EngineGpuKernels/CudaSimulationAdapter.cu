@@ -304,6 +304,12 @@ void _CudaSimulationAdapter::uniformVelocitiesForSelectedEntities(bool includeCl
     syncAndCheck();
 }
 
+void _CudaSimulationAdapter::makeSticky(bool includeClusters)
+{
+    _editKernels->makeSticky(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    syncAndCheck();
+}
+
 void _CudaSimulationAdapter::removeStickiness(bool includeClusters)
 {
     _editKernels->removeStickiness(_settings.gpuSettings, *_cudaSimulationData, includeClusters);

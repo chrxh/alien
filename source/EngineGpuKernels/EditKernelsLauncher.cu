@@ -165,6 +165,11 @@ void _EditKernelsLauncher::uniformVelocitiesForSelectedEntities(GpuSettings cons
     }
 }
 
+void _EditKernelsLauncher::makeSticky(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+{
+    KERNEL_CALL(cudaMakeSticky, data, includeClusters);
+}
+
 void _EditKernelsLauncher::removeStickiness(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaRemoveStickiness, data, includeClusters);

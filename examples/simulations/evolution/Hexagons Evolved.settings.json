@@ -1,8 +1,8 @@
 {
     "general": {
-        "time step": "23708898",
+        "time step": "60633327",
         "world size": {
-            "x": "1000",
+            "x": "1400",
             "y": "500"
         }
     },
@@ -39,7 +39,7 @@
                     "energy cost": "0.000000",
                     "geometry deviation exponent": "0.000000",
                     "target color mismatch penalty": "1.000000",
-                    "color penalty": "0.403000"
+                    "color penalty": "0.767000"
                 },
                 "constructor": {
                     "offspring": {

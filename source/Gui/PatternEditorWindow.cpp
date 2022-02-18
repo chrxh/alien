@@ -245,6 +245,9 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Generate token pathways")) {
             onGenerateBranchNumbers();
         }
+        if (ImGui::Button("Make sticky")) {
+            onMakeSticky();
+        }
         if (ImGui::Button("Remove stickiness")) {
             onRemoveStickiness();
         }
@@ -291,6 +294,7 @@ bool _PatternEditorWindow::isCopyingPossible() const
 void _PatternEditorWindow::onCopy()
 {
     _copiedSelection = _simController->getSelectedSimulationData(_editorModel->isRolloutToClusters());
+    DescriptionHelper::removeMetadata(*_copiedSelection);
 }
 
 bool _PatternEditorWindow::isPastingPossible() const
@@ -318,6 +322,11 @@ void _PatternEditorWindow::onGenerateBranchNumbers()
 
     _simController->removeSelectedEntities(true);
     _simController->addAndSelectSimulationData(dataWithClusters);
+}
+
+void _PatternEditorWindow::onMakeSticky()
+{
+    _simController->makeSticky(_editorModel->isRolloutToClusters());
 }
 
 void _PatternEditorWindow::onRemoveStickiness()

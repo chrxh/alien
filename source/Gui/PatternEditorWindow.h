@@ -26,6 +26,7 @@ private:
     void processIntern() override;
 
     void onGenerateBranchNumbers();
+    void onMakeSticky();
     void onRemoveStickiness();
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;

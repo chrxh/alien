@@ -378,7 +378,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simController->getWorldSize();
 
-        AlienImGui::Group("Location and meta data");
+        AlienImGui::Group("Location and metadata");
 
         auto& color = spot.color;
         AlienImGui::ColorButtonWithPicker(

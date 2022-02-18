@@ -316,6 +316,13 @@ void EngineWorker::uniformVelocitiesForSelectedEntities(bool includeClusters)
     _cudaSimulation->uniformVelocitiesForSelectedEntities(includeClusters);
 }
 
+void EngineWorker::makeSticky(bool includeClusters)
+{
+    EngineWorkerGuard access(this);
+
+    _cudaSimulation->makeSticky(includeClusters);
+}
+
 void EngineWorker::removeStickiness(bool includeClusters)
 {
     EngineWorkerGuard access(this);

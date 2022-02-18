@@ -64,9 +64,10 @@ public:
     static RealVector2D getPos(CellOrParticleDescription const& entity);
     static std::vector<CellOrParticleDescription> getEntities(DataDescription const& data);
 
+    static void removeMetadata(DataDescription& data);
+
 private:
     static void makeValid(DataDescription& data);
     static void makeValid(ClusterDescription& cluster);
-    static void removeMetadata(DataDescription& data);
     static void removeMetadata(CellDescription& cell);
 };

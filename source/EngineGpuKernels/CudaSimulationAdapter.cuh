@@ -39,6 +39,7 @@ public:
     void removeSelectedEntities(bool includeClusters);
     void relaxSelectedEntities(bool includeClusters);
     void uniformVelocitiesForSelectedEntities(bool includeClusters);
+    void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
 
