@@ -1,21 +1,21 @@
 {
     "general": {
-        "time step": "60633327",
+        "time step": "1081",
         "world size": {
-            "x": "1400",
-            "y": "500"
+            "x": "1000",
+            "y": "1000"
         }
     },
     "simulation parameters": {
         "time step size": "1.000000",
-        "friction": "0.000400",
+        "friction": "0.000200",
         "rigidity": "0.000000",
         "cell": {
             "binding force": "1.000000",
             "max velocity": "2.000000",
             "max binding distance": "2.600000",
             "repulsion strength": "0.080000",
-            "mutation rate": "0.000003",
+            "mutation rate": "0.000000",
             "min distance": "0.300000",
             "max distance": "1.300000",
             "max force": "0.367000",
@@ -36,10 +36,10 @@
                 },
                 "weapon": {
                     "strength": "0.100000",
-                    "energy cost": "0.000000",
-                    "geometry deviation exponent": "0.000000",
-                    "target color mismatch penalty": "1.000000",
-                    "color penalty": "0.767000"
+                    "energy cost": "0.900000",
+                    "geometry deviation exponent": "0.222000",
+                    "target color mismatch penalty": "0.000000",
+                    "color penalty": "0.545000"
                 },
                 "constructor": {
                     "offspring": {
@@ -58,13 +58,13 @@
             }
         },
         "token": {
-            "mutation rate": "0.000310",
+            "mutation rate": "0.000000",
             "memory size": "256",
             "min energy": "3.000000"
         },
         "radiation": {
             "exponent": "1.000000",
-            "factor": "0.000050",
+            "factor": "0.000160",
             "probability": "0.030000",
             "velocity multiplier": "1.000000",
             "velocity perturbation": "0.500000"
@@ -103,7 +103,7 @@
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000000"
+                    "mutation rate": "0.000500"
                 }
             },
             "1": {
@@ -138,7 +138,7 @@
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000000"
+                    "mutation rate": "0.000500"
                 }
             }
         }
@@ -150,7 +150,7 @@
         "center0": {
             "pos": {
                 "x": "500.000000",
-                "y": "250.000000"
+                "y": "500.000000"
             },
             "radius": "200.000000",
             "strength": "0.010000"

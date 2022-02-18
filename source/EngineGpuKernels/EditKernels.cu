@@ -360,6 +360,17 @@ __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity
     }
 }
 
+__global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (isSelected(cell, includeClusters)) {
+            cell->maxConnections = cudaSimulationParameters.cellMaxBonds;
+        }
+    }
+}
+
 __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
 {
     auto const cellPartition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());

@@ -52,6 +52,7 @@ public:
     void removeSelectedEntities(bool includeClusters) override;
     void relaxSelectedEntities(bool includeClusters) override;
     void uniformVelocitiesForSelectedEntities(bool includeClusters) override;
+    void makeSticky(bool includeClusters) override;
     void removeStickiness(bool includeClusters) override;
     void colorSelectedEntities(unsigned char color, bool includeClusters) override;
     void reconnectSelectedEntities() override;
