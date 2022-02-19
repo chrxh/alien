@@ -52,7 +52,7 @@ std::string CellComputationTests::runSimpleCellComputer(std::string const& progr
     _simController->setSimulationData(origData);
     _simController->calcSingleTimestep();
 
-    DataDescription data = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+    DataDescription data = _simController->getSimulationData();
 
     auto cellById = getCellById(data);
     auto const& secondCell = cellById.at(origSecondCell.id);
