@@ -41,7 +41,7 @@ public:
         double zoom) override;
 
     ClusteredDataDescription getClusteredSimulationData() override;
-    DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight) override;
+    DataDescription getSimulationData() override;
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
     DataDescription getSelectedSimulationData(bool includeClusters) override;
     DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds) override;

@@ -49,8 +49,14 @@ public:
         MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelY, 0);
         MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngularVel, 0);
         MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngularVel, 0);
+        MEMBER_DECLARATION(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    static DataDescription randomMultiply(DataDescription const& input, RandomMultiplyParameters const& parameters, IntVector2D const& worldSize);
+    static DataDescription randomMultiply(
+        DataDescription const& input,
+        RandomMultiplyParameters const& parameters,
+        IntVector2D const& worldSize,
+        DataDescription&& existentData,
+        bool& overlappingCheckSuccessful);
 
     static void reconnectCells(DataDescription& data, float maxdistance);
     static void removeStickiness(DataDescription& data);
@@ -70,4 +76,9 @@ private:
     static void makeValid(DataDescription& data);
     static void makeValid(ClusterDescription& cluster);
     static void removeMetadata(CellDescription& cell);
+    static bool isCellPresent(
+        DataDescription const& data,
+        std::unordered_map<IntVector2D, std::vector<int>> const& cellIndicesByPos,
+        SpaceCalculator const& spaceCalculator,
+        RealVector2D const& posToCheck);
 };

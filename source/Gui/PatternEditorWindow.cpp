@@ -248,7 +248,7 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Make sticky")) {
             onMakeSticky();
         }
-        if (ImGui::Button("Remove stickiness")) {
+        if (ImGui::Button("Make unsticky")) {
             onRemoveStickiness();
         }
         ImGui::EndDisabled();

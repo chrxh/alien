@@ -8,6 +8,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "AlienImGui.h"
 #include "EditorModel.h"
+#include "MessageDialog.h"
 
 namespace
 {
@@ -60,7 +61,14 @@ void _MultiplierWindow::processIntern()
                 if (_mode == MultiplierMode::Grid) {
                     return DescriptionHelper::gridMultiply(_origSelection, _gridParameters);
                 }
-                return DescriptionHelper::randomMultiply(_origSelection, _randomParameters, _simController->getWorldSize());
+                auto data = _simController->getSimulationData();
+                auto overlappingCheckSuccessful = true;
+                auto result = DescriptionHelper::randomMultiply(
+                    _origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
+                if (!overlappingCheckSuccessful) {
+                    MessageDialog::getInstance().show("Random multiplication", "Non-overlapping copies could not be created.");
+                }
+                return result;
             }();
             _simController->removeSelectedEntities(true);
             _simController->addAndSelectSimulationData(multiplicationResult);
@@ -136,9 +144,11 @@ void _MultiplierWindow::processRandomPanel()
     AlienImGui::InputFloat(
         AlienImGui::InputFloatParameters().name("Max velocity Y").textWidth(MaxContentTextWidth).format("%.2f").step(0.05f), _randomParameters._maxVelY);
     AlienImGui::InputFloat(
-        AlienImGui::InputFloatParameters().name("Min angular velocity").textWidth(MaxContentTextWidth).format("%.1f").step(0.1f), _randomParameters._minAngularVel);
+        AlienImGui::InputFloatParameters().name("Min angular velocity").textWidth(MaxContentTextWidth).format("%.1f").step(0.1f),
+        _randomParameters._minAngularVel);
     AlienImGui::InputFloat(
         AlienImGui::InputFloatParameters().name("Max angular velocity").textWidth(MaxContentTextWidth).format("%.1f").step(0.1f),
         _randomParameters._maxAngularVel);
+    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Overlapping check").textWidth(MaxContentTextWidth), _randomParameters._overlappingCheck);
 }
 

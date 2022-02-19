@@ -26,8 +26,7 @@ void _TemporalControlWindow::onSnapshot()
 {
     Snapshot newSnapshot;
     newSnapshot.timestep = _simController->getCurrentTimestep();
-    auto size = _simController->getWorldSize();
-    newSnapshot.data = _simController->getSimulationData({0, 0}, size);
+    newSnapshot.data = _simController->getSimulationData();
     _snapshot = newSnapshot;
 }
 
@@ -132,8 +131,7 @@ void _TemporalControlWindow::processStepForwardButton()
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
         Snapshot newSnapshot;
         newSnapshot.timestep = _simController->getCurrentTimestep();
-        auto size = _simController->getWorldSize();
-        newSnapshot.data = _simController->getSimulationData({0, 0}, size);
+        newSnapshot.data = _simController->getSimulationData();
         _history.emplace_back(newSnapshot);
 
         _simController->calcSingleTimestep();

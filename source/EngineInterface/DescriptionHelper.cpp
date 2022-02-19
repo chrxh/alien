@@ -122,23 +122,72 @@ DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, Gr
     return result;
 }
 
-DataDescription
-DescriptionHelper::randomMultiply(DataDescription const& input, RandomMultiplyParameters const& parameters, IntVector2D const& worldSize)
+DataDescription DescriptionHelper::randomMultiply(
+    DataDescription const& input,
+    RandomMultiplyParameters const& parameters,
+    IntVector2D const& worldSize,
+    DataDescription&& existentData,
+    bool& overlappingCheckSuccessful)
 {
+    overlappingCheckSuccessful = true;
+    SpaceCalculator spaceCalculator(worldSize);
+    std::unordered_map<IntVector2D, std::vector<int>> cellIndicesByPos;
+
+    //create map for overlapping check
+    if (parameters._overlappingCheck) {
+        int index = 0;
+        for (auto const& cell : existentData.cells) {
+            auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
+            cellIndicesByPos[intPos].emplace_back(index);
+            ++index;
+        }
+    }
+
+    //do multiplication
     DataDescription result = input;
     auto& numberGen = NumberGenerator::getInstance();
-    for (int i = 0; i < parameters._number - 1; ++i) {
-        auto templateData = input;
-        removeMetadata(templateData);
-        templateData.shift({toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
-        templateData.rotate(toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
-        templateData.accelerate(
-            {toFloat(numberGen.getRandomReal(parameters._minVelX, parameters._maxVelX)),
-             toFloat(numberGen.getRandomReal(parameters._minVelY, parameters._maxVelY))},
-            toFloat(numberGen.getRandomReal(parameters._minAngularVel, parameters._maxAngularVel)));
+    for (int i = 0; i < parameters._number; ++i) {
+        bool overlapping = false;
+        DataDescription copy;
+        int attempts = 0;
+        do {
+            copy = input;
+            removeMetadata(copy);
+            copy.shift({toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
+            copy.rotate(toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
+            copy.accelerate(
+                {toFloat(numberGen.getRandomReal(parameters._minVelX, parameters._maxVelX)),
+                 toFloat(numberGen.getRandomReal(parameters._minVelY, parameters._maxVelY))},
+                toFloat(numberGen.getRandomReal(parameters._minAngularVel, parameters._maxAngularVel)));
 
-        makeValid(templateData);
-        result.add(templateData);
+            //overlapping check
+            overlapping = false;
+            if (parameters._overlappingCheck) {
+                for (auto const& cell : copy.cells) {
+                    auto pos = spaceCalculator.getCorrectedPosition(cell.pos);
+                    if (isCellPresent(existentData, cellIndicesByPos, spaceCalculator, pos)) {
+                        overlapping = true;
+                    }
+                }
+            }
+            ++attempts;
+        } while (overlapping && attempts < 200 && overlappingCheckSuccessful);
+        if (attempts == 200) {
+            overlappingCheckSuccessful = false;
+        }
+
+        makeValid(copy);
+        result.add(copy);
+
+        //add copy to existentData for overlapping check
+        if (parameters._overlappingCheck) {
+            for (auto const& cell : copy.cells) {
+                auto index = toInt(existentData.cells.size());
+                existentData.cells.emplace_back(cell);
+                auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
+                cellIndicesByPos[intPos].emplace_back(index);
+            }
+        }
     }
 
     return result;
@@ -312,6 +361,42 @@ void DescriptionHelper::removeMetadata(CellDescription& cell)
     cell.metadata.computerSourcecode.clear();
     cell.metadata.description.clear();
     cell.metadata.name.clear();
+}
+
+bool DescriptionHelper::isCellPresent(
+    DataDescription const& data,
+    std::unordered_map<IntVector2D, std::vector<int>> const& cellIndicesByPos,
+    SpaceCalculator const& spaceCalculator,
+    RealVector2D const& posToCheck)
+{
+    auto intPos = toIntVector2D(posToCheck);
+
+    auto getMatchingCellIndices = [&cellIndicesByPos](IntVector2D const& intPos) {
+        auto findResult = cellIndicesByPos.find(intPos);
+        if (findResult != cellIndicesByPos.end()) {
+            return findResult->second;
+        }
+        return std::vector<int>{};
+    };
+
+    auto checkCells = [&](std::vector<int> const& cellIndices) {
+        for (auto const& cellIndex : cellIndices) {
+            auto otherPos = spaceCalculator.getCorrectedPosition(data.cells.at(cellIndex).pos);
+            if (Math::length(posToCheck - otherPos) < 2.0f) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            if (checkCells(getMatchingCellIndices({intPos.x + dx, intPos.y + dy}))) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 uint64_t DescriptionHelper::getId(CellOrParticleDescription const& entity)
