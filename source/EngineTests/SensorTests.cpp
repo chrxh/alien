@@ -53,7 +53,7 @@ std::string SensorTests::runSensor(DataDescription& world, SensorParameters cons
     _simController->setSimulationData(world);
     _simController->calcSingleTimestep();
 
-    DataDescription data = _simController->getSimulationData({0, 0}, _simController->getWorldSize());
+    DataDescription data = _simController->getSimulationData();
     auto cellById = getCellById(data);
     auto const& secondCell = cellById.at(origSecondCell.id);
     EXPECT_EQ(1, secondCell.tokens.size());
