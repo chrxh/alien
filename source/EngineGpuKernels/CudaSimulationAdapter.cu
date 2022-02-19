@@ -96,9 +96,9 @@ namespace
                     highestComputeCapability = computeCapability;
                 }
             }
-            if (highestComputeCapability < 600) {
+            if (highestComputeCapability < 520) {
                 throw SystemRequirementNotMetException(
-                    "No CUDA device with compute capability of 6.0 or higher found.");
+                    "No CUDA device with compute capability of 5.2 or higher found.");
             }
 
             return result;
