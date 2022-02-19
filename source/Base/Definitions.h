@@ -47,6 +47,11 @@ inline int toInt(T const& value)
     { \
         _##name = name; \
         return *this; \
+    } \
+    className& name(type&& name) \
+    { \
+        _##name = std::move(name); \
+        return *this; \
     }
 
 struct IntVector2D
@@ -60,6 +65,25 @@ struct IntVector2D
     void operator-=(IntVector2D const& vec);
 };
 
+namespace std
+{
+    template <>
+    struct hash<IntVector2D>
+    {
+        std::size_t operator()(IntVector2D const& value) const
+        {
+            using std::hash;
+            using std::size_t;
+            using std::string;
+
+            size_t res = 17;
+            res = res * 31 + hash<int>()(value.x);
+            res = res * 31 + hash<int>()(value.y);
+            return res;
+        }
+    };
+
+}
 struct RealVector2D
 {
     float x = 0.0f;
@@ -95,6 +119,11 @@ struct RealVector2D
 };
 
 using RealMatrix2D = std::array<std::array<float, 2>, 2>;
+
+inline IntVector2D toIntVector2D(RealVector2D const& v)
+{
+    return {static_cast<int>(v.x), static_cast<int>(v.y)};
+}
 
 struct RealRect
 {

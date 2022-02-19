@@ -56,9 +56,10 @@ ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData()
     return _worker.getClusteredSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-DataDescription _SimulationControllerImpl::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+DataDescription _SimulationControllerImpl::getSimulationData()
 {
-    return _worker.getSimulationData(rectUpperLeft, rectLowerRight);
+    auto size = getWorldSize();
+    return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
 ClusteredDataDescription _SimulationControllerImpl::getSelectedClusteredSimulationData(bool includeClusters)

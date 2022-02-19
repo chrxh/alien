@@ -34,3 +34,10 @@ void SpaceCalculator::correctPosition(RealVector2D& pos) const
     pos.x = std::fmod(std::fmod(pos.x, _worldSizeFloat.x) + _worldSizeFloat.x, _worldSizeFloat.x);
     pos.y = std::fmod(std::fmod(pos.y, _worldSizeFloat.y) + _worldSizeFloat.y, _worldSizeFloat.y);
 }
+
+RealVector2D SpaceCalculator::getCorrectedPosition(RealVector2D const& pos) const
+{
+    auto result = pos;
+    correctPosition(result);
+    return result;
+}
