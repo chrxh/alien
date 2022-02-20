@@ -44,7 +44,7 @@ private:
     SimulationScrollbar _scrollbarY;
 
     //overlay
-    bool _isOverlayActive = true;
+    bool _isOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
     
     //shader data
