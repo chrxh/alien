@@ -350,7 +350,7 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Unfitting color penalty")
+                .name("Successive color dominance")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
@@ -582,7 +582,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Unfitting color penalty")
+                .name("Successive color dominance")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
