@@ -36,7 +36,7 @@ _SimulationView::_SimulationView(
     Viewport const& viewport)
     : _viewport(viewport)
 {
-    _isOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", true);
+    _isOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isOverlayActive);
     _modeWindow = modeWindow;
 
     _simController = simController;

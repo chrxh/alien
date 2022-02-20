@@ -34,9 +34,6 @@ namespace
         }
         return result;
     }
-
-    std::string const labels[] =
-        {"Cells (color 1)", "Cells (color 2)", "Cells (color 3)", "Cells (color 4)", "Cells (color 5)", "Cells (color 6)", "Cells (color 7)"};
 }
 
 void _StatisticsWindow::reset()
@@ -300,7 +297,7 @@ void _StatisticsWindow::processLivePlotForCellsByColor(int row)
             ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
 
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            auto s = "Color " + std::to_string(i) + ": " + std::to_string(toInt(_liveStatistics.datas[1 + i].back()));
+            auto s = std::to_string(toInt(_liveStatistics.datas[1 + i].back()));
             ImPlot::PlotLine(
                 s.c_str(), _liveStatistics.timepointsHistory.data(), _liveStatistics.datas[1 + i].data(), toInt(_liveStatistics.datas[1 + i].size()));
             ImPlot::PopStyleColor();
@@ -376,7 +373,7 @@ void _StatisticsWindow::processLongtermPlotForCellsByColor(int row)
             ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
 
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            auto s = "Color " + std::to_string(i) + ": " + std::to_string(toInt(_longtermStatistics.datas[1 + i].back()));
+            auto s = std::to_string(toInt(_longtermStatistics.datas[1 + i].back()));
             ImPlot::PlotLine(
                 s.c_str(), _longtermStatistics.timestepHistory.data(), _longtermStatistics.datas[1 + i].data(), toInt(_longtermStatistics.datas[1 + i].size()));
             ImPlot::PopStyleColor();
