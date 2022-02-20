@@ -151,6 +151,7 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
     mutable std::mutex _mutexForStatistics;
     MonitorData _lastStatistics;
+    int _monitorCounter = 0;
 
 /*
     std::atomic<uint64_t> _timeStep{0};
