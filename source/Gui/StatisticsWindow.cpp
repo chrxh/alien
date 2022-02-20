@@ -81,12 +81,11 @@ void _StatisticsWindow::processLiveStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text("Cells");
         auto text = _showCellsByColor ? ICON_FA_MINUS : ICON_FA_PLUS;
         if (AlienImGui::Button(text)) {
             _showCellsByColor = !_showCellsByColor;
         }
-        ImGui::SameLine();
-        AlienImGui::Text("Cells");
 
         ImGui::TableSetColumnIndex(1);
         processLivePlot(0, _liveStatistics.datas[0]);
@@ -163,12 +162,11 @@ void _StatisticsWindow::processLongtermStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text("Cells");
         auto text = _showCellsByColor ? ICON_FA_MINUS : ICON_FA_PLUS;
         if (AlienImGui::Button(text)) {
             _showCellsByColor = !_showCellsByColor;
         }
-        ImGui::SameLine();
-        AlienImGui::Text("Cells");
 
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(0, _longtermStatistics.datas[0]);
@@ -371,7 +369,7 @@ void _StatisticsWindow::processLongtermPlotForCellsByColor(int row)
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(_longtermStatistics.timestepHistory.front(), _longtermStatistics.timestepHistory.back(), 0, maxValue * 1.5, ImGuiCond_Always);
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().scaleContent(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().scaleContent(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < 7; ++i) {
             ImGui::PushID(i);
             auto colorRaw = getCellColor(i);
