@@ -475,6 +475,8 @@ void EngineWorker::removeSelection()
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->removeSelection();
+
+    updateMonitorDataIntern();
 }
 
 void EngineWorker::updateSelection()
@@ -487,12 +489,16 @@ void EngineWorker::shallowUpdateSelectedEntities(ShallowUpdateSelectionData cons
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->shallowUpdateSelectedEntities(updateData);
+
+    updateMonitorDataIntern();
 }
 
 void EngineWorker::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->colorSelectedEntities(color, includeClusters);
+
+    updateMonitorDataIntern();
 }
 
 void EngineWorker::reconnectSelectedEntities()
@@ -521,7 +527,10 @@ void EngineWorker::runThreadLoop()
 
                 if (_isSimulationRunning.load()) {
                     _cudaSimulation->calcTimestep();
-                    updateMonitorDataIntern();
+                    if (++_monitorCounter == 3) {   //for performance reasons...
+                        updateMonitorDataIntern();
+                        _monitorCounter = 0;
+                    }
                 }
 
                 processJobs();
