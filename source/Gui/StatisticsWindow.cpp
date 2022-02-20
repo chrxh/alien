@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <implot.h>
 
+#include "Fonts/IconsFontAwesome5.h"
+
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/MonitorData.h"
@@ -79,12 +81,13 @@ void _StatisticsWindow::processLiveStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        auto text = _showCellsByColor ? "-" : "+";
+        auto text = _showCellsByColor ? ICON_FA_MINUS : ICON_FA_PLUS;
         if (AlienImGui::Button(text)) {
             _showCellsByColor = !_showCellsByColor;
         }
         ImGui::SameLine();
         AlienImGui::Text("Cells");
+
         ImGui::TableSetColumnIndex(1);
         processLivePlot(0, _liveStatistics.datas[0]);
         if (_showCellsByColor) {
@@ -160,12 +163,13 @@ void _StatisticsWindow::processLongtermStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        auto text = _showCellsByColor ? "-" : "+";
+        auto text = _showCellsByColor ? ICON_FA_MINUS : ICON_FA_PLUS;
         if (AlienImGui::Button(text)) {
             _showCellsByColor = !_showCellsByColor;
         }
         ImGui::SameLine();
         AlienImGui::Text("Cells");
+
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(0, _longtermStatistics.datas[0]);
         if (_showCellsByColor) {
