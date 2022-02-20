@@ -185,7 +185,6 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Tokens");
-        ImGui::Text("");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(3, _longtermStatistics.datas[2]);
         ImPlot::PopColormap();
