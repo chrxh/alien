@@ -147,8 +147,12 @@ private:
     //settings
     Settings _settings;
 
-    //monitor data
+    //statistics data
     std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
+    mutable std::mutex _mutexForStatistics;
+    OverallStatistics _lastStatistics;
+
+/*
     std::atomic<uint64_t> _timeStep{0};
     std::atomic<int> _numCells{0};
     std::atomic<int> _numParticles{0};
@@ -158,6 +162,7 @@ private:
     std::atomic<int> _numSuccessfulAttacks{0};
     std::atomic<int> _numFailedAttacks{0};
     std::atomic<int> _numMuscleActivities{0};
+*/
 
     //internals
     void* _cudaResource;

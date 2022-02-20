@@ -190,17 +190,9 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> e
 
 OverallStatistics EngineWorker::getMonitorData() const
 {
-    OverallStatistics result;
-    result.timeStep = _timeStep.load();
-    result.numCells = _numCells.load();
-    result.numParticles = _numParticles.load();
-    result.numTokens = _numTokens.load();
-    result.totalInternalEnergy = _totalInternalEnergy.load();
-    result.numCreatedCells = _numCreatedCells.load();
-    result.numSuccessfulAttacks = _numSuccessfulAttacks.load();
-    result.numFailedAttacks = _numFailedAttacks.load();
-    result.numMuscleActivities = _numMuscleActivities.load();
-    return result;
+    std::lock_guard guard(_mutexForStatistics);
+
+    return _lastStatistics;
 }
 
 namespace
@@ -578,17 +570,8 @@ void EngineWorker::updateMonitorDataIntern()
     auto now = std::chrono::steady_clock::now();
     if (!_lastMonitorUpdate || now - *_lastMonitorUpdate > MonitorUpdate) {
 
-        auto data = _cudaSimulation->getMonitorData();
-        _timeStep.store(data.timeStep);
-        _numCells.store(data.numCells);
-        _numParticles.store(data.numParticles);
-        _numTokens.store(data.numTokens);
-        _totalInternalEnergy.store(data.totalInternalEnergy);
-        _numCreatedCells.store(data.numCreatedCells);
-        _numSuccessfulAttacks.store(data.numSuccessfulAttacks);
-        _numFailedAttacks.store(data.numFailedAttacks);
-        _numMuscleActivities.store(data.numMuscleActivities);
-
+        std::lock_guard guard(_mutexForStatistics);
+        _lastStatistics = _cudaSimulation->getMonitorData();
         _lastMonitorUpdate = now;
     }
 }

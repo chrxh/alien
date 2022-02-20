@@ -46,13 +46,9 @@ void _ExportStatisticsDialog::show(LongtermStatistics const& longtermStatistics)
 
 void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
 {
-    CHECK(_statistics.timestepHistory.size() == _statistics.numCellsHistory.size()
-        && _statistics.timestepHistory.size() == _statistics.numParticlesHistory.size()
-        && _statistics.timestepHistory.size() == _statistics.numTokensHistory.size()
-        && _statistics.timestepHistory.size() == _statistics.numCreatedCellsHistory.size()
-        && _statistics.timestepHistory.size() == _statistics.numSuccessfulAttacksHistory.size()
-        && _statistics.timestepHistory.size() == _statistics.numFailedAttacksHistory.size()
-        && _statistics.timestepHistory.size() == _statistics.numMuscleActivitiesHistory.size());
+    for (auto const& data : _statistics.datas) {
+        CHECK(_statistics.timestepHistory.size() == _statistics.datas[0].size());
+    }
 
     std::ofstream file;
     file.open(filename, std::ios_base::out);
@@ -63,11 +59,10 @@ void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
 
     file << "time step, cells, particles, tokens, created cells, successful attacks, failed attacks, muscle activities" << std::endl;
     for (int i = 0; i < _statistics.timestepHistory.size(); ++i) {
-        file << static_cast<uint64_t>(_statistics.timestepHistory.at(i)) << ", " << static_cast<uint64_t>(_statistics.numCellsHistory.at(i)) << ", "
-             << static_cast<uint64_t>(_statistics.numParticlesHistory.at(i)) << ", " << static_cast<uint64_t>(_statistics.numTokensHistory.at(i)) << ", "
-             << static_cast<uint64_t>(_statistics.numCreatedCellsHistory.at(i)) << ", " << static_cast<uint64_t>(_statistics.numSuccessfulAttacksHistory.at(i))
-             << ", " << static_cast<uint64_t>(_statistics.numFailedAttacksHistory.at(i)) << ", "
-             << static_cast<uint64_t>(_statistics.numMuscleActivitiesHistory.at(i)) << std::endl;
+        file << static_cast<uint64_t>(_statistics.timestepHistory.at(i)) << ", " << static_cast<uint64_t>(_statistics.datas[0].at(i)) << ", "
+             << static_cast<uint64_t>(_statistics.datas[1].at(i)) << ", " << static_cast<uint64_t>(_statistics.datas[2].at(i)) << ", "
+             << static_cast<uint64_t>(_statistics.datas[3].at(i)) << ", " << static_cast<uint64_t>(_statistics.datas[4].at(i)) << ", "
+             << static_cast<uint64_t>(_statistics.datas[5].at(i)) << ", " << static_cast<uint64_t>(_statistics.datas[6].at(i)) << std::endl;
     }
     file.close();
 }

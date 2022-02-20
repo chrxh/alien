@@ -4,6 +4,7 @@
 #include <implot.h>
 
 #include "Base/StringHelper.h"
+#include "EngineInterface/Colors.h"
 #include "EngineInterface/OverallStatistics.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
@@ -82,19 +83,19 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(0, _liveStatistics.numCellsHistory);
+        processLivePlot(0, _liveStatistics.datas[0]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(1, _liveStatistics.numParticlesHistory);
+        processLivePlot(1, _liveStatistics.datas[1]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Tokens");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(2, _liveStatistics.numTokensHistory);
+        processLivePlot(2, _liveStatistics.datas[2]);
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
@@ -115,25 +116,25 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(3, _liveStatistics.numCreatedCellsHistory);
+        processLivePlot(3, _liveStatistics.datas[3]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(4, _liveStatistics.numSuccessfulAttacksHistory);
+        processLivePlot(4, _liveStatistics.datas[4]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(5, _liveStatistics.numFailedAttacksHistory);
+        processLivePlot(5, _liveStatistics.datas[5]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(6, _liveStatistics.numMuscleActivitiesHistory);
+        processLivePlot(6, _liveStatistics.datas[6]);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -157,19 +158,19 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(0, _longtermStatistics.numCellsHistory);
+        processLongtermPlot(0, _longtermStatistics.datas[0]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(1, _longtermStatistics.numParticlesHistory);
+        processLongtermPlot(1, _longtermStatistics.datas[1]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Tokens");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(2, _longtermStatistics.numTokensHistory);
+        processLongtermPlot(2, _longtermStatistics.datas[2]);
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
@@ -189,25 +190,25 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(3, _longtermStatistics.numCreatedCellsHistory);
+        processLongtermPlot(3, _longtermStatistics.datas[3]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(4, _longtermStatistics.numSuccessfulAttacksHistory);
+        processLongtermPlot(4, _longtermStatistics.datas[4]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, _longtermStatistics.numFailedAttacksHistory);
+        processLongtermPlot(5, _longtermStatistics.datas[5]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, _longtermStatistics.numMuscleActivitiesHistory);
+        processLongtermPlot(6, _longtermStatistics.datas[6]);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -247,12 +248,78 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
         ImPlot::PlotLine(
             "##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
 
-        ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f * ImGui::GetStyle().Alpha);
-        ImPlot::PlotShaded(
-            "##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
-        ImPlot::PopStyleVar();
-
+        if (row > 0) {
+            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f * ImGui::GetStyle().Alpha);
+            ImPlot::PlotShaded("##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
+            ImPlot::PopStyleVar();
+        }
         ImPlot::PopStyleColor();
+
+        if (row == 0) {
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.9;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor1 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.8;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor2 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.7;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor3 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.6;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor4 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.5;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor5 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.4;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor6 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+            {
+                std::vector<float> temp = valueHistory;
+                for (auto& t : temp) {
+                    t *= 0.3;
+                }
+                ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)ImColor(Const::IndividualCellColor7 | 0xff000000));
+                ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), temp.data(), toInt(valueHistory.size()));
+                ImPlot::PopStyleColor();
+            }
+        }
 
         ImPlot::EndPlot();
     }
