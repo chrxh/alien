@@ -23,5 +23,5 @@ struct Settings;
 class _SimulationController;
 using SimulationController = std::shared_ptr<_SimulationController>;
 
-struct OverallStatistics;
+struct MonitorData;
 class SpaceCalculator;

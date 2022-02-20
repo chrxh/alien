@@ -4,7 +4,7 @@
 #include <sstream>
 
 #include "Base/LoggingService.h"
-#include "EngineInterface/OverallStatistics.h"
+#include "EngineInterface/MonitorData.h"
 #include "SimulationParametersCalculator.h"
 #include "GlobalSettings.h"
 

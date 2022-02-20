@@ -1,11 +1,11 @@
 #pragma once
 
-struct OverallStatistics
+struct MonitorData
 {
     uint64_t timeStep = 0;
 
     //entities
-    int numCells = 0;
+    int numCellsByColor[7] = {0, 0, 0, 0, 0, 0, 0};
     int numParticles = 0;
     int numTokens = 0;
     double totalInternalEnergy = 0.0;

@@ -1,6 +1,6 @@
 #include "StatisticsHistory.h"
 
-#include "EngineInterface/OverallStatistics.h"
+#include "EngineInterface/MonitorData.h"
 
 #include <imgui.h>
 
@@ -14,31 +14,45 @@ void LiveStatistics::truncate()
     }
 }
 
-void LiveStatistics::add(OverallStatistics const& newStatistics)
+void LiveStatistics::add(MonitorData const& newStatistics)
 {
     truncate();
 
     timepoint += ImGui::GetIO().DeltaTime;
     timepointsHistory.emplace_back(timepoint);
-    datas[0].emplace_back(toFloat(newStatistics.numCells));
-    datas[1].emplace_back(toFloat(newStatistics.numParticles));
-    datas[2].emplace_back(toFloat(newStatistics.numTokens));
-    datas[3].emplace_back(toFloat(newStatistics.numCreatedCells));
-    datas[4].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-    datas[5].emplace_back(toFloat(newStatistics.numFailedAttacks));
-    datas[6].emplace_back(toFloat(newStatistics.numMuscleActivities));
+    int numCells = 0;
+    for (int i = 0; i < 7; ++i) {
+        numCells += newStatistics.numCellsByColor[i];
+    }
+    datas[0].emplace_back(toFloat(numCells));
+    for (int i = 0; i < 7; ++i) {
+        datas[1 + i].emplace_back(toFloat(newStatistics.numCellsByColor[i]));
+    }
+    datas[8].emplace_back(toFloat(newStatistics.numParticles));
+    datas[9].emplace_back(toFloat(newStatistics.numTokens));
+    datas[10].emplace_back(toFloat(newStatistics.numCreatedCells));
+    datas[11].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
+    datas[12].emplace_back(toFloat(newStatistics.numFailedAttacks));
+    datas[13].emplace_back(toFloat(newStatistics.numMuscleActivities));
 }
 
-void LongtermStatistics::add(OverallStatistics const& newStatistics)
+void LongtermStatistics::add(MonitorData const& newStatistics)
 {
     if (timestepHistory.empty() || newStatistics.timeStep - timestepHistory.back() > LongtermTimestepDelta) {
         timestepHistory.emplace_back(toFloat(newStatistics.timeStep));
-        datas[0].emplace_back(toFloat(newStatistics.numCells));
-        datas[1].emplace_back(toFloat(newStatistics.numParticles));
-        datas[2].emplace_back(toFloat(newStatistics.numTokens));
-        datas[3].emplace_back(toFloat(newStatistics.numCreatedCells));
-        datas[4].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-        datas[5].emplace_back(toFloat(newStatistics.numFailedAttacks));
-        datas[6].emplace_back(toFloat(newStatistics.numMuscleActivities));
+        int numCells = 0;
+        for (int i = 0; i < 7; ++i) {
+            numCells += newStatistics.numCellsByColor[i];
+        }
+        datas[0].emplace_back(toFloat(numCells));
+        for (int i = 0; i < 7; ++i) {
+            datas[1 + i].emplace_back(toFloat(newStatistics.numCellsByColor[i]));
+        }
+        datas[8].emplace_back(toFloat(newStatistics.numParticles));
+        datas[9].emplace_back(toFloat(newStatistics.numTokens));
+        datas[10].emplace_back(toFloat(newStatistics.numCreatedCells));
+        datas[11].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
+        datas[12].emplace_back(toFloat(newStatistics.numFailedAttacks));
+        datas[13].emplace_back(toFloat(newStatistics.numMuscleActivities));
     }
 }

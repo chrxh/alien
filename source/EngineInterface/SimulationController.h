@@ -89,7 +89,7 @@ public:
     virtual SymbolMap const& getSymbolMap() const = 0;
     virtual SymbolMap const& getOriginalSymbolMap() const = 0;
     virtual void setSymbolMap(SymbolMap const& symbolMap) = 0;
-    virtual OverallStatistics getStatistics() const = 0;
+    virtual MonitorData getStatistics() const = 0;
 
     virtual std::optional<int> getTpsRestriction() const = 0;
     virtual void setTpsRestriction(std::optional<int> const& value) = 0;
