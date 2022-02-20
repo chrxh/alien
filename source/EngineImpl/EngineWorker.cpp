@@ -188,7 +188,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> e
     return result;
 }
 
-OverallStatistics EngineWorker::getMonitorData() const
+MonitorData EngineWorker::getMonitorData() const
 {
     std::lock_guard guard(_mutexForStatistics);
 

@@ -6,4 +6,5 @@
 #include "SimulationData.cuh"
 #include "CudaMonitorData.cuh"
 
-__global__ void cudaGetCudaMonitorData(SimulationData data, CudaMonitorData monitorData);
+__global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitorData monitorData);
+__global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitorData monitorData);

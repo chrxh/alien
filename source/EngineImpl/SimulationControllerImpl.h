@@ -105,7 +105,7 @@ public:
     SymbolMap const& getSymbolMap() const override;
     SymbolMap const& getOriginalSymbolMap() const override;
     void setSymbolMap(SymbolMap const& symbolMap) override;
-    OverallStatistics getStatistics() const override;
+    MonitorData getStatistics() const override;
 
     std::optional<int> getTpsRestriction() const override;
     void setTpsRestriction(std::optional<int> const& value) override;

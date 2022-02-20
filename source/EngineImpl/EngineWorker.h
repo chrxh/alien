@@ -15,7 +15,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/OverallStatistics.h"
+#include "EngineInterface/MonitorData.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/Settings.h"
@@ -53,7 +53,7 @@ public:
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
     DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds);
-    OverallStatistics getMonitorData() const;
+    MonitorData getMonitorData() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
@@ -150,7 +150,7 @@ private:
     //statistics data
     std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
     mutable std::mutex _mutexForStatistics;
-    OverallStatistics _lastStatistics;
+    MonitorData _lastStatistics;
 
 /*
     std::atomic<uint64_t> _timeStep{0};

@@ -10,7 +10,7 @@
 #endif
 #include <GL/gl.h>
 
-#include "EngineInterface/OverallStatistics.h"
+#include "EngineInterface/MonitorData.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -61,7 +61,7 @@ public:
 
     ArraySizes getArraySizes() const;
 
-    OverallStatistics getMonitorData();
+    MonitorData getMonitorData();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
 

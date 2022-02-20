@@ -399,20 +399,22 @@ auto _CudaSimulationAdapter::getArraySizes() const -> ArraySizes
         _cudaSimulationData->entities.tokens.getSize_host()};
 }
 
-OverallStatistics _CudaSimulationAdapter::getMonitorData()
+MonitorData _CudaSimulationAdapter::getMonitorData()
 {
     _monitorKernels->getMonitorData(_settings.gpuSettings, *_cudaSimulationData, *_cudaMonitorData);
     syncAndCheck();
     
-    OverallStatistics result;
+    MonitorData result;
     auto monitorData = _cudaMonitorData->getMonitorData(getCurrentTimestep());
     result.timeStep = monitorData.timeStep;
-    result.numCells = monitorData.numCells;
+    for (int i = 0; i < 7; ++i) {
+        result.numCellsByColor[i] = monitorData.numCellsByColor[i];
+    }
     result.numParticles = monitorData.numParticles;
     result.numTokens = monitorData.numTokens;
     result.totalInternalEnergy = monitorData.totalInternalEnergy;
 
-    auto processStatistics = _cudaSimulationResult->getStatistics();
+    auto processStatistics = _cudaSimulationResult->getProcessMonitorData();
     result.numCreatedCells = processStatistics.createdCells;
     result.numSuccessfulAttacks = processStatistics.sucessfulAttacks;
     result.numFailedAttacks = processStatistics.failedAttacks;

@@ -17,7 +17,9 @@ private:
     void processIntern();
     void processLiveStatistics();
     void processLongtermStatistics();
+
     void processLivePlot(int row, std::vector<float> const& valueHistory);
+    void processLivePlotForCellColor(int row);
     void processLongtermPlot(int row, std::vector<float> const& valueHistory);
 
     void processBackground() override;
@@ -26,6 +28,7 @@ private:
     ExportStatisticsDialog _exportStatisticsDialog;
 
     bool _live = true;
+    bool _showCellsByColor = true;
 
     LiveStatistics _liveStatistics;
     LongtermStatistics _longtermStatistics;

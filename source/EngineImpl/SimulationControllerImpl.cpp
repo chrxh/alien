@@ -335,7 +335,7 @@ void _SimulationControllerImpl::setSymbolMap(SymbolMap const& symbolMap)
     _symbolMap = symbolMap;
 }
 
-OverallStatistics _SimulationControllerImpl::getStatistics() const
+MonitorData _SimulationControllerImpl::getStatistics() const
 {
     return _worker.getMonitorData();
 }
