@@ -204,25 +204,25 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(4, _longtermStatistics.datas[3]);
+        processLongtermPlot(4, _longtermStatistics.datas[10]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, _longtermStatistics.datas[4]);
+        processLongtermPlot(5, _longtermStatistics.datas[11]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, _longtermStatistics.datas[5]);
+        processLongtermPlot(6, _longtermStatistics.datas[12]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(7, _longtermStatistics.datas[6]);
+        processLongtermPlot(7, _longtermStatistics.datas[13]);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
