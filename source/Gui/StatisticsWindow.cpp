@@ -175,13 +175,13 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(2, _longtermStatistics.datas[1]);
+        processLongtermPlot(2, _longtermStatistics.datas[8]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Tokens");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(3, _longtermStatistics.datas[2]);
+        processLongtermPlot(3, _longtermStatistics.datas[9]);
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
