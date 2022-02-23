@@ -13,6 +13,7 @@ public:
 
 private:
     void processIntern() override;
+    void processBackground() override;
 
     void processZoomInButton();
     void processZoomOutButton();

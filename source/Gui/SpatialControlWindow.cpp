@@ -73,7 +73,10 @@ void _SpatialControlWindow::processIntern()
     ImGui::EndChild();
 
     processResizeDialog();
+}
 
+void _SpatialControlWindow::processBackground()
+{
     processCenterOnSelection();
 }
 
