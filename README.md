@@ -70,7 +70,8 @@ It is updated from the develop branch on a weekly basis.
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
 ## Documentation
-Please visit [alien-project.org](https://alien-project.org/documentation/index.html) for a documentation of the program and the underlying model. It contains many brief tutorials that guide the reader into the program in small portions.
+An up-to-date documentation is currently being prepared under [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
+The outdated documentation of the previous version with tutorials about the program and the underlying model can be found on [alien-project.org](https://alien-project.org/documentation/index.html).
 
 ## Screenshots
 #### Startup screen
