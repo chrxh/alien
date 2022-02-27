@@ -644,6 +644,7 @@ void _InspectorWindow::showDigestionTableContent()
     AlienImGui::Text("Output:");
     AlienImGui::Text(formatHex(Enums::DigestionOut_NoTarget) + ": no target cell found");
     AlienImGui::Text(formatHex(Enums::DigestionOut_Success) + ": target cell found");
+    AlienImGui::Text(formatHex(Enums::DigestionOut_Poisoned) + ": target cell poisoned");
 
     ImGui::TableNextRow();
 

@@ -210,7 +210,8 @@ namespace Enums
     enum DigestionOut_
     {
         DigestionOut_NoTarget,
-        DigestionOut_Success
+        DigestionOut_Success,
+        DigestionOut_Poisoned
     };
 
     using Muscle = int;

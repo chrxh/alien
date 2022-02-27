@@ -70,32 +70,32 @@
             "velocity perturbation": "0.500000"
         },
         "spots": {
-            "num spots": "0",
+            "num spots": "1",
             "0": {
-                "color": "0",
+                "color": "4281544458",
                 "pos": {
-                    "x": "0.000000",
-                    "y": "0.000000"
+                    "x": "477.299988",
+                    "y": "500.000000"
                 },
-                "shape": "Circular",
-                "core width": "100.000000",
-                "core height": "200.000000",
-                "core radius": "100.000000",
-                "fadeout radius": "100.000000",
-                "friction": "0.001000",
+                "shape": "Rectangular",
+                "core width": "1000.000000",
+                "core height": "19.900000",
+                "core radius": "83.333336",
+                "fadeout radius": "83.333336",
+                "friction": "0.000300",
                 "radiation": {
-                    "factor": "0.000200"
+                    "factor": "0.000050"
                 },
                 "cell": {
-                    "max force": "0.800000",
+                    "max force": "0.367000",
                     "min energy": "50.000000",
                     "binding force": "1.000000",
-                    "fusion velocity": "0.400000",
+                    "fusion velocity": "0.206000",
                     "max binding energy": "500000.000000",
-                    "mutation rate": "0.000000",
+                    "mutation rate": "0.000001",
                     "function": {
                         "weapon": {
-                            "energy cost": "0.200000",
+                            "energy cost": "0.000000",
                             "target color mismatch penalty": "0.000000",
                             "color penalty": "0.000000",
                             "geometry deviation exponent": "0.000000"
@@ -103,7 +103,7 @@
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000000"
+                    "mutation rate": "0.000090"
                 }
             },
             "1": {

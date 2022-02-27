@@ -9,11 +9,13 @@
     "simulation parameters": {
         "time step size": "1.000000",
         "friction": "0.001000",
+        "rigidity": "0.000000",
         "cell": {
             "binding force": "1.000000",
             "max velocity": "2.000000",
             "max binding distance": "2.600000",
             "repulsion strength": "0.080000",
+            "mutation rate": "0.000000",
             "min distance": "0.300000",
             "max distance": "1.300000",
             "max force": "0.367000",
@@ -36,6 +38,7 @@
                     "strength": "0.100000",
                     "energy cost": "0.900000",
                     "geometry deviation exponent": "0.222000",
+                    "target color mismatch penalty": "1.000000",
                     "color penalty": "0.545000"
                 },
                 "constructor": {
@@ -47,10 +50,10 @@
                     }
                 },
                 "sensor": {
-                    "range": "255.000000"
+                    "range": "50.000000"
                 },
                 "communicator": {
-                    "range": "255.000000"
+                    "range": "50.000000"
                 }
             }
         },
@@ -74,6 +77,9 @@
                     "x": "436.399994",
                     "y": "353.500000"
                 },
+                "shape": "Circular",
+                "core width": "100.000000",
+                "core height": "200.000000",
                 "core radius": "166.666672",
                 "fadeout radius": "166.666672",
                 "friction": "0.001000",
@@ -86,9 +92,11 @@
                     "binding force": "1.000000",
                     "fusion velocity": "0.206000",
                     "max binding energy": "500000.000000",
+                    "mutation rate": "0.000000",
                     "function": {
                         "weapon": {
                             "energy cost": "0.900000",
+                            "target color mismatch penalty": "0.000000",
                             "color penalty": "0.545000",
                             "geometry deviation exponent": "0.222000"
                         }
@@ -104,6 +112,9 @@
                     "x": "703.000000",
                     "y": "858.599976"
                 },
+                "shape": "Circular",
+                "core width": "100.000000",
+                "core height": "200.000000",
                 "core radius": "166.666672",
                 "fadeout radius": "166.666672",
                 "friction": "0.001000",
@@ -116,9 +127,11 @@
                     "binding force": "1.000000",
                     "fusion velocity": "0.206000",
                     "max binding energy": "500000.000000",
+                    "mutation rate": "0.000000",
                     "function": {
                         "weapon": {
                             "energy cost": "0.900000",
+                            "target color mismatch penalty": "0.000000",
                             "color penalty": "0.545000",
                             "geometry deviation exponent": "0.222000"
                         }
@@ -130,6 +143,7 @@
             }
         }
     },
+    "rigidity": "0.000000",
     "flow field": {
         "active": "true",
         "num centers": "1",
