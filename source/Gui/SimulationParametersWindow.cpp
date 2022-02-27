@@ -343,10 +343,10 @@ void _SimulationParametersWindow::processBase(
                 .name("Target color mismatch penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(1.0f)
+                .max(1.1f)
                 .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty)
                 .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell "
-                                     "does not match the target color.")),
+                                     "does not match the target color. ATTENTION: A value above 1 means that a mismatched color is treated as poisoned.")),
             simParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -577,7 +577,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .name("Target color mismatch penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(1.0f)
+                .max(1.1f)
                 .defaultValue(origSpot.values.cellFunctionWeaponColorTargetMismatchPenalty),
             spot.values.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(

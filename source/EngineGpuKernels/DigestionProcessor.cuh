@@ -27,103 +27,117 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
     auto const& cell = token->cell;
     auto& tokenMem = token->memory;
     tokenMem[Enums::Digestion_Output] = Enums::DigestionOut_NoTarget;
-    auto color = calcMod(token->memory[Enums::Digestion_InColor], 7);
 
-    Cell* otherCells[18];
-    int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.6f);
-    for (int i = 0; i < numOtherCells; ++i) {
-        Cell* otherCell = otherCells[i];
-        if (otherCell->tryLock()) {
-            if (!isConnectedConnected(cell, otherCell)) {
-                auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+    if (cell->tryLock()) {
 
-                auto cellFunctionWeaponGeometryDeviationExponent =
-                    SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
+        auto color = calcMod(token->memory[Enums::Digestion_InColor], 7);
 
-                if (abs(cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
-                    auto d = otherCell->absPos - cell->absPos;
-                    auto angle1 = calcOpenAngle(cell, d);
-                    auto angle2 = calcOpenAngle(otherCell, d * (-1));
-                    auto deviation =
-                        1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
+        Cell* otherCells[18];
+        int numOtherCells;
+        data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.6f);
+        for (int i = 0; i < numOtherCells; ++i) {
+            Cell* otherCell = otherCells[i];
+            if (otherCell->tryLock()) {
+                if (!isConnectedConnected(cell, otherCell)) {
+                    auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
 
-                    energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
-                }
+                    auto cellFunctionWeaponGeometryDeviationExponent =
+                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
 
-                auto otherCellColor = calcMod(otherCell->metadata.color, 7);
-                if (otherCellColor != color) {
-                    auto cellFunctionWeaponColorTargetMismatchPenalty =
-                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorTargetMismatchPenalty, data, cell->absPos);
+                    if (abs(cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
+                        auto d = otherCell->absPos - cell->absPos;
+                        auto angle1 = calcOpenAngle(cell, d);
+                        auto angle2 = calcOpenAngle(otherCell, d * (-1));
+                        auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
 
-                    energyToTransfer *= (1.0f - cellFunctionWeaponColorTargetMismatchPenalty);
-                }
-
-                auto cellFunctionWeaponColorPenalty = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionWeaponColorUnfittingPenalty, data, cell->absPos);
-
-                auto homogene = isHomogene(cell);
-                auto otherHomogene = isHomogene(otherCell);
-                if (!homogene /* && otherHomogene*/) {
-                    energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
-                }
-                auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
-                    color1 = color1 % 7;
-                    color2 = color2 % 7;
-                    if (color1 == color2 + 1 || (color1 == 0 && color2 == 6)) {
-                        return true;
+                        energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
                     }
-                    return false;
-                };
-                if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
-                    energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
-                }
 
-                if (otherCell->numConnections > cell->numConnections + 1) {
-                    energyToTransfer *= 0.66f * 0.66f;
+                    auto otherCellColor = calcMod(otherCell->metadata.color, 7);
+                    if (otherCellColor != color) {
+                        auto cellFunctionWeaponColorTargetMismatchPenalty =
+                            SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorTargetMismatchPenalty, data, cell->absPos);
+
+                        energyToTransfer *= (1.0f - cellFunctionWeaponColorTargetMismatchPenalty);
+                    }
+
+                    auto cellFunctionWeaponColorPenalty =
+                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorUnfittingPenalty, data, cell->absPos);
+
+                    auto homogene = isHomogene(cell);
+                    auto otherHomogene = isHomogene(otherCell);
+                    if (!homogene /* && otherHomogene*/) {
+                        energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
+                    }
+                    auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
+                        color1 = color1 % 7;
+                        color2 = color2 % 7;
+                        if (color1 == color2 + 1 || (color1 == 0 && color2 == 6)) {
+                            return true;
+                        }
+                        return false;
+                    };
+                    if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
+                        energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
+                    }
+
+                    if (otherCell->numConnections > cell->numConnections + 1) {
+                        energyToTransfer *= 0.66f * 0.66f;
+                    }
+                    if (otherCell->numConnections == cell->numConnections + 1) {
+                        energyToTransfer *= 0.66f;
+                    }
+                    if (otherCell->numConnections == cell->numConnections - 1) {
+                        energyToTransfer *= 1.5f;
+                    }
+                    if (otherCell->numConnections < cell->numConnections - 1) {
+                        energyToTransfer *= 1.5f * 1.5f;
+                    }
+                    if (energyToTransfer >= 0) {
+                        if (otherCell->energy > energyToTransfer) {
+                            otherCell->energy -= energyToTransfer;
+                            token->energy += energyToTransfer / 2;
+                            cell->energy += energyToTransfer / 2;
+                            token->memory[Enums::Digestion_Output] = Enums::DigestionOut_Success;
+                            result.incSuccessfulAttack();
+                        }
+                    } else {
+                        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+
+                        if (token->energy > -energyToTransfer / 2 + cudaSimulationParameters.tokenMinEnergy * 2
+                            && cell->energy > -energyToTransfer / 2 + cellMinEnergy) {
+                            otherCell->energy -= energyToTransfer;
+                            token->energy += energyToTransfer / 2;
+                            cell->energy += energyToTransfer / 2;
+                            token->memory[Enums::Digestion_Output] = Enums::DigestionOut_Poisoned;
+                        }
+                    }
                 }
-                if (otherCell->numConnections == cell->numConnections + 1) {
-                    energyToTransfer *= 0.66f;
-                }
-                if (otherCell->numConnections == cell->numConnections - 1) {
-                    energyToTransfer *= 1.5f;
-                }
-                if (otherCell->numConnections < cell->numConnections - 1) {
-                    energyToTransfer *= 1.5f * 1.5f;
-                }
-                if (otherCell->energy > energyToTransfer) {
-                    otherCell->energy -= energyToTransfer;
-                    token->energy += energyToTransfer / 2;
-                    cell->energy += energyToTransfer / 2;
-                    token->memory[Enums::Digestion_Output] = Enums::DigestionOut_Success;
-                    result.incSuccessfulAttack();
-                }
+                otherCell->releaseLock();
             }
-            otherCell->releaseLock();
         }
-    }
-    if (Enums::DigestionOut_NoTarget == token->memory[Enums::Digestion_Output]) {
-        result.incFailedAttack();
-    }
-    auto cellFunctionWeaponEnergyCost =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
-    if (cellFunctionWeaponEnergyCost > 0) {
-        auto const cellEnergy = cell->energy;
-        auto& pos = cell->absPos;
-        float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
-            + float2{
-                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-        float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
-        data.cellMap.correctPosition(particlePos);
+        if (Enums::DigestionOut_NoTarget == token->memory[Enums::Digestion_Output]) {
+            result.incFailedAttack();
+        }
+        auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
+        if (cellFunctionWeaponEnergyCost > 0) {
+            auto const cellEnergy = cell->energy;
+            auto& pos = cell->absPos;
+            float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+                + float2{
+                    (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                    (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+            float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+            data.cellMap.correctPosition(particlePos);
 
-        particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-        auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
-        cell->energy -= radiationEnergy;
-        EntityFactory factory;
-        factory.init(&data);
-        auto particle = factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
+            particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
+            auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
+            cell->energy -= radiationEnergy;
+            EntityFactory factory;
+            factory.init(&data);
+            auto particle = factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
+        }
+        cell->releaseLock();
     }
 }
 

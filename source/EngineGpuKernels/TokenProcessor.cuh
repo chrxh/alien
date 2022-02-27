@@ -131,17 +131,14 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
         auto& cell = token->cell;
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
-            if (cell->tryLock()) {
-                if (Enums::CellFunction_Scanner == cellFunctionType) {
-                    ScannerProcessor::process(token, data);
-                }
-                if (Enums::CellFunction_Digestion == cellFunctionType) {
-                    DigestionProcessor::process(token, data, result);
-                }
-                if (Enums::CellFunction_Sensor == cellFunctionType) {
-                    SensorProcessor::scheduleOperation(token, data);
-                }
-                cell->releaseLock();
+            if (Enums::CellFunction_Scanner == cellFunctionType) {
+                ScannerProcessor::process(token, data);
+            }
+            if (Enums::CellFunction_Sensor == cellFunctionType) {
+                SensorProcessor::scheduleOperation(token, data);
+            }
+            if (Enums::CellFunction_Digestion == cellFunctionType) {  //modifies energy
+                DigestionProcessor::process(token, data, result);
             }
         }
     }
@@ -159,7 +156,7 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
         if (token) {
             auto cellFunctionType = cell->getCellFunctionType();
 
-            //modifying cell functions need a lock since they should be executed consecutively on a cell
+            //cell functions need a lock since they should be executed consecutively on a cell
             //make a certain number of attempts
             for (int i = 0; i < 100; ++i) {
                 if (cell->tryLock()) {

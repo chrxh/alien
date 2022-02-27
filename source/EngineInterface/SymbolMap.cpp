@@ -89,6 +89,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("DIGESTION_OUT", "[" + std::to_string(Enums::Digestion_Output) + "]");
     result.emplace("DIGESTION_OUT::NO_TARGET", std::to_string(Enums::DigestionOut_NoTarget));
     result.emplace("DIGESTION_OUT::SUCCESS", std::to_string(Enums::DigestionOut_Success));
+    result.emplace("DIGESTION_OUT::POISONED", std::to_string(Enums::DigestionOut_Poisoned));
     result.emplace("DIGESTION_IN_COLOR", "[" + std::to_string(Enums::Digestion_InColor) + "]");
 
     //sensor
