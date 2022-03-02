@@ -145,6 +145,7 @@ DataDescription DescriptionHelper::randomMultiply(
 
     //do multiplication
     DataDescription result = input;
+    makeValid(result);
     auto& numberGen = NumberGenerator::getInstance();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
