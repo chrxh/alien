@@ -446,7 +446,7 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Render UI", "ALT+U", _uiController->isOn())) {
                 _uiController->setOn(!_uiController->isOn());
             }
-            if (ImGui::MenuItem("Render Simulation", "ALT+I", _renderSimulation)) {
+            if (ImGui::MenuItem("Render simulation", "ALT+I", _renderSimulation)) {
                 _renderSimulation = !_renderSimulation;
             }
             AlienImGui::EndMenuButton();
