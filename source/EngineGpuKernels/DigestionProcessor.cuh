@@ -211,21 +211,17 @@ __inline__ __device__ bool DigestionProcessor::isConnectedConnected(Cell* cell, 
             result = true;
             break;
         }
-/*
-        if (connectedCell->tryLock()) {
-            for (int j = 0; j < connectedCell->numConnections; ++i) {
-                auto const& connectedConnectedCell = connectedCell->connections[i].cell;
-                if (connectedConnectedCell == cell) {
-                    result = true;
-                    break;
-                }
-            }
-            connectedCell->releaseLock();
-            if (result) {
-                return true;
+
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            auto const& connectedConnectedCell = connectedCell->connections[j].cell;
+            if (connectedConnectedCell == cell) {
+                result = true;
+                break;
             }
         }
-*/
+        if (result) {
+            return true;
+        }
     }
     return result;
 }
