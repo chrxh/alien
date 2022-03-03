@@ -239,7 +239,7 @@ void _PatternEditorWindow::processIntern()
 
         ImGui::BeginDisabled(_editorModel->isCellSelectionEmpty());
 
-        if (ImGui::Button("Release tensions")) {
+        if (ImGui::Button("Release stresses")) {
             _simController->relaxSelectedEntities(_editorModel->isRolloutToClusters());
         }
         if (ImGui::Button("Generate token pathways")) {
