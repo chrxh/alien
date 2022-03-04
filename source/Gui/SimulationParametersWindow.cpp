@@ -271,7 +271,7 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellBindingForce);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Binding creation force")
+                .name("Binding creation velocity")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
@@ -281,7 +281,7 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFusionVelocity);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Binding max energy")
+                .name("Binding maximum energy")
                 .textWidth(MaxContentTextWidth)
                 .min(50.0f)
                 .max(1000000.0f)
@@ -521,7 +521,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellBindingForce);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Binding creation force")
+                .name("Binding creation velocity")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
