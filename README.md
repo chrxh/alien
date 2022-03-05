@@ -39,6 +39,11 @@ The development is driven by the desire to better understand the conditions for 
 * [Twitter](https://twitter.com/chrx_h)
 * [Reddit](https://www.reddit.com/r/AlienProject)
 
+## Documentation
+An up-to-date documentation is currently being prepared under [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
+
+The outdated documentation of the previous version with tutorials about the program and the underlying model can be found on [alien-project.org](https://alien-project.org/documentation/index.html).
+
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
@@ -68,10 +73,6 @@ An installer for 64-bit binaries is provided for Windows 10: [download link](htt
 It is updated from the develop branch on a weekly basis. 
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
-
-## Documentation
-An up-to-date documentation is currently being prepared under [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
-The outdated documentation of the previous version with tutorials about the program and the underlying model can be found on [alien-project.org](https://alien-project.org/documentation/index.html).
 
 ## Screenshots
 #### Startup screen
