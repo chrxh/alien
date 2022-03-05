@@ -490,98 +490,102 @@ void _MainWindow::processMenubar()
         ImGui::EndMainMenuBar();
     }
 
-    //menu hotkeys
+    //hotkeys
     auto io = ImGui::GetIO();
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
-        _newSimulationDialog->show();
-    }
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-        _openSimulationDialog->show();
-    }
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-        _saveSimulationDialog->show();
-    }
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
-        onRunSimulation();
-    }
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
-        onPauseSimulation();
-    }
+    if (!ImGui::GetIO().WantCaptureKeyboard) {
+        if (ImGui::IsKeyPressed(GLFW_KEY_DELETE) && _editorController->isDeletingPossible()) {
+            _editorController->onDelete();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
+            _newSimulationDialog->show();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
+            _openSimulationDialog->show();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+            _saveSimulationDialog->show();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+            onRunSimulation();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
+            onPauseSimulation();
+        }
 
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
-        _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_2)) {
-        _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_3)) {
-        _statisticsWindow->setOn(!_statisticsWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_4)) {
-        _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
-        _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
-        _logWindow->setOn(!_logWindow->isOn());
-    }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
+            _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_2)) {
+            _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_3)) {
+            _statisticsWindow->setOn(!_statisticsWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_4)) {
+            _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
+            _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
+            _logWindow->setOn(!_logWindow->isOn());
+        }
 
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
-        _modeController->setMode(
-            _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation
-                                                                : _ModeController::Mode::Action);
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-        selectionWindow->setOn(!selectionWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
-        patternEditorWindow->setOn(!patternEditorWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
-        creatorWindow->setOn(!creatorWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
-        multiplierWindow->setOn(!multiplierWindow->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
-        _editorController->onInspectEntities();
-    }
-    if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
-        _editorController->onCloseAllInspectorWindows();
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
-        symbolsWindow->setOn(!symbolsWindow->isOn());
-    }
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
-        _editorController->onCopy();
-    }
-    if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
-        _editorController->onPaste();
-    }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
+            _modeController->setMode(
+                _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation : _ModeController::Mode::Action);
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+            selectionWindow->setOn(!selectionWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
+            patternEditorWindow->setOn(!patternEditorWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+            creatorWindow->setOn(!creatorWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+            multiplierWindow->setOn(!multiplierWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
+            _editorController->onInspectEntities();
+        }
+        if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
+            _editorController->onCloseAllInspectorWindows();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
+            symbolsWindow->setOn(!symbolsWindow->isOn());
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
+            _editorController->onCopy();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
+            _editorController->onPaste();
+        }
 
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
-        _gpuSettingsDialog->show();
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
-        _displaySettingsDialog->show();
-    }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
+            _gpuSettingsDialog->show();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
+            _displaySettingsDialog->show();
+        }
 
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-        _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_U)) {
-        _uiController->setOn(!_uiController->isOn());
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_I)) {
-        _renderSimulation = !_renderSimulation;
-    }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_O)) {
+            _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_U)) {
+            _uiController->setOn(!_uiController->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_I)) {
+            _renderSimulation = !_renderSimulation;
+        }
 
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
-        _colorizeDialog->show();
-    }
-    if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
-        _patternAnalysisDialog->show();
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
+            _colorizeDialog->show();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
+            _patternAnalysisDialog->show();
+        }
     }
 }
 

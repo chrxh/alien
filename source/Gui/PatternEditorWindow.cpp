@@ -79,8 +79,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
-        _simController->removeSelectedEntities(_editorModel->isRolloutToClusters());
-        _editorModel->update();
+        onDelete();
     }
     ImGui::EndDisabled();
 
@@ -308,6 +307,17 @@ void _PatternEditorWindow::onPaste()
     auto center = _viewport->getCenterInWorldPos();
     data.setCenter(center);
     _simController->addAndSelectSimulationData(data);
+    _editorModel->update();
+}
+
+bool _PatternEditorWindow::isDeletingPossible() const
+{
+    return !_editorModel->isSelectionEmpty() && !_editorModel->areEntitiesInspected();
+}
+
+void _PatternEditorWindow::onDelete()
+{
+    _simController->removeSelectedEntities(_editorModel->isRolloutToClusters());
     _editorModel->update();
 }
 

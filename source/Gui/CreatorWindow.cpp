@@ -23,7 +23,7 @@
 namespace
 {
     auto const ModeText = std::unordered_map<CreationMode, std::string>{
-        {CreationMode::CreateParticle, "Create single particle"},
+        {CreationMode::CreateParticle, "Create single energy particle"},
         {CreationMode::CreateCell, "Create single cell"},
         {CreationMode::CreateRectangle, "Create rectangular cell cluster"},
         {CreationMode::CreateHexagon, "Create hexagonal cell cluster"},

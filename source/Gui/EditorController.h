@@ -31,6 +31,8 @@ public:
     void onCopy();
     bool isPastingPossible() const;
     void onPaste();
+    bool isDeletingPossible() const;
+    void onDelete();
 
 private:
     void processSelectionRect();
