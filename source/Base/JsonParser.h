@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "Definitions.h"
 
@@ -42,6 +43,11 @@ void JsonParser::encodeDecode(
             tree.put(node, std::to_string(parameter));
         }
     } else {
-        parameter = tree.get<T>(node, defaultValue);
+        if constexpr (std::is_same<T, std::string>::value) {
+            parameter = tree.get<std::string>(node, defaultValue);
+            boost::algorithm::to_lower(parameter);
+        } else {
+            parameter = tree.get<T>(node, defaultValue);
+        }
     }
 }
