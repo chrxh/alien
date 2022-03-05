@@ -21,8 +21,8 @@ std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
 
 namespace
 {
-    std::unordered_map<SpotShape, std::string> shapeStringMap = {{SpotShape::Circular, "Circular"}, {SpotShape::Rectangular, "Rectangular"}};
-    std::unordered_map<std::string, SpotShape> shapeEnumMap = {{"Circular", SpotShape::Circular}, {"Rectangular", SpotShape::Rectangular}};
+    std::unordered_map<SpotShape, std::string> shapeStringMap = {{SpotShape::Circular, "circular"}, {SpotShape::Rectangular, "rectangular"}};
+    std::unordered_map<std::string, SpotShape> shapeEnumMap = {{"circular", SpotShape::Circular}, {"rectangular", SpotShape::Rectangular}};
 }
 
 void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask ParserTask)
