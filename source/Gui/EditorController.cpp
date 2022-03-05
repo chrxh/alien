@@ -178,6 +178,16 @@ void _EditorController::onPaste()
     _patternEditorWindow->onPaste();
 }
 
+bool _EditorController::isDeletingPossible() const
+{
+    return _patternEditorWindow->isDeletingPossible();
+}
+
+void _EditorController::onDelete()
+{
+    _patternEditorWindow->onDelete();
+}
+
 void _EditorController::processSelectionRect()
 {
     if (_selectionRect) {
