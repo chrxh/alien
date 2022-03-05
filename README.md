@@ -42,8 +42,6 @@ The development is driven by the desire to better understand the conditions for 
 ## Documentation
 An up-to-date documentation is currently being prepared under [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
 
-The outdated documentation of the previous version with tutorials about the program and the underlying model can be found on [alien-project.org](https://alien-project.org/documentation/index.html).
-
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
