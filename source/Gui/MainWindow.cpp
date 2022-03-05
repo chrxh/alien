@@ -320,7 +320,9 @@ void _MainWindow::renderSimulation()
     }
     ImGui::Render();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    auto startTimepoint = std::chrono::steady_clock::now();
+    while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint) < std::chrono::milliseconds(25)) {
+    }
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(_window);
@@ -492,10 +494,7 @@ void _MainWindow::processMenubar()
 
     //hotkeys
     auto io = ImGui::GetIO();
-    if (!ImGui::GetIO().WantCaptureKeyboard) {
-        if (ImGui::IsKeyPressed(GLFW_KEY_DELETE) && _editorController->isDeletingPossible()) {
-            _editorController->onDelete();
-        }
+    if (!io.WantCaptureKeyboard) {
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
             _newSimulationDialog->show();
         }
