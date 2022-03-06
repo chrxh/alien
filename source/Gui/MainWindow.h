@@ -59,6 +59,7 @@ private:
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
     EditorController _editorController; 
+    FpsController _fpsController;
 
     bool _onClose = false;
     bool _simulationMenuToggled = false;

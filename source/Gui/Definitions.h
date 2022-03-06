@@ -133,6 +133,9 @@ using SimulationParametersChanger = std::shared_ptr<_SimulationParametersChanger
 class _SimulationParametersCalculator;
 using SimulationParametersCalculator = std::shared_ptr<_SimulationParametersCalculator>;
 
+class _FpsController;
+using FpsController = std::shared_ptr<_FpsController>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

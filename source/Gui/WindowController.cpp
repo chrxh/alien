@@ -46,9 +46,11 @@ namespace
 
 _WindowController::_WindowController()
 {
-    _mode = GlobalSettings::getInstance().getStringState("settings.display.mode", DesktopMode);
-    _sizeInWindowedMode.x = GlobalSettings::getInstance().getIntState("settings.display.window width", _sizeInWindowedMode.x);
-    _sizeInWindowedMode.y = GlobalSettings::getInstance().getIntState("settings.display.window height", _sizeInWindowedMode.y);
+    auto& settings = GlobalSettings::getInstance();
+    _mode = settings.getStringState("settings.display.mode", DesktopMode);
+    _sizeInWindowedMode.x = settings.getIntState("settings.display.window width", _sizeInWindowedMode.x);
+    _sizeInWindowedMode.y = settings.getIntState("settings.display.window height", _sizeInWindowedMode.y);
+    _fps = settings.getIntState("settings.display.fps", _fps);
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
@@ -97,6 +99,7 @@ void _WindowController::shutdown()
     }
     settings.setIntState("settings.display.window width", _sizeInWindowedMode.x);
     settings.setIntState("settings.display.window height", _sizeInWindowedMode.y);
+    settings.setIntState("settings.display.fps", _fps);
 }
 
 auto _WindowController::getWindowData() const -> WindowData
@@ -109,24 +112,24 @@ bool _WindowController::isWindowedMode() const
     return _mode == WindowedMode;
 }
 
-bool _WindowController::isDesktopMode() const
-{
-    return _mode == DesktopMode;
-}
-
-GLFWvidmode _WindowController::getUserDefinedResolution() const
-{
-    return convert(_mode);
-}
-
 void _WindowController::setWindowedMode()
 {
     setMode(WindowedMode);
 }
 
+bool _WindowController::isDesktopMode() const
+{
+    return _mode == DesktopMode;
+}
+
 void _WindowController::setDesktopMode()
 {
     setMode(DesktopMode);
+}
+
+GLFWvidmode _WindowController::getUserDefinedResolution() const
+{
+    return convert(_mode);
 }
 
 void _WindowController::setUserDefinedResolution(GLFWvidmode const& videoMode)
@@ -146,6 +149,9 @@ std::string _WindowController::getMode() const
 
 void _WindowController::setMode(std::string const& mode)
 {
+    if (getMode() == mode) {
+        return;
+    }
     if (isWindowedMode()) {
         updateWindowSize();
     }
@@ -193,4 +199,14 @@ std::string _WindowController::createLogString(GLFWvidmode const& videoMode) con
     std::stringstream ss;
     ss << videoMode.width << " x " << videoMode.height << " @ " << videoMode.refreshRate << "Hz";
     return ss.str();
+}
+
+int _WindowController::getFps() const
+{
+    return _fps;
+}
+
+void _WindowController::setFps(int value)
+{
+    _fps = value;
 }

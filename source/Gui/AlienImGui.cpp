@@ -50,16 +50,17 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     return result;
 }
 
-void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
+bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 {
     auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
-    ImGui::SliderInt(("##" + parameters._name).c_str(), &value, parameters._min, parameters._max);
+    auto result = ImGui::SliderInt(("##" + parameters._name).c_str(), &value, parameters._min, parameters._max);
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
         if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
+            result = true;
         }
         ImGui::EndDisabled();
     }
@@ -69,6 +70,7 @@ void AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+    return result;
 }
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
@@ -99,6 +101,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
         ImGui::BeginDisabled(value == *parameters._defaultValue);
         if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
+            result = true;
         }
         ImGui::EndDisabled();
     }
@@ -192,9 +195,9 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 
     ImGui::SameLine();
     if (parameters._defaultValue) {
-        ImGui::BeginDisabled(value == parameters._defaultValue);
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
         if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-            value = parameters._defaultValue;
+            value = *parameters._defaultValue;
             result = true;
         }
         ImGui::EndDisabled();
@@ -216,9 +219,9 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
 
     ImGui::SameLine();
     if (parameters._defaultValue) {
-        ImGui::BeginDisabled(value == parameters._defaultValue);
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
         if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-            value = parameters._defaultValue;
+            value = *parameters._defaultValue;
             result = true;
         }
         ImGui::EndDisabled();

@@ -153,18 +153,6 @@ private:
     MonitorData _lastStatistics;
     int _monitorCounter = 0;
 
-/*
-    std::atomic<uint64_t> _timeStep{0};
-    std::atomic<int> _numCells{0};
-    std::atomic<int> _numParticles{0};
-    std::atomic<int> _numTokens{0};
-    std::atomic<double> _totalInternalEnergy{0.0};
-    std::atomic<int> _numCreatedCells{0};
-    std::atomic<int> _numSuccessfulAttacks{0};
-    std::atomic<int> _numFailedAttacks{0};
-    std::atomic<int> _numMuscleActivities{0};
-*/
-
     //internals
     void* _cudaResource;
     AccessDataTOCache _dataTOCache;

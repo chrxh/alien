@@ -57,6 +57,7 @@
 #include "SymbolsWindow.h"
 #include "PatternAnalysisDialog.h"
 #include "MessageDialog.h"
+#include "FpsController.h"
 
 namespace
 {
@@ -133,6 +134,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
+    _fpsController = std::make_shared<_FpsController>();
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -320,9 +322,7 @@ void _MainWindow::renderSimulation()
     }
     ImGui::Render();
 
-    auto startTimepoint = std::chrono::steady_clock::now();
-    while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint) < std::chrono::milliseconds(25)) {
-    }
+    _fpsController->processForceFps(_windowController->getFps());
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(_window);
