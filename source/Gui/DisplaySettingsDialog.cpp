@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 170.0f;
+    auto const MaxContentTextWidth = 185.0f;
 }
 
 _DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
