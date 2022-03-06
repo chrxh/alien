@@ -23,10 +23,9 @@ private:
     std::string _origMode;
     int _origSelectionIndex;
     int _selectionIndex;
+    int _origFps;
 
     int _videoModesCount = 0;
     GLFWvidmode const* _videoModes;
     std::vector<std::string> _videoModeStrings;
-
-//    int _videoModeSelection = 0;  //1 = full screen with desktop resolution, 2 ... n+2 = video mode n
 };

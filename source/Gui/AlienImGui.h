@@ -30,7 +30,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void SliderInt(SliderIntParameters const& parameters, int& value);
+    static bool SliderInt(SliderIntParameters const& parameters, int& value);
 
     struct SliderInputFloatParameters
     {
@@ -83,7 +83,7 @@ public:
     {
         MEMBER_DECLARATION(ComboParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(ComboParameters, int, defaultValue, 0);
+        MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, 0);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
     };
     static bool Combo(ComboParameters& parameters, int& value);
@@ -92,7 +92,7 @@ public:
     {
         MEMBER_DECLARATION(CheckboxParameters, std::string, name, "");
         MEMBER_DECLARATION(CheckboxParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(CheckboxParameters, bool, defaultValue, false);
+        MEMBER_DECLARATION(CheckboxParameters, std::optional<bool>, defaultValue, false);
     };
     static bool Checkbox(CheckboxParameters const& parameters, bool& value);
     static bool ToggleButton(std::string const& text, bool& value);

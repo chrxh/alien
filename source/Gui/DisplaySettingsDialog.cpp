@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 130.0f;
+    auto const MaxContentTextWidth = 170.0f;
 }
 
 _DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
@@ -62,6 +62,19 @@ void _DisplaySettingsDialog::process()
         }
         ImGui::EndDisabled();
 
+        auto fps = _windowController->getFps();
+        if (AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
+                    .name("Frames per second")
+                    .textWidth(MaxContentTextWidth)
+                    .defaultValue(_origFps)
+                    .min(20)
+                    .max(100)
+                    .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
+                fps)) {
+            _windowController->setFps(fps);
+        }
+
         AlienImGui::Separator();
 
         if (AlienImGui::Button("OK")) {
@@ -75,6 +88,7 @@ void _DisplaySettingsDialog::process()
             ImGui::CloseCurrentPopup();
             _show = false;
             _windowController->setMode(_origMode);
+            _windowController->setFps(_origFps);
             _selectionIndex = _origSelectionIndex;
         }
 
@@ -88,6 +102,7 @@ void _DisplaySettingsDialog::show()
     _selectionIndex = getSelectionIndex();
     _origSelectionIndex = _selectionIndex;
     _origMode = _windowController->getMode();
+    _origFps = _windowController->getFps();
 }
 
 void _DisplaySettingsDialog::setFullscreen(int selectionIndex)

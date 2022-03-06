@@ -26,6 +26,8 @@ PUBLIC
     FileLogger.h
     FlowGeneratorWindow.cpp
     FlowGeneratorWindow.h
+    FpsController.cpp
+    FpsController.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GlobalSettings.cpp
