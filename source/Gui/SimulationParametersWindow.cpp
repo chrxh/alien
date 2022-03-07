@@ -369,6 +369,17 @@ void _SimulationParametersWindow::processBase(
                     std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
                                 "geometry of the attacked cell does not match the attacking cell.")),
             simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent);
+
+        AlienImGui::Group("Cell specialization: Sensor function");
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Range")
+                .textWidth(MaxContentTextWidth)
+                .min(10.0f)
+                .max(512.0f)
+                .defaultValue(origSimParameters.cellFunctionSensorRange)
+                .tooltip(std::string("The maximum radius in which a sensor can detect mass concentrations.")),
+            simParameters.cellFunctionSensorRange);
     }
     ImGui::EndChild();
 }
