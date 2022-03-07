@@ -30,22 +30,17 @@ void _GettingStartedWindow::processIntern()
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - 50), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
-        ImGui::Text("Abstract");
+        ImGui::Text("Introduction");
         ImGui::PopStyleColor();
 
-        ImGui::Text("ALIEN is an artificial life simulation program based on a specialized physics and rendering "
-                    "engine with extensive world building features. It is a high-performance simulation tool in "
-                    "the sense that it not only uses OpenGL for rendering, but also utilizes the CUDA API to run "
-                    "simulations on thousands of GPU threads.");
+        ImGui::Text("ALIEN is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media.");
 
-        ImGui::Text("Each simulated body (named as cell clusters) consists of a network of connected particles (named as "
-                    "building blocks or cells) that can be enriched with higher-level functions, ranging from pure information "
-                    "processing capabilities to physical equipment such as sensors, actuators, weapons, constructors, etc. "
-                    "To orchestrate the execution, a token concept from graph theory is utilized. A token has a state and "
-                    "is located on a cell. After each time step the token can jump to adjacent cells and triggers the "
-                    "execution of cell functions. "
-                    "In this way, a cell cluster can implement an arbitrarily complex set of behaviors and operates as an "
-                    "agent or machine in a shared environment.");
+        ImGui::Text(
+            "Each simulated body (named as cell clusters) consists of a network of connected particles (named as cells) that can be enriched with higher-level "
+            "functions, ranging from pure information processing capabilities to physical equipment such as sensors, muscles, weapons, constructors, etc. To "
+            "orchestrate the execution and cell communication, a token concept from graph theory is utilized. A token has a state and is located on a cell. "
+            "After each time step the token can jump to adjacent cells and triggers the execution of cell functions. In this way, a cell cluster can implement "
+            "an arbitrarily complex set of behaviors and operates as an agent or machine in a shared environment.");
 
         AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
@@ -53,14 +48,14 @@ void _GettingStartedWindow::processIntern()
         ImGui::PopStyleColor();
 
         ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation "
-                    "file. You find various demos in examples/simulations/* demonstrating capabilities of the "
+                    "file. You find various demos in ./examples/simulations/* demonstrating capabilities of the "
                     "engine ranging from physics examples, self-deploying structures, replicators to small "
-                    "ecosystems. To this end, go to Simulation " ICON_FA_ARROW_RIGHT
+                    "ecosystems. To this end, go to menu in Simulation " ICON_FA_ARROW_RIGHT
                     " Open and select a file. However, for starters, you can use the simple evolution example "
                     "already loaded.");
 
         ImGui::Text("At the beginning it is recommended to get familiar with the windows for temporal and spatial "
-                    "controls. The handling should be intuitive and possible without deeper knowledge.");
+                    "controls. The handling should be intuitive and requires no deeper knowledge.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
         ImGui::Text("In the temporal control window, a simulation can be started or paused. The execution speed "
@@ -75,7 +70,7 @@ void _GettingStartedWindow::processIntern()
                     "the original world can be made.");
         ImGui::Text("There are basically two modes of how the user can operate in the view where the simulation is "
                     "shown: a navigation mode and an action mode. You can switch between these two modes using the "
-                    "buttons at the bottom left of the screen.");
+                    "buttons at the bottom left of the screen or in the menu via Editor " ICON_FA_ARROW_RIGHT " Activate.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
         ImGui::Text("The navigation mode is enabled by default and allows you to zoom in (while holding the left mouse "
@@ -96,9 +91,20 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("Further steps");
         ImGui::PopStyleColor();
 
-        ImGui::Text("To build custom worlds with desired environment "
-                    "structures and agents, the included graph editor can be used in the simulator. Documentation "
-                    "with detailed tutorials can be found on the website at\nalien-project.org/documentation. ");
+        ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
+                    "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");
+
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+        auto windowWidth = ImGui::GetWindowSize().x;
+        auto weblink = "alien-project.gitbook.io/docs";
+        auto textWidth = ImGui::CalcTextSize(weblink).x;
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text(weblink);
+        ImGui::PopFont();
+
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
         ImGui::PopTextWrapPos();
     }
