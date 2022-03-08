@@ -15,5 +15,7 @@ public:
 private:
     void processIntern() override;
 
+    void openWeblink(std::string const& link);
+
     bool _showAfterStartup = true;
 };
