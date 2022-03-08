@@ -1,17 +1,22 @@
 #include "GettingStartedWindow.h"
 
 #include <imgui.h>
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "GlobalSettings.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 _GettingStartedWindow::_GettingStartedWindow()
     : _AlienWindow("Getting started", "windows.getting started", true)
 {
     _showAfterStartup = _on;
 }
+
 
 _GettingStartedWindow::~_GettingStartedWindow()
 {
@@ -98,10 +103,12 @@ void _GettingStartedWindow::processIntern()
 
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         auto windowWidth = ImGui::GetWindowSize().x;
-        auto weblink = "alien-project.gitbook.io/docs";
+        auto weblink = "https://alien-project.gitbook.io/docs";
         auto textWidth = ImGui::CalcTextSize(weblink).x;
         ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-        ImGui::TextUnformatted(weblink);
+        if(AlienImGui::Button(weblink)) {
+            openWeblink(weblink);
+        }
         ImGui::PopFont();
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));
@@ -112,5 +119,12 @@ void _GettingStartedWindow::processIntern()
 
     AlienImGui::Separator();
     AlienImGui::ToggleButton("Show after startup", _showAfterStartup);
+}
+
+void _GettingStartedWindow::openWeblink(std::string const& link)
+{
+#ifdef _WIN32
+    ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
+#endif
 }
  
