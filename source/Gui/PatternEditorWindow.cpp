@@ -52,7 +52,7 @@ void _PatternEditorWindow::processIntern()
     }
 
     //save button
-    ImGui::BeginDisabled(!isCopyingPossible());
+    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
         _savePatternDialog->show(_editorModel->isRolloutToClusters());
@@ -61,7 +61,7 @@ void _PatternEditorWindow::processIntern()
 
     //copy button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!isCopyingPossible());
+    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         onCopy();
     }
@@ -69,7 +69,7 @@ void _PatternEditorWindow::processIntern()
 
     //paste button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!isPastingPossible());
+    ImGui::BeginDisabled(!_copiedSelection.has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
         onPaste();
     }
