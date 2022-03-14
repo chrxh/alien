@@ -10,7 +10,7 @@
 
 namespace
 {
-    std::chrono::milliseconds const FrameTimeout(30);
+    std::chrono::milliseconds const FrameTimeout(50);
     std::chrono::milliseconds const MonitorUpdate(30);
 }
 
