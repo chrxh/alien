@@ -92,15 +92,21 @@ void _StatisticsWindow::processLiveStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Energy particles");
+        AlienImGui::Text("Cell connections");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(2, _liveStatistics.datas[8]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Tokens");
+        AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
         processLivePlot(3, _liveStatistics.datas[9]);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text("Tokens");
+        ImGui::TableSetColumnIndex(1);
+        processLivePlot(4, _liveStatistics.datas[10]);
 
         ImPlot::PopColormap();
 
@@ -119,25 +125,25 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(4, _liveStatistics.datas[10]);
+        processLivePlot(5, _liveStatistics.datas[11]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(5, _liveStatistics.datas[11]);
+        processLivePlot(6, _liveStatistics.datas[12]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(6, _liveStatistics.datas[12]);
+        processLivePlot(7, _liveStatistics.datas[13]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(7, _liveStatistics.datas[13]);
+        processLivePlot(8, _liveStatistics.datas[14]);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -173,15 +179,21 @@ void _StatisticsWindow::processLongtermStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Energy particles");
+        AlienImGui::Text("Cell connections");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(2, _longtermStatistics.datas[8]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Tokens");
+        AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(3, _longtermStatistics.datas[9]);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text("Tokens");
+        ImGui::TableSetColumnIndex(1);
+        processLongtermPlot(4, _longtermStatistics.datas[10]);
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
@@ -201,25 +213,25 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(4, _longtermStatistics.datas[10]);
+        processLongtermPlot(5, _longtermStatistics.datas[11]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, _longtermStatistics.datas[11]);
+        processLongtermPlot(6, _longtermStatistics.datas[12]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, _longtermStatistics.datas[12]);
+        processLongtermPlot(7, _longtermStatistics.datas[13]);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(7, _longtermStatistics.datas[13]);
+        processLongtermPlot(8, _longtermStatistics.datas[14]);
 
         ImPlot::PopColormap();
         ImGui::EndTable();

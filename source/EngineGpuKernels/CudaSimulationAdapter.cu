@@ -410,6 +410,7 @@ MonitorData _CudaSimulationAdapter::getMonitorData()
     for (int i = 0; i < 7; ++i) {
         result.numCellsByColor[i] = monitorData.numCellsByColor[i];
     }
+    result.numConnections = monitorData.numConnections;
     result.numParticles = monitorData.numParticles;
     result.numTokens = monitorData.numTokens;
     result.totalInternalEnergy = monitorData.totalInternalEnergy;

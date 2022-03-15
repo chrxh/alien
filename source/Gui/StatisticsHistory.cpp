@@ -28,12 +28,13 @@ void LiveStatistics::add(MonitorData const& newStatistics)
     for (int i = 0; i < 7; ++i) {
         datas[1 + i].emplace_back(toFloat(newStatistics.numCellsByColor[i]));
     }
-    datas[8].emplace_back(toFloat(newStatistics.numParticles));
-    datas[9].emplace_back(toFloat(newStatistics.numTokens));
-    datas[10].emplace_back(toFloat(newStatistics.numCreatedCells));
-    datas[11].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-    datas[12].emplace_back(toFloat(newStatistics.numFailedAttacks));
-    datas[13].emplace_back(toFloat(newStatistics.numMuscleActivities));
+    datas[8].emplace_back(toFloat(newStatistics.numConnections));
+    datas[9].emplace_back(toFloat(newStatistics.numParticles));
+    datas[10].emplace_back(toFloat(newStatistics.numTokens));
+    datas[11].emplace_back(toFloat(newStatistics.numCreatedCells));
+    datas[12].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
+    datas[13].emplace_back(toFloat(newStatistics.numFailedAttacks));
+    datas[14].emplace_back(toFloat(newStatistics.numMuscleActivities));
 }
 
 void LongtermStatistics::add(MonitorData const& newStatistics)
@@ -48,11 +49,12 @@ void LongtermStatistics::add(MonitorData const& newStatistics)
         for (int i = 0; i < 7; ++i) {
             datas[1 + i].emplace_back(toFloat(newStatistics.numCellsByColor[i]));
         }
-        datas[8].emplace_back(toFloat(newStatistics.numParticles));
-        datas[9].emplace_back(toFloat(newStatistics.numTokens));
-        datas[10].emplace_back(toFloat(newStatistics.numCreatedCells));
-        datas[11].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-        datas[12].emplace_back(toFloat(newStatistics.numFailedAttacks));
-        datas[13].emplace_back(toFloat(newStatistics.numMuscleActivities));
+        datas[8].emplace_back(toFloat(newStatistics.numConnections));
+        datas[9].emplace_back(toFloat(newStatistics.numParticles));
+        datas[10].emplace_back(toFloat(newStatistics.numTokens));
+        datas[11].emplace_back(toFloat(newStatistics.numCreatedCells));
+        datas[12].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
+        datas[13].emplace_back(toFloat(newStatistics.numFailedAttacks));
+        datas[14].emplace_back(toFloat(newStatistics.numMuscleActivities));
     }
 }
