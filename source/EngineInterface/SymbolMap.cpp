@@ -11,6 +11,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("j", "[254]");
     result.emplace("k", "[253]");
     result.emplace("l", "[252]");
+    result.emplace("m", "[251]");
 
     //token branch number
     result.emplace("BRANCH_NUMBER", "[0]");
