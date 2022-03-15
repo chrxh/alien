@@ -259,7 +259,7 @@ void _PatternEditorWindow::processIntern()
 
     AlienImGui::Separator();
     auto rolloutToClusters = _editorModel->isRolloutToClusters();
-    if (AlienImGui::ToggleButton("Roll out to cell clusters", rolloutToClusters)) {
+    if (AlienImGui::ToggleButton("Roll out changes to cell clusters", rolloutToClusters)) {
         _editorModel->setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
