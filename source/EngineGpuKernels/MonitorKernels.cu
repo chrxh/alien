@@ -56,5 +56,6 @@ __global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitor
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         monitorData.incNumCell(calcMod(cell->metadata.color, 7));
+        monitorData.incNumConnections(cell->numConnections);
     }
 }
