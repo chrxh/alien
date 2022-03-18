@@ -58,6 +58,12 @@
     {
       "name": "gtest",
       "version>=": "1.11.0"
+    },
+    {
+      "name": "zlib"
+    },
+    {
+      "name": "zstr"
     }
   ],
   "builtin-baseline": "d48ac9aa527620d43fb3b3327d0b9e054de203c2"

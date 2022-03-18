@@ -36,3 +36,7 @@ add_library(alien_engine_interface_lib
 
 target_link_libraries(alien_engine_interface_lib Boost::boost)
 target_link_libraries(alien_engine_interface_lib cereal)
+target_link_libraries(alien ZLIB::ZLIB)
+
+find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
+target_include_directories(alien_engine_interface_lib PRIVATE ${ZSTR_INCLUDE_DIRS})

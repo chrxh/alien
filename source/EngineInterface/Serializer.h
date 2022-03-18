@@ -37,7 +37,4 @@ private:
     static void deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream);
     static void deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream);
     static void deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream);
-
-    static void compress(std::string&& uncompressedData, std::ostream& stream);
-    static void decompress(std::string&& compressedData, std::ostream& stream);
 };
