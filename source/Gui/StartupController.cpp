@@ -10,6 +10,7 @@
 #include "Viewport.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
+#include "MessageDialog.h"
 
 namespace
 {
@@ -42,7 +43,11 @@ void _StartupController::process()
 
     if (_state == State::RequestLoading) {
         DeserializedSimulation deserializedData;
-        Serializer::deserializeSimulationFromFile(Const::AutosaveFile, deserializedData);
+        if (!Serializer::deserializeSimulationFromFile(Const::AutosaveFile, deserializedData)) {
+            MessageDialog::getInstance().show("Error", "The default simulation file could not be read. An empty simulation will be created.");
+            deserializedData.settings.generalSettings.worldSizeX = 1000;
+            deserializedData.settings.generalSettings.worldSizeY = 500;
+        }
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
         _simController->setClusteredSimulationData(deserializedData.content);
