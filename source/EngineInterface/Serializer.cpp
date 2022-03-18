@@ -14,8 +14,7 @@
 #include <cereal/types/vector.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
-#include <imgui/stb_compression.h>
-#include "zstr.hpp"
+#include <zstr.hpp>
 
 #include "Descriptions.h"
 #include "SimulationParameters.h"
@@ -141,21 +140,6 @@ bool Serializer::serializeSimulationToFile(std::string const& filename, Deserial
     }
 }
 
-namespace
-{
-    void decompress(std::string&& compressedData, std::ostream& stream)
-    {
-        const unsigned int decompressedSize = stb_decompress_length(reinterpret_cast<unsigned char const*>(compressedData.c_str()));
-        char* decompressedData = new char[decompressedSize];
-        stb_decompress(
-            reinterpret_cast<unsigned char*>(decompressedData),
-            reinterpret_cast<unsigned char const*>(compressedData.c_str()),
-            static_cast<unsigned int>(compressedData.size()));
-        stream.write(decompressedData, decompressedSize);
-        delete[] decompressedData;
-    }
-}
-
 bool Serializer::deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data)
 {
     try {
@@ -166,17 +150,12 @@ bool Serializer::deserializeSimulationFromFile(std::string const& filename, Dese
         symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
 
         {
-            std::ifstream stream(filename, std::ios::binary);
+            zstr::ifstream stream(filename, std::ios::binary);
             if (!stream) {
                 return false;
             }
-            std::string compressedData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 
-            std::stringstream stringStream;
-            decompress(std::move(compressedData), stringStream);
-            stringStream.seekg(0, std::ios::beg);
-            deserializeDataDescription(data.content, stringStream);
-            stream.close();
+            deserializeDataDescription(data.content, stream);
         }
         {
             std::ifstream stream(settingsFilename.string(), std::ios::binary);
@@ -218,20 +197,6 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
 bool Serializer::deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content)
 {
     try {
-        std::ifstream stream(filename, std::ios::binary);
-        if (!stream) {
-            return false;
-        }
-        std::string compressedData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-
-        std::stringstream stringStream;
-        decompress(std::move(compressedData), stringStream);
-        stringStream.seekg(0, std::ios::beg);
-        deserializeDataDescription(content, stringStream);
-        stream.close();
-
-        return true;
-/*
         zstr::ifstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -240,7 +205,6 @@ bool Serializer::deserializeContentFromFile(std::string const& filename, Cluster
         deserializeDataDescription(content, stream);
 
         return true;
-*/
     } catch (std::exception const& e) {
         return false;
     }

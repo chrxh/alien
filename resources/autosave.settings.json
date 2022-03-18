@@ -77,7 +77,7 @@
                     "x": "436.399994",
                     "y": "353.500000"
                 },
-                "shape": "Circular",
+                "shape": "circular",
                 "core width": "100.000000",
                 "core height": "200.000000",
                 "core radius": "166.666672",
@@ -112,7 +112,7 @@
                     "x": "703.000000",
                     "y": "858.599976"
                 },
-                "shape": "Circular",
+                "shape": "circular",
                 "core width": "100.000000",
                 "core height": "200.000000",
                 "core radius": "166.666672",
