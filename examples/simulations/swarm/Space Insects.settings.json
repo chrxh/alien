@@ -8,26 +8,26 @@
     },
     "simulation parameters": {
         "time step size": "1.000000",
-        "friction": "0.000400",
-        "rigidity": "0.560000",
+        "friction": "0.000300",
+        "rigidity": "0.100000",
         "cell": {
-            "binding force": "1.000000",
+            "binding force": "0.932000",
             "max velocity": "2.000000",
             "max binding distance": "2.600000",
             "repulsion strength": "0.080000",
             "mutation rate": "0.000000",
             "min distance": "0.300000",
             "max distance": "1.300000",
-            "max force": "0.800000",
+            "max force": "0.153000",
             "max force decay probability": "0.200000",
             "min token usages": "40000",
-            "token usage decay probability": "0.000001",
+            "token usage decay probability": "0.000002",
             "max bonds": "6",
             "max token": "3",
             "max token branch number": "6",
             "min energy": "50.000000",
             "transformation probability": "0.200000",
-            "fusion velocity": "0.400000",
+            "fusion velocity": "0.489000",
             "max binding energy": "500000.000000",
             "function": {
                 "computer": {
@@ -36,9 +36,9 @@
                 },
                 "weapon": {
                     "strength": "0.100000",
-                    "energy cost": "0.200000",
-                    "geometry deviation exponent": "0.000000",
-                    "target color mismatch penalty": "0.000000",
+                    "energy cost": "0.000000",
+                    "geometry deviation exponent": "0.222000",
+                    "target color mismatch penalty": "0.575000",
                     "color penalty": "0.000000"
                 },
                 "constructor": {
@@ -50,7 +50,7 @@
                     }
                 },
                 "sensor": {
-                    "range": "455.000000"
+                    "range": "389.351990"
                 },
                 "communicator": {
                     "range": "50.000000"
