@@ -109,17 +109,18 @@ void _StartupController::activate()
 
 void _StartupController::processWindow()
 {
+    auto styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(_logo.width + 30.0f, _logo.height + 30.0f));
+    auto imageScale = styleRep.scaleContent(1.5f);
+    ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 30.0f, _logo.height * imageScale + 30.0f));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
     ImGui::Begin("##startup", NULL, windowFlags);
-    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width, _logo.height));
+    ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    auto styleRep = StyleRepository::getInstance();
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
     ImColor textColor = Const::ProgrammVersionColor;
