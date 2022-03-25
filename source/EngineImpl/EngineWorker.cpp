@@ -29,6 +29,7 @@ void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings)
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
         _imageResourceToRegister = std::nullopt;
     }
+    updateMonitorDataIntern();
 }
 
 void EngineWorker::clear()
@@ -528,7 +529,7 @@ void EngineWorker::runThreadLoop()
                 if (_isSimulationRunning.load()) {
                     _cudaSimulation->calcTimestep();
                     if (++_monitorCounter == 3) {   //for performance reasons...
-                        updateMonitorDataIntern();
+                        updateMonitorDataIntern(true);
                         _monitorCounter = 0;
                     }
                 }
@@ -574,10 +575,10 @@ DataAccessTO EngineWorker::provideTO()
     return _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
 }
 
-void EngineWorker::updateMonitorDataIntern()
+void EngineWorker::updateMonitorDataIntern(bool afterMinDuration)
 {
     auto now = std::chrono::steady_clock::now();
-    if (!_lastMonitorUpdate || now - *_lastMonitorUpdate > MonitorUpdate) {
+    if (!afterMinDuration  || !_lastMonitorUpdate || now - *_lastMonitorUpdate > MonitorUpdate) {
 
         std::lock_guard guard(_mutexForStatistics);
         _lastStatistics = _cudaSimulation->getMonitorData();

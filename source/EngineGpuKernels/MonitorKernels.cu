@@ -44,6 +44,7 @@ __global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitor
 
     monitorData.setNumParticles(data.entities.particlePointers.getNumEntries());
     monitorData.setNumTokens(data.entities.tokenPointers.getNumEntries());
+    monitorData.setNumTokens(data.entities.tokenPointers.getNumEntries());
 
     //    KERNEL_CALL(getEnergyForMonitorData, data, monitorData);
 }
@@ -58,4 +59,9 @@ __global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitor
         monitorData.incNumCell(calcMod(cell->metadata.color, 7));
         monitorData.incNumConnections(cell->numConnections);
     }
+}
+
+__global__ void cudaGetCudaMonitorData_substep3(SimulationData data, CudaMonitorData monitorData)
+{
+    monitorData.halveNumConnections();
 }

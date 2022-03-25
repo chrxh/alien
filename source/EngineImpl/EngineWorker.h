@@ -102,7 +102,7 @@ public:
 
 private:
     DataAccessTO provideTO(); 
-    void updateMonitorDataIntern();
+    void updateMonitorDataIntern(bool afterMinDuration = false);
     void processJobs();
 
     void highPrecisionWaiting(std::chrono::microseconds const& duration) const;

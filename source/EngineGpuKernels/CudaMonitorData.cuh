@@ -73,6 +73,7 @@ public:
     __inline__ __device__ void incNumConnections(int numConnections) { atomicAdd(_numConnections, numConnections); }
     __inline__ __device__ void setNumParticles(int value) { *_numParticles = value; }
     __inline__ __device__ void setNumTokens(int value) { *_numTokens = value; }
+    __inline__ __device__ void halveNumConnections() { *_numConnections /= 2; }
 
 
 /*
