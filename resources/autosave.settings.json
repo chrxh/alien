@@ -50,7 +50,7 @@
                     }
                 },
                 "sensor": {
-                    "range": "50.000000"
+                    "range": "250.000000"
                 },
                 "communicator": {
                     "range": "50.000000"
