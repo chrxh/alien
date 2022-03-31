@@ -2,5 +2,5 @@
 
 #include <memory>
 
-class _CudaSimulationAdapter;
-using CudaSimulationAdapter = std::shared_ptr<_CudaSimulationAdapter>;
+class _CudaSimulationFacade;
+using CudaSimulationFacade = std::shared_ptr<_CudaSimulationFacade>;

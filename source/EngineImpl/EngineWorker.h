@@ -109,7 +109,7 @@ private:
     void measureTPS();
     void slowdownTPS();
 
-    CudaSimulationAdapter _cudaSimulation;
+    CudaSimulationFacade _cudaSimulation;
 
     //sync
     mutable std::timed_mutex _mutexForCudaAccess;

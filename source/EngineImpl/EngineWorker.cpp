@@ -4,7 +4,7 @@
 #include <thread>
 
 #include "EngineGpuKernels/AccessTOs.cuh"
-#include "EngineGpuKernels/CudaSimulationAdapter.cuh"
+#include "EngineGpuKernels/CudaSimulationFacade.cuh"
 #include "AccessDataTOCache.h"
 #include "DataConverter.h"
 
@@ -16,14 +16,14 @@ namespace
 
 void EngineWorker::initCuda()
 {
-    _CudaSimulationAdapter::initCuda();
+    _CudaSimulationFacade::initCuda();
 }
 
 void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings)
 {
     _settings = settings;
     _dataTOCache = std::make_shared<_AccessDataTOCache>(settings.gpuSettings);
-    _cudaSimulation = std::make_shared<_CudaSimulationAdapter>(timestep, settings);
+    _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, settings);
 
     if (_imageResourceToRegister) {
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);

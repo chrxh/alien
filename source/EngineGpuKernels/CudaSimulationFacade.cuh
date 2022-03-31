@@ -17,13 +17,13 @@
 
 #include "Definitions.cuh"
 
-class _CudaSimulationAdapter
+class _CudaSimulationFacade
 {
 public:
     static void initCuda();
 
-    _CudaSimulationAdapter(uint64_t timestep, Settings const& settings);
-    ~_CudaSimulationAdapter();
+    _CudaSimulationFacade(uint64_t timestep, Settings const& settings);
+    ~_CudaSimulationFacade();
 
     void* registerImageResource(GLuint image);
 

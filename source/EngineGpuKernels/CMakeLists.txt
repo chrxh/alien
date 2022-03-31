@@ -15,8 +15,8 @@ add_library(alien_engine_gpu_kernels_lib
     ConstructionProcessor.cuh
     CudaMemoryManager.cuh
     CudaMonitorData.cuh
-    CudaSimulationAdapter.cu
-    CudaSimulationAdapter.cuh
+    CudaSimulationFacade.cu
+    CudaSimulationFacade.cuh
     DataAccessKernels.cu
     DataAccessKernels.cuh
     DataAccessKernelsLauncher.cu
