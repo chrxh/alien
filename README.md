@@ -40,7 +40,7 @@ The development is driven by the desire to better understand the conditions for 
 * [Reddit](https://www.reddit.com/r/AlienProject)
 
 ## Documentation
-An up-to-date documentation is currently being prepared under [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
+A documentation including tutorial-like articles can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
 
 ## Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
