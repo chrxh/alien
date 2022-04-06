@@ -30,8 +30,8 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 ### Extensive editing capabilities
 - Built-in graph editor
+- Built-in programming environment for designing customized machines and worlds
 - Mass-operations and scaling functions
-- Programming environment for designing customized machines and worlds
 
 ## But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
