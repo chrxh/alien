@@ -98,7 +98,7 @@ In the case that the program crashes for an unknown reason, please refer to the 
 <img src="img/screenshot4.png" width=100%>
 </h1>
 
-#### Pattern editor and scripting environment
+#### Pattern editor and programming environment
 <h1 align="center">
 <img src="img/screenshot5.png" width=100%>
 </h1>
