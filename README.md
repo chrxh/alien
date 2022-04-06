@@ -7,6 +7,9 @@
 </h1>
 <b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media. Each simulated body consists of a network of <i>smart</i> particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by a signaling system. The bodies can be thought of as agents or digital organisms operating in a common environment.
 <br/>
+<br/>
+The simulation code is written entirely in CUDA and optimized for large-scale real-time simulations of millions of particles.
+The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 
 ## Main features
@@ -21,12 +24,14 @@ An important goal is to make the simulator user-friendly through a modern user i
 ### Artificial Life extensions
 - Programmable particle actions for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles
-- Built-in graph editor and scripting environment for designing customized machines and worlds
+- Allow spatiotemporally varying simulation parameters
 
 <img src="img/alife engine.gif" width=100%>
 
-The simulation code is written entirely in CUDA and highly optimized for large-scale real-time simulations of millions of bodies and particles.
-The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
+### Extensive editing capabilities
+- Built-in graph editor
+- Mass-operations and scaling functions
+- Programming environment for designing customized machines and worlds
 
 ## But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
