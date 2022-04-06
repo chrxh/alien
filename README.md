@@ -98,5 +98,14 @@ In the case that the program crashes for an unknown reason, please refer to the 
 <img src="img/screenshot5.png" width=100%>
 </h1>
 
+## Contributing to the project
+Contributions for the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
+- Pull requests for bug fixes or minor tweaks. If you want to implement new features or major changes, please [contact me](mailto:info@alien-project.org) in advance.
+- Interesting simulation or pattern files to be included in the standard examples.
+- Extensions or corrections of the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
+- Report of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
+
+A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
+
 ## License
 ALIEN is licensed under the [GPLv3](LICENSE).
