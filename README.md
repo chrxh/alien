@@ -5,12 +5,14 @@
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
+<p>
 <b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media. Each simulated body consists of a network of particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by a signaling system. The bodies can be thought of as agents or digital organisms operating in a common environment.
-<br/>
-<br/>
+</p>
+<p>
 The simulation code is written entirely in CUDA and optimized for large-scale real-time simulations with millions of particles.
 The development is driven by the desire to better understand the conditions for (pre-)biotic evolution and the growing complexity of biological systems.
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
+</p>
 
 ## Main features
 ### Physics and graphics engine
