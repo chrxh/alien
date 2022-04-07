@@ -75,7 +75,6 @@ If everything goes well, the ALIEN executable can be found under the build direc
 
 ## Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer.zip).
-It is updated from the develop branch on a weekly basis. 
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
