@@ -112,7 +112,7 @@ void _StartupController::processWindow()
     auto styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    auto imageScale = styleRep.scaleContent(1.5f);
+    auto imageScale = styleRep.scaleContent(2.0f);
     ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 30.0f, _logo.height * imageScale + 30.0f));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
