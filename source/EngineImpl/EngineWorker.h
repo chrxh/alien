@@ -115,6 +115,7 @@ private:
     mutable std::timed_mutex _mutexForCudaAccess;
     std::condition_variable _conditionForWorkerLoop;
 
+    std::atomic<bool> _accessRequired{false};
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
