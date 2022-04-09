@@ -112,10 +112,11 @@ private:
     CudaSimulationFacade _cudaSimulation;
 
     //sync
-    mutable std::timed_mutex _mutexForCudaAccess;
+    mutable std::mutex _mutexForCudaAccess;
+    std::condition_variable _conditionForCudaAccess;
     std::condition_variable _conditionForWorkerLoop;
 
-    std::atomic<bool> _accessRequired{false};
+    std::atomic<int> _accessRequired{0};
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;

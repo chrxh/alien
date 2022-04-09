@@ -537,9 +537,14 @@ void EngineWorker::runThreadLoop()
                 processJobs();
             }
 
-            if (_accessRequired) {
+            if (_accessRequired == 1) {
+                _accessRequired = 2;
+                while (_accessRequired == 2) {
+                }
+
+                //                 _conditionForCudaAccess.notify_all();
                 //micro sleep to trigger waiting threads which wants to acquire the mutex
-                std::this_thread::sleep_for(std::chrono::microseconds(1));
+//                std::this_thread::sleep_for(std::chrono::microseconds(1));
             }
 
             slowdownTPS();
@@ -670,6 +675,28 @@ void EngineWorker::slowdownTPS()
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
     : _worker(worker)
 {
+    if (_worker->_mutexForCudaAccess.try_lock()) {
+        checkForException(worker->_exceptionData);
+    } else {
+        worker->_accessRequired = 1;
+
+        auto startTimepoint = std::chrono::steady_clock::now();
+        while (worker->_accessRequired == 1) {
+            if (maxDuration) {
+                if (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) > *maxDuration) {
+                    _isTimeout = true;
+                    throw std::runtime_error("GPU Timeout");
+                }
+            }
+        }
+
+        _worker->_mutexForCudaAccess.lock();
+        worker->_accessRequired = 0;
+
+        checkForException(worker->_exceptionData);
+    }
+
+/*
     worker->_accessRequired = true;
     _isTimeout = !_worker->_mutexForCudaAccess.try_lock_for(maxDuration ? *maxDuration : std::chrono::milliseconds(5000));
     worker->_accessRequired = false;
@@ -678,6 +705,7 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
     if (_isTimeout && !maxDuration) {
         throw std::runtime_error("GPU Timeout");
     }
+*/
 }
 
 EngineWorkerGuard::~EngineWorkerGuard()
