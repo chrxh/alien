@@ -21,6 +21,7 @@ void EngineWorker::initCuda()
 
 void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings)
 {
+    _accessState = 0;
     _settings = settings;
     _dataTOCache = std::make_shared<_AccessDataTOCache>(settings.gpuSettings);
     _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, settings);
@@ -362,7 +363,6 @@ void EngineWorker::calcSingleTimestep()
 void EngineWorker::beginShutdown()
 {
     _isShutdown.store(true);
-    _conditionForWorkerLoop.notify_all();
 }
 
 void EngineWorker::endShutdown()
@@ -401,38 +401,26 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
 
 void EngineWorker::setSimulationParameters_async(SimulationParameters const& parameters)
 {
-    {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-        _updateSimulationParametersJob = parameters;
-    }
-    _conditionForWorkerLoop.notify_all();
+    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+    _updateSimulationParametersJob = parameters;
 }
 
 void EngineWorker::setSimulationParametersSpots_async(SimulationParametersSpots const& spots)
 {
-    {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-        _updateSimulationParametersSpotsJob = spots;
-    }
-    _conditionForWorkerLoop.notify_all();
+    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+    _updateSimulationParametersSpotsJob = spots;
 }
 
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
-    {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-        _updateGpuSettingsJob = gpuSettings;
-    }
-    _conditionForWorkerLoop.notify_all();
+    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+    _updateGpuSettingsJob = gpuSettings;
 }
 
 void EngineWorker::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
 {
-    {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-        _flowFieldSettings = flowFieldSettings;
-    }
-    _conditionForWorkerLoop.notify_all();
+    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+    _flowFieldSettings = flowFieldSettings;
 }
 
 void EngineWorker::applyForce_async(
@@ -441,11 +429,8 @@ void EngineWorker::applyForce_async(
     RealVector2D const& force,
     float radius)
 {
-    {
-        std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-        _applyForceJobs.emplace_back(ApplyForceJob{start, end, force, radius});
-    }
-    _conditionForWorkerLoop.notify_all();
+    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
+    _applyForceJobs.emplace_back(ApplyForceJob{start, end, force, radius});
 }
 
 void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
@@ -516,41 +501,22 @@ void EngineWorker::runThreadLoop()
 
         while (!_isShutdown.load()) {
 
-            if (!_isSimulationRunning.load()) {
-
-                //sleep...
-                _tps.store(0);
-                _conditionForWorkerLoop.wait(lockForLoop);
-            }
-
-            {
-                std::lock_guard guard(_mutexForCudaAccess);
-
+            if (_accessState == 0) {
                 if (_isSimulationRunning.load()) {
                     _cudaSimulation->calcTimestep();
-                    if (++_monitorCounter == 3) {   //for performance reasons...
+                    if (++_monitorCounter == 3) {  //for performance reasons...
                         updateMonitorDataIntern(true);
                         _monitorCounter = 0;
                     }
                 }
-
-                processJobs();
-            }
-
-            if (_accessRequired == 1) {
-                _accessRequired = 2;
-                while (_accessRequired == 2) {
-                }
-
-                //                 _conditionForCudaAccess.notify_all();
-                //micro sleep to trigger waiting threads which wants to acquire the mutex
-//                std::this_thread::sleep_for(std::chrono::microseconds(1));
-            }
-
-            slowdownTPS();
-
-            if (_isSimulationRunning.load()) {
                 measureTPS();
+                slowdownTPS();
+            }
+
+            processJobs();
+
+            if (_accessState == 1) {
+                _accessState = 2;
             }
         }
     } catch (std::exception const& e) {
@@ -562,7 +528,6 @@ void EngineWorker::runThreadLoop()
 void EngineWorker::runSimulation()
 {
     _isSimulationRunning.store(true);
-    _conditionForWorkerLoop.notify_all();
 }
 
 void EngineWorker::pauseSimulation()
@@ -625,31 +590,38 @@ void EngineWorker::processJobs()
     }
 }
 
-void EngineWorker::highPrecisionWaiting(std::chrono::microseconds const& duration) const
+void EngineWorker::waitAndAllowAccess(std::chrono::microseconds const& duration)
 {
     auto startTimepoint = std::chrono::steady_clock::now();
     while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration) {
+        if (_accessState == 1) {
+            _accessState = 2;
+        }
     }
 }
 
 void EngineWorker::measureTPS()
 {
-    auto timepoint = std::chrono::steady_clock::now();
-    if (!_measureTimepoint) {
-        _measureTimepoint = timepoint;
-    } else {
-        int duration = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_measureTimepoint).count());
-        if (duration > 199) {
+    if (_isSimulationRunning.load()) {
+        auto timepoint = std::chrono::steady_clock::now();
+        if (!_measureTimepoint) {
             _measureTimepoint = timepoint;
-            if (duration < 350) {
-                _tps.store(toFloat(_timestepsSinceMeasurement) * 5 * 200 / duration);
-            } else {
-                _tps.store(1000.0f / duration);
+        } else {
+            int duration = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_measureTimepoint).count());
+            if (duration > 199) {
+                _measureTimepoint = timepoint;
+                if (duration < 350) {
+                    _tps.store(toFloat(_timestepsSinceMeasurement) * 5 * 200 / duration);
+                } else {
+                    _tps.store(1000.0f / duration);
+                }
+                _timestepsSinceMeasurement = 0;
             }
-            _timestepsSinceMeasurement = 0;
         }
+        ++_timestepsSinceMeasurement;
+    } else {
+        _tps.store(0);
     }
-    ++_timestepsSinceMeasurement;
 }
 
 void EngineWorker::slowdownTPS()
@@ -663,7 +635,7 @@ void EngineWorker::slowdownTPS()
         if (_isSimulationRunning.load() && tpsRestriction > 0) {
             auto desiredDuration = std::chrono::microseconds(1000000 / tpsRestriction);
             if (desiredDuration > timestepDuration) {
-                highPrecisionWaiting(desiredDuration - timestepDuration);
+                waitAndAllowAccess(desiredDuration - timestepDuration);
             } else {
             }
             _slowDownOvershot = std::min(std::max(timestepDuration - desiredDuration, std::chrono::microseconds(0)), desiredDuration);
@@ -675,44 +647,29 @@ void EngineWorker::slowdownTPS()
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
     : _worker(worker)
 {
-    if (_worker->_mutexForCudaAccess.try_lock()) {
-        checkForException(worker->_exceptionData);
-    } else {
-        worker->_accessRequired = 1;
+    worker->_accessState = 1;
 
-        auto startTimepoint = std::chrono::steady_clock::now();
-        while (worker->_accessRequired == 1) {
-            if (maxDuration) {
-                if (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) > *maxDuration) {
-                    _isTimeout = true;
-                    throw std::runtime_error("GPU Timeout");
-                }
+    auto startTimepoint = std::chrono::steady_clock::now();
+    while (worker->_accessState == 1) {
+        auto timePassed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint);
+        if (maxDuration) {
+            if (timePassed > *maxDuration) {
+                break;
+            }
+        } else {
+            if (timePassed > std::chrono::seconds(5)) {
+                _isTimeout = true;
+                throw std::runtime_error("GPU Timeout");
             }
         }
-
-        _worker->_mutexForCudaAccess.lock();
-        worker->_accessRequired = 0;
-
-        checkForException(worker->_exceptionData);
     }
-
-/*
-    worker->_accessRequired = true;
-    _isTimeout = !_worker->_mutexForCudaAccess.try_lock_for(maxDuration ? *maxDuration : std::chrono::milliseconds(5000));
-    worker->_accessRequired = false;
 
     checkForException(worker->_exceptionData);
-    if (_isTimeout && !maxDuration) {
-        throw std::runtime_error("GPU Timeout");
-    }
-*/
 }
 
 EngineWorkerGuard::~EngineWorkerGuard()
 {
-    if(!_isTimeout) {
-        _worker->_mutexForCudaAccess.unlock();
-    }
+    _worker->_accessState = 0;
 }
 
 bool EngineWorkerGuard::isTimeout() const

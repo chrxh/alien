@@ -105,18 +105,14 @@ private:
     void updateMonitorDataIntern(bool afterMinDuration = false);
     void processJobs();
 
-    void highPrecisionWaiting(std::chrono::microseconds const& duration) const;
+    void waitAndAllowAccess(std::chrono::microseconds const& duration);
     void measureTPS();
     void slowdownTPS();
 
     CudaSimulationFacade _cudaSimulation;
 
     //sync
-    mutable std::mutex _mutexForCudaAccess;
-    std::condition_variable _conditionForCudaAccess;
-    std::condition_variable _conditionForWorkerLoop;
-
-    std::atomic<int> _accessRequired{0};
+    std::atomic<int> _accessState{0};    //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
