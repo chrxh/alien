@@ -42,10 +42,10 @@ void _GettingStartedWindow::processIntern()
 
         ImGui::Text(
             "Each simulated body (named as cell clusters) consists of a network of connected particles (named as cells) that can be enriched with higher-level "
-            "functions, ranging from pure information processing capabilities to physical equipment such as sensors, muscles, weapons, constructors, etc. To "
-            "orchestrate the execution and cell communication, a token concept from graph theory is utilized. A token has a state and is located on a cell. "
-            "After each time step the token can jump to adjacent cells and triggers the execution of cell functions. In this way, a cell cluster can implement "
-            "an arbitrarily complex set of behaviors and operates as an agent or machine in a shared environment.");
+            "functions ranging from pure information processing capabilities to physical equipment such as sensors, muscles, weapons, constructors, etc. To "
+            "orchestrate the execution and cell communication, a signaling system using tokens is utilized. A token has a state and is located on a cell. "
+            "After each time step a token can jump to adjacent cells and triggers the execution of cell functions. In this way, a cell cluster can implement "
+            "an arbitrarily complex set of behaviors and operates as an agent or machine in a common environment.");
 
         AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
@@ -55,8 +55,8 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation "
                     "file. You find various demos in ./examples/simulations/* demonstrating capabilities of the "
                     "engine ranging from physics examples, self-deploying structures, replicators to small "
-                    "ecosystems. To this end, go to menu in Simulation " ICON_FA_ARROW_RIGHT
-                    " Open and select a file. However, for starters, you can use the simple evolution example "
+                    "ecosystems. To this end, please invoke Simulation " ICON_FA_ARROW_RIGHT
+                    " Open in the menu and select a file. However, for starters, you can use the simple evolution example "
                     "already loaded.");
 
         ImGui::Text("At the beginning it is recommended to get familiar with the windows for temporal and spatial "
@@ -65,7 +65,7 @@ void _GettingStartedWindow::processIntern()
         ImGui::SameLine();
         ImGui::Text("In the temporal control window, a simulation can be started or paused. The execution speed "
                     "may be regulated if necessary. In addition, it is possible to calculate and revert single time steps as "
-                    "well as snapshots of a simulation to which one can return at any time without having "
+                    "well as to make snapshots of a simulation to which one can return at any time without having "
                     "to reload the simulation from a file.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
@@ -78,15 +78,15 @@ void _GettingStartedWindow::processIntern()
                     "buttons at the bottom left of the screen or in the menu via Editor " ICON_FA_ARROW_RIGHT " Activate.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
-        ImGui::Text("The navigation mode is enabled by default and allows you to zoom in (while holding the left mouse "
-                    "button) and zoom out (while holding the right mouse button) continuously. By holding the middle mouse "
+        ImGui::Text("The navigation mode is enabled by default and allows you to zoom in (holding the left mouse "
+                    "button) and out (holding the right mouse button) continuously. By holding the middle mouse "
                     "button and moving the mouse, you can move the visualized section of the world.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
-        ImGui::Text("In action mode, it is possible to apply forces to bodies in a running simulation or edit "
+        ImGui::Text("In the action mode, it is possible to apply forces to bodies in a running simulation or edit "
                     "them in a paused simulation. Please try this out. It can make a lot of fun!");
 
-        ImGui::Text("To be able to experiment with existing simulations, it is important to know and change the "
+        ImGui::Text("To be able to experiment with existing simulation files, it is important to know and change the "
                     "simulation parameters. This can be accomplished in the window 'Simulation parameters'. For example, "
                     "the radiation intensity can be increased or the friction can be adjusted. Explanations to the "
                     "individual parameters can be found in the tooltip next to them.");
