@@ -7,7 +7,7 @@
 - new simulation and pattern examples 
 - more modern looking user interface with imgui
 - sub-windows to group all simulator functions (temporal control, spatial control, simulation parameters etc.)
-- cross-plattform support
+- cross-platform support
 - spatially different simulation parameters and background colors via spots
 - flow generator
 - pin edit windows to multiple cells
