@@ -1,0 +1,167 @@
+{
+    "general": {
+        "time step": "22847636",
+        "world size": {
+            "x": "1000",
+            "y": "500"
+        }
+    },
+    "simulation parameters": {
+        "time step size": "1.000000",
+        "friction": "0.000000",
+        "rigidity": "1.000000",
+        "cell": {
+            "binding force": "1.000000",
+            "max velocity": "6.000000",
+            "max binding distance": "2.600000",
+            "repulsion strength": "0.080000",
+            "mutation rate": "0.001000",
+            "min distance": "0.131000",
+            "max distance": "1.722000",
+            "max force": "0.367000",
+            "max force decay probability": "0.200000",
+            "min token usages": "40000",
+            "token usage decay probability": "0.000002",
+            "max bonds": "6",
+            "max token": "3",
+            "max token branch number": "6",
+            "min energy": "200.000000",
+            "transformation probability": "0.200000",
+            "fusion velocity": "0.206000",
+            "max binding energy": "500000.000000",
+            "function": {
+                "computer": {
+                    "max instructions": "15",
+                    "memory size": "8"
+                },
+                "weapon": {
+                    "strength": "0.100000",
+                    "energy cost": "4.000000",
+                    "geometry deviation exponent": "5.000000",
+                    "target color mismatch penalty": "1.000000",
+                    "color penalty": "1.000000"
+                },
+                "constructor": {
+                    "offspring": {
+                        "cell energy": "100.000000",
+                        "cell distance": "1.600000",
+                        "token energy": "60.000000",
+                        "token suppress memory copy": "0.002000"
+                    }
+                },
+                "sensor": {
+                    "range": "50.000000"
+                },
+                "communicator": {
+                    "range": "50.000000"
+                }
+            }
+        },
+        "token": {
+            "mutation rate": "0.100000",
+            "memory size": "256",
+            "min energy": "3.000000"
+        },
+        "radiation": {
+            "exponent": "1.000000",
+            "factor": "0.010000",
+            "probability": "0.030000",
+            "velocity multiplier": "1.000000",
+            "velocity perturbation": "0.500000"
+        },
+        "spots": {
+            "num spots": "1",
+            "0": {
+                "color": "4279505408",
+                "pos": {
+                    "x": "500.000000",
+                    "y": "250.000000"
+                },
+                "shape": "circular",
+                "core width": "100.000000",
+                "core height": "200.000000",
+                "core radius": "150.600006",
+                "fadeout radius": "250.000000",
+                "friction": "0.004600",
+                "radiation": {
+                    "factor": "0.000050"
+                },
+                "cell": {
+                    "max force": "1.210000",
+                    "min energy": "41.306999",
+                    "binding force": "1.000000",
+                    "fusion velocity": "0.136000",
+                    "max binding energy": "500000.000000",
+                    "mutation rate": "0.000009",
+                    "function": {
+                        "weapon": {
+                            "energy cost": "0.682000",
+                            "target color mismatch penalty": "0.205000",
+                            "color penalty": "0.142000",
+                            "geometry deviation exponent": "0.795000"
+                        }
+                    }
+                },
+                "token": {
+                    "mutation rate": "0.000900"
+                }
+            },
+            "1": {
+                "color": "0",
+                "pos": {
+                    "x": "0.000000",
+                    "y": "0.000000"
+                },
+                "shape": "circular",
+                "core width": "100.000000",
+                "core height": "200.000000",
+                "core radius": "100.000000",
+                "fadeout radius": "100.000000",
+                "friction": "0.001000",
+                "radiation": {
+                    "factor": "0.000200"
+                },
+                "cell": {
+                    "max force": "0.800000",
+                    "min energy": "50.000000",
+                    "binding force": "1.000000",
+                    "fusion velocity": "0.400000",
+                    "max binding energy": "500000.000000",
+                    "mutation rate": "0.000000",
+                    "function": {
+                        "weapon": {
+                            "energy cost": "0.200000",
+                            "target color mismatch penalty": "0.000000",
+                            "color penalty": "0.000000",
+                            "geometry deviation exponent": "0.000000"
+                        }
+                    }
+                },
+                "token": {
+                    "mutation rate": "0.000000"
+                }
+            }
+        }
+    },
+    "rigidity": "0.000000",
+    "flow field": {
+        "active": "true",
+        "num centers": "2",
+        "center0": {
+            "pos": {
+                "x": "1000.000000",
+                "y": "250.000000"
+            },
+            "radius": "250.000000",
+            "strength": "0.500000"
+        },
+        "center1": {
+            "pos": {
+                "x": "0.000000",
+                "y": "250.000000"
+            },
+            "radius": "250.000000",
+            "strength": "0.500000"
+        }
+    }
+}
