@@ -1,5 +1,33 @@
 # Release notes
 
+## [3.0.0] - 2022-04-09
+### Added
+- new engine with soft-body dynamics
+- new GPU-based editor (enables editing at all zoom levels)
+- new simulation and pattern examples 
+- more modern looking user interface with imgui
+- sub-windows to group all simulator functions (temporal control, spatial control, simulation parameters etc.)
+- cross-plattform support
+- spatially different simulation parameters and background colors via spots
+- flow generator
+- pin edit windows to multiple cells
+- statistics include cell processes and number of cells by colors
+- freehand drawings
+- display resolution and frame rate settings
+- automatic change of GPU array sizes for entities
+- compression of simulation files
+- system font size scaling is taken into account
+- enable/disable user interface
+
+### Changed
+- simulation parameters adapted to new engine
+
+### Removed
+- settings for array sizes
+- main window toolbar
+- bug reporting after crash
+- cell function for communication
+
 ## [2.5.3] - 2021-06-12
 ### Changed
 - more specific error message in case of cudaErrorUnsupportedPtxVersion
