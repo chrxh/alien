@@ -14,7 +14,10 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
     _simController->newSimulation(0, settings, symbolMap);
 }
 
-IntegrationTestFramework::~IntegrationTestFramework() {}
+IntegrationTestFramework::~IntegrationTestFramework()
+{
+    _simController->closeSimulation();
+}
 
 TokenDescription IntegrationTestFramework::createSimpleToken() const
 {

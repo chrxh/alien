@@ -70,7 +70,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
     __syncthreads();
 
     auto const partition = calcPartition(32, threadIdx.x, blockDim.x);
-    for (float radius = 10.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange; radius += 8.0f) {
+    for (float radius = 14.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange; radius += 8.0f) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
             float angle = 360.0f / 32 * angleIndex;
 
