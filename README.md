@@ -91,7 +91,7 @@ In the case that the program crashes for an unknown reason, please refer to the 
 - [cereal](https://github.com/USCiLab/cereal)
 - [zstr](https://github.com/mateidavid/zstr)
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
-- [gtest](https://github.com/google/googletest)
+- [googletest](https://github.com/google/googletest)
 
 ## Screenshots
 #### Startup screen
