@@ -78,6 +78,20 @@ An installer for 64-bit binaries is provided for Windows 10: [download link](htt
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
+## Used external libraries
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
+- [ImPlot](https://github.com/epezent/implot)
+- [Glad](https://glad.dav1d.de)
+- [GLFW](https://www.glfw.org)
+- [glew](https://github.com/nigels-com/glew)
+- [boost](https://www.boost.org)
+- [stb](https://github.com/nothings/stb)
+- [cereal](https://github.com/USCiLab/cereal)
+- [zstr](https://github.com/mateidavid/zstr)
+- [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+- [gtest](https://github.com/google/googletest)
+
 ## Screenshots
 #### Startup screen
 <h1 align="center">
