@@ -79,9 +79,10 @@ An installer for 64-bit binaries is provided for Windows 10: [download link](htt
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
 ## Used external libraries
+- [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 - [Dear ImGui](https://github.com/ocornut/imgui)
-- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [ImPlot](https://github.com/epezent/implot)
+- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [Glad](https://glad.dav1d.de)
 - [GLFW](https://www.glfw.org)
 - [glew](https://github.com/nigels-com/glew)
