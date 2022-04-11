@@ -89,6 +89,7 @@ In the case that the program crashes for an unknown reason, please refer to the 
 - [boost](https://www.boost.org)
 - [stb](https://github.com/nothings/stb)
 - [cereal](https://github.com/USCiLab/cereal)
+- [zlib](https://www.zlib.net)
 - [zstr](https://github.com/mateidavid/zstr)
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
