@@ -14,7 +14,7 @@ The development is driven by the desire to better understand the conditions for 
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 </p>
 
-## Main features
+# Main features
 ### Physics and graphics engine
 - Particles for simulating soft body mechanics, heat dissipation, bondings, damages, phase transitions, etc.
 - Real-time user interactions with running simulations
@@ -35,7 +35,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 - Built-in programming environment for designing customized machines and worlds
 - Mass-operations and (up/down) scaling functions for simulations
 
-## But for what is this useful?
+# But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
 - Perhaps the most honest answer: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
 - A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
@@ -46,13 +46,13 @@ An important goal is to make the simulator user-friendly through a modern user i
 * [Twitter](https://twitter.com/chrx_h)
 * [Reddit](https://www.reddit.com/r/AlienProject)
 
-## Documentation
+# Documentation
 A documentation, which introduces the reader to the simulator with tutorial-like articles can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
 
-## Minimal system requirements
+# Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
-## How to build the sources
+# How to build the sources
 The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
 
 ### Getting the sources
@@ -73,12 +73,21 @@ cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 
-## Installer
+# Installer
 An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer.zip).
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
-## Dependencies
+# Contributing to the project
+Contributions for the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
+- Pull requests for bug fixes, code cleaning or minor tweaks. If you want to implement new features, refactorings or other major changes, please [contact me](mailto:info@alien-project.org) in advance.
+- Providing new content (simulation or pattern files)
+- Extensions or corrections of the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
+- Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
+
+A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
+
+# Dependency list
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [ImPlot](https://github.com/epezent/implot)
@@ -94,7 +103,7 @@ In the case that the program crashes for an unknown reason, please refer to the 
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
 
-## Screenshots
+# Screenshots
 #### Startup screen
 <h1 align="center">
 <img src="img/screenshot1.png" width=100%>
@@ -120,14 +129,5 @@ In the case that the program crashes for an unknown reason, please refer to the 
 <img src="img/screenshot5.png" width=100%>
 </h1>
 
-## Contributing to the project
-Contributions for the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
-- Pull requests for bug fixes, code cleaning or minor tweaks. If you want to implement new features, refactorings or other major changes, please [contact me](mailto:info@alien-project.org) in advance.
-- Providing new content (simulation or pattern files)
-- Extensions or corrections of the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
-- Report of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
-
-A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
-
-## License
+# License
 ALIEN is licensed under the [GPLv3](LICENSE).
