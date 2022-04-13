@@ -30,7 +30,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 <img src="img/alife engine.gif" width=100%>
 
-### Extensive editing capabilities
+### Extensive editing tools
 - Built-in graph editor
 - Built-in programming environment for designing customized machines and worlds
 - Mass-operations and (up/down) scaling functions for simulations
