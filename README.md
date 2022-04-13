@@ -82,7 +82,7 @@ In the case that the program crashes for an unknown reason, please refer to the 
 Contributions for the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
 - Pull requests for bug fixes, code cleaning or minor tweaks. If you want to implement new features, refactorings or other major changes, please [contact me](mailto:info@alien-project.org) in advance.
 - Providing new content (simulation or pattern files)
-- Extensions or corrections of the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
+- Extensions or corrections to the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
 - Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
 
 A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
