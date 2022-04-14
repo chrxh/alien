@@ -43,7 +43,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 # Documentation
 A documentation, which introduces the reader to the simulator with tutorial-like articles can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
 
-Further information and artworks:
+Further information and artwork:
 * [Website](https://alien-project.org)
 * [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 * [Twitter](https://twitter.com/chrx_h)
