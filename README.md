@@ -40,14 +40,14 @@ An important goal is to make the simulator user-friendly through a modern user i
 - Perhaps the most honest answer: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
 - A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
 
-**Further information and artworks**
+# Documentation
+A documentation, which introduces the reader to the simulator with tutorial-like articles can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
+
+Further information and artworks:
 * [Website](https://alien-project.org)
 * [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 * [Twitter](https://twitter.com/chrx_h)
 * [Reddit](https://www.reddit.com/r/AlienProject)
-
-# Documentation
-A documentation, which introduces the reader to the simulator with tutorial-like articles can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
 
 # Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
