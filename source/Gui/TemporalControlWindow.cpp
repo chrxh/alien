@@ -6,10 +6,10 @@
 
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
+#include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "StyleRepository.h"
-#include "Resources.h"
 #include "StatisticsWindow.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"

@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
+#include "Base/Resources.h"
+
 #include "OpenGLHelper.h"
-#include "Resources.h"
 #include "EditorController.h"
 
 _ModeController::_ModeController(EditorController const& editorController)

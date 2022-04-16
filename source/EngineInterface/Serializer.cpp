@@ -12,10 +12,12 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
 #include <zstr.hpp>
 
+#include "Base/Resources.h"
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "Parser.h"
@@ -264,6 +266,7 @@ bool Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolM
 void Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
 {
     cereal::PortableBinaryOutputArchive archive(stream);
+    archive(Const::ProgramVersion);
     archive(data);
 }
 
@@ -302,9 +305,24 @@ bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     return true;
 }
 
+namespace
+{
+    bool isVersionValid(std::string const& s)
+    {
+        std::vector<std::string> versionParts;
+        boost::split(versionParts, s, boost::is_any_of("."));
+        return versionParts.size() == 3;
+    }
+}
+
 void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
+    std::string version;
+    archive(version);
+    if (!isVersionValid(version)) {
+        throw std::runtime_error("No version detected.");
+    }
     archive(data);
 }
 

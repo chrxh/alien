@@ -3,9 +3,9 @@
 #include "Base/LoggingService.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineImpl/SimulationControllerImpl.h"
+#include "Base/Resources.h"
 
 #include "MainWindow.h"
-#include "Resources.h"
 #include "SimpleLogger.h"
 #include "FileLogger.h"
 

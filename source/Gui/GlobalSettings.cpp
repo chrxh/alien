@@ -5,7 +5,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
-#include "Resources.h"
+#include "Base/Resources.h"
 
 struct GlobalSettingsImpl
 {

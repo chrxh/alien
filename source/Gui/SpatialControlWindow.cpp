@@ -5,11 +5,11 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
+#include "Base/Resources.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "Resources.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 

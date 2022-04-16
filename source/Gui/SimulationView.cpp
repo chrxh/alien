@@ -3,12 +3,12 @@
 #include <glad/glad.h>
 #include <imgui.h>
 
+#include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "Shader.h"
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
-#include "Resources.h"
 #include "ModeController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"

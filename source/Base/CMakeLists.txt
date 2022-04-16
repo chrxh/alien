@@ -12,6 +12,7 @@ add_library(alien_base_lib
     NumberGenerator.h
     Physics.cpp
     Physics.h
+    Resources.h
     StringHelper.cpp
     StringHelper.h)
 

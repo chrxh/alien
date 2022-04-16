@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "Resources.h"
+#include "Base/Resources.h"
 #include "AlienImGui.h"
 
 _AboutDialog::_AboutDialog() {}
