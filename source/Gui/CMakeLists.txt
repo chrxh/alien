@@ -61,7 +61,6 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
-    Resources.h
     SavePatternDialog.cpp
     SavePatternDialog.h
     SaveSimulationDialog.cpp

@@ -3,10 +3,10 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
+#include "Base/Resources.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 #include "OpenGLHelper.h"
-#include "Resources.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"

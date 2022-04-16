@@ -8,13 +8,13 @@
 #include <imgui_freetype.h>
 #include <implot.h>
 
+#include "Base/Resources.h"
+
 #include "Fonts/DroidSans.h"
 #include "Fonts/Cousine-Regular.h"
 #include "Fonts/AlienIconFont.h"
 #include "Fonts/FontAwesomeSolid.h"
 #include "Fonts/IconsFontAwesome5.h"
-
-#include "Resources.h"
 
 StyleRepository& StyleRepository::getInstance()
 {
