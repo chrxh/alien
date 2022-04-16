@@ -54,6 +54,7 @@ public:
     void uniformVelocitiesForSelectedEntities(bool includeClusters) override;
     void makeSticky(bool includeClusters) override;
     void removeStickiness(bool includeClusters) override;
+    void setBarrier(bool value, bool includeClusters) override;
     void colorSelectedEntities(unsigned char color, bool includeClusters) override;
     void reconnectSelectedEntities() override;
     void changeCell(CellDescription const& changedCell) override;

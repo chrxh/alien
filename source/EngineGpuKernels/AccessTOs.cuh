@@ -74,6 +74,7 @@ struct CellAccessTO
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int tokenUsages;
     CellMetadataAccessTO metadata;
+	bool barrier;
 
 	int selected;
 };

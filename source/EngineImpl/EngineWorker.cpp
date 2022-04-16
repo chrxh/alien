@@ -324,6 +324,13 @@ void EngineWorker::removeStickiness(bool includeClusters)
     _cudaSimulation->removeStickiness(includeClusters);
 }
 
+void EngineWorker::setBarrier(bool value, bool includeClusters)
+{
+    EngineWorkerGuard access(this);
+
+    _cudaSimulation->setBarrier(value, includeClusters);
+}
+
 void EngineWorker::changeCell(CellDescription const& changedCell)
 {
     EngineWorkerGuard access(this);

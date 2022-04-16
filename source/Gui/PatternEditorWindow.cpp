@@ -250,6 +250,12 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Make unsticky")) {
             onRemoveStickiness();
         }
+        if (ImGui::Button("Set barrier")) {
+            onSetBarrier(true);
+        }
+        if (ImGui::Button("Unset barrier")) {
+            onSetBarrier(false);
+        }
         ImGui::EndDisabled();
 
         _lastSelection = selection;
@@ -342,6 +348,11 @@ void _PatternEditorWindow::onMakeSticky()
 void _PatternEditorWindow::onRemoveStickiness()
 {
     _simController->removeStickiness(_editorModel->isRolloutToClusters());
+}
+
+void _PatternEditorWindow::onSetBarrier(bool value)
+{
+    _simController->setBarrier(value, _editorModel->isRolloutToClusters());
 }
 
 bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)

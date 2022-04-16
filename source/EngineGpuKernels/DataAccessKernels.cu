@@ -21,6 +21,7 @@ namespace
         cellTO.id = cell->id;
         cellTO.pos = cell->absPos;
         cellTO.vel = cell->vel;
+        cellTO.barrier = cell->barrier;
         cellTO.energy = cell->energy;
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;

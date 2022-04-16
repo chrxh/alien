@@ -70,7 +70,7 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::getInstance().scaleContent(330.0f)
+    auto height = isCell() ? StyleRepository::getInstance().scaleContent(370.0f)
                            : StyleRepository::getInstance().scaleContent(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
@@ -146,7 +146,7 @@ namespace
             || left.cellFeature.constData != right.cellFeature.constData || left.cellFeature.volatileData != right.cellFeature.volatileData
             || left.metadata.computerSourcecode != right.metadata.computerSourcecode
             || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
-            || left.tokens != right.tokens;
+            || left.tokens != right.tokens || left.barrier != right.barrier;
     }
     bool hasChanges(ParticleDescription const& left, ParticleDescription const& right)
     {
@@ -230,6 +230,7 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             cell.tokenBranchNumber);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
 
         AlienImGui::Group("Metadata");
 

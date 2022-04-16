@@ -41,6 +41,7 @@ public:
     void uniformVelocitiesForSelectedEntities(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
+    void setBarrier(bool value, bool includeClusters);
     void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
 
     void applyForce(ApplyForceData const& applyData);

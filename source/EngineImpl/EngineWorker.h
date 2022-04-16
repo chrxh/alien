@@ -63,6 +63,7 @@ public:
     void uniformVelocitiesForSelectedEntities(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
+    void setBarrier(bool value, bool includeClusters);
     void changeCell(CellDescription const& changedCell);
     void changeParticle(ParticleDescription const& changedParticle);
 

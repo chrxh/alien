@@ -47,6 +47,7 @@ struct Cell
     CellMetadata metadata;
     float energy;
     int cellFunctionType;
+    bool barrier;
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = indirectly selected

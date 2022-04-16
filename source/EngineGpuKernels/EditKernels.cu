@@ -382,6 +382,17 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
     }
 }
 
+__global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClusters)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.entities.cellPointers.at(index);
+        if (isSelected(cell, includeClusters)) {
+            cell->barrier = value;
+        }
+    }
+}
+
 __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData data, int* result)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
@@ -568,7 +579,7 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
             auto const& cell = data.entities.cellPointers.at(index);
             auto const& pos = cell->absPos;
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
-            if (distanceToSegment < applyData.radius) {
+            if (distanceToSegment < applyData.radius && !cell->barrier) {
                 auto weightedForce = applyData.force;
                 //*(actionRadius - distanceToSegment) / actionRadius;
                 cell->vel = cell->vel + weightedForce;
