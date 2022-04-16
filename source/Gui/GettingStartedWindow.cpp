@@ -92,6 +92,11 @@ void _GettingStartedWindow::processIntern()
                     "individual parameters can be found in the tooltip next to them.");
 
         AlienImGui::Separator();
+
+        ImGui::Text("IMPORTANT: On older graphics cards one can significantly increase the simulation speed (in time steps per second) by decreasing the rendered frames per "
+                    "seconds. This adjustment can be made in the display settings.");
+
+        AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
         ImGui::Text("Further steps");
         ImGui::PopStyleColor();
