@@ -16,6 +16,7 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, bool, removeStickiness, false);
         MEMBER_DECLARATION(CreateRectParameters, int, maxConnection, 6);
         MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
+        MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
     };
     static DataDescription createRect(CreateRectParameters const& parameters);
 

@@ -76,7 +76,8 @@ void _CreatorWindow::processIntern()
 
         AlienImGui::Group(ModeText.at(_mode));
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
-
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxContentTextWidth), _barrier);
+        
         auto parameters = _simController->getSimulationParameters();
         if (_mode == CreationMode::CreateCell) {
             AlienImGui::SliderInt(
@@ -205,7 +206,8 @@ void _CreatorWindow::createCell()
                     .setEnergy(_energy)
                     .setMaxConnections(_maxConnections)
                     .setTokenBranchNumber(_lastBranchNumber)
-                    .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
+                    .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                    .setBarrier(_barrier);
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
     incBranchNumber();
@@ -233,7 +235,8 @@ void _CreatorWindow::createRectangle()
                                                   .removeStickiness(!_makeSticky)
                                                   .maxConnection(!_makeSticky ? parameters.cellMaxBonds : _maxConnections)
                                                   .color(_editorModel->getDefaultColorCode())
-                                                  .center(getRandomPos()));
+                                                  .center(getRandomPos())
+                                                  .barrier(_barrier));
 
     _simController->addAndSelectSimulationData(data);
 }
@@ -258,7 +261,8 @@ void _CreatorWindow::createHexagon()
                              .setEnergy(_energy)
                              .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(-j * incY)})
                              .setMaxConnections(maxConnections)
-                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
+                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                             .setBarrier(_barrier));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
@@ -267,7 +271,8 @@ void _CreatorWindow::createHexagon()
                                  .setEnergy(_energy)
                                  .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(j * incY)})
                                  .setMaxConnections(maxConnections)
-                                 .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
+                                 .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                                 .setBarrier(_barrier));
 
             }
         }
@@ -309,7 +314,8 @@ void _CreatorWindow::createDisc()
                              .setEnergy(_energy)
                              .setPos(relPos)
                              .setMaxConnections(maxConnections)
-                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode())));
+                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                             .setBarrier(_barrier));
         }
     }
 
