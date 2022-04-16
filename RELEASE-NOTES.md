@@ -1,5 +1,15 @@
 # Release notes
 
+## [3.1.0] - 2022-04-16
+### Added
+- barrier cell introduced: indestructible and immobile
+- checkbox for setting/unsetting barrier in pattern editor, creator and inspection window
+- performance notice in Getting started window
+- new physics example which uses barriers: Soft Balls.sim
+
+### Changed
+- file format contains program version (compatibility with old format remains!)
+
 ## [3.0.0] - 2022-04-09
 ### Added
 - new engine with soft-body dynamics
