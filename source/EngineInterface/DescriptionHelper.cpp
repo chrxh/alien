@@ -12,11 +12,12 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
-                             .setId(NumberGenerator::getInstance().getId())
-                             .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
-                             .setEnergy(parameters._energy)
-                             .setMaxConnections(parameters._maxConnection)
-                             .setMetadata(CellMetadata().setColor(parameters._color)));
+                               .setId(NumberGenerator::getInstance().getId())
+                               .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
+                               .setEnergy(parameters._energy)
+                               .setMaxConnections(parameters._maxConnection)
+                               .setMetadata(CellMetadata().setColor(parameters._color))
+                               .setBarrier(parameters._barrier));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
