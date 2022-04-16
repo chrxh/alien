@@ -175,6 +175,11 @@ void _EditKernelsLauncher::removeStickiness(GpuSettings const& gpuSettings, Simu
     KERNEL_CALL(cudaRemoveStickiness, data, includeClusters);
 }
 
+void _EditKernelsLauncher::setBarrier(GpuSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters)
+{
+    KERNEL_CALL(cudaSetBarrier, data, value, includeClusters);
+}
+
 void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data)
 {
     int counter = 10;

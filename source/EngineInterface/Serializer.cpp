@@ -82,7 +82,8 @@ namespace cereal
            data.metadata,
            data.cellFeature,
            data.tokens,
-           data.tokenUsages);
+           data.tokenUsages,
+           data.barrier);
     }
     template <class Archive>
     inline void serialize(Archive& ar, ClusterDescription& data)
@@ -99,6 +100,35 @@ namespace cereal
     {
         ar(data.clusters, data.particles);
     }
+
+    //DEPRECATED
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellDescription& data)
+    {
+        ar(data.id,
+           data.pos,
+           data.vel,
+           data.energy,
+           data.maxConnections,
+           data.connections,
+           data.tokenBlocked,
+           data.tokenBranchNumber,
+           data.metadata,
+           data.cellFeature,
+           data.tokens,
+           data.tokenUsages);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusterDescription& data)
+    {
+        ar(data.id, data.cells);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusteredDataDescription& data)
+    {
+        ar(data.clusters, data.particles);
+    }
+
 }
 
 bool Serializer::serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data)
@@ -135,7 +165,7 @@ bool Serializer::serializeSimulationToFile(std::string const& filename, Deserial
             stream.close();
         }
         return true;
-    } catch (std::exception const& e) {
+    } catch (...) {
         return false;
     }
 }
@@ -149,13 +179,8 @@ bool Serializer::deserializeSimulationFromFile(std::string const& filename, Dese
         std::filesystem::path symbolsFilename(filename);
         symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
 
-        {
-            zstr::ifstream stream(filename, std::ios::binary);
-            if (!stream) {
-                return false;
-            }
-
-            deserializeDataDescription(data.content, stream);
+        if (!deserializeDataDescription(data.content, filename)) {
+            return false;
         }
         {
             std::ifstream stream(settingsFilename.string(), std::ios::binary);
@@ -174,7 +199,7 @@ bool Serializer::deserializeSimulationFromFile(std::string const& filename, Dese
             stream.close();
         }
         return true;
-    } catch (std::exception const& e) {
+    } catch (...) {
         return false;
     }
 }
@@ -189,7 +214,7 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
         serializeDataDescription(content, fileStream);
 
         return true;
-    } catch (std::exception const& e) {
+    } catch (...) {
         return false;
     }
 }
@@ -197,15 +222,11 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
 bool Serializer::deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content)
 {
     try {
-        zstr::ifstream stream(filename, std::ios::binary);
-        if (!stream) {
+        if (!deserializeDataDescription(content, filename)) {
             return false;
         }
-
-        deserializeDataDescription(content, stream);
-
         return true;
-    } catch (std::exception const& e) {
+    } catch (...) {
         return false;
     }
 }
@@ -220,7 +241,7 @@ bool Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap c
         serializeSymbolMap(symbolMap, stream);
         stream.close();
         return true;
-    } catch (std::exception const& e) {
+    } catch (...) {
         return false;
     }
 }
@@ -235,7 +256,7 @@ bool Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolM
         deserializeSymbolMap(symbolMap, stream);
         stream.close();
         return true;
-    } catch (std::exception const& e) {
+    } catch (...) {
         return false;
     }
 }
@@ -261,10 +282,38 @@ void Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& strea
     boost::property_tree::json_parser::write_json(stream, tree);
 }
 
+bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
+{
+    try {
+        zstr::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        deserializeDataDescription(data, stream);
+    } catch (...) {
+
+        //try reading old unversioned data
+        zstr::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        DEPREACATED_deserializeDataDescription(data, stream);
+    }
+    return true;
+}
+
 void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     archive(data);
+}
+
+void Serializer::DEPREACATED_deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
+{
+    DEPRECATED_ClusteredDataDescription DEPRECATED_data;
+    cereal::PortableBinaryInputArchive archive(stream);
+    archive(DEPRECATED_data);
+    data = DEPRECATED_data.convert();
 }
 
 void Serializer::deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream)

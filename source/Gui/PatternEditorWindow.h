@@ -30,6 +30,7 @@ private:
     void onGenerateBranchNumbers();
     void onMakeSticky();
     void onRemoveStickiness();
+    void onSetBarrier(bool value);
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 

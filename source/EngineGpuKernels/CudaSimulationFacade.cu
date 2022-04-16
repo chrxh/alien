@@ -316,6 +316,12 @@ void _CudaSimulationFacade::removeStickiness(bool includeClusters)
     syncAndCheck();
 }
 
+void _CudaSimulationFacade::setBarrier(bool value, bool includeClusters)
+{
+    _editKernels->setBarrier(_settings.gpuSettings, *_cudaSimulationData, value, includeClusters);
+    syncAndCheck();
+}
+
 void _CudaSimulationFacade::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);

@@ -74,6 +74,9 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 if (!cell->tryLock()) {
                     continue;
                 }
+                if (cell->barrier) {
+                    continue;
+                }
                 if (particle->tryLock()) {
                     
                     atomicAdd(&cell->energy, particle->energy);

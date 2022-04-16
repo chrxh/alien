@@ -95,6 +95,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     }
     cell->tokenUsages = cellTO.tokenUsages;
     cell->metadata.color = cellTO.metadata.color;
+    cell->barrier = cellTO.barrier;
 
     copyString(
         cell->metadata.nameLen,
@@ -136,6 +137,7 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
     cell->cellFunctionType = cellTO.cellFunctionType;
+    cell->barrier = cellTO.barrier;
 
     switch (cell->cellFunctionType) {
     case Enums::CellFunction_Computation: {
@@ -252,6 +254,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->metadata.nameLen = 0;
     cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
+    cell->barrier = false;
     cell->cellFunctionType = _data->numberGen1.random(Enums::CellFunction_Count - 1);
     cell->initMemorySizes();
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
@@ -278,6 +281,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     result->metadata.nameLen = 0;
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
+    result->barrier = 0;
     return result;
 }
 

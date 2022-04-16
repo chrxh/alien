@@ -94,6 +94,9 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.entities.cellPointers.at(index);
+        if (cell->barrier) {
+            continue;
+        }
         auto mutationRate = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
         if (data.numberGen2.random() < 0.001f && data.numberGen1.random() < mutationRate * 1000) {
             auto address = data.numberGen1.random(MAX_CELL_STATIC_BYTES + 2);
@@ -139,7 +142,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 continue;
             }
 
-            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1) {
+            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier) {
                 CellConnectionProcessor::scheduleDelConnections(data, cell);
             }
 
@@ -155,11 +158,12 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             if (!alreadyConnected) {
                 auto velDelta = cell->vel - otherCell->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+                auto barrierFactor = cell->barrier ? 2 : 1;
 
                 if (Math::length(cell->vel) > 0.5f && isApproaching) {  //&& cell->numConnections == 0 
                     auto distanceSquared = distance * distance + 0.25;
-                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared);
-                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * distanceSquared);
+                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
+                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * distanceSquared) * barrierFactor;
                     atomicAdd(&cell->temp1.x, force1.x);
                     atomicAdd(&cell->temp1.y, force1.y);
                     atomicAdd(&otherCell->temp1.x, force2.x);
@@ -168,7 +172,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 else {
                     auto force = Math::normalized(posDelta)
                         * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta))
-                        * cudaSimulationParameters.cellRepulsionStrength;   ///12, 32
+                        * cudaSimulationParameters.cellRepulsionStrength * barrierFactor;  ///12, 32
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);
@@ -179,7 +183,8 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     && Math::length(velDelta)
                         >= SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
                     && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
-                    && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy) {
+                    && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
+                    && !cell->barrier && !otherCell->barrier) {
                         CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
 /*
                     //create connection only in case branch numbers fit
@@ -232,6 +237,9 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
 
         if (Math::length(cell->temp1) > SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
@@ -250,6 +258,9 @@ __inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
 
         cell->vel = cell->vel + cell->temp1;
         if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVel) {
@@ -267,7 +278,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (0 == cell->numConnections) {
+        if (0 == cell->numConnections || cell->barrier) {
             continue;
         }
         float2 force{0, 0};
@@ -342,6 +353,9 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
 
         bool scheduleForDestruction = false;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -369,6 +383,9 @@ __inline__ __device__ void CellProcessor::verletUpdatePositions(SimulationData& 
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
 
         cell->absPos = cell->absPos + cell->vel * cudaSimulationParameters.timestepSize
             + cell->temp1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
@@ -386,9 +403,12 @@ __inline__ __device__ void CellProcessor::verletUpdateVelocities(SimulationData&
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
-        auto acceleration = (cell->temp1 + cell->temp2) / 2;
-        cell->vel = cell->vel + acceleration * cudaSimulationParameters.timestepSize;
+        if (cell->barrier) {
+            cell->vel = {0, 0};
+        } else {
+            auto acceleration = (cell->temp1 + cell->temp2) / 2;
+            cell->vel = cell->vel + acceleration * cudaSimulationParameters.timestepSize;
+        }
     }
 }
 
@@ -401,7 +421,9 @@ __inline__ __device__ void CellProcessor::calcFriction(SimulationData& data)
     constexpr float innerFriction = 0.2f;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
+        if (cell->barrier) {
+            continue;
+        }
         auto friction = SpotCalculator::calcParameter(&SimulationParametersSpotValues::friction, data, cell->absPos);
         auto averagedVel = cell->vel * innerFriction;
         for (int index = 0; index < cell->numConnections; ++index) {
@@ -420,6 +442,9 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
 
         auto friction = SpotCalculator::calcParameter(&SimulationParametersSpotValues::friction, data, cell->absPos);
         cell->vel = cell->temp1;
@@ -434,7 +459,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
+        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb && !cell->barrier) {
             auto radiationFactor =
                 SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
@@ -476,6 +501,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
 
         bool destroyDueToTokenUsage = false;
         if (cell->tokenUsages > cudaSimulationParameters.cellMinTokenUsages) {

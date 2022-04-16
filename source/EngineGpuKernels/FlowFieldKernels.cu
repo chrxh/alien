@@ -44,6 +44,9 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->barrier) {
+            continue;
+        }
         cell->vel = cell->vel + calcVelocity(cell->absPos, data.cellMap);
     }
 }

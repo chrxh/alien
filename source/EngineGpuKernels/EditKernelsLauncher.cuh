@@ -28,6 +28,7 @@ public:
     void uniformVelocitiesForSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void makeSticky(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void removeStickiness(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
+    void setBarrier(GpuSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters);
     void reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data);
     void changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& changeDataTO);
     void colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);

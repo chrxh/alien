@@ -39,6 +39,7 @@ public:
     virtual void uniformVelocitiesForSelectedEntities(bool includeClusters) = 0;
     virtual void makeSticky(bool includeClusters) = 0;
     virtual void removeStickiness(bool includeClusters) = 0;
+    virtual void setBarrier(bool value, bool includeClusters) = 0;
     virtual void colorSelectedEntities(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedEntities() = 0;
     virtual void changeCell(CellDescription const& changedCell) = 0;
