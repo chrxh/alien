@@ -1,6 +1,6 @@
 {
   "name": "alien",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "dependencies": [
     {
       "name": "glew",
@@ -68,3 +68,4 @@
   ],
   "builtin-baseline": "d48ac9aa527620d43fb3b3327d0b9e054de203c2"
 }
+  
