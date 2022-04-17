@@ -93,8 +93,9 @@ void _GettingStartedWindow::processIntern()
 
         AlienImGui::Separator();
 
-        ImGui::Text("IMPORTANT: On older graphics cards one can significantly increase the simulation speed (in time steps per second) by decreasing the rendered frames per "
-                    "seconds. This adjustment can be made in the display settings.");
+        ImGui::Text(
+            "IMPORTANT: On older graphics cards or when using a high resolution (e.g. 4K), it is recommended to reduce the rendered frames per second, "
+            "as this significantly increases the simulation speed (in time steps per second). This adjustment can be made in the display settings.");
 
         AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
