@@ -12,13 +12,13 @@
         "rigidity": "0.000000",
         "cell": {
             "binding force": "1.000000",
-            "max velocity": "0.307000",
+            "max velocity": "0.511000",
             "max binding distance": "2.600000",
             "repulsion strength": "0.080000",
             "mutation rate": "0.000000",
             "min distance": "0.300000",
             "max distance": "1.300000",
-            "max force": "0.367000",
+            "max force": "0.716000",
             "max force decay probability": "0.200000",
             "min token usages": "40000",
             "token usage decay probability": "0.000002",
@@ -152,7 +152,7 @@
                 "x": "500.000000",
                 "y": "494.000000"
             },
-            "radius": "483.000000",
+            "radius": "281.000000",
             "strength": "0.010000"
         },
         "center1": {
@@ -161,7 +161,7 @@
                 "y": "809.000000"
             },
             "radius": "152.000000",
-            "strength": "0.014500"
+            "strength": "0.009900"
         }
     }
 }
