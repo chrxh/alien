@@ -2,10 +2,10 @@
 
 ## [3.1.0] - 2022-04-18
 ### Added
-- barrier cell introduced: indestructible and immobile
-- checkbox for setting/unsetting barrier in pattern editor, creator and inspection window
+- barrier cells introduced: indestructible and immobile
+- checkbox for setting/unsetting barriers in pattern editor, creator and inspection window
 - performance notice in Getting started window
-- new examples which uses barriers: Soft Balls.sim and Multiverse.sim
+- new examples which use barriers: Soft Balls.sim and Multiverse.sim
 
 ### Changed
 - file format contains program version (compatibility with old format remains!)
