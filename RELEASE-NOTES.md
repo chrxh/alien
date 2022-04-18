@@ -5,7 +5,7 @@
 - barrier cell introduced: indestructible and immobile
 - checkbox for setting/unsetting barrier in pattern editor, creator and inspection window
 - performance notice in Getting started window
-- new physics example which uses barriers: Soft Balls.sim
+- new examples which uses barriers: Soft Balls.sim and Multiverse.sim
 
 ### Changed
 - file format contains program version (compatibility with old format remains!)
