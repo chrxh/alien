@@ -1,6 +1,6 @@
 # Release notes
 
-## [3.1.0] - 2022-04-16
+## [3.1.0] - 2022-04-18
 ### Added
 - barrier cell introduced: indestructible and immobile
 - checkbox for setting/unsetting barrier in pattern editor, creator and inspection window
@@ -9,6 +9,9 @@
 
 ### Changed
 - file format contains program version (compatibility with old format remains!)
+
+### Fixed
+- autosave bug fixed (led to long lags every 20minutes)
 
 ## [3.0.0] - 2022-04-09
 ### Added

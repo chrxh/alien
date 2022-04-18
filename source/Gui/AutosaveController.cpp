@@ -42,10 +42,13 @@ void _AutosaveController::process()
         return;
     }
 
-    auto durationSinceStart =
-        std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - *_startTimePoint).count();
-    if (durationSinceStart > 0 && durationSinceStart % 20 == 0) {
+    auto durationSinceStart = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - *_startTimePoint).count();
+    if (durationSinceStart > 0 && durationSinceStart % 20 == 0 && !_alreadySaved) {
         onSave();
+        _alreadySaved = true;
+    }
+    if (durationSinceStart > 0 && durationSinceStart % 20 == 1 && _alreadySaved) {
+        _alreadySaved = false;
     }
 }
 
