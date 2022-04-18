@@ -25,4 +25,5 @@ private:
 
     bool _on = true;
     std::optional<std::chrono::steady_clock::time_point> _startTimePoint;
+    bool _alreadySaved = false;
 };
