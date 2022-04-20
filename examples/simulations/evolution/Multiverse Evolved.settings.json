@@ -1,6 +1,6 @@
 {
     "general": {
-        "time step": "0",
+        "time step": "37873189",
         "world size": {
             "x": "2000",
             "y": "520"
@@ -8,14 +8,14 @@
     },
     "simulation parameters": {
         "time step size": "1.000000",
-        "friction": "0.000400",
+        "friction": "0.000600",
         "rigidity": "0.000000",
         "cell": {
             "binding force": "1.000000",
             "max velocity": "0.920000",
             "max binding distance": "2.600000",
             "repulsion strength": "0.080000",
-            "mutation rate": "0.000002",
+            "mutation rate": "0.000007",
             "min distance": "0.300000",
             "max distance": "1.300000",
             "max force": "0.367000",
@@ -36,10 +36,10 @@
                 },
                 "weapon": {
                     "strength": "0.100000",
-                    "energy cost": "0.000000",
-                    "geometry deviation exponent": "0.000000",
-                    "target color mismatch penalty": "0.000000",
-                    "color penalty": "0.000000"
+                    "energy cost": "0.091000",
+                    "geometry deviation exponent": "1.108000",
+                    "target color mismatch penalty": "0.387000",
+                    "color penalty": "0.227000"
                 },
                 "constructor": {
                     "offspring": {
@@ -58,7 +58,7 @@
             }
         },
         "token": {
-            "mutation rate": "0.000230",
+            "mutation rate": "0.000590",
             "memory size": "256",
             "min energy": "3.000000"
         },
@@ -92,18 +92,18 @@
                     "binding force": "1.000000",
                     "fusion velocity": "0.206000",
                     "max binding energy": "500000.000000",
-                    "mutation rate": "0.000002",
+                    "mutation rate": "0.000006",
                     "function": {
                         "weapon": {
                             "energy cost": "0.000000",
-                            "target color mismatch penalty": "0.000000",
-                            "color penalty": "0.000000",
-                            "geometry deviation exponent": "0.000000"
+                            "target color mismatch penalty": "0.725000",
+                            "color penalty": "0.670000",
+                            "geometry deviation exponent": "0.767000"
                         }
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000200"
+                    "mutation rate": "0.000660"
                 }
             },
             "1": {
@@ -126,19 +126,19 @@
                     "min energy": "50.000000",
                     "binding force": "1.318000",
                     "fusion velocity": "0.206000",
-                    "max binding energy": "481183.000000",
-                    "mutation rate": "0.000002",
+                    "max binding energy": "204.000000",
+                    "mutation rate": "0.000006",
                     "function": {
                         "weapon": {
                             "energy cost": "0.000000",
-                            "target color mismatch penalty": "0.000000",
-                            "color penalty": "0.000000",
+                            "target color mismatch penalty": "0.438000",
+                            "color penalty": "0.318000",
                             "geometry deviation exponent": "0.000000"
                         }
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000240"
+                    "mutation rate": "0.000620"
                 }
             }
         }
