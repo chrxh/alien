@@ -1,5 +1,5 @@
 <h1 align="center">
-<a href="https://alien-project.org" target="_blank">ALIEN - Explore the world of artificial life</a>
+<a href="https://alien-project.org" target="_blank">ALIEN - Explore worlds of artificial life</a>
 </h1>
 
 <h1 align="center">
