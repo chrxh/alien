@@ -299,7 +299,6 @@ bool _PatternEditorWindow::isCopyingPossible() const
 void _PatternEditorWindow::onCopy()
 {
     _copiedSelection = _simController->getSelectedSimulationData(_editorModel->isRolloutToClusters());
-    DescriptionHelper::removeMetadata(*_copiedSelection);
 }
 
 bool _PatternEditorWindow::isPastingPossible() const
