@@ -313,9 +313,9 @@ void _SimulationParametersWindow::processBase(
             simParameters.cellMaxBonds);
 
         /**
-         * Mutation
+         * Mutations
          */
-        AlienImGui::Group("Mutation");
+        AlienImGui::Group("Mutations");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell mutation rate")
@@ -633,9 +633,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         }
 
         /**
-         * Mutation
+         * Mutations
          */
-        AlienImGui::Group("Mutation");
+        AlienImGui::Group("Mutations");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell mutation rate")
