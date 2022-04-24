@@ -38,7 +38,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
         for (int i = 0; i < numOtherCells; ++i) {
             Cell* otherCell = otherCells[i];
             if (otherCell->tryLock()) {
-                if (!isConnectedConnected(cell, otherCell)) {
+                if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier) {
                     auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
 
                     auto cellFunctionWeaponGeometryDeviationExponent =
