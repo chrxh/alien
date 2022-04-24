@@ -62,7 +62,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                     }
 
                     auto cellFunctionWeaponColorPenalty =
-                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorUnfittingPenalty, data, cell->absPos);
+                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorDominance, data, cell->absPos);
 
                     auto homogene = isHomogene(cell);
                     auto otherHomogene = isHomogene(otherCell);
@@ -81,18 +81,21 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                         energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
                     }
 
+                    auto cellFunctionWeaponConnectionsMismatchPenalty =
+                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponConnectionsMismatchPenalty, data, cell->absPos);
                     if (otherCell->numConnections > cell->numConnections + 1) {
-                        energyToTransfer *= 0.66f * 0.66f;
+                        energyToTransfer *= (1 - cellFunctionWeaponConnectionsMismatchPenalty) * (1 - cellFunctionWeaponConnectionsMismatchPenalty);
                     }
                     if (otherCell->numConnections == cell->numConnections + 1) {
-                        energyToTransfer *= 0.66f;
+                        energyToTransfer *= (1 - cellFunctionWeaponConnectionsMismatchPenalty);
                     }
-                    if (otherCell->numConnections == cell->numConnections - 1) {
-                        energyToTransfer *= 1.5f;
+                    //tag = number of tokens on cell
+                    if (otherCell->tag > 0) {
+                        auto cellFunctionWeaponTokenPenalty =
+                            SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponTokenPenalty, data, cell->absPos);
+                        energyToTransfer *= (1.0f - cellFunctionWeaponTokenPenalty);
                     }
-                    if (otherCell->numConnections < cell->numConnections - 1) {
-                        energyToTransfer *= 1.5f * 1.5f;
-                    }
+
                     if (energyToTransfer >= 0) {
                         if (otherCell->energy > energyToTransfer) {
                             otherCell->energy -= energyToTransfer;

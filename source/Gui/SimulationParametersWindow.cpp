@@ -397,10 +397,10 @@ void _SimulationParametersWindow::processBase(
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorUnfittingPenalty)
+                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorDominance)
                 .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell does not have the successive "
                                      "color of the attacker cell.")),
-            simParameters.spotValues.cellFunctionWeaponColorUnfittingPenalty);
+            simParameters.spotValues.cellFunctionWeaponColorDominance);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
@@ -412,6 +412,24 @@ void _SimulationParametersWindow::processBase(
                     std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
                                 "geometry of the attacked cell does not match the attacking cell.")),
             simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Connections mismatch penalty")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponConnectionsMismatchPenalty)
+                .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contain more connections.")),
+            simParameters.spotValues.cellFunctionWeaponConnectionsMismatchPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Token penalty")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponTokenPenalty)
+                .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contains a token.")),
+            simParameters.spotValues.cellFunctionWeaponTokenPenalty);
 
         /**
          * Cell specialization: Sensor function
@@ -682,8 +700,8 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponColorUnfittingPenalty),
-            spot.values.cellFunctionWeaponColorUnfittingPenalty);
+                .defaultValue(origSpot.values.cellFunctionWeaponColorDominance),
+            spot.values.cellFunctionWeaponColorDominance);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
@@ -692,6 +710,22 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .max(5.0f)
                 .defaultValue(origSpot.values.cellFunctionWeaponGeometryDeviationExponent),
             spot.values.cellFunctionWeaponGeometryDeviationExponent);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Connections mismatch penalty")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origSpot.values.cellFunctionWeaponConnectionsMismatchPenalty),
+            spot.values.cellFunctionWeaponConnectionsMismatchPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Token penalty")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origSpot.values.cellFunctionWeaponTokenPenalty),
+            spot.values.cellFunctionWeaponTokenPenalty);
     }
     ImGui::EndChild();
 }
