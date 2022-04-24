@@ -68,7 +68,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
                 nextTokenCells[numNextTokenCells++] = connectedCell;
             }
 
-            token->energy = numNextTokenCells > 0 ? token->energy / numNextTokenCells : token->energy;
+            auto tokenEnergy = numNextTokenCells > 0 ? token->energy / numNextTokenCells : token->energy;
 
             for (int i = 0; i < numNextTokenCells; ++i) {
                 auto const& connectedCell = nextTokenCells[i];
@@ -81,13 +81,27 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
                     connectedCell->energy = averageEnergy;
                     lock.releaseLock();
                 }
-
                 token->memory[Enums::Branching_TokenBranchNumber] = connectedCell->branchNumber;
+                
+                auto newToken = token;
                 if (0 == i) {
                     token->sourceCell = token->cell;
                     token->cell = connectedCell;
                 } else {
-                    factory.duplicateToken(connectedCell, token);
+                    newToken = factory.duplicateToken(connectedCell, token);
+                }
+                newToken->energy = tokenEnergy;
+
+                //token has too low energy? => try to steal energy from underlying cell
+                if (cudaSimulationParameters.cellProvideEnergyForToken && tokenEnergy < cudaSimulationParameters.tokenMinEnergy) {
+                    if (cell->tryLock()) {
+                        if (cell->energy > cudaSimulationParameters.tokenMinEnergy + cellMinEnergy + 0.1f) {
+                            auto energyToTransfer = cudaSimulationParameters.tokenMinEnergy + 0.1f - tokenEnergy;
+                            cell->energy -= energyToTransfer;
+                            token->energy += energyToTransfer;
+                        }
+                        cell->releaseLock();
+                    }
                 }
             }
         }

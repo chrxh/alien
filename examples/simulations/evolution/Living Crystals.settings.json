@@ -15,13 +15,12 @@
             "max velocity": "2.000000",
             "max binding distance": "2.600000",
             "repulsion strength": "0.080000",
+            "provide energy for token": "true",
             "mutation rate": "0.000000",
             "min distance": "0.300000",
             "max distance": "1.300000",
             "max force": "0.367000",
             "max force decay probability": "0.200000",
-            "min token usages": "40000",
-            "token usage decay probability": "0.000002",
             "max bonds": "6",
             "max token": "3",
             "max token branch number": "6",
@@ -30,6 +29,8 @@
             "fusion velocity": "0.206000",
             "max binding energy": "500000.000000",
             "function": {
+                "min invocations": "40000",
+                "invocations decay probability": "0.000000",
                 "computer": {
                     "max instructions": "15",
                     "memory size": "8"
@@ -39,7 +40,9 @@
                     "energy cost": "0.900000",
                     "geometry deviation exponent": "0.222000",
                     "target color mismatch penalty": "0.000000",
-                    "color penalty": "0.545000"
+                    "color penalty": "0.545000",
+                    "connections mismatch penalty": "0.330000",
+                    "token penalty": "0.000000"
                 },
                 "constructor": {
                     "offspring": {
@@ -94,11 +97,15 @@
                     "max binding energy": "500000.000000",
                     "mutation rate": "0.000000",
                     "function": {
+                        "min invocations": "40000",
+                        "invocations decay probability": "0.000000",
                         "weapon": {
                             "energy cost": "0.200000",
                             "target color mismatch penalty": "0.000000",
                             "color penalty": "0.000000",
-                            "geometry deviation exponent": "0.000000"
+                            "geometry deviation exponent": "0.000000",
+                            "connections mismatch penalty": "0.330000",
+                            "token penalty": "0.000000"
                         }
                     }
                 },
@@ -129,11 +136,15 @@
                     "max binding energy": "500000.000000",
                     "mutation rate": "0.000000",
                     "function": {
+                        "min invocations": "40000",
+                        "invocations decay probability": "0.000000",
                         "weapon": {
                             "energy cost": "0.200000",
                             "target color mismatch penalty": "0.000000",
                             "color penalty": "0.000000",
-                            "geometry deviation exponent": "0.000000"
+                            "geometry deviation exponent": "0.000000",
+                            "connections mismatch penalty": "0.330000",
+                            "token penalty": "0.000000"
                         }
                     }
                 },
