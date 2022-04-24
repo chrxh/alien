@@ -358,7 +358,7 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(1000000)
                 .logarithmic(true)
-                .tooltip(std::string("Minimum number of invocations of a cell function at which the cell remains stable. If the value is exceeded, the cell "
+                .tooltip(std::string("Minimum number of invocations of a cell function up to which the cell remains stable. If the value is exceeded, the cell "
                                      "decays with a certain probability.")),
             simParameters.spotValues.cellFunctionMinInvocations);
         AlienImGui::SliderFloat(
