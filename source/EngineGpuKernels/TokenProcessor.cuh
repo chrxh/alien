@@ -39,7 +39,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& token = tokens.at(index);
         auto cell = token->cell;
-//        atomicAdd(&cell->tokenUsages, 1);
+        atomicAdd(&cell->cellFunctionInvocations, 1);
 
         int numNextTokenCells = 0;
         Cell* nextTokenCells[MAX_CELL_BONDS];

@@ -72,7 +72,7 @@ struct CellAccessTO
     char staticData[MAX_CELL_STATIC_BYTES];
     unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
-    int tokenUsages;
+    int cellFunctionInvocations;
     CellMetadataAccessTO metadata;
 	bool barrier;
 

@@ -14,6 +14,8 @@ struct SimulationParametersSpotValues
 
     float tokenMutationRate = 0;
     float cellMutationRate = 0;
+    int cellFunctionMinInvocations = 40000;
+    float cellFunctionInvocationDecayProb = 0;
     float cellFunctionWeaponEnergyCost = 0.2f;
     float cellFunctionWeaponColorTargetMismatchPenalty = 0.0f;
     float cellFunctionWeaponColorUnfittingPenalty = 0.0f;
@@ -30,6 +32,7 @@ struct SimulationParametersSpotValues
             && cellFunctionWeaponColorUnfittingPenalty == other.cellFunctionWeaponColorUnfittingPenalty
             && cellFunctionWeaponColorTargetMismatchPenalty == other.cellFunctionWeaponColorTargetMismatchPenalty
             && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
-            && cellMaxBindingEnergy == other.cellMaxBindingEnergy;
+            && cellMaxBindingEnergy == other.cellMaxBindingEnergy && cellFunctionMinInvocations == other.cellFunctionMinInvocations
+            && cellFunctionInvocationDecayProb == other.cellFunctionInvocationDecayProb;
     }
 };

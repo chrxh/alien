@@ -89,7 +89,7 @@ struct CellDescription
     CellMetadata metadata;
     CellFeatureDescription cellFeature;
     std::vector<TokenDescription> tokens;
-    int tokenUsages;
+    int cellFunctionInvocations;
     bool barrier;
 
     CellDescription() = default;
@@ -158,7 +158,7 @@ struct CellDescription
     CellDescription& delToken(int index);
     CellDescription& setTokenUsages(int value)
     {
-        tokenUsages = value;
+        cellFunctionInvocations = value;
         return *this;
     }
     bool isConnectedTo(uint64_t id) const;
@@ -309,75 +309,3 @@ private:
 };
 
 using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;
-
-
-/**
- * DEPRECATED
- */
-struct DEPRECATED_CellDescription
-{
-    uint64_t id = 0;
-
-    RealVector2D pos;
-    RealVector2D vel;
-    double energy;
-    int maxConnections;
-    std::vector<ConnectionDescription> connections;
-    bool tokenBlocked;
-    int tokenBranchNumber;
-    CellMetadata metadata;
-    CellFeatureDescription cellFeature;
-    std::vector<TokenDescription> tokens;
-    int tokenUsages;
-
-    CellDescription convert() const
-    {
-        CellDescription result;
-        result.id = id;
-        result.pos = pos;
-        result.vel = vel;
-        result.energy = energy;
-        result.maxConnections = maxConnections;
-        result.connections = connections;
-        result.tokenBlocked = tokenBlocked;
-        result.tokenBranchNumber = tokenBranchNumber;
-        result.metadata = metadata;
-        result.cellFeature = cellFeature;
-        result.tokens = tokens;
-        result.tokenUsages = tokenUsages;
-        result.barrier = false;
-        return result;
-    }
-};
-
-struct DEPRECATED_ClusterDescription
-{
-    uint64_t id = 0;
-
-    std::vector<DEPRECATED_CellDescription> cells;
-    ClusterDescription convert() const
-    {
-        ClusterDescription result;
-        result.id = id;
-        for (auto const& cell : cells) {
-            result.cells.emplace_back(cell.convert());
-        }
-        return result;
-    }
-};
-
-struct DEPRECATED_ClusteredDataDescription
-{
-    std::vector<DEPRECATED_ClusterDescription> clusters;
-    std::vector<ParticleDescription> particles;
-
-    ClusteredDataDescription convert() const
-    {
-        ClusteredDataDescription result;
-        for(auto const& cluster : clusters) {
-            result.clusters.emplace_back(cluster.convert());
-        }
-        result.particles = particles;
-        return result;
-    }
-};

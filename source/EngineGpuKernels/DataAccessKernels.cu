@@ -29,7 +29,7 @@ namespace
         cellTO.tokenBlocked = cell->tokenBlocked;
         cellTO.cellFunctionType = cell->cellFunctionType;
         cellTO.numStaticBytes = cell->numStaticBytes;
-        cellTO.tokenUsages = cell->tokenUsages;
+        cellTO.cellFunctionInvocations = cell->cellFunctionInvocations;
         cellTO.metadata.color = cell->metadata.color;
 
         copyString(
