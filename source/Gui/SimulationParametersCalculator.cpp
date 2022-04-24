@@ -26,7 +26,7 @@ SimulationParametersCalculator _SimulationParametersCalculator::createWithRandom
     target.spotValues.cellFusionVelocity = numberGenerator.getRandomFloat(0.0f, 1.0f);
     target.spotValues.tokenMutationRate = numberGenerator.getRandomFloat(0.0f, 4.0f) / 1000;
     target.spotValues.cellFunctionWeaponEnergyCost = numberGenerator.getRandomFloat(0.0f, 3.0f);
-    target.spotValues.cellFunctionWeaponColorUnfittingPenalty = numberGenerator.getRandomFloat(0.0f, 1.0f);
+    target.spotValues.cellFunctionWeaponColorDominance = numberGenerator.getRandomFloat(0.0f, 1.0f);
     target.spotValues.cellFunctionWeaponGeometryDeviationExponent = numberGenerator.getRandomFloat(0.0f, 4.0f);
 
     return std::shared_ptr<_SimulationParametersCalculator>(new _SimulationParametersCalculator(source, target));
@@ -77,8 +77,8 @@ SimulationParameters _SimulationParametersCalculator::calcCurrentParameters() co
     result.spotValues.tokenMutationRate = calcCurrentParameter(_source.spotValues.tokenMutationRate, _target.spotValues.tokenMutationRate);
     result.spotValues.cellFunctionWeaponEnergyCost =
         calcCurrentParameter(_source.spotValues.cellFunctionWeaponEnergyCost, _target.spotValues.cellFunctionWeaponEnergyCost);
-    result.spotValues.cellFunctionWeaponColorUnfittingPenalty =
-        calcCurrentParameter(_source.spotValues.cellFunctionWeaponColorUnfittingPenalty, _target.spotValues.cellFunctionWeaponColorUnfittingPenalty);
+    result.spotValues.cellFunctionWeaponColorDominance =
+        calcCurrentParameter(_source.spotValues.cellFunctionWeaponColorDominance, _target.spotValues.cellFunctionWeaponColorDominance);
     result.spotValues.cellFunctionWeaponGeometryDeviationExponent =
         calcCurrentParameter(_source.spotValues.cellFunctionWeaponGeometryDeviationExponent, _target.spotValues.cellFunctionWeaponGeometryDeviationExponent);
     return result;

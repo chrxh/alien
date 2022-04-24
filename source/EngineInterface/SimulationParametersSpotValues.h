@@ -18,9 +18,10 @@ struct SimulationParametersSpotValues
     float cellFunctionInvocationDecayProb = 0;
     float cellFunctionWeaponEnergyCost = 0.2f;
     float cellFunctionWeaponColorTargetMismatchPenalty = 0.0f;
-    float cellFunctionWeaponColorUnfittingPenalty = 0.0f;
-    float cellFunctionWeaponConnectionUnfittingPenalty = 0.0f;
+    float cellFunctionWeaponColorDominance = 0.0f;
     float cellFunctionWeaponGeometryDeviationExponent = 0.0f;
+    float cellFunctionWeaponConnectionsMismatchPenalty = 0.33f;
+    float cellFunctionWeaponTokenPenalty = 0.0f;
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
@@ -29,10 +30,12 @@ struct SimulationParametersSpotValues
             && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
             && tokenMutationRate == other.tokenMutationRate && cellMutationRate == other.cellMutationRate
             && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
-            && cellFunctionWeaponColorUnfittingPenalty == other.cellFunctionWeaponColorUnfittingPenalty
+            && cellFunctionWeaponColorDominance == other.cellFunctionWeaponColorDominance
             && cellFunctionWeaponColorTargetMismatchPenalty == other.cellFunctionWeaponColorTargetMismatchPenalty
             && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy && cellFunctionMinInvocations == other.cellFunctionMinInvocations
-            && cellFunctionInvocationDecayProb == other.cellFunctionInvocationDecayProb;
+            && cellFunctionInvocationDecayProb == other.cellFunctionInvocationDecayProb
+            && cellFunctionWeaponTokenPenalty == other.cellFunctionWeaponTokenPenalty
+            && cellFunctionWeaponConnectionsMismatchPenalty == other.cellFunctionWeaponConnectionsMismatchPenalty;
     }
 };

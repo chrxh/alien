@@ -123,9 +123,21 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         ParserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.spotValues.cellFunctionWeaponColorUnfittingPenalty,
-        defaultPar.spotValues.cellFunctionWeaponColorUnfittingPenalty,
+        simPar.spotValues.cellFunctionWeaponColorDominance,
+        defaultPar.spotValues.cellFunctionWeaponColorDominance,
         "simulation parameters.cell.function.weapon.color penalty",
+        ParserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionWeaponConnectionsMismatchPenalty,
+        defaultPar.spotValues.cellFunctionWeaponConnectionsMismatchPenalty,
+        "simulation parameters.cell.function.weapon.connections mismatch penalty",
+        ParserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionWeaponTokenPenalty,
+        defaultPar.spotValues.cellFunctionWeaponTokenPenalty,
+        "simulation parameters.cell.function.weapon.token penalty",
         ParserTask);
     JsonParser::encodeDecode(
         tree,
@@ -239,8 +251,8 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
             ParserTask);
         JsonParser::encodeDecode(
             tree,
-            spot.values.cellFunctionWeaponColorUnfittingPenalty,
-            defaultSpot.values.cellFunctionWeaponColorUnfittingPenalty,
+            spot.values.cellFunctionWeaponColorDominance,
+            defaultSpot.values.cellFunctionWeaponColorDominance,
             base + "cell.function.weapon.color penalty",
             ParserTask);
         JsonParser::encodeDecode(
@@ -248,6 +260,18 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
             spot.values.cellFunctionWeaponGeometryDeviationExponent,
             defaultSpot.values.cellFunctionWeaponGeometryDeviationExponent,
             base + "cell.function.weapon.geometry deviation exponent",
+            ParserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionWeaponConnectionsMismatchPenalty,
+            defaultSpot.values.cellFunctionWeaponConnectionsMismatchPenalty,
+            base + "cell.function.weapon.connections mismatch penalty",
+            ParserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionWeaponTokenPenalty,
+            defaultSpot.values.cellFunctionWeaponTokenPenalty,
+            base + "cell.function.weapon.token penalty",
             ParserTask);
     }
 
