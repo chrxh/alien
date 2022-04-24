@@ -59,6 +59,8 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
     JsonParser::encodeDecode(
         tree, simPar.spotValues.tokenMutationRate, defaultPar.spotValues.tokenMutationRate, "simulation parameters.token.mutation rate", ParserTask);
     JsonParser::encodeDecode(
+        tree, simPar.cellProvideEnergyForToken, defaultPar.cellProvideEnergyForToken, "simulation parameters.cell.provide energy for token", ParserTask);
+    JsonParser::encodeDecode(
         tree, simPar.spotValues.cellMutationRate, defaultPar.spotValues.cellMutationRate, "simulation parameters.cell.mutation rate", ParserTask);
 
     JsonParser::encodeDecode(tree, simPar.cellMinDistance, defaultPar.cellMinDistance, "simulation parameters.cell.min distance", ParserTask);
@@ -66,6 +68,17 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
     JsonParser::encodeDecode(tree, simPar.spotValues.cellMaxForce, defaultPar.spotValues.cellMaxForce, "simulation parameters.cell.max force", ParserTask);
     JsonParser::encodeDecode(
         tree, simPar.cellMaxForceDecayProb, defaultPar.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.cellMaxToken, defaultPar.cellMaxToken, "simulation parameters.cell.max token", ParserTask);
+    JsonParser::encodeDecode(
+        tree, simPar.cellMaxTokenBranchNumber, defaultPar.cellMaxTokenBranchNumber, "simulation parameters.cell.max token branch number", ParserTask);
+    JsonParser::encodeDecode(tree, simPar.spotValues.cellMinEnergy, defaultPar.spotValues.cellMinEnergy, "simulation parameters.cell.min energy", ParserTask);
+    JsonParser::encodeDecode(
+        tree, simPar.cellTransformationProb, defaultPar.cellTransformationProb, "simulation parameters.cell.transformation probability", ParserTask);
+    JsonParser::encodeDecode(
+        tree, simPar.spotValues.cellFusionVelocity, defaultPar.spotValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", ParserTask);
+    JsonParser::encodeDecode(
+        tree, simPar.spotValues.cellMaxBindingEnergy, simPar.spotValues.cellMaxBindingEnergy, "simulation parameters.cell.max binding energy", ParserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.spotValues.cellFunctionMinInvocations,
@@ -78,17 +91,6 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         defaultPar.spotValues.cellFunctionInvocationDecayProb,
         "simulation parameters.cell.function.invocations decay probability",
         ParserTask);
-    JsonParser::encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", ParserTask);
-    JsonParser::encodeDecode(tree, simPar.cellMaxToken, defaultPar.cellMaxToken, "simulation parameters.cell.max token", ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.cellMaxTokenBranchNumber, defaultPar.cellMaxTokenBranchNumber, "simulation parameters.cell.max token branch number", ParserTask);
-    JsonParser::encodeDecode(tree, simPar.spotValues.cellMinEnergy, defaultPar.spotValues.cellMinEnergy, "simulation parameters.cell.min energy", ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.cellTransformationProb, defaultPar.cellTransformationProb, "simulation parameters.cell.transformation probability", ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.spotValues.cellFusionVelocity, defaultPar.spotValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", ParserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.spotValues.cellMaxBindingEnergy, simPar.spotValues.cellMaxBindingEnergy, "simulation parameters.cell.max binding energy", ParserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.cellFunctionComputerMaxInstructions,

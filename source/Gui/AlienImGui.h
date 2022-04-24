@@ -94,6 +94,7 @@ public:
         MEMBER_DECLARATION(CheckboxParameters, std::string, name, "");
         MEMBER_DECLARATION(CheckboxParameters, int, textWidth, 100);
         MEMBER_DECLARATION(CheckboxParameters, std::optional<bool>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(CheckboxParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Checkbox(CheckboxParameters const& parameters, bool& value);
     static bool ToggleButton(std::string const& text, bool& value);

@@ -229,6 +229,9 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
 
     return result;
 }
