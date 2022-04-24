@@ -148,6 +148,9 @@ void _SimulationParametersWindow::processBase(
     SimulationParameters const& origSimParameters)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        /**
+         * Numerics
+         */
         AlienImGui::Group("Numerics");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -160,6 +163,9 @@ void _SimulationParametersWindow::processBase(
                                      "of the simulation.")),
             simParameters.timestepSize);
 
+        /**
+         * General physics
+         */
         AlienImGui::Group("General physics");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -230,6 +236,9 @@ void _SimulationParametersWindow::processBase(
                 .tooltip(std::string("Minimum distance between two cells without them annihilating each other.")),
             simParameters.cellMinDistance);
 
+        /**
+         * Collision and binding
+         */
         AlienImGui::Group("Collision and binding");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -303,6 +312,9 @@ void _SimulationParametersWindow::processBase(
                 .tooltip(std::string("Maximum number of connections a cell can establish with others.")),
             simParameters.cellMaxBonds);
 
+        /**
+         * Mutation
+         */
         AlienImGui::Group("Mutation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -327,6 +339,37 @@ void _SimulationParametersWindow::processBase(
                 .tooltip(std::string("Probability that a memory byte of a token is changed per time step.")),
             simParameters.spotValues.tokenMutationRate);
 
+        /**
+         * Cell specialization: General
+         */
+        AlienImGui::Group("Cell specialization: General");
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Minimum invocations")
+                .textWidth(MaxContentTextWidth)
+                .defaultValue(origSimParameters.spotValues.cellFunctionMinInvocations)
+                .min(0)
+                .max(1000000)
+                .logarithmic(true)
+                .tooltip(std::string("Minimum number of invocations of a cell function at which the cell remains stable. If the value is exceeded, the cell "
+                                     "decays with a certain probability.")),
+            simParameters.spotValues.cellFunctionMinInvocations);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Invocation decay probability")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .logarithmic(true)
+                .format("%.6f")
+                .defaultValue(origSimParameters.spotValues.cellFunctionInvocationDecayProb)
+                .tooltip(std::string("The probability that a cell will be destroyed after its function is invoked more times than the minimum invocations "
+                                     "parameter specifies.")),
+            simParameters.spotValues.cellFunctionInvocationDecayProb);
+
+        /**
+         * Cell specialization: Digestion function
+         */
         AlienImGui::Group("Cell specialization: Digestion function");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -370,6 +413,9 @@ void _SimulationParametersWindow::processBase(
                                 "geometry of the attacked cell does not match the attacking cell.")),
             simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent);
 
+        /**
+         * Cell specialization: Sensor function
+         */
         AlienImGui::Group("Cell specialization: Sensor function");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -389,6 +435,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simController->getWorldSize();
 
+        /**
+         * Location and metadata
+         */
         AlienImGui::Group("Location and metadata");
 
         auto& color = spot.color;
@@ -474,6 +523,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .format("%.1f"),
             spot.fadeoutRadius);
 
+        /**
+         * General physics
+         */
         AlienImGui::Group("General physics");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -521,6 +573,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .defaultValue(origSpot.values.cellMinEnergy),
             spot.values.cellMinEnergy);
 
+        /**
+         * Collision and binding
+         */
         AlienImGui::Group("Collision and binding");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -552,6 +607,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
         }
 
+        /**
+         * Mutation
+         */
         AlienImGui::Group("Mutation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -574,6 +632,33 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .defaultValue(origSpot.values.tokenMutationRate),
             spot.values.tokenMutationRate);
 
+        /**
+         * Cell specialization: General
+         */
+        AlienImGui::Group("Cell specialization: General");
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Minimum invocations")
+                .textWidth(MaxContentTextWidth)
+                .defaultValue(origSpot.values.cellFunctionMinInvocations)
+                .min(0)
+                .max(1000000)
+                .logarithmic(true),
+            spot.values.cellFunctionMinInvocations);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Invocation decay probability")
+                .textWidth(MaxContentTextWidth)
+                .min(0)
+                .max(1.0f)
+                .logarithmic(true)
+                .format("%.6f")
+                .defaultValue(origSpot.values.cellFunctionInvocationDecayProb),
+            spot.values.cellFunctionInvocationDecayProb);
+
+        /**
+         * Cell specialization: Digestion function
+         */
         AlienImGui::Group("Cell specialization: Digestion function");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()

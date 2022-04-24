@@ -18,6 +18,16 @@ public:
             cudaSimulationParametersSpots.spots[1].values.*value);
     }
 
+    __device__ __inline__ static int calcParameter(int SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
+    {
+        return toInt(calcResultingValue(
+            data.cellMap,
+            worldPos,
+            toFloat(cudaSimulationParameters.spotValues.*value),
+            toFloat(cudaSimulationParametersSpots.spots[0].values.*value),
+            toFloat(cudaSimulationParametersSpots.spots[1].values.*value)));
+    }
+
     __device__ __inline__ static float3
     calcColor(BaseMap const& map, float2 const& worldPos, float3 const& baseColor, float3 const& spotColor1, float3 const& spotColor2)
     {

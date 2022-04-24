@@ -54,7 +54,8 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 {
     auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
-    auto result = ImGui::SliderInt(("##" + parameters._name).c_str(), &value, parameters._min, parameters._max);
+    auto result = ImGui::SliderInt(
+        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);

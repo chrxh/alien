@@ -93,7 +93,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
         cell->mutableData[i] = cellTO.mutableData[i];
     }
-    cell->tokenUsages = cellTO.tokenUsages;
+    cell->cellFunctionInvocations = cellTO.cellFunctionInvocations;
     cell->metadata.color = cellTO.metadata.color;
     cell->barrier = cellTO.barrier;
 
@@ -263,7 +263,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
         cell->mutableData[i] = _data->numberGen1.random(255);
     }
-    cell->tokenUsages = 0;
+    cell->cellFunctionInvocations = 0;
     return cell;
 }
 
@@ -272,7 +272,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     auto result = _data->entities.cells.getNewElement();
     auto cellPointer = _data->entities.cellPointers.getNewElement();
     *cellPointer = result;
-    result->tokenUsages = 0;
+    result->cellFunctionInvocations = 0;
     result->id = _data->numberGen1.createNewId_kernel();
     result->selected = 0;
     result->locked = 0;

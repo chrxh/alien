@@ -26,6 +26,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, std::string, name, "");
         MEMBER_DECLARATION(SliderIntParameters, int, min, 0);
         MEMBER_DECLARATION(SliderIntParameters, int, max, 0);
+        MEMBER_DECLARATION(SliderIntParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);

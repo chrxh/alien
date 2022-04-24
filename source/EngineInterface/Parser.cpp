@@ -66,9 +66,18 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
     JsonParser::encodeDecode(tree, simPar.spotValues.cellMaxForce, defaultPar.spotValues.cellMaxForce, "simulation parameters.cell.max force", ParserTask);
     JsonParser::encodeDecode(
         tree, simPar.cellMaxForceDecayProb, defaultPar.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", ParserTask);
-    JsonParser::encodeDecode(tree, simPar.cellMinTokenUsages, defaultPar.cellMinTokenUsages, "simulation parameters.cell.min token usages", ParserTask);
     JsonParser::encodeDecode(
-        tree, simPar.cellTokenUsageDecayProb, defaultPar.cellTokenUsageDecayProb, "simulation parameters.cell.token usage decay probability", ParserTask);
+        tree,
+        simPar.spotValues.cellFunctionMinInvocations,
+        defaultPar.spotValues.cellFunctionMinInvocations,
+        "simulation parameters.cell.function.min invocations",
+        ParserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionInvocationDecayProb,
+        defaultPar.spotValues.cellFunctionInvocationDecayProb,
+        "simulation parameters.cell.function.invocations decay probability",
+        ParserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", ParserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxToken, defaultPar.cellMaxToken, "simulation parameters.cell.max token", ParserTask);
     JsonParser::encodeDecode(
@@ -202,6 +211,20 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         JsonParser::encodeDecode(tree, spot.values.cellMaxBindingEnergy, defaultSpot.values.cellMaxBindingEnergy, base + "cell.max binding energy", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.cellMutationRate, defaultSpot.values.cellMutationRate, base + "cell.mutation rate", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.tokenMutationRate, defaultSpot.values.tokenMutationRate, base + "token.mutation rate", ParserTask);
+
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionMinInvocations,
+            defaultSpot.values.cellFunctionMinInvocations,
+            base + "cell.function.min invocations",
+            ParserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionInvocationDecayProb,
+            defaultSpot.values.cellFunctionInvocationDecayProb,
+            base + "cell.function.invocations decay probability",
+            ParserTask);
+
         JsonParser::encodeDecode(
             tree,
             spot.values.cellFunctionWeaponEnergyCost,

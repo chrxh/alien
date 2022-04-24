@@ -334,7 +334,7 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
                        .setConstData(convertToString(cellTO.staticData, cellTO.numStaticBytes))
                        .setVolatileData(convertToString(cellTO.mutableData, cellTO.numMutableBytes));
     result.cellFeature = feature;
-    result.tokenUsages = cellTO.tokenUsages;
+    result.cellFunctionInvocations = cellTO.cellFunctionInvocations;
 
     return result;
 }
@@ -374,7 +374,7 @@ void DataConverter::addCell(
 	cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.branchNumber = cellDesc.tokenBranchNumber;
     cellTO.tokenBlocked = cellDesc.tokenBlocked;
-    cellTO.tokenUsages = cellDesc.tokenUsages;
+    cellTO.cellFunctionInvocations = cellDesc.cellFunctionInvocations;
     auto const& cellFunction = cellDesc.cellFeature;
     cellTO.cellFunctionType = cellFunction.getType();
     cellTO.numStaticBytes = std::min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);

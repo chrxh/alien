@@ -14,8 +14,6 @@ struct SimulationParameters
     float cellMinDistance = 0.3f;           //
     float cellMaxCollisionDistance = 1.3f;  //
     float cellMaxForceDecayProb = 0.2f;
-    int cellMinTokenUsages = 40000;
-    float cellTokenUsageDecayProb = 0.000001f;
     int cellMaxBonds = 6;  //
     int cellMaxToken = 3;
     int cellMaxTokenBranchNumber = 6;
@@ -50,8 +48,8 @@ struct SimulationParameters
         return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVel == other.cellMaxVel
             && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxCollisionDistance == other.cellMaxCollisionDistance
-            && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellMinTokenUsages == other.cellMinTokenUsages
-            && cellTokenUsageDecayProb == other.cellTokenUsageDecayProb && cellMaxBonds == other.cellMaxBonds
+            && cellMaxForceDecayProb == other.cellMaxForceDecayProb
+            && cellMaxBonds == other.cellMaxBonds
             && cellMaxToken == other.cellMaxToken && cellMaxTokenBranchNumber == other.cellMaxTokenBranchNumber
             && cellCreationMaxConnection == other.cellCreationMaxConnection
             && cellCreationTokenAccessNumber == other.cellCreationTokenAccessNumber

@@ -505,17 +505,22 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
 
-        bool destroyDueToTokenUsage = false;
-        if (cell->tokenUsages > cudaSimulationParameters.cellMinTokenUsages) {
-            if (_data->numberGen1.random() < cudaSimulationParameters.cellTokenUsageDecayProb) {
-                destroyDueToTokenUsage = true;
+        bool destroyDueToInvocations = false;
+        if (cell->cellFunctionInvocations > 0) {
+            auto cellFunctionMinInvocations = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionMinInvocations, data, cell->absPos);
+            if (cell->cellFunctionInvocations > cellFunctionMinInvocations) {
+                auto cellFunctionInvocationDecayProb =
+                    SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionInvocationDecayProb, data, cell->absPos);
+                if (_data->numberGen1.random() < cellFunctionInvocationDecayProb) {
+                    destroyDueToInvocations = true;
+                }
             }
         }
 
         auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
         auto cellMaxBindingEnergy =
             SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
-        if (cell->energy < cellMinEnergy || destroyDueToTokenUsage) {
+        if (cell->energy < cellMinEnergy || destroyDueToInvocations) {
             CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
         } else if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDelConnections(data, cell);
