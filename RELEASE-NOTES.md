@@ -1,5 +1,21 @@
 # Release notes
 
+## [3.1.1] - 2022-04-25
+### Added
+- new simulation parameters: cellFunctionMinInvocations, cellFunctionInvocationDecayProb, cellFunctionWeaponConnectionsMismatchPenalty and cellFunctionWeaponTokenPenalty
+- new simulation example: Maze.sim
+
+### Changed
+
+### Removed
+
+### Fixed
+- keep metadata after copy & paste of patterns
+- replicators in Dark Forst.sim repaired
+- forbid digestion of barrier cells
+- crystals in Living Crystals.sim are stabilized
+- color code 6 (gray) in pattern editor is remember like the other colors
+
 ## [3.1.0] - 2022-04-18
 ### Added
 - barrier cells introduced: indestructible and immobile
