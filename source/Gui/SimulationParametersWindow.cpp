@@ -343,13 +343,6 @@ void _SimulationParametersWindow::processBase(
          * Cell specialization: General
          */
         AlienImGui::Group("Cell specialization: General");
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Provide energy for token")
-                .textWidth(MaxContentTextWidth)
-                .defaultValue(origSimParameters.cellProvideEnergyForToken)
-                .tooltip(std::string("If activated, a token that is low on energy can receive energy from the cell to survive.")),
-            simParameters.cellProvideEnergyForToken);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name("Minimum invocations")
