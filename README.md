@@ -79,8 +79,8 @@ An installer for 64-bit binaries is provided for Windows 10: [download link](htt
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
 # Contributing to the project
-Contributions for the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
-- Pull requests for bug fixes, code cleaning or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [Discussions section](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
+Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
+- Pull requests for bug fixes, code cleaning or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [discussions forum](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
 - Providing new content (simulation or pattern files)
 - Extensions or corrections to the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
 - Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
