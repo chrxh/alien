@@ -37,7 +37,7 @@ struct SimulationParameters
 
     int tokenMemorySize = 256;
     float tokenMinEnergy = 3.0f;
-    bool cellProvideEnergyForToken = false;
+    bool cellProvideEnergyForToken = true;
 
     float radiationExponent = 1;
     float radiationProb = 0.03f;

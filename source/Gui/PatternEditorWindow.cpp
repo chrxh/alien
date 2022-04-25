@@ -228,7 +228,7 @@ void _PatternEditorWindow::processIntern()
         ImGui::SameLine();
         if (colorButton("    ##color7", Const::IndividualCellColor7)) {
             _simController->colorSelectedEntities(6, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(7);
+            _editorModel->setDefaultColorCode(6);
         }
         AlienImGui::Group("Further actions");
         if (ImGui::Button("Set uniform velocities")) {
