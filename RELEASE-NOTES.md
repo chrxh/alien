@@ -5,10 +5,6 @@
 - new simulation parameters: cellFunctionMinInvocations, cellFunctionInvocationDecayProb, cellFunctionWeaponConnectionsMismatchPenalty and cellFunctionWeaponTokenPenalty
 - new simulation example: Maze.sim
 
-### Changed
-
-### Removed
-
 ### Fixed
 - keep metadata after copy & paste of patterns
 - replicators in Dark Forst.sim repaired
