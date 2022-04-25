@@ -37,7 +37,6 @@ struct SimulationParameters
 
     int tokenMemorySize = 256;
     float tokenMinEnergy = 3.0f;
-    bool cellProvideEnergyForToken = true;
 
     float radiationExponent = 1;
     float radiationProb = 0.03f;
@@ -74,8 +73,7 @@ struct SimulationParameters
             && radiationExponent == other.radiationExponent && radiationProb == other.radiationProb
             && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-            && cellRepulsionStrength == other.cellRepulsionStrength
-            && cellProvideEnergyForToken == other.cellProvideEnergyForToken;
+            && cellRepulsionStrength == other.cellRepulsionStrength;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

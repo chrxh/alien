@@ -59,8 +59,6 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
     JsonParser::encodeDecode(
         tree, simPar.spotValues.tokenMutationRate, defaultPar.spotValues.tokenMutationRate, "simulation parameters.token.mutation rate", ParserTask);
     JsonParser::encodeDecode(
-        tree, simPar.cellProvideEnergyForToken, defaultPar.cellProvideEnergyForToken, "simulation parameters.cell.provide energy for token", ParserTask);
-    JsonParser::encodeDecode(
         tree, simPar.spotValues.cellMutationRate, defaultPar.spotValues.cellMutationRate, "simulation parameters.cell.mutation rate", ParserTask);
 
     JsonParser::encodeDecode(tree, simPar.cellMinDistance, defaultPar.cellMinDistance, "simulation parameters.cell.min distance", ParserTask);

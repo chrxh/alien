@@ -93,7 +93,7 @@ __inline__ __device__ void TokenProcessor::movement(SimulationData& data)
                 newToken->energy = tokenEnergy;
 
                 //token has too low energy? => try to steal energy from underlying cell
-                if (cudaSimulationParameters.cellProvideEnergyForToken && tokenEnergy < cudaSimulationParameters.tokenMinEnergy) {
+                if (tokenEnergy < cudaSimulationParameters.tokenMinEnergy) {
                     if (cell->tryLock()) {
                         if (cell->energy > cudaSimulationParameters.tokenMinEnergy + cellMinEnergy + 0.1f) {
                             auto energyToTransfer = cudaSimulationParameters.tokenMinEnergy + 0.1f - tokenEnergy;
