@@ -213,7 +213,7 @@ void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep,
         JsonParser::encodeDecode(tree, spot.coreRadius, defaultSpot.coreRadius, base + "core radius", ParserTask);
         JsonParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.friction, defaultSpot.values.friction, base + "friction", ParserTask);
-        JsonParser::encodeDecode(tree, spot.values.rigidity, defaultSpot.values.rigidity, "rigidity", ParserTask);
+        JsonParser::encodeDecode(tree, spot.values.rigidity, defaultSpot.values.rigidity, base + "rigidity", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.radiationFactor, defaultSpot.values.radiationFactor, base + "radiation.factor", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", ParserTask);
         JsonParser::encodeDecode(tree, spot.values.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", ParserTask);

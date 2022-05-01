@@ -1,5 +1,9 @@
 # Release notes
 
+## [3.1.2] - 2022-05-01
+### Fixed
+- rigidity spot parameter is saved correctly
+
 ## [3.1.1] - 2022-04-25
 ### Added
 - new simulation parameters: cellFunctionMinInvocations, cellFunctionInvocationDecayProb, cellFunctionWeaponConnectionsMismatchPenalty and cellFunctionWeaponTokenPenalty
