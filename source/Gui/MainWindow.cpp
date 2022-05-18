@@ -58,6 +58,7 @@
 #include "PatternAnalysisDialog.h"
 #include "MessageDialog.h"
 #include "FpsController.h"
+#include "BrowserWindow.h"
 
 namespace
 {
@@ -135,6 +136,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
+    _browserWindow = std::make_shared<_BrowserWindow>(_simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -368,6 +370,13 @@ void _MainWindow::processMenubar()
             AlienImGui::EndMenuButton();
         }
 
+        if (AlienImGui::BeginMenuButton(" " ICON_FA_GLOBE "  Network ", _networkMenuToggled, "Network")) {
+            if (ImGui::MenuItem("Browser", "ALT+W", _browserWindow->isOn())) {
+                _browserWindow->setOn(!_browserWindow->isOn());
+            }
+            AlienImGui::EndMenuButton();
+        }
+
         if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuToggled, "Windows")) {
             if (ImGui::MenuItem("Temporal control", "ALT+1", _temporalControlWindow->isOn())) {
                 _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
@@ -511,6 +520,10 @@ void _MainWindow::processMenubar()
             onPauseSimulation();
         }
 
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
+            _browserWindow->setOn(!_browserWindow->isOn());
+        }
+
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
             _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
         }
@@ -612,6 +625,7 @@ void _MainWindow::processWindows()
     _flowGeneratorWindow->process();
     _logWindow->process();
     _gettingStartedWindow->process();
+    _browserWindow->process();
 }
 
 void _MainWindow::processControllers()

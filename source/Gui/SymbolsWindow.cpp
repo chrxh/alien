@@ -122,14 +122,14 @@ void _SymbolsWindow::processIntern()
         AlienImGui::Group("Edit symbol");
     }
     AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name("Name").textWidth(ContentTextInputWidth).monospaceFont(true), _symbolName, IM_ARRAYSIZE(_symbolName));
+        AlienImGui::InputTextParameters().name("Name").textWidth(ContentTextInputWidth).monospaceFont(true), _symbolName);
     AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name("Value").textWidth(ContentTextInputWidth).monospaceFont(true), _symbolValue, IM_ARRAYSIZE(_symbolValue));
+        AlienImGui::InputTextParameters().name("Value").textWidth(ContentTextInputWidth).monospaceFont(true), _symbolValue);
     AlienImGui::Separator();
     if (_mode == Mode::Create) {
         ImGui::BeginDisabled(!isEditValid());
         if (AlienImGui::Button("Add")) {
-            onAddEntry(entries, std::string(_symbolName), std::string(_symbolValue));
+            onAddEntry(entries, _symbolName, _symbolValue);
             onClearEditFields();
         }
         ImGui::EndDisabled();
@@ -137,7 +137,7 @@ void _SymbolsWindow::processIntern()
     if (_mode == Mode::Edit) {
         ImGui::BeginDisabled(!isEditValid());
         if (AlienImGui::Button("Update")) {
-            onUpdateEntry(entries, std::string(_symbolName), std::string(_symbolValue));
+            onUpdateEntry(entries, _symbolName, _symbolValue);
             onClearEditFields();
         }
         ImGui::EndDisabled();
@@ -201,8 +201,8 @@ void _SymbolsWindow::onEditEntry(Entry const& entry)
 {
     _mode = Mode::Edit;
     _origSymbolName = entry.name;
-    StringHelper::copy(_symbolName, IM_ARRAYSIZE(_symbolName), entry.name);
-    StringHelper::copy(_symbolValue, IM_ARRAYSIZE(_symbolValue), entry.value);
+    _symbolName = entry.name;
+    _symbolValue = entry.value;
 }
 
 void _SymbolsWindow::onAddEntry(std::vector<Entry>& entries, std::string const& name, std::string const& value) const

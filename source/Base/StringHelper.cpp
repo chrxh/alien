@@ -41,5 +41,7 @@ void StringHelper::copy(char* target, int targetSize, std::string const& source)
     if (sourceSize < targetSize) {
         source.copy(target, sourceSize);
         target[sourceSize] = 0;
+    } else {
+        target[0] = 0;
     }
 }

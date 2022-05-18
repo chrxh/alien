@@ -2,9 +2,9 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
-
-
 #include "Fonts/IconsFontAwesome5.h"
+
+#include "Base/StringHelper.h"
 
 #include "StyleRepository.h"
 
@@ -150,6 +150,26 @@ void AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+}
+
+void AlienImGui::InputText(InputTextParameters const& parameters, std::string& text)
+{
+    char buffer[1024];
+    StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
+
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    if (parameters._monospaceFont) {
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+    }
+    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer));
+    if (parameters._monospaceFont) {
+        ImGui::PopFont();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    text = std::string(buffer);
 }
 
 void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& parameters, char* buffer, int bufferSize)

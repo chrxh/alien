@@ -36,8 +36,8 @@ private:
     void onDeleteEntry(std::vector<Entry>& entries, std::string const& name) const;
 
     std::string _origSymbolName;
-    char _symbolName[256];
-    char _symbolValue[256];
+    std::string _symbolName;
+    std::string _symbolValue;
 
     SimulationController _simController;
     OpenSymbolsDialog _openSymbolsDialog;

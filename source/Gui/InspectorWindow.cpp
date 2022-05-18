@@ -234,16 +234,9 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
 
         AlienImGui::Group("Metadata");
 
-        StringHelper::copy(_cellName, IM_ARRAYSIZE(_cellName), cell.metadata.name);
-
-        AlienImGui::InputText(
-            AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth),
-            _cellName,
-            IM_ARRAYSIZE(_cellName));
-        cell.metadata.name = std::string(_cellName);
+        AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth), cell.metadata.name);
 
         StringHelper::copy(_cellDescription, IM_ARRAYSIZE(_cellDescription), cell.metadata.description);
-
         AlienImGui::InputTextMultiline(
             AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(MaxCellContentTextWidth).height(0),
             _cellDescription,
