@@ -136,6 +136,9 @@ using SimulationParametersCalculator = std::shared_ptr<_SimulationParametersCalc
 class _FpsController;
 using FpsController = std::shared_ptr<_FpsController>;
 
+class _BrowserWindow;
+using BrowserWindow = std::shared_ptr<_BrowserWindow>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

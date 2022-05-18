@@ -35,34 +35,39 @@ private:
     GLFWwindow* _window;
     SimpleLogger _logger;
 
-    WindowController _windowController;
-    SimulationController _simController;
+    Viewport _viewport;
+
     SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
     SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
-    ModeController _modeController;
-    GpuSettingsDialog _gpuSettingsDialog;
-    Viewport _viewport;
-    StartupController _startupController;
     FlowGeneratorWindow _flowGeneratorWindow;
     LogWindow _logWindow;
-    NewSimulationDialog _newSimulationDialog;
-    AboutDialog _aboutDialog;
-    ColorizeDialog _colorizeDialog;
-    UiController _uiController; 
-    AutosaveController _autosaveController; 
     GettingStartedWindow _gettingStartedWindow;
+    BrowserWindow _browserWindow;
+
+    GpuSettingsDialog _gpuSettingsDialog;
+    ColorizeDialog _colorizeDialog;
+    NewSimulationDialog _newSimulationDialog;
     OpenSimulationDialog _openSimulationDialog; 
     SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
+    AboutDialog _aboutDialog;
+
+    ModeController _modeController;
+    WindowController _windowController;
+    SimulationController _simController;
+    StartupController _startupController;
+    AutosaveController _autosaveController; 
+    UiController _uiController; 
     EditorController _editorController; 
     FpsController _fpsController;
 
     bool _onClose = false;
     bool _simulationMenuToggled = false;
+    bool _networkMenuToggled = false;
     bool _windowMenuToggled = false;
     bool _settingsMenuToggled = false;
     bool _viewMenuToggled = false;

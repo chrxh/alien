@@ -17,6 +17,7 @@ public:
 protected:
     virtual void processIntern() = 0;
     virtual void processBackground() {}
+    virtual void processActivated() {}
 
     bool _on = false;
     std::string _title; 

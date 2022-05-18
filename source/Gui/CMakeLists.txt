@@ -9,6 +9,8 @@ PUBLIC
     AlienWindow.h
     AutosaveController.cpp
     AutosaveController.h
+    BrowserWindow.cpp
+    BrowserWindow.h
     ColorizeDialog.cpp
     ColorizeDialog.h
     CreatorWindow.cpp
@@ -119,3 +121,4 @@ target_link_libraries(alien imgui::imgui)
 target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
+target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)

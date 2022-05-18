@@ -43,4 +43,7 @@ bool _AlienWindow::isOn() const
 void _AlienWindow::setOn(bool value)
 {
     _on = value;
+    if (value) {
+        processActivated();
+    }
 }
