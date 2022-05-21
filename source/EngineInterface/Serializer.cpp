@@ -20,7 +20,7 @@
 #include "Base/Resources.h"
 #include "Descriptions.h"
 #include "SimulationParameters.h"
-#include "Parser.h"
+#include "SettingsParser.h"
 
 namespace cereal
 {
@@ -348,7 +348,7 @@ void Serializer::serializeDataDescription(ClusteredDataDescription const& data, 
 
 void Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, Parser::encode(timestep, generalSettings));
+    boost::property_tree::json_parser::write_json(stream, SettingsParser::encode(timestep, generalSettings));
 }
 
 void Serializer::serializeSymbolMap(SymbolMap const symbols, std::ostream& stream)
@@ -414,7 +414,7 @@ void Serializer::deserializeTimestepAndSettings(uint64_t& timestep, Settings& se
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    std::tie(timestep, settings) = Parser::decodeTimestepAndSettings(tree);
+    std::tie(timestep, settings) = SettingsParser::decodeTimestepAndSettings(tree);
 }
 
 void Serializer::deserializeSymbolMap(SymbolMap& symbolMap, std::istream& stream)

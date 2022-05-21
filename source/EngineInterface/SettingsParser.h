@@ -6,7 +6,7 @@
 
 #include "Definitions.h"
 
-class Parser
+class SettingsParser
 {
 public:
     static boost::property_tree::ptree encode(uint64_t timestep, Settings parameters);

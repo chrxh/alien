@@ -63,6 +63,10 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    RemoteSimulationData.cpp
+    RemoteSimulationData.h
+    RemoteSimulationDataParser.cpp
+    RemoteSimulationDataParser.h
     SavePatternDialog.cpp
     SavePatternDialog.h
     SaveSimulationDialog.cpp
