@@ -18,12 +18,12 @@ add_library(alien_engine_interface_lib
     Metadata.h
     MonitorData.h
     OverlayDescriptions.h
-    Parser.cpp
-    Parser.h
     SelectionShallowData.h
     Serializer.cpp
     Serializer.h
     Settings.h
+    SettingsParser.cpp
+    SettingsParser.h
     SimulationController.h
     SimulationParameters.h
     SimulationParametersSpots.h

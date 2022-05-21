@@ -1,16 +1,16 @@
-#include "Parser.h"
+#include "SettingsParser.h"
 
 #include "GeneralSettings.h"
 #include "Settings.h"
 
-boost::property_tree::ptree Parser::encode(uint64_t timestep, Settings settings)
+boost::property_tree::ptree SettingsParser::encode(uint64_t timestep, Settings settings)
 {
     boost::property_tree::ptree tree;
     encodeDecode(tree, timestep, settings, ParserTask::Encode);
     return tree;
 }
 
-std::pair<uint64_t, Settings> Parser::decodeTimestepAndSettings(
+std::pair<uint64_t, Settings> SettingsParser::decodeTimestepAndSettings(
     boost::property_tree::ptree tree)
 {
     uint64_t timestep;
@@ -25,7 +25,7 @@ namespace
     std::unordered_map<std::string, SpotShape> shapeEnumMap = {{"circular", SpotShape::Circular}, {"rectangular", SpotShape::Rectangular}};
 }
 
-void Parser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask ParserTask)
+void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask ParserTask)
 {
     Settings defaultSettings;
 
