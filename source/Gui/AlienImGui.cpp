@@ -144,7 +144,11 @@ void AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
     }
-    ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize);
+    ImGuiInputTextFlags flags = 0;
+    if (parameters._readOnly) {
+        flags = ImGuiInputTextFlags_ReadOnly;
+    }
+    ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }
@@ -162,7 +166,11 @@ void AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
     }
-    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer));
+    ImGuiInputTextFlags flags = 0;
+    if (parameters._readOnly) {
+        flags = ImGuiInputTextFlags_ReadOnly;
+    }
+    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), flags);
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }

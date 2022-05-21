@@ -58,6 +58,7 @@
 #include "PatternAnalysisDialog.h"
 #include "MessageDialog.h"
 #include "FpsController.h"
+#include "NetworkController.h"
 #include "BrowserWindow.h"
 
 namespace
@@ -117,6 +118,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _editorController =
         std::make_shared<_EditorController>(_simController, _viewport);
     _modeController = std::make_shared<_ModeController>(_editorController);
+    _networkController = std::make_shared<_NetworkController>();
     _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
@@ -136,7 +138,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
-    _browserWindow = std::make_shared<_BrowserWindow>(_simController);
+    _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
