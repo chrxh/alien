@@ -64,6 +64,7 @@ private:
     UiController _uiController; 
     EditorController _editorController; 
     FpsController _fpsController;
+    NetworkController _networkController;
 
     bool _onClose = false;
     bool _simulationMenuToggled = false;

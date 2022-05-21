@@ -139,6 +139,9 @@ using FpsController = std::shared_ptr<_FpsController>;
 class _BrowserWindow;
 using BrowserWindow = std::shared_ptr<_BrowserWindow>;
 
+class _NetworkController;
+using NetworkController = std::shared_ptr<_NetworkController>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

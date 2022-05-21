@@ -69,6 +69,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, std::string, name, "");
         MEMBER_DECLARATION(InputTextParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
+        MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
     };
     static void InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static void InputText(InputTextParameters const& parameters, std::string& text);

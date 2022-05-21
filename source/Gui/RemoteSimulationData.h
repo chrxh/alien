@@ -9,10 +9,12 @@ enum RemoteSimulationDataColumnId
     RemoteSimulationDataColumnId_Timestamp,
     RemoteSimulationDataColumnId_UserName,
     RemoteSimulationDataColumnId_SimulationName,
+    RemoteSimulationDataColumnId_Likes,
     RemoteSimulationDataColumnId_Width,
     RemoteSimulationDataColumnId_Height,
     RemoteSimulationDataColumnId_Description,
-    RemoteSimulationDataColumnId_Version
+    RemoteSimulationDataColumnId_Version,
+    RemoteSimulationDataColumnId_Actions
 };
 
 class RemoteSimulationData
