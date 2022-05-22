@@ -53,8 +53,8 @@ void _BrowserWindow::processTable()
         //sort our data if sort specs have been changed!
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs())
             if (sortSpecs->SpecsDirty) {
-                if (_remoteSimulationDatas.size() > 1) {
-                    std::sort(_remoteSimulationDatas.begin(), _remoteSimulationDatas.end(), [&](auto const& left, auto const& right) {
+                if (_filteredRemoteSimulationDatas.size() > 1) {
+                    std::sort(_filteredRemoteSimulationDatas.begin(), _filteredRemoteSimulationDatas.end(), [&](auto const& left, auto const& right) {
                         return RemoteSimulationData::compare(&left, &right, sortSpecs) < 0;
                     });
                 }
@@ -62,10 +62,10 @@ void _BrowserWindow::processTable()
             }
 
         ImGuiListClipper clipper;
-        clipper.Begin(_remoteSimulationDatas.size());
+        clipper.Begin(_filteredRemoteSimulationDatas.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                RemoteSimulationData* item = &_remoteSimulationDatas[row];
+                RemoteSimulationData* item = &_filteredRemoteSimulationDatas[row];
 
                 const bool isItemSelected = _selection.find(row) != _selection.end();
 
@@ -116,10 +116,40 @@ void _BrowserWindow::processStatus()
 
 void _BrowserWindow::processFilter()
 {
-    AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter);
+    if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
+        _filteredRemoteSimulationDatas.clear();
+        for (auto const& remoteSimulationData : _remoteSimulationDatas) {
+            auto match = false;
+            if (remoteSimulationData.description.find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (std::to_string(remoteSimulationData.width).find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (std::to_string(remoteSimulationData.height).find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (remoteSimulationData.simName.find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (remoteSimulationData.timestamp.find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (remoteSimulationData.userName.find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (remoteSimulationData.version.find(_filter) != std::string::npos) {
+                match = true;
+            }
+            if (match) {
+                _filteredRemoteSimulationDatas.emplace_back(remoteSimulationData);
+            }
+        }
+    }
 }
 
 void _BrowserWindow::processActivated()
 {
     _remoteSimulationDatas = _networkController->getRemoteSimulationDataList();
+    _filteredRemoteSimulationDatas = _remoteSimulationDatas;
 }

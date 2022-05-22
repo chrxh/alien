@@ -137,7 +137,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     }
 }
 
-void AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
+bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -148,15 +148,17 @@ void AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._readOnly) {
         flags = ImGuiInputTextFlags_ReadOnly;
     }
-    ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
+    auto result = ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+
+    return result;
 }
 
-void AlienImGui::InputText(InputTextParameters const& parameters, std::string& text)
+bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& text)
 {
     char buffer[1024];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
@@ -170,7 +172,7 @@ void AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
     if (parameters._readOnly) {
         flags = ImGuiInputTextFlags_ReadOnly;
     }
-    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), flags);
+    auto result = ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), flags);
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }
@@ -178,6 +180,8 @@ void AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
     ImGui::TextUnformatted(parameters._name.c_str());
 
     text = std::string(buffer);
+
+    return result;
 }
 
 void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& parameters, char* buffer, int bufferSize)
