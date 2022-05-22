@@ -24,6 +24,7 @@ private:
     std::string _filter;
     std::set<int> _selection;
     std::vector<RemoteSimulationData> _remoteSimulationDatas;
+    std::vector<RemoteSimulationData> _filteredRemoteSimulationDatas;
 
     SimulationController _simController;
     NetworkController _networkController;

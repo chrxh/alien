@@ -71,8 +71,8 @@ public:
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
     };
-    static void InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
-    static void InputText(InputTextParameters const& parameters, std::string& text);
+    static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
+    static bool InputText(InputTextParameters const& parameters, std::string& text);
 
     struct InputTextMultilineParameters
     {
