@@ -48,6 +48,7 @@ Further information and artwork:
 * [YouTube](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw)
 * [Twitter](https://twitter.com/chrx_h)
 * [Reddit](https://www.reddit.com/r/AlienProject)
+* [Discord](https://discord.gg/7bjyZdXXQ2)
 
 # Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
