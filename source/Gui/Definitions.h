@@ -142,6 +142,9 @@ using BrowserWindow = std::shared_ptr<_BrowserWindow>;
 class _NetworkController;
 using NetworkController = std::shared_ptr<_NetworkController>;
 
+class _LoginDialog;
+using LoginDialog = std::shared_ptr<_LoginDialog>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

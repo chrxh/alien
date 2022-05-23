@@ -146,7 +146,10 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     }
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
-        flags = ImGuiInputTextFlags_ReadOnly;
+        flags |= ImGuiInputTextFlags_ReadOnly;
+    }
+    if (parameters._password) {
+        flags |= ImGuiInputTextFlags_Password;
     }
     auto result = ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
     if (parameters._monospaceFont) {
@@ -162,23 +165,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
 {
     char buffer[1024];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
-
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    if (parameters._monospaceFont) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-    }
-    ImGuiInputTextFlags flags = 0;
-    if (parameters._readOnly) {
-        flags = ImGuiInputTextFlags_ReadOnly;
-    }
-    auto result = ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), flags);
-    if (parameters._monospaceFont) {
-        ImGui::PopFont();
-    }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
-
+    auto result = InputText(parameters, buffer, IM_ARRAYSIZE(buffer));
     text = std::string(buffer);
 
     return result;
@@ -505,7 +492,7 @@ void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
         toFloat((rgb >> 16) & 0xff) / 255, toFloat((rgb >> 8) & 0xff) / 255, toFloat((rgb & 0xff)) / 255, h, s, v);
 }
 
-bool AlienImGui::ToggleButton(std::string const& text, bool& value)
+bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& value)
 {
     auto origValue = value;
     ImVec4* colors = ImGui::GetStyle().Colors;
@@ -517,7 +504,7 @@ bool AlienImGui::ToggleButton(std::string const& text, bool& value)
     float radius = height * 0.50f*0.8f;
     height = height * 0.8f;
 
-    ImGui::InvisibleButton(text.c_str(), ImVec2(width, height));
+    ImGui::InvisibleButton(parameters._name.c_str(), ImVec2(width, height));
     if (ImGui::IsItemClicked()) {
         value = !value;
     }
@@ -543,7 +530,10 @@ bool AlienImGui::ToggleButton(std::string const& text, bool& value)
     draw_list->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
 
     ImGui::SameLine();
-    ImGui::TextUnformatted(text.c_str());
+    ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
 
     return value != origValue;
 }

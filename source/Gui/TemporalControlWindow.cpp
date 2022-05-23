@@ -80,7 +80,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 
 void _TemporalControlWindow::processTpsRestriction()
 {
-    AlienImGui::ToggleButton("Slow down", _slowDown);
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Slow down"), _slowDown);
     ImGui::SameLine();
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);

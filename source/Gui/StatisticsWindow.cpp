@@ -46,7 +46,7 @@ void _StatisticsWindow::processIntern()
 {
     _exportStatisticsDialog->process();
 
-    AlienImGui::ToggleButton("Real time", _live);
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Real time"), _live);
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);

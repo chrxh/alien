@@ -27,7 +27,7 @@ void _FlowGeneratorWindow::processIntern()
 
     auto worldSize = _simController->getWorldSize();
 
-    AlienImGui::ToggleButton(" ", flowFieldSettings.active);
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name(" "), flowFieldSettings.active);
     ImGui::SameLine();
     
     const char* flowTypes[] = {"Radial flow"};

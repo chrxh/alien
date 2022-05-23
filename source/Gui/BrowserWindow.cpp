@@ -104,8 +104,8 @@ void _BrowserWindow::processStatus()
     if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(30.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
-        if (_networkController->isLoggedIn()) {
-            AlienImGui::Text("Logged in to " + _networkController->getServerAddress() + ".");
+        if (auto userName = _networkController->getLoggedInUserName()) {
+            AlienImGui::Text("Logged as " + *userName + " @ " + _networkController->getServerAddress() + ".");
         } else {
             AlienImGui::Text("Not logged in to " + _networkController->getServerAddress() + ".");
         }

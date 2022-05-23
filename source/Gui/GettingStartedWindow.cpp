@@ -124,7 +124,7 @@ void _GettingStartedWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
-    AlienImGui::ToggleButton("Show after startup", _showAfterStartup);
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
 }
 
 void _GettingStartedWindow::openWeblink(std::string const& link)
