@@ -39,5 +39,5 @@ void _LogWindow::processIntern()
 
     ImGui::Spacing();
     ImGui::Spacing();
-    AlienImGui::ToggleButton("Verbose", _verbose);
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Verbose"), _verbose);
 }

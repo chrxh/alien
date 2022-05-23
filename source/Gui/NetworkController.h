@@ -10,10 +10,12 @@ public:
     ~_NetworkController();
 
     std::string getServerAddress() const;
-    bool isLoggedIn() const;
+    std::optional<std::string> getLoggedInUserName() const;
+    bool login(std::string const& userName, std::string const& passwordHash);
 
     std::vector<RemoteSimulationData> getRemoteSimulationDataList() const;
 
 private:
-    std::string _server;
+    std::string _serverAddress;
+    std::optional<std::string> _loggedInUserName;
 };

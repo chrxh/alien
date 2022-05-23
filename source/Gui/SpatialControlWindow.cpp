@@ -62,7 +62,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::PopFont();
 
         AlienImGui::Separator();
-        AlienImGui::ToggleButton("Autotracking on selection", _centerSelection);
+        AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Autotracking on selection"), _centerSelection);
         ImGui::Spacing();
         ImGui::Spacing();
         float sensitivity = _viewport->getZoomSensitivity();
@@ -137,7 +137,7 @@ void _SpatialControlWindow::processResizeDialog()
 
                 ImGui::EndTable();
             }
-            AlienImGui::ToggleButton("Scale content", _scaleContent);
+            AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
 
             AlienImGui::Separator();
 

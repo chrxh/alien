@@ -55,6 +55,7 @@ private:
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
+    LoginDialog _loginDialog;
 
     ModeController _modeController;
     WindowController _windowController;

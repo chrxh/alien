@@ -70,6 +70,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
+        MEMBER_DECLARATION(InputTextParameters, bool, password, false);
     };
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static bool InputText(InputTextParameters const& parameters, std::string& text);
@@ -99,7 +100,13 @@ public:
         MEMBER_DECLARATION(CheckboxParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Checkbox(CheckboxParameters const& parameters, bool& value);
-    static bool ToggleButton(std::string const& text, bool& value);
+
+    struct ToggleButtonParameters
+    {
+        MEMBER_DECLARATION(ToggleButtonParameters, std::string, name, "");
+        MEMBER_DECLARATION(ToggleButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
     static void Text(std::string const& text);
 

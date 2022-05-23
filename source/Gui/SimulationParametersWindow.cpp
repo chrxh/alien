@@ -91,7 +91,7 @@ void _SimulationParametersWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
-    if (AlienImGui::ToggleButton("Change automatically", _changeAutomatically)) {
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Change automatically"), _changeAutomatically)) {
         if (_changeAutomatically) {
             _simulationParametersChanger->activate();
         } else {
