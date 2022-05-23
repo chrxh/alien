@@ -27,6 +27,7 @@ void _BrowserWindow::processIntern()
     processTable();
     processStatus();
     processFilter();
+    processRefresh();
 }
 
 void _BrowserWindow::processTable()
@@ -35,7 +36,7 @@ void _BrowserWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY;
-    if (ImGui::BeginTable("table_sorting", 8, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(70.0f)), 0.0f)) {
+    if (ImGui::BeginTable("table_sorting", 8, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
             "Timestamp", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Timestamp);
         ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_UserName);
@@ -67,7 +68,7 @@ void _BrowserWindow::processTable()
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 RemoteSimulationData* item = &_filteredRemoteSimulationDatas[row];
 
-                const bool isItemSelected = _selection.find(row) != _selection.end();
+                auto isItemSelected = _selectionIds.find(item->id) != _selectionIds.end();
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow();
@@ -76,7 +77,7 @@ void _BrowserWindow::processTable()
 
                 ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
                 if (ImGui::Selectable(item->timestamp.c_str(), isItemSelected, selectableFlags, ImVec2(0, 0.0f))) {
-                    _selection = {row};
+                    _selectionIds = {item->id};
                 }
 
                 ImGui::TableNextColumn();
@@ -145,6 +146,13 @@ void _BrowserWindow::processFilter()
                 _filteredRemoteSimulationDatas.emplace_back(remoteSimulationData);
             }
         }
+    }
+}
+
+void _BrowserWindow::processRefresh()
+{
+    if (AlienImGui::Button("Refresh")) {
+        processActivated();
     }
 }
 

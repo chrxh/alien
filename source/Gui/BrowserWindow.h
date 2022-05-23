@@ -18,11 +18,12 @@ private:
     void processTable();
     void processStatus();
     void processFilter();
+    void processRefresh();
 
     void processActivated() override;
 
     std::string _filter;
-    std::set<int> _selection;
+    std::set<std::string> _selectionIds;
     std::vector<RemoteSimulationData> _remoteSimulationDatas;
     std::vector<RemoteSimulationData> _filteredRemoteSimulationDatas;
 
