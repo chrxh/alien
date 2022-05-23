@@ -20,6 +20,7 @@ enum RemoteSimulationDataColumnId
 class RemoteSimulationData
 {
 public:
+    std::string id;
     std::string timestamp;
     std::string userName;
     std::string simName;

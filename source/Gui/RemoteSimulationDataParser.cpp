@@ -5,6 +5,7 @@ std::vector<RemoteSimulationData> RemoteSimulationDataParser::decode(boost::prop
     std::vector<RemoteSimulationData> result;
     for (auto const& [key, subTree] : tree) {
         RemoteSimulationData entry;
+        entry.id = subTree.get<std::string>("id");
         entry.simName = subTree.get<std::string>("simulationName");
         entry.userName = subTree.get<std::string>("userName");
         entry.width = subTree.get<int>("width");
