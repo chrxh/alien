@@ -52,17 +52,21 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("First steps");
         ImGui::PopStyleColor();
 
-        ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation "
-                    "file. You find various demos in ./examples/simulations/* demonstrating capabilities of the "
+        ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation file.");
+        ImGui::Text(ICON_FA_CARET_RIGHT);
+        ImGui::SameLine();
+        ImGui::Text("You find various demos in ./examples/simulations/* demonstrating capabilities of the "
                     "engine ranging from physics examples, self-deploying structures, replicators to small "
                     "ecosystems. To this end, please invoke Simulation " ICON_FA_ARROW_RIGHT
-                    " Open in the menu and select a file. More simulations from other users can be downloaded from the server. "
-                    "For this purpose, open the Browser from "
-                    "the Network menu. However, for starters, you can use the simple evolution example "
-                    "already loaded.");
-
-        ImGui::Text("At the beginning it is recommended to get familiar with the windows for temporal and spatial "
-                    "controls. The handling should be intuitive and requires no deeper knowledge.");
+                    " Open in the menu and select a file.");
+        ImGui::Text(ICON_FA_CARET_RIGHT);
+        ImGui::SameLine();
+        ImGui::Text("Simulations from other users can be downloaded by using the in-game browser that is connected to a server. "
+                    "For this purpose, please click on 'Browser' in the 'Network' menu. In order to upload own simulations to the server and rate other "
+                    "simulations, you need to create a new user, which can be accomplished in the login dialog.");
+            
+        ImGui::Text("For the beginning, however, you can use the simple evolution example already loaded. At the beginning it is recommended to get familiar with "
+                    "the windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
         ImGui::Text("In the temporal control window, a simulation can be started or paused. The execution speed "
