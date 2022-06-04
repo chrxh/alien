@@ -377,6 +377,10 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GLOBE "  Network ", _networkMenuToggled, "Network", false)) {
+            if (ImGui::MenuItem("Browser", "ALT+W", _browserWindow->isOn())) {
+                _browserWindow->setOn(!_browserWindow->isOn());
+            }
+            ImGui::Separator();
             if (ImGui::MenuItem("Login", "ALT+L")) {
                 _loginDialog->show();
             }
@@ -385,9 +389,6 @@ void _MainWindow::processMenubar()
                 _networkController->logout();
             }
             ImGui::EndDisabled();
-            if (ImGui::MenuItem("Browser", "ALT+W", _browserWindow->isOn())) {
-                _browserWindow->setOn(!_browserWindow->isOn());
-            }
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Upload", "ALT+D")) {
                 _uploadSimulationDialog->show();

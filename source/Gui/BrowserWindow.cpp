@@ -53,16 +53,19 @@ void _BrowserWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY;
-    if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
             "Timestamp", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Timestamp);
         ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_UserName);
         ImGui::TableSetupColumn(
             "Simulation name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_SimulationName);
+        ImGui::TableSetupColumn(
+            "Description", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Description);
         ImGui::TableSetupColumn("Likes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
-        ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Size);
+        ImGui::TableSetupColumn("Particles", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_FileSize);
         ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Version);
         ImGui::TableSetupColumn(
             "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthStretch, 0.0f, RemoteSimulationDataColumnId_Actions);
@@ -70,8 +73,8 @@ void _BrowserWindow::processTable()
         ImGui::TableHeadersRow();
 
         //sort our data if sort specs have been changed!
-        if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs())
-            if (sortSpecs->SpecsDirty) {
+        if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
+            if (sortSpecs->SpecsDirty || _scheduleSort) {
                 if (_filteredRemoteSimulationDatas.size() > 1) {
                     std::sort(_filteredRemoteSimulationDatas.begin(), _filteredRemoteSimulationDatas.end(), [&](auto const& left, auto const& right) {
                         return RemoteSimulationData::compare(&left, &right, sortSpecs) < 0;
@@ -79,6 +82,7 @@ void _BrowserWindow::processTable()
                 }
                 sortSpecs->SpecsDirty = false;
             }
+        }
 
         ImGuiListClipper clipper;
         clipper.Begin(_filteredRemoteSimulationDatas.size());
@@ -105,10 +109,14 @@ void _BrowserWindow::processTable()
                 ImGui::TableNextColumn();
                 AlienImGui::Text(item->simName);
                 ImGui::TableNextColumn();
+                AlienImGui::Text(item->description);
+                ImGui::TableNextColumn();
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->width));
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->height));
+                ImGui::TableNextColumn();
+                AlienImGui::Text(StringHelper::format(item->particles / 1000) + " K");
                 ImGui::TableNextColumn();
                 AlienImGui::Text(StringHelper::format(item->contentSize / 1024) + " KB");
                 ImGui::TableNextColumn();
@@ -155,31 +163,9 @@ void _BrowserWindow::processFilter()
 {
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
         _filteredRemoteSimulationDatas.clear();
-        for (auto const& remoteSimulationData : _remoteSimulationDatas) {
-            auto match = false;
-            if (remoteSimulationData.description.find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (std::to_string(remoteSimulationData.width).find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (std::to_string(remoteSimulationData.height).find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (remoteSimulationData.simName.find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (remoteSimulationData.timestamp.find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (remoteSimulationData.userName.find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (remoteSimulationData.version.find(_filter) != std::string::npos) {
-                match = true;
-            }
-            if (match) {
-                _filteredRemoteSimulationDatas.emplace_back(remoteSimulationData);
+        for (auto const& entry : _remoteSimulationDatas) {
+            if (entry.matchWithFilter(_filter)) {
+                _filteredRemoteSimulationDatas.emplace_back(entry);
             }
         }
     }
@@ -189,6 +175,7 @@ void _BrowserWindow::processRefresh()
 {
     if (AlienImGui::Button("Refresh")) {
         processActivated();
+        sortTable();
     }
 }
 
@@ -196,6 +183,11 @@ void _BrowserWindow::processActivated()
 {
     _remoteSimulationDatas = _networkController->getRemoteSimulationDataList();
     _filteredRemoteSimulationDatas = _remoteSimulationDatas;
+}
+
+void _BrowserWindow::sortTable()
+{
+    _scheduleSort = true;
 }
 
 void _BrowserWindow::onOpenSimulation(std::string const& id)

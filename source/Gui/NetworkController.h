@@ -20,6 +20,7 @@ public:
         std::string const& simulationName,
         std::string const& description,
         IntVector2D const& size,
+        int particles,
         std::string const& content,
         std::string const& settings,
         std::string const& symbolMap);

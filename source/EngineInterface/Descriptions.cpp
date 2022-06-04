@@ -79,6 +79,15 @@ void ClusteredDataDescription::shift(RealVector2D const& delta)
     }
 }
 
+int ClusteredDataDescription::getNumberOfCellAndParticles() const
+{
+    int result = static_cast<int>(particles.size());
+    for (auto const& cluster : clusters) {
+        result += static_cast<int>(cluster.cells.size());
+    }
+    return result;
+}
+
 DataDescription::DataDescription(ClusteredDataDescription const& clusteredData)
 {
     for (auto const& cluster : clusteredData.clusters) {

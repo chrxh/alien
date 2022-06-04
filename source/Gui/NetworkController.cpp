@@ -94,6 +94,7 @@ void _NetworkController::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
     IntVector2D const& size,
+    int particles,
     std::string const& content,
     std::string const& settings,
     std::string const& symbolMap)
@@ -108,6 +109,7 @@ void _NetworkController::uploadSimulation(
         {"description", description, "", ""},
         {"width", std::to_string(size.x), "", ""},
         {"height", std::to_string(size.y), "", ""},
+        {"particles", std::to_string(particles), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", content, "", "application/octet-stream"},
         {"settings", settings, "", ""},

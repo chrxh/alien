@@ -27,8 +27,11 @@ private:
 
     void processActivated() override;
 
+    void sortTable();
+
     void onOpenSimulation(std::string const& id);
 
+    bool _scheduleSort = false;
     std::string _filter;
     std::set<std::string> _selectionIds;
     std::vector<RemoteSimulationData> _remoteSimulationDatas;
