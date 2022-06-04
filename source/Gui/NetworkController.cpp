@@ -3,7 +3,9 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#include <httplib.h>
+#include <cpp-httplib/httplib.h>
+
+#include "Base/Resources.h"
 
 #include "GlobalSettings.h"
 #include "RemoteSimulationDataParser.h"
@@ -64,14 +66,21 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
     auto result = tree.get<bool>("result");
     if (result) {
         _loggedInUserName = userName;
+        _passwordHash = passwordHash;
     }
     return result;
+}
+
+void _NetworkController::logout()
+{
+    _loggedInUserName = std::nullopt;
 }
 
 std::vector<RemoteSimulationData> _NetworkController::getRemoteSimulationDataList() const
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
+
     auto result = client.Get("/alien-server/getsimulationinfo.php");
     checkResult(result);
 
@@ -79,4 +88,57 @@ std::vector<RemoteSimulationData> _NetworkController::getRemoteSimulationDataLis
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     return RemoteSimulationDataParser::decode(tree);
+}
+
+void _NetworkController::uploadSimulation(
+    std::string const& simulationName,
+    std::string const& description,
+    IntVector2D const& size,
+    std::string const& content,
+    std::string const& settings,
+    std::string const& symbolMap)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::MultipartFormDataItems items = {
+        {"userName", *_loggedInUserName, "", ""},
+        {"passwordHash", *_passwordHash, "", ""},
+        {"simName", simulationName, "", ""},
+        {"description", description, "", ""},
+        {"width", std::to_string(size.x), "", ""},
+        {"height", std::to_string(size.y), "", ""},
+        {"version", Const::ProgramVersion, "", ""},
+        {"content", content, "", "application/octet-stream"},
+        {"settings", settings, "", ""},
+        {"symbolMap", symbolMap, "", ""},
+    };
+
+    auto postResult = client.Post("/alien-server/uploadsimulation.php", items);
+    checkResult(postResult);
+}
+
+void _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& id)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("id", id);
+
+    {
+        auto result = client.Get("/alien-server/downloadcontent.php", params, {});
+        checkResult(result);
+        content = result->body;
+    }
+    {
+        auto result = client.Get("/alien-server/downloadsettings.php", params, {});
+        checkResult(result);
+        settings = result->body;
+    }
+    {
+        auto result = client.Get("/alien-server/downloadsymbolmap.php", params, {});
+        checkResult(result);
+        symbolMap = result->body;
+    }
 }

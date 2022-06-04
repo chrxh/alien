@@ -39,7 +39,7 @@ void _SaveSimulationDialog::process()
         sim.symbolMap = _simController->getSymbolMap();
         sim.content = _simController->getClusteredSimulationData();
 
-        if (!Serializer::serializeSimulationToFile(firstFilename.string(), sim)) {
+        if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
             MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
         }
     }

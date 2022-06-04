@@ -43,7 +43,7 @@ void _StartupController::process()
 
     if (_state == State::RequestLoading) {
         DeserializedSimulation deserializedData;
-        if (!Serializer::deserializeSimulationFromFile(Const::AutosaveFile, deserializedData)) {
+        if (!Serializer::deserializeSimulationFromFiles(deserializedData, Const::AutosaveFile)) {
             MessageDialog::getInstance().show("Error", "The default simulation file could not be read. An empty simulation will be created.");
             deserializedData.settings.generalSettings.worldSizeX = 1000;
             deserializedData.settings.generalSettings.worldSizeY = 500;

@@ -68,8 +68,5 @@ private:
     uint64_t _entityId = 0;
     char _cellCode[1024 * 16];
     char _cellMemory[256];
-
-    char _cellDescription[1024*16];
-
     char _tokenMemory[256];
 };

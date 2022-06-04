@@ -109,6 +109,8 @@ PUBLIC
     TemporalControlWindow.h
     UiController.cpp
     UiController.h
+    UploadSimulationDialog.cpp
+    UploadSimulationDialog.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp

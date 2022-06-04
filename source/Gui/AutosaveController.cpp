@@ -59,5 +59,5 @@ void _AutosaveController::onSave()
     sim.settings = _simController->getSettings();
     sim.symbolMap = _simController->getSymbolMap();
     sim.content = _simController->getClusteredSimulationData();
-    Serializer::serializeSimulationToFile(Const::AutosaveFile, sim);
+    Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }

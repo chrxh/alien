@@ -34,7 +34,7 @@ void _OpenSymbolsDialog::process()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         SymbolMap symbolMap;
-        if (Serializer::deserializeSymbolsFromFile(firstFilename.string(), symbolMap)) {
+        if (Serializer::deserializeSymbolsFromFile(symbolMap, firstFilename.string())) {
             _simController->setSymbolMap(symbolMap);
         } else {
             MessageDialog::getInstance().show("Open symbols", "The selected file could not be opened.");

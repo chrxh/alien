@@ -151,7 +151,12 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._password) {
         flags |= ImGuiInputTextFlags_Password;
     }
-    auto result = ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
+    auto result = [&] {
+        if(!parameters._hint.empty()) {
+            return ImGui::InputTextWithHint(("##" + parameters._hint).c_str(), parameters._hint.c_str(), buffer, bufferSize, flags);
+        }
+        return ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
+    }();
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }
@@ -163,7 +168,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& text)
 {
-    char buffer[1024];
+    static char buffer[1024];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
     auto result = InputText(parameters, buffer, IM_ARRAYSIZE(buffer));
     text = std::string(buffer);
@@ -171,16 +176,27 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
     return result;
 }
 
-void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& parameters, char* buffer, int bufferSize)
+void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text)
 {
+    static char buffer[1024*16];
+    StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
+
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     auto height = parameters._height == 0
         ? ImGui::GetContentRegionAvail().y
         : StyleRepository::getInstance().scaleContent(parameters._height);
-    ImGui::InputTextMultiline(("##" + parameters._name).c_str(), buffer, bufferSize, {0, height});
+    auto id = parameters._hint.empty() ? ("##" + parameters._name).c_str() : ("##" + parameters._hint).c_str();
+    ImGui::InputTextEx(
+        ("##" + parameters._name).c_str(),
+        parameters._hint.c_str(),
+        buffer,
+        IM_ARRAYSIZE(buffer),
+        {ImGui::GetContentRegionAvail().x - textWidth, height},
+        ImGuiInputTextFlags_Multiline);
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+
+    text = std::string(buffer);
 }
 
 namespace

@@ -61,6 +61,7 @@
 #include "NetworkController.h"
 #include "BrowserWindow.h"
 #include "LoginDialog.h"
+#include "UploadSimulationDialog.h"
 
 namespace
 {
@@ -139,8 +140,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
-    _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController);
+    _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
     _loginDialog = std::make_shared<_LoginDialog>(_networkController);
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_simController, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -378,9 +380,19 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Login", "ALT+L")) {
                 _loginDialog->show();
             }
+            ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+            if (ImGui::MenuItem("Logout", "ALT+T")) {
+                _networkController->logout();
+            }
+            ImGui::EndDisabled();
             if (ImGui::MenuItem("Browser", "ALT+W", _browserWindow->isOn())) {
                 _browserWindow->setOn(!_browserWindow->isOn());
             }
+            ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+            if (ImGui::MenuItem("Upload", "ALT+D")) {
+                _uploadSimulationDialog->show();
+            }
+            ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
         }
 
@@ -533,6 +545,12 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L)) {
             _loginDialog->show();
         }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
+            _networkController->logout();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkController->getLoggedInUserName()) {
+            _uploadSimulationDialog->show();
+        }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
             _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
@@ -622,6 +640,7 @@ void _MainWindow::processDialogs()
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
     _loginDialog->process();
+    _uploadSimulationDialog->process();
     MessageDialog::getInstance().process();
     processExitDialog();
 }

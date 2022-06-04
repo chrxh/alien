@@ -67,6 +67,7 @@ public:
     struct InputTextParameters
     {
         MEMBER_DECLARATION(InputTextParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputTextParameters, std::string, hint, "");
         MEMBER_DECLARATION(InputTextParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
@@ -78,10 +79,11 @@ public:
     struct InputTextMultilineParameters
     {
         MEMBER_DECLARATION(InputTextMultilineParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputTextMultilineParameters, std::string, hint, "");
         MEMBER_DECLARATION(InputTextMultilineParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputTextMultilineParameters, float, height, 100.0f);
     };
-    static void InputTextMultiline(InputTextMultilineParameters const& parameters, char* buffer, int bufferSize);
+    static void InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text);
 
     struct ComboParameters
     {

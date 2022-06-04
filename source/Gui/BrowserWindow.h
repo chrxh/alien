@@ -9,7 +9,12 @@
 class _BrowserWindow : public _AlienWindow
 {
 public:
-    _BrowserWindow(SimulationController const& simController, NetworkController const& networkController);
+    _BrowserWindow(
+        SimulationController const& simController,
+        NetworkController const& networkController,
+        StatisticsWindow const& statisticsWindow,
+        Viewport const& viewport,
+        TemporalControlWindow const& temporalControlWindow);
     ~_BrowserWindow();
 
 private:
@@ -22,6 +27,8 @@ private:
 
     void processActivated() override;
 
+    void onOpenSimulation(std::string const& id);
+
     std::string _filter;
     std::set<std::string> _selectionIds;
     std::vector<RemoteSimulationData> _remoteSimulationDatas;
@@ -29,4 +36,7 @@ private:
 
     SimulationController _simController;
     NetworkController _networkController;
+    StatisticsWindow _statisticsWindow;
+    Viewport _viewport;
+    TemporalControlWindow _temporalControlWindow;
 };
