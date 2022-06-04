@@ -41,8 +41,7 @@ void _UploadSimulationDialog::process()
     ImGui::OpenPopup("Upload simulation");
     if (ImGui::BeginPopupModal("Upload simulation", NULL, ImGuiWindowFlags_None)) {
         AlienImGui::Text("Data privacy policy");
-        AlienImGui::HelpMarker(
-            "The simulation file, name and description are stored on the server. It is not guaranteed that these data will remain on the server.");
+        AlienImGui::HelpMarker("The simulation file, name and description are stored on the server. It might happen that the data on the server will be deleted unexpectedly in the future.");
         AlienImGui::Separator();
 
         AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Simulation name").textWidth(0), _simName);
