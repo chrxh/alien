@@ -126,7 +126,7 @@ void _BrowserWindow::processTable()
                     onOpenSimulation(item->id);
                 }
                 ImGui::SameLine();
-                ImGui::BeginDisabled();
+                ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
                 if (ImGui::Button(ICON_FA_THUMBS_UP)) {
                 }
                 ImGui::EndDisabled();
@@ -149,7 +149,7 @@ void _BrowserWindow::processStatus()
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
         if (auto userName = _networkController->getLoggedInUserName()) {
-            AlienImGui::Text("Logged as " + *userName + " @ " + _networkController->getServerAddress() + ".");
+            AlienImGui::Text("Logged in as " + *userName + " @ " + _networkController->getServerAddress() + ".");
         } else {
             AlienImGui::Text("Not logged in to " + _networkController->getServerAddress() + ".");
         }
