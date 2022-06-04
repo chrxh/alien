@@ -44,7 +44,7 @@ void _OpenSimulationDialog::process()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         DeserializedSimulation deserializedData;
-        if (Serializer::deserializeSimulationFromFile(firstFilename.string(), deserializedData)) {
+        if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
             _simController->closeSimulation();
             _statisticsWindow->reset();
 

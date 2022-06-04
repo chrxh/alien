@@ -27,6 +27,9 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
         case RemoteSimulationDataColumnId_Height:
             delta = (leftImpl->height - rightImpl->height);
             break;
+        case RemoteSimulationDataColumnId_Size:
+            delta = static_cast<int>(leftImpl->contentSize / 1024) - static_cast<int>(rightImpl->contentSize / 1024);
+            break;
         case RemoteSimulationDataColumnId_Description:
             delta = leftImpl->description.compare(rightImpl->description);
             break;

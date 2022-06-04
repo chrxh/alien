@@ -37,8 +37,8 @@ void _LoginDialog::process()
     ImGui::OpenPopup("Login");
     if (ImGui::BeginPopupModal("Login", NULL, ImGuiWindowFlags_None)) {
 
-        AlienImGui::InputText(AlienImGui::InputTextParameters().name("User name"), _userName);
-        AlienImGui::InputText(AlienImGui::InputTextParameters().name("Password").password(true), _password);
+        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
+        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
         AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip("Only hash values of the password will be saved."), _remember);
 
         AlienImGui::Separator();

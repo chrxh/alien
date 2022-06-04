@@ -56,6 +56,7 @@ private:
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
     LoginDialog _loginDialog;
+    UploadSimulationDialog _uploadSimulationDialog;
 
     ModeController _modeController;
     WindowController _windowController;

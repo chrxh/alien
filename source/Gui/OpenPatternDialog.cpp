@@ -42,7 +42,7 @@ void _OpenPatternDialog::process()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         ClusteredDataDescription content;
-        if (Serializer::deserializeContentFromFile(firstFilename.string(), content)) {
+        if (Serializer::deserializeContentFromFile(content, firstFilename.string())) {
             auto center = _viewport->getCenterInWorldPos();
             content.setCenter(center);
             _simController->addAndSelectSimulationData(DataDescription(content));

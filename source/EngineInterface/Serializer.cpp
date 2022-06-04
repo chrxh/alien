@@ -209,7 +209,7 @@ namespace cereal
 
 }
 
-bool Serializer::serializeSimulationToFile(std::string const& filename, DeserializedSimulation const& data)
+bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
 
@@ -220,11 +220,11 @@ bool Serializer::serializeSimulationToFile(std::string const& filename, Deserial
         symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
 
         {
-            zstr::ofstream fileStream(filename, std::ios::binary);
-            if (!fileStream) {
+            zstr::ofstream stream(filename, std::ios::binary);
+            if (!stream) {
                 return false;
             }
-            serializeDataDescription(data.content, fileStream);
+            serializeDataDescription(data.content, stream);
         }
         {
             std::ofstream stream(settingsFilename.string(), std::ios::binary);
@@ -248,7 +248,7 @@ bool Serializer::serializeSimulationToFile(std::string const& filename, Deserial
     }
 }
 
-bool Serializer::deserializeSimulationFromFile(std::string const& filename, DeserializedSimulation& data)
+bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
 {
     try {
         std::filesystem::path settingsFilename(filename);
@@ -282,6 +282,127 @@ bool Serializer::deserializeSimulationFromFile(std::string const& filename, Dese
     }
 }
 
+bool Serializer::serializeSimulationToStrings(
+    std::string& content,
+    std::string& timestepAndSettings,
+    std::string& symbolMap,
+    DeserializedSimulation const& data)
+{
+    try {
+        {
+            std::stringstream stdStream;
+            zstr::ostream stream(stdStream, std::ios::binary);
+            if (!stream) {
+                return false;
+            }
+            serializeDataDescription(data.content, stream);
+            stream.flush();
+            content = stdStream.str();
+        }
+        {
+            std::stringstream stream;
+            serializeTimestepAndSettings(data.timestep, data.settings, stream);
+            timestepAndSettings = stream.str();
+        }
+        {
+            std::stringstream stream;
+            serializeSymbolMap(data.symbolMap, stream);
+            symbolMap = stream.str();
+        }
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::deserializeSimulationFromStrings(
+    DeserializedSimulation& data,
+    std::string const& content,
+    std::string const& timestepAndSettings,
+    std::string const& symbolMap)
+{
+    try {
+        {
+            std::stringstream stdStream(content);
+            zstr::istream stream(stdStream, std::ios::binary);
+            if (!stream) {
+                return false;
+            }
+            deserializeDataDescription(data.content, stream);
+        }
+        {
+            std::stringstream stream(timestepAndSettings);
+            deserializeTimestepAndSettings(data.timestep, data.settings, stream);
+        }
+        {
+            std::stringstream stream(symbolMap);
+            deserializeSymbolMap(data.symbolMap, stream);
+        }
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+/*
+bool Serializer::serializeSimulationToSingleString(std::string& output, DeserializedSimulation const& data)
+{
+    try {
+        std::stringstream stream;
+        zstr::ostream zstrStream(stream);
+        if (!zstrStream) {
+            return false;
+        }
+        serializeDataDescription(data.content, zstrStream);
+        {
+            std::stringstream auxStream;
+            serializeTimestepAndSettings(data.timestep, data.settings, auxStream);
+            auto auxData = auxStream.str();
+            zstrStream << auxData;
+        }
+        {
+            std::stringstream auxStream;
+            serializeSymbolMap(data.symbolMap, auxStream);
+            auto auxData = auxStream.str();
+            zstrStream << auxData;
+        }
+        zstrStream.flush();
+        output = stream.str();
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::deserializeSimulationFromSingleString(DeserializedSimulation& data, std::string const& input)
+{
+    try {
+        std::stringstream stream(input);
+        zstr::istream zstrStream(stream);
+        if (!zstrStream) {
+            return false;
+        }
+        deserializeDataDescription(data.content, zstrStream);
+        {
+            std::string auxData;
+            zstrStream >> auxData;
+            std::stringstream auxStream(auxData);
+            deserializeTimestepAndSettings(data.timestep, data.settings, zstrStream);
+        }
+        {
+            std::string auxData;
+            zstrStream >> auxData;
+            std::stringstream auxStream(auxData);
+            deserializeSymbolMap(data.symbolMap, zstrStream);
+        }
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+*/
+
+
 bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
@@ -297,7 +418,7 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
     }
 }
 
-bool Serializer::deserializeContentFromFile(std::string const& filename, ClusteredDataDescription& content)
+bool Serializer::deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename)
 {
     try {
         if (!deserializeDataDescription(content, filename)) {
@@ -324,7 +445,7 @@ bool Serializer::serializeSymbolsToFile(std::string const& filename, SymbolMap c
     }
 }
 
-bool Serializer::deserializeSymbolsFromFile(std::string const& filename, SymbolMap& symbolMap)
+bool Serializer::deserializeSymbolsFromFile(SymbolMap& symbolMap, std::string const& filename)
 {
     try {
         std::ifstream stream(filename, std::ios::binary);
