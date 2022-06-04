@@ -66,10 +66,6 @@
       "name": "zstr"
     },
     {
-      "name": "cpp-httplib",
-      "version>=": "0.10.7"
-    },
-    {
       "name": "openssl",
       "version>=": "1.1.1l"
     }

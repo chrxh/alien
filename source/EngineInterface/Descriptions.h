@@ -274,6 +274,7 @@ struct ClusteredDataDescription
 
     RealVector2D calcCenter() const;
     void shift(RealVector2D const& delta);
+    int getNumberOfCellAndParticles() const;
 };
 
 struct DataDescription

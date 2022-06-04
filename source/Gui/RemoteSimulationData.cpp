@@ -21,17 +21,23 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
         case RemoteSimulationDataColumnId_SimulationName:
             delta = leftImpl->simName.compare(rightImpl->simName);
             break;
+        case RemoteSimulationDataColumnId_Description:
+            delta = leftImpl->description.compare(rightImpl->description);
+            break;
+        case RemoteSimulationDataColumnId_Likes:
+            delta = (leftImpl->likes - rightImpl->likes);
+            break;
         case RemoteSimulationDataColumnId_Width:
             delta = (leftImpl->width - rightImpl->width);
             break;
         case RemoteSimulationDataColumnId_Height:
             delta = (leftImpl->height - rightImpl->height);
             break;
-        case RemoteSimulationDataColumnId_Size:
-            delta = static_cast<int>(leftImpl->contentSize / 1024) - static_cast<int>(rightImpl->contentSize / 1024);
+        case RemoteSimulationDataColumnId_Particles:
+            delta = (leftImpl->particles - rightImpl->particles);
             break;
-        case RemoteSimulationDataColumnId_Description:
-            delta = leftImpl->description.compare(rightImpl->description);
+        case RemoteSimulationDataColumnId_FileSize:
+            delta = static_cast<int>(leftImpl->contentSize / 1024) - static_cast<int>(rightImpl->contentSize / 1024);
             break;
         case RemoteSimulationDataColumnId_Version:
             delta = leftImpl->version.compare(rightImpl->version);
@@ -46,4 +52,40 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
     }
 
     return 0;
+}
+
+bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
+{
+    auto match = false;
+    if (timestamp.find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (userName.find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (simName.find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (std::to_string(likes).find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (std::to_string(width).find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (std::to_string(height).find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (std::to_string(particles).find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (std::to_string(contentSize).find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (description.find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (version.find(filter) != std::string::npos) {
+        match = true;
+    }
+    return match;
 }
