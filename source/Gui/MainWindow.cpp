@@ -62,6 +62,7 @@
 #include "BrowserWindow.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
+#include "CreateUserDialog.h"
 
 namespace
 {
@@ -141,7 +142,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
-    _loginDialog = std::make_shared<_LoginDialog>(_networkController);
+    _createUserDialog = std::make_shared<_CreateUserDialog>(_networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_createUserDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_simController, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
@@ -641,6 +643,7 @@ void _MainWindow::processDialogs()
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
     _loginDialog->process();
+    _createUserDialog->process();
     _uploadSimulationDialog->process();
     MessageDialog::getInstance().process();
     processExitDialog();

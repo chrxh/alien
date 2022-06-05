@@ -72,6 +72,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
         MEMBER_DECLARATION(InputTextParameters, bool, password, false);
+        MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static bool InputText(InputTextParameters const& parameters, std::string& text);
