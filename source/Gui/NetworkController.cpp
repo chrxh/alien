@@ -106,7 +106,7 @@ void _NetworkController::uploadSimulation(
         {"userName", *_loggedInUserName, "", ""},
         {"passwordHash", *_passwordHash, "", ""},
         {"simName", simulationName, "", ""},
-        {"description", description, "", ""},
+        {"simDesc", description, "", ""},
         {"width", std::to_string(size.x), "", ""},
         {"height", std::to_string(size.y), "", ""},
         {"particles", std::to_string(particles), "", ""},

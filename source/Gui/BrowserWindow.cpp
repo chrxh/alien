@@ -16,6 +16,7 @@
 #include "StatisticsWindow.h"
 #include "Viewport.h"
 #include "TemporalControlWindow.h"
+#include "MessageDialog.h"
 
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
@@ -109,7 +110,21 @@ void _BrowserWindow::processTable()
                 ImGui::TableNextColumn();
                 AlienImGui::Text(item->simName);
                 ImGui::TableNextColumn();
+                auto textSize = ImGui::CalcTextSize(item->description.c_str());
+                auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth();
+                auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scaleContent(15.0f);
                 AlienImGui::Text(item->description);
+                if (needDetailButton) {
+                    ImGui::SameLine();
+                    ImGui::SetCursorPosX(cursorPos);
+                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0.3f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0, 0, 0.4f));
+                    auto detailClicked = AlienImGui::Button("...");
+                    ImGui::PopStyleColor(2);
+                    if (detailClicked) {
+                        MessageDialog::getInstance().show("Description", item->description.c_str());
+                    }
+                }
                 ImGui::TableNextColumn();
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->width));
