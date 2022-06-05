@@ -207,6 +207,9 @@ void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
     }
 
     std::unordered_map<uint64_t, int> cache;
+    for (auto& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
+        cache.emplace(cell.id, static_cast<int>(index));
+    }
     for (auto& cell : data.cells) {
         auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell.pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
