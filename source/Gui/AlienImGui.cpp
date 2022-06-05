@@ -162,6 +162,9 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
 
     return result;
 }

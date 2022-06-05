@@ -13,6 +13,8 @@ PUBLIC
     BrowserWindow.h
     ColorizeDialog.cpp
     ColorizeDialog.h
+    CreateUserDialog.cpp
+    CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
     Definitions.h

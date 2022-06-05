@@ -5,7 +5,7 @@
 class _LoginDialog
 {
 public:
-    _LoginDialog(NetworkController const& networkController);
+    _LoginDialog(CreateUserDialog const& createUserDialog, NetworkController const& networkController);
     ~_LoginDialog();
 
     void process();
@@ -15,6 +15,7 @@ public:
 private:
     void onLogin();
 
+    CreateUserDialog _createUserDialog;
     NetworkController _networkController;
 
     bool _show = false;
