@@ -49,13 +49,33 @@ namespace
     }
 }
 
-bool _NetworkController::login(std::string const& userName, std::string const& passwordHash)
+bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
+
     httplib::Params params;
     params.emplace("userName", userName);
-    params.emplace("passwordHash", passwordHash);
+    params.emplace("password", password);
+    params.emplace("email", email);
+
+    auto postResult = client.Post("/alien-server/createuser.php", params);
+    checkResult(postResult);
+
+    std::stringstream stream(postResult->body);
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(stream, tree);
+    return tree.get<bool>("result");
+}
+
+bool _NetworkController::login(std::string const& userName, std::string const& password)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", userName);
+    params.emplace("password", password);
 
     auto postResult = client.Post("/alien-server/login.php", params);
     checkResult(postResult);
@@ -66,7 +86,7 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
     auto result = tree.get<bool>("result");
     if (result) {
         _loggedInUserName = userName;
-        _passwordHash = passwordHash;
+        _password = password;
     }
     return result;
 }
@@ -104,7 +124,7 @@ void _NetworkController::uploadSimulation(
 
     httplib::MultipartFormDataItems items = {
         {"userName", *_loggedInUserName, "", ""},
-        {"passwordHash", *_passwordHash, "", ""},
+        {"password", *_password, "", ""},
         {"simName", simulationName, "", ""},
         {"simDesc", description, "", ""},
         {"width", std::to_string(size.x), "", ""},

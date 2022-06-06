@@ -24,26 +24,27 @@ void _CreateUserDialog::process()
 
     ImGui::OpenPopup("Create user");
     if (ImGui::BeginPopupModal("Create user", NULL, ImGuiWindowFlags_None)) {
-
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
-        AlienImGui::InputText(
-            AlienImGui::InputTextParameters().hint("Email").password(true).textWidth(0).tooltip(
-                "The email address will not be stored on the server and only used to send the confirmation code."),
-            _password);
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Re-enter password").password(true).textWidth(0), _password);
-        
+        AlienImGui::Text("Please enter your email address to receive the\nactivation code for the new user.");
         AlienImGui::Separator();
         AlienImGui::Text("Security information");
-        AlienImGui::HelpMarker(
-            "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
-            "value in the database. The email address will not be stored and only used to send the confirmation code.");
+        AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
+                               "as a SHA-256 hash value in the database.");
+        AlienImGui::Text("Data privacy policy");
+        AlienImGui::HelpMarker("The email address will only be used to send the activation code. It will not be passed on to third parties. A SHA-256 "
+                               "hash value of the email address is stored on the server side to check uniqueness.");
+        AlienImGui::Separator();
+        AlienImGui::InputText(
+            AlienImGui::InputTextParameters().hint("Email").textWidth(0),
+            _email);
+        
         AlienImGui::Separator();
 
-        ImGui::BeginDisabled(_userName.empty() || _password.empty());
+        ImGui::BeginDisabled(_email.empty());
         if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             _show = false;
+
+            onCreateUser();
         }
         ImGui::EndDisabled();
         ImGui::SetItemDefaultFocus();
@@ -58,7 +59,14 @@ void _CreateUserDialog::process()
     }
 }
 
-void _CreateUserDialog::show()
+void _CreateUserDialog::show(std::string const& userName, std::string const& password)
 {
     _show = true;
+    _userName = userName;
+    _password = password;
+}
+
+void _CreateUserDialog::onCreateUser()
+{
+    _networkController->createUser(_userName, _password, _email);
 }
