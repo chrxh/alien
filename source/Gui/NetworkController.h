@@ -12,7 +12,8 @@ public:
     std::string getServerAddress() const;
     std::optional<std::string> getLoggedInUserName() const;
 
-    bool login(std::string const& userName, std::string const& passwordHash);
+    bool createUser(std::string const& userName, std::string const& password, std::string const& email);
+    bool login(std::string const& userName, std::string const& password);
     void logout();
 
     std::vector<RemoteSimulationData> getRemoteSimulationDataList() const;
@@ -29,5 +30,5 @@ public:
 private:
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
-    std::optional<std::string> _passwordHash;
+    std::optional<std::string> _password;
 };

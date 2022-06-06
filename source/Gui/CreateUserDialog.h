@@ -10,13 +10,15 @@ public:
 
     void process();
 
-    void show();
+    void show(std::string const& userName, std::string const& password);
 
 private:
+    void onCreateUser();
+
     NetworkController _networkController;
 
     bool _show = false;
     std::string _userName;
     std::string _password;
-    std::string _reenteredPassword;
+    std::string _email;
 };
