@@ -47,7 +47,7 @@ void _LoginDialog::process()
             _remember);
 
         AlienImGui::Separator();
-        AlienImGui::Text("How to register a new user?");
+        AlienImGui::Text("How to create a new user?");
         AlienImGui::HelpMarker(
             "Please enter the desired user name and password and then proceed by clicking the 'Create user' button.");
 

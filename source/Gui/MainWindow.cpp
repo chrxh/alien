@@ -146,7 +146,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_networkController);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_createUserDialog, _networkController);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_simController, _networkController);
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
