@@ -7,9 +7,11 @@
 #include "NetworkController.h"
 #include "MessageDialog.h"
 #include "CreateUserDialog.h"
+#include "BrowserWindow.h"
 
-_LoginDialog::_LoginDialog(CreateUserDialog const& createUserDialog, NetworkController const& networkController)
-    : _createUserDialog(createUserDialog)
+_LoginDialog::_LoginDialog(BrowserWindow const& browserWindow, CreateUserDialog const& createUserDialog, NetworkController const& networkController)
+    : _browserWindow(browserWindow)
+    , _createUserDialog(createUserDialog)
     , _networkController(networkController)
 {
     auto& settings = GlobalSettings::getInstance();
@@ -98,5 +100,7 @@ void _LoginDialog::onLogin()
 {
     if (!_networkController->login(_userName, _password)) {
         MessageDialog::getInstance().show("Error", "Login failed.");
+        return;
     }
+    _browserWindow->onRefresh();
 }

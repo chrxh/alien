@@ -143,9 +143,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
-    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_networkController);
+    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_browserWindow, _networkController);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
-    _loginDialog = std::make_shared<_LoginDialog>(_createUserDialog, _networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
@@ -393,6 +393,7 @@ void _MainWindow::processMenubar()
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Logout", "ALT+T")) {
                 _networkController->logout();
+                _browserWindow->onRefresh();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
@@ -554,6 +555,7 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
             _networkController->logout();
+            _browserWindow->onRefresh();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkController->getLoggedInUserName()) {
             _uploadSimulationDialog->show();
