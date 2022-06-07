@@ -17,13 +17,15 @@ public:
         TemporalControlWindow const& temporalControlWindow);
     ~_BrowserWindow();
 
+    void onRefresh();
+
 private:
     void processIntern() override;
 
     void processTable();
     void processStatus();
     void processFilter();
-    void processRefresh();
+    void processRefreshButton();
 
     void processActivated() override;
 

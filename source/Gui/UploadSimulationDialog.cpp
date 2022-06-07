@@ -10,10 +10,15 @@
 #include "MessageDialog.h"
 #include "NetworkController.h"
 #include "StyleRepository.h"
+#include "BrowserWindow.h"
 
-_UploadSimulationDialog::_UploadSimulationDialog(SimulationController const& simController, NetworkController const& networkController)
+_UploadSimulationDialog::_UploadSimulationDialog(
+    BrowserWindow const& browserWindow,
+    SimulationController const& simController,
+    NetworkController const& networkController)
     : _simController(simController)
     , _networkController(networkController)
+    , _browserWindow(browserWindow)
 {
     auto& settings = GlobalSettings::getInstance();
     _simName = settings.getStringState("dialogs.upload.simulation name", "");
@@ -96,4 +101,5 @@ void _UploadSimulationDialog::onUpload()
         symbolMap)) {
         MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
     }
+    _browserWindow->onRefresh();
 }

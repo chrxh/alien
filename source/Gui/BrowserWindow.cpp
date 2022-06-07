@@ -37,7 +37,12 @@ _BrowserWindow::_BrowserWindow(
 }
 
 _BrowserWindow::~_BrowserWindow()
+{}
+
+void _BrowserWindow::onRefresh()
 {
+    processActivated();
+    sortTable();
 }
 
 void _BrowserWindow::processIntern()
@@ -49,7 +54,7 @@ void _BrowserWindow::processIntern()
     processTable();
     processStatus();
     processFilter();
-    processRefresh();
+    processRefreshButton();
 }
 
 void _BrowserWindow::processTable()
@@ -190,11 +195,10 @@ void _BrowserWindow::processFilter()
     }
 }
 
-void _BrowserWindow::processRefresh()
+void _BrowserWindow::processRefreshButton()
 {
     if (AlienImGui::Button("Refresh")) {
-        processActivated();
-        sortTable();
+        onRefresh();
     }
 }
 

@@ -52,6 +52,7 @@ namespace
             if (++attempt == 5) {
                 throw std::runtime_error("Error connecting to the server.");
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
