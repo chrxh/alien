@@ -18,6 +18,7 @@ public:
     void logout();
 
     bool getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const;
+    bool getLikedSimulationIdList(std::vector<std::string>& result) const;
     bool uploadSimulation(
         std::string const& simulationName,
         std::string const& description,
@@ -27,6 +28,7 @@ public:
         std::string const& settings,
         std::string const& symbolMap);
     bool downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& id);
+    bool toggleLikeSimulation(std::string const& id);
 
 private:
     std::string _serverAddress;

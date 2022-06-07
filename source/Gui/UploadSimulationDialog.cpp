@@ -89,6 +89,7 @@ void _UploadSimulationDialog::onUpload()
     std::string content, settings, symbolMap;
     if (!Serializer::serializeSimulationToStrings(content, settings, symbolMap, sim)) {
         MessageDialog::getInstance().show("Save simulation", "The simulation could not be uploaded.");
+        return;
     }
 
     if (!_networkController->uploadSimulation(
@@ -100,6 +101,7 @@ void _UploadSimulationDialog::onUpload()
         settings,
         symbolMap)) {
         MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
+        return;
     }
     _browserWindow->onRefresh();
 }

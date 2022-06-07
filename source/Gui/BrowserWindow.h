@@ -32,11 +32,14 @@ private:
     void sortTable();
 
     void onOpenSimulation(std::string const& id);
+    void onToggleLike(RemoteSimulationData& entry);
+    bool isLiked(std::string const& id);
 
     bool _scheduleActivate = false;
     bool _scheduleSort = false;
     std::string _filter;
-    std::set<std::string> _selectionIds;
+    std::unordered_set<std::string> _selectionIds;
+    std::unordered_set<std::string> _likedIds;
     std::vector<RemoteSimulationData> _remoteSimulationDatas;
     std::vector<RemoteSimulationData> _filteredRemoteSimulationDatas;
 

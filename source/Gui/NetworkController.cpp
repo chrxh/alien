@@ -144,6 +144,32 @@ bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulatio
     }
 }
 
+bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& result) const
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+
+    auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations.php", params); });
+
+    try {
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+
+        result.clear();
+        for (auto const& [key, subTree] : tree) {
+            result.emplace_back(subTree.get<std::string>("id"));
+        }
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
 bool _NetworkController::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
@@ -200,4 +226,19 @@ bool _NetworkController::downloadSimulation(std::string& content, std::string& s
     } catch (...) {
         return false;
     }
+}
+
+bool _NetworkController::toggleLikeSimulation(std::string const& id)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+    params.emplace("simId", id);
+
+    auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
+
+    return parseBoolResult(result->body);
 }

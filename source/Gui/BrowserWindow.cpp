@@ -41,7 +41,21 @@ _BrowserWindow::~_BrowserWindow()
 
 void _BrowserWindow::onRefresh()
 {
-    processActivated();
+    if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas)) {
+        MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+    }
+    _filteredRemoteSimulationDatas = _remoteSimulationDatas;
+
+    if (_networkController->getLoggedInUserName()) {
+        std::vector<std::string> likedIds;
+        if (!_networkController->getLikedSimulationIdList(likedIds)) {
+            MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+        }
+        _likedIds = std::unordered_set<std::string>(likedIds.begin(), likedIds.end());
+    } else {
+        _likedIds.clear();
+    }
+
     sortTable();
 }
 
@@ -126,15 +140,18 @@ void _BrowserWindow::processTable()
                 if (needDetailButton) {
                     ImGui::SameLine();
                     ImGui::SetCursorPosX(cursorPos);
-                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0.3f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0, 0, 0.4f));
+
+                    auto color = Const::DetailButtonColor;
+                    float h, s, v;
+                    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
+                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s, v * 0.3f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s, v * 0.4f));
                     auto detailClicked = AlienImGui::Button("...");
                     ImGui::PopStyleColor(2);
-                    if (detailClicked) {
-                        MessageDialog::getInstance().show("Description", item->description.c_str());
-                    }
+                    AlienImGui::Tooltip(item->description.c_str());
                 }
                 ImGui::TableNextColumn();
+                AlienImGui::Text(std::to_string(item->likes));
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->width));
                 ImGui::TableNextColumn();
@@ -151,7 +168,15 @@ void _BrowserWindow::processTable()
                 }
                 ImGui::SameLine();
                 ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+                auto liked = isLiked(item->id);
+                if (liked) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
+                }
                 if (ImGui::Button(ICON_FA_THUMBS_UP)) {
+                    onToggleLike(*item);
+                }
+                if (liked) {
+                    ImGui::PopStyleColor(1);
                 }
                 ImGui::EndDisabled();
                 ImGui::SameLine();
@@ -204,10 +229,7 @@ void _BrowserWindow::processRefreshButton()
 
 void _BrowserWindow::processActivated()
 {
-    if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas)) {
-        MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
-    }
-    _filteredRemoteSimulationDatas = _remoteSimulationDatas;
+    onRefresh();
 }
 
 void _BrowserWindow::sortTable()
@@ -235,4 +257,23 @@ void _BrowserWindow::onOpenSimulation(std::string const& id)
         {toFloat(deserializedSim.settings.generalSettings.worldSizeX) / 2, toFloat(deserializedSim.settings.generalSettings.worldSizeY) / 2});
     _viewport->setZoomFactor(2.0f);
     _temporalControlWindow->onSnapshot();
+}
+
+void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)
+{
+    auto findResult = _likedIds.find(entry.id);
+    if (findResult != _likedIds.end()) {
+        _likedIds.erase(findResult);
+        --entry.likes;
+    } else {
+        _likedIds.insert(entry.id);
+        ++entry.likes;
+    }
+    _networkController->toggleLikeSimulation(entry.id);
+    sortTable();
+}
+
+bool _BrowserWindow::isLiked(std::string const& id)
+{
+    return _likedIds.find(id) != _likedIds.end();
 }
