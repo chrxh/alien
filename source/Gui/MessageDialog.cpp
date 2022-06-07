@@ -20,6 +20,7 @@ void MessageDialog::process()
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
         AlienImGui::Text(_message);
+        AlienImGui::Separator();
 
         if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();

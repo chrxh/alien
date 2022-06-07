@@ -37,16 +37,37 @@ namespace
         client.set_ca_cert_path("./resources/ca-bundle.crt");
         client.enable_server_certificate_verification(true);
         if (auto result = client.get_openssl_verify_result()) {
-            throw std::runtime_error("verify error: " + std::string(X509_verify_cert_error_string(result)));
+            throw std::runtime_error("OpenSSL verify error: " + std::string(X509_verify_cert_error_string(result)));
         }
     }
 
-    void checkResult(httplib::Result const& result)
+    httplib::Result executeRequest(std::function<httplib::Result()> const& func)
     {
-        if (!result) {
-            throw std::runtime_error("Error connecting to the server.");
+        auto attempt = 0;
+        while(true) {
+            auto result = func();
+            if (result) {
+                return result;
+            }
+            if (++attempt == 5) {
+                throw std::runtime_error("Error connecting to the server.");
+            }
         }
     }
+
+    bool parseBoolResult(std::string const& result)
+    {
+        try {
+            std::stringstream stream(result);
+            boost::property_tree::ptree tree;
+            boost::property_tree::read_json(stream, tree);
+            return tree.get<bool>("result");
+        }
+        catch(...) {
+            return false;
+        }
+    }
+
 }
 
 bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
@@ -59,13 +80,24 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
     params.emplace("password", password);
     params.emplace("email", email);
 
-    auto postResult = client.Post("/alien-server/createuser.php", params);
-    checkResult(postResult);
+    auto result = executeRequest([&] { return client.Post("/alien-server/createuser.php", params); });
 
-    std::stringstream stream(postResult->body);
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(stream, tree);
-    return tree.get<bool>("result");
+    return parseBoolResult(result->body);
+}
+
+bool _NetworkController::activateUser(std::string const& userName, std::string const& password, std::string const& activationCode)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", userName);
+    params.emplace("password", password);
+    params.emplace("activationCode", activationCode);
+
+    auto result = executeRequest([&] { return client.Post("/alien-server/activateuser.php", params); });
+
+    return parseBoolResult(result->body);
 }
 
 bool _NetworkController::login(std::string const& userName, std::string const& password)
@@ -77,18 +109,14 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
     params.emplace("userName", userName);
     params.emplace("password", password);
 
-    auto postResult = client.Post("/alien-server/login.php", params);
-    checkResult(postResult);
+    auto result = executeRequest([&] { return client.Post("/alien-server/login.php", params); });
 
-    std::stringstream stream(postResult->body);
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(stream, tree);
-    auto result = tree.get<bool>("result");
-    if (result) {
+    auto boolResult = parseBoolResult(result->body);
+    if (boolResult) {
         _loggedInUserName = userName;
         _password = password;
     }
-    return result;
+    return boolResult;
 }
 
 void _NetworkController::logout()
@@ -96,21 +124,26 @@ void _NetworkController::logout()
     _loggedInUserName = std::nullopt;
 }
 
-std::vector<RemoteSimulationData> _NetworkController::getRemoteSimulationDataList() const
+bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
-    auto result = client.Get("/alien-server/getsimulationinfo.php");
-    checkResult(result);
+    auto postResult = executeRequest([&] { return client.Get("/alien-server/getsimulationinfo.php"); });
 
-    std::stringstream stream(result->body);
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(stream, tree);
-    return RemoteSimulationDataParser::decode(tree);
+    try {
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        result.clear();
+        result = RemoteSimulationDataParser::decode(tree);
+        return true;
+    } catch (...) {
+        return false;
+    }
 }
 
-void _NetworkController::uploadSimulation(
+bool _NetworkController::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
     IntVector2D const& size,
@@ -136,11 +169,12 @@ void _NetworkController::uploadSimulation(
         {"symbolMap", symbolMap, "", ""},
     };
 
-    auto postResult = client.Post("/alien-server/uploadsimulation.php", items);
-    checkResult(postResult);
+    auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
+
+    return parseBoolResult(result->body);
 }
 
-void _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& id)
+bool _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& id)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -148,19 +182,21 @@ void _NetworkController::downloadSimulation(std::string& content, std::string& s
     httplib::Params params;
     params.emplace("id", id);
 
-    {
-        auto result = client.Get("/alien-server/downloadcontent.php", params, {});
-        checkResult(result);
-        content = result->body;
-    }
-    {
-        auto result = client.Get("/alien-server/downloadsettings.php", params, {});
-        checkResult(result);
-        settings = result->body;
-    }
-    {
-        auto result = client.Get("/alien-server/downloadsymbolmap.php", params, {});
-        checkResult(result);
-        symbolMap = result->body;
+    try {
+        {
+            auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
+            content = result->body;
+        }
+        {
+            auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
+            settings = result->body;
+        }
+        {
+            auto result = executeRequest([&] { return client.Get("/alien-server/downloadsymbolmap.php", params, {}); });
+            symbolMap = result->body;
+        }
+        return true;
+    } catch (...) {
+        return false;
     }
 }

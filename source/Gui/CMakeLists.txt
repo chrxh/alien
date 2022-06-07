@@ -3,6 +3,8 @@ target_sources(alien
 PUBLIC
     AboutDialog.cpp
     AboutDialog.h
+    ActivateUserDialog.cpp
+    ActivateUserDialog.h
     AlienImGui.cpp
     AlienImGui.h
     AlienWindow.cpp
