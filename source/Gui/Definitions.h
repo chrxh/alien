@@ -151,6 +151,9 @@ using UploadSimulationDialog = std::shared_ptr<_UploadSimulationDialog>;
 class _CreateUserDialog;
 using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;
 
+class _ActivateUserDialog;
+using ActivateUserDialog = std::shared_ptr<_ActivateUserDialog>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

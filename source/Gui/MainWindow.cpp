@@ -63,6 +63,7 @@
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
 #include "CreateUserDialog.h"
+#include "ActivateUserDialog.h"
 
 namespace
 {
@@ -142,7 +143,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
-    _createUserDialog = std::make_shared<_CreateUserDialog>(_networkController);
+    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_networkController);
+    _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_createUserDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_simController, _networkController);
 
@@ -383,9 +385,11 @@ void _MainWindow::processMenubar()
                 _browserWindow->setOn(!_browserWindow->isOn());
             }
             ImGui::Separator();
+            ImGui::BeginDisabled((bool)_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Login", "ALT+L")) {
                 _loginDialog->show();
             }
+            ImGui::EndDisabled();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Logout", "ALT+T")) {
                 _networkController->logout();
@@ -545,7 +549,7 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
             _browserWindow->setOn(!_browserWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L) && !_networkController->getLoggedInUserName()) {
             _loginDialog->show();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
@@ -644,6 +648,7 @@ void _MainWindow::processDialogs()
     _patternAnalysisDialog->process();
     _loginDialog->process();
     _createUserDialog->process();
+    _activateUserDialog->process();
     _uploadSimulationDialog->process();
     MessageDialog::getInstance().process();
     processExitDialog();

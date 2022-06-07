@@ -86,12 +86,14 @@ void _UploadSimulationDialog::onUpload()
         MessageDialog::getInstance().show("Save simulation", "The simulation could not be uploaded.");
     }
 
-    _networkController->uploadSimulation(
+    if (!_networkController->uploadSimulation(
         _simName,
         _simDescription,
         {sim.settings.generalSettings.worldSizeX, sim.settings.generalSettings.worldSizeY},
         sim.content.getNumberOfCellAndParticles(),
         content,
         settings,
-        symbolMap);
+        symbolMap)) {
+        MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
+    }
 }

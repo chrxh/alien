@@ -31,6 +31,7 @@ private:
 
     void onOpenSimulation(std::string const& id);
 
+    bool _scheduleActivate = false;
     bool _scheduleSort = false;
     std::string _filter;
     std::set<std::string> _selectionIds;

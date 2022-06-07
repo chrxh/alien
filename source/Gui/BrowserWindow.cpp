@@ -32,7 +32,7 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
 {
     if (_on) {
-        processActivated();
+        _scheduleActivate = true;
     }
 }
 
@@ -42,6 +42,10 @@ _BrowserWindow::~_BrowserWindow()
 
 void _BrowserWindow::processIntern()
 {
+    if (_scheduleActivate) {
+        _scheduleActivate = false;
+        processActivated();
+    }
     processTable();
     processStatus();
     processFilter();
@@ -196,7 +200,9 @@ void _BrowserWindow::processRefresh()
 
 void _BrowserWindow::processActivated()
 {
-    _remoteSimulationDatas = _networkController->getRemoteSimulationDataList();
+    if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas)) {
+        MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+    }
     _filteredRemoteSimulationDatas = _remoteSimulationDatas;
 }
 
@@ -208,7 +214,10 @@ void _BrowserWindow::sortTable()
 void _BrowserWindow::onOpenSimulation(std::string const& id)
 {
     std::string content, settings, symbolMap;
-    _networkController->downloadSimulation(content, settings, symbolMap, id);
+    if (!_networkController->downloadSimulation(content, settings, symbolMap, id)) {
+        MessageDialog::getInstance().show("Error", "Failed to download simulation.");
+        return;
+    }
 
     DeserializedSimulation deserializedSim;
     Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings, symbolMap);
