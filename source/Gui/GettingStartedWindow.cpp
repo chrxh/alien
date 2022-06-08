@@ -56,7 +56,9 @@ void _GettingStartedWindow::processIntern()
                     "file. You find various demos in ./examples/simulations/* demonstrating capabilities of the "
                     "engine ranging from physics examples, self-deploying structures, replicators to small "
                     "ecosystems. To this end, please invoke Simulation " ICON_FA_ARROW_RIGHT
-                    " Open in the menu and select a file. However, for starters, you can use the simple evolution example "
+                    " Open in the menu and select a file. More simulations from other users can be downloaded from the server. "
+                    "For this purpose, open the Browser from "
+                    "the Network menu. However, for starters, you can use the simple evolution example "
                     "already loaded.");
 
         ImGui::Text("At the beginning it is recommended to get familiar with the windows for temporal and spatial "

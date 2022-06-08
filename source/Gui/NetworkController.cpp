@@ -6,6 +6,7 @@
 #include <cpp-httplib/httplib.h>
 
 #include "Base/Resources.h"
+#include "Base/LoggingService.h"
 
 #include "GlobalSettings.h"
 #include "RemoteSimulationDataParser.h"
@@ -67,15 +68,25 @@ namespace
         }
     }
 
-    bool parseBoolResult(std::string const& result)
+    void logNetworkError(std::string const& serverResponse)
+    {
+        log(Priority::Important, "network: an error occurred while parsing the server response: " + serverResponse);
+    }
+
+    bool parseBoolResult(std::string const& serverResponse)
     {
         try {
-            std::stringstream stream(result);
+            std::stringstream stream(serverResponse);
             boost::property_tree::ptree tree;
             boost::property_tree::read_json(stream, tree);
-            return tree.get<bool>("result");
+            auto result = tree.get<bool>("result");
+            if (!result) {
+                log(Priority::Important, "network: negative response received from server");
+            }
+            return result;
         }
         catch(...) {
+            logNetworkError(serverResponse);
             return false;
         }
     }
@@ -84,6 +95,8 @@ namespace
 
 bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
+    log(Priority::Important, "network: create user '" + userName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -99,6 +112,8 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
 
 bool _NetworkController::activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode)
 {
+    log(Priority::Important, "network: activate user '" + userName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -114,6 +129,8 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
 
 bool _NetworkController::login(std::string const& userName, std::string const& password)
 {
+    log(Priority::Important, "network: login user '" + userName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -133,12 +150,16 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
 
 void _NetworkController::logout()
 {
+    log(Priority::Important, "network: logout");
+
     _loggedInUserName = std::nullopt;
     _password = std::nullopt;
 }
 
 bool _NetworkController::deleteUser()
 {
+    log(Priority::Important, "network: delete user '" + *_loggedInUserName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -158,6 +179,8 @@ bool _NetworkController::deleteUser()
 
 bool _NetworkController::resetPassword(std::string const& userName, std::string const& email)
 {
+    log(Priority::Important, "network: reset password of user '" + userName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -172,6 +195,8 @@ bool _NetworkController::resetPassword(std::string const& userName, std::string 
 
 bool _NetworkController::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
 {
+    log(Priority::Important, "network: set new password for user '" + userName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -187,6 +212,8 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
 
 bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const
 {
+    log(Priority::Important, "network: get simulation list");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -200,12 +227,15 @@ bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulatio
         result = RemoteSimulationDataParser::decode(tree);
         return true;
     } catch (...) {
+        logNetworkError(postResult->body);
         return false;
     }
 }
 
 bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& result) const
 {
+    log(Priority::Important, "network: get liked simulations");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -226,12 +256,15 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
         }
         return true;
     } catch (...) {
+        logNetworkError(postResult->body);
         return false;
     }
 }
 
 bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId)
 {
+    log(Priority::Important, "network: get user likes for simulation with id=" + simId);
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -251,12 +284,15 @@ bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result
         }
         return true;
     } catch (...) {
+        logNetworkError(postResult->body);
         return false;
     }
 }
 
 bool _NetworkController::toggleLikeSimulation(std::string const& simId)
 {
+    log(Priority::Important, "network: toggle like for simulation with id=" + simId);
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -279,6 +315,8 @@ bool _NetworkController::uploadSimulation(
     std::string const& settings,
     std::string const& symbolMap)
 {
+    log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -303,6 +341,8 @@ bool _NetworkController::uploadSimulation(
 
 bool _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& simId)
 {
+    log(Priority::Important, "network: download simulation with id=" + simId);
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -324,12 +364,15 @@ bool _NetworkController::downloadSimulation(std::string& content, std::string& s
         }
         return true;
     } catch (...) {
+        log(Priority::Important, "network: an error occurred");
         return false;
     }
 }
 
 bool _NetworkController::deleteSimulation(std::string const& simId)
 {
+    log(Priority::Important, "network: delete simulation with id=" + simId);
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 

@@ -35,6 +35,11 @@ An important goal is to make the simulator user-friendly through a modern user i
 - Built-in programming environment for designing customized machines and worlds
 - Mass-operations and (up/down) scaling functions for simulations
 
+### Networking
+- Built-in simulation browser
+- Downloading and uploading simulation files
+- rate other simulations by Likes
+
 # But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
 - Perhaps the most honest answer: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
@@ -52,6 +57,11 @@ Further information and artwork:
 
 # Minimal system requirements
 An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
+
+# Installer
+An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer.zip).
+
+In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
 # How to build the sources
 The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
@@ -73,11 +83,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
-
-# Installer
-An installer for 64-bit binaries is provided for Windows 10: [download link](https://alien-project.org/media/files/alien-installer.zip).
-
-In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
 # Contributing to the project
 Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
@@ -102,6 +107,8 @@ A short architectural overview of the source code can be found in the [documenta
 - [cereal](https://github.com/USCiLab/cereal)
 - [zlib](https://www.zlib.net)
 - [zstr](https://github.com/mateidavid/zstr)
+- [OpenSSL](https://github.com/openssl/openssl)
+- [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
 
