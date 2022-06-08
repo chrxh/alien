@@ -1,6 +1,7 @@
 #include "CreateUserDialog.h"
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
@@ -76,6 +77,9 @@ void _CreateUserDialog::onCreateUser()
         _activateUserDialog->show(_userName, _password);
     } else {
         MessageDialog::getInstance().show(
-            "Error", "An error occurred on the server. This could be related to the fact that the\nuser name or email address is already in use.");
+            "Error",
+            "An error occurred on the server. This could be related to the fact that\n" ICON_FA_CARET_RIGHT
+            " your user name or email address is already in use,\n" ICON_FA_CARET_RIGHT " or your user "
+            "name contains white spaces.");
     }
 }

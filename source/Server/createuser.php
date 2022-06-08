@@ -5,6 +5,11 @@
     $db->begin_transaction();
 
     $userName = $_POST["userName"];
+    if (!preg_match("#^[^ ]+$#", $userName)) {
+        echo json_encode(["result"=>false]);
+        exit;
+    }
+
     $pw = $_POST["password"];
     $email = str_replace(" ", "", $_POST["email"]);
 
