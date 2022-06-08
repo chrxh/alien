@@ -20,6 +20,8 @@ PUBLIC
     CreatorWindow.cpp
     CreatorWindow.h
     Definitions.h
+    DeleteUserDialog.cpp
+    DeleteUserDialog.h
     DisplaySettingsDialog.cpp
     DisplaySettingsDialog.h
     EditorController.cpp

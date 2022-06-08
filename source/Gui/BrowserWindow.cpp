@@ -1,5 +1,6 @@
 #include "BrowserWindow.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
@@ -31,9 +32,7 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    if (_on) {
-        _scheduleActivate = true;
-    }
+    _on = false;
 }
 
 _BrowserWindow::~_BrowserWindow()
@@ -41,34 +40,39 @@ _BrowserWindow::~_BrowserWindow()
 
 void _BrowserWindow::onRefresh()
 {
-    if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas)) {
-        MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
-    }
-    _filteredRemoteSimulationDatas = _remoteSimulationDatas;
-
-    if (_networkController->getLoggedInUserName()) {
-        std::vector<std::string> likedIds;
-        if (!_networkController->getLikedSimulationIdList(likedIds)) {
+    try {
+        if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas)) {
             MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
         }
-        _likedIds = std::unordered_set<std::string>(likedIds.begin(), likedIds.end());
-    } else {
-        _likedIds.clear();
-    }
+        _filteredRemoteSimulationDatas = _remoteSimulationDatas;
 
-    sortTable();
+        if (_networkController->getLoggedInUserName()) {
+            std::vector<std::string> likedIds;
+            if (!_networkController->getLikedSimulationIdList(likedIds)) {
+                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+            }
+            _likedIds = std::unordered_set<std::string>(likedIds.begin(), likedIds.end());
+        } else {
+            _likedIds.clear();
+        }
+
+        sortTable();
+    }
+    catch(std::exception const& e) {
+        MessageDialog::getInstance().show("Error", e.what());
+    }
 }
 
 void _BrowserWindow::processIntern()
 {
-    if (_scheduleActivate) {
-        _scheduleActivate = false;
-        processActivated();
-    }
     processTable();
     processStatus();
     processFilter();
     processRefreshButton();
+    if(_scheduleRefresh) {
+        onRefresh();
+        _scheduleRefresh = false;
+    }
 }
 
 void _BrowserWindow::processTable()
@@ -141,17 +145,16 @@ void _BrowserWindow::processTable()
                     ImGui::SameLine();
                     ImGui::SetCursorPosX(cursorPos);
 
-                    auto color = Const::DetailButtonColor;
-                    float h, s, v;
-                    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s, v * 0.3f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s, v * 0.4f));
-                    auto detailClicked = AlienImGui::Button("...");
-                    ImGui::PopStyleColor(2);
+                    processDetailButton();
                     AlienImGui::Tooltip(item->description.c_str());
                 }
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->likes));
+                if(item->likes > 0) {
+                    ImGui::SameLine();
+                    processDetailButton();
+                    AlienImGui::Tooltip([&] { return getUserLikes(item->id); });
+                }
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->width));
                 ImGui::TableNextColumn();
@@ -180,8 +183,9 @@ void _BrowserWindow::processTable()
                 }
                 ImGui::EndDisabled();
                 ImGui::SameLine();
-                ImGui::BeginDisabled();
+                ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
                 if (ImGui::Button(ICON_FA_TRASH)) {
+                    onDeleteSimulation(item->id);
                 }
                 ImGui::EndDisabled();
                 ImGui::PopID();
@@ -227,6 +231,18 @@ void _BrowserWindow::processRefreshButton()
     }
 }
 
+bool _BrowserWindow::processDetailButton()
+{
+    auto color = Const::DetailButtonColor;
+    float h, s, v;
+    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s, v * 0.3f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s, v * 0.4f));
+    auto detailClicked = AlienImGui::Button("...");
+    ImGui::PopStyleColor(2);
+    return detailClicked;
+}
+
 void _BrowserWindow::processActivated()
 {
     onRefresh();
@@ -259,6 +275,15 @@ void _BrowserWindow::onOpenSimulation(std::string const& id)
     _temporalControlWindow->onSnapshot();
 }
 
+void _BrowserWindow::onDeleteSimulation(std::string const& id)
+{
+    if (!_networkController->deleteSimulation(id)) {
+        MessageDialog::getInstance().show("Error", "Failed to delete simulation.");
+        return;
+    }
+    _scheduleRefresh = true;
+}
+
 void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)
 {
     auto findResult = _likedIds.find(entry.id);
@@ -269,6 +294,7 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)
         _likedIds.insert(entry.id);
         ++entry.likes;
     }
+    _userLikesByIdCache.erase(entry.id); //invalidate cache entry
     _networkController->toggleLikeSimulation(entry.id);
     sortTable();
 }
@@ -276,4 +302,19 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)
 bool _BrowserWindow::isLiked(std::string const& id)
 {
     return _likedIds.find(id) != _likedIds.end();
+}
+
+std::string _BrowserWindow::getUserLikes(std::string const& id)
+{
+    std::set<std::string> userLikes;
+
+    auto findResult = _userLikesByIdCache.find(id);
+    if (findResult != _userLikesByIdCache.end()) {
+        userLikes = findResult->second;
+    } else {
+        _networkController->getUserLikesForSimulation(userLikes, id);
+        _userLikesByIdCache.emplace(id, userLikes);
+    }
+
+    return boost::algorithm::join(userLikes, ", ");
 }

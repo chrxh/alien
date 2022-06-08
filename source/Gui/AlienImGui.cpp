@@ -505,6 +505,13 @@ void AlienImGui::Tooltip(std::string const& text)
     }
 }
 
+void AlienImGui::Tooltip(std::function<std::string()> const& textFunc)
+{
+    if (ImGui::IsItemHovered()) {
+        Tooltip(textFunc());
+    }
+}
+
 void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(
