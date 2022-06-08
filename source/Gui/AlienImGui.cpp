@@ -161,6 +161,14 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
         ImGui::PopFont();
     }
     ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);

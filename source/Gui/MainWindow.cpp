@@ -65,6 +65,7 @@
 #include "CreateUserDialog.h"
 #include "ActivateUserDialog.h"
 #include "DeleteUserDialog.h"
+#include "NetworkSettingsDialog.h"
 
 namespace
 {
@@ -149,6 +150,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
+    _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -521,6 +523,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Display settings", "ALT+V")) {
                 _displaySettingsDialog->show();
             }
+            if (ImGui::MenuItem("Network settings", "ALT+K")) {
+                _networkSettingsDialog->show();
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -630,6 +635,9 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
             _displaySettingsDialog->show();
         }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_K)) {
+            _networkSettingsDialog->show();
+        }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_O)) {
             _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
@@ -665,6 +673,8 @@ void _MainWindow::processDialogs()
     _activateUserDialog->process();
     _uploadSimulationDialog->process();
     _deleteUserDialog->process();
+    _networkSettingsDialog->process();
+
     MessageDialog::getInstance().process();
     processExitDialog();
 }

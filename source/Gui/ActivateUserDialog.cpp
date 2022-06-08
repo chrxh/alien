@@ -65,6 +65,6 @@ void _ActivateUserDialog::onActivateUser()
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try again to register again.");
         return;
     }
-    MessageDialog::getInstance().show("Information", "The user '" + _userName + "' has been successfully created.");
+    MessageDialog::getInstance().show("Information", "The user '" + _userName + "' has been successfully created.\nYou are logged in.");
     _browserWindow->onRefresh();
 }

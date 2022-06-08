@@ -10,6 +10,7 @@ public:
     ~_NetworkController();
 
     std::string getServerAddress() const;
+    void setServerAddress(std::string const& value);
     std::optional<std::string> getLoggedInUserName() const;
     std::optional<std::string> getPassword() const;
 
