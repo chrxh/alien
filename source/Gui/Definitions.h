@@ -154,6 +154,9 @@ using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;
 class _ActivateUserDialog;
 using ActivateUserDialog = std::shared_ptr<_ActivateUserDialog>;
 
+class _DeleteUserDialog;
+using DeleteUserDialog = std::shared_ptr<_DeleteUserDialog>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

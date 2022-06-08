@@ -59,6 +59,7 @@ private:
     CreateUserDialog _createUserDialog;
     UploadSimulationDialog _uploadSimulationDialog;
     ActivateUserDialog _activateUserDialog;
+    DeleteUserDialog _deleteUserDialog;
 
     ModeController _modeController;
     WindowController _windowController;

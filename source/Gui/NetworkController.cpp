@@ -30,6 +30,11 @@ std::optional<std::string> _NetworkController::getLoggedInUserName() const
     return _loggedInUserName;
 }
 
+std::optional<std::string> _NetworkController::getPassword() const
+{
+    return _password;
+}
+
 namespace
 {
     void configureClient(httplib::SSLClient& client)
@@ -123,6 +128,26 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
 void _NetworkController::logout()
 {
     _loggedInUserName = std::nullopt;
+}
+
+bool _NetworkController::deleteUser()
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+
+    auto postResult = executeRequest([&] { return client.Post("/alien-server/deleteuser.php", params); });
+
+    auto result = parseBoolResult(postResult->body);
+    if(result) {
+        _loggedInUserName = std::nullopt;
+        _password = std::nullopt;
+    }
+
+    return result;
 }
 
 bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const
