@@ -64,6 +64,7 @@
 #include "UploadSimulationDialog.h"
 #include "CreateUserDialog.h"
 #include "ActivateUserDialog.h"
+#include "DeleteUserDialog.h"
 
 namespace
 {
@@ -147,6 +148,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
+    _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -401,6 +403,13 @@ void _MainWindow::processMenubar()
                 _uploadSimulationDialog->show();
             }
             ImGui::EndDisabled();
+
+            ImGui::Separator();
+            ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+            if (ImGui::MenuItem("Delete", "ALT+J")) {
+                _deleteUserDialog->show();
+            }
+            ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
         }
 
@@ -560,6 +569,9 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkController->getLoggedInUserName()) {
             _uploadSimulationDialog->show();
         }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && _networkController->getLoggedInUserName()) {
+            _deleteUserDialog->show();
+        }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
             _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
@@ -652,6 +664,7 @@ void _MainWindow::processDialogs()
     _createUserDialog->process();
     _activateUserDialog->process();
     _uploadSimulationDialog->process();
+    _deleteUserDialog->process();
     MessageDialog::getInstance().process();
     processExitDialog();
 }
