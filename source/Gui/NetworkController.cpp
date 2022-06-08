@@ -25,6 +25,12 @@ std::string _NetworkController::getServerAddress() const
     return _serverAddress;
 }
 
+void _NetworkController::setServerAddress(std::string const& value)
+{
+    _serverAddress = value;
+    logout();
+}
+
 std::optional<std::string> _NetworkController::getLoggedInUserName() const
 {
     return _loggedInUserName;
@@ -128,6 +134,7 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
 void _NetworkController::logout()
 {
     _loggedInUserName = std::nullopt;
+    _password = std::nullopt;
 }
 
 bool _NetworkController::deleteUser()
@@ -142,9 +149,8 @@ bool _NetworkController::deleteUser()
     auto postResult = executeRequest([&] { return client.Post("/alien-server/deleteuser.php", params); });
 
     auto result = parseBoolResult(postResult->body);
-    if(result) {
-        _loggedInUserName = std::nullopt;
-        _password = std::nullopt;
+    if (result) {
+        logout();
     }
 
     return result;

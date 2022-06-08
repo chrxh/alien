@@ -59,6 +59,8 @@ PUBLIC
     MultiplierWindow.h
     NetworkController.cpp
     NetworkController.h
+    NetworkSettingsDialog.cpp
+    NetworkSettingsDialog.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
     OpenGLHelper.cpp

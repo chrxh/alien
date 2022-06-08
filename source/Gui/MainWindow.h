@@ -60,6 +60,7 @@ private:
     UploadSimulationDialog _uploadSimulationDialog;
     ActivateUserDialog _activateUserDialog;
     DeleteUserDialog _deleteUserDialog;
+    NetworkSettingsDialog _networkSettingsDialog;
 
     ModeController _modeController;
     WindowController _windowController;
