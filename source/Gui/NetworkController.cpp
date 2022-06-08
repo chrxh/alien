@@ -170,6 +170,46 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
     }
 }
 
+bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("simId", simId);
+
+    auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
+
+    try {
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+
+        result.clear();
+        for (auto const& [key, subTree] : tree) {
+            result.insert(subTree.get<std::string>("userName"));
+        }
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool _NetworkController::toggleLikeSimulation(std::string const& simId)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+    params.emplace("simId", simId);
+
+    auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
+
+    return parseBoolResult(result->body);
+}
+
 bool _NetworkController::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
@@ -201,13 +241,13 @@ bool _NetworkController::uploadSimulation(
     return parseBoolResult(result->body);
 }
 
-bool _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& id)
+bool _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& simId)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
     httplib::Params params;
-    params.emplace("id", id);
+    params.emplace("id", simId);
 
     try {
         {
@@ -228,7 +268,7 @@ bool _NetworkController::downloadSimulation(std::string& content, std::string& s
     }
 }
 
-bool _NetworkController::toggleLikeSimulation(std::string const& id)
+bool _NetworkController::deleteSimulation(std::string const& simId)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -236,9 +276,9 @@ bool _NetworkController::toggleLikeSimulation(std::string const& id)
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
     params.emplace("password", *_password);
-    params.emplace("simId", id);
+    params.emplace("simId", simId);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
+    auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
 
     return parseBoolResult(result->body);
 }

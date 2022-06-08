@@ -19,6 +19,9 @@ public:
 
     bool getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const;
     bool getLikedSimulationIdList(std::vector<std::string>& result) const;
+    bool getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId);
+    bool toggleLikeSimulation(std::string const& simId);
+
     bool uploadSimulation(
         std::string const& simulationName,
         std::string const& description,
@@ -27,8 +30,8 @@ public:
         std::string const& content,
         std::string const& settings,
         std::string const& symbolMap);
-    bool downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& id);
-    bool toggleLikeSimulation(std::string const& id);
+    bool downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& simId);
+    bool deleteSimulation(std::string const& simId);
 
 private:
     std::string _serverAddress;

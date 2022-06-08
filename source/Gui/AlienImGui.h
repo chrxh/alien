@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "Base/Definitions.h"
 #include "Definitions.h"
 
@@ -130,6 +132,7 @@ public:
     static bool Button(std::string const& text);
 
     static void Tooltip(std::string const& text);
+    static void Tooltip(std::function<std::string()> const& textFunc);
 
     static void convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 };
