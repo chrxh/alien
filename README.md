@@ -37,8 +37,8 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 ### Networking
 - Built-in simulation browser
-- Downloading and uploading simulation files
-- rate other simulations by Likes
+- Download and upload simulation files
+- Rate simulations by likes
 
 # But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
