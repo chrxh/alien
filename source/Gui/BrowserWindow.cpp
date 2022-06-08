@@ -84,11 +84,21 @@ void _BrowserWindow::processTable()
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
             "Timestamp", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Timestamp);
-        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_UserName);
         ImGui::TableSetupColumn(
-            "Simulation name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_SimulationName);
+            "User name",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scaleContent(120.0f),
+            RemoteSimulationDataColumnId_UserName);
         ImGui::TableSetupColumn(
-            "Description", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Description);
+            "Simulation name",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scaleContent(135.0f),
+            RemoteSimulationDataColumnId_SimulationName);
+        ImGui::TableSetupColumn(
+            "Description",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scaleContent(120.0f),
+            RemoteSimulationDataColumnId_Description);
         ImGui::TableSetupColumn("Likes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
