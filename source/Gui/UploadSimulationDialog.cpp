@@ -40,6 +40,11 @@ void _UploadSimulationDialog::process()
 
     ImGui::OpenPopup("Upload simulation");
     if (ImGui::BeginPopupModal("Upload simulation", NULL, ImGuiWindowFlags_None)) {
+        AlienImGui::Text("Data privacy policy");
+        AlienImGui::HelpMarker(
+            "The simulation file, name and description are stored on the server. It is not guaranteed that these data will remain on the server.");
+        AlienImGui::Separator();
+
         AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Simulation name").textWidth(0), _simName);
         AlienImGui::Separator();
         AlienImGui::InputTextMultiline(
@@ -52,11 +57,13 @@ void _UploadSimulationDialog::process()
 
         AlienImGui::Separator();
 
+        ImGui::BeginDisabled(_simName.empty());
         if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             _show = false;
             onUpload();
         }
+        ImGui::EndDisabled();
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();

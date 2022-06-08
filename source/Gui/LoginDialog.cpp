@@ -84,6 +84,9 @@ void _LoginDialog::process()
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
+        ImGui::Dummy(ImVec2(40.0f, 0.0f));
+
+        ImGui::SameLine();
         ImGui::BeginDisabled(_userName.empty() || _password.empty());
         if (AlienImGui::Button("Create user")) {
             ImGui::CloseCurrentPopup();
