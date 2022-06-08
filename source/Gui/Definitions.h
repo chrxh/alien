@@ -160,6 +160,12 @@ using DeleteUserDialog = std::shared_ptr<_DeleteUserDialog>;
 class _NetworkSettingsDialog;
 using NetworkSettingsDialog = std::shared_ptr<_NetworkSettingsDialog>;
 
+class _ResetPasswordDialog;
+using ResetPasswordDialog = std::shared_ptr<_ResetPasswordDialog>;
+
+class _NewPasswordDialog;
+using NewPasswordDialog = std::shared_ptr<_NewPasswordDialog>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

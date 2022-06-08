@@ -61,6 +61,8 @@ private:
     ActivateUserDialog _activateUserDialog;
     DeleteUserDialog _deleteUserDialog;
     NetworkSettingsDialog _networkSettingsDialog;
+    ResetPasswordDialog _resetPasswordDialog;
+    NewPasswordDialog _newPasswordDialog;
 
     ModeController _modeController;
     WindowController _windowController;

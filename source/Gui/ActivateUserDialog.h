@@ -21,5 +21,5 @@ private:
     bool _show = false;
     std::string _userName;
     std::string _password;
-    std::string _activationCode;
+    std::string _confirmationCode;
 };

@@ -5,7 +5,11 @@
 class _LoginDialog
 {
 public:
-    _LoginDialog(BrowserWindow const& browserWindow, CreateUserDialog const& createUserDialog, NetworkController const& networkController);
+    _LoginDialog(
+        BrowserWindow const& browserWindow,
+        CreateUserDialog const& createUserDialog,
+        ResetPasswordDialog const& resetPasswordDialog,
+        NetworkController const& networkController);
     ~_LoginDialog();
 
     void process();
@@ -18,6 +22,7 @@ private:
     BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;
     NetworkController _networkController;
+    ResetPasswordDialog _resetPasswordDialog;
 
     bool _show = false;
     bool _remember = true;

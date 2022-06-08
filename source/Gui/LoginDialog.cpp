@@ -8,11 +8,18 @@
 #include "MessageDialog.h"
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
+#include "ResetPasswordDialog.h"
 
-_LoginDialog::_LoginDialog(BrowserWindow const& browserWindow, CreateUserDialog const& createUserDialog, NetworkController const& networkController)
+_LoginDialog::_LoginDialog(
+    BrowserWindow const& browserWindow,
+    CreateUserDialog const& createUserDialog,
+    ResetPasswordDialog const& resetPasswordDialog,
+    NetworkController const& networkController)
     : _browserWindow(browserWindow)
     , _createUserDialog(createUserDialog)
     , _networkController(networkController)
+    , _resetPasswordDialog(resetPasswordDialog)
+
 {
     auto& settings = GlobalSettings::getInstance();
     _remember = settings.getBoolState("dialogs.login.remember", false);
@@ -41,6 +48,19 @@ void _LoginDialog::process()
     ImGui::OpenPopup("Login");
     if (ImGui::BeginPopupModal("Login", NULL, ImGuiWindowFlags_None)) {
 
+        AlienImGui::Text("How to create a new user?");
+        AlienImGui::HelpMarker("Please enter the desired user name and password and proceed by clicking the 'Create user' button.");
+
+        AlienImGui::Text("Forgot your password?");
+        AlienImGui::HelpMarker("Please enter the user name and proceed by clicking the 'Reset password' button.");
+
+        AlienImGui::Text("Security information");
+        AlienImGui::HelpMarker(
+            "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
+            "value in the database. If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine.");
+
+        AlienImGui::Separator();
+
         AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
         AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
         AlienImGui::ToggleButton(
@@ -49,16 +69,7 @@ void _LoginDialog::process()
             _remember);
 
         AlienImGui::Separator();
-        AlienImGui::Text("How to create a new user?");
-        AlienImGui::HelpMarker(
-            "Please enter the desired user name and password and then proceed by clicking the 'Create user' button.");
-
-        AlienImGui::Text("Security information");
-        AlienImGui::HelpMarker(
-            "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
-            "value in the database. If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine.");
-        AlienImGui::Separator();
-
+        
         ImGui::BeginDisabled(_userName.empty() || _password.empty());
         if (AlienImGui::Button("Login")) {
             ImGui::CloseCurrentPopup();
@@ -78,6 +89,15 @@ void _LoginDialog::process()
             ImGui::CloseCurrentPopup();
             _show = false;
             _createUserDialog->show(_userName, _password);
+        }
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled(_userName.empty());
+        if (AlienImGui::Button("Reset password")) {
+            ImGui::CloseCurrentPopup();
+            _show = false;
+            _resetPasswordDialog->show(_userName);
         }
         ImGui::EndDisabled();
 

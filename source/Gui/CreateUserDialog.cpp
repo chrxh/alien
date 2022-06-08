@@ -26,15 +26,15 @@ void _CreateUserDialog::process()
 
     ImGui::OpenPopup("Create user");
     if (ImGui::BeginPopupModal("Create user", NULL, ImGuiWindowFlags_None)) {
-        AlienImGui::Text("Please enter your email address to receive the\nactivation code for the new user.");
-        AlienImGui::Separator();
         AlienImGui::Text("Security information");
         AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
                                "as a SHA-256 hash value in the database.");
         AlienImGui::Text("Data privacy policy");
-        AlienImGui::HelpMarker(
-            "The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send the activation code. "
-            "2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
+        AlienImGui::HelpMarker("The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send "
+                               "the confirmation code. "
+                               "2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
+        AlienImGui::Separator();
+        AlienImGui::Text("Please enter your email address to receive the\nconfirmation code for the new user.");
         AlienImGui::Separator();
         AlienImGui::InputText(
             AlienImGui::InputTextParameters().hint("Email").textWidth(0),
@@ -67,6 +67,7 @@ void _CreateUserDialog::show(std::string const& userName, std::string const& pas
     _show = true;
     _userName = userName;
     _password = password;
+    _email.clear();
 }
 
 void _CreateUserDialog::onCreateUser()
@@ -75,6 +76,6 @@ void _CreateUserDialog::onCreateUser()
         _activateUserDialog->show(_userName, _password);
     } else {
         MessageDialog::getInstance().show(
-            "Error", "An error occurred on the server. This could be related to the fact that the\nusername or email address is already in use.");
+            "Error", "An error occurred on the server. This could be related to the fact that the\nuser name or email address is already in use.");
     }
 }
