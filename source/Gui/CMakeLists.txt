@@ -63,6 +63,8 @@ PUBLIC
     NetworkSettingsDialog.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
+    NewPasswordDialog.cpp
+    NewPasswordDialog.h
     OpenGLHelper.cpp
     OpenGLHelper.h
     OpenPatternDialog.cpp
@@ -79,6 +81,8 @@ PUBLIC
     RemoteSimulationData.h
     RemoteSimulationDataParser.cpp
     RemoteSimulationDataParser.h
+    ResetPasswordDialog.cpp
+    ResetPasswordDialog.h
     SavePatternDialog.cpp
     SavePatternDialog.h
     SaveSimulationDialog.cpp

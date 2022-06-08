@@ -15,10 +15,12 @@ public:
     std::optional<std::string> getPassword() const;
 
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
-    bool activateUser(std::string const& userName, std::string const& password, std::string const& activationCode);
+    bool activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode);
     bool login(std::string const& userName, std::string const& password);
     void logout();
     bool deleteUser();
+    bool resetPassword(std::string const& userName, std::string const& email);
+    bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
     bool getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const;
     bool getLikedSimulationIdList(std::vector<std::string>& result) const;

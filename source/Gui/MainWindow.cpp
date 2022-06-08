@@ -66,6 +66,8 @@
 #include "ActivateUserDialog.h"
 #include "DeleteUserDialog.h"
 #include "NetworkSettingsDialog.h"
+#include "ResetPasswordDialog.h"
+#include "NewPasswordDialog.h"
 
 namespace
 {
@@ -147,7 +149,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_browserWindow, _networkController);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
-    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _networkController);
+    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
+    _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _resetPasswordDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
@@ -674,6 +678,8 @@ void _MainWindow::processDialogs()
     _uploadSimulationDialog->process();
     _deleteUserDialog->process();
     _networkSettingsDialog->process();
+    _resetPasswordDialog->process();
+    _newPasswordDialog->process();
 
     MessageDialog::getInstance().process();
     processExitDialog();

@@ -23,13 +23,13 @@ void _ActivateUserDialog::process()
 
     ImGui::OpenPopup("Activate user");
     if (ImGui::BeginPopupModal("Activate user", NULL, ImGuiWindowFlags_None)) {
-        AlienImGui::Text("Please enter the activation code sent to your email address.");
+        AlienImGui::Text("Please enter the confirmation code sent to your email address.");
         AlienImGui::Separator();
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _activationCode);
+        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
 
         AlienImGui::Separator();
 
-        ImGui::BeginDisabled(_activationCode.empty());
+        ImGui::BeginDisabled(_confirmationCode.empty());
         if (AlienImGui::Button("OK")) {
             ImGui::CloseCurrentPopup();
             _show = false;
@@ -57,12 +57,12 @@ void _ActivateUserDialog::show(std::string const& userName, std::string const& p
 
 void _ActivateUserDialog::onActivateUser()
 {
-    auto result = _networkController->activateUser(_userName, _password, _activationCode);
+    auto result = _networkController->activateUser(_userName, _password, _confirmationCode);
     if (result) {
         result |= _networkController->login(_userName, _password);
     }
     if (!result) {
-        MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try again to register again.");
+        MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
         return;
     }
     MessageDialog::getInstance().show("Information", "The user '" + _userName + "' has been successfully created.\nYou are logged in.");

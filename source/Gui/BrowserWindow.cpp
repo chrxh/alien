@@ -83,7 +83,10 @@ void _BrowserWindow::processTable()
         | ImGuiTableFlags_ScrollY;
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Timestamp", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Timestamp);
+            "Timestamp",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
+            0.0f,
+            RemoteSimulationDataColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,

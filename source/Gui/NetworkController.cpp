@@ -97,7 +97,7 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
     return parseBoolResult(result->body);
 }
 
-bool _NetworkController::activateUser(std::string const& userName, std::string const& password, std::string const& activationCode)
+bool _NetworkController::activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -105,7 +105,7 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     httplib::Params params;
     params.emplace("userName", userName);
     params.emplace("password", password);
-    params.emplace("activationCode", activationCode);
+    params.emplace("activationCode", confirmationCode);
 
     auto result = executeRequest([&] { return client.Post("/alien-server/activateuser.php", params); });
 
@@ -154,6 +154,35 @@ bool _NetworkController::deleteUser()
     }
 
     return result;
+}
+
+bool _NetworkController::resetPassword(std::string const& userName, std::string const& email)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", userName);
+    params.emplace("email", email);
+
+    auto result = executeRequest([&] { return client.Post("/alien-server/resetpw.php", params); });
+
+    return parseBoolResult(result->body);
+}
+
+bool _NetworkController::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", userName);
+    params.emplace("newPassword", newPassword);
+    params.emplace("activationCode", confirmationCode);
+
+    auto result = executeRequest([&] { return client.Post("/alien-server/setnewpw.php", params); });
+
+    return parseBoolResult(result->body);
 }
 
 bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const
