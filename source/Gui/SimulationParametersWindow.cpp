@@ -166,7 +166,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * General physics
          */
-        AlienImGui::Group("General physics");
+        AlienImGui::Group("Physics: General");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Friction")
@@ -239,7 +239,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Collision and binding
          */
-        AlienImGui::Group("Collision and binding");
+        AlienImGui::Group("Physics: Collision and binding");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Repulsion strength")
@@ -544,7 +544,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         /**
          * General physics
          */
-        AlienImGui::Group("General physics");
+        AlienImGui::Group("Physics: General");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Friction")
@@ -594,7 +594,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         /**
          * Collision and binding
          */
-        AlienImGui::Group("Collision and binding");
+        AlienImGui::Group("Physics: Collision and binding");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Binding force strength")
