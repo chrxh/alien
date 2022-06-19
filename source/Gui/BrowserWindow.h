@@ -20,6 +20,8 @@ public:
     void onRefresh();
 
 private:
+    void refreshIntern(bool firstTimeStartup);
+
     void processIntern() override;
 
     void processTable();

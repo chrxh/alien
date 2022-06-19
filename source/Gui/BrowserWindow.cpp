@@ -25,24 +25,35 @@ _BrowserWindow::_BrowserWindow(
     StatisticsWindow const& statisticsWindow,
     Viewport const& viewport,
     TemporalControlWindow const& temporalControlWindow)
-    : _AlienWindow("Browser", "browser.network", false)
+    : _AlienWindow("Browser", "windows.browser", true)
     , _simController(simController)
     , _networkController(networkController)
     , _statisticsWindow(statisticsWindow)
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    _on = false;
+    if (_on) {
+        refreshIntern(true);
+    }
 }
 
 _BrowserWindow::~_BrowserWindow()
-{}
+{
+    _on = false;
+}
 
 void _BrowserWindow::onRefresh()
 {
+    refreshIntern(false);
+}
+
+void _BrowserWindow::refreshIntern(bool firstTimeStartup)
+{
     try {
-        if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas)) {
-            MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+        if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas, !firstTimeStartup)) {
+            if (!firstTimeStartup) {
+                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+            }
         }
         _filteredRemoteSimulationDatas = _remoteSimulationDatas;
 
@@ -57,9 +68,10 @@ void _BrowserWindow::onRefresh()
         }
 
         sortTable();
-    }
-    catch(std::exception const& e) {
-        MessageDialog::getInstance().show("Error", e.what());
+    } catch (std::exception const& e) {
+        if (!firstTimeStartup) {
+            MessageDialog::getInstance().show("Error", e.what());
+        }
     }
 }
 

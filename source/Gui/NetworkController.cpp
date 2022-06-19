@@ -53,7 +53,7 @@ namespace
         }
     }
 
-    httplib::Result executeRequest(std::function<httplib::Result()> const& func)
+    httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
     {
         auto attempt = 0;
         while(true) {
@@ -61,7 +61,7 @@ namespace
             if (result) {
                 return result;
             }
-            if (++attempt == 5) {
+            if (++attempt == 5 || !withRetry) {
                 throw std::runtime_error("Error connecting to the server.");
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -210,14 +210,14 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     return parseBoolResult(result->body);
 }
 
-bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result) const
+bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
-    auto postResult = executeRequest([&] { return client.Get("/alien-server/getsimulationinfo.php"); });
+    auto postResult = executeRequest([&] { return client.Get("/alien-server/getsimulationinfo.php"); }, withRetry);
 
     try {
         std::stringstream stream(postResult->body);

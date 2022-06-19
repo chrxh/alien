@@ -702,8 +702,8 @@ void _MainWindow::processWindows()
     _simulationParametersWindow->process();
     _flowGeneratorWindow->process();
     _logWindow->process();
-    _gettingStartedWindow->process();
     _browserWindow->process();
+    _gettingStartedWindow->process();
 }
 
 void _MainWindow::processControllers()
