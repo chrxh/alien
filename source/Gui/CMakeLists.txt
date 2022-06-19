@@ -36,12 +36,16 @@ PUBLIC
     FlowGeneratorWindow.h
     FpsController.cpp
     FpsController.h
+    GenericOpenFileDialog.cpp
+    GenericOpenFileDialog.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GlobalSettings.cpp
     GlobalSettings.h
     GpuSettingsDialog.cpp
     GpuSettingsDialog.h
+    ImageToPatternDialog.cpp
+    ImageToPatternDialog.h
     InspectorWindow.cpp
     InspectorWindow.h
     LoginDialog.cpp

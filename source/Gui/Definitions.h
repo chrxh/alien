@@ -166,6 +166,9 @@ using ResetPasswordDialog = std::shared_ptr<_ResetPasswordDialog>;
 class _NewPasswordDialog;
 using NewPasswordDialog = std::shared_ptr<_NewPasswordDialog>;
 
+class _ImageToPatternDialog;
+using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

@@ -63,6 +63,7 @@ private:
     NetworkSettingsDialog _networkSettingsDialog;
     ResetPasswordDialog _resetPasswordDialog;
     NewPasswordDialog _newPasswordDialog;
+    ImageToPatternDialog _imageToPatternDialog;
 
     ModeController _modeController;
     WindowController _windowController;
