@@ -68,6 +68,8 @@
 #include "NetworkSettingsDialog.h"
 #include "ResetPasswordDialog.h"
 #include "NewPasswordDialog.h"
+#include "ImageToPatternDialog.h"
+#include "GenericOpenFileDialog.h"
 
 namespace
 {
@@ -155,6 +157,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
+    _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -514,6 +517,10 @@ void _MainWindow::processMenubar()
                 _patternAnalysisDialog->show();
                 _toolsMenuToggled = false;
             }
+            if (ImGui::MenuItem("Image to pattern", "ALT+P")) {
+                _imageToPatternDialog->show();
+                _toolsMenuToggled = false;
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -682,6 +689,7 @@ void _MainWindow::processDialogs()
     _newPasswordDialog->process();
 
     MessageDialog::getInstance().process();
+    GenericOpenFileDialog::getInstance().process();
     processExitDialog();
 }
 
