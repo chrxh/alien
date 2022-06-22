@@ -32,7 +32,7 @@ void _GettingStartedWindow::processIntern()
     ImGui::PopFont();
     AlienImGui::Separator();
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - 50), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - 50), false)) {
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
         ImGui::Text("Introduction");
