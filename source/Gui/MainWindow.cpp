@@ -476,6 +476,7 @@ void _MainWindow::processMenubar()
                 _editorController->onCloseAllInspectorWindows();
             }
             ImGui::EndDisabled();
+            ImGui::Separator();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
             if (ImGui::MenuItem("Symbols", "ALT+B", symbolsWindow->isOn())) {
                 symbolsWindow->setOn(!symbolsWindow->isOn());
@@ -517,7 +518,7 @@ void _MainWindow::processMenubar()
                 _patternAnalysisDialog->show();
                 _toolsMenuToggled = false;
             }
-            if (ImGui::MenuItem("Image to pattern", "ALT+P")) {
+            if (ImGui::MenuItem("Image to pattern", "ALT+G")) {
                 _imageToPatternDialog->show();
                 _toolsMenuToggled = false;
             }
@@ -665,6 +666,9 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
             _patternAnalysisDialog->show();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_G)) {
+            _imageToPatternDialog->show();
         }
     }
 }

@@ -147,6 +147,9 @@ __inline__ __device__ void Math::angleCorrection(int &angle)
 
 __inline__ __device__ bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate)
 {
+    if (angle1 == angle2 && angle1 != angleBetweenCandidate) {
+        return false;
+    }
     if (angleBetweenCandidate < angle1) {
         angleBetweenCandidate += 360.0f;
         angle2 += 360.0f;
@@ -154,7 +157,7 @@ __inline__ __device__ bool Math::isAngleInBetween(float angle1, float angle2, fl
     if (angle2 < angleBetweenCandidate) {
         angle2 += 360.0f;
     }
-    return angle2 - angle1 <= 360.0f;
+    return angle2 - angle1 < 360.0f;
 }
 
 __inline__ __device__ void Math::angleCorrection(float &angle)

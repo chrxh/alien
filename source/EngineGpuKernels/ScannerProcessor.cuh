@@ -133,17 +133,15 @@ __device__ __inline__ auto ScannerProcessor::spiralLookupAlgorithm(int depth, Ce
             if (!visitedCell.contains(nextCandidateCell) && !nextCandidateCell->tokenBlocked) {
 
                 //calc angle from nextCandidateCell
-                auto nextPosDelta = nextCandidateCell->absPos - cell->absPos;
+                auto nextPosDelta = nextCandidateCell->absPos - result.cell->absPos;
                 data.cellMap.correctDirection(nextPosDelta);
                 auto angle = Math::angleOfVector(nextPosDelta);
 
                 //another cell already found? => compare angles
                 if (nextCellFound) {
 
-                    //new angle should be between "originAngle" and "nextCellAngle" in modulo arithmetic,
-                    //i.e. nextCellAngle > originAngle: angle\in (nextCellAngle,originAngle]
-                    //nextCellAngle < originAngle: angle >= originAngle or angle < nextCellAngle
-                    if ((nextCellAngle > angle && angle >= originAngle) || (nextCellAngle < originAngle && (angle >= originAngle || angle < nextCellAngle))) {
+                    //"angle" should be between "originAngle" and "nextCellAngle" in modulo arithmetic,
+                    if (Math::isAngleInBetween(originAngle, nextCellAngle, angle)) {
                         nextCell = nextCandidateCell;
                         nextCellAngle = angle;
                     }
