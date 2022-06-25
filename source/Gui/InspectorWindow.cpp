@@ -656,7 +656,7 @@ void _InspectorWindow::showConstructionTableContent()
     AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorNoEnergy) + ": error - not enough energy");
     AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorConnection) + ": error - no free connection");
     AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorLock) + ": error - construction blocked by other processes");
-    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorDist) + ": error - no free connection");
+    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorDist) + ": error - invalid connection distance");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
