@@ -95,6 +95,8 @@ void _BrowserWindow::processTable()
         | ImGuiTableFlags_ScrollY;
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
+            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthStretch, 0.0f, RemoteSimulationDataColumnId_Actions);
+        ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             0.0f,
@@ -120,8 +122,6 @@ void _BrowserWindow::processTable()
         ImGui::TableSetupColumn("Particles", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Particles);
         ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_FileSize);
         ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Version);
-        ImGui::TableSetupColumn(
-            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthStretch, 0.0f, RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -147,6 +147,30 @@ void _BrowserWindow::processTable()
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow();
+
+                ImGui::TableNextColumn();
+                if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
+                    onOpenSimulation(item->id);
+                }
+                ImGui::SameLine();
+                ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+                auto liked = isLiked(item->id);
+                if (liked) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
+                }
+                if (ImGui::Button(ICON_FA_THUMBS_UP)) {
+                    onToggleLike(*item);
+                }
+                if (liked) {
+                    ImGui::PopStyleColor(1);
+                }
+                ImGui::EndDisabled();
+                ImGui::SameLine();
+                ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
+                if (ImGui::Button(ICON_FA_TRASH)) {
+                    onDeleteSimulation(item->id);
+                }
+                ImGui::EndDisabled();
 
                 ImGui::TableNextColumn();
 
@@ -190,29 +214,6 @@ void _BrowserWindow::processTable()
                 AlienImGui::Text(StringHelper::format(item->contentSize / 1024) + " KB");
                 ImGui::TableNextColumn();
                 AlienImGui::Text(item->version);
-                ImGui::TableNextColumn();
-                if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-                    onOpenSimulation(item->id);
-                }
-                ImGui::SameLine();
-                ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
-                auto liked = isLiked(item->id);
-                if (liked) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
-                }
-                if (ImGui::Button(ICON_FA_THUMBS_UP)) {
-                    onToggleLike(*item);
-                }
-                if (liked) {
-                    ImGui::PopStyleColor(1);
-                }
-                ImGui::EndDisabled();
-                ImGui::SameLine();
-                ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
-                if (ImGui::Button(ICON_FA_TRASH)) {
-                    onDeleteSimulation(item->id);
-                }
-                ImGui::EndDisabled();
                 ImGui::PopID();
             }
         ImGui::EndTable();
