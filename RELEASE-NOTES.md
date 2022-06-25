@@ -1,5 +1,21 @@
 # Release notes
 
+## [3.2.0] - 2022-06-25
+### Added
+- browser for downloading simulations from a server
+- registration of users on a server
+- uploading and rating other simulations
+- image to pattern converter
+- new examples
+
+### Changed
+- window transparency lowered
+- simulation parameter group renamed
+
+### Fixed
+- editor performance increased through caching
+- scanner function scans correct cell
+
 ## [3.1.2] - 2022-05-01
 ### Fixed
 - rigidity spot parameter is saved correctly
