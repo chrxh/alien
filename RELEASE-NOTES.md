@@ -4,7 +4,8 @@
 ### Added
 - browser for downloading simulations from a server
 - registration of users on a server
-- uploading and rating other simulations
+- upload simulations
+- rate simulations by likes
 - image to pattern converter
 - new examples
 

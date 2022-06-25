@@ -55,7 +55,6 @@
     "DIGESTION_IN_COLOR": "[8]",
     "DIGESTION_OUT": "[5]",
     "DIGESTION_OUT::NO_TARGET": "0",
-    "DIGESTION_OUT::POISONED": "2",
     "DIGESTION_OUT::SUCCESS": "1",
     "ENERGY_GUIDANCE_IN": "[1]",
     "ENERGY_GUIDANCE_IN::BALANCE_BOTH": "3",
@@ -110,6 +109,5 @@
     "i": "[255]",
     "j": "[254]",
     "k": "[253]",
-    "l": "[252]",
-    "m": "[251]"
+    "l": "[252]"
 }
