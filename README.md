@@ -26,7 +26,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 ### Artificial Life extensions
 - Programmable particle actions for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles
-- Allow spatiotemporally varying simulation parameters
+- Spatiotemporally varying simulation parameters
 
 <img src="img/alife engine.gif" width=100%>
 
