@@ -314,18 +314,19 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
 
 __inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* cell)
 {
-    if (cell->tryLock()) {
-        for (int i = cell->numConnections - 1; i >= 0; --i) {
-            auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->tryLock()) {
+    for (int i = cell->numConnections - 1; i >= 0; --i) {
+        auto connectedCell = cell->connections[0].cell;
+        SystemDoubleLock lock;
+        lock.init(&cell->locked, &connectedCell->locked);
+        if (lock.tryLock()) {
 
+            if (cell->numConnections > 0) {
                 delConnectionOneWay(cell, connectedCell);
                 delConnectionOneWay(connectedCell, cell);
-
-                connectedCell->releaseLock();
             }
+
+            lock.releaseLock();
         }
-        cell->releaseLock();
     }
 }
 
