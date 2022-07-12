@@ -24,11 +24,13 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_substep6, data, result);
     KERNEL_CALL(cudaNextTimestep_substep7, data);
     KERNEL_CALL(cudaNextTimestep_substep8, data, result);
-    KERNEL_CALL(cudaNextTimestep_substep9, data);
+    if (_counter == 0) {
+        KERNEL_CALL(cudaNextTimestep_substep9, data);
+    }
     KERNEL_CALL(cudaNextTimestep_substep10, data);
 
     if (isRigidityUpdateEnabled(settings)) {
-        if (++_counter == 3) {  //execute rigidity update only every 3rd time step for performance reasons
+        if (_counter == 0) {  //execute rigidity update only every 3rd time step for performance reasons
             KERNEL_CALL(cudaInitClusterData, data);
             KERNEL_CALL(cudaFindClusterIteration, data);  //3 iterations should provide a good approximation
             KERNEL_CALL(cudaFindClusterIteration, data);
@@ -37,7 +39,6 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
             KERNEL_CALL(cudaAccumulateClusterPosAndVel, data);
             KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
             KERNEL_CALL(cudaApplyClusterData, data);
-            _counter = 0;
         }
     }
     KERNEL_CALL_1_1(cudaNextTimestep_substep11, data);
@@ -46,6 +47,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_substep14, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
+    if (++_counter == 3) {
+        _counter = 0;
+    }
 }
 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const

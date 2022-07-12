@@ -89,7 +89,7 @@ __global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult 
 __global__ void cudaNextTimestep_substep9(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcFriction(data);
+    cellProcessor.applyInnerFriction(data);
 }
 
 __global__ void cudaNextTimestep_substep10(SimulationData data)
