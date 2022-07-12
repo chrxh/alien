@@ -66,7 +66,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::Spacing();
         ImGui::Spacing();
         float sensitivity = _viewport->getZoomSensitivity();
-        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.15f).textWidth(130).format(""), sensitivity)) {
+        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.05f).textWidth(130).format(""), sensitivity)) {
             _viewport->setZoomSensitivity(sensitivity);
         }
     }
