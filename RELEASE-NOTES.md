@@ -1,5 +1,13 @@
 # Release notes
 
+## [3.2.1] - 2022-07-13
+### Added
+- Mycelial Networks example
+
+### Changed
+- calculation of inner forces improved: prevent unwanted rotations and movements
+- performance optimizations in case for many cell connections
+
 ## [3.2.0] - 2022-06-25
 ### Added
 - browser for downloading simulations from a server
