@@ -65,6 +65,6 @@ void _ActivateUserDialog::onActivateUser()
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
         return;
     }
-    MessageDialog::getInstance().show("Information", "The user '" + _userName + "' has been successfully created.\nYou are logged in.");
+    MessageDialog::getInstance().show("Information", "The user '" + _userName + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor rate others by likes.");
     _browserWindow->onRefresh();
 }
