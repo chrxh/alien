@@ -6,7 +6,7 @@
 
 ### Changed
 - calculation of inner forces improved: prevent unwanted rotations and movements
-- performance optimizations in case for many cell connections
+- performance optimizations in case of many cell connections
 
 ## [3.2.0] - 2022-06-25
 ### Added
