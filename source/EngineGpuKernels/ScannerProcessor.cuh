@@ -130,7 +130,7 @@ __device__ __inline__ auto ScannerProcessor::spiralLookupAlgorithm(int depth, Ce
         auto nextCellAngle = 0.0f;
         for (int i = 0; i < result.cell->numConnections; ++i) {
             auto nextCandidateCell = result.cell->connections[i].cell;
-            if (!visitedCell.contains(nextCandidateCell) && !nextCandidateCell->tokenBlocked) {
+            if (!visitedCell.contains(nextCandidateCell)) {
 
                 //calc angle from nextCandidateCell
                 auto nextPosDelta = nextCandidateCell->absPos - result.cell->absPos;
