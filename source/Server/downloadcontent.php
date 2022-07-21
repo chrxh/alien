@@ -6,6 +6,8 @@
 
     $id = $_GET["id"];
 
+    $db->query("UPDATE simulation Set NUM_DOWNLOADS = NUM_DOWNLOADS + 1 where ID=$id");
+
     if ($response = $db->query("SELECT sim.id as id, sim.content as content FROM simulation sim where ID=$id")) {
         $obj = $response->fetch_object();
         echo $obj->content;
