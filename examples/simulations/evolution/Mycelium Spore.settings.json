@@ -28,8 +28,8 @@
             "fusion velocity": "0.206000",
             "max binding energy": "500000.000000",
             "function": {
-                "min invocations": "40000",
-                "invocations decay probability": "0.000000",
+                "min invocations": "2000000",
+                "invocations decay probability": "0.000001",
                 "computer": {
                     "max instructions": "15",
                     "memory size": "8"
@@ -38,7 +38,7 @@
                     "strength": "0.100000",
                     "energy cost": "0.000000",
                     "geometry deviation exponent": "0.000000",
-                    "target color mismatch penalty": "0.913000",
+                    "target color mismatch penalty": "0.688000",
                     "color penalty": "0.000000",
                     "connections mismatch penalty": "0.000000",
                     "token penalty": "0.000000"
@@ -60,7 +60,7 @@
             }
         },
         "token": {
-            "mutation rate": "0.000000",
+            "mutation rate": "0.000010",
             "memory size": "256",
             "min energy": "3.000000"
         },
@@ -74,7 +74,7 @@
         "spots": {
             "num spots": "1",
             "0": {
-                "color": "4279969814",
+                "color": "4278858515",
                 "pos": {
                     "x": "500.000000",
                     "y": "250.000000"
@@ -82,8 +82,8 @@
                 "shape": "circular",
                 "core width": "100.000000",
                 "core height": "200.000000",
-                "core radius": "50.000000",
-                "fadeout radius": "143.500000",
+                "core radius": "83.333336",
+                "fadeout radius": "150.600006",
                 "friction": "0.000300",
                 "rigidity": "0.000000",
                 "radiation": {
@@ -97,11 +97,11 @@
                     "max binding energy": "500000.000000",
                     "mutation rate": "0.000000",
                     "function": {
-                        "min invocations": "40000",
-                        "invocations decay probability": "0.000000",
+                        "min invocations": "2000000",
+                        "invocations decay probability": "0.000001",
                         "weapon": {
                             "energy cost": "0.000000",
-                            "target color mismatch penalty": "0.913000",
+                            "target color mismatch penalty": "0.688000",
                             "color penalty": "0.000000",
                             "geometry deviation exponent": "0.000000",
                             "connections mismatch penalty": "0.000000",
@@ -110,7 +110,7 @@
                     }
                 },
                 "token": {
-                    "mutation rate": "0.000000"
+                    "mutation rate": "0.000010"
                 }
             },
             "1": {
