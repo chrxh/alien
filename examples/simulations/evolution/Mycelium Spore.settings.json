@@ -60,7 +60,7 @@
             }
         },
         "token": {
-            "mutation rate": "0.000010",
+            "mutation rate": "0.000000",
             "memory size": "256",
             "min energy": "3.000000"
         },

@@ -27,6 +27,9 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
         case RemoteSimulationDataColumnId_Likes:
             delta = (leftImpl->likes - rightImpl->likes);
             break;
+        case RemoteSimulationDataColumnId_NumDownloads:
+            delta = (leftImpl->numDownloads - rightImpl->numDownloads);
+            break;
         case RemoteSimulationDataColumnId_Width:
             delta = (leftImpl->width - rightImpl->width);
             break;
@@ -67,6 +70,9 @@ bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
         match = true;
     }
     if (std::to_string(likes).find(filter) != std::string::npos) {
+        match = true;
+    }
+    if (std::to_string(numDownloads).find(filter) != std::string::npos) {
         match = true;
     }
     if (std::to_string(width).find(filter) != std::string::npos) {

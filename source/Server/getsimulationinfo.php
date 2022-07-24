@@ -21,6 +21,7 @@
             sim.PARTICLES as particles,
             sim.VERSION as version, 
             sim.TIMESTAMP as timestamp,
+            sim.NUM_DOWNLOADS as numDownloads,
             OCTET_LENGTH(sim.content) as contentSize
         FROM simulation sim
         LEFT JOIN
@@ -43,7 +44,8 @@
             "version" => $obj->version,
             "timestamp" => $obj->timestamp,
             "contentSize" => $obj->contentSize,
-            "likes" => $likes
+            "likes" => $likes,
+            "numDownloads" => (int)$obj->numDownloads
         ];
     }
 

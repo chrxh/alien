@@ -11,6 +11,7 @@ enum RemoteSimulationDataColumnId
     RemoteSimulationDataColumnId_SimulationName,
     RemoteSimulationDataColumnId_Description,
     RemoteSimulationDataColumnId_Likes,
+    RemoteSimulationDataColumnId_NumDownloads,
     RemoteSimulationDataColumnId_Width,
     RemoteSimulationDataColumnId_Height,
     RemoteSimulationDataColumnId_Particles,
@@ -27,6 +28,7 @@ public:
     std::string userName;
     std::string simName;
     int likes;
+    int numDownloads;
     int width;
     int height;
     int particles;
