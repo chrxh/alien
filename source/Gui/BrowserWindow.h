@@ -28,6 +28,7 @@ private:
     void processStatus();
     void processFilter();
     void processRefreshButton();
+    void processShortenedText(std::string const& text);
     bool processDetailButton();
 
     void processActivated() override;

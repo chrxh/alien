@@ -1,5 +1,13 @@
 # Release notes
 
+## [3.2.2] - 2022-07-24
+### Added
+- show downloads in browser
+- more spore examples
+
+### Changed
+- allow scanning of token blocked cells
+
 ## [3.2.1] - 2022-07-13
 ### Added
 - Mycelial Networks example

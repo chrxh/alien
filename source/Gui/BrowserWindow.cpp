@@ -93,9 +93,9 @@ void _BrowserWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY;
-    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthStretch, 0.0f, RemoteSimulationDataColumnId_Actions);
+            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
@@ -117,6 +117,7 @@ void _BrowserWindow::processTable()
             styleRepository.scaleContent(120.0f),
             RemoteSimulationDataColumnId_Description);
         ImGui::TableSetupColumn("Likes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
+        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
         ImGui::TableSetupColumn("Particles", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Particles);
@@ -182,21 +183,11 @@ void _BrowserWindow::processTable()
 */
                 AlienImGui::Text(item->timestamp);
                 ImGui::TableNextColumn();
-                AlienImGui::Text(item->userName);
+                processShortenedText(item->userName);
                 ImGui::TableNextColumn();
-                AlienImGui::Text(item->simName);
+                processShortenedText(item->simName);
                 ImGui::TableNextColumn();
-                auto textSize = ImGui::CalcTextSize(item->description.c_str());
-                auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth();
-                auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scaleContent(15.0f);
-                AlienImGui::Text(item->description);
-                if (needDetailButton) {
-                    ImGui::SameLine();
-                    ImGui::SetCursorPosX(cursorPos);
-
-                    processDetailButton();
-                    AlienImGui::Tooltip(item->description.c_str());
-                }
+                processShortenedText(item->description);
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->likes));
                 if(item->likes > 0) {
@@ -204,6 +195,8 @@ void _BrowserWindow::processTable()
                     processDetailButton();
                     AlienImGui::Tooltip([&] { return getUserLikes(item->id); });
                 }
+                ImGui::TableNextColumn();
+                AlienImGui::Text(std::to_string(item->numDownloads));
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->width));
                 ImGui::TableNextColumn();
@@ -225,18 +218,26 @@ void _BrowserWindow::processStatus()
     auto styleRepository = StyleRepository::getInstance();
 
     if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(30.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+//        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
         std::string statusText;
-        if (auto userName = _networkController->getLoggedInUserName()) {
-            statusText = "Logged in as " + *userName + " @ " + _networkController->getServerAddress() + ": ";
-        } else {
-            statusText = "Not logged in to " + _networkController->getServerAddress() + ": ";
-        }
+        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_remoteSimulationDatas.size()) + " simulations found";
+
+        statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
+        if (auto userName = _networkController->getLoggedInUserName()) {
+            statusText += "Logged in as " + *userName + " @ " + _networkController->getServerAddress();// + ": ";
+        } else {
+            statusText += "Not logged in to " + _networkController->getServerAddress();// + ": ";
+        }
+
+        if (!_networkController->getLoggedInUserName()) {
+            statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
+            statusText += "In order to upload and rate simulations you need to log in.";
+        }
         AlienImGui::Text(statusText);
         ImGui::PopStyleColor();
-        ImGui::PopFont();
+//        ImGui::PopFont();
     }
     ImGui::EndChild();
 }
@@ -257,6 +258,21 @@ void _BrowserWindow::processRefreshButton()
 {
     if (AlienImGui::Button("Refresh")) {
         onRefresh();
+    }
+}
+
+void _BrowserWindow::processShortenedText(std::string const& text) {
+    auto styleRepository = StyleRepository::getInstance();
+    auto textSize = ImGui::CalcTextSize(text.c_str());
+    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth();
+    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scaleContent(15.0f);
+    AlienImGui::Text(text);
+    if (needDetailButton) {
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(cursorPos);
+
+        processDetailButton();
+        AlienImGui::Tooltip(text.c_str());
     }
 }
 
