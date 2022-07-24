@@ -218,7 +218,6 @@ void _BrowserWindow::processStatus()
     auto styleRepository = StyleRepository::getInstance();
 
     if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(30.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-//        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
@@ -237,7 +236,6 @@ void _BrowserWindow::processStatus()
         }
         AlienImGui::Text(statusText);
         ImGui::PopStyleColor();
-//        ImGui::PopFont();
     }
     ImGui::EndChild();
 }
