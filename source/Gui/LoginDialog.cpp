@@ -22,7 +22,7 @@ _LoginDialog::_LoginDialog(
 
 {
     auto& settings = GlobalSettings::getInstance();
-    _remember = settings.getBoolState("dialogs.login.remember", false);
+    _remember = settings.getBoolState("dialogs.login.remember", true);
     if (_remember) {
         settings.getStringState("dialogs.login.user name", "");
         settings.getStringState("dialogs.login.password", "");

@@ -17,6 +17,8 @@ public:
         TemporalControlWindow const& temporalControlWindow);
     ~_BrowserWindow();
 
+    void registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
+
     void onRefresh();
 
 private:
@@ -27,7 +29,7 @@ private:
     void processTable();
     void processStatus();
     void processFilter();
-    void processRefreshButton();
+    void processToolbar();
     void processShortenedText(std::string const& text);
     bool processDetailButton();
 
@@ -56,4 +58,6 @@ private:
     StatisticsWindow _statisticsWindow;
     Viewport _viewport;
     TemporalControlWindow _temporalControlWindow;
+    LoginDialogWeakPtr _loginDialog;
+    UploadSimulationDialogWeakPtr _uploadSimulationDialog;
 };

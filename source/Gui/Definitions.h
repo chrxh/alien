@@ -144,9 +144,11 @@ using NetworkController = std::shared_ptr<_NetworkController>;
 
 class _LoginDialog;
 using LoginDialog = std::shared_ptr<_LoginDialog>;
+using LoginDialogWeakPtr = std::weak_ptr<_LoginDialog>;
 
 class _UploadSimulationDialog;
 using UploadSimulationDialog = std::shared_ptr<_UploadSimulationDialog>;
+using UploadSimulationDialogWeakPtr = std::weak_ptr<_UploadSimulationDialog>;
 
 class _CreateUserDialog;
 using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;
