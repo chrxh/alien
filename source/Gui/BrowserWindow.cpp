@@ -199,6 +199,8 @@ void _BrowserWindow::processTable()
                 if (ImGui::Button(ICON_FA_DOWNLOAD)) {
                     onOpenSimulation(item->id);
                 }
+                AlienImGui::Tooltip("Download");
+
                 ImGui::SameLine();
                 ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
                 auto liked = isLiked(item->id);
@@ -208,6 +210,8 @@ void _BrowserWindow::processTable()
                 if (ImGui::Button(ICON_FA_THUMBS_UP)) {
                     onToggleLike(*item);
                 }
+                AlienImGui::Tooltip("Like");
+
                 if (liked) {
                     ImGui::PopStyleColor(1);
                 }
@@ -218,6 +222,7 @@ void _BrowserWindow::processTable()
                     onDeleteSimulation(item->id);
                 }
                 ImGui::EndDisabled();
+                AlienImGui::Tooltip("Delete");
 
                 ImGui::TableNextColumn();
 
