@@ -18,6 +18,8 @@
 #include "Viewport.h"
 #include "TemporalControlWindow.h"
 #include "MessageDialog.h"
+#include "LoginDialog.h"
+#include "UploadSimulationDialog.h"
 
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
@@ -40,6 +42,12 @@ _BrowserWindow::_BrowserWindow(
 _BrowserWindow::~_BrowserWindow()
 {
     _on = false;
+}
+
+void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+{
+    _loginDialog = loginDialog;
+    _uploadSimulationDialog = uploadSimulationDialog;
 }
 
 void _BrowserWindow::onRefresh()
@@ -77,14 +85,54 @@ void _BrowserWindow::refreshIntern(bool firstTimeStartup)
 
 void _BrowserWindow::processIntern()
 {
+    processToolbar();
     processTable();
     processStatus();
     processFilter();
-    processRefreshButton();
     if(_scheduleRefresh) {
         onRefresh();
         _scheduleRefresh = false;
     }
+}
+
+void _BrowserWindow::processToolbar()
+{
+    if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
+        onRefresh();
+    }
+    AlienImGui::Tooltip("Refresh");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_networkController->getLoggedInUserName().has_value());
+    if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
+        if (auto loginDialog = _loginDialog.lock()) {
+            loginDialog->show();
+        }
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Login or register");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+    if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
+        if (auto loginDialog = _loginDialog.lock()) {
+            _networkController->logout();
+            onRefresh();
+        }
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Logout");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+    if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
+        if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
+            uploadSimulationDialog->show();
+        }
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Upload simulation");
+    AlienImGui::Separator();
 }
 
 void _BrowserWindow::processTable()
@@ -93,7 +141,7 @@ void _BrowserWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY;
-    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(90.0f)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(63.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
             "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
@@ -150,7 +198,7 @@ void _BrowserWindow::processTable()
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
+                if (ImGui::Button(ICON_FA_DOWNLOAD)) {
                     onOpenSimulation(item->id);
                 }
                 ImGui::SameLine();
@@ -217,7 +265,7 @@ void _BrowserWindow::processStatus()
 {
     auto styleRepository = StyleRepository::getInstance();
 
-    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(30.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(33.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
@@ -249,13 +297,6 @@ void _BrowserWindow::processFilter()
                 _filteredRemoteSimulationDatas.emplace_back(entry);
             }
         }
-    }
-}
-
-void _BrowserWindow::processRefreshButton()
-{
-    if (AlienImGui::Button("Refresh")) {
-        onRefresh();
     }
 }
 

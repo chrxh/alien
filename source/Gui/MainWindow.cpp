@@ -159,6 +159,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
 
+    //cyclic references
+    _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
+
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
 
