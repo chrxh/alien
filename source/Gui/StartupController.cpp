@@ -123,7 +123,7 @@ void _StartupController::processWindow()
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
-    ImColor textColor = Const::ProgrammVersionColor;
+    ImColor textColor = Const::ProgramVersionColor;
     textColor.Value.w = ImGui::GetStyle().Alpha;
 
     drawList->AddText(

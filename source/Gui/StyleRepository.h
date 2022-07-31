@@ -8,7 +8,7 @@
 
 namespace Const
 {
-    ImColor const ProgrammVersionColor = ImColor::HSV(0.63f, 0.3f, 1.0f, 1.0f);
+    ImColor const ProgramVersionColor = ImColor::HSV(0.5f, 0.1f, 1.0f, 1.0f);
 
     int64_t const SimulationSliderColor_Base = 0xff4c4c4c;
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
