@@ -1,5 +1,9 @@
 # Release notes
 
+## [3.2.3] - 2022-07-31
+### Added
+- toolbar for browser window: refresh, login, logout, upload
+
 ## [3.2.2] - 2022-07-24
 ### Added
 - show downloads in browser
