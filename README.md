@@ -24,7 +24,7 @@ An important goal is to make the simulator user-friendly through a modern user i
 <img src="img/physics engine.gif" width=100%>
 
 ### Artificial Life extensions
-- Programmable particle actions for simulating digital organisms and studying evolution
+- Dynamically programmable matter approach for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles
 - Spatiotemporally varying simulation parameters
 
