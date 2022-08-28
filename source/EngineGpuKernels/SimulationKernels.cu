@@ -5,7 +5,6 @@
 __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
 {
     data.prepareForNextTimestep();
-    result.resetStatistics();
     result.setArrayResizeNeeded(data.shouldResize());
 }
 

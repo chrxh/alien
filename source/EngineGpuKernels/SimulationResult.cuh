@@ -34,6 +34,8 @@ public:
     {
         ProcessMonitorData result;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _statistics, sizeof(ProcessMonitorData), cudaMemcpyDeviceToHost));
+        ProcessMonitorData empty;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_statistics, &empty, sizeof(ProcessMonitorData), cudaMemcpyHostToDevice));
         return result;
     }
 
