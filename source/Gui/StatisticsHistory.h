@@ -27,5 +27,10 @@ struct LongtermStatistics
     std::array<std::vector<float>, 15>
         datas;  //cells, cells by colors (7x), particles, tokens, created cells, successful attacks, failed attacks, muscle activities
 
+    float accumulatedCreatedCells = 0;
+    float accumulatedSuccessfulAttacks = 0;
+    float accumulatedFailedAttack = 0;
+    float accumulatedMuscleActivities = 0;
+
     void add(MonitorData const& statistics);
 };
