@@ -52,9 +52,18 @@ void LongtermStatistics::add(MonitorData const& newStatistics)
         datas[8].emplace_back(toFloat(newStatistics.numConnections));
         datas[9].emplace_back(toFloat(newStatistics.numParticles));
         datas[10].emplace_back(toFloat(newStatistics.numTokens));
-        datas[11].emplace_back(toFloat(newStatistics.numCreatedCells));
-        datas[12].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-        datas[13].emplace_back(toFloat(newStatistics.numFailedAttacks));
-        datas[14].emplace_back(toFloat(newStatistics.numMuscleActivities));
+        datas[11].emplace_back(accumulatedCreatedCells);
+        datas[12].emplace_back(accumulatedSuccessfulAttacks);
+        datas[13].emplace_back(accumulatedFailedAttack);
+        datas[14].emplace_back(accumulatedMuscleActivities);
+        accumulatedCreatedCells = 0;
+        accumulatedSuccessfulAttacks = 0;
+        accumulatedFailedAttack = 0;
+        accumulatedMuscleActivities = 0;
+    } else {
+        accumulatedCreatedCells += newStatistics.numCreatedCells;
+        accumulatedSuccessfulAttacks += newStatistics.numSuccessfulAttacks;
+        accumulatedFailedAttack += newStatistics.numFailedAttacks;
+        accumulatedMuscleActivities += newStatistics.numMuscleActivities;
     }
 }
