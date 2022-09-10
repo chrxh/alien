@@ -26,6 +26,16 @@ public:
 /**
  * Implementations
  */
+
+template <typename T>
+std::string to_string_with_precision(const T a_value, const int n = 6)
+{
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
+}
+
 template <typename T>
 void JsonParser::encodeDecode(
     boost::property_tree::ptree& tree,
@@ -40,7 +50,7 @@ void JsonParser::encodeDecode(
         } else if constexpr (std::is_same<T, std::string>::value) {
             tree.put(node, parameter);
         } else {
-            tree.put(node, std::to_string(parameter));
+            tree.put(node, to_string_with_precision(parameter, 8));
         }
     } else {
         if constexpr (std::is_same<T, std::string>::value) {
