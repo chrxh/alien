@@ -124,10 +124,13 @@ __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool incl
                 auto connectedCell = cell->connections[i].cell;
                 if ((includeClusters && connectedCell->selected == 0) || (!includeClusters && connectedCell->selected != 1)) {
 
-                    if (connectedCell->tryLock()) {
+                    SystemDoubleLock lock;
+                    lock.init(&cell->locked, &connectedCell->locked);
+
+                    if (lock.tryLock()) {
                         CellConnectionProcessor::delConnections(cell, connectedCell);
                         --i;
-                        connectedCell->releaseLock();
+                        lock.releaseLock();
                     } else {
                         atomicExch(retry, 1);
                     }
