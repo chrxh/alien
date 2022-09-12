@@ -27,6 +27,7 @@ public:
         float desiredDistance,
         int angleAlignment = 0);
     __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
 private:
     __inline__ __device__ static void addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens);
@@ -41,7 +42,6 @@ private:
 
     __inline__ __device__ static void delConnectionsIntern(Cell* cell);
     __inline__ __device__ static void delConnectionIntern(Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
     __inline__ __device__ static void delCell(SimulationData& data, Cell* cell, int cellIndex);
 };
