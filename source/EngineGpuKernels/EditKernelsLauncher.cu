@@ -134,11 +134,7 @@ void _EditKernelsLauncher::shallowUpdateSelectedEntities(
 
 void _EditKernelsLauncher::removeSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
-    do {
-        setValueToDevice(_cudaRemoveResult, 0);
-        KERNEL_CALL(cudaRemoveSelectedCellConnections, data, includeClusters, _cudaRemoveResult);
-        cudaDeviceSynchronize();
-    } while (1 == copyToHost(_cudaRemoveResult));
+    KERNEL_CALL(cudaRemoveSelectedCellConnections, data, includeClusters);
 
     KERNEL_CALL(cudaRemoveSelectedEntities, data, includeClusters);
     cudaDeviceSynchronize();

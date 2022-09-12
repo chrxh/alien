@@ -113,28 +113,17 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
     }
 }
 
-__global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters, int* retry)
+__global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters)
 {
     auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.entities.cellPointers.at(index);
-        if (isSelected(cell, includeClusters)) {
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto connectedCell = cell->connections[i].cell;
-                if ((includeClusters && connectedCell->selected == 0) || (!includeClusters && connectedCell->selected != 1)) {
-
-                    SystemDoubleLock lock;
-                    lock.init(&cell->locked, &connectedCell->locked);
-
-                    if (lock.tryLock()) {
-                        CellConnectionProcessor::delConnections(cell, connectedCell);
-                        --i;
-                        lock.releaseLock();
-                    } else {
-                        atomicExch(retry, 1);
-                    }
-                }
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectedCell = cell->connections[i].cell;
+            if ((includeClusters && cell->selected != 0) || (!includeClusters && (cell->selected == 1 || connectedCell->selected == 1))) {
+                CellConnectionProcessor::delConnectionOneWay(cell, connectedCell);
+                --i;
             }
         }
     }
