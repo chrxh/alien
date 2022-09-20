@@ -97,7 +97,6 @@ A short architectural overview of the source code can be found in the [documenta
 # Dependency list
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 - [Dear ImGui](https://github.com/ocornut/imgui)
-- [vcpkg](https://vcpkg.io/en/index.html)
 - [ImPlot](https://github.com/epezent/implot)
 - [ImFileDialog](https://github.com/dfranx/ImFileDialog)
 - [boost](https://www.boost.org)
@@ -112,6 +111,7 @@ A short architectural overview of the source code can be found in the [documenta
 - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
+- [vcpkg](https://vcpkg.io/en/index.html)
 
 # Screenshots
 #### Startup screen
