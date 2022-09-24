@@ -4,6 +4,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -14,6 +15,18 @@
 namespace
 {
     auto const MaxContentTextWidth = 260.0f;
+    std::vector<std::vector<float>> toVector(float const v[7][7])
+    {
+        std::vector<std::vector<float>> result;
+        for (int row = 0; row < 7; ++row) {
+            std::vector<float> rowVector;
+            for (int col = 0; col < 7; ++col) {
+                rowVector.emplace_back(v[row][col]);
+            }
+            result.emplace_back(rowVector);
+        }
+        return result;
+    }
 }
 
 _SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController)
@@ -274,9 +287,8 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(4.0f)
                 .defaultValue(origSimParameters.spotValues.cellBindingForce)
-                .tooltip(std::string(
-                    "Strength of the force that holds two connected cells together. For larger binding forces, the "
-                    "time step size should be selected smaller due to numerical instabilities.")),
+                .tooltip(std::string("Strength of the force that holds two connected cells together. For larger binding forces, the "
+                                     "time step size should be selected smaller due to numerical instabilities.")),
             simParameters.spotValues.cellBindingForce);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -285,8 +297,7 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(1.0f)
                 .defaultValue(origSimParameters.spotValues.cellFusionVelocity)
-                .tooltip(
-                    std::string("Minimum velocity of two colliding cells so that a connection can be established.")),
+                .tooltip(std::string("Minimum velocity of two colliding cells so that a connection can be established.")),
             simParameters.spotValues.cellFusionVelocity);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -313,6 +324,26 @@ void _SimulationParametersWindow::processBase(
             simParameters.cellMaxBonds);
 
         /**
+         * Cell color transition rules
+         */
+        AlienImGui::Group("Cell color transition rules");
+        for (int color = 0; color < 7; ++color) {
+            ImGui::PushID(color);
+            auto parameters = AlienImGui::InputColorTransitionParameters()
+                                  .textWidth(MaxContentTextWidth)
+                                  .color(color)
+                                  .defaultTargetColor(origSimParameters.spotValues.cellColorTransitionTargetColor[color])
+                                  .defaultTransitionAge(origSimParameters.spotValues.cellColorTransitionDuration[color])
+                                  .logarithmic(true);
+            if (0 == color) {
+                parameters.name("Target color and duration").tooltip("Cell color");
+            }
+            AlienImGui::InputColorTransition(
+                parameters, color, simParameters.spotValues.cellColorTransitionTargetColor[color], simParameters.spotValues.cellColorTransitionDuration[color]);
+            ImGui::PopID();
+        }
+
+         /**
          * Mutations
          */
         AlienImGui::Group("Mutations");
@@ -371,6 +402,13 @@ void _SimulationParametersWindow::processBase(
          * Cell specialization: Digestion function
          */
         AlienImGui::Group("Cell specialization: Digestion function");
+        AlienImGui::InputColorMatrix(
+            AlienImGui::InputMatrixParameters()
+                .name("Food chain color matrix")
+                .textWidth(MaxContentTextWidth)
+                .tooltip("Color matrix")
+                .defaultValue(toVector(origSimParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix)),
+            simParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -378,8 +416,7 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(4.0f)
                 .defaultValue(origSimParameters.spotValues.cellFunctionWeaponEnergyCost)
-                .tooltip(std::string(
-                    "Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
+                .tooltip(std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
             simParameters.spotValues.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -393,24 +430,13 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Successive color dominance")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorDominance)
-                .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell does not have the successive "
-                                     "color of the attacker cell.")),
-            simParameters.spotValues.cellFunctionWeaponColorDominance);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
                 .defaultValue(origSimParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent)
-                .tooltip(
-                    std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
-                                "geometry of the attacked cell does not match the attacking cell.")),
+                .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
+                                     "geometry of the attacked cell does not match the attacking cell.")),
             simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -626,6 +652,26 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         }
 
         /**
+         * Cell color transition rules
+         */
+        AlienImGui::Group("Cell color transition rules");
+        for (int color = 0; color < 7; ++color) {
+            ImGui::PushID(color);
+            auto parameters = AlienImGui::InputColorTransitionParameters()
+                                  .textWidth(MaxContentTextWidth)
+                                  .color(color)
+                                  .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
+                                  .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
+                                  .logarithmic(true);
+            if (0 == color) {
+                parameters.name("Target color and duration");
+            }
+            AlienImGui::InputColorTransition(
+                parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
+            ImGui::PopID();
+        }
+
+        /**
          * Mutations
          */
         AlienImGui::Group("Mutations");
@@ -678,6 +724,12 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          * Cell specialization: Digestion function
          */
         AlienImGui::Group("Cell specialization: Digestion function");
+        AlienImGui::InputColorMatrix(
+            AlienImGui::InputMatrixParameters()
+                .name("Food chain color matrix")
+                .textWidth(MaxContentTextWidth)
+                .defaultValue(toVector(origSpot.values.cellFunctionWeaponFoodChainColorMatrix)),
+            spot.values.cellFunctionWeaponFoodChainColorMatrix);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -694,14 +746,6 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .max(1.1f)
                 .defaultValue(origSpot.values.cellFunctionWeaponColorTargetMismatchPenalty),
             spot.values.cellFunctionWeaponColorTargetMismatchPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Successive color dominance")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponColorDominance),
-            spot.values.cellFunctionWeaponColorDominance);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
@@ -729,4 +773,3 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
     }
     ImGui::EndChild();
 }
-

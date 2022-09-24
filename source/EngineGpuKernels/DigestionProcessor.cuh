@@ -61,25 +61,30 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                         energyToTransfer *= (1.0f - cellFunctionWeaponColorTargetMismatchPenalty);
                     }
 
-                    auto cellFunctionWeaponColorPenalty =
-                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorDominance, data, cell->absPos);
-
                     auto homogene = isHomogene(cell);
                     auto otherHomogene = isHomogene(otherCell);
-                    if (!homogene /* && otherHomogene*/) {
-                        energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
+
+                    auto color = calcMod(cell->metadata.color, 7);
+                    auto otherColor = calcMod(otherCell->metadata.color, 7);
+
+                    energyToTransfer *= SpotCalculator::calcColorMatrix(color, otherColor, data, cell->absPos);
+
+                    /*!isColorSuperior(cell->metadata.color, otherCell->metadata.color)*/
+                    //(color1 == 0 && color2 == 0) || (color1 == 0 && color2 == 1) || (color1 == 1 && color2 == 2) || (color1 == 1 && color2 > 2)
+/*
+                    if ( !(
+                        (color1 == 0 && color2 == 3) || (color1 == 2 && color2 == 3) || (color1 == 1 && color2 == 2) || (color1 == 3 && color2 == 2)
+                        || (color1 == 0 && color2 == 0)
+                        || (color1 == 1 && color2 == 1))) {
+                        energyToTransfer *= (1.0f - cellFunctionWeaponColorDominance);
                     }
-                    auto isColorSuperior = [](unsigned char color1, unsigned char color2) {
-                        color1 = color1 % 7;
-                        color2 = color2 % 7;
-                        if (color1 == color2 + 1 || (color1 == 0 && color2 == 6)) {
-                            return true;
-                        }
-                        return false;
-                    };
-                    if (homogene && otherHomogene && !isColorSuperior(cell->metadata.color, otherCell->metadata.color)) {
-                        energyToTransfer *= (1.0f - cellFunctionWeaponColorPenalty);
+                    if ((color1 == 0 && color2 == 0) || (color1 == 1 && color2 == 1)) {
+                        energyToTransfer *= 0.02f;
                     }
+                    if ((color1 == 1 && color2 == 2) || (color1 == 3 && color2 == 2)) {
+                        energyToTransfer *= 0.4f;
+                    }
+*/
 
                     auto cellFunctionWeaponConnectionsMismatchPenalty =
                         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponConnectionsMismatchPenalty, data, cell->absPos);

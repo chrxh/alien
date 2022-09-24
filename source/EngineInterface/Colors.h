@@ -4,6 +4,8 @@
 
 namespace Const
 {
+    uint32_t const IndividualCellColors[7] = {0x5070ff, 0xff6040, 0x70ff50, 0xffdf50, 0xbf50ff, 0x50ffef, 0xbfbfbf};
+
     uint32_t const IndividualCellColor1 = 0x5070ff;
     uint32_t const IndividualCellColor2 = 0xff6040;
     uint32_t const IndividualCellColor3 = 0x70ff50;

@@ -103,7 +103,7 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
             if (address < MAX_CELL_STATIC_BYTES) {
                 cell->staticData[address] = data.numberGen1.random(255);
             } else if (address == MAX_CELL_STATIC_BYTES) {
-                cell->metadata.color = data.numberGen1.random(6);
+//                cell->metadata.color = data.numberGen1.random(6);
             } else if (address == MAX_CELL_STATIC_BYTES + 1) {
                 cell->cellFunctionType = data.numberGen1.random(Enums::CellFunction_Count - 1);
                 cell->initMemorySizes();
@@ -112,6 +112,13 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
             }
         }
 
+        auto color = calcMod(cell->metadata.color, 7);
+        auto minAge = SpotCalculator::calcColorMutationMinAge(color, data, cell->absPos);
+        if (++cell->age > minAge) {
+            auto targetColor = SpotCalculator::calcColorMutationTargetColor(color, data, cell->absPos);
+            cell->metadata.color = targetColor;
+           
+        }
     }
 }
 

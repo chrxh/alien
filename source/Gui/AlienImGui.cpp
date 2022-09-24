@@ -5,6 +5,7 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
+#include "EngineInterface/Colors.h"
 
 #include "StyleRepository.h"
 
@@ -137,6 +138,82 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     }
 }
 
+void AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
+{
+    if (width == 0) {
+        width = StyleRepository::getInstance().scaleContent(30);
+    }
+    float h, s, v;
+    AlienImGui::convertRGBtoHSV(cellColor, h, s, v);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
+/*
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+*/
+    ImGui::Button("##", ImVec2(width, ImGui::GetTextLineHeight()));
+    ImGui::PopStyleColor(3);
+}
+
+void AlienImGui::InputColorMatrix(InputMatrixParameters const& parameters, float (&value)[7][7])
+{
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), 8, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+        for (int row = 0; row < 8; ++row) {
+            ImGui::PushID(row);
+            for (int col = 0; col < 8; ++col) {
+                ImGui::PushID(std::to_string(col).c_str());
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (row == 0 && col > 0) {
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                    ColorField(Const::IndividualCellColors[col - 1], -1);
+                } else if (row > 0 && col == 0) {
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                    ColorField(Const::IndividualCellColors[row - 1], -1);
+                } else if (row > 0 && col > 0) {
+                    ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());
+                }
+                ImGui::PopID();
+            }
+            ImGui::TableNextRow();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+        ImGui::SameLine();
+        if (parameters._defaultValue) {
+            bool changed = false;
+            for (int row = 0; row < 7; ++row) {
+                for (int col = 0; col < 7; ++col) {
+                    if(value[row][col] != (*parameters._defaultValue)[row][col]) {
+                        changed = true;
+                    }
+                }
+            }
+            ImGui::BeginDisabled(!changed);
+            if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+                for (int row = 0; row < 7; ++row) {
+                    for (int col = 0; col < 7; ++col) {
+                        value[row][col] = (*parameters._defaultValue)[row][col];
+                    }
+                }
+            }
+            ImGui::EndDisabled();
+        }
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+
+        if (parameters._tooltip) {
+            AlienImGui::HelpMarker(*parameters._tooltip);
+        }
+    }
+}
+
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
@@ -254,6 +331,92 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     delete[] items;
 
     return result;
+}
+
+bool AlienImGui::ComboColor(ComboColorParameters& parameters, int& value)
+{
+    const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
+    auto styleRep = StyleRepository::getInstance();
+
+    ImVec2 comboPos = ImGui::GetCursorPos();
+    ImGui::SetNextItemWidth(styleRep.scaleContent(70));
+    if (ImGui::BeginCombo(("##" + parameters._name).c_str(), "")) {
+        for (int n = 0; n < 7; ++n) {
+            bool isSelected = (value == n);  // You can store your selection however you want, outside or inside your objects
+
+            if (ImGui::Selectable(items[n], isSelected)) {
+                value = n;
+            }
+            ImGui::SameLine();
+            ColorField(Const::IndividualCellColors[n], styleRep.scaleContent(30));
+            ImGui::SameLine();
+            ImGui::TextUnformatted(" ");
+            if (isSelected) {
+                ImGui::SetItemDefaultFocus();  // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+    ImVec2 backupPos = ImGui::GetCursorPos();
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImGui::SetCursorPos(ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y));
+    ColorField(Const::IndividualCellColors[value], styleRep.scaleContent(30));
+    ImGui::SetCursorPos(backupPos);
+
+    ImGui::Dummy(ImVec2(0,0));
+
+    return true;
+}
+
+void AlienImGui::InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge)
+{
+    //source color field
+    ImGui::PushID(sourceColor);
+    {
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+    }
+    AlienImGui::ColorField(Const::IndividualCellColors[sourceColor], 0);
+    ImGui::SameLine();
+
+    //combo for target color
+    {
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
+    }
+    AlienImGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
+    ImGui::SameLine();
+    ImGui::PushID(1);
+    AlienImGui::ComboColor(AlienImGui::ComboColorParameters(), targetColor);
+    ImGui::PopID();
+
+    ImGui::SameLine();
+
+    //slider for transition age
+    ImGui::PushID(2);
+    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
+    ImGui::SliderInt(
+        ("##" + parameters._name).c_str(), &transitionAge, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+    if (parameters._defaultTransitionAge && parameters._defaultTargetColor) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(transitionAge == *parameters._defaultTransitionAge && targetColor == *parameters._defaultTargetColor);
+        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            transitionAge = *parameters._defaultTransitionAge;
+            targetColor = *parameters._defaultTargetColor;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+    ImGui::PopID();
+    ImGui::PopID();
 }
 
 bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)

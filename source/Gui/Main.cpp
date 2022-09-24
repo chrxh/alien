@@ -9,6 +9,8 @@
 #include "SimpleLogger.h"
 #include "FileLogger.h"
 
+#include <boost/optional.hpp>
+
 int main(int, char**)
 {
     SimpleLogger logger = std::make_shared<_SimpleLogger>();
