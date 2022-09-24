@@ -16,4 +16,6 @@ public:
 private:
     static void
     encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask task);
+
+    static void decodeOldVersions(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask task);
 };

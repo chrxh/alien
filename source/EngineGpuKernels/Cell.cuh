@@ -48,6 +48,7 @@ struct Cell
     float energy;
     int cellFunctionType;
     bool barrier;
+    int age;
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = indirectly selected

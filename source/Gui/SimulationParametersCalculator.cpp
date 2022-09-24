@@ -26,7 +26,11 @@ SimulationParametersCalculator _SimulationParametersCalculator::createWithRandom
     target.spotValues.cellFusionVelocity = numberGenerator.getRandomFloat(0.0f, 1.0f);
     target.spotValues.tokenMutationRate = numberGenerator.getRandomFloat(0.0f, 4.0f) / 1000;
     target.spotValues.cellFunctionWeaponEnergyCost = numberGenerator.getRandomFloat(0.0f, 3.0f);
-    target.spotValues.cellFunctionWeaponColorDominance = numberGenerator.getRandomFloat(0.0f, 1.0f);
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            target.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j] = numberGenerator.getRandomFloat(0.0f, 1.0f);
+        }
+    }
     target.spotValues.cellFunctionWeaponGeometryDeviationExponent = numberGenerator.getRandomFloat(0.0f, 4.0f);
 
     return std::shared_ptr<_SimulationParametersCalculator>(new _SimulationParametersCalculator(source, target));
@@ -77,8 +81,13 @@ SimulationParameters _SimulationParametersCalculator::calcCurrentParameters() co
     result.spotValues.tokenMutationRate = calcCurrentParameter(_source.spotValues.tokenMutationRate, _target.spotValues.tokenMutationRate);
     result.spotValues.cellFunctionWeaponEnergyCost =
         calcCurrentParameter(_source.spotValues.cellFunctionWeaponEnergyCost, _target.spotValues.cellFunctionWeaponEnergyCost);
-    result.spotValues.cellFunctionWeaponColorDominance =
-        calcCurrentParameter(_source.spotValues.cellFunctionWeaponColorDominance, _target.spotValues.cellFunctionWeaponColorDominance);
+
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            result.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j] =
+                calcCurrentParameter(_source.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j], _target.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j]);
+        }
+    }
     result.spotValues.cellFunctionWeaponGeometryDeviationExponent =
         calcCurrentParameter(_source.spotValues.cellFunctionWeaponGeometryDeviationExponent, _target.spotValues.cellFunctionWeaponGeometryDeviationExponent);
     return result;

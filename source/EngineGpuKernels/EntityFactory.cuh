@@ -70,6 +70,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     *cellPointer = cell;
 
     cell->id = createIds ? _data->numberGen1.createNewId_kernel() : cellTO.id;
+    cell->age = 0;
     cell->absPos = cellTO.pos;
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
@@ -240,6 +241,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     *cellPointers = cell;
 
     cell->id = _data->numberGen1.createNewId_kernel();
+    cell->age = 0;
     cell->absPos = pos;
     cell->vel = vel;
     cell->energy = energy;
@@ -274,6 +276,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     *cellPointer = result;
     result->cellFunctionInvocations = 0;
     result->id = _data->numberGen1.createNewId_kernel();
+    result->age = 0;
     result->selected = 0;
     result->locked = 0;
     result->temp3 = {0, 0};

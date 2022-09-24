@@ -66,6 +66,18 @@ public:
     };
     static void InputFloat(InputFloatParameters const& parameters, float& value);
 
+    static void ColorField(uint32_t cellColor, int width = 0);
+
+    struct InputMatrixParameters
+    {
+        MEMBER_DECLARATION(InputMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputMatrixParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputMatrixParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void InputColorMatrix(InputMatrixParameters const& parameters, float (&value)[7][7]);
+
     struct InputTextParameters
     {
         MEMBER_DECLARATION(InputTextParameters, std::string, name, "");
@@ -97,6 +109,27 @@ public:
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
     };
     static bool Combo(ComboParameters& parameters, int& value);
+
+    struct ComboColorParameters
+    {
+        MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
+        MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
+    };
+    static bool ComboColor(ComboColorParameters& parameters, int& value);
+
+    struct InputColorTransitionParameters
+    {
+        MEMBER_DECLARATION(InputColorTransitionParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputColorTransitionParameters, int, color, 0);
+        MEMBER_DECLARATION(InputColorTransitionParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputColorTransitionParameters, int, min, 0);
+        MEMBER_DECLARATION(InputColorTransitionParameters, int, max, 1000000);
+        MEMBER_DECLARATION(InputColorTransitionParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTargetColor, std::nullopt);
+        MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTransitionAge, std::nullopt);
+        MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge);
 
     struct CheckboxParameters
     {
