@@ -70,7 +70,6 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     *cellPointer = cell;
 
     cell->id = createIds ? _data->numberGen1.createNewId_kernel() : cellTO.id;
-    cell->age = 0;
     cell->absPos = cellTO.pos;
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
@@ -97,6 +96,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->cellFunctionInvocations = cellTO.cellFunctionInvocations;
     cell->metadata.color = cellTO.metadata.color;
     cell->barrier = cellTO.barrier;
+    cell->age = cellTO.age;
 
     copyString(
         cell->metadata.nameLen,
@@ -139,6 +139,7 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     cell->energy = cellTO.energy;
     cell->cellFunctionType = cellTO.cellFunctionType;
     cell->barrier = cellTO.barrier;
+    cell->age = cellTO.age;
 
     switch (cell->cellFunctionType) {
     case Enums::CellFunction_Computation: {
@@ -241,7 +242,6 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     *cellPointers = cell;
 
     cell->id = _data->numberGen1.createNewId_kernel();
-    cell->age = 0;
     cell->absPos = pos;
     cell->vel = vel;
     cell->energy = energy;
@@ -257,6 +257,8 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
     cell->barrier = false;
+    cell->age = 0;
+
     cell->cellFunctionType = _data->numberGen1.random(Enums::CellFunction_Count - 1);
     cell->initMemorySizes();
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
@@ -276,7 +278,6 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     *cellPointer = result;
     result->cellFunctionInvocations = 0;
     result->id = _data->numberGen1.createNewId_kernel();
-    result->age = 0;
     result->selected = 0;
     result->locked = 0;
     result->temp3 = {0, 0};
@@ -285,6 +286,7 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
     result->barrier = 0;
+    result->age = 0;
     return result;
 }
 

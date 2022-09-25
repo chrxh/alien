@@ -129,33 +129,27 @@ __inline__ __device__ void ConstructionProcessor::readConstructionData(Token* to
 
     auto option = static_cast<unsigned char>(token->memory[Enums::Constr_InOption]) % Enums::ConstrInOption_Count;
 
-    data.isConstructToken = Enums::ConstrInOption_CreateEmptyToken == option
-        || Enums::ConstrInOption_CreateDupToken == option
-        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
-        || Enums::ConstrInOption_FinishWithDupTokenSep == option;
-    data.isDuplicateTokenMemory = (Enums::ConstrInOption_CreateDupToken == option
-                                   || Enums::ConstrInOption_FinishWithDupTokenSep == option)
+    data.isConstructToken = Enums::ConstrInOption_CreateEmptyToken == option || Enums::ConstrInOption_CreateDupToken == option
+        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option || Enums::ConstrInOption_FinishWithDupTokenSep == option;
+    data.isDuplicateTokenMemory = (Enums::ConstrInOption_CreateDupToken == option || Enums::ConstrInOption_FinishWithDupTokenSep == option)
         && !cudaSimulationParameters.cellFunctionConstructorOffspringTokenSuppressMemoryCopy;
-    data.isFinishConstruction = Enums::ConstrInOption_FinishNoSep == option
-        || Enums::ConstrInOption_FinishWithSep == option
-        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
-        || Enums::ConstrInOption_FinishWithDupTokenSep == option;
-    data.isSeparateConstruction = Enums::ConstrInOption_FinishWithSep == option
-        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
+    data.isFinishConstruction = Enums::ConstrInOption_FinishNoSep == option || Enums::ConstrInOption_FinishWithSep == option
+        || Enums::ConstrInOption_FinishWithEmptyTokenSep == option || Enums::ConstrInOption_FinishWithDupTokenSep == option;
+    data.isSeparateConstruction = Enums::ConstrInOption_FinishWithSep == option || Enums::ConstrInOption_FinishWithEmptyTokenSep == option
         || Enums::ConstrInOption_FinishWithDupTokenSep == option;
 
     data.angleAlignment = static_cast<unsigned char>(memory[Enums::Constr_InAngleAlignment]);
 
     data.uniformDist =
-        (static_cast<unsigned char>(token->memory[Enums::Constr_InUniformDist]) % Enums::ConstrInUniformDist_Count) == Enums::ConstrInUniformDist_Yes
-        ? true
-        : false;
+        (static_cast<unsigned char>(token->memory[Enums::Constr_InUniformDist]) % Enums::ConstrInUniformDist_Count) == Enums::ConstrInUniformDist_Yes ? true
+                                                                                                                                                      : false;
 
     data.angle = memory[Enums::Constr_InOutAngle];
     data.distance = memory[Enums::Constr_InDist];
     data.maxConnections = memory[Enums::Constr_InCellMaxConnections];
     data.branchNumber = memory[Enums::Constr_InCellBranchNumber];
-    data.metaData = calcMod(token->cell->metadata.color, 7);//memory[Enums::Constr_InCellColor];
+    data.metaData =
+        cudaSimulationParameters.cellFunctionConstructorOffspringInheritColor ? calcMod(token->cell->metadata.color, 7) : memory[Enums::Constr_InCellColor];
     data.cellFunctionType = memory[Enums::Constr_InCellFunction];
 }
 

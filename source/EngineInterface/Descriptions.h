@@ -91,6 +91,7 @@ struct CellDescription
     std::vector<TokenDescription> tokens;
     int cellFunctionInvocations;
     bool barrier;
+    int age;
 
     CellDescription() = default;
     CellDescription& setId(uint64_t value)

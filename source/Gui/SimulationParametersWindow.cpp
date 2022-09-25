@@ -336,7 +336,10 @@ void _SimulationParametersWindow::processBase(
                                   .defaultTransitionAge(origSimParameters.spotValues.cellColorTransitionDuration[color])
                                   .logarithmic(true);
             if (0 == color) {
-                parameters.name("Target color and duration").tooltip("Cell color");
+                parameters.name("Target color and duration")
+                    .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "
+                             "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding colors are kept. "
+                             "The color of a cell can have significance in its digestion, depending on the configuration of the digestion function.");
             }
             AlienImGui::InputColorTransition(
                 parameters, color, simParameters.spotValues.cellColorTransitionTargetColor[color], simParameters.spotValues.cellColorTransitionDuration[color]);
@@ -406,7 +409,10 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::InputMatrixParameters()
                 .name("Food chain color matrix")
                 .textWidth(MaxContentTextWidth)
-                .tooltip("Color matrix")
+                .tooltip("This matrix can be used to determine how well one cell can digest another cell. The color of the attacking cell is shown in the header "
+                         "column while the color of the attacked cell is shown in the header row. A value of 0 means that the attacked cell cannot be digested, "
+                         "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: If a 0 is "
+                         "entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
                 .defaultValue(toVector(origSimParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix)),
             simParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix);
         AlienImGui::SliderFloat(
@@ -456,6 +462,19 @@ void _SimulationParametersWindow::processBase(
                 .defaultValue(origSimParameters.spotValues.cellFunctionWeaponTokenPenalty)
                 .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contains a token.")),
             simParameters.spotValues.cellFunctionWeaponTokenPenalty);
+
+        /**
+         * Cell specialization: Construction function
+         */
+        AlienImGui::Group("Cell specialization: Construction function");
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Inherit cell color")
+                .textWidth(MaxContentTextWidth)
+                .defaultValue(origSimParameters.cellFunctionConstructorOffspringInheritColor)
+                .tooltip(std::string("If this option is set, a constructor cell can only create cells with its color. Otherwise the color of the cell "
+                                     "to be created is read from the token memory.")),
+            simParameters.cellFunctionConstructorOffspringInheritColor);
 
         /**
          * Cell specialization: Sensor function

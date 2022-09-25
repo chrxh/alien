@@ -183,6 +183,12 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         parserTask);
     JsonParser::encodeDecode(
         tree,
+        simPar.cellFunctionConstructorOffspringInheritColor,
+        defaultPar.cellFunctionConstructorOffspringInheritColor,
+        "simulation parameters.cell.function.constructor.offspring.inherit color",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
         simPar.cellFunctionConstructorTokenDataMutationProb,
         defaultPar.cellFunctionConstructorTokenDataMutationProb,
         "simulation parameters.cell.function.constructor.offspring.token suppress memory copy",

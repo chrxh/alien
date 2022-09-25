@@ -113,11 +113,12 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
         }
 
         auto color = calcMod(cell->metadata.color, 7);
-        auto minAge = SpotCalculator::calcColorMutationMinAge(color, data, cell->absPos);
-        if (++cell->age > minAge) {
-            auto targetColor = SpotCalculator::calcColorMutationTargetColor(color, data, cell->absPos);
+        auto transitionDuration = SpotCalculator::calcColorTransitionDuration(color, data, cell->absPos);
+        ++cell->age;
+        if (transitionDuration > 0 && cell->age > transitionDuration) {
+            auto targetColor = SpotCalculator::calcColorTransitionTargetColor(color, data, cell->absPos);
             cell->metadata.color = targetColor;
-           
+            cell->age = 0;
         }
     }
 }
