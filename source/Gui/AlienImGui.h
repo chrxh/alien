@@ -115,7 +115,7 @@ public:
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
     };
-    static bool ComboColor(ComboColorParameters& parameters, int& value);
+    static bool ComboColor(ComboColorParameters const& parameters, int& value);
 
     struct InputColorTransitionParameters
     {
