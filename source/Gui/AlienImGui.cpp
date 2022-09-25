@@ -333,7 +333,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     return result;
 }
 
-bool AlienImGui::ComboColor(ComboColorParameters& parameters, int& value)
+bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
     auto styleRep = StyleRepository::getInstance();
