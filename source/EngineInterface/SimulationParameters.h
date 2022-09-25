@@ -28,6 +28,7 @@ struct SimulationParameters
     float cellFunctionConstructorOffspringCellDistance = 1.6f;
     float cellFunctionConstructorOffspringTokenEnergy = 60.0f;
     bool cellFunctionConstructorOffspringTokenSuppressMemoryCopy = false;
+    bool cellFunctionConstructorOffspringInheritColor = false;
     float cellFunctionConstructorTokenDataMutationProb = 0.002f;
     float cellFunctionConstructorCellDataMutationProb = 0.002f;
     float cellFunctionConstructorCellPropertyMutationProb = 0.002f;

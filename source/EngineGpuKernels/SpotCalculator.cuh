@@ -38,7 +38,7 @@ public:
             cudaSimulationParametersSpots.spots[1].values.cellFunctionWeaponFoodChainColorMatrix[color][otherColor]);
     }
 
-    __device__ __inline__ static int calcColorMutationMinAge(int color, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static int calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)
     {
         return toInt(calcResultingValue(
             data.cellMap,
@@ -48,14 +48,14 @@ public:
             toFloat(cudaSimulationParametersSpots.spots[1].values.cellColorTransitionDuration[color])));
     }
 
-    __device__ __inline__ static float calcColorMutationTargetColor(int color, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static int calcColorTransitionTargetColor(int color, SimulationData const& data, float2 const& worldPos)
     {
         return toInt(calcResultingValue(
             data.cellMap,
             worldPos,
             toFloat(cudaSimulationParameters.spotValues.cellColorTransitionTargetColor[color]),
             toFloat(cudaSimulationParametersSpots.spots[0].values.cellColorTransitionTargetColor[color]),
-            toFloat(cudaSimulationParametersSpots.spots[1].values.cellColorTransitionTargetColor[color])));
+            toFloat(cudaSimulationParametersSpots.spots[1].values.cellColorTransitionTargetColor[color])) + 0.5f);
     }
 
     __device__ __inline__ static float3

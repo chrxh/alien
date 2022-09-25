@@ -85,7 +85,8 @@ namespace cereal
            data.cellFeature,
            data.tokens,
            data.cellFunctionInvocations,
-           data.barrier);
+           data.barrier,
+           data.age);
     }
     template <class Archive>
     inline void serialize(Archive& ar, ClusterDescription& data)
@@ -104,11 +105,81 @@ namespace cereal
     }
 }
 
-/**
- * For supporting old file formats
- */
+/************************************************************************/
+/* Old file formats                                                     */
+/************************************************************************/
 namespace
 {
+    struct DEPRECATED_CellDescription_3_2
+    {
+        uint64_t id = 0;
+
+        RealVector2D pos;
+        RealVector2D vel;
+        double energy;
+        int maxConnections;
+        std::vector<ConnectionDescription> connections;
+        bool tokenBlocked;
+        int tokenBranchNumber;
+        CellMetadata metadata;
+        CellFeatureDescription cellFeature;
+        std::vector<TokenDescription> tokens;
+        int cellFunctionInvocations;
+        bool barrier;
+
+        CellDescription convert() const
+        {
+            CellDescription result;
+            result.id = id;
+            result.pos = pos;
+            result.vel = vel;
+            result.energy = energy;
+            result.maxConnections = maxConnections;
+            result.connections = connections;
+            result.tokenBlocked = tokenBlocked;
+            result.tokenBranchNumber = tokenBranchNumber;
+            result.metadata = metadata;
+            result.cellFeature = cellFeature;
+            result.tokens = tokens;
+            result.cellFunctionInvocations = cellFunctionInvocations;
+            result.barrier = barrier;
+            result.age = 0;
+            return result;
+        }
+    };
+
+    struct DEPRECATED_ClusterDescription_3_2
+    {
+        uint64_t id = 0;
+
+        std::vector<DEPRECATED_CellDescription_3_2> cells;
+        ClusterDescription convert() const
+        {
+            ClusterDescription result;
+            result.id = id;
+            for (auto const& cell : cells) {
+                result.cells.emplace_back(cell.convert());
+            }
+            return result;
+        }
+    };
+
+    struct DEPRECATED_ClusteredDataDescription_3_2
+    {
+        std::vector<DEPRECATED_ClusterDescription_3_2> clusters;
+        std::vector<ParticleDescription> particles;
+
+        ClusteredDataDescription convert() const
+        {
+            ClusteredDataDescription result;
+            for (auto const& cluster : clusters) {
+                result.clusters.emplace_back(cluster.convert());
+            }
+            result.particles = particles;
+            return result;
+        }
+    };
+
     struct DEPRECATED_CellDescription
     {
         uint64_t id = 0;
@@ -180,6 +251,37 @@ namespace
 
 namespace cereal
 {
+    //version 3.2
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellDescription_3_2& data)
+    {
+        ar(data.id,
+           data.pos,
+           data.vel,
+           data.energy,
+           data.maxConnections,
+           data.connections,
+           data.tokenBlocked,
+           data.tokenBranchNumber,
+           data.metadata,
+           data.cellFeature,
+           data.tokens,
+           data.cellFunctionInvocations,
+           data.barrier);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusterDescription_3_2& data)
+    {
+        ar(data.id, data.cells);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusteredDataDescription_3_2& data)
+    {
+        ar(data.clusters, data.particles);
+    }
+
+
+    //unknown version
     template <class Archive>
     inline void serialize(Archive& ar, DEPRECATED_CellDescription& data)
     {
@@ -344,65 +446,6 @@ bool Serializer::deserializeSimulationFromStrings(
     }
 }
 
-/*
-bool Serializer::serializeSimulationToSingleString(std::string& output, DeserializedSimulation const& data)
-{
-    try {
-        std::stringstream stream;
-        zstr::ostream zstrStream(stream);
-        if (!zstrStream) {
-            return false;
-        }
-        serializeDataDescription(data.content, zstrStream);
-        {
-            std::stringstream auxStream;
-            serializeTimestepAndSettings(data.timestep, data.settings, auxStream);
-            auto auxData = auxStream.str();
-            zstrStream << auxData;
-        }
-        {
-            std::stringstream auxStream;
-            serializeSymbolMap(data.symbolMap, auxStream);
-            auto auxData = auxStream.str();
-            zstrStream << auxData;
-        }
-        zstrStream.flush();
-        output = stream.str();
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-bool Serializer::deserializeSimulationFromSingleString(DeserializedSimulation& data, std::string const& input)
-{
-    try {
-        std::stringstream stream(input);
-        zstr::istream zstrStream(stream);
-        if (!zstrStream) {
-            return false;
-        }
-        deserializeDataDescription(data.content, zstrStream);
-        {
-            std::string auxData;
-            zstrStream >> auxData;
-            std::stringstream auxStream(auxData);
-            deserializeTimestepAndSettings(data.timestep, data.settings, zstrStream);
-        }
-        {
-            std::string auxData;
-            zstrStream >> auxData;
-            std::stringstream auxStream(auxData);
-            deserializeSymbolMap(data.symbolMap, zstrStream);
-        }
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-*/
-
-
 bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
@@ -508,7 +551,26 @@ namespace
     {
         std::vector<std::string> versionParts;
         boost::split(versionParts, s, boost::is_any_of("."));
+        try {
+            for (auto const& versionPart : versionParts) {
+                std::stoi(versionPart);
+            }
+        } catch (...) {
+            return false;
+        }
         return versionParts.size() == 3;
+    }
+    struct VersionParts
+    {
+        int major;
+        int minor;
+        int patch;
+    };
+    VersionParts getVersionParts(std::string const& s)
+    {
+        std::vector<std::string> versionParts;
+        boost::split(versionParts, s, boost::is_any_of("."));
+        return {std::stoi(versionParts.at(0)), std::stoi(versionParts.at(1)), std::stoi(versionParts.at(2))};
     }
 }
 
@@ -520,7 +582,14 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     if (!isVersionValid(version)) {
         throw std::runtime_error("No version detected.");
     }
-    archive(data);
+    auto versionParts = getVersionParts(version);
+    if (versionParts.major <= 3 && versionParts.minor <= 2) {
+        DEPRECATED_ClusteredDataDescription_3_2 oldData;
+        archive(oldData);
+        data = oldData.convert();
+    } else {
+        archive(data);
+    }
 }
 
 void Serializer::DEPREACATED_deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)

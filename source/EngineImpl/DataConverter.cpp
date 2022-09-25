@@ -310,6 +310,7 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     result.tokenBlocked = cellTO.tokenBlocked;
     result.tokenBranchNumber = cellTO.branchNumber;
     result.barrier = cellTO.barrier;
+    result.age = cellTO.age;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadata().setColor(metadataTO.color);
@@ -383,6 +384,7 @@ void DataConverter::addCell(
     convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
 	cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
+    cellTO.age = cellDesc.age;
     auto& metadataTO = cellTO.metadata;
     metadataTO.color = cellDesc.metadata.color;
     metadataTO.nameLen = toInt(cellDesc.metadata.name.size());

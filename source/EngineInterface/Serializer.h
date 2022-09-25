@@ -34,11 +34,6 @@ public:
         std::string const& timestepAndSettings,
         std::string const& symbolMap);
 
-/*
-    static bool serializeSimulationToSingleString(std::string& output, DeserializedSimulation const& data);
-    static bool deserializeSimulationFromSingleString(DeserializedSimulation& data, std::string const& input);
-*/
-
     static bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
     static bool deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filenam);
 

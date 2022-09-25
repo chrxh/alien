@@ -75,6 +75,7 @@ struct CellAccessTO
     int cellFunctionInvocations;
     CellMetadataAccessTO metadata;
 	bool barrier;
+	int age;
 
 	int selected;
 };
