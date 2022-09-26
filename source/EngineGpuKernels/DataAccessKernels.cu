@@ -31,6 +31,7 @@ namespace
         cellTO.numStaticBytes = cell->numStaticBytes;
         cellTO.cellFunctionInvocations = cell->cellFunctionInvocations;
         cellTO.metadata.color = cell->metadata.color;
+        cellTO.age = cell->age;
 
         copyString(
             cellTO.metadata.nameLen, cellTO.metadata.nameStringIndex, cell->metadata.nameLen, cell->metadata.name, *dataTO.numStringBytes, dataTO.stringBytes);
