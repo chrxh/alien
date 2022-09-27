@@ -70,6 +70,7 @@
 #include "NewPasswordDialog.h"
 #include "ImageToPatternDialog.h"
 #include "GenericOpenFileDialog.h"
+#include "ShaderWindow.h"
 
 namespace
 {
@@ -158,6 +159,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
+    _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
@@ -444,6 +446,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Log", "ALT+6", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
+            if (ImGui::MenuItem("Shader", "ALT+7", _shaderWindow->isOn())) {
+                _shaderWindow->setOn(!_shaderWindow->isOn());
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -611,6 +616,9 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
             _logWindow->setOn(!_logWindow->isOn());
         }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
+            _shaderWindow->setOn(!_shaderWindow->isOn());
+        }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
             _modeController->setMode(
@@ -711,6 +719,7 @@ void _MainWindow::processWindows()
     _logWindow->process();
     _browserWindow->process();
     _gettingStartedWindow->process();
+    _shaderWindow->process();
 }
 
 void _MainWindow::processControllers()

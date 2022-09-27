@@ -55,6 +55,18 @@ void GlobalSettings::setIntState(std::string const& name, int value)
     JsonParser::encodeDecode(_impl->_tree, value, 0, name, ParserTask::Encode);
 }
 
+float GlobalSettings::getFloatState(std::string const& name, float defaultValue)
+{
+    float result;
+    JsonParser::encodeDecode(_impl->_tree, result, defaultValue, name, ParserTask::Decode);
+    return result;
+}
+
+void GlobalSettings::setFloatState(std::string const& name, float value)
+{
+    JsonParser::encodeDecode(_impl->_tree, value, 0.0f, name, ParserTask::Encode);
+}
+
 std::string GlobalSettings::getStringState(std::string const& name, std::string defaultValue)
 {
     std::string result;

@@ -35,15 +35,15 @@ void _GpuSettingsDialog::process()
     auto origGpuSettings = _simController->getOriginalGpuSettings();
     auto lastGpuSettings = gpuSettings;
 
-    ImGui::OpenPopup("GPU settings");
-    if (ImGui::BeginPopupModal("GPU settings", NULL, ImGuiWindowFlags_None)) {
+    ImGui::OpenPopup("CUDA settings");
+    if (ImGui::BeginPopupModal("CUDA settings", NULL, ImGuiWindowFlags_None)) {
 
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Blocks")
                 .textWidth(MaxContentTextWidth)
                 .defaultValue(origGpuSettings.numBlocks)
-                .tooltip(std::string("Number of GPU thread blocks.")),
+                .tooltip(std::string("Number of CUDA thread blocks.")),
             gpuSettings.numBlocks);
 
         AlienImGui::InputInt(
@@ -51,7 +51,7 @@ void _GpuSettingsDialog::process()
                 .name("Threads per Block")
                 .textWidth(MaxContentTextWidth)
                 .defaultValue(origGpuSettings.numThreadsPerBlock)
-                .tooltip(std::string("Number of GPU threads per blocks.")),
+                .tooltip(std::string("Number of CUDA threads per blocks.")),
             gpuSettings.numThreadsPerBlock);
 
         ImGui::Spacing();

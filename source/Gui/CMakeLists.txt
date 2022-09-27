@@ -97,6 +97,8 @@ PUBLIC
     SelectionWindow.h
     Shader.cpp
     Shader.h
+    ShaderWindow.cpp
+    ShaderWindow.h
     SimpleLogger.cpp
     SimpleLogger.h
     SimulationParametersCalculator.cpp

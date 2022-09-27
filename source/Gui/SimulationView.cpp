@@ -15,8 +15,8 @@
 
 namespace
 {
-    auto const MotionBlurStandard = 0.8f;
-    auto const MotionBlurZooming = 0.5f;
+    auto const MotionBlurStatic = 0.8f;
+    auto const MotionBlurMoving = 0.5f;
     auto const ZoomFactorForOverlay = 16.0f;
 
     std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
@@ -91,7 +91,9 @@ _SimulationView::_SimulationView(
     _shader->setInt("texture2", 1);
     _shader->setBool("glowEffect", true);
     _shader->setBool("motionEffect", true);
-    _shader->setFloat("motionBlurFactor", MotionBlurStandard);
+    updateMotionBlur();
+    setBrightness(1.0f);
+    setContrast(1.0f);
 }
 
 _SimulationView::~_SimulationView()
@@ -134,7 +136,8 @@ void _SimulationView::resize(IntVector2D const& size)
 
 void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 {
-    _shader->setFloat("motionBlurFactor", MotionBlurZooming);
+    _navigationState = NavigationState::Moving;
+    updateMotionBlur();
 }
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
@@ -146,12 +149,14 @@ void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2
 
 void _SimulationView::leftMouseButtonReleased()
 {
-    _shader->setFloat("motionBlurFactor", MotionBlurStandard);
+    _navigationState = NavigationState::Static;
+    updateMotionBlur();
 }
 
 void _SimulationView::rightMouseButtonPressed()
 {
-    _shader->setFloat("motionBlurFactor", MotionBlurZooming);
+    _navigationState = NavigationState::Moving;
+    updateMotionBlur();
 }
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
@@ -163,7 +168,8 @@ void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 
 void _SimulationView::rightMouseButtonReleased()
 {
-    _shader->setFloat("motionBlurFactor", MotionBlurStandard);
+    _navigationState = NavigationState::Static;
+    updateMotionBlur();
 }
 
 void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
@@ -278,6 +284,22 @@ void _SimulationView::setOverlayActive(bool active)
     _isOverlayActive = active;
 }
 
+void _SimulationView::setBrightness(float value)
+{
+    _shader->setFloat("brightness", value);
+}
+
+void _SimulationView::setContrast(float value)
+{
+    _shader->setFloat("contrast", value);
+}
+
+void _SimulationView::setMotionBlur(float value)
+{
+    _motionBlurFactor = value;
+    updateMotionBlur();
+}
+
 void _SimulationView::updateImageFromSimulation()
 {
     auto worldRect = _viewport->getVisibleWorldRect();
@@ -345,5 +367,16 @@ void _SimulationView::updateImageFromSimulation()
             }
         }
     }
+}
+
+void _SimulationView::updateMotionBlur()
+{
+    auto motionBlur = _navigationState == NavigationState::Static ? MotionBlurStatic : MotionBlurMoving;
+    if (_motionBlurFactor == 0) {
+        motionBlur = 1.0f;
+    } else {
+        motionBlur = std::min(1.0f, motionBlur / _motionBlurFactor);
+    }
+    _shader->setFloat("motionBlurFactor", motionBlur);
 }
 
