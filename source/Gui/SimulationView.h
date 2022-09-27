@@ -22,6 +22,10 @@ public:
     bool isOverlayActive() const;
     void setOverlayActive(bool active);
 
+    void setBrightness(float value);
+    void setContrast(float value);
+    void setMotionBlur(float value);
+
 private:
     void processEvents();
 
@@ -38,6 +42,7 @@ private:
     void middleMouseButtonReleased();
 
     void updateImageFromSimulation();
+    void updateMotionBlur();
 
     //widgets
     SimulationScrollbar _scrollbarX;
@@ -45,6 +50,11 @@ private:
 
     //overlay
     bool _isOverlayActive = false;
+    float _motionBlurFactor = 1.0f;
+    enum class NavigationState {
+        Static, Moving
+    };
+    NavigationState _navigationState = NavigationState::Static;
     std::optional<OverlayDescription> _overlay;
     
     //shader data

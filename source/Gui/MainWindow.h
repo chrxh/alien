@@ -46,6 +46,7 @@ private:
     LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
     BrowserWindow _browserWindow;
+    ShaderWindow _shaderWindow;
 
     GpuSettingsDialog _gpuSettingsDialog;
     ColorizeDialog _colorizeDialog;

@@ -40,6 +40,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
         ImGui::BeginDisabled(value == *parameters._defaultValue);
         if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
             value = *parameters._defaultValue;
+            result = true;
         }
         ImGui::EndDisabled();
     }
