@@ -371,7 +371,7 @@ void DataConverter::addCell(
     cellTO.id = cellDesc.id == 0 ? NumberGenerator::getInstance().getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
-    cellTO.energy = toFloat(cellDesc.energy);
+    cellTO.energy = /*cellDesc.energy == 300.0f && cellDesc.metadata.color == 0 ? 30.0f :*/ toFloat(cellDesc.energy);
 	cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.branchNumber = cellDesc.tokenBranchNumber;
     cellTO.tokenBlocked = cellDesc.tokenBlocked;
