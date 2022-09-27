@@ -17,6 +17,7 @@ _ShaderWindow::_ShaderWindow(SimulationView const& simulationView)
     _contrast = GlobalSettings::getInstance().getFloatState("windows.shader.contrast", _contrast);
     _motionBlur = GlobalSettings::getInstance().getFloatState("windows.shader.motion blur", _motionBlur);
     _simulationView->setBrightness(_brightness);
+    _simulationView->setContrast(_contrast);
     _simulationView->setMotionBlur(_motionBlur);
 }
 
