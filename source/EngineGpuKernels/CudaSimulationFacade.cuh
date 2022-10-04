@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <atomic>
 #include <vector>
+#include <optional>
 
 #if defined(_WIN32)
 #define NOMINMAX
@@ -78,6 +79,7 @@ private:
     void resizeArrays(ArraySizes const& additionals);
 
     std::atomic<uint64_t> _currentTimestep;
+    uint64_t _timestepOfLastMonitorData = 0llu;
     Settings _settings;
 
     std::shared_ptr<SimulationData> _cudaSimulationData;

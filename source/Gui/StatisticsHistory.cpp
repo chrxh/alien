@@ -31,16 +31,16 @@ void LiveStatistics::add(MonitorData const& newStatistics)
     datas[8].emplace_back(toFloat(newStatistics.numConnections));
     datas[9].emplace_back(toFloat(newStatistics.numParticles));
     datas[10].emplace_back(toFloat(newStatistics.numTokens));
-    datas[11].emplace_back(toFloat(newStatistics.numCreatedCells));
-    datas[12].emplace_back(toFloat(newStatistics.numSuccessfulAttacks));
-    datas[13].emplace_back(toFloat(newStatistics.numFailedAttacks));
-    datas[14].emplace_back(toFloat(newStatistics.numMuscleActivities));
+    datas[11].emplace_back(newStatistics.numCreatedCells);
+    datas[12].emplace_back(newStatistics.numSuccessfulAttacks);
+    datas[13].emplace_back(newStatistics.numFailedAttacks);
+    datas[14].emplace_back(newStatistics.numMuscleActivities);
 }
 
 void LongtermStatistics::add(MonitorData const& newStatistics)
 {
-    if (timestepHistory.empty() || newStatistics.timeStep - timestepHistory.back() > LongtermTimestepDelta) {
-        timestepHistory.emplace_back(toFloat(newStatistics.timeStep));
+    if (timestepHistory.empty() || newStatistics.timestep - timestepHistory.back() > LongtermTimestepDelta) {
+        timestepHistory.emplace_back(toFloat(newStatistics.timestep));
         int numCells = 0;
         for (int i = 0; i < 7; ++i) {
             numCells += newStatistics.numCellsByColor[i];
@@ -52,18 +52,21 @@ void LongtermStatistics::add(MonitorData const& newStatistics)
         datas[8].emplace_back(toFloat(newStatistics.numConnections));
         datas[9].emplace_back(toFloat(newStatistics.numParticles));
         datas[10].emplace_back(toFloat(newStatistics.numTokens));
-        datas[11].emplace_back(accumulatedCreatedCells);
-        datas[12].emplace_back(accumulatedSuccessfulAttacks);
-        datas[13].emplace_back(accumulatedFailedAttack);
-        datas[14].emplace_back(accumulatedMuscleActivities);
+
+        datas[11].emplace_back(accumulatedCreatedCells / numberOfAccumulation);
+        datas[12].emplace_back(accumulatedSuccessfulAttacks / numberOfAccumulation);
+        datas[13].emplace_back(accumulatedFailedAttack / numberOfAccumulation);
+        datas[14].emplace_back(accumulatedMuscleActivities / numberOfAccumulation);
         accumulatedCreatedCells = 0;
         accumulatedSuccessfulAttacks = 0;
         accumulatedFailedAttack = 0;
         accumulatedMuscleActivities = 0;
+        numberOfAccumulation = 1;
     } else {
         accumulatedCreatedCells += newStatistics.numCreatedCells;
         accumulatedSuccessfulAttacks += newStatistics.numSuccessfulAttacks;
         accumulatedFailedAttack += newStatistics.numFailedAttacks;
         accumulatedMuscleActivities += newStatistics.numMuscleActivities;
+        ++numberOfAccumulation;
     }
 }

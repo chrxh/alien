@@ -23,6 +23,8 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
 
 namespace
 {
+    auto const HeadColWidth = 150.0f;
+
     template<typename T>
     T getMax(std::vector<T> const& range)
     {
@@ -70,8 +72,7 @@ void _StatisticsWindow::processLiveStatistics()
 {
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn(
-            "Entities", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(125.0f));
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -115,8 +116,7 @@ void _StatisticsWindow::processLiveStatistics()
 
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn(
-            "Processes", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(125.0f));
+        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -125,25 +125,25 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(5, _liveStatistics.datas[11]);
+        processLivePlot(5, _liveStatistics.datas[11], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(6, _liveStatistics.datas[12]);
+        processLivePlot(6, _liveStatistics.datas[12], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(7, _liveStatistics.datas[13]);
+        processLivePlot(7, _liveStatistics.datas[13], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(8, _liveStatistics.datas[14]);
+        processLivePlot(8, _liveStatistics.datas[14], 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -158,7 +158,7 @@ void _StatisticsWindow::processLongtermStatistics()
             2,
             /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
             ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Entities", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -204,7 +204,7 @@ void _StatisticsWindow::processLongtermStatistics()
             2,
             /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
             ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Processes", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -213,32 +213,32 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, _longtermStatistics.datas[11]);
+        processLongtermPlot(5, _longtermStatistics.datas[11], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, _longtermStatistics.datas[12]);
+        processLongtermPlot(6, _longtermStatistics.datas[12], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(7, _longtermStatistics.datas[13]);
+        processLongtermPlot(7, _longtermStatistics.datas[13], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(8, _longtermStatistics.datas[14]);
+        processLongtermPlot(8, _longtermStatistics.datas[14], 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
 }
 
-void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& valueHistory)
+void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals)
 {
     auto maxValue = getMax(valueHistory);
     
@@ -265,7 +265,7 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
                 ImVec2(-10.0f, 10.0f),
                 color,
                 "%s",
-                StringHelper::format(toInt(valueHistory.back())).c_str());
+                StringHelper::format(valueHistory.back(), fracPartDecimals).c_str());
         }
 
 
@@ -322,7 +322,7 @@ void _StatisticsWindow::processLivePlotForCellsByColor(int row)
     ImGui::PopID();
 }
 
-void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& valueHistory)
+void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals)
 {
     auto maxValue = getMax(valueHistory);
 
@@ -347,7 +347,7 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
                 ImVec2(-10.0f, 10.0f),
                 ImPlot::GetLastItemColor(),
                 "%s",
-                StringHelper::format(toInt(valueHistory.back())).c_str());
+                StringHelper::format(valueHistory.back(), fracPartDecimals).c_str());
         }
         ImPlot::PushStyleColor(ImPlotCol_Line, color);
         ImPlot::PlotLine(

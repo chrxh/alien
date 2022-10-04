@@ -443,11 +443,11 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Flow generator", "ALT+5", _flowGeneratorWindow->isOn())) {
                 _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
             }
-            if (ImGui::MenuItem("Log", "ALT+6", _logWindow->isOn())) {
-                _logWindow->setOn(!_logWindow->isOn());
-            }
-            if (ImGui::MenuItem("Shader", "ALT+7", _shaderWindow->isOn())) {
+            if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
                 _shaderWindow->setOn(!_shaderWindow->isOn());
+            }
+            if (ImGui::MenuItem("Log", "ALT+7", _logWindow->isOn())) {
+                _logWindow->setOn(!_logWindow->isOn());
             }
             AlienImGui::EndMenuButton();
         }
@@ -537,7 +537,7 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
                 _autosaveController->setOn(!_autosaveController->isOn());
             }
-            if (ImGui::MenuItem("GPU settings", "ALT+C")) {
+            if (ImGui::MenuItem("CUDA settings", "ALT+C")) {
                 _gpuSettingsDialog->show();
             }
             if (ImGui::MenuItem("Display settings", "ALT+V")) {
@@ -614,10 +614,10 @@ void _MainWindow::processMenubar()
             _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
-            _logWindow->setOn(!_logWindow->isOn());
+            _shaderWindow->setOn(!_shaderWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
-            _shaderWindow->setOn(!_shaderWindow->isOn());
+            _logWindow->setOn(!_logWindow->isOn());
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {

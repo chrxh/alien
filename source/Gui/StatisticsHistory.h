@@ -32,5 +32,7 @@ struct LongtermStatistics
     float accumulatedFailedAttack = 0;
     float accumulatedMuscleActivities = 0;
 
+    int numberOfAccumulation = 1;
+
     void add(MonitorData const& statistics);
 };
