@@ -123,6 +123,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     log(Priority::Important, "initialize simulation");
 
     _currentTimestep.store(timestep);
+    _timestepOfLastMonitorData = _currentTimestep;
     _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaRenderingData = std::make_shared<RenderingData>();
     _cudaSimulationResult = std::make_shared<SimulationResult>();
@@ -412,7 +413,7 @@ MonitorData _CudaSimulationFacade::getMonitorData()
     
     MonitorData result;
     auto monitorData = _cudaMonitorData->getMonitorData(getCurrentTimestep());
-    result.timeStep = monitorData.timeStep;
+    result.timestep = monitorData.timeStep;
     for (int i = 0; i < 7; ++i) {
         result.numCellsByColor[i] = monitorData.numCellsByColor[i];
     }
@@ -421,11 +422,21 @@ MonitorData _CudaSimulationFacade::getMonitorData()
     result.numTokens = monitorData.numTokens;
     result.totalInternalEnergy = monitorData.totalInternalEnergy;
 
-    auto processStatistics = _cudaSimulationResult->getProcessMonitorData();
+    auto processStatistics = _cudaSimulationResult->getAndResetProcessMonitorData();
     result.numCreatedCells = processStatistics.createdCells;
     result.numSuccessfulAttacks = processStatistics.sucessfulAttacks;
     result.numFailedAttacks = processStatistics.failedAttacks;
     result.numMuscleActivities = processStatistics.muscleActivities;
+
+    auto deltaTime = static_cast<int64_t>(result.timestep) - static_cast<int64_t>(_timestepOfLastMonitorData);
+    auto divisor = deltaTime > 0 ? deltaTime : 1;
+    result.numCreatedCells /= divisor;
+    result.numSuccessfulAttacks /= divisor;
+    result.numFailedAttacks /= divisor;
+    result.numMuscleActivities /= divisor;
+    if (deltaTime != 0) {
+        _timestepOfLastMonitorData = result.timestep;
+    }
     return result;
 }
 

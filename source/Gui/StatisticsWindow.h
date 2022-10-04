@@ -18,9 +18,9 @@ private:
     void processLiveStatistics();
     void processLongtermStatistics();
 
-    void processLivePlot(int row, std::vector<float> const& valueHistory);
+    void processLivePlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals = 0);
     void processLivePlotForCellsByColor(int row);
-    void processLongtermPlot(int row, std::vector<float> const& valueHistory);
+    void processLongtermPlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals = 0);
     void processLongtermPlotForCellsByColor(int row);
 
     void processBackground() override;

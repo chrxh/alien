@@ -6,13 +6,13 @@ public:
     __host__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<bool>(1, _arrayResizingNeeded);
-        CudaMemoryManager::getInstance().acquireMemory<ProcessMonitorData>(1, _statistics);
+        CudaMemoryManager::getInstance().acquireMemory<ProcessMonitorData>(1, _data);
         ProcessMonitorData statistics;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_statistics, &statistics, sizeof(ProcessMonitorData), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &statistics, sizeof(ProcessMonitorData), cudaMemcpyHostToDevice));
     }
 
     __host__ void free() {
-        CudaMemoryManager::getInstance().freeMemory(_statistics);
+        CudaMemoryManager::getInstance().freeMemory(_data);
         CudaMemoryManager::getInstance().freeMemory(_arrayResizingNeeded);
     }
 
@@ -30,24 +30,24 @@ public:
         int failedAttacks = 0;
         int muscleActivities = 0;
     };
-    __host__ ProcessMonitorData getProcessMonitorData()
+    __host__ ProcessMonitorData getAndResetProcessMonitorData()
     {
         ProcessMonitorData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _statistics, sizeof(ProcessMonitorData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(ProcessMonitorData), cudaMemcpyDeviceToHost));
         ProcessMonitorData empty;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_statistics, &empty, sizeof(ProcessMonitorData), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &empty, sizeof(ProcessMonitorData), cudaMemcpyHostToDevice));
         return result;
     }
 
     __device__ void setArrayResizeNeeded(bool value) { *_arrayResizingNeeded = value; }
 
-    __device__ void resetStatistics() { *_statistics = ProcessMonitorData(); }
-    __device__ void incCreatedCell() { atomicAdd(&_statistics->createdCells, 1); }
-    __device__ void incSuccessfulAttack() { atomicAdd(&_statistics->sucessfulAttacks, 1); }
-    __device__ void incFailedAttack() { atomicAdd(&_statistics->failedAttacks, 1); }
-    __device__ void incMuscleActivity() { atomicAdd(&_statistics->muscleActivities, 1); }
+    __device__ void resetStatistics() { *_data = ProcessMonitorData(); }
+    __device__ void incCreatedCell() { atomicAdd(&_data->createdCells, 1); }
+    __device__ void incSuccessfulAttack() { atomicAdd(&_data->sucessfulAttacks, 1); }
+    __device__ void incFailedAttack() { atomicAdd(&_data->failedAttacks, 1); }
+    __device__ void incMuscleActivity() { atomicAdd(&_data->muscleActivities, 1); }
 
 private:
-    ProcessMonitorData* _statistics;
+    ProcessMonitorData* _data;
     bool* _arrayResizingNeeded;
 };

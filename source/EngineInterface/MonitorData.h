@@ -2,7 +2,7 @@
 
 struct MonitorData
 {
-    uint64_t timeStep = 0;
+    uint64_t timestep = 0;
 
     //entities
     int numCellsByColor[7] = {0, 0, 0, 0, 0, 0, 0};
@@ -12,8 +12,8 @@ struct MonitorData
     double totalInternalEnergy = 0.0;
 
     //processes
-    int numCreatedCells = 0;
-    int numSuccessfulAttacks = 0;
-    int numFailedAttacks = 0;
-    int numMuscleActivities = 0;
+    float numCreatedCells = 0;
+    float numSuccessfulAttacks = 0;
+    float numFailedAttacks = 0;
+    float numMuscleActivities = 0;
 };
