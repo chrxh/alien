@@ -64,6 +64,7 @@ public:
     ArraySizes getArraySizes() const;
 
     MonitorData getMonitorData();
+    void resetProcessMonitorData();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
 
