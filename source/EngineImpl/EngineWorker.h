@@ -103,7 +103,7 @@ public:
 
 private:
     DataAccessTO provideTO(); 
-    void resetMonitorDataIntern();
+    void resetProcessMonitorData();
     void updateMonitorDataIntern(bool afterMinDuration = false);
     void processJobs();
 

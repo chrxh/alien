@@ -404,7 +404,7 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->setCurrentTimestep(value);
-    resetMonitorDataIntern();
+    resetProcessMonitorData();
 }
 
 void EngineWorker::setSimulationParameters_async(SimulationParameters const& parameters)
@@ -555,10 +555,10 @@ DataAccessTO EngineWorker::provideTO()
     return _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
 }
 
-void EngineWorker::resetMonitorDataIntern()
+void EngineWorker::resetProcessMonitorData()
 {
     std::lock_guard guard(_mutexForStatistics);
-    _cudaSimulation->getMonitorData();
+    _cudaSimulation->resetProcessMonitorData();
 }
 
 void EngineWorker::updateMonitorDataIntern(bool afterMinDuration)

@@ -440,6 +440,11 @@ MonitorData _CudaSimulationFacade::getMonitorData()
     return result;
 }
 
+void _CudaSimulationFacade::resetProcessMonitorData()
+{
+    _cudaSimulationResult->getAndResetProcessMonitorData();
+}
+
 uint64_t _CudaSimulationFacade::getCurrentTimestep() const
 {
     return _currentTimestep.load();
