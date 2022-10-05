@@ -1,5 +1,17 @@
 # Release notes
 
+## [3.3.0] - 2022-10-05
+### Added
+- extended color semantic for cells: food chain color matrix and cell color transition rules
+- new simulation parameters for cell colors
+- shader parameter window
+- Symbiosis examples
+
+### Fixed
+- process statistics corrected (showing processes per time step)
+- deadlock problem during removing cells fixed
+- precision of simulation parameters increased (relevant for mutation rates)
+
 ## [3.2.3] - 2022-07-31
 ### Added
 - toolbar for browser window: refresh, login, logout, upload
