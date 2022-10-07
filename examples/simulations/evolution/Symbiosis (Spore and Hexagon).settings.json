@@ -113,7 +113,7 @@
                         "cell distance": "1.60000002",
                         "token energy": "60.00000000",
                         "token suppress memory copy": "0.00200000",
-                        "inherit color": "false"
+                        "inherit color": "true"
                     }
                 },
                 "sensor": {
