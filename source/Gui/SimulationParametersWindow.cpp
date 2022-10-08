@@ -357,7 +357,7 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(0.001f)
                 .logarithmic(true)
-                .format("%.7f")
+                .format("%.8f")
                 .defaultValue(origSimParameters.spotValues.cellMutationRate)
                 .tooltip(std::string("Probability that a byte or property of a cell is changed per time step.")),
             simParameters.spotValues.cellMutationRate);
@@ -368,7 +368,7 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(0.1f)
                 .logarithmic(true)
-                .format("%.5f")
+                .format("%.6f")
                 .defaultValue(origSimParameters.spotValues.tokenMutationRate)
                 .tooltip(std::string("Probability that a memory byte of a token is changed per time step.")),
             simParameters.spotValues.tokenMutationRate);
@@ -701,7 +701,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .min(0)
                 .max(0.001f)
                 .logarithmic(true)
-                .format("%.7f")
+                .format("%.8f")
                 .defaultValue(origSpot.values.cellMutationRate),
             spot.values.cellMutationRate);
         AlienImGui::SliderFloat(
@@ -711,7 +711,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .min(0)
                 .max(0.1f)
                 .logarithmic(true)
-                .format("%.5f")
+                .format("%.6f")
                 .defaultValue(origSpot.values.tokenMutationRate),
             spot.values.tokenMutationRate);
 
