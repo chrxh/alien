@@ -21,7 +21,7 @@ namespace
 
     std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
         {Enums::CellFunction_Computation, "Computation"},
-        {Enums::CellFunction_Communication, "Communication"},
+        {Enums::CellFunction_NeuralNet, "Neural Net"},
         {Enums::CellFunction_Scanner, "Scanner"},
         {Enums::CellFunction_Digestion, "Digestion"},
         {Enums::CellFunction_Constructor, "Construction"},

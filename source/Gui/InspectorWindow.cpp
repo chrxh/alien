@@ -24,7 +24,7 @@ namespace
     auto const MaxCellContentTextWidth = 120.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
     auto const CellFunctions =
-        std::vector{"Computation"s, "Communication"s, "Scanner"s, "Digestion"s, "Construction"s, "Sensor"s, "Muscle"s};
+        std::vector{"Computation"s, "Neural Net"s, "Scanner"s, "Digestion"s, "Construction"s, "Sensor"s, "Muscle"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -345,8 +345,8 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             if (cell.cellFeature.getType() == Enums::CellFunction_Scanner) {
                 showScannerTableContent();
             }
-            if (cell.cellFeature.getType() == Enums::CellFunction_Communication) {
-                showCommunicationTableContent();
+            if (cell.cellFeature.getType() == Enums::CellFunction_NeuralNet) {
+                showNeuralNetTableContent();
             }
             if (cell.cellFeature.getType() == Enums::CellFunction_Digestion) {
                 showDigestionTableContent();
@@ -619,7 +619,7 @@ void _InspectorWindow::showScannerTableContent()
     AlienImGui::Text("Output:\ninternal data of scanned cell\n(e.g. cell code and cell memory");
 }
 
-void _InspectorWindow::showCommunicationTableContent()
+void _InspectorWindow::showNeuralNetTableContent()
 {
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Not yet implemented");
@@ -881,7 +881,7 @@ void _InspectorWindow::showSensorTableContent()
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_OutMass));
+    AlienImGui::Text(formatHex(Enums::Sensor_OutDensity));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Output: detected mass concentration");

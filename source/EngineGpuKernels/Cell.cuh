@@ -51,7 +51,7 @@ struct Cell
     int age;
 
     //editing data
-    int selected;   //0 = no, 1 = selected, 2 = indirectly selected
+    int selected;   //0 = no, 1 = selected, 2 = cluster selected
 
     //temporary data
     int locked;	//0 = unlocked, 1 = locked
@@ -98,7 +98,7 @@ struct Cell
 
     __inline__ __device__ Enums::CellFunction getCellFunctionType() const
     {
-        return static_cast<unsigned int>(cellFunctionType) % Enums::CellFunction_Count;
+        return calcMod (cellFunctionType, Enums::CellFunction_Count);
     }
 
     __inline__ __device__ void initMemorySizes()

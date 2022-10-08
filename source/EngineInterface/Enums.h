@@ -12,7 +12,7 @@ namespace Enums
     enum CellFunction_
     {
         CellFunction_Computation,
-        CellFunction_Communication,
+        CellFunction_NeuralNet,
         CellFunction_Scanner,
         CellFunction_Digestion,
         CellFunction_Constructor,
@@ -39,36 +39,6 @@ namespace Enums
         EnergyGuidanceIn_HarvestCell,
         EnergyGuidanceIn_HarvestToken,
         EnergyGuidanceIn_Count
-    };
-
-    using Communicator = int;
-    enum Communicator_
-    {
-        Communicator_Input = 26,
-        Communicator_InChannel = 27,
-        Communicator_InMessage = 28,
-        Communicator_InAngle = 29,
-        Communicator_InDistance = 30,
-        Communicator_OutSentNumMessage = 31,
-        Communicator_OutReceivedNewMessage = 32,
-        Communicator_OutReceivedMessage = 33,
-        Communicator_OutReceivedAngle = 34,
-        Communicator_OutReceivedDistance = 35,
-    };
-    using CommunicatorIn = int;
-    enum CommunicatorIn_
-    {
-        CommunicatorIn_DoNothing,
-        CommunicatorIn_SetListeningChannel,
-        CommunicatorIn_SendMessage,
-        CommunicatorIn_ReceiveMessage,
-        CommunicatorIn_Count
-    };
-    using CommunicatorOutReceivedNewMessage = int;
-    enum CommunicatorOutReceivedNewMessage_
-    {
-        CommunicatorOutReceivedNewMessage_No,
-        CommunicatorOutReceivedNewMessage_Yes
     };
 
     using ComputationOperation = int;
@@ -152,6 +122,12 @@ namespace Enums
         ConstrInUniformDist_Count
     };
 
+    using NeuralNet = int;
+    enum NeuralNet_
+    {
+        NeuralNet_InOut = 110,
+    };
+
     using Scanner = int;
     enum Scanner_
     {
@@ -182,7 +158,7 @@ namespace Enums
         Sensor_InMinDensity = 22,
         Sensor_InMaxDensity = 23,
         Sensor_InColor = 8,
-        Sensor_OutMass = 24,
+        Sensor_OutDensity = 24,
         Sensor_OutDistance = 25
     };
     using SensorIn = int;

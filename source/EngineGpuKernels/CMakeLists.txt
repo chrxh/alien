@@ -9,7 +9,6 @@ add_library(alien_engine_gpu_kernels_lib
     CellFunctionData.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
-    CommunicationProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
     ConstructionProcessor.cuh
@@ -53,6 +52,7 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernels.cu
     MonitorKernels.cuh
     MuscleProcessor.cuh
+    NeuralNetProcessor.cuh
     Operations.cuh
     Particle.cuh
     ParticleProcessor.cuh
