@@ -12,7 +12,7 @@
 #include "ConstructionProcessor.cuh"
 #include "ScannerProcessor.cuh"
 #include "DigestionProcessor.cuh"
-#include "CommunicationProcessor.cuh"
+#include "NeuralNetProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
 
@@ -181,9 +181,6 @@ TokenProcessor::executeModifyingCellFunctions(SimulationData& data, SimulationRe
                     }
                     if (Enums::CellFunction_Constructor == cellFunctionType) {
                         ConstructionProcessor::process(token, data, result);
-                    }
-                    if (Enums::CellFunction_Communication == cellFunctionType) {
-                        CommunicationProcessor::process(token, data);
                     }
                     if (Enums::CellFunction_Muscle == cellFunctionType) {
                         MuscleProcessor::process(token, data, result);
