@@ -13,19 +13,25 @@
 
 struct SimulationData
 {
+    //maps
     int2 worldSize;
-
     CellMap cellMap;
     ParticleMap particleMap;
-    CellFunctionData cellFunctionData;
 
+    //objects
     Entities entities;
     Entities entitiesForCleanup;
 
+    //additional data for cell functions
     RawMemory processMemory;
+    CellFunctionData cellFunctionData;
+
+    //scheduled operations
     TempArray<StructuralOperation> structuralOperations;
     TempArray<SensorOperation> sensorOperations;
+    TempArray<NeuralNetOperation> neuralNetOperations;
 
+    //number generators
     CudaNumberGenerator numberGen1;
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
