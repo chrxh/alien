@@ -90,7 +90,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(Token* token, Simulat
         if (threadIdx.x == 0) {
             if (result != 0xffffffff) {
                 token->memory[Enums::Sensor_Output] = Enums::SensorOut_ClusterFound;
-                token->memory[Enums::Sensor_OutMass] = static_cast<unsigned char>((result >> 8) & 0xff);
+                token->memory[Enums::Sensor_OutDensity] = static_cast<unsigned char>((result >> 8) & 0xff);
                 auto radiusInt = static_cast<uint32_t>(radius);
                 if (radiusInt > 255) {
                     radiusInt = 255;
@@ -154,7 +154,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
     if (threadIdx.x == 0) {
         if (result != 0xffffffff) {
             token->memory[Enums::Sensor_Output] = Enums::SensorOut_ClusterFound;
-            token->memory[Enums::Sensor_OutMass] = static_cast<unsigned char>(result & 0xff);
+            token->memory[Enums::Sensor_OutDensity] = static_cast<unsigned char>(result & 0xff);
             auto distance = static_cast<uint32_t>((result >> 8) & 0xff);
             if (distance > 255) {
                 distance = 255;

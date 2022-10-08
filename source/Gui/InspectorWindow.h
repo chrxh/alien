@@ -43,7 +43,7 @@ private:
     void processParticle(ParticleDescription particle);
 
     void showScannerTableContent();
-    void showCommunicationTableContent();
+    void showNeuralNetTableContent();
     void showDigestionTableContent();
     void showConstructionTableContent();
     void showMuscleTableContent();
