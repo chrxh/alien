@@ -57,7 +57,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("CONSTR_IN_CELL_COLOR", "[" + std::to_string(Enums::Constr_InCellColor) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION", "[" + std::to_string(Enums::Constr_InCellFunction) + "]");
     result.emplace("CONSTR_IN_CELL_FUNCTION::COMPUTATION", std::to_string(Enums::CellFunction_Computation));
-    result.emplace("CONSTR_IN_CELL_FUNCTION::COMMUNICATION", std::to_string(Enums::CellFunction_Communication));
+    result.emplace("CONSTR_IN_CELL_FUNCTION::NEURALNET", std::to_string(Enums::CellFunction_NeuralNet));
     result.emplace("CONSTR_IN_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("CONSTR_IN_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("CONSTR_IN_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
@@ -78,7 +78,7 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SCANNER_OUT_CELL_COLOR", "[" + std::to_string(Enums::Scanner_OutCellColor) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION", "[" + std::to_string(Enums::Scanner_OutCellFunction) + "]");
     result.emplace("SCANNER_OUT_CELL_FUNCTION::COMPUTATION", std::to_string(Enums::CellFunction_Computation));
-    result.emplace("SCANNER_OUT_CELL_FUNCTION::COMMUNICATION", std::to_string(Enums::CellFunction_Communication));
+    result.emplace("SCANNER_OUT_CELL_FUNCTION::NEURALNET", std::to_string(Enums::CellFunction_NeuralNet));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::SCANNER", std::to_string(Enums::CellFunction_Scanner));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::DIGESTION", std::to_string(Enums::CellFunction_Digestion));
     result.emplace("SCANNER_OUT_CELL_FUNCTION::CONSTR", std::to_string(Enums::CellFunction_Constructor));
@@ -105,26 +105,8 @@ SymbolMap SymbolMapHelper::getDefaultSymbolMap()
     result.emplace("SENSOR_IN_MIN_DENSITY", "[" + std::to_string(Enums::Sensor_InMinDensity) + "]");
     result.emplace("SENSOR_IN_MAX_DENSITY", "[" + std::to_string(Enums::Sensor_InMaxDensity) + "]");
     result.emplace("SENSOR_IN_COLOR", "[" + std::to_string(Enums::Sensor_InColor) + "]");
-    result.emplace("SENSOR_OUT_MASS", "[" + std::to_string(Enums::Sensor_OutMass) + "]");
+    result.emplace("SENSOR_OUT_DENSITY", "[" + std::to_string(Enums::Sensor_OutDensity) + "]");
     result.emplace("SENSOR_OUT_DISTANCE", "[" + std::to_string(Enums::Sensor_OutDistance) + "]");
-
-    //communicator
-    result.emplace("COMMUNICATOR_IN", "[" + std::to_string(Enums::Communicator_Input) + "]");
-    result.emplace("COMMUNICATOR_IN::DO_NOTHING", std::to_string(Enums::CommunicatorIn_DoNothing));
-    result.emplace("COMMUNICATOR_IN::SET_LISTENING_CHANNEL", std::to_string(Enums::CommunicatorIn_SetListeningChannel));
-    result.emplace("COMMUNICATOR_IN::SEND_MESSAGE", std::to_string(Enums::CommunicatorIn_SendMessage));
-    result.emplace("COMMUNICATOR_IN::RECEIVE_MESSAGE", std::to_string(Enums::CommunicatorIn_ReceiveMessage));
-    result.emplace("COMMUNICATOR_IN_CHANNEL", "[" + std::to_string(Enums::Communicator_InChannel) + "]");
-    result.emplace("COMMUNICATOR_IN_MESSAGE", "[" + std::to_string(Enums::Communicator_InMessage) + "]");
-    result.emplace("COMMUNICATOR_IN_ANGLE", "[" + std::to_string(Enums::Communicator_InAngle) + "]");
-    result.emplace("COMMUNICATOR_IN_DISTANCE", "[" + std::to_string(Enums::Communicator_InDistance) + "]");
-    result.emplace("COMMUNICATOR_OUT_SENT_NUM_MESSAGE", "[" + std::to_string(Enums::Communicator_OutSentNumMessage) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE", "[" + std::to_string(Enums::Communicator_OutReceivedNewMessage) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::NO", std::to_string(Enums::CommunicatorOutReceivedNewMessage_No));
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_NEW_MESSAGE::YES", std::to_string(Enums::CommunicatorOutReceivedNewMessage_Yes));
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_MESSAGE", "[" + std::to_string(Enums::Communicator_OutReceivedMessage) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_ANGLE", "[" + std::to_string(Enums::Communicator_OutReceivedAngle) + "]");
-    result.emplace("COMMUNICATOR_OUT_RECEIVED_DISTANCE", "[" + std::to_string(Enums::Communicator_OutReceivedDistance) + "]");
 
     //muscle
     result.emplace("MUSCLE_IN", "[" + std::to_string(Enums::Muscle_Input) + "]");
