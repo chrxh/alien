@@ -98,7 +98,7 @@ struct Cell
 
     __inline__ __device__ Enums::CellFunction getCellFunctionType() const
     {
-        return calcMod (cellFunctionType, Enums::CellFunction_Count);
+        return calcMod(cellFunctionType, Enums::CellFunction_Count);
     }
 
     __inline__ __device__ void initMemorySizes()

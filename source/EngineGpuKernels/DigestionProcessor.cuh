@@ -10,6 +10,7 @@ class DigestionProcessor
 {
 public:
     __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(Cell* cell, char color, char& output, float& tokenEnergy, SimulationData& data, SimulationResult& result);
 
 private:
     __inline__ __device__ static bool isHomogene(Cell* cell);
@@ -24,13 +25,17 @@ private:
 
 __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
-    auto const& cell = token->cell;
-    auto& tokenMem = token->memory;
-    tokenMem[Enums::Digestion_Output] = Enums::DigestionOut_NoTarget;
+    process(token->cell, token->memory[Enums::Digestion_InColor], token->memory[Enums::Digestion_Output], token->energy, data, result);
+}
+
+__inline__ __device__ void
+DigestionProcessor::process(Cell* cell, char color_, char& output, float& tokenEnergy, SimulationData& data, SimulationResult& result)
+{
+    output = Enums::DigestionOut_NoTarget;
 
     if (cell->tryLock()) {
 
-        auto color = calcMod(token->memory[Enums::Digestion_InColor], 7);
+        auto color = calcMod(color_, 7);
 
         Cell* otherCells[18];
         int numOtherCells;
@@ -71,7 +76,7 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
 
                     /*!isColorSuperior(cell->metadata.color, otherCell->metadata.color)*/
                     //(color1 == 0 && color2 == 0) || (color1 == 0 && color2 == 1) || (color1 == 1 && color2 == 2) || (color1 == 1 && color2 > 2)
-/*
+                    /*
                     if ( !(
                         (color1 == 0 && color2 == 3) || (color1 == 2 && color2 == 3) || (color1 == 1 && color2 == 2) || (color1 == 3 && color2 == 2)
                         || (color1 == 0 && color2 == 0)
@@ -104,29 +109,29 @@ __inline__ __device__ void DigestionProcessor::process(Token* token, SimulationD
                     if (energyToTransfer >= 0) {
                         if (otherCell->energy > energyToTransfer) {
                             otherCell->energy -= energyToTransfer;
-                            token->energy += energyToTransfer / 2;
+                            tokenEnergy += energyToTransfer / 2;
                             cell->energy += energyToTransfer / 2;
-                            if (token->memory[Enums::Digestion_Output] != Enums::DigestionOut_Poisoned) {
-                                token->memory[Enums::Digestion_Output] = Enums::DigestionOut_Success;
+                            if (output != Enums::DigestionOut_Poisoned) {
+                                output = Enums::DigestionOut_Success;
                             }
                             result.incSuccessfulAttack();
                         }
                     } else {
                         auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
 
-                        if (token->energy > -energyToTransfer / 2 + cudaSimulationParameters.tokenMinEnergy * 2
+                        if (tokenEnergy > -energyToTransfer / 2 + cudaSimulationParameters.tokenMinEnergy * 2
                             && cell->energy > -energyToTransfer / 2 + cellMinEnergy) {
                             otherCell->energy -= energyToTransfer;
-                            token->energy += energyToTransfer / 2;
+                            tokenEnergy += energyToTransfer / 2;
                             cell->energy += energyToTransfer / 2;
-                            token->memory[Enums::Digestion_Output] = Enums::DigestionOut_Poisoned;
+                            output = Enums::DigestionOut_Poisoned;
                         }
                     }
                 }
                 otherCell->releaseLock();
             }
         }
-        if (Enums::DigestionOut_NoTarget == token->memory[Enums::Digestion_Output]) {
+        if (Enums::DigestionOut_NoTarget == output) {
             result.incFailedAttack();
         }
         auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);

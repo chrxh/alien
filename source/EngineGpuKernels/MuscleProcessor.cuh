@@ -11,6 +11,7 @@ class MuscleProcessor
 {
 public:
     __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(Cell* cell, Cell* sourceCell, char input, char& output, SimulationData& data, SimulationResult& result);
 
 private:
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
@@ -22,26 +23,26 @@ private:
 
 __inline__ __device__ void MuscleProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
-    auto const& sourceCell = token->sourceCell;
-    auto const& cell = token->cell;
-    auto& tokenMem = token->memory;
-    auto command = static_cast<unsigned char>(tokenMem[Enums::Muscle_Input]) % Enums::MuscleIn_Count;
+    process(token->cell, token->sourceCell, token->memory[Enums::Muscle_Input], token->memory[Enums::Muscle_Output], data, result);
+}
+
+__inline__ __device__ void MuscleProcessor::process(Cell* cell, Cell* sourceCell, char input, char& output, SimulationData& data, SimulationResult& result)
+{
+    auto command = static_cast<unsigned char>(input) % Enums::MuscleIn_Count;
 
     if (Enums::MuscleIn_DoNothing == command) {
-        tokenMem[Enums::Muscle_Output] = Enums::MuscleOut_Success;
+        output = Enums::MuscleOut_Success;
         return;
     }
 
     auto index = getConnectionIndex(cell, sourceCell);
     auto& connection = cell->connections[index];
-    auto factor =
-        (Enums::MuscleIn_Contract == command || Enums::MuscleIn_ContractRelax == command) ? (1.0f / 1.2f) : 1.2f;
+    auto factor = (Enums::MuscleIn_Contract == command || Enums::MuscleIn_ContractRelax == command) ? (1.0f / 1.2f) : 1.2f;
     auto origDistance = connection.distance;
     auto distance = origDistance * factor;
 
     if (sourceCell->tryLock()) {
-        if (distance > cudaSimulationParameters.cellMinDistance
-            && distance < cudaSimulationParameters.cellMaxCollisionDistance) {
+        if (distance > cudaSimulationParameters.cellMinDistance && distance < cudaSimulationParameters.cellMaxCollisionDistance) {
 
             connection.distance = distance;
 
@@ -49,7 +50,7 @@ __inline__ __device__ void MuscleProcessor::process(Token* token, SimulationData
             auto otherIndex = getConnectionIndex(connectingCell, cell);
             connectingCell->connections[otherIndex].distance *= factor;
         } else {
-            tokenMem[Enums::Muscle_Output] = Enums::MuscleOut_LimitReached;
+            output = Enums::MuscleOut_LimitReached;
             sourceCell->releaseLock();
             return;
         }
@@ -64,7 +65,7 @@ __inline__ __device__ void MuscleProcessor::process(Token* token, SimulationData
         sourceCell->releaseLock();
     }
 
-    tokenMem[Enums::Muscle_Output] = Enums::MuscleOut_Success;
+    output = Enums::MuscleOut_Success;
     result.incMuscleActivity();
 }
 

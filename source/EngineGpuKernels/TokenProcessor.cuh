@@ -151,6 +151,11 @@ __inline__ __device__ void TokenProcessor::executeReadonlyCellFunctions(Simulati
             if (Enums::CellFunction_Sensor == cellFunctionType) {
                 SensorProcessor::scheduleOperation(token, data);
             }
+/*
+            if (Enums::CellFunction_NeuralNet == cellFunctionType) {
+                NeuralNetProcessor::scheduleOperation(token, data);
+            }
+*/
             if (Enums::CellFunction_Digestion == cellFunctionType) {  //modifies energy
                 DigestionProcessor::process(token, data, result);
             }
