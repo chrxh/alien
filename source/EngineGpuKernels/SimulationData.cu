@@ -19,6 +19,7 @@ void SimulationData::init(int2 const& worldSize_)
 
     structuralOperations.init();
     sensorOperations.init();
+    neuralNetOperations.init();
 }
 
 __device__ void SimulationData::prepareForNextTimestep()
@@ -32,6 +33,9 @@ __device__ void SimulationData::prepareForNextTimestep()
 
     auto maxSensorOperations = entities.cellPointers.getNumEntries() / 2;
     sensorOperations.setMemory(processMemory.getArray<SensorOperation>(maxSensorOperations), maxSensorOperations);
+
+    auto maxNeuralNetOperations = entities.cellPointers.getNumEntries() / 2;
+    neuralNetOperations.setMemory(processMemory.getArray<NeuralNetOperation>(maxNeuralNetOperations), maxNeuralNetOperations);
 
     entities.saveNumEntries();
 }
@@ -83,7 +87,7 @@ void SimulationData::resizeRemainings()
     particleMap.resize(cellArraySize);
 
     //heuristic
-    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + 200) * (cellArraySize + 1000);
+    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(NeuralNetOperation) + 200) * (cellArraySize + 1000);
     processMemory.resize(upperBoundDynamicMemory);
 }
 
@@ -106,6 +110,7 @@ void SimulationData::free()
 
     structuralOperations.free();
     sensorOperations.free();
+    neuralNetOperations.free();
 }
 
 template <typename Entity>
