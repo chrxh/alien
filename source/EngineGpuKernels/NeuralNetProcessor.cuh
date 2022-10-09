@@ -4,7 +4,13 @@
 #include "QuantityConverter.cuh"
 #include "SensorProcessor.cuh"
 #include "MuscleProcessor.cuh"
+#include "DigestionProcessor.cuh"
 
+/**
+ * Simulates the neural net on a cell. It consists of 8 neurons each connected to 8 input values.
+ * - The 8x8 weights and 8 bias values are retrieved from cell memory with 4 bit precision.
+ * - The input values are retrieved from token memory with 16 bit precision.
+ */
 class NeuralNetProcessor
 {
 public:
@@ -32,6 +38,7 @@ private:
     spiralLookupAlgorithm(int depth, Enums::CellFunction cellFunctionType, Cell* cell, Cell* sourceCell, SimulationData& data);
 
     __inline__ __device__ static float getWeight(Cell* cell, int index1, int index2);
+    __inline__ __device__ static float getBias(Cell* cell, int index);
     __inline__ __device__ static float getInput(Token* token, int index);
     __inline__ __device__ static void setOutput(Token* token, int index, float value);
     __inline__ __device__ static float sigmoid(float z);
@@ -60,13 +67,14 @@ __inline__ __device__ void NeuralNetProcessor::processOperation(Token* token, Si
     auto cell = token->cell;
     auto partition = calcPartition(8, threadIdx.x, blockDim.x);
 
-    __shared__ float input[8];
-    __shared__ float output[8];
+    __shared__ float nnInput[8];
+    __shared__ float nnOutput[8];
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        input[i] = getInput(token, i);
+        nnInput[i] = getInput(token, i);
     }
     __syncthreads();
 
+    //obtain input from sensor cell
     if (hasSensorInput(cell)) {
 
         __shared__ SpiralLookupResult lookupResult;
@@ -92,40 +100,56 @@ __inline__ __device__ void NeuralNetProcessor::processOperation(Token* token, Si
 
             if (0 == threadIdx.x) {
                 if (output == Enums::SensorOut_ClusterFound) {
-                    input[0] = static_cast<float>(static_cast<unsigned char>(distance)) / 255.0f;
-                    input[1] = static_cast<float>(angle) / 128.0f;
+                    nnInput[0] = static_cast<float>(static_cast<unsigned char>(distance)) / 255.0f;
+                    nnInput[1] = static_cast<float>(angle) / 128.0f;
                 } else {
-                    input[0] = 1.0f;
-                    input[1] = 0;
+                    nnInput[0] = 1.0f;
+                    nnInput[1] = 0;
                 }
             }
         }
     }
     __syncthreads();
 
+    //perform neural net
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        float netInput = 0;
+        float sumInput = 0;
         for (int j = 0; j < 8; ++j) {
-            netInput += getWeight(cell, i, j) * input[j];
+            sumInput += getWeight(cell, i, j) * nnInput[j];
         }
-        output[i] = sigmoid(netInput);
-        setOutput(token, i, output[i]);
+        sumInput += getBias(cell, i);
+        nnOutput[i] = sigmoid(sumInput);
+        setOutput(token, i, nnOutput[i]);
     }
     __syncthreads();
 
+    //deliver output to muscle and digestion cells
     if (0 == threadIdx.x) {
         if (hasMuscleAndDigestionOutput(cell)) {
             auto lookupResult = spiralLookupAlgorithm(16, Enums::CellFunction_Muscle, cell, token->sourceCell, data);
-            char discardedOutput;
+            char output;
             if (lookupResult.firstMatchCell) {
                 MuscleProcessor::process(
-                    lookupResult.firstMatchCell, lookupResult.firstMatchPrevCell, getAndSwapMuscleCommand(output[0], cell), discardedOutput, data, result);
+                    lookupResult.firstMatchCell, lookupResult.firstMatchPrevCell, getAndSwapMuscleCommand(nnOutput[0], cell), output, data, result);
             }
             if (lookupResult.secondMatchCell) {
                 MuscleProcessor::process(
-                    lookupResult.secondMatchCell, lookupResult.secondMatchPrevCell, getAndSwapMuscleCommand(output[1], cell), discardedOutput, data, result);
+                    lookupResult.secondMatchCell, lookupResult.secondMatchPrevCell, getAndSwapMuscleCommand(nnOutput[1], cell), output, data, result);
             }
 
+            lookupResult = spiralLookupAlgorithm(16, Enums::CellFunction_Digestion, cell, token->sourceCell, data);
+            if (lookupResult.firstMatchCell) {
+                DigestionProcessor::process(lookupResult.secondMatchCell, token->memory[Enums::Digestion_InColor], output, token->energy, data, result);
+                if (output == Enums::DigestionOut_NoTarget) {
+                    setOutput(token, 2, 0);
+                }
+                if (output == Enums::DigestionOut_Success) {
+                    setOutput(token, 2, 1.0f);
+                }
+                if (output == Enums::DigestionOut_Poisoned) {
+                    setOutput(token, 2, -1.0f);
+                }
+            }
         }
     }
 }
@@ -244,10 +268,17 @@ NeuralNetProcessor::spiralLookupAlgorithm(int depth, Enums::CellFunction cellFun
 
 __inline__ __device__ float NeuralNetProcessor::getWeight(Cell* cell, int index1, int index2)
 {
-    auto flatIndex = index1 + 1 + index2 * 8;
-    auto data = static_cast<unsigned char>(cell->staticData[flatIndex / 2]);
-    int weigthInt = (flatIndex % 2) == 0 ? data & 0xf : (data >> 4) & 0xf;
-    return static_cast<float>(weigthInt) / 16 - 0.5f;
+    auto resultIndex = index1 + index2 * 8;
+    auto data = static_cast<unsigned char>(cell->staticData[1 + resultIndex / 2]);
+    int weigthInt = (resultIndex % 2) == 0 ? data & 0xf : (data >> 4) & 0xf;
+    return static_cast<float>(weigthInt) / 8 - 1.0f;
+}
+
+__inline__ __device__ float NeuralNetProcessor::getBias(Cell* cell, int index)
+{
+    auto data = static_cast<unsigned char>(cell->staticData[65 + index / 2]);
+    int biasInt = (index % 2) == 0 ? data & 0xf : (data >> 4) & 0xf;
+    return static_cast<float>(biasInt) / 8 - 1.0f;
 }
 
 __inline__ __device__ float NeuralNetProcessor::getInput(Token* token, int index)
