@@ -28,7 +28,6 @@ namespace
         cellTO.branchNumber = cell->branchNumber;
         cellTO.tokenBlocked = cell->tokenBlocked;
         cellTO.cellFunctionType = cell->cellFunctionType;
-        cellTO.numStaticBytes = cell->numStaticBytes;
         cellTO.cellFunctionInvocations = cell->cellFunctionInvocations;
         cellTO.metadata.color = cell->metadata.color;
         cellTO.age = cell->age;
@@ -60,7 +59,6 @@ namespace
         for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
             cellTO.staticData[i] = cell->staticData[i];
         }
-        cellTO.numMutableBytes = cell->numMutableBytes;
         for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
             cellTO.mutableData[i] = cell->mutableData[i];
         }

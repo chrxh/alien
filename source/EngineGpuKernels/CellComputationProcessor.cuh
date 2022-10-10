@@ -36,7 +36,7 @@ __inline__ __device__ void CellComputationProcessor::process(Token* token)
     auto cell = token->cell;
     bool condTable[MAX_CELL_STATIC_BYTES / 3 + 1];
     int condPointer(0);
-    int numStaticBytes = min(cell->numStaticBytes, cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3);
+    int numStaticBytes = min(static_cast<unsigned char>(cell->staticData[0]), cudaSimulationParameters.cellFunctionComputerMaxInstructions) * 3;
     for (int instructionPointer = 0; instructionPointer < numStaticBytes; ) {
 
         //decode instruction
@@ -156,11 +156,11 @@ __inline__ __device__ void
     CellComputationProcessor::readInstruction(char const* data, int& instructionPointer, CellInstruction& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
-    instructionCoded.operation = (data[instructionPointer] >> 4) & 0xF;
-    instructionCoded.opType1 = ((data[instructionPointer] >> 2) & 0x3) % 3;
-    instructionCoded.opType2 = data[instructionPointer] & 0x3;
-    instructionCoded.operand1 = data[instructionPointer + 1];
-    instructionCoded.operand2 = data[instructionPointer + 2];
+    instructionCoded.operation = (data[instructionPointer + 1] >> 4) & 0xF;
+    instructionCoded.opType1 = ((data[instructionPointer + 1] >> 2) & 0x3) % 3;
+    instructionCoded.opType2 = data[instructionPointer + 1] & 0x3;
+    instructionCoded.operand1 = data[instructionPointer + 2];
+    instructionCoded.operand2 = data[instructionPointer + 3];
 
     instructionPointer += 3;
 }

@@ -179,7 +179,7 @@ void _InspectorWindow::processCell(CellDescription cell)
         ImGui::EndTabBar();
 
         //fill up with zeros
-        auto constDataMaxSize = CellComputationCompiler::getMaxBytes(parameters);
+        auto constDataMaxSize = CellComputationCompiler::getMaxCompiledCodeSize(parameters);
         if (constDataMaxSize > cell.cellFeature.constData.size()) {
             cell.cellFeature.constData.append(constDataMaxSize - cell.cellFeature.constData.size(), 0);
         }
@@ -300,7 +300,7 @@ void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
 
             auto dataSize = cell.cellFeature.constData.size();
             cell.cellFeature.constData.copy(_cellMemory, dataSize);
-            auto maxDataSize = CellComputationCompiler::getMaxBytes(parameters);
+            auto maxDataSize = CellComputationCompiler::getMaxCompiledCodeSize(parameters);
             for (int i = dataSize; i < maxDataSize; ++i) {
                 _cellMemory[i] = 0;
             }

@@ -97,14 +97,11 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
     tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->branchNumber;
     tokenMem[Enums::Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
     tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
-    tokenMem[Enums::Scanner_OutCellFunctionData] = lookupResult.prevCell->numStaticBytes;
-    for (int i = 0; i < lookupResult.prevCell->numStaticBytes; ++i) {
-        tokenMem[Enums::Scanner_OutCellFunctionData + 1 + i] = lookupResult.prevCell->staticData[i];
+    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+        tokenMem[Enums::Scanner_OutCellFunctionData + i] = lookupResult.prevCell->staticData[i];
     }
-    int mutableDataIndex = lookupResult.prevCell->numStaticBytes + 1;
-    tokenMem[Enums::Scanner_OutCellFunctionData + mutableDataIndex] = lookupResult.prevCell->numMutableBytes;
-    for (int i = 0; i < lookupResult.prevCell->numMutableBytes; ++i) {
-        tokenMem[Enums::Scanner_OutCellFunctionData + mutableDataIndex + 1 + i] = lookupResult.prevCell->mutableData[i];
+    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+        tokenMem[Enums::Scanner_OutCellFunctionData + MAX_CELL_STATIC_BYTES  + i] = lookupResult.prevCell->mutableData[i];
     }
 }
 
