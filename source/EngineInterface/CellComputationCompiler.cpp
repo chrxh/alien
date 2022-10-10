@@ -30,6 +30,8 @@ namespace
         std::string comp;
     };
 
+    int const BytesPerInstruction = 3;
+
     std::string lastChar(std::string const& s)
     {
         if (!s.empty()) {
@@ -306,6 +308,7 @@ CompilationResult CellComputationCompiler::compileSourceCode(std::string const& 
     CompilerState state = CompilerState::LOOKING_FOR_INSTR_START;
 
     CompilationResult result;
+    result.compilation = std::string(getMaxCompiledCodeSize(parameters), 0);
     int linePos = 0;
     InstructionUncoded instructionUncoded;
     CellInstruction instructionCoded;
@@ -329,7 +332,7 @@ CompilationResult CellComputationCompiler::compileSourceCode(std::string const& 
             instructionUncoded = InstructionUncoded();
         }
     }
-    if (state == CompilerState::LOOKING_FOR_INSTR_START && result.compilation.size() <= getMaxBytes(parameters)) {
+    if (state == CompilerState::LOOKING_FOR_INSTR_START && linePos - 1 > parameters.cellFunctionComputerMaxInstructions) {
         result.compilationOk = true;
     } else {
         result.compilationOk = false;
@@ -357,13 +360,13 @@ std::string CellComputationCompiler::decompileSourceCode(
     std::string text;
     std::string textOp1, textOp2;
     int nestingLevel = 0;
-    auto dataSize = (data.size() / 3) * 3;
+    int dataSize = data[0];
     auto isNullInstruction = [&data](int address) {
-        return data[address] == 0 && data[address + 1] == 0 && data[address + 2] == 0;
+        return data[address + 1] == 0 && data[address + 2] == 0 && data[address + 3] == 0;
     };
-    while (dataSize >= 3) {
-        if (isNullInstruction(dataSize - 3)) {
-            dataSize -= 3;
+    while (dataSize >= BytesPerInstruction) {
+        if (isNullInstruction(dataSize - BytesPerInstruction)) {
+            dataSize -= BytesPerInstruction;
         } else {
             break;
         }
@@ -478,19 +481,21 @@ std::optional<int> CellComputationCompiler::extractAddress(std::string const& s)
     }
 }
 
-int CellComputationCompiler::getMaxBytes(SimulationParameters const& parameters)
+int CellComputationCompiler::getMaxCompiledCodeSize(SimulationParameters const& parameters)
 {
-    return parameters.cellFunctionComputerMaxInstructions * 3;
+    return parameters.cellFunctionComputerMaxInstructions * 3 + 1;
 }
 
 void CellComputationCompiler::writeInstruction(std::string& data, CellInstruction const& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/MEMMEM/CMEM - 2 Bit][MEM/MEMMEM/CMEM/CONST - 2 Bit]
-    data.push_back(
-        (static_cast<uint8_t>(instructionCoded.operation) << 4) | (static_cast<uint8_t>(instructionCoded.opType1) << 2)
-        | static_cast<uint8_t>(instructionCoded.opType2));
-    data.push_back(instructionCoded.operand1);
-    data.push_back(instructionCoded.operand2);
+    auto currentInstructions = data[0];
+    data[currentInstructions * BytesPerInstruction + 1] = (static_cast<uint8_t>(instructionCoded.operation) << 4)
+        | (static_cast<uint8_t>(instructionCoded.opType1) << 2)
+        | static_cast<uint8_t>(instructionCoded.opType2);
+    data[currentInstructions * BytesPerInstruction + 2] = instructionCoded.operand1;
+    data[currentInstructions * BytesPerInstruction + 3] = instructionCoded.operand2;
+    ++data[0];
 }
 
 void CellComputationCompiler::readInstruction(
@@ -499,14 +504,14 @@ void CellComputationCompiler::readInstruction(
     CellInstruction& instructionCoded)
 {
     //machine code: [INSTR - 4 Bits][MEM/ADDR/CMEM - 2 Bit][MEM/ADDR/CMEM/CONST - 2 Bit]
-    instructionCoded.operation = static_cast<Enums::ComputationOperation>((data[instructionPointer] >> 4) & 0xF);
-    instructionCoded.opType1 = static_cast<Enums::ComputationOpType>(((data[instructionPointer] >> 2) & 0x3) % 3);
-    instructionCoded.opType2 = static_cast<Enums::ComputationOpType>(data[instructionPointer] & 0x3);
-    instructionCoded.operand1 = data[instructionPointer + 1];  //readInteger(_code,instructionPointer + 1);
-    instructionCoded.operand2 = data[instructionPointer + 2];  //readInteger(_code,instructionPointer + 2);
+    instructionCoded.operation = static_cast<Enums::ComputationOperation>((data[instructionPointer + 1] >> 4) & 0xF);
+    instructionCoded.opType1 = static_cast<Enums::ComputationOpType>(((data[instructionPointer + 1] >> 2) & 0x3) % 3);
+    instructionCoded.opType2 = static_cast<Enums::ComputationOpType>(data[instructionPointer + 1] & 0x3);
+    instructionCoded.operand1 = data[instructionPointer + 2];  //readInteger(_code,instructionPointer + 1);
+    instructionCoded.operand2 = data[instructionPointer + 3];  //readInteger(_code,instructionPointer + 2);
 
     //increment instruction pointer
-    instructionPointer += 3;
+    instructionPointer += BytesPerInstruction;
 }
 
 uint8_t CellComputationCompiler::convertToAddress(int8_t addr, uint32_t size)

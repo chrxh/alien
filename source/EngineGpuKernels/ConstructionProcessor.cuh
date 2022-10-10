@@ -397,21 +397,12 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
         % cudaSimulationParameters.cellMaxTokenBranchNumber;
     result->tokenBlocked = true;
     result->cellFunctionType = constructionData.cellFunctionType;
-    result->numStaticBytes = static_cast<unsigned char>(token->memory[Enums::Constr_InCellFunctionData])
-        % (MAX_CELL_STATIC_BYTES + 1);
-    auto offset = result->numStaticBytes + 1;
-    result->numMutableBytes =
-        static_cast<unsigned char>(
-            token->memory[(Enums::Constr_InCellFunctionData + offset) % MAX_TOKEN_MEM_SIZE])
-        % (MAX_CELL_MUTABLE_BYTES + 1);
     result->metadata.color = constructionData.metaData;
-
-    for (int i = 0; i < result->numStaticBytes; ++i) {
-        result->staticData[i] = token->memory[(Enums::Constr_InCellFunctionData + i + 1) % MAX_TOKEN_MEM_SIZE];
+    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+        result->staticData[i] = token->memory[(Enums::Constr_InCellFunctionData + i) % MAX_TOKEN_MEM_SIZE];
     }
-    for (int i = 0; i <= result->numMutableBytes; ++i) {
-        result->mutableData[i] =
-            token->memory[(Enums::Constr_InCellFunctionData + offset + i + 1) % MAX_TOKEN_MEM_SIZE];
+    for (int i = 0; i <= MAX_CELL_MUTABLE_BYTES; ++i) {
+        result->mutableData[i] = token->memory[(Enums::Constr_InCellFunctionData + MAX_CELL_STATIC_BYTES + i) % MAX_TOKEN_MEM_SIZE];
     }
 }
 

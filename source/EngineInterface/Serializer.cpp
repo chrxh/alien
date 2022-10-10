@@ -108,6 +108,121 @@ namespace cereal
 /************************************************************************/
 /* Old file formats                                                     */
 /************************************************************************/
+
+/************************************************************************/
+/* Version 3.3 support code                                             */
+/************************************************************************/
+namespace
+{
+    struct DEPRECATED_CellDescription_3_3
+    {
+        uint64_t id = 0;
+
+        RealVector2D pos;
+        RealVector2D vel;
+        double energy;
+        int maxConnections;
+        std::vector<ConnectionDescription> connections;
+        bool tokenBlocked;
+        int tokenBranchNumber;
+        CellMetadata metadata;
+        CellFeatureDescription cellFeature;
+        std::vector<TokenDescription> tokens;
+        int cellFunctionInvocations;
+        bool barrier;
+
+        CellDescription convert() const
+        {
+            CellDescription result;
+            result.id = id;
+            result.pos = pos;
+            result.vel = vel;
+            result.energy = energy;
+            result.maxConnections = maxConnections;
+            result.connections = connections;
+            result.tokenBlocked = tokenBlocked;
+            result.tokenBranchNumber = tokenBranchNumber;
+            result.metadata = metadata;
+            result.cellFeature = cellFeature;
+            result.tokens = tokens;
+            result.cellFunctionInvocations = cellFunctionInvocations;
+            result.barrier = barrier;
+            result.age = 0;
+            if (result.cellFeature.getType() == Enums::CellFunction_Computation) {
+                auto numInstructions = (result.cellFeature.constData.size() / 3);
+                result.cellFeature.constData = std::string(1, static_cast<char>(numInstructions)) + result.cellFeature.constData;
+            }
+            return result;
+        }
+    };
+
+    struct DEPRECATED_ClusterDescription_3_3
+    {
+        uint64_t id = 0;
+
+        std::vector<DEPRECATED_CellDescription_3_3> cells;
+        ClusterDescription convert() const
+        {
+            ClusterDescription result;
+            result.id = id;
+            for (auto const& cell : cells) {
+                result.cells.emplace_back(cell.convert());
+            }
+            return result;
+        }
+    };
+
+    struct DEPRECATED_ClusteredDataDescription_3_3
+    {
+        std::vector<DEPRECATED_ClusterDescription_3_3> clusters;
+        std::vector<ParticleDescription> particles;
+
+        ClusteredDataDescription convert() const
+        {
+            ClusteredDataDescription result;
+            for (auto const& cluster : clusters) {
+                result.clusters.emplace_back(cluster.convert());
+            }
+            result.particles = particles;
+            return result;
+        }
+    };
+}
+
+namespace cereal
+{
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellDescription_3_3& data)
+    {
+        ar(data.id,
+           data.pos,
+           data.vel,
+           data.energy,
+           data.maxConnections,
+           data.connections,
+           data.tokenBlocked,
+           data.tokenBranchNumber,
+           data.metadata,
+           data.cellFeature,
+           data.tokens,
+           data.cellFunctionInvocations,
+           data.barrier);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusterDescription_3_3& data)
+    {
+        ar(data.id, data.cells);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusteredDataDescription_3_3& data)
+    {
+        ar(data.clusters, data.particles);
+    }
+}
+
+/************************************************************************/
+/* Version 3.2 support code                                             */
+/************************************************************************/
 namespace
 {
     struct DEPRECATED_CellDescription_3_2
@@ -144,6 +259,10 @@ namespace
             result.cellFunctionInvocations = cellFunctionInvocations;
             result.barrier = barrier;
             result.age = 0;
+            if (result.cellFeature.getType() == Enums::CellFunction_Computation) {
+                auto numInstructions = (result.cellFeature.constData.size() / 3);
+                result.cellFeature.constData = std::string(1, static_cast<char>(numInstructions)) + result.cellFeature.constData;
+            }
             return result;
         }
     };
@@ -179,7 +298,44 @@ namespace
             return result;
         }
     };
+}
 
+namespace cereal
+{
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellDescription_3_2& data)
+    {
+        ar(data.id,
+           data.pos,
+           data.vel,
+           data.energy,
+           data.maxConnections,
+           data.connections,
+           data.tokenBlocked,
+           data.tokenBranchNumber,
+           data.metadata,
+           data.cellFeature,
+           data.tokens,
+           data.cellFunctionInvocations,
+           data.barrier);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusterDescription_3_2& data)
+    {
+        ar(data.id, data.cells);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_ClusteredDataDescription_3_2& data)
+    {
+        ar(data.clusters, data.particles);
+    }
+}
+
+/************************************************************************/
+/* Unknown version support code                                         */
+/************************************************************************/
+namespace
+{
     struct DEPRECATED_CellDescription
     {
         uint64_t id = 0;
@@ -251,37 +407,6 @@ namespace
 
 namespace cereal
 {
-    //version 3.2
-    template <class Archive>
-    inline void serialize(Archive& ar, DEPRECATED_CellDescription_3_2& data)
-    {
-        ar(data.id,
-           data.pos,
-           data.vel,
-           data.energy,
-           data.maxConnections,
-           data.connections,
-           data.tokenBlocked,
-           data.tokenBranchNumber,
-           data.metadata,
-           data.cellFeature,
-           data.tokens,
-           data.cellFunctionInvocations,
-           data.barrier);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, DEPRECATED_ClusterDescription_3_2& data)
-    {
-        ar(data.id, data.cells);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, DEPRECATED_ClusteredDataDescription_3_2& data)
-    {
-        ar(data.clusters, data.particles);
-    }
-
-
-    //unknown version
     template <class Archive>
     inline void serialize(Archive& ar, DEPRECATED_CellDescription& data)
     {
@@ -310,6 +435,7 @@ namespace cereal
     }
 
 }
+/************************************************************************/
 
 bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
@@ -583,7 +709,11 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
         throw std::runtime_error("No version detected.");
     }
     auto versionParts = getVersionParts(version);
-    if (versionParts.major <= 3 && versionParts.minor <= 2) {
+    if (versionParts.major == 3 && versionParts.minor == 3) {
+        DEPRECATED_ClusteredDataDescription_3_3 oldData;
+        archive(oldData);
+        data = oldData.convert();
+    } else if (versionParts.major == 3 && versionParts.minor <= 2) {
         DEPRECATED_ClusteredDataDescription_3_2 oldData;
         archive(oldData);
         data = oldData.convert();

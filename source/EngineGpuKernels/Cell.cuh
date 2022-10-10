@@ -39,9 +39,7 @@ struct Cell
     int maxConnections;
     int numConnections;
     CellConnection connections[MAX_CELL_BONDS];
-    unsigned char numStaticBytes;
     char staticData[MAX_CELL_STATIC_BYTES];
-    unsigned char numMutableBytes;
     char mutableData[MAX_CELL_MUTABLE_BYTES];
     int cellFunctionInvocations;
     CellMetadata metadata;
@@ -101,23 +99,6 @@ struct Cell
         return calcMod(cellFunctionType, Enums::CellFunction_Count);
     }
 
-    __inline__ __device__ void initMemorySizes()
-    {
-        switch (getCellFunctionType()) {
-        case Enums::CellFunction_Computation: {
-            numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
-            numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
-        } break;
-        case Enums::CellFunction_Sensor: {
-            numStaticBytes = 0;
-            numMutableBytes = 5;
-        } break;
-        default: {
-            numStaticBytes = 0;
-            numMutableBytes = 0;
-        }
-        }
-    }
 };
 
 template<>

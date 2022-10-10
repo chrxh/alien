@@ -25,7 +25,7 @@ public:
     decompileSourceCode(std::string const& data, SymbolMap const& symbols, SimulationParameters const& parameters);
 
     static std::optional<int> extractAddress(std::string const& s);
-    static int getMaxBytes(SimulationParameters const& parameters);
+    static int getMaxCompiledCodeSize(SimulationParameters const& parameters);
 
 private:
     static void writeInstruction(std::string& data, CellInstruction const& instructionCoded);

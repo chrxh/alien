@@ -85,8 +85,6 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     }
     cell->energy = cellTO.energy;
     cell->cellFunctionType = cellTO.cellFunctionType;
-    cell->numStaticBytes = cellTO.numStaticBytes;
-    cell->numMutableBytes = cellTO.numMutableBytes;
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = cellTO.staticData[i];
     }
@@ -141,20 +139,6 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
 
-    switch (cell->cellFunctionType) {
-    case Enums::CellFunction_Computation: {
-        cell->numStaticBytes = cellTO.numStaticBytes;
-        cell->numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
-    } break;
-    case Enums::CellFunction_Sensor: {
-        cell->numStaticBytes = 0;
-        cell->numMutableBytes = 5;
-    } break;
-    default: {
-        cell->numStaticBytes = 0;
-        cell->numMutableBytes = 0;
-    }
-    }
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = cellTO.staticData[i];
     }
@@ -260,7 +244,6 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->age = 0;
 
     cell->cellFunctionType = _data->numberGen1.random(Enums::CellFunction_Count - 1);
-    cell->initMemorySizes();
     for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
         cell->staticData[i] = _data->numberGen1.random(255);
     }

@@ -106,7 +106,6 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
 //                cell->metadata.color = data.numberGen1.random(6);
             } else if (address == MAX_CELL_STATIC_BYTES + 1) {
                 cell->cellFunctionType = data.numberGen1.random(Enums::CellFunction_Count - 1);
-                cell->initMemorySizes();
             } else {
                 cell->branchNumber = data.numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber);
             }

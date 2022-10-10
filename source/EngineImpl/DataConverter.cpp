@@ -332,8 +332,8 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
 
     auto feature = CellFeatureDescription()
                        .setType(static_cast<Enums::CellFunction>(cellTO.cellFunctionType))
-                       .setConstData(convertToString(cellTO.staticData, cellTO.numStaticBytes))
-                       .setVolatileData(convertToString(cellTO.mutableData, cellTO.numMutableBytes));
+                       .setConstData(convertToString(cellTO.staticData, MAX_CELL_STATIC_BYTES))
+                       .setVolatileData(convertToString(cellTO.mutableData, MAX_CELL_MUTABLE_BYTES));
     result.cellFeature = feature;
     result.cellFunctionInvocations = cellTO.cellFunctionInvocations;
 
@@ -378,8 +378,6 @@ void DataConverter::addCell(
     cellTO.cellFunctionInvocations = cellDesc.cellFunctionInvocations;
     auto const& cellFunction = cellDesc.cellFeature;
     cellTO.cellFunctionType = cellFunction.getType();
-    cellTO.numStaticBytes = std::min(static_cast<int>(cellFunction.constData.size()), MAX_CELL_STATIC_BYTES);
-    cellTO.numMutableBytes = std::min(static_cast<int>(cellFunction.volatileData.size()), MAX_CELL_MUTABLE_BYTES);
     convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
     convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
 	cellTO.numConnections = 0;

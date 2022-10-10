@@ -14,7 +14,7 @@ struct CellFeatureDescription
 
     Enums::CellFunction getType() const
     {
-        return _type % Enums::CellFunction_Count;
+        return static_cast<unsigned int>(_type) % Enums::CellFunction_Count;
     }
 	CellFeatureDescription& setType(Enums::CellFunction value) { _type = value; return *this; }
     CellFeatureDescription& setVolatileData(std::string const& value)
