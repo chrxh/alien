@@ -143,7 +143,7 @@ namespace
     {
         return left.energy != right.energy || left.maxConnections != right.maxConnections || left.tokenBlocked != right.tokenBlocked
             || left.tokenBranchNumber != right.tokenBranchNumber || left.cellFeature.getType() != right.cellFeature.getType()
-            || left.cellFeature.constData != right.cellFeature.constData || left.cellFeature.volatileData != right.cellFeature.volatileData
+            || left.cellFeature.staticData != right.cellFeature.staticData || left.cellFeature.mutableData != right.cellFeature.mutableData
             || left.metadata.computerSourcecode != right.metadata.computerSourcecode
             || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
             || left.tokens != right.tokens || left.barrier != right.barrier;
@@ -178,19 +178,12 @@ void _InspectorWindow::processCell(CellDescription cell)
         }
         ImGui::EndTabBar();
 
-        //fill up with zeros
-        auto constDataMaxSize = CellComputationCompiler::getMaxCompiledCodeSize(parameters);
-        if (constDataMaxSize > cell.cellFeature.constData.size()) {
-            cell.cellFeature.constData.append(constDataMaxSize - cell.cellFeature.constData.size(), 0);
-        }
-        if (constDataMaxSize > origCell.cellFeature.constData.size()) {
-            origCell.cellFeature.constData.append(constDataMaxSize - origCell.cellFeature.constData.size(), 0);
-        }
-
         if (hasChanges(cell, origCell)) {
+/*
             if (cell.cellFeature != origCell.cellFeature) {
                 cell.metadata.computerSourcecode.clear();
             }
+*/
             _simController->changeCell(cell);
         }
     }
@@ -253,9 +246,7 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
                     _lastCompilationResult->compilationOk = true;
                 }
                 return CellComputationCompiler::decompileSourceCode(
-                    cell.cellFeature.constData,
-                    _simController->getSymbolMap(),
-                    _simController->getSimulationParameters());
+                    cell.cellFeature.staticData, _simController->getSymbolMap(), _simController->getSimulationParameters());
             }
             return cell.metadata.computerSourcecode;
         }();
@@ -272,12 +263,14 @@ void _InspectorWindow::showCellCodeTab(CellDescription& cell)
 
         //compilation state
         auto sourcecode = std::string(_cellCode);
+
         if (sourcecode != origSourcecode || !_lastCompilationResult) {
-            _lastCompilationResult =
-                std::make_shared<CompilationResult>(
+            _lastCompilationResult = std::make_shared<CompilationResult>(
                 CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap(), _simController->getSimulationParameters()));
+        }
+        if (sourcecode != origSourcecode) {
             if (_lastCompilationResult->compilationOk) {
-                cell.cellFeature.constData = _lastCompilationResult->compilation;
+                cell.cellFeature.setStaticData(_lastCompilationResult->compilation);
             }
             cell.metadata.computerSourcecode = sourcecode;
         }
@@ -298,25 +291,15 @@ void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
             AlienImGui::Group("Instruction section");
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
 
-            auto dataSize = cell.cellFeature.constData.size();
-            cell.cellFeature.constData.copy(_cellMemory, dataSize);
-            auto maxDataSize = CellComputationCompiler::getMaxCompiledCodeSize(parameters);
-            for (int i = dataSize; i < maxDataSize; ++i) {
-                _cellMemory[i] = 0;
-            }
-             _cellDataMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), maxDataSize);
+            _cellDataMemoryEdit->DrawContents(cell.cellFeature.staticData.data(), sizeof(cell.cellFeature.staticData));
 
-            cell.cellFeature.constData = std::string(_cellMemory, maxDataSize);
             ImGui::PopFont();
         }
         ImGui::EndChild();
         if (ImGui::BeginChild("##2", ImVec2(0, 0), false, 0)) {
             AlienImGui::Group("Data section");
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-            auto dataSize = cell.cellFeature.volatileData.size();
-            cell.cellFeature.volatileData.copy(_cellMemory, dataSize);
-            _cellInstructionMemoryEdit->DrawContents(reinterpret_cast<void*>(_cellMemory), dataSize);
-            cell.cellFeature.volatileData = std::string(_cellMemory, dataSize);
+            _cellInstructionMemoryEdit->DrawContents(cell.cellFeature.mutableData.data(), sizeof(cell.cellFeature.mutableData));
             ImGui::PopFont();
         }
         ImGui::EndChild();

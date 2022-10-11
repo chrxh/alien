@@ -332,8 +332,8 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
 
     auto feature = CellFeatureDescription()
                        .setType(static_cast<Enums::CellFunction>(cellTO.cellFunctionType))
-                       .setConstData(convertToString(cellTO.staticData, MAX_CELL_STATIC_BYTES))
-                       .setVolatileData(convertToString(cellTO.mutableData, MAX_CELL_MUTABLE_BYTES));
+                       .setStaticData(cellTO.staticData)
+                       .setMutableData(cellTO.mutableData);
     result.cellFeature = feature;
     result.cellFunctionInvocations = cellTO.cellFunctionInvocations;
 
@@ -378,8 +378,8 @@ void DataConverter::addCell(
     cellTO.cellFunctionInvocations = cellDesc.cellFunctionInvocations;
     auto const& cellFunction = cellDesc.cellFeature;
     cellTO.cellFunctionType = cellFunction.getType();
-    convertToArray(cellFunction.constData, cellTO.staticData, MAX_CELL_STATIC_BYTES);
-    convertToArray(cellFunction.volatileData, cellTO.mutableData, MAX_CELL_MUTABLE_BYTES);
+    memcpy(cellTO.staticData, cellFunction.staticData.data(), MAX_CELL_STATIC_BYTES);
+    memcpy(cellTO.mutableData, cellFunction.mutableData.data(), MAX_CELL_MUTABLE_BYTES);
 	cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;

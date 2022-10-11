@@ -7,35 +7,52 @@
 #include "Definitions.h"
 #include "Metadata.h"
 
+using StaticData = std::array<char, 76>;
+using MutableData = std::array<char, 8>;
+
 struct CellFeatureDescription
 {
-	std::string volatileData;
-    std::string constData;
+    MutableData mutableData;
+    StaticData staticData;
+    Enums::CellFunction type = Enums::CellFunction_Computation;
 
     Enums::CellFunction getType() const
     {
-        return static_cast<unsigned int>(_type) % Enums::CellFunction_Count;
+        return static_cast<unsigned int>(type) % Enums::CellFunction_Count;
     }
-	CellFeatureDescription& setType(Enums::CellFunction value) { _type = value; return *this; }
-    CellFeatureDescription& setVolatileData(std::string const& value)
+	CellFeatureDescription& setType(Enums::CellFunction value) { type = value; return *this; }
+    CellFeatureDescription& setMutableData(MutableData const& value)
     {
-        volatileData = value;
+        mutableData = value;
         return *this;
     }
-    CellFeatureDescription& setConstData(std::string const& value)
+    CellFeatureDescription& setMutableData(char const* value)
     {
-        constData = value;
+        for (int i = 0; i < sizeof(mutableData); ++i) {
+            mutableData[i] = value[i];
+        }
         return *this;
     }
-	bool operator==(CellFeatureDescription const& other) const {
-		return _type == other._type
-			&& volatileData == other.volatileData
-			&& constData == other.constData;
+    CellFeatureDescription& setStaticData(StaticData const& value)
+    {
+        staticData = value;
+        return *this;
+    }
+    CellFeatureDescription& setStaticData(char const* value)
+    {
+        for (int i = 0; i < sizeof(staticData); ++i) {
+            staticData[i] = value[i];
+        }
+        return *this;
+    }
+    bool operator==(CellFeatureDescription const& other) const
+    {
+		return type == other.type
+			&& mutableData == other.mutableData
+			&& staticData == other.staticData;
 	}
 	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
 
-private:
-    Enums::CellFunction _type = Enums::CellFunction_Computation;
 };
 
 struct TokenDescription
