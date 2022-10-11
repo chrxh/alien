@@ -398,11 +398,26 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     result->tokenBlocked = true;
     result->cellFunctionType = constructionData.cellFunctionType;
     result->metadata.color = constructionData.metaData;
-    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-        result->staticData[i] = token->memory[(Enums::Constr_InCellFunctionData + i) % MAX_TOKEN_MEM_SIZE];
-    }
-    for (int i = 0; i <= MAX_CELL_MUTABLE_BYTES; ++i) {
-        result->mutableData[i] = token->memory[(Enums::Constr_InCellFunctionData + MAX_CELL_STATIC_BYTES + i) % MAX_TOKEN_MEM_SIZE];
+    if (result->getCellFunctionType() != Enums::CellFunction_NeuralNet) {
+
+        //encoding to support older versions
+        auto len = min(48 - 1, static_cast<unsigned char>(token->memory[Enums::Constr_InCellFunctionData]));
+        result->staticData[0] = len / 3;
+        for (int i = 0; i < len; ++i) {
+            result->staticData[i + 1] = token->memory[Enums::Constr_InCellFunctionData + i + 1];
+        }
+        for (int i = 0; i < 8; ++i) {
+            result->mutableData[i] = token->memory[Enums::Constr_InCellFunctionData + 2 + len + i];
+        }
+    } else {
+
+        //new encoding
+        for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+            result->staticData[i] = token->memory[(Enums::Constr_InCellFunctionData + i) % MAX_TOKEN_MEM_SIZE];
+        }
+        for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+            result->mutableData[i] = token->memory[(Enums::Constr_InCellFunctionData + MAX_CELL_STATIC_BYTES + i) % MAX_TOKEN_MEM_SIZE];
+        }
     }
 }
 

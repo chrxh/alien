@@ -97,11 +97,27 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
     tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->branchNumber;
     tokenMem[Enums::Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
     tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
-    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-        tokenMem[Enums::Scanner_OutCellFunctionData + i] = lookupResult.prevCell->staticData[i];
-    }
-    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-        tokenMem[Enums::Scanner_OutCellFunctionData + MAX_CELL_STATIC_BYTES  + i] = lookupResult.prevCell->mutableData[i];
+    if (lookupResult.prevCell->getCellFunctionType() != Enums::CellFunction_NeuralNet) {
+
+        //encoding to support older versions
+        auto len = min(48 - 1, static_cast<unsigned char>(lookupResult.prevCell->staticData[0]) * 3);
+        tokenMem[Enums::Scanner_OutCellFunctionData] = len;
+        for (int i = 0; i < len; ++i) {
+            tokenMem[Enums::Scanner_OutCellFunctionData + i + 1] = lookupResult.prevCell->staticData[i + 1];
+        }
+        tokenMem[Enums::Scanner_OutCellFunctionData + len + 1] = 8;
+        for (int i = 0; i < 8; ++i) {
+            tokenMem[Enums::Scanner_OutCellFunctionData + len + 2 + i] = lookupResult.prevCell->mutableData[i];
+        }
+    } else {
+
+        //new encoding
+        for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
+            tokenMem[Enums::Scanner_OutCellFunctionData + i] = lookupResult.prevCell->staticData[i];
+        }
+        for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
+            tokenMem[Enums::Scanner_OutCellFunctionData + MAX_CELL_STATIC_BYTES + i] = lookupResult.prevCell->mutableData[i];
+        }
     }
 }
 

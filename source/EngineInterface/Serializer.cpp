@@ -18,6 +18,7 @@
 #include <zstr.hpp>
 
 #include "Base/Resources.h"
+#include "EngineInterface/CellComputationCompiler.h"
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "SettingsParser.h"
@@ -37,16 +38,15 @@ namespace cereal
     }
 
     template <class Archive>
-    inline void save(Archive& ar, CellFeatureDescription const& data)
+    inline void serialize(Archive& ar, CellFeatureDescription& data)
     {
-        ar(data.getType(), data.volatileData, data.constData);
-    }
-    template <class Archive>
-    inline void load(Archive& ar, CellFeatureDescription& data)
-    {
-        Enums::CellFunction type;
-        ar(type, data.volatileData, data.constData);
-        data.setType(type);
+        ar(data.type);
+        for (auto& c : data.mutableData) {
+            ar(c);
+        }
+        for (auto& c : data.staticData) {
+            ar(c);
+        }
     }
 
     template <class Archive>
@@ -106,7 +106,7 @@ namespace cereal
 }
 
 /************************************************************************/
-/* Old file formats                                                     */
+/* Support for old file formats                                         */
 /************************************************************************/
 
 /************************************************************************/
@@ -114,6 +114,70 @@ namespace cereal
 /************************************************************************/
 namespace
 {
+    int const MaxCellStaticBytes = 48;
+    int const MaxCellMutableBytes = 16;
+
+    int getNumberOfInstructions(std::string const& compiledCode)
+    {
+        auto result = compiledCode.size();
+        auto bytesPerInstruction = CellComputationCompiler::getBytesPerInstruction();
+        while (result >= bytesPerInstruction) {
+            if (compiledCode[result - bytesPerInstruction] == 0 && compiledCode[result - bytesPerInstruction + 1] == 0
+                && compiledCode[result - bytesPerInstruction + 2] == 0) {
+                result -= bytesPerInstruction;
+            } else {
+                break;
+            }
+        }
+        return result / bytesPerInstruction;
+    }
+
+    StaticData convertStaticData(std::string const& data, Enums::CellFunction const& cellFunction)
+    {
+        StaticData result;
+        auto dataSize = data.size();
+        if (cellFunction == Enums::CellFunction_Computation) {
+            result[0] = static_cast<char>(getNumberOfInstructions(data));
+            int i = 1;
+            for (; i < sizeof(result) && i - 1 < dataSize; ++i) {
+                result[i] = data[i - 1];
+            }
+            for (; i < sizeof(result); ++i) {
+                result[i] = 0;
+            }
+        } else {
+            int i = 0;
+            for (; i < sizeof(result) && i < dataSize; ++i) {
+                result[i] = data[i];
+            }
+            for (; i < sizeof(result); ++i) {
+                result[i] = 0;
+            }
+        }
+        return result;
+    }
+
+    MutableData convertMutableData(std::string const& data)
+    {
+        MutableData result;
+        auto dataSize = data.size();
+        int i = 0;
+        for (; i < sizeof(result) && i < dataSize; ++i) {
+            result[i] = data[i];
+        }
+        for (; i < sizeof(result); ++i) {
+            result[i] = 0;
+        }
+        return result;
+    }
+
+    struct DEPRECATED_CellFeatureDescription_3_3
+    {
+        std::string mutableData;
+        std::string staticData;
+        Enums::CellFunction type;
+    };
+
     struct DEPRECATED_CellDescription_3_3
     {
         uint64_t id = 0;
@@ -126,7 +190,7 @@ namespace
         bool tokenBlocked;
         int tokenBranchNumber;
         CellMetadata metadata;
-        CellFeatureDescription cellFeature;
+        DEPRECATED_CellFeatureDescription_3_3 cellFeature;
         std::vector<TokenDescription> tokens;
         int cellFunctionInvocations;
         bool barrier;
@@ -143,15 +207,17 @@ namespace
             result.tokenBlocked = tokenBlocked;
             result.tokenBranchNumber = tokenBranchNumber;
             result.metadata = metadata;
-            result.cellFeature = cellFeature;
+            result.cellFeature.setType(cellFeature.type);
+            result.cellFeature.staticData = convertStaticData(cellFeature.staticData, result.cellFeature.getType());
+            result.cellFeature.mutableData = convertMutableData(cellFeature.mutableData);
+            if (result.cellFeature.getType() == Enums::CellFunction_NeuralNet) {
+                result.cellFeature.setType(Enums::CellFunction_Computation);
+                result.cellFeature.staticData[0] = 0;
+            }
             result.tokens = tokens;
             result.cellFunctionInvocations = cellFunctionInvocations;
             result.barrier = barrier;
             result.age = 0;
-            if (result.cellFeature.getType() == Enums::CellFunction_Computation) {
-                auto numInstructions = (result.cellFeature.constData.size() / 3);
-                result.cellFeature.constData = std::string(1, static_cast<char>(numInstructions)) + result.cellFeature.constData;
-            }
             return result;
         }
     };
@@ -192,6 +258,12 @@ namespace
 namespace cereal
 {
     template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellFeatureDescription_3_3& data)
+    {
+        ar(data.type, data.mutableData, data.staticData);
+    }
+
+    template <class Archive>
     inline void serialize(Archive& ar, DEPRECATED_CellDescription_3_3& data)
     {
         ar(data.id,
@@ -225,6 +297,13 @@ namespace cereal
 /************************************************************************/
 namespace
 {
+    struct DEPRECATED_CellFeatureDescription_3_2
+    {
+        std::string mutableData;
+        std::string staticData;
+        Enums::CellFunction type;
+    };
+
     struct DEPRECATED_CellDescription_3_2
     {
         uint64_t id = 0;
@@ -237,7 +316,7 @@ namespace
         bool tokenBlocked;
         int tokenBranchNumber;
         CellMetadata metadata;
-        CellFeatureDescription cellFeature;
+        DEPRECATED_CellFeatureDescription_3_2 cellFeature;
         std::vector<TokenDescription> tokens;
         int cellFunctionInvocations;
         bool barrier;
@@ -254,15 +333,17 @@ namespace
             result.tokenBlocked = tokenBlocked;
             result.tokenBranchNumber = tokenBranchNumber;
             result.metadata = metadata;
-            result.cellFeature = cellFeature;
+            result.cellFeature.setType(cellFeature.type);
+            result.cellFeature.staticData = convertStaticData(cellFeature.staticData, result.cellFeature.getType());
+            result.cellFeature.mutableData = convertMutableData(cellFeature.mutableData);
+            if (result.cellFeature.getType() == Enums::CellFunction_NeuralNet) {
+                result.cellFeature.setType(Enums::CellFunction_Computation);
+                result.cellFeature.staticData[0] = 0;
+            }
             result.tokens = tokens;
             result.cellFunctionInvocations = cellFunctionInvocations;
             result.barrier = barrier;
             result.age = 0;
-            if (result.cellFeature.getType() == Enums::CellFunction_Computation) {
-                auto numInstructions = (result.cellFeature.constData.size() / 3);
-                result.cellFeature.constData = std::string(1, static_cast<char>(numInstructions)) + result.cellFeature.constData;
-            }
             return result;
         }
     };
@@ -303,6 +384,12 @@ namespace
 namespace cereal
 {
     template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellFeatureDescription_3_2& data)
+    {
+        ar(data.type, data.mutableData, data.staticData);
+    }
+
+    template <class Archive>
     inline void serialize(Archive& ar, DEPRECATED_CellDescription_3_2& data)
     {
         ar(data.id,
@@ -336,6 +423,13 @@ namespace cereal
 /************************************************************************/
 namespace
 {
+    struct DEPRECATED_CellFeatureDescription
+    {
+        std::string mutableData;
+        std::string staticData;
+        Enums::CellFunction type;
+    };
+
     struct DEPRECATED_CellDescription
     {
         uint64_t id = 0;
@@ -348,7 +442,7 @@ namespace
         bool tokenBlocked;
         int tokenBranchNumber;
         CellMetadata metadata;
-        CellFeatureDescription cellFeature;
+        DEPRECATED_CellFeatureDescription cellFeature;
         std::vector<TokenDescription> tokens;
         int tokenUsages;
 
@@ -364,7 +458,13 @@ namespace
             result.tokenBlocked = tokenBlocked;
             result.tokenBranchNumber = tokenBranchNumber;
             result.metadata = metadata;
-            result.cellFeature = cellFeature;
+            result.cellFeature.setType(cellFeature.type);
+            result.cellFeature.staticData = convertStaticData(cellFeature.staticData, result.cellFeature.getType());
+            result.cellFeature.mutableData = convertMutableData(cellFeature.mutableData);
+            if (result.cellFeature.getType() == Enums::CellFunction_NeuralNet) {
+                result.cellFeature.setType(Enums::CellFunction_Computation);
+                result.cellFeature.staticData[0] = 0;
+            }
             result.tokens = tokens;
             result.cellFunctionInvocations = tokenUsages;
             result.barrier = false;
@@ -407,6 +507,12 @@ namespace
 
 namespace cereal
 {
+    template <class Archive>
+    inline void serialize(Archive& ar, DEPRECATED_CellFeatureDescription& data)
+    {
+        ar(data.type, data.mutableData, data.staticData);
+    }
+
     template <class Archive>
     inline void serialize(Archive& ar, DEPRECATED_CellDescription& data)
     {
