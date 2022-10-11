@@ -179,11 +179,6 @@ void _InspectorWindow::processCell(CellDescription cell)
         ImGui::EndTabBar();
 
         if (hasChanges(cell, origCell)) {
-/*
-            if (cell.cellFeature != origCell.cellFeature) {
-                cell.metadata.computerSourcecode.clear();
-            }
-*/
             _simController->changeCell(cell);
         }
     }
@@ -291,7 +286,11 @@ void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
             AlienImGui::Group("Instruction section");
             ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
 
+            auto origStaticData = cell.cellFeature.staticData;
             _cellDataMemoryEdit->DrawContents(cell.cellFeature.staticData.data(), sizeof(cell.cellFeature.staticData));
+            if (origStaticData != cell.cellFeature.staticData) {
+                cell.metadata.computerSourcecode.clear();
+            }
 
             ImGui::PopFont();
         }
