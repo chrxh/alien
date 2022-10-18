@@ -9,7 +9,7 @@
 class CellConnectionProcessor
 {
 public:
-    __inline__ __device__ static void scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens);
+    __inline__ __device__ static void scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
     __inline__ __device__ static void scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex);
@@ -30,7 +30,7 @@ public:
     __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
 private:
-    __inline__ __device__ static void addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens);
+    __inline__ __device__ static void addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static void addConnectionIntern(
         SimulationData& data,
         Cell* cell1,
@@ -50,13 +50,12 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 __inline__ __device__ void
-CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens)
+CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::AddConnections;
     operation.data.addConnectionOperation.cell = cell1;
     operation.data.addConnectionOperation.otherCell = cell2;
-    operation.data.addConnectionOperation.addTokens = addTokens;
     data.structuralOperations.tryAddEntry(operation);
 }
 
@@ -122,8 +121,7 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
             addConnectionsIntern(
                 data,
                 operation.data.addConnectionOperation.cell,
-                operation.data.addConnectionOperation.otherCell,
-                operation.data.addConnectionOperation.addTokens);
+                operation.data.addConnectionOperation.otherCell);
         }
     }
 }
@@ -163,7 +161,7 @@ CellConnectionProcessor::delConnections(Cell* cell1, Cell* cell2)
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens)
+CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
@@ -189,25 +187,6 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
             addConnectionIntern(data, cell1, cell2, posDelta, 1, 0, 6);
             addConnectionIntern(data, cell2, cell1, posDelta * (-1), 1, 0, 6);
 */
-
-            if (addTokens) {
-                EntityFactory factory;
-                factory.init(&data);
-
-                auto cellMinEnergy =
-                    SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell1->absPos);
-                auto newTokenEnergy = cudaSimulationParameters.tokenMinEnergy * 1.5f;
-                if (cell1->energy > cellMinEnergy + newTokenEnergy) {
-                    auto token = factory.createToken(cell1, cell2);
-                    token->energy = newTokenEnergy;
-                    cell1->energy -= newTokenEnergy;
-                }
-                if (cell2->energy > cellMinEnergy + newTokenEnergy) {
-                    auto token = factory.createToken(cell2, cell1);
-                    token->energy = newTokenEnergy;
-                    cell2->energy -= newTokenEnergy;
-                }
-            }
         }
 
         lock.releaseLock();
@@ -369,10 +348,10 @@ __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data
         if (0 == cell->numConnections && cell->energy != 0 /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
             EntityFactory factory;
             factory.init(&data);
-            factory.createParticle(cell->energy, cell->absPos, cell->vel, {cell->metadata.color});
+            factory.createParticle(cell->energy, cell->absPos, cell->vel, cell->color);
             cell->setDeleted();
 
-            data.entities.cellPointers.at(cellIndex) = nullptr;
+            data.objects.cellPointers.at(cellIndex) = nullptr;
         }
 
         cell->releaseLock();

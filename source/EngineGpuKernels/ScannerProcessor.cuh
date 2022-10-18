@@ -94,10 +94,10 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
     int cellEnergy = min(static_cast<int>(floorf(lookupResult.prevCell->energy)), 255);
     tokenMem[Enums::Scanner_OutEnergy] = cellEnergy;
     tokenMem[Enums::Scanner_OutCellMaxConnections] = lookupResult.prevCell->maxConnections;
-    tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->branchNumber;
+    tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->executionOrderNumber;
     tokenMem[Enums::Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
     tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
-    if (lookupResult.prevCell->getCellFunctionType() != Enums::CellFunction_NeuralNet) {
+    if (lookupResult.prevCell->getCellFunctionType() != Enums::CellFunction_Neurons) {
 
         //encoding to support older versions
         auto len = min(48 - 1, static_cast<unsigned char>(lookupResult.prevCell->staticData[0]) * 3);

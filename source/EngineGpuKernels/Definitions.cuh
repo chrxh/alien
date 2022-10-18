@@ -5,7 +5,7 @@
 struct Cell;
 struct Token;
 struct Particle;
-struct Entities;
+struct Objects;
 
 struct SimulationData;
 struct RenderingData;
@@ -61,5 +61,4 @@ struct ArraySizes
 {
     int cellArraySize;
     int particleArraySize;
-    int tokenArraySize;
 };

@@ -11,7 +11,7 @@ struct OverlayElementDescription
     bool cell;  //false = energy particle
     Enums::CellFunction cellType;
     RealVector2D pos;
-    int branchNumber;
+    int executionOrderNumber;
     int selected;
 };
 

@@ -8,7 +8,6 @@
 #include "Particle.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
-#include "Token.cuh"
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
@@ -19,17 +18,13 @@ public:
     __inline__ __device__ Particle* createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds);
     __inline__ __device__ Cell* createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO, bool createIds);
     __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
-    __inline__ __device__ Token* createTokenFromTO(TokenAccessTO const& tokenTO, Cell* cellArray);
     __inline__ __device__ void changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle);
-    __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, ParticleMetadata const& metadata);
+    __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
     __inline__ __device__ Cell* createCell();
-    __inline__ __device__ Token* duplicateToken(Cell* targetCell, Token* sourceToken);
-    __inline__ __device__ Token* createToken(Cell* cell, Cell* sourceCell);
 
 private:
-    __inline__ __device__ void
-    copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes);
+    __inline__ __device__ void copyBytes(int& targetLen, char*& targetString, int sourceLen, uint64_t sourceStringIndex, char* stringBytes);
 
     BaseMap _map;
     SimulationData* _data;
@@ -47,8 +42,8 @@ __inline__ __device__ void EntityFactory::init(SimulationData* data)
 
 __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds)
 {
-    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
-    Particle* particle = _data->entities.particles.getNewElement();
+    Particle** particlePointer = _data->objects.particlePointers.getNewElement();
+    Particle* particle = _data->objects.particles.getNewElement();
     *particlePointer = particle;
     
     particle->id = createIds ? _data->numberGen1.createNewId_kernel() : particleTO.id;
@@ -58,14 +53,14 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
     particle->energy = particleTO.energy;
     particle->locked = 0;
     particle->selected = 0;
-    particle->metadata.color = particleTO.metadata.color;
+    particle->color = particleTO.metadata.color;
     return particle;
 }
 
 __inline__ __device__ Cell*
 EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO, bool createIds)
 {
-    Cell** cellPointer = _data->entities.cellPointers.getNewElement();
+    Cell** cellPointer = _data->objects.cellPointers.getNewElement();
     Cell* cell = cellTargetArray + targetIndex;
     *cellPointer = cell;
 
@@ -73,8 +68,8 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->absPos = cellTO.pos;
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
-    cell->branchNumber = cellTO.branchNumber;
-    cell->tokenBlocked = cellTO.tokenBlocked;
+    cell->executionOrderNumber = cellTO.executionOrderNumber;
+    cell->cellFunctionBlocked = cellTO.cellFunctionBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->numConnections = cellTO.numConnections;
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -84,33 +79,26 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
     cell->energy = cellTO.energy;
-    cell->cellFunctionType = cellTO.cellFunctionType;
-    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-        cell->staticData[i] = cellTO.staticData[i];
-    }
-    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-        cell->mutableData[i] = cellTO.mutableData[i];
-    }
-    cell->cellFunctionInvocations = cellTO.cellFunctionInvocations;
-    cell->metadata.color = cellTO.metadata.color;
+    cell->cellFunction = cellTO.cellFunction;
+    cell->color = cellTO.color;
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
 
-    copyString(
+    copyBytes(
         cell->metadata.nameLen,
         cell->metadata.name,
         cellTO.metadata.nameLen,
         cellTO.metadata.nameStringIndex,
         simulationTO->stringBytes);
 
-    copyString(
+    copyBytes(
         cell->metadata.descriptionLen,
         cell->metadata.description,
         cellTO.metadata.descriptionLen,
         cellTO.metadata.descriptionStringIndex,
         simulationTO->stringBytes);
 
-    copyString(
+    copyBytes(
         cell->metadata.sourceCodeLen,
         cell->metadata.sourceCode,
         cellTO.metadata.sourceCodeLen,
@@ -131,37 +119,30 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     cell->absPos = cellTO.pos;
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
-    cell->branchNumber = cellTO.branchNumber;
-    cell->tokenBlocked = cellTO.tokenBlocked;
+    cell->executionOrderNumber = cellTO.executionOrderNumber;
+    cell->cellFunctionBlocked = cellTO.cellFunctionBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
-    cell->cellFunctionType = cellTO.cellFunctionType;
+    cell->cellFunction = cellTO.cellFunction;
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
+    cell->color = cellTO.color;
 
-    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-        cell->staticData[i] = cellTO.staticData[i];
-    }
-    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-        cell->mutableData[i] = cellTO.mutableData[i];
-    }
-    cell->metadata.color = cellTO.metadata.color;
-
-    copyString(
+    copyBytes(
         cell->metadata.nameLen,
         cell->metadata.name,
         cellTO.metadata.nameLen,
         cellTO.metadata.nameStringIndex,
         dataTO.stringBytes);
 
-    copyString(
+    copyBytes(
         cell->metadata.descriptionLen,
         cell->metadata.description,
         cellTO.metadata.descriptionLen,
         cellTO.metadata.descriptionStringIndex,
         dataTO.stringBytes);
 
-    copyString(
+    copyBytes(
         cell->metadata.sourceCodeLen,
         cell->metadata.sourceCode,
         cellTO.metadata.sourceCodeLen,
@@ -169,34 +150,18 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
         dataTO.stringBytes);
 }
 
-__inline__ __device__ Token* EntityFactory::createTokenFromTO(TokenAccessTO const& tokenTO, Cell* cellArray)
-{
-    Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
-    Token* token = _data->entities.tokens.getNewElement();
-    *tokenPointer = token;
-
-    token->energy = tokenTO.energy;
-    for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
-        token->memory[i] = tokenTO.memory[i];
-    }
-    token->cell = cellArray + tokenTO.cellIndex;
-    token->sourceCell = token->cell;
-    return token;
-}
-
 __inline__ __device__ void EntityFactory::changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle)
 {
     particle->energy = particleTO.energy;
     particle->absPos = particleTO.pos;
-    particle->metadata.color = particleTO.metadata.color;
+    particle->color = particleTO.metadata.color;
 }
 
-__inline__ __device__ void
-EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, int sourceStringIndex, char* stringBytes)
+__inline__ __device__ void EntityFactory::copyBytes(int& targetLen, char*& targetString, int sourceLen, uint64_t sourceStringIndex, char* stringBytes)
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
-        targetString = _data->entities.stringBytes.getArray<char>(sourceLen);
+        targetString = _data->objects.stringBytes.getArray<char>(sourceLen);
         for (int i = 0; i < sourceLen; ++i) {
             targetString[i] = stringBytes[sourceStringIndex + i];
         }
@@ -204,10 +169,10 @@ EntityFactory::copyString(int& targetLen, char*& targetString, int sourceLen, in
 }
 
 __inline__ __device__ Particle*
-EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, ParticleMetadata const& metadata)
+EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
 {
-    Particle** particlePointer = _data->entities.particlePointers.getNewElement();
-    Particle* particle = _data->entities.particles.getNewElement();
+    Particle** particlePointer = _data->objects.particlePointers.getNewElement();
+    Particle* particle = _data->objects.particles.getNewElement();
     *particlePointer = particle;
     particle->id = _data->numberGen1.createNewId_kernel();
     particle->selected = 0;
@@ -215,14 +180,14 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     particle->energy = energy;
     particle->absPos = pos;
     particle->vel = vel;
-    particle->metadata = metadata;
+    particle->color = color;
     return particle;
 }
 
 __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto cell = _data->entities.cells.getNewElement();
-    auto cellPointers = _data->entities.cellPointers.getNewElement();
+    auto cell = _data->objects.cells.getNewElement();
+    auto cellPointers = _data->objects.cellPointers.getNewElement();
     *cellPointers = cell;
 
     cell->id = _data->numberGen1.createNewId_kernel();
@@ -230,73 +195,37 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->vel = vel;
     cell->energy = energy;
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    cell->branchNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
+    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
     cell->numConnections = 0;
-    cell->tokenBlocked = false;
+    cell->cellFunctionBlocked = false;
     cell->locked = 0;
     cell->selected = 0;
     cell->temp3 = {0, 0};
-    cell->metadata.color = 0;
+    cell->color = 0;
     cell->metadata.nameLen = 0;
     cell->metadata.descriptionLen = 0;
     cell->metadata.sourceCodeLen = 0;
     cell->barrier = false;
     cell->age = 0;
 
-    cell->cellFunctionType = _data->numberGen1.random(Enums::CellFunction_Count - 1);
-    for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-        cell->staticData[i] = _data->numberGen1.random(255);
-    }
-    for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-        cell->mutableData[i] = _data->numberGen1.random(255);
-    }
-    cell->cellFunctionInvocations = 0;
+    cell->cellFunction = _data->numberGen1.random(Enums::CellFunction_Count - 1);
     return cell;
 }
 
 __inline__ __device__ Cell* EntityFactory::createCell()
 {
-    auto result = _data->entities.cells.getNewElement();
-    auto cellPointer = _data->entities.cellPointers.getNewElement();
+    auto result = _data->objects.cells.getNewElement();
+    auto cellPointer = _data->objects.cellPointers.getNewElement();
     *cellPointer = result;
-    result->cellFunctionInvocations = 0;
     result->id = _data->numberGen1.createNewId_kernel();
     result->selected = 0;
     result->locked = 0;
     result->temp3 = {0, 0};
-    result->metadata.color = 0;
+    result->color = 0;
     result->metadata.nameLen = 0;
     result->metadata.descriptionLen = 0;
     result->metadata.sourceCodeLen = 0;
     result->barrier = 0;
     result->age = 0;
     return result;
-}
-
-__inline__ __device__ Token* EntityFactory::duplicateToken(Cell* targetCell, Token* sourceToken)
-{
-    Token* token = _data->entities.tokens.getNewElement();
-    Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
-    *tokenPointer = token;
-
-    *token = *sourceToken;
-    token->memory[0] = targetCell->branchNumber;
-    token->sourceCell = token->cell;
-    token->cell = targetCell;
-    return token;
-}
-
-__inline__ __device__ Token* EntityFactory::createToken(Cell* cell, Cell* sourceCell)
-{
-    Token* token = _data->entities.tokens.getNewSubarray(1);
-    Token** tokenPointer = _data->entities.tokenPointers.getNewElement();
-    *tokenPointer = token;
-
-    token->cell = cell;
-    token->sourceCell = sourceCell;
-    token->memory[0] = cell->branchNumber;
-    for (int i = 1; i < MAX_TOKEN_MEM_SIZE; ++i) {
-        token->memory[i] = 0;
-    }
-    return token;
 }

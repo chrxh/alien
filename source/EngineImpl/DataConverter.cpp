@@ -40,33 +40,6 @@ ClusteredDataDescription DataConverter::convertAccessTOtoClusteredDataDescriptio
     }
     result.addClusters(clusters);
 
-    //tokens
-    for (int i = 0; i < *dataTO.numTokens; ++i) {
-        TokenAccessTO const& token = dataTO.tokens[i];
-
-        std::string data(_parameters.tokenMemorySize, 0);
-        for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
-            data[i] = token.memory[i];
-        }
-        auto clusterDescIndex = cellTOIndexToClusterDescIndex.at(token.cellIndex);
-        auto cellDescIndex = cellTOIndexToCellDescIndex.at(token.cellIndex);
-        CellDescription& cell = result.clusters.at(clusterDescIndex).cells.at(cellDescIndex);
-        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data).setSequenceNumber(token.sequenceNumber));
-    }
-    //sort tokens by sequence number
-    if (sortTokens == SortTokens::Yes) {
-        for (auto& cluster : result.clusters) {
-            for (auto& cell : cluster.cells) {
-                std::sort(
-                    cell.tokens.begin(),
-                    cell.tokens.end(),
-                    [](TokenDescription const& left, TokenDescription const& right) {
-                        return left.sequenceNumber < right.sequenceNumber;
-                    });
-            }
-        }
-    }
-
     //particles
     std::vector<ParticleDescription> particles;
     for (int i = 0; i < *dataTO.numParticles; ++i) {
@@ -94,27 +67,6 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataAccessTO con
     }
     result.addCells(cells);
 
-    //tokens
-    for (int i = 0; i < *dataTO.numTokens; ++i) {
-        TokenAccessTO const& token = dataTO.tokens[i];
-
-        std::string data(_parameters.tokenMemorySize, 0);
-        for (int i = 0; i < _parameters.tokenMemorySize; ++i) {
-            data[i] = token.memory[i];
-        }
-        auto cellDescIndex = token.cellIndex;
-        CellDescription& cell = result.cells.at(cellDescIndex);
-        cell.addToken(TokenDescription().setEnergy(token.energy).setData(data).setSequenceNumber(token.sequenceNumber));
-    }
-    //sort tokens by sequence number
-    if (sortTokens == SortTokens::Yes) {
-        for (auto& cell: result.cells) {
-            std::sort(cell.tokens.begin(), cell.tokens.end(), [](TokenDescription const& left, TokenDescription const& right) {
-                return left.sequenceNumber < right.sequenceNumber;
-            });
-        }
-    }
-
     //particles
     std::vector<ParticleDescription> particles;
     for (int i = 0; i < *dataTO.numParticles; ++i) {
@@ -141,9 +93,9 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataAccess
         element.id = cellTO.id;
         element.cell = true;
         element.pos = {cellTO.pos.x, cellTO.pos.y};
-        element.cellType = static_cast<Enums::CellFunction>(static_cast<unsigned int>(cellTO.cellFunctionType) % Enums::CellFunction_Count);
+        element.cellType = static_cast<Enums::CellFunction>(static_cast<unsigned int>(cellTO.cellFunction) % Enums::CellFunction_Count);
         element.selected = cellTO.selected;
-        element.branchNumber = cellTO.branchNumber;
+        element.executionOrderNumber = cellTO.executionOrderNumber;
         result.elements.emplace_back(element);
     }
 
@@ -307,13 +259,14 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
         connections.emplace_back(connection);
     }
     result.connections = connections;
-    result.tokenBlocked = cellTO.tokenBlocked;
-    result.tokenBranchNumber = cellTO.branchNumber;
+    result.cellFunctionBlocked = cellTO.cellFunctionBlocked;
+    result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
+    result.color = cellTO.color;
 
     auto const& metadataTO = cellTO.metadata;
-    auto metadata = CellMetadata().setColor(metadataTO.color);
+    auto metadata = CellMetadata();
     if (metadataTO.nameLen > 0) {
         auto const name = std::string(&dataTO.stringBytes[metadataTO.nameStringIndex], metadataTO.nameLen);
         metadata.setName(name);
@@ -330,12 +283,7 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
     }
     result.metadata = metadata;
 
-    auto feature = CellFeatureDescription()
-                       .setType(static_cast<Enums::CellFunction>(cellTO.cellFunctionType))
-                       .setStaticData(cellTO.staticData)
-                       .setMutableData(cellTO.mutableData);
-    result.cellFeature = feature;
-    result.cellFunctionInvocations = cellTO.cellFunctionInvocations;
+    result.cellFunction = cellTO.cellFunction;
 
     return result;
 }
@@ -373,18 +321,14 @@ void DataConverter::addCell(
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
     cellTO.energy = toFloat(cellDesc.energy);
 	cellTO.maxConnections = cellDesc.maxConnections;
-    cellTO.branchNumber = cellDesc.tokenBranchNumber;
-    cellTO.tokenBlocked = cellDesc.tokenBlocked;
-    cellTO.cellFunctionInvocations = cellDesc.cellFunctionInvocations;
-    auto const& cellFunction = cellDesc.cellFeature;
-    cellTO.cellFunctionType = cellFunction.getType();
-    memcpy(cellTO.staticData, cellFunction.staticData.data(), MAX_CELL_STATIC_BYTES);
-    memcpy(cellTO.mutableData, cellFunction.mutableData.data(), MAX_CELL_MUTABLE_BYTES);
+    cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
+    cellTO.cellFunctionBlocked = cellDesc.cellFunctionBlocked;
+    cellTO.cellFunction = cellDesc.cellFunction;
 	cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
+    cellTO.color = cellDesc.color;
     auto& metadataTO = cellTO.metadata;
-    metadataTO.color = cellDesc.metadata.color;
     metadataTO.nameLen = toInt(cellDesc.metadata.name.size());
     if (metadataTO.nameLen > 0) {
         metadataTO.nameStringIndex = convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.name);
@@ -397,15 +341,6 @@ void DataConverter::addCell(
     if (metadataTO.sourceCodeLen > 0) {
         metadataTO.sourceCodeStringIndex =
             convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.computerSourcecode);
-    }
-
-    for (int i = 0; i < cellDesc.tokens.size(); ++i) {
-        TokenDescription const& tokenDesc = cellDesc.tokens.at(i);
-        int tokenIndex = (*dataTO.numTokens)++;
-        TokenAccessTO& tokenTO = dataTO.tokens[tokenIndex];
-        tokenTO.energy = toFloat(tokenDesc.energy);
-        tokenTO.cellIndex = cellIndex;
-        convertToArray(tokenDesc.data, tokenTO.memory, _parameters.tokenMemorySize);
     }
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }

@@ -57,7 +57,6 @@ void _AutosaveController::onSave()
     DeserializedSimulation sim;
     sim.timestep = _simController->getCurrentTimestep();
     sim.settings = _simController->getSettings();
-    sim.symbolMap = _simController->getSymbolMap();
     sim.content = _simController->getClusteredSimulationData();
     Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }

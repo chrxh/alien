@@ -33,15 +33,15 @@ private:
     {
         int maxConnections;
         int numConnections;
-        bool tokenBlocked;
-        int tokenBranchNumber;
+        bool cellFunctionBlocked;
+        int executionOrderNumber;
         int color;
         CellFeatureAnalysisDescription feature;
 
         bool operator==(CellAnalysisDescription const& other) const
         {
-            return maxConnections == other.maxConnections && numConnections == other.numConnections && tokenBlocked == other.tokenBlocked
-                && tokenBranchNumber == other.tokenBranchNumber && feature == other.feature
+            return maxConnections == other.maxConnections && numConnections == other.numConnections && cellFunctionBlocked == other.cellFunctionBlocked
+                && executionOrderNumber == other.executionOrderNumber && feature == other.feature
                 /*&& color == other.color*/;
         }
 
@@ -55,11 +55,11 @@ private:
             if (numConnections != other.numConnections) {
                 return numConnections < other.numConnections;
             }
-            if (tokenBlocked != other.tokenBlocked) {
-                return tokenBlocked < other.tokenBlocked;
+            if (cellFunctionBlocked != other.cellFunctionBlocked) {
+                return cellFunctionBlocked < other.cellFunctionBlocked;
             }
-            if (tokenBranchNumber != other.tokenBranchNumber) {
-                return tokenBranchNumber < other.tokenBranchNumber;
+            if (executionOrderNumber != other.executionOrderNumber) {
+                return executionOrderNumber < other.executionOrderNumber;
             }
             if (feature != other.feature) {
                 return feature < other.feature;
@@ -74,14 +74,10 @@ private:
     };
     struct ClusterAnalysisDescription
     {
-        bool hasToken;
         std::set<std::set<CellAnalysisDescription>> connectedCells;
 
         bool operator<(ClusterAnalysisDescription const& other) const
         {
-            if (hasToken != other.hasToken) {
-                return hasToken < other.hasToken;
-            }
             if (connectedCells != other.connectedCells) {
                 return connectedCells < other.connectedCells;
             }

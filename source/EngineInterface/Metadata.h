@@ -21,7 +21,6 @@ struct CellMetadata
 
 	CellMetadata& setName(std::string const& value) { name = value; return *this; }
     CellMetadata& setDescription(std::string const& value) { description = value; return *this; }
-    CellMetadata& setColor(uint8_t value) { color = value; return *this; }
     CellMetadata& setSourceCode(std::string const& value) { computerSourcecode = value; return *this; }
 };
 

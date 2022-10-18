@@ -63,7 +63,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
     int sum = 0;
     std::vector<PartitionClassData> partitionData;
     for (auto const& [analysisDesc, partitionClassData] : partitionClassDataByDescription) {
-        if (partitionClassData.numberOfElements > 1 && analysisDesc.hasToken) {
+        if (partitionClassData.numberOfElements > 1) {
             partitionData.emplace_back(partitionClassData);
         }
     }
@@ -116,20 +116,18 @@ auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalys
 auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cluster) const -> ClusterAnalysisDescription
 {
     ClusterAnalysisDescription result;
-    result.hasToken = false;
-
     std::map<uint64_t, CellAnalysisDescription> cellAnalysisDescById;
     auto insertCellAnalysisDescription = [&cellAnalysisDescById](CellDescription const& cell) {
         if (cellAnalysisDescById.find(cell.id) == cellAnalysisDescById.end()) {
             CellAnalysisDescription result;
             result.maxConnections = cell.maxConnections;
             result.numConnections = cell.connections.size();
-            result.tokenBlocked = cell.tokenBlocked;
-            result.tokenBranchNumber = cell.tokenBranchNumber;
+            result.cellFunctionBlocked = cell.cellFunctionBlocked;
+            result.executionOrderNumber = cell.executionOrderNumber;
             //            result.color = cell.metadata.color;
 
             CellFeatureAnalysisDescription featureAnalysisData;
-            featureAnalysisData.cellFunction = cell.cellFeature.getType();
+            featureAnalysisData.cellFunction = cell.cellFunction;
             result.feature = featureAnalysisData;
 
             cellAnalysisDescById.insert_or_assign(cell.id, result);
@@ -147,9 +145,6 @@ auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cl
             auto connectingCellId = connection.cellId;
             insertCellAnalysisDescription(cluster.cells.at(cellDescIndexById.at(connectingCellId)));
             result.connectedCells.insert(std::set<CellAnalysisDescription>{cellAnalysisDescById.at(cell.id), cellAnalysisDescById.at(connectingCellId)});
-        }
-        if (cell.tokens.size() > 0) {
-            result.hasToken = true;
         }
     }
     return result;

@@ -9,8 +9,6 @@
 
 struct CellMetadata
 {
-    unsigned char color;
-
     int nameLen;
     char* name;
 
@@ -28,25 +26,81 @@ struct CellConnection
     float angleFromPrevious;
 };
 
+struct Activity
+{
+    bool changes;
+    float channels[8];
+};
+
+struct NeuralNetFunction
+{
+    struct NeurolNetState
+    {
+        float weights[8 * 8];
+        float bias[8];
+    };
+
+    NeurolNetState* neurolNetState;
+};
+struct TransmitterFunction
+{
+};
+struct ConstructorFunction
+{
+    Enums::ConstructorMode mode;
+    int constructionDataLen;
+    unsigned char* constructionData;
+};
+struct SensorFunction
+{
+    Enums::SensorMode mode;
+    unsigned char color;
+};
+struct NerveFunction
+{
+};
+struct DigestionFunction
+{
+};
+struct InjectorFunction
+{
+    int constructionDataLen;
+    unsigned char* constructionData;
+};
+
+union CellFunctionData
+{
+    NeuralNetFunction neuralNetFunction;
+    TransmitterFunction transmitterFunction;
+    ConstructorFunction constructorFunction;
+    SensorFunction sensorFunction;
+    NerveFunction nerveFunction;
+    DigestionFunction digestionFunction;
+    InjectorFunction injectorFunction;
+};
+
 struct Cell
 {
     uint64_t id;
+    CellConnection connections[MAX_CELL_BONDS];
+
     float2 absPos;
     float2 vel;
-
-    int branchNumber;
-    bool tokenBlocked;
+    int executionOrderNumber;
     int maxConnections;
     int numConnections;
-    CellConnection connections[MAX_CELL_BONDS];
-    char staticData[MAX_CELL_STATIC_BYTES];
-    char mutableData[MAX_CELL_MUTABLE_BYTES];
-    int cellFunctionInvocations;
-    CellMetadata metadata;
     float energy;
-    int cellFunctionType;
+    int color;
     bool barrier;
     int age;
+
+    bool cellFunctionBlocked;
+    bool inputBlocked;
+    Enums::CellFunction cellFunction;
+    CellFunctionData cellFunctionData;
+    Activity activity;
+
+    CellMetadata metadata;
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = cluster selected
@@ -94,11 +148,7 @@ struct Cell
         atomicExch(&locked, 0);
     }
 
-    __inline__ __device__ Enums::CellFunction getCellFunctionType() const
-    {
-        return calcMod(cellFunctionType, Enums::CellFunction_Count);
-    }
-
+    __inline__ __device__ Enums::CellFunction getCellFunctionType() const { return calcMod(cellFunction, Enums::CellFunction_Count); }
 };
 
 template<>

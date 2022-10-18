@@ -22,7 +22,7 @@ private:
 
 __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -39,7 +39,7 @@ __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& dat
 
 __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -67,7 +67,7 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
 
 __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -84,7 +84,7 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -111,7 +111,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -139,7 +139,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
 
 __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {

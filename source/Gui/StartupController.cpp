@@ -47,9 +47,10 @@ void _StartupController::process()
             MessageDialog::getInstance().show("Error", "The default simulation file could not be read. An empty simulation will be created.");
             deserializedData.settings.generalSettings.worldSizeX = 1000;
             deserializedData.settings.generalSettings.worldSizeY = 500;
+            deserializedData.timestep = 0;
         }
 
-        _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
+        _simController->newSimulation(deserializedData.timestep, deserializedData.settings);
         _simController->setClusteredSimulationData(deserializedData.content);
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,

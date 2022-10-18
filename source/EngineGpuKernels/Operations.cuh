@@ -54,13 +54,3 @@ struct StructuralOperation
     Type type;
     StructureOperationData data;
 };
-
-struct SensorOperation
-{
-    Token* token;
-};
-
-struct NeuralNetOperation
-{
-    Token* token;
-};

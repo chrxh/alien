@@ -48,8 +48,7 @@ void _OpenSimulationDialog::process()
             _simController->closeSimulation();
             _statisticsWindow->reset();
 
-            _simController->newSimulation(
-                deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
+            _simController->newSimulation(deserializedData.timestep, deserializedData.settings);
             _simController->setClusteredSimulationData(deserializedData.content);
             _viewport->setCenterInWorldPos(
                 {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,

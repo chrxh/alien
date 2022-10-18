@@ -75,8 +75,6 @@ PUBLIC
     OpenPatternDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
-    OpenSymbolsDialog.cpp
-    OpenSymbolsDialog.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
@@ -91,8 +89,6 @@ PUBLIC
     SavePatternDialog.h
     SaveSimulationDialog.cpp
     SaveSimulationDialog.h
-    SaveSymbolsDialog.cpp
-    SaveSymbolsDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
     Shader.cpp
@@ -121,8 +117,6 @@ PUBLIC
     StatisticsWindow.h
     StyleRepository.cpp
     StyleRepository.h
-    SymbolsWindow.cpp
-    SymbolsWindow.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
     UiController.cpp

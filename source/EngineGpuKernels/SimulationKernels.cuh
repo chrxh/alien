@@ -9,7 +9,6 @@
 #include "Map.cuh"
 #include "CellProcessor.cuh"
 #include "ParticleProcessor.cuh"
-#include "TokenProcessor.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "Operations.cuh"
 #include "DebugKernels.cuh"
@@ -22,15 +21,14 @@ __global__ void cudaNextTimestep_substep3(SimulationData data);
 __global__ void cudaNextTimestep_substep4(SimulationData data);
 __global__ void cudaNextTimestep_substep5(SimulationData data);
 __global__ void cudaNextTimestep_substep6(SimulationData data, SimulationResult result);
-__global__ void cudaNextTimestep_substep7(SimulationData data, SimulationResult result);
-__global__ void cudaNextTimestep_substep8(SimulationData data);
-__global__ void cudaNextTimestep_substep9(SimulationData data, SimulationResult result);
+__global__ void cudaNextTimestep_substep7(SimulationData data);
+__global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result);
+__global__ void cudaNextTimestep_substep9(SimulationData data);
 __global__ void cudaNextTimestep_substep10(SimulationData data);
 __global__ void cudaNextTimestep_substep11(SimulationData data);
 __global__ void cudaNextTimestep_substep12(SimulationData data);
 __global__ void cudaNextTimestep_substep13(SimulationData data);
 __global__ void cudaNextTimestep_substep14(SimulationData data);
-__global__ void cudaNextTimestep_substep15(SimulationData data);
 
 __global__ void cudaInitClusterData(SimulationData data);
 __global__ void cudaFindClusterIteration(SimulationData data);

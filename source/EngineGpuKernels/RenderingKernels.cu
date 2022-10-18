@@ -28,7 +28,7 @@ namespace
     __device__ __inline__ float3 calcColor(Cell* cell, int selected)
     {
         uint32_t cellColor;
-        switch (cell->metadata.color % 7) {
+        switch (calcMod(cell->color, 7)) {
         case 0: {
             cellColor = Const::IndividualCellColor1;
             break;
@@ -82,8 +82,6 @@ namespace
 
         return {intensity, 0, 0.08f};
     }
-
-    __device__ __inline__ float3 calcColor(bool selected) { return selected ? float3{0.75f, 0.75f, 0.75f} : float3{0.5f, 0.5f, 0.5f}; }
 
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
     {
@@ -207,6 +205,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             }
 
             //draw arrows
+/*
             if (zoom >= 15.0f) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
@@ -247,27 +246,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                     }
                 }
             }
-        }
-    }
-}
-
-__global__ void
-cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Token*> tokens, uint64_t* imageData, int2 imageSize, float zoom)
-{
-    BaseMap map;
-    map.init(universeSize);
-
-    auto partition = calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (auto tokenIndex = partition.startIndex; tokenIndex <= partition.endIndex; ++tokenIndex) {
-        auto const& token = tokens.at(tokenIndex);
-        auto const& cell = token->cell;
-
-        auto cellPos = cell->absPos;
-        map.correctPosition(cellPos);
-        auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-        if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
-            auto const color = calcColor(false);
-            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
+*/
         }
     }
 }
@@ -278,9 +257,9 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
     BaseMap map;
     map.init(universeSize);
 
-    auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto particlePos = particle->absPos;
         map.correctPosition(particlePos);

@@ -38,9 +38,9 @@ std::string SensorTests::runSensor(DataDescription& world, SensorParameters cons
     DataDescription sensorData = DescriptionHelper::createRect(
         DescriptionHelper::CreateRectParameters().width(2).height(1).center(parameters._center));
     auto& origFirstCell = sensorData.cells.at(0);
-    origFirstCell.tokenBranchNumber = 0;
+    origFirstCell.executionOrderNumber = 0;
     auto& origSecondCell = sensorData.cells.at(1);
-    origSecondCell.tokenBranchNumber = 1;
+    origSecondCell.executionOrderNumber = 1;
     origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction_Sensor);
     auto token = createSimpleToken();
     token.data[Enums::Sensor_Input] = parameters._command;

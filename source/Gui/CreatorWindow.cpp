@@ -159,8 +159,8 @@ void _CreatorWindow::onDrawing()
                         .setPos(pos)
                         .setEnergy(_energy)
                         .setMaxConnections(maxConnections)
-                        .setTokenBranchNumber(_lastBranchNumber)
-                        .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
+                        .setExecutionOrderNumber(_lastBranchNumber)
+                        .setColor(_editorModel->getDefaultColorCode());
         _drawing.addCell(cell);
         incBranchNumber();
     } else {
@@ -173,8 +173,8 @@ void _CreatorWindow::onDrawing()
                                 .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
                                 .setEnergy(_energy)
                                 .setMaxConnections(maxConnections)
-                                .setTokenBranchNumber(_lastBranchNumber)
-                                .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()));
+                                .setExecutionOrderNumber(_lastBranchNumber)
+                                .setColor(_editorModel->getDefaultColorCode());
                 _drawing.addCell(cell);
                 incBranchNumber();
             }
@@ -205,8 +205,8 @@ void _CreatorWindow::createCell()
                     .setPos(getRandomPos())
                     .setEnergy(_energy)
                     .setMaxConnections(_maxConnections)
-                    .setTokenBranchNumber(_lastBranchNumber)
-                    .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                    .setExecutionOrderNumber(_lastBranchNumber)
+                    .setColor(_editorModel->getDefaultColorCode())
                     .setBarrier(_barrier);
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
@@ -261,7 +261,7 @@ void _CreatorWindow::createHexagon()
                              .setEnergy(_energy)
                              .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(-j * incY)})
                              .setMaxConnections(maxConnections)
-                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                             .setColor(_editorModel->getDefaultColorCode())
                              .setBarrier(_barrier));
 
             //create cell: under layer (except for 0-layer)
@@ -271,7 +271,7 @@ void _CreatorWindow::createHexagon()
                                  .setEnergy(_energy)
                                  .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(j * incY)})
                                  .setMaxConnections(maxConnections)
-                                 .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                                 .setColor(_editorModel->getDefaultColorCode())
                                  .setBarrier(_barrier));
 
             }
@@ -314,7 +314,7 @@ void _CreatorWindow::createDisc()
                              .setEnergy(_energy)
                              .setPos(relPos)
                              .setMaxConnections(maxConnections)
-                             .setMetadata(CellMetadata().setColor(_editorModel->getDefaultColorCode()))
+                             .setColor(_editorModel->getDefaultColorCode())
                              .setBarrier(_barrier));
         }
     }

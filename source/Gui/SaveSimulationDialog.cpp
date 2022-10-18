@@ -36,7 +36,6 @@ void _SaveSimulationDialog::process()
         DeserializedSimulation sim;
         sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         sim.settings = _simController->getSettings();
-        sim.symbolMap = _simController->getSymbolMap();
         sim.content = _simController->getClusteredSimulationData();
 
         if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {

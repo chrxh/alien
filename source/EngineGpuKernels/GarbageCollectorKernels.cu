@@ -2,17 +2,15 @@
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
 {
-    data.entitiesForCleanup.particlePointers.reset();
-    data.entitiesForCleanup.cellPointers.reset();
-    data.entitiesForCleanup.tokenPointers.reset();
+    data.tempObjects.particlePointers.reset();
+    data.tempObjects.cellPointers.reset();
 }
 
 __global__ void cudaPrepareArraysForCleanup(SimulationData data)
 {
-    data.entitiesForCleanup.particles.reset();
-    data.entitiesForCleanup.cells.reset();
-    data.entitiesForCleanup.tokens.reset();
-    data.entitiesForCleanup.stringBytes.reset();
+    data.tempObjects.particles.reset();
+    data.tempObjects.cells.reset();
+    data.tempObjects.stringBytes.reset();
 }
 
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
@@ -38,7 +36,7 @@ __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cel
     }
 }
 
-__global__ void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells)
+__global__ void cudaCleanupCellsStep2(Array<Cell> cells)
 {
     {
         auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -51,38 +49,11 @@ __global__ void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> c
             }
         }
     }
-    {
-        auto partition = calcPartition(tokenPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (auto& token = tokenPointers.at(index)) {
-                token->cell = &cells.at(token->cell->tag);
-                token->sourceCell = &cells.at(token->sourceCell->tag);
-            }
-        }
-    }
-}
-
-__global__ void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken)
-{
-    auto partition = calcPartition(tokenPointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-    if (partition.numElements() > 0) {
-        Token* newEntities = newToken.getNewSubarray(partition.numElements());
-
-        int targetIndex = 0;
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& token = tokenPointers.at(index);
-            newEntities[targetIndex] = *token;
-            token = &newEntities[targetIndex];
-            ++targetIndex;
-        }
-    }
 }
 
 namespace
 {
-    __device__ void copyString(char*& string, int numBytes, RawMemory& stringBytes)
+    __device__ void copyBytes(char*& string, int numBytes, RawMemory& stringBytes)
     {
         if (numBytes > 0) {
             char* newString = stringBytes.getArray<char>(numBytes);
@@ -94,15 +65,15 @@ namespace
     }
 }
 
-__global__ void cudaCleanupStringBytes(Array<Cell*> cellPointers, RawMemory stringBytes)
+__global__ void cudaCleanupRawBytes(Array<Cell*> cellPointers, RawMemory stringBytes)
 {
     auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cellPointers.at(index);
-        copyString(cell->metadata.name, cell->metadata.nameLen, stringBytes);
-        copyString(cell->metadata.description, cell->metadata.descriptionLen, stringBytes);
-        copyString(cell->metadata.sourceCode, cell->metadata.sourceCodeLen, stringBytes);
+        copyBytes(cell->metadata.name, cell->metadata.nameLen, stringBytes);
+        copyBytes(cell->metadata.description, cell->metadata.descriptionLen, stringBytes);
+        copyBytes(cell->metadata.sourceCode, cell->metadata.sourceCodeLen, stringBytes);
     }
 }
 
@@ -118,17 +89,15 @@ __global__ void cudaCleanupParticleMap(SimulationData data)
 
 __global__ void cudaSwapPointerArrays(SimulationData data)
 {
-    data.entities.particlePointers.swapContent(data.entitiesForCleanup.particlePointers);
-    data.entities.cellPointers.swapContent(data.entitiesForCleanup.cellPointers);
-    data.entities.tokenPointers.swapContent(data.entitiesForCleanup.tokenPointers);
+    data.objects.particlePointers.swapContent(data.tempObjects.particlePointers);
+    data.objects.cellPointers.swapContent(data.tempObjects.cellPointers);
 }
 
 __global__ void cudaSwapArrays(SimulationData data)
 {
-    data.entities.cells.swapContent(data.entitiesForCleanup.cells);
-    data.entities.tokens.swapContent(data.entitiesForCleanup.tokens);
-    data.entities.particles.swapContent(data.entitiesForCleanup.particles);
-    data.entities.stringBytes.swapContent(data.entitiesForCleanup.stringBytes);
+    data.objects.cells.swapContent(data.tempObjects.cells);
+    data.objects.particles.swapContent(data.tempObjects.particles);
+    data.objects.stringBytes.swapContent(data.tempObjects.stringBytes);
 }
 
 
@@ -155,9 +124,8 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Pa
 
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
 {
-    if (data.entities.particles.getNumEntries() > data.entities.particles.getSize() * Const::ArrayFillLevelFactor
-        || data.entities.cells.getNumEntries() > data.entities.cells.getSize() * Const::ArrayFillLevelFactor
-        || data.entities.tokens.getNumEntries() > data.entities.tokens.getSize() * Const::ArrayFillLevelFactor) {
+    if (data.objects.particles.getNumEntries() > data.objects.particles.getSize() * Const::ArrayFillLevelFactor
+        || data.objects.cells.getNumEntries() > data.objects.cells.getSize() * Const::ArrayFillLevelFactor) {
         *result = true;
     } else {
         *result = false;

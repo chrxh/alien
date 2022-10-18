@@ -6,7 +6,6 @@ add_library(alien_engine_gpu_kernels_lib
     CellConnectionProcessor.cuh
     Cell.cuh
     CellComputationProcessor.cuh
-    CellFunctionData.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
     ConstantMemory.cu
@@ -31,8 +30,6 @@ add_library(alien_engine_gpu_kernels_lib
     EditKernelsLauncher.cu
     EditKernelsLauncher.cuh
     EnergyGuidance.cuh
-    Entities.cu
-    Entities.cuh
     EntityFactory.cuh
     FlowFieldKernels.cu
     FlowFieldKernels.cuh
@@ -53,10 +50,13 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernels.cuh
     MuscleProcessor.cuh
     NeuralNetProcessor.cuh
+    Objects.cu
+    Objects.cuh
     Operations.cuh
     Particle.cuh
     ParticleProcessor.cuh
     Physics.cuh
+    ProprocessedCellFunctionData.cuh
     QuantityConverter.cuh
     RawMemory.cuh
     RenderingData.cu
@@ -76,9 +76,7 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationKernelsLauncher.cuh
     SimulationResult.cuh
     SpotCalculator.cuh
-    Swap.cuh
-    Token.cuh
-    TokenProcessor.cuh)
+    Swap.cuh)
 
 target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)
 

@@ -5,14 +5,13 @@
 #include "Settings.h"
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationController.h"
-#include "SymbolMap.h"
 
 class _SimulationController
 {
 public:
     virtual void initCuda() = 0;
 
-    virtual void newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap) = 0;
+    virtual void newSimulation(uint64_t timestep, Settings const& settings) = 0;
     virtual void clear() = 0;
 
     virtual void registerImageResource(void* image) = 0;
@@ -87,9 +86,6 @@ public:
     virtual GeneralSettings getGeneralSettings() const = 0;
     virtual IntVector2D getWorldSize() const = 0;
     virtual Settings getSettings() const = 0;
-    virtual SymbolMap const& getSymbolMap() const = 0;
-    virtual SymbolMap const& getOriginalSymbolMap() const = 0;
-    virtual void setSymbolMap(SymbolMap const& symbolMap) = 0;
     virtual MonitorData getStatistics() const = 0;
 
     virtual std::optional<int> getTpsRestriction() const = 0;

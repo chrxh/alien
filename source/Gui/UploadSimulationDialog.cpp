@@ -89,11 +89,10 @@ void _UploadSimulationDialog::onUpload()
     DeserializedSimulation sim;
     sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     sim.settings = _simController->getSettings();
-    sim.symbolMap = _simController->getSymbolMap();
     sim.content = _simController->getClusteredSimulationData();
 
-    std::string content, settings, symbolMap;
-    if (!Serializer::serializeSimulationToStrings(content, settings, symbolMap, sim)) {
+    std::string content, settings;
+    if (!Serializer::serializeSimulationToStrings(content, settings, sim)) {
         MessageDialog::getInstance().show("Save simulation", "The simulation could not be uploaded.");
         return;
     }
@@ -104,8 +103,7 @@ void _UploadSimulationDialog::onUpload()
         {sim.settings.generalSettings.worldSizeX, sim.settings.generalSettings.worldSizeY},
         sim.content.getNumberOfCellAndParticles(),
         content,
-        settings,
-        symbolMap)) {
+        settings)) {
         MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
         return;
     }
