@@ -20,13 +20,14 @@ namespace
     auto const ZoomFactorForOverlay = 16.0f;
 
     std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
-        {Enums::CellFunction_Computation, "Computation"},
-        {Enums::CellFunction_NeuralNet, "Neural Net"},
-        {Enums::CellFunction_Scanner, "Scanner"},
+        {Enums::CellFunction_Constructor, "Constructor"},
         {Enums::CellFunction_Digestion, "Digestion"},
-        {Enums::CellFunction_Constructor, "Construction"},
-        {Enums::CellFunction_Sensor, "Sensor"},
+        {Enums::CellFunction_Injector, "Injector"},
         {Enums::CellFunction_Muscle, "Muscle"},
+        {Enums::CellFunction_Nerve, "Nerve"},
+        {Enums::CellFunction_Neurons, "Neurons"},
+        {Enums::CellFunction_Sensor, "Sensor"},
+        {Enums::CellFunction_Transmitter, "Transmitter"},
     };
 }
 
@@ -350,13 +351,13 @@ void _SimulationView::updateImageFromSimulation()
                         fontSize,
                         {viewPos.x, viewPos.y},
                         Const::BranchNumberOverlayShadowColor,
-                        std::to_string(overlayElement.branchNumber).c_str());
+                        std::to_string(overlayElement.executionOrderNumber).c_str());
                     drawList->AddText(
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x + 1, viewPos.y + 1},
                         Const::BranchNumberOverlayColor,
-                        std::to_string(overlayElement.branchNumber).c_str());
+                        std::to_string(overlayElement.executionOrderNumber).c_str());
                 }
             }
 

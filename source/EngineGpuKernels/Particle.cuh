@@ -2,17 +2,12 @@
 
 #include "Base.cuh"
 
-struct ParticleMetadata
-{
-    unsigned char color;
-};
-
 struct Particle
 {
     uint64_t id;
     float2 absPos;
     float2 vel;
-    ParticleMetadata metadata;
+    unsigned char color;
     float energy;
 
     //editing data

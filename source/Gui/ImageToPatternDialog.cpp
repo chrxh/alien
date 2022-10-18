@@ -108,7 +108,7 @@ void _ImageToPatternDialog::show()
                                          .setEnergy(matchedCellIntensity * 200)
                                          .setPos({toFloat(x) + xOffset, toFloat(y)})
                                          .setMaxConnections(maxConnections)
-                                         .setMetadata(CellMetadata().setColor(matchedCellColor))
+                                         .setColor(matchedCellColor)
                                          .setBarrier(false));
                 }
             }

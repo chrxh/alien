@@ -43,9 +43,9 @@ std::string CellComputationTests::runSimpleCellComputer(std::string const& progr
     DataDescription origData
         = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().width(2).height(1));
     auto& origFirstCell = origData.cells.at(0);
-    origFirstCell.tokenBranchNumber = 0;
+    origFirstCell.executionOrderNumber = 0;
     auto& origSecondCell = origData.cells.at(1);
-    origSecondCell.tokenBranchNumber = 1;
+    origSecondCell.executionOrderNumber = 1;
     origSecondCell.cellFeature = CellFeatureDescription().setType(Enums::CellFunction_Computation).setStaticData(compiledProgram.compilation);
     origFirstCell.addToken(createSimpleToken());
 

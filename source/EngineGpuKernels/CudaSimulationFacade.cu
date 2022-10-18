@@ -23,7 +23,7 @@
 #include "ConstantMemory.cuh"
 #include "CudaMemoryManager.cuh"
 #include "CudaMonitorData.cuh"
-#include "Entities.cuh"
+#include "Objects.cuh"
 #include "Map.cuh"
 #include "MonitorKernels.cuh"
 #include "EditKernels.cuh"
@@ -146,11 +146,10 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
-    resizeArrays({100000, 100000, 10000});
+    resizeArrays({100000, 100000});
 }
 
 _CudaSimulationFacade::~_CudaSimulationFacade()
@@ -163,11 +162,9 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numTokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
 
     log(Priority::Important, "close simulation");
@@ -401,9 +398,8 @@ void _CudaSimulationFacade::setGpuConstants(GpuSettings const& gpuConstants)
 auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
 {
     return {
-        _cudaSimulationData->entities.cells.getSize_host(),
-        _cudaSimulationData->entities.particles.getSize_host(),
-        _cudaSimulationData->entities.tokens.getSize_host()};
+        _cudaSimulationData->objects.cells.getSize_host(),
+        _cudaSimulationData->objects.particles.getSize_host()};
 }
 
 MonitorData _CudaSimulationFacade::getMonitorData()
@@ -486,7 +482,7 @@ void _CudaSimulationFacade::clear()
 void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additionals)
 {
     if (_cudaSimulationData->shouldResize(
-            additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize)) {
+            additionals.cellArraySize, additionals.particleArraySize)) {
         resizeArrays(additionals);
     }
 }
@@ -501,12 +497,10 @@ void _CudaSimulationFacade::copyDataTOtoDevice(DataAccessTO const& dataTO)
 {
     copyToDevice(_cudaAccessTO->numCells, dataTO.numCells);
     copyToDevice(_cudaAccessTO->numParticles, dataTO.numParticles);
-    copyToDevice(_cudaAccessTO->numTokens, dataTO.numTokens);
     copyToDevice(_cudaAccessTO->numStringBytes, dataTO.numStringBytes);
 
     copyToDevice(_cudaAccessTO->cells, dataTO.cells, *dataTO.numCells);
     copyToDevice(_cudaAccessTO->particles, dataTO.particles, *dataTO.numParticles);
-    copyToDevice(_cudaAccessTO->tokens, dataTO.tokens, *dataTO.numTokens);
     copyToDevice(_cudaAccessTO->stringBytes, dataTO.stringBytes, *dataTO.numStringBytes);
 }
 
@@ -514,12 +508,10 @@ void _CudaSimulationFacade::copyDataTOtoHost(DataAccessTO const& dataTO)
 {
     copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
     copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);
-    copyToHost(dataTO.numTokens, _cudaAccessTO->numTokens);
     copyToHost(dataTO.numStringBytes, _cudaAccessTO->numStringBytes);
 
     copyToHost(dataTO.cells, _cudaAccessTO->cells, *dataTO.numCells);
     copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
-    copyToHost(dataTO.tokens, _cudaAccessTO->tokens, *dataTO.numTokens);
     copyToHost(dataTO.stringBytes, _cudaAccessTO->stringBytes, *dataTO.numStringBytes);
 }
 
@@ -528,7 +520,7 @@ void _CudaSimulationFacade::automaticResizeArrays()
     //make check after every 10th time step
     if (_currentTimestep.load() % 10 == 0) {
         if (_cudaSimulationResult->isArrayResizeNeeded()) {
-            resizeArrays({0, 0, 0});
+            resizeArrays({0, 0});
         }
     }
 }
@@ -537,8 +529,7 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 {
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeEntitiesForCleanup(
-        additionals.cellArraySize, additionals.particleArraySize, additionals.tokenArraySize);
+    _cudaSimulationData->resizeEntitiesForCleanup(additionals.cellArraySize, additionals.particleArraySize);
     if (!_cudaSimulationData->isEmpty()) {
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, *_cudaSimulationData);
         syncAndCheck();
@@ -553,22 +544,18 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->tokens);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
 
-    auto cellArraySize = _cudaSimulationData->entities.cells.getSize_host();
-    auto tokenArraySize = _cudaSimulationData->entities.tokens.getSize_host();
+    auto cellArraySize = _cudaSimulationData->objects.cells.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
     CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().acquireMemory<TokenAccessTO>(tokenArraySize, _cudaAccessTO->tokens);
-    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_STRING_BYTES, _cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_RAW_BYTES, _cudaAccessTO->stringBytes);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     log(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
     log(Priority::Unimportant, "particle array size: " + std::to_string(cellArraySize));
-    log(Priority::Unimportant, "token array size: " + std::to_string(tokenArraySize));
 
-        auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+    auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
 }

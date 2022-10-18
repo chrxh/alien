@@ -1,7 +1,5 @@
 ﻿#include "MonitorKernels.cuh"
 
-#include "Token.cuh"
-
 namespace
 {
 /*
@@ -42,21 +40,19 @@ __global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitor
 {
     monitorData.reset();
 
-    monitorData.setNumParticles(data.entities.particlePointers.getNumEntries());
-    monitorData.setNumTokens(data.entities.tokenPointers.getNumEntries());
-    monitorData.setNumTokens(data.entities.tokenPointers.getNumEntries());
+    monitorData.setNumParticles(data.objects.particlePointers.getNumEntries());
 
     //    KERNEL_CALL(getEnergyForMonitorData, data, monitorData);
 }
 
 __global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitorData monitorData)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        monitorData.incNumCell(calcMod(cell->metadata.color, 7));
+        monitorData.incNumCell(calcMod(cell->color, 7));
         monitorData.incNumConnections(cell->numConnections);
     }
 }

@@ -5,24 +5,6 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-CellDescription& CellDescription::addToken(TokenDescription const& value)
-{
-    tokens.emplace_back(value);
-    return *this;
-}
-
-CellDescription& CellDescription::addToken(int index, TokenDescription const& value)
-{
-    tokens.insert(tokens.begin() + index, value);
-    return *this;
-}
-
-CellDescription& CellDescription::delToken(int index)
-{
-    tokens.erase(tokens.begin() + index);
-    return *this;
-}
-
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(

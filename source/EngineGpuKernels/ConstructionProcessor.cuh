@@ -159,7 +159,7 @@ __inline__ __device__ Cell* ConstructionProcessor::getFirstCellOfConstructionSit
     auto const& cell = token->cell;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto const& connectingCell = cell->connections[i].cell;
-        if (connectingCell->tokenBlocked) {
+        if (connectingCell->cellFunctionBlocked) {
             result = connectingCell;
         }
     }
@@ -216,7 +216,7 @@ __inline__ __device__ void ConstructionProcessor::startNewConstruction(
             cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
     }
     if (constructionData.isFinishConstruction) {
-        newCell->tokenBlocked = false;
+        newCell->cellFunctionBlocked = false;
     }
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
         cell->maxConnections = cell->numConnections;
@@ -265,7 +265,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
     Cell* newCell;
     auto posOfNewCell = cell->absPos + posDelta;
     constructCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
-    firstConstructedCell->tokenBlocked = false;
+    firstConstructedCell->cellFunctionBlocked = false;
 
     if (!newCell->tryLock()) {
         cell->energy +=
@@ -314,7 +314,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
         constructionData.angleAlignment*/);
 
     if (constructionData.isFinishConstruction) {
-        newCell->tokenBlocked = false;
+        newCell->cellFunctionBlocked = false;
     }
 
     Math::normalize(posDelta);
@@ -393,12 +393,12 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     data.cellMap.correctPosition(result->absPos);
     result->maxConnections = getMaxConnections(constructionData);
     result->numConnections = 0;
-    result->branchNumber = static_cast<unsigned char>(constructionData.branchNumber)
+    result->executionOrderNumber = static_cast<unsigned char>(constructionData.branchNumber)
         % cudaSimulationParameters.cellMaxTokenBranchNumber;
-    result->tokenBlocked = true;
+    result->cellFunctionBlocked = true;
     result->cellFunctionType = constructionData.cellFunctionType;
     result->metadata.color = constructionData.metaData;
-    if (result->getCellFunctionType() != Enums::CellFunction_NeuralNet) {
+    if (result->getCellFunctionType() != Enums::CellFunction_Neurons) {
 
         //encoding to support older versions
         auto len = min(48 - 1, static_cast<unsigned char>(token->memory[Enums::Constr_InCellFunctionData]));

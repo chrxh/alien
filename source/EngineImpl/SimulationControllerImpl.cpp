@@ -7,12 +7,10 @@ void _SimulationControllerImpl::initCuda()
     _worker.initCuda();
 }
 
-void _SimulationControllerImpl::newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap)
+void _SimulationControllerImpl::newSimulation(uint64_t timestep, Settings const& settings)
 {
     _settings = settings;
     _origSettings = settings;
-    _symbolMap = symbolMap;
-    _origSymbolMap = symbolMap;
     _worker.newSimulation(timestep, settings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
@@ -323,21 +321,6 @@ IntVector2D _SimulationControllerImpl::getWorldSize() const
 Settings _SimulationControllerImpl::getSettings() const
 {
     return _settings;
-}
-
-SymbolMap const& _SimulationControllerImpl::getSymbolMap() const
-{
-    return _symbolMap;
-}
-
-SymbolMap const& _SimulationControllerImpl::getOriginalSymbolMap() const
-{
-    return _origSymbolMap;
-}
-
-void _SimulationControllerImpl::setSymbolMap(SymbolMap const& symbolMap)
-{
-    _symbolMap = symbolMap;
 }
 
 MonitorData _SimulationControllerImpl::getStatistics() const

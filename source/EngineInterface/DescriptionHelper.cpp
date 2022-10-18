@@ -16,7 +16,7 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
                                .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .setEnergy(parameters._energy)
                                .setMaxConnections(parameters._maxConnection)
-                               .setMetadata(CellMetadata().setColor(parameters._color))
+                               .setColor(parameters._color)
                                .setBarrier(parameters._barrier));
         }
     }
@@ -292,7 +292,7 @@ void DescriptionHelper::generateBranchNumbers(DataDescription& data, std::unorde
             auto const& lastCellId = cellIdPath.back();
 
             auto& cell = data.cells.at(idToIndexMap.at(lastCellId));
-            cell.setTokenBranchNumber((cellIdPath.size() - 1) % maxBranchNumbers);
+            cell.setExecutionOrderNumber((cellIdPath.size() - 1) % maxBranchNumbers);
         }
 
         //modify paths

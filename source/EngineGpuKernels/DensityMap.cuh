@@ -38,7 +38,7 @@ public:
     {
         auto index = toInt(cell->absPos.x) / _slotSize + toInt(cell->absPos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto color = calcMod(cell->metadata.color, 7);
+            auto color = calcMod(cell->color, 7);
             alienAtomicAdd(&_densityMap[index], uint64_t(1) << (color * 8));
         }
     }

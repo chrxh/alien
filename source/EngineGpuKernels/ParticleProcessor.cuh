@@ -24,19 +24,19 @@ public:
 
 __inline__ __device__ void ParticleProcessor::updateMap(SimulationData& data)
 {
-    auto partition = calcPartition(data.entities.particlePointers.getNumEntries(), blockIdx.x, gridDim.x);
+    auto partition = calcPartition(data.objects.particlePointers.getNumEntries(), blockIdx.x, gridDim.x);
 
-    Particle** particlePointers = &data.entities.particlePointers.at(partition.startIndex);
+    Particle** particlePointers = &data.objects.particlePointers.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
 }
 
 __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 {
     auto partition = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        auto& particle = data.entities.particlePointers.at(particleIndex);
+        auto& particle = data.objects.particlePointers.at(particleIndex);
         particle->absPos = particle->absPos + particle->vel;
         data.particleMap.correctPosition(particle->absPos);
     }
@@ -45,10 +45,10 @@ __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 {
     auto partition = calcPartition(
-        data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        auto& particle = data.entities.particlePointers.at(particleIndex);
+        auto& particle = data.objects.particlePointers.at(particleIndex);
         auto otherParticle = data.particleMap.get(particle->absPos);
         if (otherParticle && otherParticle != particle
             && Math::lengthSquared(particle->absPos - otherParticle->absPos) < 0.5) {
@@ -94,17 +94,17 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 
 __inline__ __device__ void ParticleProcessor::transformation(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.entities.particlePointers.getNumOrigEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        if (auto& particle = data.entities.particlePointers.at(particleIndex)) {
+        if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
             auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, particle->absPos);
             if (particle->energy >= cellMinEnergy) {
                 EntityFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);
-                cell->metadata.color = particle->metadata.color;
+                cell->color = particle->color;
 
                 particle = nullptr;
             }

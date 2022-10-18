@@ -2,7 +2,6 @@
 
 #include "Cell.cuh"
 #include "SimulationData.cuh"
-#include "Token.cuh"
 
 class SensorProcessor
 {
@@ -96,7 +95,7 @@ __device__ __inline__ void SensorProcessor::searchByAngle(Token* token, Simulati
         auto distance = 12.0f + cudaSimulationParameters.cellFunctionSensorRange / 64 * distanceIndex;
         auto scanPos = token->cell->absPos + searchDelta * distance;
         data.cellMap.correctPosition(scanPos);
-        auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos, color));
+        auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
         if (density >= minDensity && density <= maxDensity) {
             uint32_t combined = static_cast<uint32_t>(distance) << 8 | static_cast<uint32_t>(density);
             atomicMin(&result, combined);
@@ -161,7 +160,7 @@ __device__ __inline__ void SensorProcessor::searchVicinity(
             auto delta = Math::unitVectorOfAngle(angle) * radius;
             auto scanPos = cell_->absPos + delta;
             data.cellMap.correctPosition(scanPos);
-            auto density = static_cast<unsigned char>(data.cellFunctionData.densityMap.getDensity(scanPos, color));
+            auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
             if (density >= minDensity && density <= maxDensity) {
                 auto relAngle = Math::subtractAngle(angle, originAngle);
                 uint32_t angle = static_cast<uint32_t>(QuantityConverter::convertAngleToData(relAngle));

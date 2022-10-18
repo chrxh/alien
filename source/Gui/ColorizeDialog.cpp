@@ -90,7 +90,6 @@ void _ColorizeDialog::onColorize()
 {
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     auto settings = _simController->getSettings();
-    auto symbolMap = _simController->getSymbolMap();
     auto content = _simController->getClusteredSimulationData();
 
     std::vector<int> colorCodes;
@@ -102,6 +101,6 @@ void _ColorizeDialog::onColorize()
     DescriptionHelper::colorize(content, colorCodes);
 
     _simController->closeSimulation();
-    _simController->newSimulation(timestep, settings, symbolMap);
+    _simController->newSimulation(timestep, settings);
     _simController->setClusteredSimulationData(content);
 }

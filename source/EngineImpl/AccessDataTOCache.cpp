@@ -31,7 +31,6 @@ DataAccessTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
     auto clear = [](auto& result) {
             *result.numCells = 0;
             *result.numParticles = 0;
-            *result.numTokens = 0;
             *result.numStringBytes = 0;
     };
 
@@ -67,12 +66,10 @@ DataAccessTO _AccessDataTOCache::getNewDataTO()
         DataAccessTO result;
         result.numCells = new int;
         result.numParticles = new int;
-        result.numTokens = new int;
         result.numStringBytes = new int;
         result.cells = new CellAccessTO[_arraySizes->cellArraySize];
         result.particles = new ParticleAccessTO[_arraySizes->particleArraySize];
-        result.tokens = new TokenAccessTO[_arraySizes->tokenArraySize];
-        result.stringBytes = new char[MAX_STRING_BYTES];
+        result.stringBytes = new char[MAX_RAW_BYTES];
         return result;
     } catch (std::bad_alloc const&) {
         throw BugReportException("There is not sufficient CPU memory available.");
@@ -83,10 +80,8 @@ void _AccessDataTOCache::deleteDataTO(DataAccessTO const& dataTO)
 {
     delete dataTO.numCells;
     delete dataTO.numParticles;
-    delete dataTO.numTokens;
     delete dataTO.numStringBytes;
     delete[] dataTO.cells;
     delete[] dataTO.particles;
-    delete[] dataTO.tokens;
     delete[] dataTO.stringBytes;
 }

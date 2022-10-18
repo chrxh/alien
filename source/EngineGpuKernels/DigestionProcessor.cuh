@@ -4,7 +4,6 @@
 #include "Cell.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
-#include "Token.cuh"
 
 class DigestionProcessor
 {

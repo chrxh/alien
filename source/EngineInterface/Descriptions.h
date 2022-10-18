@@ -7,84 +7,6 @@
 #include "Definitions.h"
 #include "Metadata.h"
 
-using StaticData = std::array<char, 76>;
-using MutableData = std::array<char, 8>;
-
-struct CellFeatureDescription
-{
-    MutableData mutableData;
-    StaticData staticData;
-    Enums::CellFunction type = Enums::CellFunction_Computation;
-
-    Enums::CellFunction getType() const
-    {
-        return static_cast<unsigned int>(type) % Enums::CellFunction_Count;
-    }
-	CellFeatureDescription& setType(Enums::CellFunction value) { type = value; return *this; }
-    CellFeatureDescription& setMutableData(MutableData const& value)
-    {
-        mutableData = value;
-        return *this;
-    }
-    CellFeatureDescription& setMutableData(char const* value)
-    {
-        for (int i = 0; i < sizeof(mutableData); ++i) {
-            mutableData[i] = value[i];
-        }
-        return *this;
-    }
-    CellFeatureDescription& setStaticData(StaticData const& value)
-    {
-        staticData = value;
-        return *this;
-    }
-    CellFeatureDescription& setStaticData(char const* value)
-    {
-        for (int i = 0; i < sizeof(staticData); ++i) {
-            staticData[i] = value[i];
-        }
-        return *this;
-    }
-    bool operator==(CellFeatureDescription const& other) const
-    {
-		return type == other.type
-			&& mutableData == other.mutableData
-			&& staticData == other.staticData;
-	}
-	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
-
-};
-
-struct TokenDescription
-{
-    double energy = 0;
-    std::string data;
-
-    //only for temporary use
-    int sequenceNumber = 0;
-
-    TokenDescription& setEnergy(double value)
-    {
-        energy = value;
-        return *this;
-    }
-    TokenDescription& setData(std::string const& value)
-    {
-        data = value;
-        return *this;
-    }
-    TokenDescription& setSequenceNumber(int value)
-    {
-        sequenceNumber = value;
-        return *this;
-    }
-    bool operator==(TokenDescription const& other) const
-    {
-        return energy == other.energy && data == other.data && sequenceNumber == other.sequenceNumber;
-    }
-    bool operator!=(TokenDescription const& other) const { return !operator==(other); }
-};
-
 struct ConnectionDescription
 {
     uint64_t cellId;    //value of 0 means cell not present in DataDescription
@@ -95,20 +17,21 @@ struct ConnectionDescription
 struct CellDescription
 {
     uint64_t id = 0;
+    std::vector<ConnectionDescription> connections;
 
     RealVector2D pos;
     RealVector2D vel;
     double energy;
+    int color;
     int maxConnections;
-    std::vector<ConnectionDescription> connections;
-    bool tokenBlocked;
-    int tokenBranchNumber;
-    CellMetadata metadata;
-    CellFeatureDescription cellFeature;
-    std::vector<TokenDescription> tokens;
-    int cellFunctionInvocations;
+    int executionOrderNumber;
     bool barrier;
     int age;
+
+    bool cellFunctionBlocked;
+    Enums::CellFunction cellFunction = Enums::CellFunction_None;
+
+    CellMetadata metadata;
 
     CellDescription() = default;
     CellDescription& setId(uint64_t value)
@@ -131,6 +54,11 @@ struct CellDescription
         energy = value;
         return *this;
     }
+    CellDescription& setColor(unsigned char value)
+    {
+        color = value;
+        return *this;
+    }
     CellDescription& setBarrier(bool value)
     {
         barrier = value;
@@ -146,37 +74,19 @@ struct CellDescription
         connections = value;
         return *this;
     }
-    CellDescription& setFlagTokenBlocked(bool value)
+    CellDescription& setcellFunctionBlocked(bool value)
     {
-        tokenBlocked = value;
+        cellFunctionBlocked = value;
         return *this;
     }
-    CellDescription& setTokenBranchNumber(int value)
+    CellDescription& setExecutionOrderNumber(int value)
     {
-        tokenBranchNumber = value;
+        executionOrderNumber = value;
         return *this;
     }
     CellDescription& setMetadata(CellMetadata const& value)
     {
         metadata = value;
-        return *this;
-    }
-    CellDescription& setCellFeature(CellFeatureDescription const& value)
-    {
-        cellFeature = value;
-        return *this;
-    }
-    CellDescription& setTokens(std::vector<TokenDescription> const& value)
-    {
-        tokens = value;
-        return *this;
-    }
-    CellDescription& addToken(TokenDescription const& value);
-    CellDescription& addToken(int index, TokenDescription const& value);
-    CellDescription& delToken(int index);
-    CellDescription& setTokenUsages(int value)
-    {
-        cellFunctionInvocations = value;
         return *this;
     }
     bool isConnectedTo(uint64_t id) const;

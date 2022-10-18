@@ -4,7 +4,7 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "Entities.cuh"
+#include "Objects.cuh"
 
 class CudaMonitorData
 {

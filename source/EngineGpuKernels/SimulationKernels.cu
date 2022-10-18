@@ -39,18 +39,12 @@ __global__ void cudaNextTimestep_substep3(SimulationData data)
     ParticleProcessor particleProcessor;
     particleProcessor.movement(data);
     particleProcessor.collision(data);
-
-    TokenProcessor tokenProcessor;
-    tokenProcessor.applyMutation(data);
 }
 
 __global__ void cudaNextTimestep_substep4(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcConnectionForces(data);
-
-    TokenProcessor tokenProcessor;
-    tokenProcessor.movement(data);
 }
 
 __global__ void cudaNextTimestep_substep5(SimulationData data)
@@ -58,62 +52,48 @@ __global__ void cudaNextTimestep_substep5(SimulationData data)
     CellProcessor cellProcessor;
     cellProcessor.verletUpdatePositions(data);
     cellProcessor.checkConnections(data);
-
-    data.entities.tokenPointers.saveNumEntries();
 }
 
 __global__ void cudaNextTimestep_substep6(SimulationData data, SimulationResult result)
 {
     CellProcessor cellProcessor;
     cellProcessor.calcConnectionForces(data);
-
-    TokenProcessor tokenProcessor;
-    tokenProcessor.executeReadonlyCellFunctions(data, result);
 }
 
-__global__ void cudaNextTimestep_substep7(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_substep7(SimulationData data)
 {
-    NeuralNetProcessor::processScheduledOperation(data, result);  //#TODO move to step8?
-}
-
-__global__ void cudaNextTimestep_substep8(SimulationData data)
-{
-    SensorProcessor::processScheduledOperation(data);
-
     CellProcessor cellProcessor;
     cellProcessor.verletUpdateVelocities(data);             //#TODO move to step11?
 }
 
-__global__ void cudaNextTimestep_substep9(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result)
 {
-    TokenProcessor tokenProcessor;
-    tokenProcessor.executeModifyingCellFunctions(data, result);
 }
 
-__global__ void cudaNextTimestep_substep10(SimulationData data)
+__global__ void cudaNextTimestep_substep9(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.applyInnerFriction(data);
 }
 
-__global__ void cudaNextTimestep_substep11(SimulationData data)
+__global__ void cudaNextTimestep_substep10(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.applyFriction(data);
     cellProcessor.decay(data);
 }
 
-__global__ void cudaNextTimestep_substep12(SimulationData data)
+__global__ void cudaNextTimestep_substep11(SimulationData data)
 {
     data.structuralOperations.saveNumEntries();
 }
 
-__global__ void cudaNextTimestep_substep13(SimulationData data)
+__global__ void cudaNextTimestep_substep12(SimulationData data)
 {
     CellConnectionProcessor::processConnectionsOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep14(SimulationData data)
+__global__ void cudaNextTimestep_substep13(SimulationData data)
 {
     ParticleProcessor particleProcessor;
     particleProcessor.transformation(data);
@@ -121,10 +101,8 @@ __global__ void cudaNextTimestep_substep14(SimulationData data)
     CellConnectionProcessor::processDelCellOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep15(SimulationData data)
+__global__ void cudaNextTimestep_substep14(SimulationData data)
 {
-    TokenProcessor tokenProcessor;
-    tokenProcessor.deleteTokenIfCellDeleted(data);
 }
 
 __global__ void cudaInitClusterData(SimulationData data)

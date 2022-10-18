@@ -29,20 +29,10 @@ private:
 
     void processCell(CellDescription cell);
     void showCellGeneralTab(CellDescription& cell);
-    void showCellCodeTab(CellDescription& cell);
-    void showCellMemoryTab(CellDescription& cell);
     void showCellInOutChannelTab(CellDescription& cell);
-    void showTokenTab(CellDescription& cell, int tokenIndex);
-    void showTokenMemorySection(
-        int address,
-        int numBytes,
-        int& currentMemoryEditIndex,
-        std::vector<std::string> const& symbols = {});
-    void showCompilationResult(CompilationResult const& compilationResult);
 
     void processParticle(ParticleDescription particle);
 
-    void showScannerTableContent();
     void showNeuralNetTableContent();
     void showDigestionTableContent();
     void showConstructionTableContent();
@@ -50,8 +40,6 @@ private:
     void showSensorTableContent();
 
     float calcWindowWidth() const;
-    void addToken(CellDescription& cell);
-    void delToken(CellDescription& cell, int index);
 
 private:
     std::shared_ptr<MemoryEditor> _cellDataMemoryEdit;

@@ -342,19 +342,19 @@ void _BrowserWindow::sortTable()
 
 void _BrowserWindow::onOpenSimulation(std::string const& id)
 {
-    std::string content, settings, symbolMap;
-    if (!_networkController->downloadSimulation(content, settings, symbolMap, id)) {
+    std::string content, settings;
+    if (!_networkController->downloadSimulation(content, settings, id)) {
         MessageDialog::getInstance().show("Error", "Failed to download simulation.");
         return;
     }
 
     DeserializedSimulation deserializedSim;
-    Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings, symbolMap);
+    Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings);
 
     _simController->closeSimulation();
     _statisticsWindow->reset();
 
-    _simController->newSimulation(deserializedSim.timestep, deserializedSim.settings, deserializedSim.symbolMap);
+    _simController->newSimulation(deserializedSim.timestep, deserializedSim.settings);
     _simController->setClusteredSimulationData(deserializedSim.content);
     _viewport->setCenterInWorldPos(
         {toFloat(deserializedSim.settings.generalSettings.worldSizeX) / 2, toFloat(deserializedSim.settings.generalSettings.worldSizeY) / 2});

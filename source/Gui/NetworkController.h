@@ -33,9 +33,8 @@ public:
         IntVector2D const& size,
         int particles,
         std::string const& content,
-        std::string const& settings,
-        std::string const& symbolMap);
-    bool downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& simId);
+        std::string const& settings);
+    bool downloadSimulation(std::string& content, std::string& settings, std::string const& simId);
     bool deleteSimulation(std::string const& simId);
 
 private:

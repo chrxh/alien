@@ -2,7 +2,7 @@
 
 __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -30,10 +30,10 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
 
 __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int location)
 {
-    auto partition = calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        if (auto& particle = data.entities.particlePointers.at(particleIndex)) {
+        if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             if (particle->energy < 0 || isnan(particle->energy)) {
                 printf("particle energy invalid at %d", location);
                 CUDA_THROW_NOT_IMPLEMENTED();

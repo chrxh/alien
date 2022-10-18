@@ -9,7 +9,6 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
-#include "EngineInterface/CellComputationCompiler.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
@@ -141,12 +140,11 @@ namespace
 {
     bool hasChanges(CellDescription const& left, CellDescription const& right)
     {
-        return left.energy != right.energy || left.maxConnections != right.maxConnections || left.tokenBlocked != right.tokenBlocked
-            || left.tokenBranchNumber != right.tokenBranchNumber || left.cellFeature.getType() != right.cellFeature.getType()
-            || left.cellFeature.staticData != right.cellFeature.staticData || left.cellFeature.mutableData != right.cellFeature.mutableData
+        return left.energy != right.energy || left.maxConnections != right.maxConnections || left.cellFunctionBlocked != right.cellFunctionBlocked
+            || left.executionOrderNumber != right.executionOrderNumber || left.cellFunction != right.cellFunction
             || left.metadata.computerSourcecode != right.metadata.computerSourcecode
             || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
-            || left.tokens != right.tokens || left.barrier != right.barrier;
+            || left.barrier != right.barrier;
     }
     bool hasChanges(ParticleDescription const& left, ParticleDescription const& right)
     {
@@ -160,22 +158,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
         showCellGeneralTab(cell);
-        if (cell.cellFeature.getType() == Enums::CellFunction_Computation) {
-            showCellCodeTab(cell);
-            showCellMemoryTab(cell);
-        } else {
-            showCellInOutChannelTab(cell);
-        }
-        for (int i = 0; i < cell.tokens.size(); ++i) {
-            showTokenTab(cell, i);
-        }
-        auto const& parameters = _simController->getSimulationParameters();
-        if (cell.tokens.size() < parameters.cellMaxToken) {
-            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_SetSelected)) {
-                addToken(cell);
-            }
-            AlienImGui::Tooltip("Add token");
-        }
+        showCellInOutChannelTab(cell);
         ImGui::EndTabBar();
 
         if (hasChanges(cell, origCell)) {
@@ -189,13 +172,10 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         AlienImGui::Group("Properties");
         auto const& parameters = _simController->getSimulationParameters();
-        int type = static_cast<int>(cell.cellFeature.getType());
+        int type = cell.cellFunction;
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
-                              .name("Specialization")
-                              .values(CellFunctions)
-                              .textWidth(MaxCellContentTextWidth), type);
-        cell.cellFeature.setType(static_cast<Enums::CellFunction>(type));
+                              .name("Specialization").values(CellFunctions).textWidth(MaxCellContentTextWidth), cell.cellFunction);
 
         auto energy = toFloat(cell.energy);
         AlienImGui::InputFloat(
@@ -211,13 +191,13 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             cell.maxConnections);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
-                .name("Branch number")
+                .name("Execution order")
                 .textWidth(MaxCellContentTextWidth)
                 .max(parameters.cellMaxTokenBranchNumber - 1)
                 .min(0),
-            cell.tokenBranchNumber);
+            cell.executionOrderNumber);
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.tokenBlocked);
+            AlienImGui::CheckboxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.cellFunctionBlocked);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
 
         AlienImGui::Group("Metadata");
@@ -231,88 +211,13 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showCellCodeTab(CellDescription& cell)
-{
-    ImGuiTabItemFlags flags = 0;
-    if (ImGui::BeginTabItem("Code", nullptr, flags)) {
-        auto origSourcecode = [&] {
-            if (cell.metadata.computerSourcecode.empty()) {
-                if (_lastCompilationResult) {
-                    _lastCompilationResult->compilationOk = true;
-                }
-                return CellComputationCompiler::decompileSourceCode(
-                    cell.cellFeature.staticData, _simController->getSymbolMap(), _simController->getSimulationParameters());
-            }
-            return cell.metadata.computerSourcecode;
-        }();
-        StringHelper::copy(_cellCode, IM_ARRAYSIZE(_cellCode), origSourcecode);
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-        ImGui::InputTextMultiline(
-            "##source",
-            _cellCode,
-            IM_ARRAYSIZE(_cellCode),
-            {ImGui::GetContentRegionAvail().x,
-             ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(20)},
-            ImGuiInputTextFlags_AllowTabInput);
-        ImGui::PopFont();
-
-        //compilation state
-        auto sourcecode = std::string(_cellCode);
-
-        if (sourcecode != origSourcecode || !_lastCompilationResult) {
-            _lastCompilationResult = std::make_shared<CompilationResult>(
-                CellComputationCompiler::compileSourceCode(sourcecode, _simController->getSymbolMap(), _simController->getSimulationParameters()));
-        }
-        if (sourcecode != origSourcecode) {
-            if (_lastCompilationResult->compilationOk) {
-                cell.cellFeature.setStaticData(_lastCompilationResult->compilation);
-            }
-            cell.metadata.computerSourcecode = sourcecode;
-        }
-        showCompilationResult(*_lastCompilationResult);
-        ImGui::EndTabItem();
-    }
-}
-
-void _InspectorWindow::showCellMemoryTab(CellDescription& cell)
-{
-    if (ImGui::BeginTabItem("Memory", nullptr, ImGuiTabItemFlags_None)) {
-        auto const& parameters = _simController->getSimulationParameters();
-        if (ImGui::BeginChild(
-                "##1",
-                ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(90)),
-                false,
-                0)) {
-            AlienImGui::Group("Instruction section");
-            ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-
-            auto origStaticData = cell.cellFeature.staticData;
-            _cellDataMemoryEdit->DrawContents(cell.cellFeature.staticData.data(), sizeof(cell.cellFeature.staticData));
-            if (origStaticData != cell.cellFeature.staticData) {
-                cell.metadata.computerSourcecode.clear();
-            }
-
-            ImGui::PopFont();
-        }
-        ImGui::EndChild();
-        if (ImGui::BeginChild("##2", ImVec2(0, 0), false, 0)) {
-            AlienImGui::Group("Data section");
-            ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-            _cellInstructionMemoryEdit->DrawContents(cell.cellFeature.mutableData.data(), sizeof(cell.cellFeature.mutableData));
-            ImGui::PopFont();
-        }
-        ImGui::EndChild();
-        ImGui::EndTabItem();
-    }
-}
-
 void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem(ICON_FA_EXCHANGE_ALT " In/out channels", nullptr, ImGuiTabItemFlags_None)) {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Const::InfoTextColor));
         AlienImGui::Text("This is a pure information tab.");
         ImGui::SameLine();
-        AlienImGui::HelpMarker("The following table shows where the cell obtains their input and output from the token memory. Please check the symbol editor for the corresponding variables and constants.");
+        AlienImGui::HelpMarker("");
         ImGui::PopStyleColor();
         
         if (ImGui::BeginTable(
@@ -324,154 +229,31 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             ImGui::TableSetupColumn("Semantic", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
             ImGui::TableNextRow();
-            if (cell.cellFeature.getType() == Enums::CellFunction_Scanner) {
-                showScannerTableContent();
-            }
-            if (cell.cellFeature.getType() == Enums::CellFunction_NeuralNet) {
-                showNeuralNetTableContent();
-            }
-            if (cell.cellFeature.getType() == Enums::CellFunction_Digestion) {
-                showDigestionTableContent();
-            }
-            if (cell.cellFeature.getType() == Enums::CellFunction_Constructor) {
+            switch(cell.cellFunction){
+            case Enums::CellFunction_Constructor:
                 showConstructionTableContent();
-            }
-            if (cell.cellFeature.getType() == Enums::CellFunction_Muscle) {
-                showMuscleTableContent();
-            }
-            if (cell.cellFeature.getType() == Enums::CellFunction_Sensor) {
+                break;
+            case Enums::CellFunction_Digestion:
+                showDigestionTableContent();
+                break;
+            case Enums::CellFunction_Injector:
+            case Enums::CellFunction_Nerve:
+            case Enums::CellFunction_Neurons:
+                showNeuralNetTableContent();
+                break;
+            case Enums::CellFunction_Sensor:
                 showSensorTableContent();
+                break;
+            case Enums::CellFunction_Transmitter:
+            case Enums::CellFunction_Muscle:
+                showMuscleTableContent();
+                break;
             }
             ImGui::EndTable();
         }
 
         ImGui::EndTabItem();
     }
-}
-
-void _InspectorWindow::showTokenTab(CellDescription& cell, int tokenIndex)
-{
-    bool open = true;
-    if (ImGui::BeginTabItem(("Token " + std::to_string(tokenIndex + 1)).c_str(), &open, ImGuiTabItemFlags_None)) {
-        auto const& parameters = _simController->getSimulationParameters();
-
-        AlienImGui::Group("Properties");
-        auto& token = cell.tokens.at(tokenIndex);
-        auto energy = toFloat(token.energy);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
-        token.energy = energy;
-
-        AlienImGui::Group("Memory");
-        auto dataSize = token.data.size();
-        token.data.copy(_tokenMemory, dataSize);
-
-        std::map<int, std::vector<std::string>> addressToSymbolNamesMap;
-        auto const& symbolMap = _simController->getSymbolMap();
-        for (auto const& [key, value] : symbolMap) {
-            if (auto address = CellComputationCompiler::extractAddress(value)) {
-                addressToSymbolNamesMap[*address].emplace_back(key);
-            }
-        }
-        int currentMemoryEditIndex = 0;
-        if (addressToSymbolNamesMap.empty() || addressToSymbolNamesMap.begin()->first != 0) {
-            int numBytes = addressToSymbolNamesMap.empty() ? 256 : addressToSymbolNamesMap.begin()->first;
-            showTokenMemorySection(0, numBytes, currentMemoryEditIndex);
-        }
-
-        std::optional<int> lastAddress;
-        for (auto const& [address, symbolNames] : addressToSymbolNamesMap) {
-            if (lastAddress && address - *lastAddress > 1) {
-                showTokenMemorySection(*lastAddress + 1, address - *lastAddress - 1, currentMemoryEditIndex);
-            }
-            showTokenMemorySection(address, 1, currentMemoryEditIndex, symbolNames);
-            lastAddress = address;
-        }
-
-        if (!addressToSymbolNamesMap.empty()
-            && addressToSymbolNamesMap.rbegin()->first < parameters.tokenMemorySize - 1) {
-            auto lastAddress = addressToSymbolNamesMap.rbegin()->first;
-            showTokenMemorySection(
-                lastAddress + 1, parameters.tokenMemorySize - lastAddress - 1, currentMemoryEditIndex);
-        }
-
-        token.data = std::string(_tokenMemory, dataSize);
-        ImGui::EndTabItem();
-    }
-    if (!open) {
-        delToken(cell, tokenIndex);
-    }
-}
-
-void _InspectorWindow::showTokenMemorySection(
-    int address,
-    int numBytes,
-    int& currentMemoryEditIndex,
-    std::vector<std::string> const& symbols)
-{
-    ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
-    int height = ImGui::GetTextLineHeight() * ((numBytes + 7) / 8);
-    ImGui::BeginChild(
-        ("##TokenMemorySection" + std::to_string(currentMemoryEditIndex)).c_str(), ImVec2(0, height), false, 0);
-    currentMemoryEditIndex++;
-    _tokenMemoryEdits.at(currentMemoryEditIndex++)
-        ->DrawContents(reinterpret_cast<void*>(&_tokenMemory[address]), numBytes, address);
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(StyleRepository::getInstance().scaleContent(205.0f));
-
-    auto text = !symbols.empty() ? boost::join(symbols, "\n") : std::string("unnamed block");
-    AlienImGui::Text(text);
-    ImGui::PopFont();
-
-    auto const& parameters = _simController->getSimulationParameters();
-    if (address + numBytes < parameters.tokenMemorySize) {
-        AlienImGui::Separator();
-    }
-}
-
-void _InspectorWindow::showCompilationResult(CompilationResult const& compilationResult)
-{
-    ImGui::Text("Compilation result: ");
-    if (compilationResult.compilationOk) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::CompilationSuccessColor);
-        ImGui::SameLine();
-        ImGui::Text("Success");
-        ImGui::PopStyleColor();
-    } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::CompilationErrorColor);
-        ImGui::SameLine();
-        AlienImGui::Text("Error at line " + std::to_string(compilationResult.lineOfFirstError));
-        ImGui::PopStyleColor();
-    }
-    ImGui::SameLine();
-    auto const& parameters = _simController->getSimulationParameters();
-    AlienImGui::HelpMarker(
-        "A cell code consists of maximal " + std::to_string(parameters.cellFunctionComputerMaxInstructions)
-        + " instructions. The following instructions are allowed:\n\n"
-        ICON_FA_CARET_RIGHT " mov op1, op2  (means op1 = op2)\n" 
-        ICON_FA_CARET_RIGHT " add op1, op2  (means op1 = op1 + op2)\n" 
-        ICON_FA_CARET_RIGHT " sub op1, op2  (means op1 = op1 - op2)\n" 
-        ICON_FA_CARET_RIGHT " mul op1, op2  (means op1 = op1 * op2)\n" 
-        ICON_FA_CARET_RIGHT " div op1, op2  (means op1 = op1 / op2)\n" 
-        ICON_FA_CARET_RIGHT " xor op1, op2  (means op1 = op1 ^ op2)\n" 
-        ICON_FA_CARET_RIGHT " or op1, op2  (means op1 = op1 | op2)\n" 
-        ICON_FA_CARET_RIGHT " and op1, op2  (means op1 = op1 & op2)\n" 
-        ICON_FA_CARET_RIGHT " if op1 > op2\n" 
-        ICON_FA_CARET_RIGHT " if op1 >= op2\n" 
-        ICON_FA_CARET_RIGHT " if op1 = op2  (means if (op1 == op2))\n" 
-        ICON_FA_CARET_RIGHT " if op1 != op2\n" 
-        ICON_FA_CARET_RIGHT " if op1 <= op2\n" 
-        ICON_FA_CARET_RIGHT " if op1 < op2\n" 
-        ICON_FA_CARET_RIGHT " else\n" 
-        ICON_FA_CARET_RIGHT " endif\n\n"
-          "op1 can be (x denotes an address between 0 and 255)\n" 
-        ICON_FA_CARET_RIGHT " a reference to a token memory byte with notation [x] \n" 
-        ICON_FA_CARET_RIGHT " a reference to a reference to a token memory byte with notation [[x]]\n" 
-        ICON_FA_CARET_RIGHT " a reference to a cell memory byte with notation (x)\n\n"
-          "op2 can be a type such as op1 or a constant between -127 and 128.\n\n"
-          "In all above instructions the calculations/comparisons are performed on signed integers in the range -127 to 128.\n");
 }
 
 void _InspectorWindow::processParticle(ParticleDescription particle)
@@ -500,107 +282,6 @@ namespace
     }
 }
 
-void _InspectorWindow::showScannerTableContent()
-{
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_Output));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::ScannerOut_Success) + ": cell scanned");
-    AlienImGui::Text(formatHex(Enums::ScannerOut_Finished) + ": scanning process completed");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_InOutCellNumber));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: number of the cell to be scanned");
-    AlienImGui::Text("Output: number of the next cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutEnergy));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: energy of scanned cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutAngle));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: relative angle of scanned cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutDistance));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: relative distance of scanned cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutCellMaxConnections));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: max connections of scanned cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutCellBranchNumber));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: branch number of scanned cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutCellColor));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: color of scanned cell");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Scanner_OutCellFunction));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: specialization of scanned cell");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Computation) + ": Computation");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Scanner) + ": Scanner");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Digestion) + ": Digestion");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Constructor) + ": Construction");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Sensor) + ": Sensor");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Muscle) + ": Muscle");
-    ImGui::Spacing();
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(
-        formatHex(Enums::Scanner_OutCellFunctionData) + " - "
-        + formatHex(Enums::Scanner_OutCellFunctionData + 48 + 16 + 1));
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output:\ninternal data of scanned cell\n(e.g. cell code and cell memory");
-}
-
 void _InspectorWindow::showNeuralNetTableContent()
 {
     ImGui::TableSetColumnIndex(1);
@@ -610,18 +291,12 @@ void _InspectorWindow::showNeuralNetTableContent()
 void _InspectorWindow::showDigestionTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Digestion_Output));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::DigestionOut_NoTarget) + ": no target cell found");
-    AlienImGui::Text(formatHex(Enums::DigestionOut_Success) + ": target cell found");
-    AlienImGui::Text(formatHex(Enums::DigestionOut_Poisoned) + ": target cell poisoned");
 
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Digestion_InColor));
 
     ImGui::TableSetColumnIndex(1);
     AlienImGui::Text("Input: target color (number from 0-6)");
@@ -630,274 +305,162 @@ void _InspectorWindow::showDigestionTableContent()
 void _InspectorWindow::showConstructionTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_Output));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::ConstrOut_Success) + ": construction of new cell was successful");
-    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorNoEnergy) + ": error - not enough energy");
-    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorConnection) + ": error - no free connection");
-    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorLock) + ": error - construction blocked by other processes");
-    AlienImGui::Text(formatHex(Enums::ConstrOut_ErrorDist) + ": error - invalid connection distance");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_Input));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: main command");
-    AlienImGui::Text(formatHex(Enums::ConstrIn_DoNothing) + ": do nothing");
-    AlienImGui::Text(formatHex(Enums::ConstrIn_Construct) + ": try construct cell");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InOption));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: options");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_Standard) + ": standard construction process");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_CreateEmptyToken) + ": construct cell and token with empty memory");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_CreateDupToken) + ": construct cell and token with copied memory");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishNoSep) + ": construct cell and finish construction process without separation");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishWithSep) + ": construct cell and finish construction process with separation");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishWithEmptyTokenSep) + ": construct cell with empty token and finish construction process with separation");
-    AlienImGui::Text(formatHex(Enums::ConstrInOption_FinishWithDupTokenSep) + ": construct cell with copied token and finish construction process with separation");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InAngleAlignment));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: align relative angle");
-    AlienImGui::Text(formatHex(0) + ": no alignment");
-    AlienImGui::Text(formatHex(1) + ": align angle to multiples of 360 degrees");
-    AlienImGui::Text(formatHex(2) + ": align angle to multiples of 180 degrees");
-    AlienImGui::Text(formatHex(3) + ": align angle to multiples of 120 degrees");
-    AlienImGui::Text(formatHex(4) + ": align angle to multiples of 90 degrees");
-    AlienImGui::Text(formatHex(5) + ": align angle to multiples of 72 degrees");
-    AlienImGui::Text(formatHex(6) + ": align angle to multiples of 60 degrees");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InUniformDist));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: uniform distances");
-    AlienImGui::Text(
-        formatHex(Enums::ConstrInUniformDist_No)
-        + ": if constructed cell is connected to a nearby cell then\n    the spatial distance is taken as reference distance");
-    AlienImGui::Text(
-        formatHex(Enums::ConstrInUniformDist_Yes)
-        + ": if constructed cell is connected to a nearby cell then\n    the reference distance will be equal to the given\n    input distance at address"
-        + formatHex(Enums::Constr_InDist));
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InOutAngle));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: angle");
-    AlienImGui::Text("[the reference angle between this cell and the constructed\ncell and previous constructed cell and the constructed cell]");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InDist));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: distance");
-    AlienImGui::Text("[the reference distance between the constructed cell and the\nprevious constructed cell]");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellMaxConnections));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: max connections of constructed cell");
-    AlienImGui::Text(formatHex(0) +  ": adapt max connections automatically");
-    auto const& parameters = _simController->getSimulationParameters();
-    AlienImGui::Text(formatHex(1) + " - " + formatHex(parameters.cellMaxBonds) + ": max connections");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellBranchNumber));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: branch number of constructed cell");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellColor));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: color of constructed cell");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellFunction));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: specialization of constructed cell");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Computation) + ": Computation");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Scanner) + ": Scanner");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Digestion) + ": Digestion");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Constructor) + ": Construction");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Sensor) + ": Sensor");
-    AlienImGui::Text(formatHex(Enums::CellFunction_Muscle) + ": Muscle");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Constr_InCellFunctionData) + " - " + formatHex(Enums::Constr_InCellFunctionData + 48 + 16 + 1));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input:");
-    AlienImGui::Text("internal data of constructed cell\n(e.g. cell code and cell memory");
 }
 
 void _InspectorWindow::showMuscleTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Muscle_Output));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::MuscleOut_Success) + ": muscle activity was performed");
-    AlienImGui::Text(formatHex(Enums::MuscleOut_LimitReached) + ": no activity was performed since distance limit is reached");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Muscle_Input));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input:");
-    AlienImGui::Text(formatHex(Enums::MuscleIn_DoNothing) + ": do nothing");
-    AlienImGui::Text(formatHex(Enums::MuscleIn_Contract) + ": contract cell connection and produce impulse");
-    AlienImGui::Text(formatHex(Enums::MuscleIn_ContractRelax) + ": contract cell connection");
-    AlienImGui::Text(formatHex(Enums::MuscleIn_Expand) + ": expand cell connection and produce impulse");
-    AlienImGui::Text(formatHex(Enums::MuscleIn_ExpandRelax) + ": expand cell connection");
 }
 
 void _InspectorWindow::showSensorTableContent()
 {
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_Output));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output:");
-    AlienImGui::Text(formatHex(Enums::SensorOut_NothingFound) + ": nothing found");
-    AlienImGui::Text(formatHex(Enums::SensorOut_ClusterFound) + ": mass concentration found");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_Input));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input:");
-    AlienImGui::Text(formatHex(Enums::SensorIn_DoNothing) + ": do nothing");
-    AlienImGui::Text(formatHex(Enums::SensorIn_SearchVicinity) + ": search vicinity for mass concentration");
-    AlienImGui::Text(formatHex(Enums::SensorIn_SearchByAngle) + ": search in specific direction for mass concentration");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_InOutAngle));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: angle to specify the search direction");
-    AlienImGui::Text("Output: angle where mass concentration has been found");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_InMinDensity));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: minimum mass density of the mass concentration to be detected");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_InMaxDensity));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: maximum mass density of the mass concentration to be detected, 0 = no upper limit");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_InColor));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: color (number from 0-6) of the mass density to be detected");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_OutDensity));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: detected mass concentration");
 
     ImGui::Spacing();
     ImGui::TableNextRow();
 
     ImGui::TableSetColumnIndex(0);
-    AlienImGui::Text(formatHex(Enums::Sensor_OutDistance));
 
     ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Output: distance of detected mass concentration");
 }
 
 float _InspectorWindow::calcWindowWidth() const
 {
     if (isCell()) {
         auto cell = std::get<CellDescription>(_editorModel->getInspectedEntity(_entityId));
-        return StyleRepository::getInstance().scaleContent(280.0f + 50.0f * cell.tokens.size());
+        return StyleRepository::getInstance().scaleContent(280.0f);
     }
     return StyleRepository::getInstance().scaleContent(280.0f);
 }
-
-void _InspectorWindow::addToken(CellDescription& cell)
-{
-    auto const& parameters = _simController->getSimulationParameters();
-
-    auto data = std::string(parameters.tokenMemorySize, 0);
-    data[Enums::Branching_TokenBranchNumber] = static_cast<unsigned char>(cell.tokenBranchNumber);
-    cell.addToken(TokenDescription().setEnergy(parameters.tokenMinEnergy * 2).setData(data));
-}
-
-void _InspectorWindow::delToken(CellDescription& cell, int index)
-{
-    cell.tokens.erase(cell.tokens.begin() + index);
-}
-

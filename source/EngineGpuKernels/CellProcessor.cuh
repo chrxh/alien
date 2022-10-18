@@ -47,7 +47,7 @@ private:
 
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     _partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
@@ -59,7 +59,7 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::clearTag(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     _partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
@@ -71,52 +71,43 @@ __inline__ __device__ void CellProcessor::clearTag(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
 {
-    auto const partition = calcPartition(data.entities.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    Cell** cellPointers = &data.entities.cellPointers.at(partition.startIndex);
+    auto const partition = calcPartition(data.objects.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
+    Cell** cellPointers = &data.objects.cellPointers.at(partition.startIndex);
     data.cellMap.set_block(partition.numElements(), cellPointers);
 }
 
 __inline__ __device__ void CellProcessor::clearDensityMap(SimulationData& data)
 {
-    data.cellFunctionData.densityMap.clear();
+    data.preprocessedCellFunctionData.densityMap.clear();
 }
 
 __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.cellFunctionData.densityMap.addCell(data.entities.cellPointers.at(index));
+        data.preprocessedCellFunctionData.densityMap.addCell(data.objects.cellPointers.at(index));
     }
 }
 
 __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.entities.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.entities.cellPointers.at(index);
+        auto& cell = data.objects.cellPointers.at(index);
         if (cell->barrier) {
             continue;
         }
         auto mutationRate = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
         if (data.numberGen2.random() < 0.001f && data.numberGen1.random() < mutationRate * 1000) {
-            auto address = data.numberGen1.random(MAX_CELL_STATIC_BYTES + 2);
-            if (address < MAX_CELL_STATIC_BYTES) {
-                cell->staticData[address] = data.numberGen1.random(255);
-            } else if (address == MAX_CELL_STATIC_BYTES) {
-//                cell->metadata.color = data.numberGen1.random(6);
-            } else if (address == MAX_CELL_STATIC_BYTES + 1) {
-                cell->cellFunctionType = data.numberGen1.random(Enums::CellFunction_Count - 1);
-            } else {
-                cell->branchNumber = data.numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber);
-            }
+            //#TODO
         }
 
-        auto color = calcMod(cell->metadata.color, 7);
+        auto color = calcMod(cell->color, 7);
         auto transitionDuration = SpotCalculator::calcColorTransitionDuration(color, data, cell->absPos);
         ++cell->age;
         if (transitionDuration > 0 && cell->age > transitionDuration) {
             auto targetColor = SpotCalculator::calcColorTransitionTargetColor(color, data, cell->absPos);
-            cell->metadata.color = targetColor;
+            cell->color = targetColor;
             cell->age = 0;
         }
     }
@@ -125,7 +116,7 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
 __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 {
     _data = &data;
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     _partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     Cell* otherCells[18];
@@ -191,19 +182,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
                     && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
                     && !cell->barrier && !otherCell->barrier) {
-                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
-/*
-                    //create connection only in case branch numbers fit
-                    bool ascending = cell->numConnections > 0
-                        && ((cell->branchNumber - (cell->connections[0].cell->branchNumber + 1)) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0);
-                    if (ascending && (otherCell->branchNumber - (cell->branchNumber + 1)) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
-                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
-                    }
-                    if (!ascending && (cell->branchNumber - (otherCell->branchNumber + 1)) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
-                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell, true);
-                    }
-*/
-
+                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
 /*
@@ -237,7 +216,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     _data = &data;
 
@@ -257,7 +236,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     _data = &data;
@@ -279,7 +258,7 @@ __inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
 __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data)
 {
     _data = &data;
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -357,7 +336,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 {
     _data = &data;
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -386,7 +365,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 __inline__ __device__ void CellProcessor::verletUpdatePositions(SimulationData& data)
 {
     _data = &data;
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -407,7 +386,7 @@ __inline__ __device__ void CellProcessor::verletUpdatePositions(SimulationData& 
 __inline__ __device__ void CellProcessor::verletUpdateVelocities(SimulationData& data)
 {
     _data = &data;
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -423,7 +402,7 @@ __inline__ __device__ void CellProcessor::verletUpdateVelocities(SimulationData&
 
 __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -450,7 +429,7 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
 
 __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -467,7 +446,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 {
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
 
     auto partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -499,7 +478,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
                     EntityFactory factory;
                     factory.init(&data);
-                    factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
+                    factory.createParticle(radiationEnergy, particlePos, particleVel, cell->color);
                 }
             }
         }
@@ -509,7 +488,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 {
     _data = &data;
-    auto& cells = data.entities.cellPointers;
+    auto& cells = data.objects.cellPointers;
     auto partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -519,22 +498,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
 
-        bool destroyDueToInvocations = false;
-        if (cell->cellFunctionInvocations > 0) {
-            auto cellFunctionMinInvocations = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionMinInvocations, data, cell->absPos);
-            if (cell->cellFunctionInvocations > cellFunctionMinInvocations) {
-                auto cellFunctionInvocationDecayProb =
-                    SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionInvocationDecayProb, data, cell->absPos);
-                if (_data->numberGen1.random() < cellFunctionInvocationDecayProb) {
-                    destroyDueToInvocations = true;
-                }
-            }
-        }
-
         auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
         auto cellMaxBindingEnergy =
             SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
-        if (cell->energy < cellMinEnergy || destroyDueToInvocations) {
+        if (cell->energy < cellMinEnergy) {
             CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
         } else if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDelConnections(data, cell);

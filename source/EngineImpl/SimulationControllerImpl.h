@@ -3,7 +3,6 @@
 #include <thread>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/SymbolMap.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -19,7 +18,7 @@ public:
 
     void initCuda() override;
 
-    void newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap) override;
+    void newSimulation(uint64_t timestep, Settings const& settings) override;
     void clear() override;
 
     void registerImageResource(void* image) override;
@@ -103,9 +102,6 @@ public:
     GeneralSettings getGeneralSettings() const override;
     IntVector2D getWorldSize() const override;
     Settings getSettings() const override;
-    SymbolMap const& getSymbolMap() const override;
-    SymbolMap const& getOriginalSymbolMap() const override;
-    void setSymbolMap(SymbolMap const& symbolMap) override;
     MonitorData getStatistics() const override;
 
     std::optional<int> getTpsRestriction() const override;
@@ -118,8 +114,6 @@ private:
 
     Settings _origSettings;
     Settings _settings;
-    SymbolMap _symbolMap;
-    SymbolMap _origSymbolMap;
 
     EngineWorker _worker;
     std::thread* _thread = nullptr;

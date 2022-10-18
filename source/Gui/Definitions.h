@@ -100,9 +100,6 @@ using WindowController = std::shared_ptr<_WindowController>;
 class _SavePatternDialog;
 using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;
 
-class _SaveSymbolsDialog;
-using SaveSymbolsDialog = std::shared_ptr<_SaveSymbolsDialog>;
-
 class _OpenPatternDialog;
 using OpenPatternDialog = std::shared_ptr<_OpenPatternDialog>;
 
@@ -117,9 +114,6 @@ using CreatorWindow = std::shared_ptr<_CreatorWindow>;
 
 class _MultiplierWindow;
 using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
-
-class _SymbolsWindow;
-using SymbolsWindow = std::shared_ptr<_SymbolsWindow>;
 
 class _PatternAnalysisDialog;
 using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;

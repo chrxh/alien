@@ -3,7 +3,6 @@
 #include "EngineInterface/Enums.h"
 
 #include "SimulationData.cuh"
-#include "Token.cuh"
 #include "Cell.cuh"
 
 class EnergyGuidance

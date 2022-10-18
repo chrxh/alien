@@ -21,7 +21,6 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
 __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO);
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO);
 __global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO);
-__global__ void cudaGetTokenData(SimulationData data, DataAccessTO dataTO);
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access);
 __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData, bool createIds);
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO);

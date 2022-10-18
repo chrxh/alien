@@ -3,21 +3,10 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#define MAX_STRING_BYTES 50000000
-#define MAX_TOKEN_MEM_SIZE 256
+#include "EngineInterface/Enums.h"
+
+#define MAX_RAW_BYTES 50000000
 #define MAX_CELL_BONDS 6
-#define MAX_CELL_STATIC_BYTES 76
-#define MAX_CELL_MUTABLE_BYTES 8
-
-struct TokenAccessTO
-{
-	float energy;
-	char memory[MAX_TOKEN_MEM_SIZE];
-	int cellIndex;
-
-	//only for temporary use
-	int sequenceNumber;
-};
 
 struct ParticleMetadataAccessTO
 {
@@ -37,16 +26,14 @@ struct ParticleAccessTO
 
 struct CellMetadataAccessTO
 {
-    unsigned char color;
-
     int nameLen;
-    int nameStringIndex;
+    uint64_t nameStringIndex;
 
     int descriptionLen;
-    int descriptionStringIndex;
+    uint64_t descriptionStringIndex;
 
     int sourceCodeLen;
-    int sourceCodeStringIndex;
+    uint64_t sourceCodeStringIndex;
 };
 
 struct ConnectionAccessTO
@@ -59,21 +46,22 @@ struct ConnectionAccessTO
 struct CellAccessTO
 {
 	uint64_t id;
-	float2 pos;
+    ConnectionAccessTO connections[MAX_CELL_BONDS];
+
+    float2 pos;
     float2 vel;
 	float energy;
-	int maxConnections;
+    int color;
+    int maxConnections;
 	int numConnections;
-	int branchNumber;
-	bool tokenBlocked;
-    ConnectionAccessTO connections[MAX_CELL_BONDS];
-    int cellFunctionType;
-    char staticData[MAX_CELL_STATIC_BYTES];
-    char mutableData[MAX_CELL_MUTABLE_BYTES];
-    int cellFunctionInvocations;
-    CellMetadataAccessTO metadata;
-	bool barrier;
-	int age;
+	int executionOrderNumber;
+    bool barrier;
+    int age;
+
+	bool cellFunctionBlocked;
+    Enums::CellFunction cellFunction;
+
+	CellMetadataAccessTO metadata;
 
 	int selected;
 };
@@ -84,8 +72,6 @@ struct DataAccessTO
 	CellAccessTO* cells = nullptr;
 	int* numParticles = nullptr;
 	ParticleAccessTO* particles = nullptr;
-	int* numTokens = nullptr;
-	TokenAccessTO* tokens = nullptr;
     int* numStringBytes = nullptr;
     char* stringBytes = nullptr;
 
@@ -95,8 +81,6 @@ struct DataAccessTO
 			&& cells == other.cells
 			&& numParticles == other.numParticles
 			&& particles == other.particles
-			&& numTokens == other.numTokens
-			&& tokens == other.tokens
             && numStringBytes == other.numStringBytes
             && stringBytes == other.stringBytes;
 	}

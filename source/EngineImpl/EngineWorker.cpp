@@ -89,8 +89,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
             zoom);
 
         auto arraySizes = _cudaSimulation->getArraySizes();
-        DataAccessTO dataTO = _dataTOCache->getDataTO(
-            {arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+        DataAccessTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
 
         _cudaSimulation->getOverlayData(
             {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
@@ -112,7 +111,7 @@ ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D co
 
     auto arraySizes = _cudaSimulation->getArraySizes();
     DataAccessTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
     _cudaSimulation->getSimulationData(
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
@@ -129,7 +128,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     EngineWorkerGuard access(this);
 
     auto arraySizes = _cudaSimulation->getArraySizes();
-    DataAccessTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    DataAccessTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
     _cudaSimulation->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
@@ -145,7 +144,7 @@ ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool i
     EngineWorkerGuard access(this);
 
     auto arraySizes = _cudaSimulation->getArraySizes();
-    DataAccessTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    DataAccessTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
     _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
@@ -162,7 +161,7 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
 
     auto arraySizes = _cudaSimulation->getArraySizes();
     DataAccessTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
     _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
@@ -179,7 +178,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> e
 
     auto arraySizes = _cudaSimulation->getArraySizes();
     DataAccessTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
     _cudaSimulation->getInspectedSimulationData(entityIds, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
@@ -210,9 +209,6 @@ namespace
         NumberOfEntities result;
         for (auto const& cluster : data.clusters) {
             result.cells += cluster.cells.size();
-            for (auto const& cell : cluster.cells) {
-                result.tokens += cell.tokens.size();
-            }
         }
         result.particles = data.particles.size();
         return result;
@@ -221,9 +217,6 @@ namespace
     {
         NumberOfEntities result;
         result.cells = data.cells.size();
-        for (auto const& cell : data.cells) {
-            result.tokens += cell.tokens.size();
-        }
         result.particles = data.particles.size();
         return result;
     }
@@ -235,8 +228,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(
-        {numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
+    _cudaSimulation->resizeArraysIfNecessary({numberOfEntities.cells, numberOfEntities.particles});
 
     DataAccessTO dataTO = provideTO();
 
@@ -255,8 +247,7 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(
-        {numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
+    _cudaSimulation->resizeArraysIfNecessary({numberOfEntities.cells, numberOfEntities.particles});
 
     DataAccessTO dataTO = provideTO();
 
@@ -275,7 +266,7 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary({numberOfEntities.cells, numberOfEntities.particles, numberOfEntities.tokens});
+    _cudaSimulation->resizeArraysIfNecessary({numberOfEntities.cells, numberOfEntities.particles});
 
     DataAccessTO dataTO = provideTO();
 
@@ -552,7 +543,7 @@ bool EngineWorker::isSimulationRunning() const
 DataAccessTO EngineWorker::provideTO()
 {
     auto arraySizes = _cudaSimulation->getArraySizes();
-    return _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize, arraySizes.tokenArraySize});
+    return _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
 }
 
 void EngineWorker::resetProcessMonitorData()

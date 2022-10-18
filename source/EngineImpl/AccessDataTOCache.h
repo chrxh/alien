@@ -17,12 +17,10 @@ public:
     {
         int cellArraySize;
         int particleArraySize;
-        int tokenArraySize;
 
         bool operator==(ArraySizes const& other) const
         {
-            return cellArraySize == other.cellArraySize && particleArraySize == other.particleArraySize
-                && tokenArraySize == other.tokenArraySize;
+            return cellArraySize == other.cellArraySize && particleArraySize == other.particleArraySize;
         }
 
         bool operator!=(ArraySizes const& other) const { return !operator==(other); };

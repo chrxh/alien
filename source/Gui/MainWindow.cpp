@@ -54,7 +54,6 @@
 #include "WindowController.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
-#include "SymbolsWindow.h"
 #include "PatternAnalysisDialog.h"
 #include "MessageDialog.h"
 #include "FpsController.h"
@@ -362,7 +361,6 @@ void _MainWindow::processMenubar()
     auto patternEditorWindow = _editorController->getPatternEditorWindow();
     auto creatorWindow = _editorController->getCreatorWindow();
     auto multiplierWindow = _editorController->getMultiplierWindow();
-    auto symbolsWindow = _editorController->getSymbolsWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -482,12 +480,6 @@ void _MainWindow::processMenubar()
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
-            }
-            ImGui::EndDisabled();
-            ImGui::Separator();
-            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
-            if (ImGui::MenuItem("Symbols", "ALT+B", symbolsWindow->isOn())) {
-                symbolsWindow->setOn(!symbolsWindow->isOn());
             }
             ImGui::EndDisabled();
             ImGui::Separator();
@@ -641,9 +633,6 @@ void _MainWindow::processMenubar()
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
             _editorController->onCloseAllInspectorWindows();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
-            symbolsWindow->setOn(!symbolsWindow->isOn());
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
             _editorController->onCopy();

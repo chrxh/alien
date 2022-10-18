@@ -2,74 +2,36 @@
 
 namespace Enums
 {
-    using Branching = int;
-    enum Branching_
-    {
-        Branching_TokenBranchNumber = 0
-    };
-
     using CellFunction = int;
     enum CellFunction_
     {
-        CellFunction_Computation,
-        CellFunction_NeuralNet,
-        CellFunction_Scanner,
-        CellFunction_Digestion,
+        CellFunction_None,
+        CellFunction_Neurons,
+        CellFunction_Transmitter,
         CellFunction_Constructor,
         CellFunction_Sensor,
+        CellFunction_Nerve,
+        CellFunction_Digestion,
+        CellFunction_Injector,
         CellFunction_Muscle,
         CellFunction_Count
     };
 
-    using EnergyGuidance = int;
-    enum EnergyGuidance_
+    using SensorMode = int;
+    enum SensorMode_
     {
-        EnergyGuidance_Input = 1,
-        EnergyGuidance_InValueCell = 2,
-        EnergyGuidance_InValueToken = 3
+        SensorMode_AllAngles = 0,
+        SensorMode_FixedAngle = 1
     };
 
-    using EnergyGuidanceIn = int;
-    enum EnergyGuidanceIn_
+    using ConstructorMode = int;
+    enum ConstructorMode_
     {
-        EnergyGuidanceIn_Deactivated,
-        EnergyGuidanceIn_BalanceCell,
-        EnergyGuidanceIn_BalanceToken,
-        EnergyGuidanceIn_BalanceBoth,
-        EnergyGuidanceIn_HarvestCell,
-        EnergyGuidanceIn_HarvestToken,
-        EnergyGuidanceIn_Count
+        ConstructorMode_Automatic = 0,
+        ConstructorMode_Manual = 1
     };
 
-    using ComputationOperation = int;
-    enum ComputationOperation_
-    {
-        ComputationOperation_Mov,
-        ComputationOperation_Add,
-        ComputationOperation_Sub,
-        ComputationOperation_Mul,
-        ComputationOperation_Div,
-        ComputationOperation_Xor,
-        ComputationOperation_Or,
-        ComputationOperation_And,
-        ComputationOperation_Ifg,
-        ComputationOperation_Ifge,
-        ComputationOperation_Ife,
-        ComputationOperation_Ifne,
-        ComputationOperation_Ifle,
-        ComputationOperation_Ifl,
-        ComputationOperation_Else,
-        ComputationOperation_Endif
-    };
-    using ComputationOpType = int;
-    enum ComputationOpType_
-    {
-        ComputationOpType_Mem,
-        ComputationOpType_MemMem,
-        ComputationOpType_Cmem,
-        ComputationOpType_Constant
-    };
-
+    /*
     using Constr = int;
     enum Constr_ {
         Constr_Output = 5,
@@ -212,4 +174,5 @@ namespace Enums
         MuscleIn_ExpandRelax,
         MuscleIn_Count
     };
+*/
 }

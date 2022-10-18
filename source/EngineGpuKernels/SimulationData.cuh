@@ -3,13 +3,12 @@
 #include <atomic>
 
 #include "Base.cuh"
-#include "CellFunctionData.cuh"
+#include "ProprocessedCellFunctionData.cuh"
 #include "Definitions.cuh"
 #include "EngineInterface/GpuSettings.h"
-#include "Entities.cuh"
+#include "Objects.cuh"
 #include "Map.cuh"
 #include "Operations.cuh"
-#include "Token.cuh"
 
 struct SimulationData
 {
@@ -19,25 +18,23 @@ struct SimulationData
     ParticleMap particleMap;
 
     //objects
-    Entities entities;
-    Entities entitiesForCleanup;
+    Objects objects;
+    Objects tempObjects;
 
     //additional data for cell functions
     RawMemory processMemory;
-    CellFunctionData cellFunctionData;
+    PreprocessedCellFunctionData preprocessedCellFunctionData;
 
     //scheduled operations
     TempArray<StructuralOperation> structuralOperations;
-    TempArray<SensorOperation> sensorOperations;
-    TempArray<NeuralNetOperation> neuralNetOperations;
 
     //number generators
     CudaNumberGenerator numberGen1;
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
     void init(int2 const& worldSize);
-    bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens);
-    void resizeEntitiesForCleanup(int additionalCells, int additionalParticles, int additionalTokens);
+    bool shouldResize(int additionalCells, int additionalParticles);
+    void resizeEntitiesForCleanup(int additionalCells, int additionalParticles);
     void resizeRemainings();
     bool isEmpty();
     void free();

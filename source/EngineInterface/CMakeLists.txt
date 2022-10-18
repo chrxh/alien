@@ -1,9 +1,6 @@
 
 add_library(alien_engine_interface_lib
     ShallowUpdateSelectionData.h
-    CellComputationCompiler.cpp
-    CellComputationCompiler.h
-    CellInstruction.h
     Colors.h
     Definitions.h
     DescriptionHelper.cpp
@@ -30,8 +27,6 @@ add_library(alien_engine_interface_lib
     SimulationParametersSpotValues.h
     SpaceCalculator.cpp
     SpaceCalculator.h
-    SymbolMap.cpp
-    SymbolMap.h
     ZoomLevels.h)
 
 target_link_libraries(alien_engine_interface_lib Boost::boost)

@@ -13,7 +13,6 @@
 #include "PatternEditorWindow.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
-#include "SymbolsWindow.h"
 
 _EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
@@ -24,7 +23,6 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
-    _symbolsWindow = std::make_shared<_SymbolsWindow>(_simController);
 }
 
 bool _EditorController::isOn() const
@@ -48,7 +46,6 @@ void _EditorController::process()
         _patternEditorWindow->process();
         _creatorWindow->process();
         _multiplierWindow->process();
-        _symbolsWindow->process();
     }
     if (!_creatorWindow->isOn()) {
         _editorModel->setDrawMode(false);
@@ -131,11 +128,6 @@ CreatorWindow _EditorController::getCreatorWindow() const
 MultiplierWindow _EditorController::getMultiplierWindow() const
 {
     return _multiplierWindow;
-}
-
-SymbolsWindow _EditorController::getSymbolsWindow() const
-{
-    return _symbolsWindow;
 }
 
 bool _EditorController::areInspectionWindowsActive() const

@@ -20,7 +20,6 @@ void _DataAccessKernelsLauncher::getData(
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
-    KERNEL_CALL(cudaGetTokenData, data, dataTO);
     KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
@@ -33,7 +32,6 @@ void _DataAccessKernelsLauncher::getSelectedData(
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
-    KERNEL_CALL(cudaGetTokenData, data, dataTO);
     KERNEL_CALL(cudaGetSelectedParticleData, data, dataTO);
 }
 
@@ -46,7 +44,6 @@ void _DataAccessKernelsLauncher::getInspectedData(
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetInspectedCellDataWithoutConnections, entityIds, data, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
-    KERNEL_CALL(cudaGetTokenData, data, dataTO);
     KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, dataTO);
 }
 

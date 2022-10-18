@@ -19,7 +19,6 @@ public:
     PatternEditorWindow getPatternEditorWindow() const;
     CreatorWindow getCreatorWindow() const;
     MultiplierWindow getMultiplierWindow() const;
-    SymbolsWindow getSymbolsWindow() const;
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
@@ -54,7 +53,6 @@ private:
     PatternEditorWindow _patternEditorWindow;
     CreatorWindow _creatorWindow; 
     MultiplierWindow _multiplierWindow; 
-    SymbolsWindow _symbolsWindow;
 
     SimulationController _simController;
     Viewport _viewport;

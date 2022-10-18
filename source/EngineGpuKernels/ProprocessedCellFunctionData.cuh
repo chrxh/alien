@@ -2,7 +2,7 @@
 
 #include "DensityMap.cuh"
 
-struct CellFunctionData
+struct PreprocessedCellFunctionData
 {
     DensityMap densityMap;
 
