@@ -94,8 +94,9 @@ struct Cell
     bool barrier;
     int age;
 
-    bool cellFunctionBlocked;
+    bool underConstruction;
     bool inputBlocked;
+    bool outputBlocked;
     Enums::CellFunction cellFunction;
     CellFunctionData cellFunctionData;
     Activity activity;

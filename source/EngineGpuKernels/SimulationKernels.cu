@@ -63,7 +63,7 @@ __global__ void cudaNextTimestep_substep6(SimulationData data, SimulationResult 
 __global__ void cudaNextTimestep_substep7(SimulationData data)
 {
     CellProcessor cellProcessor;
-    cellProcessor.verletUpdateVelocities(data);             //#TODO move to step11?
+    cellProcessor.verletUpdateVelocities(data);
 }
 
 __global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result)

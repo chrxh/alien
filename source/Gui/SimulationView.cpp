@@ -329,19 +329,21 @@ void _SimulationView::updateImageFromSimulation()
                 {
                     auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
-                    auto text = cellFunctionToStringMap.at(overlayElement.cellType);
-                    drawList->AddText(
-                        StyleRepository::getInstance().getMediumFont(),
-                        fontSize,
-                        {viewPos.x - 2 * fontSize, viewPos.y},
-                        Const::CellFunctionOverlayShadowColor,
-                        text.c_str());
-                    drawList->AddText(
-                        StyleRepository::getInstance().getMediumFont(),
-                        fontSize,
-                        {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
-                        Const::CellFunctionOverlayColor,
-                        text.c_str());
+                    if (overlayElement.cellType != Enums::CellFunction_None) {
+                        auto text = cellFunctionToStringMap.at(overlayElement.cellType);
+                        drawList->AddText(
+                            StyleRepository::getInstance().getMediumFont(),
+                            fontSize,
+                            {viewPos.x - 2 * fontSize, viewPos.y},
+                            Const::CellFunctionOverlayShadowColor,
+                            text.c_str());
+                        drawList->AddText(
+                            StyleRepository::getInstance().getMediumFont(),
+                            fontSize,
+                            {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
+                            Const::CellFunctionOverlayColor,
+                            text.c_str());
+                    }
                 }
                 {
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f});
