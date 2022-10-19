@@ -351,6 +351,6 @@ void _CreatorWindow::incBranchNumber()
 {
     if (_ascendingBranchNumbers) {
         auto parameters = _simController->getSimulationParameters();
-        _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxTokenBranchNumber;
+        _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxExecutionOrderNumber;
     }
 }

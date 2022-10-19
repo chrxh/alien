@@ -5,7 +5,7 @@
 
 #include "AccessTOs.cuh"
 #include "Base.cuh"
-#include "EntityFactory.cuh"
+#include "ObjectFactory.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
@@ -452,7 +452,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     }
                     cell->energy -= radiationEnergy;
 
-                    EntityFactory factory;
+                    ObjectFactory factory;
                     factory.init(&data);
                     factory.createParticle(radiationEnergy, particlePos, particleVel, cell->color);
                 }

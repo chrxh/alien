@@ -140,7 +140,8 @@ namespace
 {
     bool hasChanges(CellDescription const& left, CellDescription const& right)
     {
-        return left.energy != right.energy || left.maxConnections != right.maxConnections || left.cellFunctionBlocked != right.cellFunctionBlocked
+        return left.energy != right.energy || left.maxConnections != right.maxConnections || left.underConstruction != right.underConstruction
+            || left.inputBlocked != right.inputBlocked || left.outputBlocked != right.outputBlocked
             || left.executionOrderNumber != right.executionOrderNumber || left.cellFunction != right.cellFunction
             || left.metadata.computerSourcecode != right.metadata.computerSourcecode
             || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
@@ -193,11 +194,10 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::SliderIntParameters()
                 .name("Execution order")
                 .textWidth(MaxCellContentTextWidth)
-                .max(parameters.cellMaxTokenBranchNumber - 1)
+                .max(parameters.cellMaxExecutionOrderNumber - 1)
                 .min(0),
             cell.executionOrderNumber);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Block token").textWidth(MaxCellContentTextWidth), cell.cellFunctionBlocked);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
 
         AlienImGui::Group("Metadata");

@@ -346,7 +346,7 @@ __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data
     if (cell->tryLock()) {
 
         if (0 == cell->numConnections && cell->energy != 0 /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
-            EntityFactory factory;
+            ObjectFactory factory;
             factory.init(&data);
             factory.createParticle(cell->energy, cell->absPos, cell->vel, cell->color);
             cell->setDeleted();

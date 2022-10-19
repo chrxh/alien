@@ -15,34 +15,23 @@ public:
 private:
     void saveRepetitiveActiveClustersToFiles(std::string const& filename);
 
-    struct CellFeatureAnalysisDescription
-    {
-        int cellFunction;
-
-        bool operator<(CellFeatureAnalysisDescription const& other) const
-        {
-            if (cellFunction != other.cellFunction) {
-                return cellFunction < other.cellFunction;
-            }
-            return false;
-        }
-        bool operator==(CellFeatureAnalysisDescription const& other) const { return cellFunction == other.cellFunction; }
-        bool operator!=(CellFeatureAnalysisDescription const& other) const { return !operator==(other); }
-    };
     struct CellAnalysisDescription
     {
         int maxConnections;
         int numConnections;
-        bool cellFunctionBlocked;
+        bool underConstruction;
+        bool inputBlocked;
+        bool outputBlocked;
         int executionOrderNumber;
         int color;
-        CellFeatureAnalysisDescription feature;
+        int cellFunction;
 
         bool operator==(CellAnalysisDescription const& other) const
         {
-            return maxConnections == other.maxConnections && numConnections == other.numConnections && cellFunctionBlocked == other.cellFunctionBlocked
-                && executionOrderNumber == other.executionOrderNumber && feature == other.feature
-                /*&& color == other.color*/;
+            return maxConnections == other.maxConnections && numConnections == other.numConnections && underConstruction == other.underConstruction
+                && inputBlocked == other.inputBlocked && outputBlocked == other.outputBlocked && executionOrderNumber == other.executionOrderNumber
+                && cellFunction == other.cellFunction
+                && color == other.color;
         }
 
         bool operator!=(CellAnalysisDescription const& other) const { return !operator==(other); }
@@ -55,20 +44,24 @@ private:
             if (numConnections != other.numConnections) {
                 return numConnections < other.numConnections;
             }
-            if (cellFunctionBlocked != other.cellFunctionBlocked) {
-                return cellFunctionBlocked < other.cellFunctionBlocked;
+            if (underConstruction != other.underConstruction) {
+                return underConstruction < other.underConstruction;
+            }
+            if (inputBlocked != other.inputBlocked) {
+                return underConstruction < other.underConstruction;
+            }
+            if (outputBlocked != other.outputBlocked) {
+                return underConstruction < other.underConstruction;
             }
             if (executionOrderNumber != other.executionOrderNumber) {
                 return executionOrderNumber < other.executionOrderNumber;
             }
-            if (feature != other.feature) {
-                return feature < other.feature;
+            if (cellFunction != other.cellFunction) {
+                return cellFunction < other.cellFunction;
             }
-            /*
             if (color != other.color) {
                 return color < other.color;
             }
-*/
             return false;
         }
     };

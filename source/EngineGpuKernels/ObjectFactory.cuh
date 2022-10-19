@@ -11,7 +11,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-class EntityFactory
+class ObjectFactory
 {
 public:
     __inline__ __device__ void init(SimulationData* data);
@@ -34,13 +34,13 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void EntityFactory::init(SimulationData* data)
+__inline__ __device__ void ObjectFactory::init(SimulationData* data)
 {
     _data = data;
     _map.init(data->worldSize);
 }
 
-__inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds)
+__inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
     Particle* particle = _data->objects.particles.getNewElement();
@@ -58,7 +58,7 @@ __inline__ __device__ Particle* EntityFactory::createParticleFromTO(ParticleAcce
 }
 
 __inline__ __device__ Cell*
-EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO, bool createIds)
+ObjectFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO, bool createIds)
 {
     Cell** cellPointer = _data->objects.cellPointers.getNewElement();
     Cell* cell = cellTargetArray + targetIndex;
@@ -69,7 +69,9 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
-    cell->underConstruction = cellTO.cellFunctionBlocked;
+    cell->underConstruction = cellTO.underConstruction;
+    cell->inputBlocked = cellTO.inputBlocked;
+    cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->numConnections = cellTO.numConnections;
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -111,7 +113,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     return cell;
 }
 
-__inline__ __device__ void EntityFactory::changeCellFromTO(
+__inline__ __device__ void ObjectFactory::changeCellFromTO(
     CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell)
 {
     cell->id = cellTO.id;
@@ -119,7 +121,9 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
-    cell->underConstruction = cellTO.cellFunctionBlocked;
+    cell->underConstruction = cellTO.underConstruction;
+    cell->inputBlocked = cellTO.inputBlocked;
+    cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
     cell->cellFunction = cellTO.cellFunction;
@@ -149,14 +153,14 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
         dataTO.stringBytes);
 }
 
-__inline__ __device__ void EntityFactory::changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle)
+__inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle)
 {
     particle->energy = particleTO.energy;
     particle->absPos = particleTO.pos;
     particle->color = particleTO.metadata.color;
 }
 
-__inline__ __device__ void EntityFactory::copyBytes(int& targetLen, char*& targetString, int sourceLen, uint64_t sourceStringIndex, char* stringBytes)
+__inline__ __device__ void ObjectFactory::copyBytes(int& targetLen, char*& targetString, int sourceLen, uint64_t sourceStringIndex, char* stringBytes)
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
@@ -168,7 +172,7 @@ __inline__ __device__ void EntityFactory::copyBytes(int& targetLen, char*& targe
 }
 
 __inline__ __device__ Particle*
-EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
+ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
     Particle* particle = _data->objects.particles.getNewElement();
@@ -183,7 +187,7 @@ EntityFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     return particle;
 }
 
-__inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
     auto cell = _data->objects.cells.getNewElement();
     auto cellPointers = _data->objects.cellPointers.getNewElement();
@@ -194,7 +198,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->vel = vel;
     cell->energy = energy;
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
+    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumber - 1);
     cell->numConnections = 0;
     cell->underConstruction = false;
     cell->locked = 0;
@@ -210,7 +214,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     return cell;
 }
 
-__inline__ __device__ Cell* EntityFactory::createCell()
+__inline__ __device__ Cell* ObjectFactory::createCell()
 {
     auto result = _data->objects.cells.getNewElement();
     auto cellPointer = _data->objects.cellPointers.getNewElement();

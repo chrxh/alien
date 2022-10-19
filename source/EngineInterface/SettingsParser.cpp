@@ -67,9 +67,8 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     JsonParser::encodeDecode(
         tree, simPar.cellMaxForceDecayProb, defaultPar.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", parserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", parserTask);
-    JsonParser::encodeDecode(tree, simPar.cellMaxToken, defaultPar.cellMaxToken, "simulation parameters.cell.max token", parserTask);
     JsonParser::encodeDecode(
-        tree, simPar.cellMaxTokenBranchNumber, defaultPar.cellMaxTokenBranchNumber, "simulation parameters.cell.max token branch number", parserTask);
+        tree, simPar.cellMaxExecutionOrderNumber, defaultPar.cellMaxExecutionOrderNumber, "simulation parameters.cell.max execution order number", parserTask);
     JsonParser::encodeDecode(tree, simPar.spotValues.cellMinEnergy, defaultPar.spotValues.cellMinEnergy, "simulation parameters.cell.min energy", parserTask);
     JsonParser::encodeDecode(
         tree, simPar.cellTransformationProb, defaultPar.cellTransformationProb, "simulation parameters.cell.transformation probability", parserTask);

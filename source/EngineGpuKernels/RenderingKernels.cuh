@@ -6,7 +6,7 @@
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
-#include "EntityFactory.cuh"
+#include "ObjectFactory.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
 #include "RenderingData.cuh"

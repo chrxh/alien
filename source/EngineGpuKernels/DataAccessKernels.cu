@@ -26,7 +26,9 @@ namespace
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
         cellTO.executionOrderNumber = cell->executionOrderNumber;
-        cellTO.cellFunctionBlocked = cell->underConstruction;
+        cellTO.underConstruction = cell->underConstruction;
+        cellTO.inputBlocked = cell->inputBlocked;
+        cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
         cellTO.color = cell->color;
         cellTO.age = cell->age;
@@ -253,7 +255,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
 
 __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData, bool createIds)
 {
-    __shared__ EntityFactory factory;
+    __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
         factory.init(&data);
     }

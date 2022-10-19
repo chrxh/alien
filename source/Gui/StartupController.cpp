@@ -48,6 +48,7 @@ void _StartupController::process()
             deserializedData.settings.generalSettings.worldSizeX = 1000;
             deserializedData.settings.generalSettings.worldSizeY = 500;
             deserializedData.timestep = 0;
+            deserializedData.content = ClusteredDataDescription();
         }
 
         _simController->newSimulation(deserializedData.timestep, deserializedData.settings);
