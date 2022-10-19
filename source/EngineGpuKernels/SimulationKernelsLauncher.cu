@@ -19,9 +19,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_substep1, data);
     KERNEL_CALL(cudaNextTimestep_substep2, data);
     KERNEL_CALL(cudaNextTimestep_substep3, data);
-    KERNEL_CALL(cudaNextTimestep_substep4, data);
+    KERNEL_CALL(cudaNextTimestep_substep4, data, _counter == 0);
     KERNEL_CALL(cudaNextTimestep_substep5, data);
-    KERNEL_CALL(cudaNextTimestep_substep6, data, result);
+    KERNEL_CALL(cudaNextTimestep_substep6, data, _counter == 0);
     KERNEL_CALL(cudaNextTimestep_substep7, data);
     KERNEL_CALL(cudaNextTimestep_substep8, data, result);
     if (_counter == 0) {

@@ -15,7 +15,6 @@ class CellProcessor
 {
 public:
     __inline__ __device__ void init(SimulationData& data);
-    __inline__ __device__ void clearTag(SimulationData& data);
     __inline__ __device__ void updateMap(SimulationData& data);
     __inline__ __device__ void clearDensityMap(SimulationData& data);
     __inline__ __device__ void fillDensityMap(SimulationData& data);
@@ -25,7 +24,7 @@ public:
     __inline__ __device__ void checkForces(SimulationData& data);
     __inline__ __device__ void updateVelocities(SimulationData& data);    //prerequisite: tag from collisions
 
-    __inline__ __device__ void calcConnectionForces(SimulationData& data);
+    __inline__ __device__ void calcConnectionForces(SimulationData& data, bool considerAngles);
     __inline__ __device__ void checkConnections(SimulationData& data);
     __inline__ __device__ void verletUpdatePositions(SimulationData& data);
     __inline__ __device__ void verletUpdateVelocities(SimulationData& data);
@@ -54,18 +53,6 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
         auto& cell = cells.at(index);
 
         cell->temp1 = {0, 0};
-    }
-}
-
-__inline__ __device__ void CellProcessor::clearTag(SimulationData& data)
-{
-    auto& cells = data.objects.cellPointers;
-    _partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-    for (int index = _partition.startIndex; index <= _partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-
-        cell->tag = 0;
     }
 }
 
@@ -255,7 +242,7 @@ __inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data, bool considerAngles)
 {
     _data = &data;
     auto& cells = data.objects.cellPointers;
@@ -283,7 +270,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation / 2 * cellBindingForce;
 
-            if (cell->numConnections >= 2) {
+            if (considerAngles && cell->numConnections >= 2) {
 
                 auto lastIndex = (i + cell->numConnections - 1) % cell->numConnections;
                 auto lastConnectedCell = cell->connections[lastIndex].cell;
