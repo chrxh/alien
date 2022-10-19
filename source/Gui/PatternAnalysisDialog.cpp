@@ -122,13 +122,12 @@ auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cl
             CellAnalysisDescription result;
             result.maxConnections = cell.maxConnections;
             result.numConnections = cell.connections.size();
-            result.cellFunctionBlocked = cell.cellFunctionBlocked;
+            result.underConstruction = cell.underConstruction;
+            result.inputBlocked = cell.inputBlocked;
+            result.outputBlocked = cell.outputBlocked;
             result.executionOrderNumber = cell.executionOrderNumber;
-            //            result.color = cell.metadata.color;
-
-            CellFeatureAnalysisDescription featureAnalysisData;
-            featureAnalysisData.cellFunction = cell.cellFunction;
-            result.feature = featureAnalysisData;
+            result.color = cell.color;
+            result.cellFunction = cell.cellFunction;
 
             cellAnalysisDescById.insert_or_assign(cell.id, result);
         }

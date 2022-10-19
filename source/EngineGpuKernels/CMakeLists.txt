@@ -30,7 +30,6 @@ add_library(alien_engine_gpu_kernels_lib
     EditKernelsLauncher.cu
     EditKernelsLauncher.cuh
     EnergyGuidance.cuh
-    EntityFactory.cuh
     FlowFieldKernels.cu
     FlowFieldKernels.cuh
     GarbageCollectorKernels.cu
@@ -52,6 +51,7 @@ add_library(alien_engine_gpu_kernels_lib
     NeuralNetProcessor.cuh
     Objects.cu
     Objects.cuh
+    ObjectFactory.cuh
     Operations.cuh
     Particle.cuh
     ParticleProcessor.cuh

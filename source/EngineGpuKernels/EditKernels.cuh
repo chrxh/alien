@@ -10,7 +10,7 @@
 #include "AccessTOs.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
-#include "EntityFactory.cuh"
+#include "ObjectFactory.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "SelectionResult.cuh"
 #include "CellConnectionProcessor.cuh"

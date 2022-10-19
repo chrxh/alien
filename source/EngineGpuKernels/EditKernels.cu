@@ -32,7 +32,7 @@ __global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO)
         auto const& cell = data.objects.cellPointers.at(index);
         auto const& cellTO = changeDataTO.cells[0];
         if (cell->id == cellTO.id) {
-            EntityFactory entityFactory;
+            ObjectFactory entityFactory;
             entityFactory.init(&data);
             entityFactory.changeCellFromTO(cellTO, changeDataTO, cell);
         }
@@ -47,7 +47,7 @@ __global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataT
         auto const& particle = data.objects.particlePointers.at(index);
         auto const& particleTO = changeDataTO.particles[0];
         if (particle->id == particleTO.id) {
-            EntityFactory entityFactory;
+            ObjectFactory entityFactory;
             entityFactory.init(&data);
             entityFactory.changeParticleFromTO(particleTO, particle);
         }

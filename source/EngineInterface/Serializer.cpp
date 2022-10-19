@@ -63,7 +63,9 @@ namespace cereal
            data.connections,
            data.executionOrderNumber,
            data.color,
-           data.cellFunctionBlocked,
+           data.underConstruction,
+           data.inputBlocked,
+           data.outputBlocked,
            data.cellFunction,
            data.barrier,
            data.age);

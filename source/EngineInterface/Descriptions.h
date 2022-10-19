@@ -28,7 +28,9 @@ struct CellDescription
     bool barrier;
     int age;
 
-    bool cellFunctionBlocked;
+    bool underConstruction;
+    bool inputBlocked;
+    bool outputBlocked;
     Enums::CellFunction cellFunction = Enums::CellFunction_None;
 
     CellMetadata metadata;
@@ -74,9 +76,9 @@ struct CellDescription
         connections = value;
         return *this;
     }
-    CellDescription& setcellFunctionBlocked(bool value)
+    CellDescription& setUnderConstruction(bool value)
     {
-        cellFunctionBlocked = value;
+        underConstruction = value;
         return *this;
     }
     CellDescription& setExecutionOrderNumber(int value)

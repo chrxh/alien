@@ -101,7 +101,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
             
             auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, particle->absPos);
             if (particle->energy >= cellMinEnergy) {
-                EntityFactory factory;
+                ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);
                 cell->color = particle->color;

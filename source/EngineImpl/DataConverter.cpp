@@ -259,7 +259,9 @@ CellDescription DataConverter::createCellDescription(DataAccessTO const& dataTO,
         connections.emplace_back(connection);
     }
     result.connections = connections;
-    result.cellFunctionBlocked = cellTO.cellFunctionBlocked;
+    result.underConstruction = cellTO.underConstruction;
+    result.inputBlocked = cellTO.inputBlocked;
+    result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
@@ -322,7 +324,9 @@ void DataConverter::addCell(
     cellTO.energy = toFloat(cellDesc.energy);
 	cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
-    cellTO.cellFunctionBlocked = cellDesc.cellFunctionBlocked;
+    cellTO.underConstruction = cellDesc.underConstruction;
+    cellTO.inputBlocked = cellDesc.inputBlocked;
+    cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.cellFunction;
 	cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;

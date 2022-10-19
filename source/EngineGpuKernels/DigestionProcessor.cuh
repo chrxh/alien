@@ -147,7 +147,7 @@ DigestionProcessor::process(Cell* cell, char color_, char& output, float& tokenE
             particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
             auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
             cell->energy -= radiationEnergy;
-            EntityFactory factory;
+            ObjectFactory factory;
             factory.init(&data);
             auto particle = factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
         }

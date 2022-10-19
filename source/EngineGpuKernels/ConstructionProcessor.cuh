@@ -385,7 +385,7 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     ConstructionData const& constructionData,
     Cell*& result)
 {
-    EntityFactory factory;
+    ObjectFactory factory;
     factory.init(&data);
     result = factory.createCell();
     result->energy = energyOfNewCell;
@@ -394,7 +394,7 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     result->maxConnections = getMaxConnections(constructionData);
     result->numConnections = 0;
     result->executionOrderNumber = static_cast<unsigned char>(constructionData.branchNumber)
-        % cudaSimulationParameters.cellMaxTokenBranchNumber;
+        % cudaSimulationParameters.cellMaxExecutionOrderNumber;
     result->underConstruction = true;
     result->cellFunctionType = constructionData.cellFunctionType;
     result->metadata.color = constructionData.metaData;
@@ -516,7 +516,7 @@ __inline__ __device__ Token* ConstructionProcessor::constructToken(
     float energy,
     bool duplicateMemory)
 {
-    EntityFactory factory;
+    ObjectFactory factory;
     factory.init(&data);
 
     Token* result;
