@@ -12,7 +12,6 @@ __global__ void cudaNextTimestep_substep1(SimulationData data)
 {
     CellProcessor cellProcessor;
     cellProcessor.init(data);
-    cellProcessor.clearTag(data);
     cellProcessor.updateMap(data);
     cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
     cellProcessor.clearDensityMap(data);
@@ -33,7 +32,6 @@ __global__ void cudaNextTimestep_substep3(SimulationData data)
     CellProcessor cellProcessor;
     cellProcessor.checkForces(data);
     cellProcessor.updateVelocities(data);
-    cellProcessor.clearTag(data);
     cellProcessor.applyMutation(data);
 
     ParticleProcessor particleProcessor;
@@ -41,10 +39,10 @@ __global__ void cudaNextTimestep_substep3(SimulationData data)
     particleProcessor.collision(data);
 }
 
-__global__ void cudaNextTimestep_substep4(SimulationData data)
+__global__ void cudaNextTimestep_substep4(SimulationData data, bool considerAngles)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcConnectionForces(data);
+    cellProcessor.calcConnectionForces(data, considerAngles);
 }
 
 __global__ void cudaNextTimestep_substep5(SimulationData data)
@@ -54,10 +52,10 @@ __global__ void cudaNextTimestep_substep5(SimulationData data)
     cellProcessor.checkConnections(data);
 }
 
-__global__ void cudaNextTimestep_substep6(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_substep6(SimulationData data, bool considerAngles)
 {
     CellProcessor cellProcessor;
-    cellProcessor.calcConnectionForces(data);
+    cellProcessor.calcConnectionForces(data, considerAngles);
 }
 
 __global__ void cudaNextTimestep_substep7(SimulationData data)

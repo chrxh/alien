@@ -111,7 +111,6 @@ struct Cell
     int tag;
     float2 temp1;
     float2 temp2;
-    float2 temp3;
 
     //cluster data
     int clusterIndex;

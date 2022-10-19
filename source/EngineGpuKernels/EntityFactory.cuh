@@ -107,7 +107,6 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
 
     cell->selected = 0;
     cell->locked = 0;
-    cell->temp3 = {0, 0};
 
     return cell;
 }
@@ -200,7 +199,6 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->underConstruction = false;
     cell->locked = 0;
     cell->selected = 0;
-    cell->temp3 = {0, 0};
     cell->color = 0;
     cell->metadata.nameLen = 0;
     cell->metadata.descriptionLen = 0;
@@ -220,7 +218,6 @@ __inline__ __device__ Cell* EntityFactory::createCell()
     result->id = _data->numberGen1.createNewId_kernel();
     result->selected = 0;
     result->locked = 0;
-    result->temp3 = {0, 0};
     result->color = 0;
     result->metadata.nameLen = 0;
     result->metadata.descriptionLen = 0;
