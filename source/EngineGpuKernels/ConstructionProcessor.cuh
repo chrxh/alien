@@ -159,7 +159,7 @@ __inline__ __device__ Cell* ConstructionProcessor::getFirstCellOfConstructionSit
     auto const& cell = token->cell;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto const& connectingCell = cell->connections[i].cell;
-        if (connectingCell->cellFunctionBlocked) {
+        if (connectingCell->underConstruction) {
             result = connectingCell;
         }
     }
@@ -216,7 +216,7 @@ __inline__ __device__ void ConstructionProcessor::startNewConstruction(
             cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
     }
     if (constructionData.isFinishConstruction) {
-        newCell->cellFunctionBlocked = false;
+        newCell->underConstruction = false;
     }
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
         cell->maxConnections = cell->numConnections;
@@ -265,7 +265,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
     Cell* newCell;
     auto posOfNewCell = cell->absPos + posDelta;
     constructCell(data, token, posOfNewCell, energyForNewEntities.cell, constructionData, newCell);
-    firstConstructedCell->cellFunctionBlocked = false;
+    firstConstructedCell->underConstruction = false;
 
     if (!newCell->tryLock()) {
         cell->energy +=
@@ -314,7 +314,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
         constructionData.angleAlignment*/);
 
     if (constructionData.isFinishConstruction) {
-        newCell->cellFunctionBlocked = false;
+        newCell->underConstruction = false;
     }
 
     Math::normalize(posDelta);
@@ -395,7 +395,7 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     result->numConnections = 0;
     result->executionOrderNumber = static_cast<unsigned char>(constructionData.branchNumber)
         % cudaSimulationParameters.cellMaxTokenBranchNumber;
-    result->cellFunctionBlocked = true;
+    result->underConstruction = true;
     result->cellFunctionType = constructionData.cellFunctionType;
     result->metadata.color = constructionData.metaData;
     if (result->getCellFunctionType() != Enums::CellFunction_Neurons) {

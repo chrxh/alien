@@ -69,7 +69,7 @@ EntityFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
-    cell->cellFunctionBlocked = cellTO.cellFunctionBlocked;
+    cell->underConstruction = cellTO.cellFunctionBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->numConnections = cellTO.numConnections;
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -120,7 +120,7 @@ __inline__ __device__ void EntityFactory::changeCellFromTO(
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
-    cell->cellFunctionBlocked = cellTO.cellFunctionBlocked;
+    cell->underConstruction = cellTO.cellFunctionBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
     cell->cellFunction = cellTO.cellFunction;
@@ -197,7 +197,7 @@ __inline__ __device__ Cell* EntityFactory::createRandomCell(float energy, float2
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
     cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxTokenBranchNumber - 1);
     cell->numConnections = 0;
-    cell->cellFunctionBlocked = false;
+    cell->underConstruction = false;
     cell->locked = 0;
     cell->selected = 0;
     cell->temp3 = {0, 0};
