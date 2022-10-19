@@ -11,10 +11,10 @@
 class ParticleProcessor
 {
 public:
-    __inline__ __device__ void updateMap(SimulationData& data);
-    __inline__ __device__ void movement(SimulationData& data);
-    __inline__ __device__ void collision(SimulationData& data);
-    __inline__ __device__ void transformation(SimulationData& data);
+    __inline__ __device__ static void updateMap(SimulationData& data);
+    __inline__ __device__ static void movement(SimulationData& data);
+    __inline__ __device__ static void collision(SimulationData& data);
+    __inline__ __device__ static void transformation(SimulationData& data);
 };
 
 
