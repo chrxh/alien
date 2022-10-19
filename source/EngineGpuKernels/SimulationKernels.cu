@@ -10,58 +10,49 @@ __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult re
 
 __global__ void cudaNextTimestep_substep1(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.init(data);
-    cellProcessor.updateMap(data);
-    cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
-    cellProcessor.clearDensityMap(data);
+    CellProcessor::init(data);
+    CellProcessor::updateMap(data);
+    CellProcessor::radiation(data);  //do not use ParticleProcessor in this kernel
+    CellProcessor::clearDensityMap(data);
 }
 
 __global__ void cudaNextTimestep_substep2(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.collisions(data);
-    cellProcessor.fillDensityMap(data);
+    CellProcessor::collisions(data);
+    CellProcessor::fillDensityMap(data);
 
-    ParticleProcessor particleProcessor;
-    particleProcessor.updateMap(data);
+    ParticleProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_substep3(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.checkForces(data);
-    cellProcessor.updateVelocities(data);
-    cellProcessor.applyMutation(data);
+    CellProcessor::checkForces(data);
+    CellProcessor::updateVelocities(data);
+    CellProcessor::applyMutation(data);
 
-    ParticleProcessor particleProcessor;
-    particleProcessor.movement(data);
-    particleProcessor.collision(data);
+    ParticleProcessor::movement(data);
+    ParticleProcessor::collision(data);
 }
 
 __global__ void cudaNextTimestep_substep4(SimulationData data, bool considerAngles)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.calcConnectionForces(data, considerAngles);
+    CellProcessor::calcConnectionForces(data, considerAngles);
 }
 
 __global__ void cudaNextTimestep_substep5(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.verletUpdatePositions(data);
-    cellProcessor.checkConnections(data);
+    CellProcessor::verletUpdatePositions(data);
+    CellProcessor::checkConnections(data);
 }
 
 __global__ void cudaNextTimestep_substep6(SimulationData data, bool considerAngles)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.calcConnectionForces(data, considerAngles);
+    CellProcessor::calcConnectionForces(data, considerAngles);
 }
 
 __global__ void cudaNextTimestep_substep7(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.verletUpdateVelocities(data);
+    CellProcessor::verletUpdateVelocities(data);
 }
 
 __global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result)
@@ -70,15 +61,13 @@ __global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult 
 
 __global__ void cudaNextTimestep_substep9(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.applyInnerFriction(data);
+    CellProcessor::applyInnerFriction(data);
 }
 
 __global__ void cudaNextTimestep_substep10(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.applyFriction(data);
-    cellProcessor.decay(data);
+    CellProcessor::applyFriction(data);
+    CellProcessor::decay(data);
 }
 
 __global__ void cudaNextTimestep_substep11(SimulationData data)
@@ -93,8 +82,7 @@ __global__ void cudaNextTimestep_substep12(SimulationData data)
 
 __global__ void cudaNextTimestep_substep13(SimulationData data)
 {
-    ParticleProcessor particleProcessor;
-    particleProcessor.transformation(data);
+    ParticleProcessor::transformation(data);
 
     CellConnectionProcessor::processDelCellOperations(data);
 }
