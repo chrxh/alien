@@ -17,6 +17,5 @@ private:
     bool isRigidityUpdateEnabled(Settings const& settings) const;
 
     GarbageCollectorKernelsLauncher _garbageCollector;
-    int _counter = 0;
 };
 
