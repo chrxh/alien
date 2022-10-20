@@ -147,8 +147,6 @@ struct Cell
         __threadfence();
         atomicExch(&locked, 0);
     }
-
-    __inline__ __device__ Enums::CellFunction getCellFunctionType() const { return calcMod(cellFunction, Enums::CellFunction_Count); }
 };
 
 template<>

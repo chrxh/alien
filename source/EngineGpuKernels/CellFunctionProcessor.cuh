@@ -25,9 +25,12 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
+    auto maxExecutionOrderNumber = cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    auto executionOrderNumber = data.timestep % maxExecutionOrderNumber;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
-
+        if (cell->executionOrderNumber == executionOrderNumber) {
+            data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+        }
     }
 }
