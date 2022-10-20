@@ -49,6 +49,7 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernels.cu
     MonitorKernels.cuh
     MuscleProcessor.cuh
+    NerveProcessor.cuh
     NeuralNetProcessor.cuh
     Objects.cu
     Objects.cuh

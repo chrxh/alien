@@ -18,7 +18,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     numberGen2.init(1536941);  //some array size for random numbers (~ 1.5 MB)
 
     structuralOperations.init();
-    for (int i = 0; i < Enums::CellFunction_Count; ++i) {
+    for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].init();
     }
 }
@@ -33,7 +33,7 @@ __device__ void SimulationData::prepareForNextTimestep()
     structuralOperations.setMemory(processMemory.getArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
     auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();
-    for (int i = 0; i < Enums::CellFunction_Count; ++i) {
+    for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].setMemory(processMemory.getArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
     }
 
@@ -99,7 +99,7 @@ void SimulationData::free()
     processMemory.free();
 
     structuralOperations.free();
-    for (int i = 0; i < Enums::CellFunction_Count; ++i) {
+    for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].free();
     }
 }

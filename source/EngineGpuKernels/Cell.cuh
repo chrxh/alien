@@ -28,16 +28,15 @@ struct CellConnection
 
 struct Activity
 {
-    bool changes;
-    float channels[8];
+    float channels[MAX_CHANNELS];
 };
 
 struct NeuralNetFunction
 {
     struct NeurolNetState
     {
-        float weights[8 * 8];
-        float bias[8];
+        float weights[MAX_CHANNELS * MAX_CHANNELS];
+        float bias[MAX_CHANNELS];
     };
 
     NeurolNetState* neurolNetState;
