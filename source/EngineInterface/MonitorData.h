@@ -8,7 +8,6 @@ struct MonitorData
     int numCellsByColor[7] = {0, 0, 0, 0, 0, 0, 0};
     int numConnections = 0;
     int numParticles = 0;
-    int numTokens = 0;
     double totalInternalEnergy = 0.0;
 
     //processes

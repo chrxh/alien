@@ -103,12 +103,6 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(1);
         processLivePlot(3, _liveStatistics.datas[9]);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Tokens");
-        ImGui::TableSetColumnIndex(1);
-        processLivePlot(4, _liveStatistics.datas[10]);
-
         ImPlot::PopColormap();
 
         ImGui::EndTable();
@@ -125,25 +119,25 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(5, _liveStatistics.datas[11], 2);
+        processLivePlot(4, _liveStatistics.datas[10], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(6, _liveStatistics.datas[12], 2);
+        processLivePlot(5, _liveStatistics.datas[11], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(7, _liveStatistics.datas[13], 2);
+        processLivePlot(6, _liveStatistics.datas[12], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(8, _liveStatistics.datas[14], 2);
+        processLivePlot(7, _liveStatistics.datas[13], 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -189,11 +183,6 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(1);
         processLongtermPlot(3, _longtermStatistics.datas[9]);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Tokens");
-        ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(4, _longtermStatistics.datas[10]);
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
@@ -213,25 +202,25 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, _longtermStatistics.datas[11], 2);
+        processLongtermPlot(4, _longtermStatistics.datas[10], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, _longtermStatistics.datas[12], 2);
+        processLongtermPlot(5, _longtermStatistics.datas[11], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(7, _longtermStatistics.datas[13], 2);
+        processLongtermPlot(6, _longtermStatistics.datas[12], 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(8, _longtermStatistics.datas[14], 2);
+        processLongtermPlot(7, _longtermStatistics.datas[13], 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();

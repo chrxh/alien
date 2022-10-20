@@ -92,7 +92,7 @@ void _SimulationParametersChanger::onChangeParameters()
     ++_measurementsSinceBeginning;
 
     auto statistics = _simController->getStatistics();
-    auto activeClusters = statistics.numTokens;
+    auto activeClusters = statistics.numCreatedCells + statistics.numSuccessfulAttacks + statistics.numFailedAttacks + statistics.numMuscleActivities;
 
     if (State::Init == _state) {
         if (InitDuration == _measurementsSinceBeginning) {
