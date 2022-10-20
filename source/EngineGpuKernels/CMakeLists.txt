@@ -3,9 +3,10 @@ add_library(alien_engine_gpu_kernels_lib
     AccessTOs.cuh
     Array.cuh
     Base.cuh
-    CellConnectionProcessor.cuh
     Cell.cuh
     CellComputationProcessor.cuh
+    CellConnectionProcessor.cuh
+    CellFunctionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
     ConstantMemory.cu

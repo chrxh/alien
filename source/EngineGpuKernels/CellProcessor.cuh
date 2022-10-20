@@ -43,7 +43,7 @@ public:
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
-    auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);

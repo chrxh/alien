@@ -122,8 +122,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 
     log(Priority::Important, "initialize simulation");
 
-    _currentTimestep.store(timestep);
-    _timestepOfLastMonitorData = _currentTimestep;
+    _timestepOfLastMonitorData = timestep;
     _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaRenderingData = std::make_shared<RenderingData>();
     _cudaSimulationResult = std::make_shared<SimulationResult>();
@@ -131,7 +130,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     _cudaAccessTO = std::make_shared<DataAccessTO>();
     _cudaMonitorData = std::make_shared<CudaMonitorData>();
 
-    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY});
+    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaRenderingData->init();
     _cudaMonitorData->init();
     _cudaSimulationResult->init();
@@ -182,11 +181,13 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
 
 void _CudaSimulationFacade::calcTimestep()
 {
-    _simulationKernels->calcTimestep(_settings, *_cudaSimulationData, *_cudaSimulationResult);
+    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_cudaSimulationResult);
     syncAndCheck();
 
     automaticResizeArrays();
-    ++_currentTimestep;
+
+    std::lock_guard lock(_mutex);
+    ++_cudaSimulationData->timestep;
 }
 
 void _CudaSimulationFacade::drawVectorGraphics(
@@ -204,7 +205,8 @@ void _CudaSimulationFacade::drawVectorGraphics(
 
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
-    _renderingKernels->drawImage(_settings.gpuSettings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), *_cudaSimulationData, *_cudaRenderingData);
+    _renderingKernels->drawImage(
+        _settings.gpuSettings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
     syncAndCheck();
 
     const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
@@ -226,7 +228,7 @@ void _CudaSimulationFacade::getSimulationData(
     int2 const& rectLowerRight,
     DataAccessTO const& dataTO)
 {
-    _dataAccessKernels->getData(_settings.gpuSettings, *_cudaSimulationData, rectUpperLeft, rectLowerRight, *_cudaAccessTO);
+    _dataAccessKernels->getData(_settings.gpuSettings, getSimulationDataIntern(), rectUpperLeft, rectLowerRight, *_cudaAccessTO);
     syncAndCheck();
 
     copyDataTOtoHost(dataTO);
@@ -234,7 +236,7 @@ void _CudaSimulationFacade::getSimulationData(
 
 void _CudaSimulationFacade::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
 {
-    _dataAccessKernels->getSelectedData(_settings.gpuSettings, *_cudaSimulationData, includeClusters, *_cudaAccessTO);
+    _dataAccessKernels->getSelectedData(_settings.gpuSettings, getSimulationDataIntern(), includeClusters, *_cudaAccessTO);
     syncAndCheck();
 
     copyDataTOtoHost(dataTO);
@@ -252,14 +254,14 @@ void _CudaSimulationFacade::getInspectedSimulationData(std::vector<uint64_t> ent
     if (entityIds.size() < Const::MaxInspectedEntities) {
         ids.values[entityIds.size()] = 0;
     }
-    _dataAccessKernels->getInspectedData(_settings.gpuSettings, *_cudaSimulationData, ids, *_cudaAccessTO);
+    _dataAccessKernels->getInspectedData(_settings.gpuSettings, getSimulationDataIntern(), ids, *_cudaAccessTO);
     syncAndCheck();
     copyDataTOtoHost(dataTO);
 }
 
 void _CudaSimulationFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
 {
-    _dataAccessKernels->getOverlayData(_settings.gpuSettings, *_cudaSimulationData, rectUpperLeft, rectLowerRight, *_cudaAccessTO);
+    _dataAccessKernels->getOverlayData(_settings.gpuSettings, getSimulationDataIntern(), rectUpperLeft, rectLowerRight, *_cudaAccessTO);
     syncAndCheck();
 
     copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
@@ -271,119 +273,119 @@ void _CudaSimulationFacade::getOverlayData(int2 const& rectUpperLeft, int2 const
 void _CudaSimulationFacade::addAndSelectSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
-    _editKernels->removeSelection(_settings.gpuSettings, *_cudaSimulationData);
-    _dataAccessKernels->addData(_settings.gpuSettings, *_cudaSimulationData, *_cudaAccessTO, true, true);
+    _editKernels->removeSelection(_settings.gpuSettings, getSimulationDataIntern());
+    _dataAccessKernels->addData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaAccessTO, true, true);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::setSimulationData(DataAccessTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
-    _dataAccessKernels->clearData(_settings.gpuSettings, *_cudaSimulationData);
-    _dataAccessKernels->addData(_settings.gpuSettings, *_cudaSimulationData, *_cudaAccessTO, false, false);
+    _dataAccessKernels->clearData(_settings.gpuSettings, getSimulationDataIntern());
+    _dataAccessKernels->addData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaAccessTO, false, false);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::removeSelectedEntities(bool includeClusters)
 {
-    _editKernels->removeSelectedEntities(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    _editKernels->removeSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::relaxSelectedEntities(bool includeClusters)
 {
-    _editKernels->relaxSelectedEntities(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    _editKernels->relaxSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::uniformVelocitiesForSelectedEntities(bool includeClusters)
 {
-    _editKernels->uniformVelocitiesForSelectedEntities(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    _editKernels->uniformVelocitiesForSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::makeSticky(bool includeClusters)
 {
-    _editKernels->makeSticky(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    _editKernels->makeSticky(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::removeStickiness(bool includeClusters)
 {
-    _editKernels->removeStickiness(_settings.gpuSettings, *_cudaSimulationData, includeClusters);
+    _editKernels->removeStickiness(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::setBarrier(bool value, bool includeClusters)
 {
-    _editKernels->setBarrier(_settings.gpuSettings, *_cudaSimulationData, value, includeClusters);
+    _editKernels->setBarrier(_settings.gpuSettings, getSimulationDataIntern(), value, includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);
-    _editKernels->changeSimulationData(_settings.gpuSettings, *_cudaSimulationData, *_cudaAccessTO);
+    _editKernels->changeSimulationData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaAccessTO);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::applyForce(ApplyForceData const& applyData)
 {
-    _editKernels->applyForce(_settings.gpuSettings, *_cudaSimulationData, applyData);
+    _editKernels->applyForce(_settings.gpuSettings, getSimulationDataIntern(), applyData);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::switchSelection(PointSelectionData const& pointData)
 {
-    _editKernels->switchSelection(_settings.gpuSettings, *_cudaSimulationData, pointData);
+    _editKernels->switchSelection(_settings.gpuSettings, getSimulationDataIntern(), pointData);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::swapSelection(PointSelectionData const& pointData)
 {
-    _editKernels->swapSelection(_settings.gpuSettings, *_cudaSimulationData, pointData);
+    _editKernels->swapSelection(_settings.gpuSettings, getSimulationDataIntern(), pointData);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::setSelection(AreaSelectionData const& selectionData)
 {
-    _editKernels->setSelection(_settings.gpuSettings, *_cudaSimulationData, selectionData);
+    _editKernels->setSelection(_settings.gpuSettings, getSimulationDataIntern(), selectionData);
 }
 
  SelectionShallowData _CudaSimulationFacade::getSelectionShallowData()
 {
-    _editKernels->getSelectionShallowData(_settings.gpuSettings, *_cudaSimulationData, *_cudaSelectionResult);
+    _editKernels->getSelectionShallowData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
 void _CudaSimulationFacade::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    _editKernels->shallowUpdateSelectedEntities(_settings.gpuSettings, *_cudaSimulationData, shallowUpdateData);
+    _editKernels->shallowUpdateSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), shallowUpdateData);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::removeSelection()
 {
-    _editKernels->removeSelection(_settings.gpuSettings, *_cudaSimulationData);
+    _editKernels->removeSelection(_settings.gpuSettings, getSimulationDataIntern());
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::updateSelection()
 {
-    _editKernels->updateSelection(_settings.gpuSettings, *_cudaSimulationData);
+    _editKernels->updateSelection(_settings.gpuSettings, getSimulationDataIntern());
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::colorSelectedEntities(unsigned char color, bool includeClusters)
 {
-    _editKernels->colorSelectedCells(_settings.gpuSettings, *_cudaSimulationData, color, includeClusters);
+    _editKernels->colorSelectedCells(_settings.gpuSettings, getSimulationDataIntern(), color, includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::reconnectSelectedEntities()
 {
-    _editKernels->reconnectSelectedEntities(_settings.gpuSettings, *_cudaSimulationData);
+    _editKernels->reconnectSelectedEntities(_settings.gpuSettings, getSimulationDataIntern());
     syncAndCheck();
 }
 
@@ -404,7 +406,7 @@ auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
 
 MonitorData _CudaSimulationFacade::getMonitorData()
 {
-    _monitorKernels->getMonitorData(_settings.gpuSettings, *_cudaSimulationData, *_cudaMonitorData);
+    _monitorKernels->getMonitorData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaMonitorData);
     syncAndCheck();
     
     MonitorData result;
@@ -443,12 +445,14 @@ void _CudaSimulationFacade::resetProcessMonitorData()
 
 uint64_t _CudaSimulationFacade::getCurrentTimestep() const
 {
-    return _currentTimestep.load();
+    std::lock_guard lock(_mutex);
+    return _cudaSimulationData->timestep;
 }
 
 void _CudaSimulationFacade::setCurrentTimestep(uint64_t timestep)
 {
-    _currentTimestep.store(timestep);
+    std::lock_guard lock(_mutex);
+    _cudaSimulationData->timestep = timestep;
 }
 
 void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& parameters)
@@ -475,7 +479,7 @@ void _CudaSimulationFacade::setFlowFieldSettings(FlowFieldSettings const& settin
 
 void _CudaSimulationFacade::clear()
 {
-    _dataAccessKernels->clearData(_settings.gpuSettings, *_cudaSimulationData);
+    _dataAccessKernels->clearData(_settings.gpuSettings, getSimulationDataIntern());
     syncAndCheck();
 }
 
@@ -518,7 +522,8 @@ void _CudaSimulationFacade::copyDataTOtoHost(DataAccessTO const& dataTO)
 void _CudaSimulationFacade::automaticResizeArrays()
 {
     //make check after every 10th time step
-    if (_currentTimestep.load() % 10 == 0) {
+    std::lock_guard lock(_mutex);
+    if (_cudaSimulationData->timestep % 10 == 0) {
         if (_cudaSimulationResult->isArrayResizeNeeded()) {
             resizeArrays({0, 0});
         }
@@ -531,12 +536,12 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 
     _cudaSimulationData->resizeEntitiesForCleanup(additionals.cellArraySize, additionals.particleArraySize);
     if (!_cudaSimulationData->isEmpty()) {
-        _garbageCollectorKernels->copyArrays(_settings.gpuSettings, *_cudaSimulationData);
+        _garbageCollectorKernels->copyArrays(_settings.gpuSettings, getSimulationDataIntern());
         syncAndCheck();
 
         _cudaSimulationData->resizeRemainings();
 
-        _garbageCollectorKernels->swapArrays(_settings.gpuSettings, *_cudaSimulationData);
+        _garbageCollectorKernels->swapArrays(_settings.gpuSettings, getSimulationDataIntern());
         syncAndCheck();
     } else {
         _cudaSimulationData->resizeRemainings();
@@ -558,4 +563,10 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
+}
+
+SimulationData _CudaSimulationFacade::getSimulationDataIntern() const
+{
+    std::lock_guard lock(_mutex);
+    return *_cudaSimulationData;
 }
