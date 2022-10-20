@@ -350,56 +350,11 @@ void _SimulationParametersWindow::processBase(
          * Mutations
          */
         AlienImGui::Group("Mutations");
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Cell mutation rate")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(0.001f)
-                .logarithmic(true)
-                .format("%.8f")
-                .defaultValue(origSimParameters.spotValues.cellMutationRate)
-                .tooltip(std::string("Probability that a byte or property of a cell is changed per time step.")),
-            simParameters.spotValues.cellMutationRate);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Token mutation rate")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(0.1f)
-                .logarithmic(true)
-                .format("%.6f")
-                .defaultValue(origSimParameters.spotValues.tokenMutationRate)
-                .tooltip(std::string("Probability that a memory byte of a token is changed per time step.")),
-            simParameters.spotValues.tokenMutationRate);
 
         /**
          * Cell specialization: General
          */
         AlienImGui::Group("Cell specialization: General");
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
-                .name("Minimum invocations")
-                .textWidth(MaxContentTextWidth)
-                .defaultValue(origSimParameters.spotValues.cellFunctionMinInvocations)
-                .min(0)
-                .max(1000000)
-                .logarithmic(true)
-                .tooltip(std::string("Minimum number of invocations of a cell function up to which the cell remains stable. If the value is exceeded, the cell "
-                                     "decays with a certain probability.")),
-            simParameters.spotValues.cellFunctionMinInvocations);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Invocation decay probability")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.0f)
-                .logarithmic(true)
-                .format("%.6f")
-                .defaultValue(origSimParameters.spotValues.cellFunctionInvocationDecayProb)
-                .tooltip(std::string("The probability that a cell will be destroyed after its function is invoked more times than the minimum invocations "
-                                     "parameter specifies.")),
-            simParameters.spotValues.cellFunctionInvocationDecayProb);
 
         /**
          * Cell specialization: Digestion function
@@ -426,16 +381,6 @@ void _SimulationParametersWindow::processBase(
             simParameters.spotValues.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Target color mismatch penalty")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.1f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty)
-                .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the attacked cell "
-                                     "does not match the target color. ATTENTION: A value above 1 means that a mismatched color is treated as poisoned.")),
-            simParameters.spotValues.cellFunctionWeaponColorTargetMismatchPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
@@ -453,28 +398,10 @@ void _SimulationParametersWindow::processBase(
                 .defaultValue(origSimParameters.spotValues.cellFunctionWeaponConnectionsMismatchPenalty)
                 .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contain more connections.")),
             simParameters.spotValues.cellFunctionWeaponConnectionsMismatchPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Token penalty")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponTokenPenalty)
-                .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contains a token.")),
-            simParameters.spotValues.cellFunctionWeaponTokenPenalty);
 
         /**
          * Cell specialization: Construction function
          */
-        AlienImGui::Group("Cell specialization: Construction function");
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Inherit cell color")
-                .textWidth(MaxContentTextWidth)
-                .defaultValue(origSimParameters.cellFunctionConstructorOffspringInheritColor)
-                .tooltip(std::string("If this option is set, a constructor cell can only create cells with its color. Otherwise the color of the cell "
-                                     "to be created is read from the token memory.")),
-            simParameters.cellFunctionConstructorOffspringInheritColor);
 
         /**
          * Cell specialization: Sensor function
@@ -694,50 +621,11 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          * Mutations
          */
         AlienImGui::Group("Mutations");
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Cell mutation rate")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(0.001f)
-                .logarithmic(true)
-                .format("%.8f")
-                .defaultValue(origSpot.values.cellMutationRate),
-            spot.values.cellMutationRate);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Token mutation rate")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(0.1f)
-                .logarithmic(true)
-                .format("%.6f")
-                .defaultValue(origSpot.values.tokenMutationRate),
-            spot.values.tokenMutationRate);
 
         /**
          * Cell specialization: General
          */
         AlienImGui::Group("Cell specialization: General");
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
-                .name("Minimum invocations")
-                .textWidth(MaxContentTextWidth)
-                .defaultValue(origSpot.values.cellFunctionMinInvocations)
-                .min(0)
-                .max(1000000)
-                .logarithmic(true),
-            spot.values.cellFunctionMinInvocations);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Invocation decay probability")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.0f)
-                .logarithmic(true)
-                .format("%.6f")
-                .defaultValue(origSpot.values.cellFunctionInvocationDecayProb),
-            spot.values.cellFunctionInvocationDecayProb);
 
         /**
          * Cell specialization: Digestion function
@@ -759,14 +647,6 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellFunctionWeaponEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Target color mismatch penalty")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.1f)
-                .defaultValue(origSpot.values.cellFunctionWeaponColorTargetMismatchPenalty),
-            spot.values.cellFunctionWeaponColorTargetMismatchPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
@@ -781,14 +661,6 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .max(1.0f)
                 .defaultValue(origSpot.values.cellFunctionWeaponConnectionsMismatchPenalty),
             spot.values.cellFunctionWeaponConnectionsMismatchPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Token penalty")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponTokenPenalty),
-            spot.values.cellFunctionWeaponTokenPenalty);
     }
     ImGui::EndChild();
 }

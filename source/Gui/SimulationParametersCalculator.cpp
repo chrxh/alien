@@ -24,7 +24,6 @@ SimulationParametersCalculator _SimulationParametersCalculator::createWithRandom
     target.spotValues.cellMinEnergy = numberGenerator.getRandomFloat(25.0f, 80.0f);
     target.spotValues.cellBindingForce = numberGenerator.getRandomFloat(0.3f, 2.0f);
     target.spotValues.cellFusionVelocity = numberGenerator.getRandomFloat(0.0f, 1.0f);
-    target.spotValues.tokenMutationRate = numberGenerator.getRandomFloat(0.0f, 4.0f) / 1000;
     target.spotValues.cellFunctionWeaponEnergyCost = numberGenerator.getRandomFloat(0.0f, 3.0f);
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
@@ -78,7 +77,6 @@ SimulationParameters _SimulationParametersCalculator::calcCurrentParameters() co
     result.spotValues.cellMinEnergy = calcCurrentParameter(_source.spotValues.cellMinEnergy, _target.spotValues.cellMinEnergy);
     result.spotValues.cellBindingForce = calcCurrentParameter(_source.spotValues.cellBindingForce, _target.spotValues.cellBindingForce);
     result.spotValues.cellFusionVelocity = calcCurrentParameter(_source.spotValues.cellFusionVelocity, _target.spotValues.cellFusionVelocity);
-    result.spotValues.tokenMutationRate = calcCurrentParameter(_source.spotValues.tokenMutationRate, _target.spotValues.tokenMutationRate);
     result.spotValues.cellFunctionWeaponEnergyCost =
         calcCurrentParameter(_source.spotValues.cellFunctionWeaponEnergyCost, _target.spotValues.cellFunctionWeaponEnergyCost);
 
