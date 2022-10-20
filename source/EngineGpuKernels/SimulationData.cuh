@@ -2,10 +2,12 @@
 
 #include <atomic>
 
+#include "EngineInterface/Enums.h"
+#include "EngineInterface/GpuSettings.h"
+
 #include "Base.cuh"
 #include "ProprocessedCellFunctionData.cuh"
 #include "Definitions.cuh"
-#include "EngineInterface/GpuSettings.h"
 #include "Objects.cuh"
 #include "Map.cuh"
 #include "Operations.cuh"
@@ -28,7 +30,7 @@ struct SimulationData
 
     //scheduled operations
     TempArray<StructuralOperation> structuralOperations;
-    TempArray<CellFunctionOperation> cellFunctionOperations;
+    TempArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_Count];
 
     //number generators
     CudaNumberGenerator numberGen1;

@@ -1,6 +1,7 @@
 ﻿#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
+#include "CellFunctionProcessor.cuh"
 
 __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
 {
@@ -57,6 +58,7 @@ __global__ void cudaNextTimestep_substep7(SimulationData data)
 
 __global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result)
 {
+    CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
 __global__ void cudaNextTimestep_substep9(SimulationData data)
