@@ -54,3 +54,8 @@ struct StructuralOperation
     Type type;
     StructureOperationData data;
 };
+
+struct CellFunctionOperation
+{
+    Cell* cell;
+};

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <atomic>
+#include <mutex>
 #include <vector>
 #include <optional>
 
@@ -79,7 +79,8 @@ private:
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals);
 
-    std::atomic<uint64_t> _currentTimestep;
+    SimulationData getSimulationDataIntern() const;
+
     uint64_t _timestepOfLastMonitorData = 0llu;
     Settings _settings;
 
@@ -89,6 +90,8 @@ private:
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataAccessTO> _cudaAccessTO;
     std::shared_ptr<CudaMonitorData> _cudaMonitorData;
+
+    mutable std::mutex _mutex;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

@@ -2,9 +2,10 @@
 
 #include "GarbageCollectorKernels.cuh"
 
-void SimulationData::init(int2 const& worldSize_)
+void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
 {
     worldSize = worldSize_;
+    timestep = timestep_;
 
     objects.init();
     tempObjects.init();

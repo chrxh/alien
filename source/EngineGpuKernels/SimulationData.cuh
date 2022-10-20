@@ -13,6 +13,7 @@
 struct SimulationData
 {
     //maps
+    uint64_t timestep;
     int2 worldSize;
     CellMap cellMap;
     ParticleMap particleMap;
@@ -27,12 +28,13 @@ struct SimulationData
 
     //scheduled operations
     TempArray<StructuralOperation> structuralOperations;
+    TempArray<CellFunctionOperation> cellFunctionOperations;
 
     //number generators
     CudaNumberGenerator numberGen1;
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
-    void init(int2 const& worldSize);
+    void init(int2 const& worldSize, uint64_t timestep);
     bool shouldResize(int additionalCells, int additionalParticles);
     void resizeEntitiesForCleanup(int additionalCells, int additionalParticles);
     void resizeRemainings();
