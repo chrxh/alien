@@ -29,11 +29,12 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_substep5, data);
     KERNEL_CALL(cudaNextTimestep_substep6, data, considerForcesFromAngleMismatch);
     KERNEL_CALL(cudaNextTimestep_substep7, data);
-    KERNEL_CALL(cudaNextTimestep_substep8, data, result);
+    KERNEL_CALL(cudaNextTimestep_substep8, data);
+    KERNEL_CALL(cudaNextTimestep_substep9, data, result);
     if (considerInnerFriction) {
-        KERNEL_CALL(cudaNextTimestep_substep9, data);
+        KERNEL_CALL(cudaNextTimestep_substep10, data);
     }
-    KERNEL_CALL(cudaNextTimestep_substep10, data);
+    KERNEL_CALL(cudaNextTimestep_substep11, data);
 
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);
@@ -45,9 +46,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
         KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
         KERNEL_CALL(cudaApplyClusterData, data);
     }
-    KERNEL_CALL_1_1(cudaNextTimestep_substep11, data);
-    KERNEL_CALL(cudaNextTimestep_substep12, data);
+    KERNEL_CALL_1_1(cudaNextTimestep_substep12, data);
     KERNEL_CALL(cudaNextTimestep_substep13, data);
+    KERNEL_CALL(cudaNextTimestep_substep14, data);
     KERNEL_CALL(cudaNextTimestep_substep14, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);

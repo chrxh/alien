@@ -1,11 +1,14 @@
 #pragma once
 
+#define MAX_RAW_BYTES 50000000
+#define MAX_CELL_BONDS 6
+#define MAX_CHANNELS 8
+
 namespace Enums
 {
     using CellFunction = int;
     enum CellFunction_
     {
-        CellFunction_None,
         CellFunction_Neurons,
         CellFunction_Transmitter,
         CellFunction_Constructor,
@@ -14,7 +17,10 @@ namespace Enums
         CellFunction_Digestion,
         CellFunction_Injector,
         CellFunction_Muscle,
-        CellFunction_Count
+        CellFunction_WithoutNoneCount,
+
+        CellFunction_None = CellFunction_WithoutNoneCount,
+        CellFunction_Count,
     };
 
     using SensorMode = int;

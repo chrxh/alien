@@ -30,7 +30,7 @@ struct SimulationData
 
     //scheduled operations
     TempArray<StructuralOperation> structuralOperations;
-    TempArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_Count];
+    TempArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_WithoutNoneCount];
 
     //number generators
     CudaNumberGenerator numberGen1;

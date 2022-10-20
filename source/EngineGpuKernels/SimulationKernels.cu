@@ -2,6 +2,7 @@
 #include "FlowFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
 #include "CellFunctionProcessor.cuh"
+#include "NerveProcessor.cuh"
 
 __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
 {
@@ -56,41 +57,42 @@ __global__ void cudaNextTimestep_substep7(SimulationData data)
     CellProcessor::verletUpdateVelocities(data);
 }
 
-__global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_substep8(SimulationData data)
 {
     CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep9(SimulationData data)
+__global__ void cudaNextTimestep_substep9(SimulationData data, SimulationResult result)
+{
+    NerveProcessor::process(data);
+}
+
+__global__ void cudaNextTimestep_substep10(SimulationData data)
 {
     CellProcessor::applyInnerFriction(data);
 }
 
-__global__ void cudaNextTimestep_substep10(SimulationData data)
+__global__ void cudaNextTimestep_substep11(SimulationData data)
 {
     CellProcessor::applyFriction(data);
     CellProcessor::decay(data);
 }
 
-__global__ void cudaNextTimestep_substep11(SimulationData data)
+__global__ void cudaNextTimestep_substep12(SimulationData data)
 {
     data.structuralOperations.saveNumEntries();
 }
 
-__global__ void cudaNextTimestep_substep12(SimulationData data)
+__global__ void cudaNextTimestep_substep13(SimulationData data)
 {
     CellConnectionProcessor::processConnectionsOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep13(SimulationData data)
+__global__ void cudaNextTimestep_substep14(SimulationData data)
 {
     ParticleProcessor::transformation(data);
 
     CellConnectionProcessor::processDelCellOperations(data);
-}
-
-__global__ void cudaNextTimestep_substep14(SimulationData data)
-{
 }
 
 __global__ void cudaInitClusterData(SimulationData data)

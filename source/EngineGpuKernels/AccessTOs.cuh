@@ -5,9 +5,6 @@
 
 #include "EngineInterface/Enums.h"
 
-#define MAX_RAW_BYTES 50000000
-#define MAX_CELL_BONDS 6
-
 struct ParticleMetadataAccessTO
 {
     unsigned char color;
