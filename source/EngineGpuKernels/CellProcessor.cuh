@@ -80,10 +80,6 @@ __inline__ __device__ void CellProcessor::applyMutation(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        auto mutationRate = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMutationRate, data, cell->absPos);
-        if (data.numberGen2.random() < 0.001f && data.numberGen1.random() < mutationRate * 1000) {
-            //#TODO
-        }
 
         auto color = calcMod(cell->color, 7);
         auto transitionDuration = SpotCalculator::calcColorTransitionDuration(color, data, cell->absPos);

@@ -38,27 +38,6 @@ _InspectorWindow::_InspectorWindow(
     , _editorModel(editorModel)
     , _simController(simController)
 {
-    _cellInstructionMemoryEdit = std::make_shared<MemoryEditor>();
-    _cellInstructionMemoryEdit->OptShowOptions = false;
-    _cellInstructionMemoryEdit->OptShowAscii = false;
-    _cellInstructionMemoryEdit->OptMidColsCount = 0;
-    _cellInstructionMemoryEdit->Cols = 8;
-
-    _cellDataMemoryEdit = std::make_shared<MemoryEditor>();
-    _cellDataMemoryEdit->OptShowOptions = false;
-    _cellDataMemoryEdit->OptShowAscii = false;
-    _cellDataMemoryEdit->OptMidColsCount = 0;
-    _cellDataMemoryEdit->Cols = 8;
-
-    auto const& parameters = _simController->getSimulationParameters();
-    for (int i = 0; i < parameters.tokenMemorySize; ++i) {
-        auto tokenMemoryEdit = std::make_shared<MemoryEditor>();
-        tokenMemoryEdit->OptShowOptions = false;
-        tokenMemoryEdit->OptShowAscii = false;
-        tokenMemoryEdit->OptMidColsCount = 0;
-        tokenMemoryEdit->Cols = 8;
-        _tokenMemoryEdits.emplace_back(tokenMemoryEdit);
-    }
 }
 
 _InspectorWindow::~_InspectorWindow() {}

@@ -42,10 +42,6 @@ private:
     float calcWindowWidth() const;
 
 private:
-    std::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
-    std::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
-    std::vector<std::shared_ptr<MemoryEditor>> _tokenMemoryEdits;
-
     std::shared_ptr<CompilationResult> _lastCompilationResult;
     SimulationController _simController;
     Viewport _viewport; 
