@@ -30,11 +30,10 @@ void LiveStatistics::add(MonitorData const& newStatistics)
     }
     datas[8].emplace_back(toFloat(newStatistics.numConnections));
     datas[9].emplace_back(toFloat(newStatistics.numParticles));
-    datas[10].emplace_back(toFloat(newStatistics.numTokens));
-    datas[11].emplace_back(newStatistics.numCreatedCells);
-    datas[12].emplace_back(newStatistics.numSuccessfulAttacks);
-    datas[13].emplace_back(newStatistics.numFailedAttacks);
-    datas[14].emplace_back(newStatistics.numMuscleActivities);
+    datas[10].emplace_back(newStatistics.numCreatedCells);
+    datas[11].emplace_back(newStatistics.numSuccessfulAttacks);
+    datas[12].emplace_back(newStatistics.numFailedAttacks);
+    datas[13].emplace_back(newStatistics.numMuscleActivities);
 }
 
 void LongtermStatistics::add(MonitorData const& newStatistics)
@@ -51,12 +50,11 @@ void LongtermStatistics::add(MonitorData const& newStatistics)
         }
         datas[8].emplace_back(toFloat(newStatistics.numConnections));
         datas[9].emplace_back(toFloat(newStatistics.numParticles));
-        datas[10].emplace_back(toFloat(newStatistics.numTokens));
 
-        datas[11].emplace_back(accumulatedCreatedCells / numberOfAccumulation);
-        datas[12].emplace_back(accumulatedSuccessfulAttacks / numberOfAccumulation);
-        datas[13].emplace_back(accumulatedFailedAttack / numberOfAccumulation);
-        datas[14].emplace_back(accumulatedMuscleActivities / numberOfAccumulation);
+        datas[10].emplace_back(accumulatedCreatedCells / numberOfAccumulation);
+        datas[11].emplace_back(accumulatedSuccessfulAttacks / numberOfAccumulation);
+        datas[12].emplace_back(accumulatedFailedAttack / numberOfAccumulation);
+        datas[13].emplace_back(accumulatedMuscleActivities / numberOfAccumulation);
         accumulatedCreatedCells = 0;
         accumulatedSuccessfulAttacks = 0;
         accumulatedFailedAttack = 0;

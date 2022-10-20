@@ -50,5 +50,5 @@ private:
     SimulationParameters _parameters;
     SimulationParametersCalculator _calculator;
 
-    std::optional<int> _activeClustersReference;
+    std::optional<float> _activeClustersReference;
 };

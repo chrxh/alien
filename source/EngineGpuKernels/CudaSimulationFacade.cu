@@ -417,7 +417,6 @@ MonitorData _CudaSimulationFacade::getMonitorData()
     }
     result.numConnections = monitorData.numConnections;
     result.numParticles = monitorData.numParticles;
-    result.numTokens = monitorData.numTokens;
     result.totalInternalEnergy = monitorData.totalInternalEnergy;
 
     auto processStatistics = _cudaSimulationResult->getAndResetProcessMonitorData();
