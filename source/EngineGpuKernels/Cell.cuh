@@ -31,15 +31,15 @@ struct Activity
     float channels[MAX_CHANNELS];
 };
 
-struct NeuralNetFunction
+struct NeuronFunction
 {
     struct NeurolNetState
     {
-        float weights[MAX_CHANNELS * MAX_CHANNELS];
+        float weights[MAX_CHANNELS][MAX_CHANNELS];
         float bias[MAX_CHANNELS];
     };
 
-    NeurolNetState* neurolNetState;
+    NeurolNetState* neuronState;
 };
 struct TransmitterFunction
 {
@@ -69,7 +69,7 @@ struct InjectorFunction
 
 union CellFunctionData
 {
-    NeuralNetFunction neuralNetFunction;
+    NeuronFunction neuronFunction;
     TransmitterFunction transmitterFunction;
     ConstructorFunction constructorFunction;
     SensorFunction sensorFunction;
@@ -99,6 +99,7 @@ struct Cell
     Enums::CellFunction cellFunction;
     CellFunctionData cellFunctionData;
     Activity activity;
+    bool activityChanges;
 
     CellMetadata metadata;
 
