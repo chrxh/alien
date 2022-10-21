@@ -14,6 +14,38 @@ bool CellDescription::isConnectedTo(uint64_t id) const
         != connections.end();
 }
 
+Enums::CellFunction CellDescription::getCellFunctionType() const
+{
+    if (!cellFunction) {
+        return Enums::CellFunction_None;
+    }
+    if (std::holds_alternative<NeuronDescription>(*cellFunction)) {
+        return Enums::CellFunction_Neuron;
+    }
+    if (std::holds_alternative<TransmitterDescription>(*cellFunction)) {
+        return Enums::CellFunction_Transmitter;
+    }
+    if (std::holds_alternative<ConstructorDescription>(*cellFunction)) {
+        return Enums::CellFunction_Constructor;
+    }
+    if (std::holds_alternative<SensorDescription>(*cellFunction)) {
+        return Enums::CellFunction_Sensor;
+    }
+    if (std::holds_alternative<NerveDescription>(*cellFunction)) {
+        return Enums::CellFunction_Nerve;
+    }
+    if (std::holds_alternative<AttackDescription>(*cellFunction)) {
+        return Enums::CellFunction_Attack;
+    }
+    if (std::holds_alternative<InjectorDescription>(*cellFunction)) {
+        return Enums::CellFunction_Injector;
+    }
+    if (std::holds_alternative<MuscleDescription>(*cellFunction)) {
+        return Enums::CellFunction_Muscle;
+    }
+    return Enums::CellFunction_None;
+}
+
 RealVector2D ClusterDescription::getClusterPosFromCells() const
 {
     RealVector2D result;

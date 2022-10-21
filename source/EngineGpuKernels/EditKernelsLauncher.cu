@@ -209,7 +209,7 @@ void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSetti
     updateSelection(gpuSettings, data);
 }
 
-void _EditKernelsLauncher::changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& changeDataTO)
+void _EditKernelsLauncher::changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& changeDataTO)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 

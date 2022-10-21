@@ -4,19 +4,16 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "AccessTOs.cuh"
+#include "TOs.cuh"
 #include "ConstantMemory.cuh"
 
-struct CellMetadata
+struct CellMetadataDescription
 {
-    int nameLen;
-    char* name;
+    uint64_t nameSize;
+    uint8_t* name;
 
-    int descriptionLen;
-    char* description;
-
-    int sourceCodeLen;
-    char* sourceCode;
+    uint64_t descriptionSize;
+    uint8_t* description;
 };
 
 struct CellConnection
@@ -41,30 +38,40 @@ struct NeuronFunction
 
     NeurolNetState* neuronState;
 };
+
 struct TransmitterFunction
 {
 };
+
 struct ConstructorFunction
 {
     Enums::ConstructorMode mode;
-    int constructionDataLen;
-    unsigned char* constructionData;
+    uint64_t constructionDataSize;
+    uint8_t* constructionData;
 };
+
 struct SensorFunction
 {
     Enums::SensorMode mode;
-    unsigned char color;
+    int color;
 };
+
 struct NerveFunction
 {
 };
-struct DigestionFunction
+
+struct AttackFunction
 {
 };
+
 struct InjectorFunction
 {
-    int constructionDataLen;
-    unsigned char* constructionData;
+    uint64_t constructionDataSize;
+    uint8_t* constructionData;
+};
+
+struct MuscleFunction
+{
 };
 
 union CellFunctionData
@@ -74,8 +81,9 @@ union CellFunctionData
     ConstructorFunction constructorFunction;
     SensorFunction sensorFunction;
     NerveFunction nerveFunction;
-    DigestionFunction digestionFunction;
+    AttackFunction digestionFunction;
     InjectorFunction injectorFunction;
+    MuscleFunction muscleFunction;
 };
 
 struct Cell
@@ -98,15 +106,17 @@ struct Cell
     bool outputBlocked;
     Enums::CellFunction cellFunction;
     CellFunctionData cellFunctionData;
-    Activity activity;
-    bool activityChanges;
+    Activity activity;      //not inside cellFunctionData for easier handling and performance
 
-    CellMetadata metadata;
+    CellMetadataDescription metadata;
+
+    //visualization
+    bool activityChanges;
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = cluster selected
 
-    //temporary data
+    //temporary data for algorithms
     int locked;	//0 = unlocked, 1 = locked
     int tag;
     float2 temp1;

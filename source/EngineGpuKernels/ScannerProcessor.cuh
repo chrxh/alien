@@ -97,7 +97,7 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
     tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->executionOrderNumber;
     tokenMem[Enums::Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
     tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
-    if (lookupResult.prevCell->getCellFunctionType() != Enums::CellFunction_Neurons) {
+    if (lookupResult.prevCell->getCellFunctionType() != Enums::CellFunction_Neuron) {
 
         //encoding to support older versions
         auto len = min(48 - 1, static_cast<unsigned char>(lookupResult.prevCell->staticData[0]) * 3);

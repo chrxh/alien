@@ -10,7 +10,7 @@ __global__ void cudaPrepareArraysForCleanup(SimulationData data)
 {
     data.tempObjects.particles.reset();
     data.tempObjects.cells.reset();
-    data.tempObjects.stringBytes.reset();
+    data.tempObjects.additionalData.reset();
 }
 
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
@@ -71,8 +71,8 @@ __global__ void cudaCleanupRawBytes(Array<Cell*> cellPointers, RawMemory stringB
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cellPointers.at(index);
-        copyBytes(cell->metadata.name, cell->metadata.nameLen, stringBytes);
-        copyBytes(cell->metadata.description, cell->metadata.descriptionLen, stringBytes);
+        copyBytes(cell->metadata.name, cell->metadata.nameSize, stringBytes);
+        copyBytes(cell->metadata.description, cell->metadata.descriptionSize, stringBytes);
         copyBytes(cell->metadata.sourceCode, cell->metadata.sourceCodeLen, stringBytes);
     }
 }
@@ -97,7 +97,7 @@ __global__ void cudaSwapArrays(SimulationData data)
 {
     data.objects.cells.swapContent(data.tempObjects.cells);
     data.objects.particles.swapContent(data.tempObjects.particles);
-    data.objects.stringBytes.swapContent(data.tempObjects.stringBytes);
+    data.objects.additionalData.swapContent(data.tempObjects.additionalData);
 }
 
 

@@ -29,8 +29,8 @@ struct SimulationData
     PreprocessedCellFunctionData preprocessedCellFunctionData;
 
     //scheduled operations
-    TempArray<StructuralOperation> structuralOperations;
-    TempArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_WithoutNoneCount];
+    ChildArray<StructuralOperation> structuralOperations;
+    ChildArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_WithoutNoneCount];
 
     //number generators
     CudaNumberGenerator numberGen1;
@@ -38,8 +38,8 @@ struct SimulationData
 
     void init(int2 const& worldSize, uint64_t timestep);
     bool shouldResize(int additionalCells, int additionalParticles);
-    void resizeEntitiesForCleanup(int additionalCells, int additionalParticles);
-    void resizeRemainings();
+    void resizeTargetObjects(int additionalCells, int additionalParticles);
+    void resizeObjects();
     bool isEmpty();
     void free();
 

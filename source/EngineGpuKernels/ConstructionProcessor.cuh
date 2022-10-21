@@ -398,7 +398,7 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     result->underConstruction = true;
     result->cellFunctionType = constructionData.cellFunctionType;
     result->metadata.color = constructionData.metaData;
-    if (result->getCellFunctionType() != Enums::CellFunction_Neurons) {
+    if (result->getCellFunctionType() != Enums::CellFunction_Neuron) {
 
         //encoding to support older versions
         auto len = min(48 - 1, static_cast<unsigned char>(token->memory[Enums::Constr_InCellFunctionData]));

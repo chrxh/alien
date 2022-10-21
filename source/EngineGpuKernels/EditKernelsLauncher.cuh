@@ -30,7 +30,7 @@ public:
     void removeStickiness(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void setBarrier(GpuSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters);
     void reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data);
-    void changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& changeDataTO);
+    void changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& changeDataTO);
     void colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
 
     void applyForce(GpuSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);

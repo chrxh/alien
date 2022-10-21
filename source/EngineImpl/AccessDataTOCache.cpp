@@ -6,82 +6,56 @@ _AccessDataTOCache::_AccessDataTOCache(GpuSettings const& gpuConstants)
 
 _AccessDataTOCache::~_AccessDataTOCache()
 {
-    for (DataAccessTO const& dataTO : _freeDataTOs) {
-        deleteDataTO(dataTO);
-    }
-    for (DataAccessTO const& dataTO : _usedDataTOs) {
-        deleteDataTO(dataTO);
+    if(_dataTO) {
+        deleteDataTO(*_dataTO);
     }
 }
 
-DataAccessTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
+DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
 {
-    if (!_arraySizes || *_arraySizes != arraySizes) {
-        for (DataAccessTO const& dataTO : _freeDataTOs) {
-            deleteDataTO(dataTO);
+    if (_dataTO) {
+        auto existingArraySizes = getArraySizes(*_dataTO);
+        if (fits(existingArraySizes, arraySizes)) {
+            *_dataTO->numCells = 0;
+            *_dataTO->numParticles = 0;
+            *_dataTO->numAdditionalData = 0;
+            return *_dataTO;
+        } else {
+            deleteDataTO(*_dataTO);
         }
-        for (DataAccessTO const& dataTO : _usedDataTOs) {
-            deleteDataTO(dataTO);
-        }
-        _freeDataTOs.clear();
-        _usedDataTOs.clear();
-        _arraySizes = arraySizes;
     }
-
-    auto clear = [](auto& result) {
-            *result.numCells = 0;
-            *result.numParticles = 0;
-            *result.numStringBytes = 0;
-    };
-
-    DataAccessTO result;
-    if (!_freeDataTOs.empty()) {
-        result = *_freeDataTOs.begin();
-        _freeDataTOs.erase(_freeDataTOs.begin());
-        _usedDataTOs.emplace_back(result);
-
-        clear(result);
-        return result;
-    }
-    result = getNewDataTO();
-    _usedDataTOs.emplace_back(result);
-    clear(result);
-    return result;
-}
-
-void _AccessDataTOCache::releaseDataTO(DataAccessTO const& dataTO)
-{
-    auto usedDataTO = std::find_if(_usedDataTOs.begin(), _usedDataTOs.end(), [&dataTO](DataAccessTO const& usedDataTO) {
-        return usedDataTO == dataTO;
-    });
-    if (usedDataTO != _usedDataTOs.end()) {
-        _freeDataTOs.emplace_back(*usedDataTO);
-        _usedDataTOs.erase(usedDataTO);
-    }
-}
-
-DataAccessTO _AccessDataTOCache::getNewDataTO()
-{
     try {
-        DataAccessTO result;
-        result.numCells = new int;
-        result.numParticles = new int;
-        result.numStringBytes = new int;
-        result.cells = new CellAccessTO[_arraySizes->cellArraySize];
-        result.particles = new ParticleAccessTO[_arraySizes->particleArraySize];
-        result.stringBytes = new char[MAX_RAW_BYTES];
+        DataTO result;
+        result.numCells = new uint64_t;
+        result.numParticles = new uint64_t;
+        result.numAdditionalData = new uint64_t;
+        result.cells = new CellTO[arraySizes.cellArraySize];
+        result.particles = new ParticleTO[arraySizes.particleArraySize];
+        result.additionalData = new uint8_t[arraySizes.additionalDataSize];
+        _dataTO = result;
         return result;
     } catch (std::bad_alloc const&) {
         throw BugReportException("There is not sufficient CPU memory available.");
     }
 }
 
-void _AccessDataTOCache::deleteDataTO(DataAccessTO const& dataTO)
+bool _AccessDataTOCache::fits(ArraySizes const& left, ArraySizes const& right) const
+{
+    return left.cellArraySize >= right.cellArraySize && left.particleArraySize >= right.particleArraySize
+        && left.additionalDataSize >= right.additionalDataSize;
+}
+
+auto _AccessDataTOCache::getArraySizes(DataTO const& dataTO) const -> ArraySizes
+{
+    return {*dataTO.numCells, *dataTO.numParticles, *dataTO.numAdditionalData};
+}
+
+void _AccessDataTOCache::deleteDataTO(DataTO const& dataTO)
 {
     delete dataTO.numCells;
     delete dataTO.numParticles;
-    delete dataTO.numStringBytes;
+    delete dataTO.numAdditionalData;
     delete[] dataTO.cells;
     delete[] dataTO.particles;
-    delete[] dataTO.stringBytes;
+    delete[] dataTO.additionalData;
 }

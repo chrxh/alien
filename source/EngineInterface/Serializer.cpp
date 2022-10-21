@@ -37,7 +37,7 @@ namespace cereal
     }
 
     template <class Archive>
-    inline void serialize(Archive& ar, CellMetadata& data)
+    inline void serialize(Archive& ar, CellMetadataDescription& data)
     {
         ar(data.computerSourcecode, data.name, data.description, data.color);
     }

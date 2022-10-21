@@ -5,7 +5,7 @@
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
 
-class DigestionProcessor
+class AttackProcessor
 {
 public:
     __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
@@ -22,13 +22,13 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void DigestionProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
+__inline__ __device__ void AttackProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
     process(token->cell, token->memory[Enums::Digestion_InColor], token->memory[Enums::Digestion_Output], token->energy, data, result);
 }
 
 __inline__ __device__ void
-DigestionProcessor::process(Cell* cell, char color_, char& output, float& tokenEnergy, SimulationData& data, SimulationResult& result)
+AttackProcessor::process(Cell* cell, char color_, char& output, float& tokenEnergy, SimulationData& data, SimulationResult& result)
 {
     output = Enums::DigestionOut_NoTarget;
 
@@ -155,7 +155,7 @@ DigestionProcessor::process(Cell* cell, char color_, char& output, float& tokenE
     }
 }
 
-__inline__ __device__ bool DigestionProcessor::isHomogene(Cell* cell)
+__inline__ __device__ bool AttackProcessor::isHomogene(Cell* cell)
 {
     int color = cell->metadata.color;
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -173,7 +173,7 @@ __inline__ __device__ bool DigestionProcessor::isHomogene(Cell* cell)
     return true;
 }
 
-__inline__ __device__ float DigestionProcessor::calcOpenAngle(Cell* cell, float2 direction)
+__inline__ __device__ float AttackProcessor::calcOpenAngle(Cell* cell, float2 direction)
 {
     if (0 == cell->numConnections) {
         return 0.0f;
@@ -213,7 +213,7 @@ __inline__ __device__ float DigestionProcessor::calcOpenAngle(Cell* cell, float2
     return Math::subtractAngle(largerAngle, smallerAngle);
 }
 
-__inline__ __device__ bool DigestionProcessor::isConnectedConnected(Cell* cell, Cell* otherCell)
+__inline__ __device__ bool AttackProcessor::isConnectedConnected(Cell* cell, Cell* otherCell)
 {
     if (cell == otherCell) {
         return true;

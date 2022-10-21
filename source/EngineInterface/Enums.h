@@ -9,12 +9,12 @@ namespace Enums
     using CellFunction = int;
     enum CellFunction_
     {
-        CellFunction_Neurons,
+        CellFunction_Neuron,
         CellFunction_Transmitter,
         CellFunction_Constructor,
         CellFunction_Sensor,
         CellFunction_Nerve,
-        CellFunction_Digestion,
+        CellFunction_Attack,
         CellFunction_Injector,
         CellFunction_Muscle,
         CellFunction_WithoutNoneCount,

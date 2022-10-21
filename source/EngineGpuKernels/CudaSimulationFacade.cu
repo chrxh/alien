@@ -17,7 +17,7 @@
 
 #include "Base/LoggingService.h"
 #include "DataAccessKernels.cuh"
-#include "AccessTOs.cuh"
+#include "TOs.cuh"
 #include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "ConstantMemory.cuh"
@@ -127,7 +127,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     _cudaRenderingData = std::make_shared<RenderingData>();
     _cudaSimulationResult = std::make_shared<SimulationResult>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
-    _cudaAccessTO = std::make_shared<DataAccessTO>();
+    _cudaAccessTO = std::make_shared<DataTO>();
     _cudaMonitorData = std::make_shared<CudaMonitorData>();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
@@ -145,7 +145,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numStringBytes);
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numAdditionalData);
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000});
@@ -161,10 +161,10 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->additionalData);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numStringBytes);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAdditionalData);
 
     log(Priority::Important, "close simulation");
 }
@@ -226,7 +226,7 @@ void _CudaSimulationFacade::drawVectorGraphics(
 void _CudaSimulationFacade::getSimulationData(
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
-    DataAccessTO const& dataTO)
+    DataTO const& dataTO)
 {
     _dataAccessKernels->getData(_settings.gpuSettings, getSimulationDataIntern(), rectUpperLeft, rectLowerRight, *_cudaAccessTO);
     syncAndCheck();
@@ -234,7 +234,7 @@ void _CudaSimulationFacade::getSimulationData(
     copyDataTOtoHost(dataTO);
 }
 
-void _CudaSimulationFacade::getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO)
+void _CudaSimulationFacade::getSelectedSimulationData(bool includeClusters, DataTO const& dataTO)
 {
     _dataAccessKernels->getSelectedData(_settings.gpuSettings, getSimulationDataIntern(), includeClusters, *_cudaAccessTO);
     syncAndCheck();
@@ -242,7 +242,7 @@ void _CudaSimulationFacade::getSelectedSimulationData(bool includeClusters, Data
     copyDataTOtoHost(dataTO);
 }
 
-void _CudaSimulationFacade::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO)
+void _CudaSimulationFacade::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataTO const& dataTO)
 {
     InspectedEntityIds ids;
     if (entityIds.size() > Const::MaxInspectedEntities) {
@@ -259,7 +259,7 @@ void _CudaSimulationFacade::getInspectedSimulationData(std::vector<uint64_t> ent
     copyDataTOtoHost(dataTO);
 }
 
-void _CudaSimulationFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO)
+void _CudaSimulationFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO)
 {
     _dataAccessKernels->getOverlayData(_settings.gpuSettings, getSimulationDataIntern(), rectUpperLeft, rectLowerRight, *_cudaAccessTO);
     syncAndCheck();
@@ -270,7 +270,7 @@ void _CudaSimulationFacade::getOverlayData(int2 const& rectUpperLeft, int2 const
     copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
 }
 
-void _CudaSimulationFacade::addAndSelectSimulationData(DataAccessTO const& dataTO)
+void _CudaSimulationFacade::addAndSelectSimulationData(DataTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
     _editKernels->removeSelection(_settings.gpuSettings, getSimulationDataIntern());
@@ -278,7 +278,7 @@ void _CudaSimulationFacade::addAndSelectSimulationData(DataAccessTO const& dataT
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::setSimulationData(DataAccessTO const& dataTO)
+void _CudaSimulationFacade::setSimulationData(DataTO const& dataTO)
 {
     copyDataTOtoDevice(dataTO);
     _dataAccessKernels->clearData(_settings.gpuSettings, getSimulationDataIntern());
@@ -322,7 +322,7 @@ void _CudaSimulationFacade::setBarrier(bool value, bool includeClusters)
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::changeInspectedSimulationData(DataAccessTO const& changeDataTO)
+void _CudaSimulationFacade::changeInspectedSimulationData(DataTO const& changeDataTO)
 {
     copyDataTOtoDevice(changeDataTO);
     _editKernels->changeSimulationData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaAccessTO);
@@ -401,7 +401,9 @@ auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
 {
     return {
         _cudaSimulationData->objects.cells.getSize_host(),
-        _cudaSimulationData->objects.particles.getSize_host()};
+        _cudaSimulationData->objects.particles.getSize_host(),
+        _cudaSimulationData->objects.additionalData.getSize_host()
+    };
 }
 
 MonitorData _CudaSimulationFacade::getMonitorData()
@@ -496,26 +498,26 @@ void _CudaSimulationFacade::syncAndCheck()
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 }
 
-void _CudaSimulationFacade::copyDataTOtoDevice(DataAccessTO const& dataTO)
+void _CudaSimulationFacade::copyDataTOtoDevice(DataTO const& dataTO)
 {
     copyToDevice(_cudaAccessTO->numCells, dataTO.numCells);
     copyToDevice(_cudaAccessTO->numParticles, dataTO.numParticles);
-    copyToDevice(_cudaAccessTO->numStringBytes, dataTO.numStringBytes);
+    copyToDevice(_cudaAccessTO->numAdditionalData, dataTO.numAdditionalData);
 
     copyToDevice(_cudaAccessTO->cells, dataTO.cells, *dataTO.numCells);
     copyToDevice(_cudaAccessTO->particles, dataTO.particles, *dataTO.numParticles);
-    copyToDevice(_cudaAccessTO->stringBytes, dataTO.stringBytes, *dataTO.numStringBytes);
+    copyToDevice(_cudaAccessTO->additionalData, dataTO.additionalData, *dataTO.numAdditionalData);
 }
 
-void _CudaSimulationFacade::copyDataTOtoHost(DataAccessTO const& dataTO)
+void _CudaSimulationFacade::copyDataTOtoHost(DataTO const& dataTO)
 {
     copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
     copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);
-    copyToHost(dataTO.numStringBytes, _cudaAccessTO->numStringBytes);
+    copyToHost(dataTO.numAdditionalData, _cudaAccessTO->numAdditionalData);
 
     copyToHost(dataTO.cells, _cudaAccessTO->cells, *dataTO.numCells);
     copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
-    copyToHost(dataTO.stringBytes, _cudaAccessTO->stringBytes, *dataTO.numStringBytes);
+    copyToHost(dataTO.additionalData, _cudaAccessTO->additionalData, *dataTO.numAdditionalData);
 }
 
 void _CudaSimulationFacade::automaticResizeArrays()
@@ -533,27 +535,27 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 {
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeEntitiesForCleanup(additionals.cellArraySize, additionals.particleArraySize);
+    _cudaSimulationData->resizeTargetObjects(additionals.cellArraySize, additionals.particleArraySize);
     if (!_cudaSimulationData->isEmpty()) {
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, getSimulationDataIntern());
         syncAndCheck();
 
-        _cudaSimulationData->resizeRemainings();
+        _cudaSimulationData->resizeObjects();
 
         _garbageCollectorKernels->swapArrays(_settings.gpuSettings, getSimulationDataIntern());
         syncAndCheck();
     } else {
-        _cudaSimulationData->resizeRemainings();
+        _cudaSimulationData->resizeObjects();
     }
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->additionalData);
 
     auto cellArraySize = _cudaSimulationData->objects.cells.getSize_host();
-    CudaMemoryManager::getInstance().acquireMemory<CellAccessTO>(cellArraySize, _cudaAccessTO->cells);
-    CudaMemoryManager::getInstance().acquireMemory<ParticleAccessTO>(cellArraySize, _cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_RAW_BYTES, _cudaAccessTO->stringBytes);
+    CudaMemoryManager::getInstance().acquireMemory<CellTO>(cellArraySize, _cudaAccessTO->cells);
+    CudaMemoryManager::getInstance().acquireMemory<ParticleTO>(cellArraySize, _cudaAccessTO->particles);
+    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_RAW_BYTES, _cudaAccessTO->additionalData);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 

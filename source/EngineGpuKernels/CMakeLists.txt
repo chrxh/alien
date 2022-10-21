@@ -1,7 +1,7 @@
 
 add_library(alien_engine_gpu_kernels_lib
-    AccessTOs.cuh
     Array.cuh
+    AttackProcessor.cuh
     Base.cuh
     Cell.cuh
     CellComputationProcessor.cuh
@@ -25,7 +25,6 @@ add_library(alien_engine_gpu_kernels_lib
     Definitions.cuh
     Definitions.h
     DensityMap.cuh
-    DigestionProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
     EditKernelsLauncher.cu
@@ -78,7 +77,8 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationKernelsLauncher.cuh
     SimulationResult.cuh
     SpotCalculator.cuh
-    Swap.cuh)
+    Swap.cuh
+    TOs.cuh)
 
 target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)
 
