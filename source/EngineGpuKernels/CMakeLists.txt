@@ -1,7 +1,7 @@
 
 add_library(alien_engine_gpu_kernels_lib
     Array.cuh
-    AttackProcessor.cuh
+    AttackerProcessor.cuh
     Base.cuh
     Cell.cuh
     CellComputationProcessor.cuh
@@ -49,7 +49,7 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernels.cuh
     MuscleProcessor.cuh
     NerveProcessor.cuh
-    NeuralNetProcessor.cuh
+    NeuronProcessor.cuh
     Objects.cu
     Objects.cuh
     ObjectFactory.cuh

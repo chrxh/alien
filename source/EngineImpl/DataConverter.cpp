@@ -8,6 +8,31 @@
 #include "EngineInterface/Descriptions.h"
 
 
+namespace
+{
+    void convert(DataTO const& dataTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<uint8_t>& target)
+    {
+        target.resize(sourceSize);
+        for (int i = 0; i < sourceSize; ++i) {
+            target[i] = dataTO.additionalData[sourceIndex + i];
+        }
+    }
+
+    template<typename Source>
+    void convert(DataTO const& dataTO, Source const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    {
+        targetSize = source.size();
+        if (targetSize > 0) {
+            targetIndex = *dataTO.numAdditionalData;
+            uint64_t size = source.size();
+            for (int i = 0; i < size; ++i) {
+                dataTO.additionalData[targetIndex + i] = source.at(i);
+            }
+            (*dataTO.numAdditionalData) += size;
+        }
+    }
+}
+
 DataConverter::DataConverter(SimulationParameters const& parameters)
     : _parameters(parameters)
 {}
@@ -73,7 +98,7 @@ ClusteredDataDescription DataConverter::convertAccessTOtoClusteredDataDescriptio
                                    .setPos({particle.pos.x, particle.pos.y})
                                    .setVel({particle.vel.x, particle.vel.y})
                                    .setEnergy(particle.energy)
-                                   .setMetadata(ParticleMetadata().setColor(particle.metadata.color)));
+                                   .setColor(particle.color));
     }
     result.addParticles(particles);
 
@@ -100,7 +125,7 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataTO const& da
                                    .setPos({particle.pos.x, particle.pos.y})
                                    .setVel({particle.vel.x, particle.vel.y})
                                    .setEnergy(particle.energy)
-                                   .setMetadata(ParticleMetadata().setColor(particle.metadata.color)));
+                                   .setColor(particle.color));
     }
     result.addParticles(particles);
 
@@ -198,7 +223,7 @@ void DataConverter::addAdditionalDataSizeForCell(CellDescription const& cell, ui
         break;
     case Enums::CellFunction_Nerve:
         break;
-    case Enums::CellFunction_Attack:
+    case Enums::CellFunction_Attacker:
         break;
     case Enums::CellFunction_Injector:
         additionalDataSize += std::get<InjectorDescription>(*cell.cellFunction).dna.size();
@@ -207,29 +232,6 @@ void DataConverter::addAdditionalDataSizeForCell(CellDescription const& cell, ui
         break;
     }
 }    
-
-namespace
-{
-    std::string convertToString(char const* data, int size) {
-        std::string result(size, 0);
-        for (int i = 0; i < size; ++i) {
-            result[i] = data[i];
-        }
-        return result;
-    }
-
-    void convertToArray(std::string const& source, char* target, int size)
-    {
-        for (int i = 0; i < size; ++i) {
-            if (i < source.size()) {
-                target[i] = source.at(i);
-            }
-            else {
-                target[i] = 0;
-            }
-        }
-    }
-}
 
 namespace
 {
@@ -320,17 +322,60 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
     if (metadataTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&dataTO.additionalData[metadataTO.nameByteIndex]), metadataTO.nameSize);
+        auto const name = std::string(reinterpret_cast<char*>(&dataTO.additionalData[metadataTO.nameIndex]), metadataTO.nameSize);
         metadata.setName(name);
     }
     if (metadataTO.descriptionSize > 0) {
         auto const description =
-            std::string(reinterpret_cast<char*>(&dataTO.additionalData[metadataTO.descriptionByteIndex]), metadataTO.descriptionSize);
+            std::string(reinterpret_cast<char*>(&dataTO.additionalData[metadataTO.descriptionIndex]), metadataTO.descriptionSize);
         metadata.setDescription(description);
     }
     result.metadata = metadata;
 
-    result.cellFunction = cellTO.cellFunction;
+    switch (cellTO.cellFunction) {
+    case Enums::CellFunction_Neuron: {
+        NeuronDescription neuron;
+        convert(dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBias, neuron.weigthsAndBias);
+        result.cellFunction = neuron;
+    } break;
+    case Enums::CellFunction_Transmitter: {
+        TransmitterDescription transmitter;
+        result.cellFunction = transmitter;
+    } break;
+    case Enums::CellFunction_Constructor: {
+        ConstructorDescription constructor;
+        convert(dataTO, cellTO.cellFunctionData.constructor.dnaSize, cellTO.cellFunctionData.constructor.dna, constructor.dna);
+        result.cellFunction = constructor;
+    } break;
+    case Enums::CellFunction_Sensor: {
+        SensorDescription sensor;
+        sensor.mode = cellTO.cellFunctionData.sensor.mode;
+        sensor.color = cellTO.cellFunctionData.sensor.color;
+        result.cellFunction = sensor;
+    } break;
+    case Enums::CellFunction_Nerve: {
+        NerveDescription nerve;
+        result.cellFunction = nerve;
+    } break;
+    case Enums::CellFunction_Attacker: {
+        AttackerDescription attacker;
+        result.cellFunction = attacker;
+    } break;
+    case Enums::CellFunction_Injector: {
+        InjectorDescription injector;
+        convert(dataTO, cellTO.cellFunctionData.injector.dnaSize, cellTO.cellFunctionData.injector.dna, injector.dna);
+        result.cellFunction = injector;
+    } break;
+    case Enums::CellFunction_Muscle: {
+        MuscleDescription muscle;
+        result.cellFunction = muscle;
+    } break;
+    }
+
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        result.activity.channels[i] = cellTO.activity.channels[i];
+    }
+    result.activityChanged = cellTO.activityChanged;
 
     return result;
 }
@@ -344,18 +389,7 @@ void DataConverter::addParticle(DataTO const& dataTO, ParticleDescription const&
     particleTO.pos = {particleDesc.pos.x, particleDesc.pos.y};
     particleTO.vel = {particleDesc.vel.x, particleDesc.vel.y};
 	particleTO.energy = toFloat(particleDesc.energy);
-    particleTO.metadata.color = particleDesc.metadata.color;
-}
-
-int DataConverter::convertStringAndReturnStringIndex(DataTO const& dataTO, std::string const& s) const
-{
-    auto result = *dataTO.numAdditionalData;
-    int len = static_cast<int>(s.size());
-    for (int i = 0; i < len; ++i) {
-        dataTO.additionalData[result + i] = s.at(i);
-    }
-    (*dataTO.numAdditionalData) += len;
-    return result;
+    particleTO.color = particleDesc.color;
 }
 
 void DataConverter::addCell(
@@ -372,25 +406,56 @@ void DataConverter::addCell(
     cellTO.underConstruction = cellDesc.underConstruction;
     cellTO.inputBlocked = cellDesc.inputBlocked;
     cellTO.outputBlocked = cellDesc.outputBlocked;
-    cellTO.cellFunction = cellDesc.cellFunction;
+    cellTO.cellFunction = cellDesc.getCellFunctionType();
+    switch (cellDesc.getCellFunctionType()) {
+    case Enums::CellFunction_Neuron: {
+        NeuronTO neuronTO;
+        convert(dataTO, std::get<NeuronDescription>(*cellDesc.cellFunction).weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBias);
+        cellTO.cellFunctionData.neuron = neuronTO;
+    } break;
+    case Enums::CellFunction_Transmitter: {
+        TransmitterTO transmitterTO;
+        cellTO.cellFunctionData.transmitter = transmitterTO;
+    } break;
+    case Enums::CellFunction_Constructor: {
+        ConstructorTO constructorTO;
+        convert(dataTO, std::get<ConstructorDescription>(*cellDesc.cellFunction).dna, constructorTO.dnaSize, constructorTO.dna);
+        cellTO.cellFunctionData.constructor = constructorTO;
+    } break;
+    case Enums::CellFunction_Sensor: {
+        SensorTO sensorTO;
+        sensorTO.mode = cellTO.cellFunctionData.sensor.mode;
+        sensorTO.color = cellTO.cellFunctionData.sensor.color;
+        cellTO.cellFunctionData.sensor = sensorTO;
+    } break;
+    case Enums::CellFunction_Nerve: {
+        NerveTO nerveTO;
+        cellTO.cellFunctionData.nerve = nerveTO;
+    } break;
+    case Enums::CellFunction_Attacker: {
+        AttackerTO attackerTO;
+        cellTO.cellFunctionData.attacker = attackerTO;
+    } break;
+    case Enums::CellFunction_Injector: {
+        InjectorTO injectorTO;
+        convert(dataTO, std::get<InjectorDescription>(*cellDesc.cellFunction).dna, injectorTO.dnaSize, injectorTO.dna);
+        cellTO.cellFunctionData.injector = injectorTO;
+    } break;
+    case Enums::CellFunction_Muscle: {
+        MuscleTO muscleTO;
+        cellTO.cellFunctionData.muscle = muscleTO;
+    } break;
+    }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        cellTO.activity.channels[i] = cellDesc.activity.channels[i];
+    }
+    cellTO.activityChanged = cellDesc.activityChanged;
 	cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
-    auto& metadataTO = cellTO.metadata;
-    metadataTO.nameSize = toInt(cellDesc.metadata.name.size());
-    if (metadataTO.nameSize > 0) {
-        metadataTO.nameByteIndex = convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.name);
-    }
-    metadataTO.descriptionSize = toInt(cellDesc.metadata.description.size());
-    if (metadataTO.descriptionSize > 0) {
-        metadataTO.descriptionByteIndex = convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.description);
-    }
-    metadataTO.sourceCodeLen = toInt(cellDesc.metadata.computerSourcecode.size());
-    if (metadataTO.sourceCodeLen > 0) {
-        metadataTO.sourceCodeByteIndex =
-            convertStringAndReturnStringIndex(dataTO, cellDesc.metadata.computerSourcecode);
-    }
+    convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameIndex);
+    convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
@@ -414,13 +479,4 @@ void DataConverter::setConnections(DataTO const& dataTO, CellDescription const& 
         cellTO.connections[0].angleFromPrevious += angleOffset;
     }
     cellTO.numConnections = index;
-}
-
-namespace
-{
-	void convert(RealVector2D const& input, float2& output)
-	{
-		output.x = input.x;
-		output.y = input.y;
-	}
 }

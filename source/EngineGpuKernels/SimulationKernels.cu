@@ -3,7 +3,7 @@
 #include "ClusterProcessor.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "NerveProcessor.cuh"
-#include "NeuralNetProcessor.cuh"
+#include "NeuronProcessor.cuh"
 
 __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
 {
@@ -70,7 +70,7 @@ __global__ void cudaNextTimestep_nerveFunction(SimulationData data, SimulationRe
 
 __global__ void cudaNextTimestep_neuronFunction(SimulationData data, SimulationResult result)
 {
-    NeuralNetProcessor::process(data, result);
+    NeuronProcessor::process(data, result);
 }
 
 __global__ void cudaNextTimestep_substep10(SimulationData data)

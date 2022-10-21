@@ -212,7 +212,7 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             case Enums::CellFunction_Constructor:
                 showConstructionTableContent();
                 break;
-            case Enums::CellFunction_Attack:
+            case Enums::CellFunction_Attacker:
                 showDigestionTableContent();
                 break;
             case Enums::CellFunction_Injector:

@@ -34,8 +34,8 @@ Enums::CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<NerveDescription>(*cellFunction)) {
         return Enums::CellFunction_Nerve;
     }
-    if (std::holds_alternative<AttackDescription>(*cellFunction)) {
-        return Enums::CellFunction_Attack;
+    if (std::holds_alternative<AttackerDescription>(*cellFunction)) {
+        return Enums::CellFunction_Attacker;
     }
     if (std::holds_alternative<InjectorDescription>(*cellFunction)) {
         return Enums::CellFunction_Injector;
