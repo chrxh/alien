@@ -14,7 +14,7 @@ namespace
     {
         target.resize(sourceSize);
         for (int i = 0; i < sourceSize; ++i) {
-            target[i] = dataTO.additionalData[sourceIndex + i];
+            target[i] = dataTO.auxiliaryData[sourceIndex + i];
         }
     }
 
@@ -23,12 +23,12 @@ namespace
     {
         targetSize = source.size();
         if (targetSize > 0) {
-            targetIndex = *dataTO.numAdditionalData;
+            targetIndex = *dataTO.numAuxiliaryData;
             uint64_t size = source.size();
             for (int i = 0; i < size; ++i) {
-                dataTO.additionalData[targetIndex + i] = source.at(i);
+                dataTO.auxiliaryData[targetIndex + i] = source.at(i);
             }
-            (*dataTO.numAdditionalData) += size;
+            (*dataTO.numAuxiliaryData) += size;
         }
     }
 }
@@ -43,7 +43,7 @@ ArraySizes DataConverter::getArraySizes(DataDescription const& data) const
     result.cellArraySize = data.cells.size();
     result.particleArraySize = data.particles.size();
     for (auto const& cell : data.cells) {
-        addAdditionalDataSizeForCell(cell, result.additionalDataSize);
+        addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
     }
     return result;
 }
@@ -54,7 +54,7 @@ ArraySizes DataConverter::getArraySizes(ClusteredDataDescription const& data) co
     for (auto const& cluster : data.clusters) {
         result.cellArraySize += cluster.cells.size();
         for (auto const& cell : cluster.cells) {
-            addAdditionalDataSizeForCell(cell, result.additionalDataSize);
+            addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
         }
     }
     result.particleArraySize = data.particles.size();
@@ -322,12 +322,12 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
     if (metadataTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&dataTO.additionalData[metadataTO.nameIndex]), metadataTO.nameSize);
+        auto const name = std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.nameIndex]), metadataTO.nameSize);
         metadata.setName(name);
     }
     if (metadataTO.descriptionSize > 0) {
         auto const description =
-            std::string(reinterpret_cast<char*>(&dataTO.additionalData[metadataTO.descriptionIndex]), metadataTO.descriptionSize);
+            std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.descriptionIndex]), metadataTO.descriptionSize);
         metadata.setDescription(description);
     }
     result.metadata = metadata;

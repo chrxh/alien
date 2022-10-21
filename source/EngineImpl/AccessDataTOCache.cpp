@@ -18,7 +18,7 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
         if (fits(existingArraySizes, arraySizes)) {
             *_dataTO->numCells = 0;
             *_dataTO->numParticles = 0;
-            *_dataTO->numAdditionalData = 0;
+            *_dataTO->numAuxiliaryData = 0;
             return *_dataTO;
         } else {
             deleteDataTO(*_dataTO);
@@ -28,10 +28,10 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
         DataTO result;
         result.numCells = new uint64_t;
         result.numParticles = new uint64_t;
-        result.numAdditionalData = new uint64_t;
+        result.numAuxiliaryData = new uint64_t;
         result.cells = new CellTO[arraySizes.cellArraySize];
         result.particles = new ParticleTO[arraySizes.particleArraySize];
-        result.additionalData = new uint8_t[arraySizes.additionalDataSize];
+        result.auxiliaryData = new uint8_t[arraySizes.additionalDataSize];
         _dataTO = result;
         return result;
     } catch (std::bad_alloc const&) {
@@ -42,20 +42,20 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
 bool _AccessDataTOCache::fits(ArraySizes const& left, ArraySizes const& right) const
 {
     return left.cellArraySize >= right.cellArraySize && left.particleArraySize >= right.particleArraySize
-        && left.additionalDataSize >= right.additionalDataSize;
+        && left.auxiliaryDataSize >= right.auxiliaryDataSize;
 }
 
 auto _AccessDataTOCache::getArraySizes(DataTO const& dataTO) const -> ArraySizes
 {
-    return {*dataTO.numCells, *dataTO.numParticles, *dataTO.numAdditionalData};
+    return {*dataTO.numCells, *dataTO.numParticles, *dataTO.numAuxiliaryData};
 }
 
 void _AccessDataTOCache::deleteDataTO(DataTO const& dataTO)
 {
     delete dataTO.numCells;
     delete dataTO.numParticles;
-    delete dataTO.numAdditionalData;
+    delete dataTO.numAuxiliaryData;
     delete[] dataTO.cells;
     delete[] dataTO.particles;
-    delete[] dataTO.additionalData;
+    delete[] dataTO.auxiliaryData;
 }

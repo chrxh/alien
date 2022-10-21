@@ -40,31 +40,33 @@ __device__ void SimulationData::prepareForNextTimestep()
     objects.saveNumEntries();
 }
 
-bool SimulationData::shouldResize(int additionalCells, int additionalParticles)
+bool SimulationData::shouldResize(ArraySizes const& additionals)
 {
-    auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
+    auto cellAndParticleArraySizeInc = std::max(additionals.cellArraySize, additionals.particleArraySize);
 
     return objects.cells.shouldResize_host(cellAndParticleArraySizeInc)
         || objects.cellPointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
         || objects.particles.shouldResize_host(cellAndParticleArraySizeInc)
-        || objects.particlePointers.shouldResize_host(cellAndParticleArraySizeInc * 10);
+        || objects.particlePointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
+        || objects.auxiliaryData.shouldResize_host(additionals.auxiliaryDataSize);
 }
 
 __device__ bool SimulationData::shouldResize()
 {
     return objects.cells.shouldResize(0) || objects.cellPointers.shouldResize(0)
         || objects.particles.shouldResize(0) || objects.particlePointers.shouldResize(0)
-        || objects.additionalData.shouldResize(0);
+        || objects.auxiliaryData.shouldResize(0);
 }
 
-void SimulationData::resizeTargetObjects(int additionalCells, int additionalParticles)
+void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
 {
-    auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
+    auto cellAndParticleArraySizeInc = std::max(additionals.cellArraySize, additionals.particleArraySize);
 
     resizeTargetIntern(objects.cells, tempObjects.cells, cellAndParticleArraySizeInc);
     resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellAndParticleArraySizeInc * 10);
     resizeTargetIntern(objects.particles, tempObjects.particles, cellAndParticleArraySizeInc);
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, cellAndParticleArraySizeInc * 10);
+    resizeTargetIntern(objects.auxiliaryData, tempObjects.auxiliaryData, additionals.auxiliaryDataSize);
 }
 
 void SimulationData::resizeObjects()
