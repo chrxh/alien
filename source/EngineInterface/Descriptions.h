@@ -33,6 +33,19 @@ struct ConnectionDescription
     float angleFromPrevious = 0;
 };
 
+struct ActivityDescription
+{
+    float channels[MAX_CHANNELS];
+
+    ActivityDescription()
+    {
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            channels[i] = 0;
+        }
+    }
+};
+
+
 struct NeuronDescription
 {
     std::vector<uint8_t> weigthsAndBias;
@@ -49,13 +62,13 @@ struct ConstructorDescription
 struct SensorDescription
 {
     Enums::SensorMode mode;
-    int color;
+    int color = 0;
 };
 
 struct NerveDescription
 {};
 
-struct AttackDescription
+struct AttackerDescription
 {};
 
 struct InjectorDescription
@@ -66,13 +79,13 @@ struct InjectorDescription
 struct MuscleDescription
 {};
 
-using CellFunction = std::optional<std::variant<
+using CellFunctionDescription = std::optional<std::variant<
     NeuronDescription,
     TransmitterDescription,
     ConstructorDescription,
     SensorDescription,
     NerveDescription,
-    AttackDescription,
+    AttackerDescription,
     InjectorDescription,
     MuscleDescription>>;
 
@@ -83,20 +96,22 @@ struct CellDescription
 
     RealVector2D pos;
     RealVector2D vel;
-    double energy;
-    int color;
-    int maxConnections;
-    int executionOrderNumber;
-    bool barrier;
-    int age;
+    double energy = 0;
+    int color = 0;
+    int maxConnections = 0;
+    int executionOrderNumber = 0;
+    bool barrier = false;
+    int age = 0;
 
-    bool underConstruction;
-    bool inputBlocked;
-    bool outputBlocked;
-    CellFunction cellFunction;
+    bool underConstruction = false;
+    bool inputBlocked = false;
+    bool outputBlocked = false;
+    CellFunctionDescription cellFunction;
+    ActivityDescription activity;
 
-    bool activityChanges;
     CellMetadataDescription metadata;
+
+    bool activityChanged;
 
     CellDescription() = default;
     CellDescription& setId(uint64_t value)
@@ -192,8 +207,8 @@ struct ParticleDescription
 
     RealVector2D pos;
     RealVector2D vel;
-    double energy;
-    ParticleMetadata metadata;
+    double energy = 0;
+    int color = 0;
 
     ParticleDescription() = default;
     ParticleDescription& setId(uint64_t value)
@@ -216,9 +231,9 @@ struct ParticleDescription
         energy = value;
         return *this;
     }
-    ParticleDescription& setMetadata(ParticleMetadata const& value)
+    ParticleDescription& setColor(int value)
     {
-        metadata = value;
+        color = value;
         return *this;
     }
 };

@@ -48,8 +48,6 @@ private:
 	void setConnections(
         DataTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const;
 
-    int convertStringAndReturnStringIndex(DataTO const& dataTO, std::string const& s) const;
-
 private:
 	SimulationParameters _parameters;
     GpuSettings _gpuConstants;

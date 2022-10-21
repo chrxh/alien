@@ -92,7 +92,7 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
         changes += abs(newActivity.channels[i] - cell->activity.channels[i]);
     }
     if (changes > 0.1f) {
-        cell->activityChanges = true;
+        cell->activityChanged = true;
     }
     cell->activity = newActivity;
 }

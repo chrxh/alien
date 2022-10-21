@@ -60,7 +60,7 @@ struct NerveFunction
 {
 };
 
-struct AttackFunction
+struct AttackerFunction
 {
 };
 
@@ -81,7 +81,7 @@ union CellFunctionData
     ConstructorFunction constructorFunction;
     SensorFunction sensorFunction;
     NerveFunction nerveFunction;
-    AttackFunction digestionFunction;
+    AttackerFunction digestionFunction;
     InjectorFunction injectorFunction;
     MuscleFunction muscleFunction;
 };
@@ -111,7 +111,7 @@ struct Cell
     CellMetadataDescription metadata;
 
     //visualization
-    bool activityChanges;
+    bool activityChanged;
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = cluster selected

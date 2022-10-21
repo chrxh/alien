@@ -5,7 +5,7 @@
 #include "SimulationData.cuh"
 #include "CellFunctionProcessor.cuh"
 
-class NeuralNetProcessor
+class NeuronProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
@@ -20,7 +20,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ void NeuralNetProcessor::process(SimulationData& data, SimulationResult& result)
+__device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationResult& result)
 {
     auto partition = calcPartition(data.cellFunctionOperations[Enums::CellFunction_Neuron].getNumEntries(), blockIdx.x, gridDim.x);
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
@@ -29,7 +29,7 @@ __device__ __inline__ void NeuralNetProcessor::process(SimulationData& data, Sim
     }
 }
 
-__inline__ __device__ void NeuralNetProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
     __shared__ Activity outputActivity;
     __shared__ Activity inputActivity;
@@ -67,7 +67,7 @@ __inline__ __device__ void NeuralNetProcessor::processCell(SimulationData& data,
     __syncthreads();
 }
 
-__inline__ __device__ float NeuralNetProcessor::sigmoid(float z)
+__inline__ __device__ float NeuronProcessor::sigmoid(float z)
 {
     return 1.0f / (1.0f + __expf(-z));
 }

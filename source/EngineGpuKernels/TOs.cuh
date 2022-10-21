@@ -19,10 +19,10 @@ struct ParticleTO
 struct CellMetadataTO
 {
     uint64_t nameSize;
-    uint64_t nameByteIndex;
+    uint64_t nameIndex;
 
     uint64_t descriptionSize;
-    uint64_t descriptionByteIndex;
+    uint64_t descriptionIndex;
 };
 
 struct ConnectionTO
@@ -49,8 +49,8 @@ struct TransmitterTO
 struct ConstructorTO
 {
     Enums::ConstructorMode mode;
-    uint64_t constructionDataSize;
-    uint64_t constructionData;
+    uint64_t dnaSize;
+    uint64_t dna;
 };
 
 struct SensorTO
@@ -62,13 +62,13 @@ struct SensorTO
 struct NerveTO
 {};
 
-struct AttackTO
+struct AttackerTO
 {};
 
 struct InjectorTO
 {
-    uint64_t constructionDataSize;
-    uint64_t constructionData;
+    uint64_t dnaSize;
+    uint64_t dna;
 };
 
 struct MuscleTO
@@ -76,14 +76,14 @@ struct MuscleTO
 
 union CellFunctionTO
 {
-    NeuronTO neuronFunction;
-    TransmitterTO transmitterFunction;
-    ConstructorTO constructorFunction;
-    SensorTO sensorFunction;
-    NerveTO nerveFunction;
-    AttackTO digestionFunction;
-    InjectorTO injectorFunction;
-    MuscleTO muscleFunction;
+    NeuronTO neuron;
+    TransmitterTO transmitter;
+    ConstructorTO constructor;
+    SensorTO sensor;
+    NerveTO nerve;
+    AttackerTO attacker;
+    InjectorTO injector;
+    MuscleTO muscle;
 };
 
 struct CellTO
@@ -106,12 +106,12 @@ struct CellTO
     bool outputBlocked;
 
     Enums::CellFunction cellFunction;
-    CellFunctionTO cellFunctionTO;
+    CellFunctionTO cellFunctionData;
     ActivityTO activity;
 
     CellMetadataTO metadata;
 
-    bool activityChanges;
+    bool activityChanged;
     int selected;
 };
 

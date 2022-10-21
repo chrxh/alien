@@ -34,10 +34,10 @@ namespace
         cellTO.age = cell->age;
 
         copyBytes(
-            cellTO.metadata.nameSize, cellTO.metadata.nameByteIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAdditionalData, dataTO.additionalData);
+            cellTO.metadata.nameSize, cellTO.metadata.nameIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAdditionalData, dataTO.additionalData);
         copyBytes(
             cellTO.metadata.descriptionSize,
-            cellTO.metadata.descriptionByteIndex,
+            cellTO.metadata.descriptionIndex,
             cell->metadata.descriptionSize,
             cell->metadata.description,
             *dataTO.numAdditionalData,

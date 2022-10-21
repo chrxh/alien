@@ -14,7 +14,7 @@ namespace Enums
         CellFunction_Constructor,
         CellFunction_Sensor,
         CellFunction_Nerve,
-        CellFunction_Attack,
+        CellFunction_Attacker,
         CellFunction_Injector,
         CellFunction_Muscle,
         CellFunction_WithoutNoneCount,

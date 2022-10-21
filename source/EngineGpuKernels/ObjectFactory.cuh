@@ -90,14 +90,14 @@ ObjectFactory::createCellFromTO(int targetIndex, CellTO const& cellTO, Cell* cel
         cell->metadata.nameSize,
         cell->metadata.name,
         cellTO.metadata.nameSize,
-        cellTO.metadata.nameByteIndex,
+        cellTO.metadata.nameIndex,
         simulationTO->additionalData);
 
     copyBytes(
         cell->metadata.descriptionSize,
         cell->metadata.description,
         cellTO.metadata.descriptionSize,
-        cellTO.metadata.descriptionByteIndex,
+        cellTO.metadata.descriptionIndex,
         simulationTO->additionalData);
 
     copyBytes(
@@ -135,14 +135,14 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(
         cell->metadata.nameSize,
         cell->metadata.name,
         cellTO.metadata.nameSize,
-        cellTO.metadata.nameByteIndex,
+        cellTO.metadata.nameIndex,
         dataTO.additionalData);
 
     copyBytes(
         cell->metadata.descriptionSize,
         cell->metadata.description,
         cellTO.metadata.descriptionSize,
-        cellTO.metadata.descriptionByteIndex,
+        cellTO.metadata.descriptionIndex,
         dataTO.additionalData);
 
     copyBytes(
