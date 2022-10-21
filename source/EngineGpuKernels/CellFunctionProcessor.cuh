@@ -15,7 +15,8 @@ class CellFunctionProcessor
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
 
-    __inline__ __device__ static void calcInputActivity(Cell* cell, bool& inputAvailable, Activity& result);
+    __inline__ __device__ static Activity calcInputActivity(Cell* cell);
+    __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
 };
 
 /************************************************************************/
@@ -37,12 +38,21 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     }
 }
 
-__inline__ __device__ void CellFunctionProcessor::calcInputActivity(Cell* cell, bool& inputAvailable, Activity& result)
+__inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell)
 {
+    Activity result;
+
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        result.channels[i] = 0;
+    }
+
+    if (cell->inputBlocked) {
+        return result;
+    }
     int inputExecutionOrderNumber = -cudaSimulationParameters.cellMaxExecutionOrderNumber;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->inputBlocked) {
+        if (connectedCell->outputBlocked) {
             continue;
         }
         auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
@@ -55,21 +65,15 @@ __inline__ __device__ void CellFunctionProcessor::calcInputActivity(Cell* cell, 
     }
 
     if (inputExecutionOrderNumber == -cudaSimulationParameters.cellMaxExecutionOrderNumber) {
-        inputAvailable = false;
-        return;
+        return result;
     }
 
-    inputAvailable = true;
     if (inputExecutionOrderNumber < 0) {
         inputExecutionOrderNumber += cudaSimulationParameters.cellMaxExecutionOrderNumber;
     }
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
-        result.channels[i] = 0;
-    }
-
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->inputBlocked) {
+        if (connectedCell->outputBlocked) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
@@ -78,4 +82,17 @@ __inline__ __device__ void CellFunctionProcessor::calcInputActivity(Cell* cell, 
             }
         }
     }
+    return result;
+}
+
+__inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activity const& newActivity)
+{
+    auto changes = 0.0f;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        changes += abs(newActivity.channels[i] - cell->activity.channels[i]);
+    }
+    if (changes > 0.1f) {
+        cell->activityChanges = true;
+    }
+    cell->activity = newActivity;
 }

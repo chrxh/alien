@@ -30,7 +30,8 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_substep6, data, considerForcesFromAngleMismatch);
     KERNEL_CALL(cudaNextTimestep_substep7, data);
     KERNEL_CALL(cudaNextTimestep_substep8, data);
-    KERNEL_CALL(cudaNextTimestep_substep9, data, result);
+    KERNEL_CALL(cudaNextTimestep_nerveFunction, data, result);
+    KERNEL_CALL(cudaNextTimestep_neuronFunction, data, result);
     if (considerInnerFriction) {
         KERNEL_CALL(cudaNextTimestep_substep10, data);
     }
