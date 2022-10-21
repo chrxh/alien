@@ -31,19 +31,19 @@ public:
     void calcTimestep();
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    void getSelectedSimulationData(bool includeClusters, DataAccessTO const& dataTO);
-    void getInspectedSimulationData(std::vector<uint64_t> entityIds, DataAccessTO const& dataTO);
-    void getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataAccessTO const& dataTO);
-    void addAndSelectSimulationData(DataAccessTO const& dataTO);
-    void setSimulationData(DataAccessTO const& dataTO);
+    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
+    void getSelectedSimulationData(bool includeClusters, DataTO const& dataTO);
+    void getInspectedSimulationData(std::vector<uint64_t> entityIds, DataTO const& dataTO);
+    void getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
+    void addAndSelectSimulationData(DataTO const& dataTO);
+    void setSimulationData(DataTO const& dataTO);
     void removeSelectedEntities(bool includeClusters);
     void relaxSelectedEntities(bool includeClusters);
     void uniformVelocitiesForSelectedEntities(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeInspectedSimulationData(DataAccessTO const& changeDataTO);
+    void changeInspectedSimulationData(DataTO const& changeDataTO);
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
@@ -74,8 +74,8 @@ public:
 
 private:
     void syncAndCheck();
-    void copyDataTOtoDevice(DataAccessTO const& dataTO);
-    void copyDataTOtoHost(DataAccessTO const& dataTO);
+    void copyDataTOtoDevice(DataTO const& dataTO);
+    void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals);
 
@@ -88,7 +88,7 @@ private:
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SimulationResult> _cudaSimulationResult;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
-    std::shared_ptr<DataAccessTO> _cudaAccessTO;
+    std::shared_ptr<DataTO> _cudaAccessTO;
     std::shared_ptr<CudaMonitorData> _cudaMonitorData;
 
     mutable std::mutex _mutex;

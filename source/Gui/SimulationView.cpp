@@ -21,11 +21,11 @@ namespace
 
     std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
         {Enums::CellFunction_Constructor, "Constructor"},
-        {Enums::CellFunction_Digestion, "Digestion"},
+        {Enums::CellFunction_Attack, "Digestion"},
         {Enums::CellFunction_Injector, "Injector"},
         {Enums::CellFunction_Muscle, "Muscle"},
         {Enums::CellFunction_Nerve, "Nerve"},
-        {Enums::CellFunction_Neurons, "Neurons"},
+        {Enums::CellFunction_Neuron, "Neurons"},
         {Enums::CellFunction_Sensor, "Sensor"},
         {Enums::CellFunction_Transmitter, "Transmitter"},
     };

@@ -208,16 +208,16 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             ImGui::TableSetupColumn("Semantic", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
             ImGui::TableNextRow();
-            switch(cell.cellFunction){
+            switch(cell.getCellFunctionType()){
             case Enums::CellFunction_Constructor:
                 showConstructionTableContent();
                 break;
-            case Enums::CellFunction_Digestion:
+            case Enums::CellFunction_Attack:
                 showDigestionTableContent();
                 break;
             case Enums::CellFunction_Injector:
             case Enums::CellFunction_Nerve:
-            case Enums::CellFunction_Neurons:
+            case Enums::CellFunction_Neuron:
                 showNeuralNetTableContent();
                 break;
             case Enums::CellFunction_Sensor:

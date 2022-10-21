@@ -7,7 +7,7 @@ struct Particle
     uint64_t id;
     float2 absPos;
     float2 vel;
-    unsigned char color;
+    int color;
     float energy;
 
     //editing data

@@ -53,10 +53,11 @@ bool SimulationData::shouldResize(int additionalCells, int additionalParticles)
 __device__ bool SimulationData::shouldResize()
 {
     return objects.cells.shouldResize(0) || objects.cellPointers.shouldResize(0)
-        || objects.particles.shouldResize(0) || objects.particlePointers.shouldResize(0);
+        || objects.particles.shouldResize(0) || objects.particlePointers.shouldResize(0)
+        || objects.additionalData.shouldResize(0);
 }
 
-void SimulationData::resizeEntitiesForCleanup(int additionalCells, int additionalParticles)
+void SimulationData::resizeTargetObjects(int additionalCells, int additionalParticles)
 {
     auto cellAndParticleArraySizeInc = std::max(additionalCells, additionalParticles);
 
@@ -66,7 +67,7 @@ void SimulationData::resizeEntitiesForCleanup(int additionalCells, int additiona
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, cellAndParticleArraySizeInc * 10);
 }
 
-void SimulationData::resizeRemainings()
+void SimulationData::resizeObjects()
 {
     objects.cells.resize(tempObjects.cells.getSize_host());
     objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());

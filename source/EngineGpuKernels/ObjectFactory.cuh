@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.cuh"
-#include "AccessTOs.cuh"
+#include "TOs.cuh"
 #include "Map.cuh"
 #include "Math.cuh"
 #include "EngineInterface/Enums.h"
@@ -15,16 +15,16 @@ class ObjectFactory
 {
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ Particle* createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds);
-    __inline__ __device__ Cell* createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellArray, DataAccessTO* simulationTO, bool createIds);
-    __inline__ __device__ void changeCellFromTO(CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell);
-    __inline__ __device__ void changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle);
+    __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO, bool createIds);
+    __inline__ __device__ Cell* createCellFromTO(int targetIndex, CellTO const& cellTO, Cell* cellArray, DataTO* simulationTO, bool createIds);
+    __inline__ __device__ void changeCellFromTO(CellTO const& cellTO, DataTO const& dataTO, Cell* cell);
+    __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
     __inline__ __device__ Cell* createCell();
 
 private:
-    __inline__ __device__ void copyBytes(int& targetLen, char*& targetString, int sourceLen, uint64_t sourceStringIndex, char* stringBytes);
+    __inline__ __device__ void copyBytes(uint64_t& targetLen, uint8_t*& target, uint64_t sourceLen, uint64_t sourceIndex, uint8_t* source);
 
     BaseMap _map;
     SimulationData* _data;
@@ -40,7 +40,7 @@ __inline__ __device__ void ObjectFactory::init(SimulationData* data)
     _map.init(data->worldSize);
 }
 
-__inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleAccessTO const& particleTO, bool createIds)
+__inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO const& particleTO, bool createIds)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
     Particle* particle = _data->objects.particles.getNewElement();
@@ -58,7 +58,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleAcce
 }
 
 __inline__ __device__ Cell*
-ObjectFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cell* cellTargetArray, DataAccessTO* simulationTO, bool createIds)
+ObjectFactory::createCellFromTO(int targetIndex, CellTO const& cellTO, Cell* cellTargetArray, DataTO* simulationTO, bool createIds)
 {
     Cell** cellPointer = _data->objects.cellPointers.getNewElement();
     Cell* cell = cellTargetArray + targetIndex;
@@ -87,25 +87,25 @@ ObjectFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
     cell->age = cellTO.age;
 
     copyBytes(
-        cell->metadata.nameLen,
+        cell->metadata.nameSize,
         cell->metadata.name,
-        cellTO.metadata.nameLen,
-        cellTO.metadata.nameStringIndex,
-        simulationTO->stringBytes);
+        cellTO.metadata.nameSize,
+        cellTO.metadata.nameByteIndex,
+        simulationTO->additionalData);
 
     copyBytes(
-        cell->metadata.descriptionLen,
+        cell->metadata.descriptionSize,
         cell->metadata.description,
-        cellTO.metadata.descriptionLen,
-        cellTO.metadata.descriptionStringIndex,
-        simulationTO->stringBytes);
+        cellTO.metadata.descriptionSize,
+        cellTO.metadata.descriptionByteIndex,
+        simulationTO->additionalData);
 
     copyBytes(
         cell->metadata.sourceCodeLen,
         cell->metadata.sourceCode,
         cellTO.metadata.sourceCodeLen,
-        cellTO.metadata.sourceCodeStringIndex,
-        simulationTO->stringBytes);
+        cellTO.metadata.sourceCodeByteIndex,
+        simulationTO->additionalData);
 
     cell->selected = 0;
     cell->locked = 0;
@@ -114,7 +114,7 @@ ObjectFactory::createCellFromTO(int targetIndex, CellAccessTO const& cellTO, Cel
 }
 
 __inline__ __device__ void ObjectFactory::changeCellFromTO(
-    CellAccessTO const& cellTO, DataAccessTO const& dataTO, Cell* cell)
+    CellTO const& cellTO, DataTO const& dataTO, Cell* cell)
 {
     cell->id = cellTO.id;
     cell->absPos = cellTO.pos;
@@ -132,41 +132,41 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(
     cell->color = cellTO.color;
 
     copyBytes(
-        cell->metadata.nameLen,
+        cell->metadata.nameSize,
         cell->metadata.name,
-        cellTO.metadata.nameLen,
-        cellTO.metadata.nameStringIndex,
-        dataTO.stringBytes);
+        cellTO.metadata.nameSize,
+        cellTO.metadata.nameByteIndex,
+        dataTO.additionalData);
 
     copyBytes(
-        cell->metadata.descriptionLen,
+        cell->metadata.descriptionSize,
         cell->metadata.description,
-        cellTO.metadata.descriptionLen,
-        cellTO.metadata.descriptionStringIndex,
-        dataTO.stringBytes);
+        cellTO.metadata.descriptionSize,
+        cellTO.metadata.descriptionByteIndex,
+        dataTO.additionalData);
 
     copyBytes(
         cell->metadata.sourceCodeLen,
         cell->metadata.sourceCode,
         cellTO.metadata.sourceCodeLen,
-        cellTO.metadata.sourceCodeStringIndex,
-        dataTO.stringBytes);
+        cellTO.metadata.sourceCodeByteIndex,
+        dataTO.additionalData);
 }
 
-__inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleAccessTO const& particleTO, Particle* particle)
+__inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const& particleTO, Particle* particle)
 {
     particle->energy = particleTO.energy;
     particle->absPos = particleTO.pos;
     particle->color = particleTO.metadata.color;
 }
 
-__inline__ __device__ void ObjectFactory::copyBytes(int& targetLen, char*& targetString, int sourceLen, uint64_t sourceStringIndex, char* stringBytes)
+__inline__ __device__ void ObjectFactory::copyBytes(uint64_t& targetLen, uint8_t*& target, uint64_t sourceLen, uint64_t sourceIndex, uint8_t* source)
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
-        targetString = _data->objects.stringBytes.getArray<char>(sourceLen);
+        target = _data->objects.additionalData.getNewSubarray(sourceLen);
         for (int i = 0; i < sourceLen; ++i) {
-            targetString[i] = stringBytes[sourceStringIndex + i];
+            target[i] = source[sourceIndex + i];
         }
     }
 }
@@ -204,8 +204,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->locked = 0;
     cell->selected = 0;
     cell->color = 0;
-    cell->metadata.nameLen = 0;
-    cell->metadata.descriptionLen = 0;
+    cell->metadata.nameSize = 0;
+    cell->metadata.descriptionSize = 0;
     cell->metadata.sourceCodeLen = 0;
     cell->barrier = false;
     cell->age = 0;
@@ -223,8 +223,8 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     result->selected = 0;
     result->locked = 0;
     result->color = 0;
-    result->metadata.nameLen = 0;
-    result->metadata.descriptionLen = 0;
+    result->metadata.nameSize = 0;
+    result->metadata.descriptionSize = 0;
     result->metadata.sourceCodeLen = 0;
     result->barrier = 0;
     result->age = 0;

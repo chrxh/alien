@@ -5,7 +5,7 @@
 
 #include "SimulationData.cuh"
 #include "Cell.cuh"
-#include "AccessTOs.cuh"
+#include "TOs.cuh"
 
 class CellComputationProcessor
 {

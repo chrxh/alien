@@ -13,7 +13,7 @@ namespace
         }
     }
 
-    __device__ void createCellTO(Cell* cell, DataAccessTO& dataTO, Cell* cellArrayStart)
+    __device__ void createCellTO(Cell* cell, DataTO& dataTO, Cell* cellArrayStart)
     {
         auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
         auto& cellTO = dataTO.cells[cellTOIndex];
@@ -34,21 +34,21 @@ namespace
         cellTO.age = cell->age;
 
         copyBytes(
-            cellTO.metadata.nameLen, cellTO.metadata.nameStringIndex, cell->metadata.nameLen, cell->metadata.name, *dataTO.numStringBytes, dataTO.stringBytes);
+            cellTO.metadata.nameSize, cellTO.metadata.nameByteIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAdditionalData, dataTO.additionalData);
         copyBytes(
-            cellTO.metadata.descriptionLen,
-            cellTO.metadata.descriptionStringIndex,
-            cell->metadata.descriptionLen,
+            cellTO.metadata.descriptionSize,
+            cellTO.metadata.descriptionByteIndex,
+            cell->metadata.descriptionSize,
             cell->metadata.description,
-            *dataTO.numStringBytes,
-            dataTO.stringBytes);
+            *dataTO.numAdditionalData,
+            dataTO.additionalData);
         copyBytes(
             cellTO.metadata.sourceCodeLen,
-            cellTO.metadata.sourceCodeStringIndex,
+            cellTO.metadata.sourceCodeByteIndex,
             cell->metadata.sourceCodeLen,
             cell->metadata.sourceCode,
-            *dataTO.numStringBytes,
-            dataTO.stringBytes);
+            *dataTO.numAdditionalData,
+            dataTO.additionalData);
 
         cell->tag = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -59,10 +59,10 @@ namespace
         }
     }
 
-    __device__ void createParticleTO(Particle* particle, DataAccessTO& dataTO)
+    __device__ void createParticleTO(Particle* particle, DataTO& dataTO)
     {
         int particleTOIndex = atomicAdd(dataTO.numParticles, 1);
-        ParticleAccessTO& particleTO = dataTO.particles[particleTOIndex];
+        ParticleTO& particleTO = dataTO.particles[particleTOIndex];
 
         particleTO.id = particle->id;
         particleTO.pos = particle->absPos;
@@ -75,7 +75,7 @@ namespace
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO)
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataTO dataTO)
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -91,7 +91,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     }
 }
 
-__global__ void cudaGetSelectedParticleData(SimulationData data, DataAccessTO access)
+__global__ void cudaGetSelectedParticleData(SimulationData data, DataTO access)
 {
     PartitionData particleBlock = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -105,7 +105,7 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, DataAccessTO ac
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataTO dataTO)
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -132,7 +132,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
     }
 }
 
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access)
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataTO access)
 {
     PartitionData particleBlock = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
 
@@ -155,7 +155,7 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
     }
 }
 
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
 {
     {
         auto const& cells = data.objects.cellPointers;
@@ -202,7 +202,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
 }
 
 //tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -222,7 +222,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
     }
 }
 
-__global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO)
+__global__ void cudaResolveConnections(SimulationData data, DataTO dataTO)
 {
     auto const partition = calcAllThreadsPartition(*dataTO.numCells);
     auto const firstCell = data.objects.cells.getArray();
@@ -237,7 +237,7 @@ __global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO)
     }
 }
 
-__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO access)
 {
     PartitionData particleBlock = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -253,7 +253,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData, bool createIds)
+__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, bool selectNewData, bool createIds)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -279,7 +279,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, b
     }
 }
 
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO dataTO)
 {
     {
         auto const partition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -299,11 +299,11 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAcce
     }
 }
 
-__global__ void cudaClearDataTO(DataAccessTO dataTO)
+__global__ void cudaClearDataTO(DataTO dataTO)
 {
     *dataTO.numCells = 0;
     *dataTO.numParticles = 0;
-    *dataTO.numStringBytes = 0;
+    *dataTO.numAdditionalData = 0;
 }
 
 __global__ void cudaClearData(SimulationData data)
@@ -312,7 +312,7 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.particlePointers.reset();
     data.objects.cells.reset();
     data.objects.particles.reset();
-    data.objects.stringBytes.reset();
+    data.objects.additionalData.reset();
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)

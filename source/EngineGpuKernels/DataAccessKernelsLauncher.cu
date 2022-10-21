@@ -15,7 +15,7 @@ void _DataAccessKernelsLauncher::getData(
     SimulationData const& data,
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
-    DataAccessTO const& dataTO)
+    DataTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, dataTO);
@@ -27,7 +27,7 @@ void _DataAccessKernelsLauncher::getSelectedData(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     bool includeClusters,
-    DataAccessTO const& dataTO)
+    DataTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
@@ -39,7 +39,7 @@ void _DataAccessKernelsLauncher::getInspectedData(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     InspectedEntityIds entityIds,
-    DataAccessTO const& dataTO)
+    DataTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetInspectedCellDataWithoutConnections, entityIds, data, dataTO);
@@ -52,13 +52,13 @@ void _DataAccessKernelsLauncher::getOverlayData(
     SimulationData const& data,
     int2 rectUpperLeft,
     int2 rectLowerRight,
-    DataAccessTO const& dataTO)
+    DataTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
-void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataAccessTO const& dataTO, bool selectData, bool createIds)
+void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& dataTO, bool selectData, bool createIds)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen1, dataTO);

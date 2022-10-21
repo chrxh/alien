@@ -2,8 +2,9 @@
 
 #include "Base/Definitions.h"
 
+#include "EngineInterface/ArraySizes.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineGpuKernels/AccessTOs.cuh"
+#include "EngineGpuKernels/TOs.cuh"
 
 #include "Definitions.h"
 
@@ -13,28 +14,14 @@ public:
     _AccessDataTOCache(GpuSettings const& gpuConstants);
     ~_AccessDataTOCache();
 
-    struct ArraySizes
-    {
-        int cellArraySize;
-        int particleArraySize;
-
-        bool operator==(ArraySizes const& other) const
-        {
-            return cellArraySize == other.cellArraySize && particleArraySize == other.particleArraySize;
-        }
-
-        bool operator!=(ArraySizes const& other) const { return !operator==(other); };
-    };
-    DataAccessTO getDataTO(ArraySizes const& arraySizes);
-    void releaseDataTO(DataAccessTO const& dataTO);
+    DataTO getDataTO(ArraySizes const& arraySizes);
 
 private:
-    DataAccessTO getNewDataTO();
-    void deleteDataTO(DataAccessTO const& dataTO);
+    bool fits(ArraySizes const& left, ArraySizes const& right) const;
+    ArraySizes getArraySizes(DataTO const& dataTO) const;
+    void deleteDataTO(DataTO const& dataTO);
 
     GpuSettings _gpuConstants;
-    std::vector<DataAccessTO> _freeDataTOs;
-    std::vector<DataAccessTO> _usedDataTOs;
-    std::optional<ArraySizes> _arraySizes;
+    std::optional<DataTO> _dataTO;
 };
 

@@ -1,6 +1,5 @@
 
 add_library(alien_engine_interface_lib
-    ShallowUpdateSelectionData.h
     Colors.h
     Definitions.h
     DescriptionHelper.cpp
@@ -12,7 +11,6 @@ add_library(alien_engine_interface_lib
     GeneralSettings.h
     GpuSettings.h
     InspectedEntityIds.h
-    Metadata.h
     MonitorData.h
     OverlayDescriptions.h
     SelectionShallowData.h
@@ -21,6 +19,7 @@ add_library(alien_engine_interface_lib
     Settings.h
     SettingsParser.cpp
     SettingsParser.h
+    ShallowUpdateSelectionData.h
     SimulationController.h
     SimulationParameters.h
     SimulationParametersSpots.h

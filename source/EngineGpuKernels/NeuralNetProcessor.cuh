@@ -22,9 +22,9 @@ private:
 
 __device__ __inline__ void NeuralNetProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto partition = calcPartition(data.cellFunctionOperations[Enums::CellFunction_Neurons].getNumEntries(), blockIdx.x, gridDim.x);
+    auto partition = calcPartition(data.cellFunctionOperations[Enums::CellFunction_Neuron].getNumEntries(), blockIdx.x, gridDim.x);
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto cell = data.cellFunctionOperations[Enums::CellFunction_Neurons].at(i).cell;
+        auto cell = data.cellFunctionOperations[Enums::CellFunction_Neuron].at(i).cell;
         processCell(data, result, cell);
     }
 }

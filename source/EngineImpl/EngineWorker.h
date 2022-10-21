@@ -31,7 +31,7 @@ struct ExceptionData
     std::optional<std::string> errorMessage;
 };
 
-struct DataAccessTO;
+struct DataTO;
 
 class EngineWorker
 {
@@ -102,7 +102,7 @@ public:
     bool isSimulationRunning() const;
 
 private:
-    DataAccessTO provideTO(); 
+    DataTO provideTO(); 
     void resetProcessMonitorData();
     void updateMonitorDataIntern(bool afterMinDuration = false);
     void processJobs();

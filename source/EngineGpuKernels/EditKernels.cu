@@ -25,7 +25,7 @@ __global__ void cudaPrepareForUpdate(SimulationData data)
 }
 
 //assumes that *changeDataTO.numCells == 1
-__global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO)
+__global__ void cudaChangeCell(SimulationData data, DataTO changeDataTO)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -40,7 +40,7 @@ __global__ void cudaChangeCell(SimulationData data, DataAccessTO changeDataTO)
 }
 
 //assumes that *changeDataTO.numParticles == 1
-__global__ void cudaChangeParticle(SimulationData data, DataAccessTO changeDataTO)
+__global__ void cudaChangeParticle(SimulationData data, DataTO changeDataTO)
 {
     auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {

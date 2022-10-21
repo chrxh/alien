@@ -5,7 +5,26 @@
 #include "Base/Definitions.h"
 
 #include "Definitions.h"
-#include "Metadata.h"
+
+struct CellMetadataDescription
+{
+    std::string name;
+    std::string description;
+
+    bool operator==(CellMetadataDescription const& other) const { return name == other.name && description == other.description; }
+    bool operator!=(CellMetadataDescription const& other) const { return !operator==(other); }
+
+    CellMetadataDescription& setName(std::string const& value)
+    {
+        name = value;
+        return *this;
+    }
+    CellMetadataDescription& setDescription(std::string const& value)
+    {
+        description = value;
+        return *this;
+    }
+};
 
 struct ConnectionDescription
 {
@@ -13,6 +32,49 @@ struct ConnectionDescription
     float distance = 0;
     float angleFromPrevious = 0;
 };
+
+struct NeuronDescription
+{
+    std::vector<uint8_t> weigthsAndBias;
+};
+
+struct TransmitterDescription
+{};
+
+struct ConstructorDescription
+{
+    std::vector<uint8_t> dna;
+};
+
+struct SensorDescription
+{
+    Enums::SensorMode mode;
+    int color;
+};
+
+struct NerveDescription
+{};
+
+struct AttackDescription
+{};
+
+struct InjectorDescription
+{
+    std::vector<uint8_t> dna;
+};
+
+struct MuscleDescription
+{};
+
+using CellFunction = std::optional<std::variant<
+    NeuronDescription,
+    TransmitterDescription,
+    ConstructorDescription,
+    SensorDescription,
+    NerveDescription,
+    AttackDescription,
+    InjectorDescription,
+    MuscleDescription>>;
 
 struct CellDescription
 {
@@ -31,9 +93,10 @@ struct CellDescription
     bool underConstruction;
     bool inputBlocked;
     bool outputBlocked;
-    Enums::CellFunction cellFunction = Enums::CellFunction_None;
+    CellFunction cellFunction;
 
-    CellMetadata metadata;
+    bool activityChanges;
+    CellMetadataDescription metadata;
 
     CellDescription() = default;
     CellDescription& setId(uint64_t value)
@@ -86,12 +149,14 @@ struct CellDescription
         executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setMetadata(CellMetadata const& value)
+    CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;
         return *this;
     }
     bool isConnectedTo(uint64_t id) const;
+
+    Enums::CellFunction getCellFunctionType() const;
 };
 
 struct ClusterDescription

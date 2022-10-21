@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AccessTOs.cuh"
+#include "TOs.cuh"
 #include "Base.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "Map.cuh"

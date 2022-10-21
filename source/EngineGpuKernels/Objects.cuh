@@ -14,7 +14,7 @@ struct Objects
     Array<Cell> cells;
     Array<Particle> particles;
 
-    RawMemory stringBytes;
+    Array<uint8_t> additionalData;
 
     void init();
     void free();

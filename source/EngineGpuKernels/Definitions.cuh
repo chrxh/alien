@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "EngineInterface/ArraySizes.h"
+
 struct Cell;
 struct Token;
 struct Particle;
@@ -11,9 +13,9 @@ struct SimulationData;
 struct RenderingData;
 class SimulationResult;
 class SelectionResult;
-struct CellAccessTO;
+struct CellTO;
 struct ClusterAccessTO;
-struct DataAccessTO;
+struct DataTO;
 struct SimulationParameters;
 struct GpuSettings;
 class CudaMonitorData;
@@ -55,10 +57,4 @@ struct AreaSelectionData
 {
     float2 startPos;
     float2 endPos;
-};
-
-struct ArraySizes
-{
-    int cellArraySize;
-    int particleArraySize;
 };
