@@ -263,7 +263,7 @@ void DescriptionHelper::colorize(ClusteredDataDescription& data, std::vector<int
     for (auto& cluster : data.clusters) {
         auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
         for (auto& cell : cluster.cells) {
-            cell.metadata.color = color;
+            cell.color = color;
         }
     }
 }
@@ -363,7 +363,6 @@ void DescriptionHelper::removeMetadata(DataDescription& data)
 
 void DescriptionHelper::removeMetadata(CellDescription& cell)
 {
-    cell.metadata.computerSourcecode.clear();
     cell.metadata.description.clear();
     cell.metadata.name.clear();
 }
