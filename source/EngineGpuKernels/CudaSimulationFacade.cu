@@ -143,9 +143,9 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     _editKernels = std::make_shared<_EditKernelsLauncher>();
     _monitorKernels = std::make_shared<_MonitorKernelsLauncher>();
 
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numCells);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaAccessTO->numAdditionalData);
+    CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numCells);
+    CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numParticles);
+    CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numAuxiliaryData);
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000});
@@ -161,10 +161,10 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->additionalData);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->auxiliaryData);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAdditionalData);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAuxiliaryData);
 
     log(Priority::Important, "close simulation");
 }
@@ -402,7 +402,7 @@ auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
     return {
         _cudaSimulationData->objects.cells.getSize_host(),
         _cudaSimulationData->objects.particles.getSize_host(),
-        _cudaSimulationData->objects.additionalData.getSize_host()
+        _cudaSimulationData->objects.auxiliaryData.getSize_host()
     };
 }
 
@@ -486,8 +486,7 @@ void _CudaSimulationFacade::clear()
 
 void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additionals)
 {
-    if (_cudaSimulationData->shouldResize(
-            additionals.cellArraySize, additionals.particleArraySize)) {
+    if (_cudaSimulationData->shouldResize(additionals)) {
         resizeArrays(additionals);
     }
 }
@@ -502,22 +501,22 @@ void _CudaSimulationFacade::copyDataTOtoDevice(DataTO const& dataTO)
 {
     copyToDevice(_cudaAccessTO->numCells, dataTO.numCells);
     copyToDevice(_cudaAccessTO->numParticles, dataTO.numParticles);
-    copyToDevice(_cudaAccessTO->numAdditionalData, dataTO.numAdditionalData);
+    copyToDevice(_cudaAccessTO->numAuxiliaryData, dataTO.numAuxiliaryData);
 
     copyToDevice(_cudaAccessTO->cells, dataTO.cells, *dataTO.numCells);
     copyToDevice(_cudaAccessTO->particles, dataTO.particles, *dataTO.numParticles);
-    copyToDevice(_cudaAccessTO->additionalData, dataTO.additionalData, *dataTO.numAdditionalData);
+    copyToDevice(_cudaAccessTO->auxiliaryData, dataTO.auxiliaryData, *dataTO.numAuxiliaryData);
 }
 
 void _CudaSimulationFacade::copyDataTOtoHost(DataTO const& dataTO)
 {
     copyToHost(dataTO.numCells, _cudaAccessTO->numCells);
     copyToHost(dataTO.numParticles, _cudaAccessTO->numParticles);
-    copyToHost(dataTO.numAdditionalData, _cudaAccessTO->numAdditionalData);
+    copyToHost(dataTO.numAuxiliaryData, _cudaAccessTO->numAuxiliaryData);
 
     copyToHost(dataTO.cells, _cudaAccessTO->cells, *dataTO.numCells);
     copyToHost(dataTO.particles, _cudaAccessTO->particles, *dataTO.numParticles);
-    copyToHost(dataTO.additionalData, _cudaAccessTO->additionalData, *dataTO.numAdditionalData);
+    copyToHost(dataTO.auxiliaryData, _cudaAccessTO->auxiliaryData, *dataTO.numAuxiliaryData);
 }
 
 void _CudaSimulationFacade::automaticResizeArrays()
@@ -535,7 +534,7 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 {
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeTargetObjects(additionals.cellArraySize, additionals.particleArraySize);
+    _cudaSimulationData->resizeTargetObjects(additionals);
     if (!_cudaSimulationData->isEmpty()) {
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, getSimulationDataIntern());
         syncAndCheck();
@@ -550,17 +549,20 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->additionalData);
+    CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->auxiliaryData);
 
     auto cellArraySize = _cudaSimulationData->objects.cells.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<CellTO>(cellArraySize, _cudaAccessTO->cells);
-    CudaMemoryManager::getInstance().acquireMemory<ParticleTO>(cellArraySize, _cudaAccessTO->particles);
-    CudaMemoryManager::getInstance().acquireMemory<char>(MAX_RAW_BYTES, _cudaAccessTO->additionalData);
+    auto particleArraySize = _cudaSimulationData->objects.particlePointers.getSize_host();
+    CudaMemoryManager::getInstance().acquireMemory<ParticleTO>(particleArraySize, _cudaAccessTO->particles);
+    auto auxiliaryDataSize = _cudaSimulationData->objects.auxiliaryData.getSize_host();
+    CudaMemoryManager::getInstance().acquireMemory<uint8_t>(auxiliaryDataSize, _cudaAccessTO->auxiliaryData);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     log(Priority::Unimportant, "cell array size: " + std::to_string(cellArraySize));
-    log(Priority::Unimportant, "particle array size: " + std::to_string(cellArraySize));
+    log(Priority::Unimportant, "particle array size: " + std::to_string(particleArraySize));
+    log(Priority::Unimportant, "auxiliary data size: " + std::to_string(auxiliaryDataSize));
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");

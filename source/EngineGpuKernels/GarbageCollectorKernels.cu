@@ -10,7 +10,7 @@ __global__ void cudaPrepareArraysForCleanup(SimulationData data)
 {
     data.tempObjects.particles.reset();
     data.tempObjects.cells.reset();
-    data.tempObjects.additionalData.reset();
+    data.tempObjects.auxiliaryData.reset();
 }
 
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells)
@@ -53,27 +53,26 @@ __global__ void cudaCleanupCellsStep2(Array<Cell> cells)
 
 namespace
 {
-    __device__ void copyBytes(char*& string, int numBytes, RawMemory& stringBytes)
+    __device__ void copyBytes(uint8_t*& source, uint64_t numBytes, Array<uint8_t>& target)
     {
         if (numBytes > 0) {
-            char* newString = stringBytes.getArray<char>(numBytes);
-            for (int i = 0; i < numBytes; ++i) {
-                newString[i] = string[i];
+            uint8_t* bytes = target.getNewSubarray(numBytes);
+            for (uint64_t i = 0; i < numBytes; ++i) {
+                bytes[i] = source[i];
             }
-            string = newString;
+            source = bytes;
         }
     }
 }
 
-__global__ void cudaCleanupRawBytes(Array<Cell*> cellPointers, RawMemory stringBytes)
+__global__ void cudaCleanupRawBytes(Array<Cell*> cellPointers, Array<uint8_t> auxiliaryData)
 {
     auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cellPointers.at(index);
-        copyBytes(cell->metadata.name, cell->metadata.nameSize, stringBytes);
-        copyBytes(cell->metadata.description, cell->metadata.descriptionSize, stringBytes);
-        copyBytes(cell->metadata.sourceCode, cell->metadata.sourceCodeLen, stringBytes);
+        copyBytes(cell->metadata.name, cell->metadata.nameSize, auxiliaryData);
+        copyBytes(cell->metadata.description, cell->metadata.descriptionSize, auxiliaryData);
     }
 }
 
@@ -97,7 +96,7 @@ __global__ void cudaSwapArrays(SimulationData data)
 {
     data.objects.cells.swapContent(data.tempObjects.cells);
     data.objects.particles.swapContent(data.tempObjects.particles);
-    data.objects.additionalData.swapContent(data.tempObjects.additionalData);
+    data.objects.auxiliaryData.swapContent(data.tempObjects.auxiliaryData);
 }
 
 

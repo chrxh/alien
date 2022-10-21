@@ -1,10 +1,12 @@
 #pragma once
 
+#include "EngineInterface/Constants.h"
+#include "EngineInterface/Enums.h"
+
 #include "Base.cuh"
 #include "TOs.cuh"
 #include "Map.cuh"
 #include "Math.cuh"
-#include "EngineInterface/Enums.h"
 #include "Particle.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
@@ -53,7 +55,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     particle->energy = particleTO.energy;
     particle->locked = 0;
     particle->selected = 0;
-    particle->color = particleTO.metadata.color;
+    particle->color = particleTO.color;
     return particle;
 }
 
@@ -91,21 +93,14 @@ ObjectFactory::createCellFromTO(int targetIndex, CellTO const& cellTO, Cell* cel
         cell->metadata.name,
         cellTO.metadata.nameSize,
         cellTO.metadata.nameIndex,
-        simulationTO->additionalData);
+        simulationTO->auxiliaryData);
 
     copyBytes(
         cell->metadata.descriptionSize,
         cell->metadata.description,
         cellTO.metadata.descriptionSize,
         cellTO.metadata.descriptionIndex,
-        simulationTO->additionalData);
-
-    copyBytes(
-        cell->metadata.sourceCodeLen,
-        cell->metadata.sourceCode,
-        cellTO.metadata.sourceCodeLen,
-        cellTO.metadata.sourceCodeByteIndex,
-        simulationTO->additionalData);
+        simulationTO->auxiliaryData);
 
     cell->selected = 0;
     cell->locked = 0;
@@ -136,35 +131,28 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(
         cell->metadata.name,
         cellTO.metadata.nameSize,
         cellTO.metadata.nameIndex,
-        dataTO.additionalData);
+        dataTO.auxiliaryData);
 
     copyBytes(
         cell->metadata.descriptionSize,
         cell->metadata.description,
         cellTO.metadata.descriptionSize,
         cellTO.metadata.descriptionIndex,
-        dataTO.additionalData);
-
-    copyBytes(
-        cell->metadata.sourceCodeLen,
-        cell->metadata.sourceCode,
-        cellTO.metadata.sourceCodeLen,
-        cellTO.metadata.sourceCodeByteIndex,
-        dataTO.additionalData);
+        dataTO.auxiliaryData);
 }
 
 __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const& particleTO, Particle* particle)
 {
     particle->energy = particleTO.energy;
     particle->absPos = particleTO.pos;
-    particle->color = particleTO.metadata.color;
+    particle->color = particleTO.color;
 }
 
 __inline__ __device__ void ObjectFactory::copyBytes(uint64_t& targetLen, uint8_t*& target, uint64_t sourceLen, uint64_t sourceIndex, uint8_t* source)
 {
     targetLen = sourceLen;
     if (sourceLen > 0) {
-        target = _data->objects.additionalData.getNewSubarray(sourceLen);
+        target = _data->objects.auxiliaryData.getNewSubarray(sourceLen);
         for (int i = 0; i < sourceLen; ++i) {
             target[i] = source[sourceIndex + i];
         }
@@ -206,7 +194,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->color = 0;
     cell->metadata.nameSize = 0;
     cell->metadata.descriptionSize = 0;
-    cell->metadata.sourceCodeLen = 0;
     cell->barrier = false;
     cell->age = 0;
 
@@ -225,7 +212,6 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     result->color = 0;
     result->metadata.nameSize = 0;
     result->metadata.descriptionSize = 0;
-    result->metadata.sourceCodeLen = 0;
     result->barrier = 0;
     result->age = 0;
     return result;

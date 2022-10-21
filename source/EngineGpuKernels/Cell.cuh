@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineInterface/Constants.h"
 #include "EngineInterface/Enums.h"
 
 #include "Base.cuh"

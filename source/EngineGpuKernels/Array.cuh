@@ -22,9 +22,9 @@ private:
 
 public:
     T** _data;
-    Array()
-    {}
+    Array() {}
 
+    //methods for host
     __host__ __inline__ void init()
     {
         T* data = nullptr;
@@ -38,7 +38,6 @@ public:
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(uint64_t)));
     }
-
 
     __host__ __inline__ void init(uint64_t size)
     {
@@ -67,28 +66,39 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_size);
     }
 
-    __device__ __inline__ T* getArray() const { return *_data; }
+    __host__ __inline__ void resize(uint64_t newSize) const
+    {
+        auto size = getSize_host();
+
+        if (size == newSize) {
+            return;
+        }
+        if (size > 0) {
+            T* data;
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+            CudaMemoryManager::getInstance().freeMemory(data);
+        }
+        T* newData;
+        CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_size, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
+    }
+
     __host__ __inline__ T* getArray_host() const
     {
         T* result;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(T*), cudaMemcpyDeviceToHost));
         return result;
     }
-    __host__ __inline__ void setArray_host(T* data) const
-    {
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
-    }
+    __host__ __inline__ void setArray_host(T* data) const { CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice)); }
 
-    __device__ __inline__ uint64_t getSize() const { return *_size; }
     __host__ __inline__ uint64_t getSize_host() const
     {
-        int result;
+        uint64_t result;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _size, sizeof(uint64_t), cudaMemcpyDeviceToHost));
         return result;
     }
 
-    __device__ __inline__ uint64_t getNumEntries() const { return *_numEntries; }
-    __device__ __inline__ void setNumEntries(uint64_t value) const { *_numEntries = value; }
     __host__ __inline__ uint64_t getNumEntries_host() const
     {
         uint64_t result;
@@ -96,9 +106,21 @@ public:
         return result;
     }
     __host__ __inline__ void setNumEntries_host(uint64_t value) { checkCudaErrors(cudaMemcpy(_numEntries, &value, sizeof(uint64_t), cudaMemcpyHostToDevice)); }
+
+    __host__ __inline__ bool shouldResize_host(uint64_t arraySizeInc) const
+    {
+        return getNumEntries_host() + arraySizeInc > getSize_host() * Const::ArrayFillLevelFactor;
+    }
+
+    //methods for device
+    __device__ __inline__ T* getArray() const { return *_data; }
+
+    __device__ __inline__ uint64_t getSize() const { return *_size; }
+
+    __device__ __inline__ uint64_t getNumEntries() const { return *_numEntries; }
+    __device__ __inline__ void setNumEntries(uint64_t value) const { *_numEntries = value; }
     __device__ __inline__ uint64_t getNumOrigEntries() const { return *_numOrigEntries; }
     __device__ __inline__ uint64_t saveNumEntries() const { return *_numOrigEntries = *_numEntries; }
-
 
     __device__ __inline__ void swapContent(Array& other)
     {
@@ -123,7 +145,7 @@ public:
     {
         uint64_t oldIndex = atomicAdd(_numEntries, 1);
         if (oldIndex >= *_size) {
-            atomicAdd(_numEntries, -1);
+            atomicAdd(_numEntries, (unsigned long long int)(-1LL));
             printf("Not enough fixed memory!\n");
             ABORT();
         }
@@ -138,28 +160,6 @@ public:
     __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const
     {
         return getNumEntries() + arraySizeInc > getSize() * Const::ArrayFillLevelFactor;
-    }
-    __host__ __inline__ bool shouldResize_host(uint64_t arraySizeInc) const
-    {
-        return getNumEntries_host() + arraySizeInc > getSize_host() * Const::ArrayFillLevelFactor;
-    }
-
-    __host__ __inline__ void resize(uint64_t newSize) const
-    {
-        auto size = getSize_host();
-
-        if (size == newSize) {
-            return;
-        }
-        if (size > 0) {
-            T* data;
-            CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
-            CudaMemoryManager::getInstance().freeMemory(data);
-        }
-        T* newData;
-        CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_size, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
     }
 };
 
@@ -176,6 +176,7 @@ public:
 
     ChildArray() {}
 
+    //methods for host
     __host__ __inline__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numEntries);
@@ -196,6 +197,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_data);
     }
 
+    //methods for device
     __device__ __inline__ void setMemory(T* data, int size) const
     {
         *_data = data;

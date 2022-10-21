@@ -1,6 +1,8 @@
 
 add_library(alien_engine_interface_lib
+    ArraySizes.h
     Colors.h
+    Constants.h
     Definitions.h
     DescriptionHelper.cpp
     DescriptionHelper.h

@@ -2,13 +2,14 @@
 
 namespace
 {
-    __device__ void copyBytes(int& targetLen, uint64_t& targetStringIndex, int sourceLen, char* sourceString, int& numStringBytes, char*& stringBytes)
+    __device__ void
+    copyBytes(uint64_t& targetSize, uint64_t& targetIndex, uint64_t sourceSize, uint8_t* source, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
-        targetLen = sourceLen;
-        if (sourceLen > 0) {
-            targetStringIndex = atomicAdd(&numStringBytes, sourceLen);
-            for (int i = 0; i < sourceLen; ++i) {
-                stringBytes[targetStringIndex + i] = sourceString[i];
+        targetSize = sourceSize;
+        if (sourceSize > 0) {
+            targetIndex = atomicAdd(&auxiliaryDataSize, sourceSize);
+            for (int i = 0; i < sourceSize; ++i) {
+                auxiliaryData[targetIndex + i] = source[i];
             }
         }
     }
@@ -34,21 +35,14 @@ namespace
         cellTO.age = cell->age;
 
         copyBytes(
-            cellTO.metadata.nameSize, cellTO.metadata.nameIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAdditionalData, dataTO.additionalData);
+            cellTO.metadata.nameSize, cellTO.metadata.nameIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAuxiliaryData, dataTO.auxiliaryData);
         copyBytes(
             cellTO.metadata.descriptionSize,
             cellTO.metadata.descriptionIndex,
             cell->metadata.descriptionSize,
             cell->metadata.description,
-            *dataTO.numAdditionalData,
-            dataTO.additionalData);
-        copyBytes(
-            cellTO.metadata.sourceCodeLen,
-            cellTO.metadata.sourceCodeByteIndex,
-            cell->metadata.sourceCodeLen,
-            cell->metadata.sourceCode,
-            *dataTO.numAdditionalData,
-            dataTO.additionalData);
+            *dataTO.numAuxiliaryData,
+            dataTO.auxiliaryData);
 
         cell->tag = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -303,7 +297,7 @@ __global__ void cudaClearDataTO(DataTO dataTO)
 {
     *dataTO.numCells = 0;
     *dataTO.numParticles = 0;
-    *dataTO.numAdditionalData = 0;
+    *dataTO.numAuxiliaryData = 0;
 }
 
 __global__ void cudaClearData(SimulationData data)
@@ -312,7 +306,7 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.particlePointers.reset();
     data.objects.cells.reset();
     data.objects.particles.reset();
-    data.objects.additionalData.reset();
+    data.objects.auxiliaryData.reset();
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)

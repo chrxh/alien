@@ -37,8 +37,8 @@ struct SimulationData
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
     void init(int2 const& worldSize, uint64_t timestep);
-    bool shouldResize(int additionalCells, int additionalParticles);
-    void resizeTargetObjects(int additionalCells, int additionalParticles);
+    bool shouldResize(ArraySizes const& additionals);
+    void resizeTargetObjects(ArraySizes const& additionals);
     void resizeObjects();
     bool isEmpty();
     void free();

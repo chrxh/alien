@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
+#include "EngineInterface/Constants.h"
 #include "EngineInterface/Enums.h"
 
 struct ParticleTO
@@ -121,8 +122,8 @@ struct DataTO
 	CellTO* cells = nullptr;
     uint64_t* numParticles = nullptr;
 	ParticleTO* particles = nullptr;
-    uint64_t* numAdditionalData = nullptr;
-    uint8_t* additionalData = nullptr;
+    uint64_t* numAuxiliaryData = nullptr;
+    uint8_t* auxiliaryData = nullptr;
 
 	bool operator==(DataTO const& other) const
 	{
@@ -130,8 +131,8 @@ struct DataTO
 			&& cells == other.cells
 			&& numParticles == other.numParticles
 			&& particles == other.particles
-            && numAdditionalData == other.numAdditionalData
-            && additionalData == other.additionalData;
+            && numAuxiliaryData == other.numAuxiliaryData
+            && auxiliaryData == other.auxiliaryData;
 	}
 };
 

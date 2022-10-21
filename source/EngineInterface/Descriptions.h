@@ -28,7 +28,7 @@ struct CellMetadataDescription
 
 struct ConnectionDescription
 {
-    uint64_t cellId;    //value of 0 means cell not present in DataDescription
+    uint64_t cellId = 0;    //value of 0 means cell not present in DataDescription
     float distance = 0;
     float angleFromPrevious = 0;
 };
@@ -111,7 +111,7 @@ struct CellDescription
 
     CellMetadataDescription metadata;
 
-    bool activityChanged;
+    bool activityChanged = false;
 
     CellDescription() = default;
     CellDescription& setId(uint64_t value)

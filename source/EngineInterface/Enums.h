@@ -1,9 +1,5 @@
 #pragma once
 
-#define MAX_RAW_BYTES 50000000
-#define MAX_CELL_BONDS 6
-#define MAX_CHANNELS 8
-
 namespace Enums
 {
     using CellFunction = int;
