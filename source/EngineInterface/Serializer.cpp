@@ -12,6 +12,7 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/variant.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
@@ -48,10 +49,42 @@ namespace cereal
     }
 
     template <class Archive>
-    inline void serialize(Archive& ar, ParticleMetadata& data)
+    inline void serialize(Archive& ar, NeuronDescription& data)
     {
-        ar(data.color);
+        ar(data.weigthsAndBias);
     }
+    template <class Archive>
+    inline void serialize(Archive& ar, TransmitterDescription& data)
+    {
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, ConstructorDescription& data)
+    {
+        ar(data.dna);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, SensorDescription& data)
+    {
+        ar(data.mode, data.color);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, NerveDescription& data)
+    {
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, AttackerDescription& data)
+    {
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, InjectorDescription& data)
+    {
+        ar(data.dna);
+    }
+    template <class Archive>
+    inline void serialize(Archive& ar, MuscleDescription& data)
+    {
+    }
+
     template <class Archive>
     inline void serialize(Archive& ar, CellDescription& data)
     {
@@ -78,7 +111,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, ParticleDescription& data)
     {
-        ar(data.id, data.pos, data.vel, data.energy, data.metadata);
+        ar(data.id, data.pos, data.vel, data.energy, data.color);
     }
     template <class Archive>
     inline void serialize(Archive& ar, ClusteredDataDescription& data)

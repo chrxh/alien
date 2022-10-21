@@ -31,7 +31,7 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
         result.numAuxiliaryData = new uint64_t;
         result.cells = new CellTO[arraySizes.cellArraySize];
         result.particles = new ParticleTO[arraySizes.particleArraySize];
-        result.auxiliaryData = new uint8_t[arraySizes.additionalDataSize];
+        result.auxiliaryData = new uint8_t[arraySizes.auxiliaryDataSize];
         _dataTO = result;
         return result;
     } catch (std::bad_alloc const&) {

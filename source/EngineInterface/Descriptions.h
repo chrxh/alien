@@ -3,6 +3,7 @@
 #include <variant>
 
 #include "Base/Definitions.h"
+#include "EngineInterface/Constants.h"
 
 #include "Definitions.h"
 

@@ -22,8 +22,7 @@ namespace
 {
     auto const MaxCellContentTextWidth = 120.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
-    auto const CellFunctions =
-        std::vector{"Computation"s, "Neural Net"s, "Scanner"s, "Digestion"s, "Construction"s, "Sensor"s, "Muscle"s};
+    auto const CellFunctionStrings = std::vector{"Neurons"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -121,8 +120,7 @@ namespace
     {
         return left.energy != right.energy || left.maxConnections != right.maxConnections || left.underConstruction != right.underConstruction
             || left.inputBlocked != right.inputBlocked || left.outputBlocked != right.outputBlocked
-            || left.executionOrderNumber != right.executionOrderNumber || left.cellFunction != right.cellFunction
-            || left.metadata.computerSourcecode != right.metadata.computerSourcecode
+            || left.executionOrderNumber != right.executionOrderNumber
             || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
             || left.barrier != right.barrier;
     }
@@ -152,10 +150,8 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         AlienImGui::Group("Properties");
         auto const& parameters = _simController->getSimulationParameters();
-        int type = cell.cellFunction;
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                              .name("Specialization").values(CellFunctions).textWidth(MaxCellContentTextWidth), cell.cellFunction);
+        int type = cell.getCellFunctionType();
+        AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(CellFunctionStrings).textWidth(MaxCellContentTextWidth), type);
 
         auto energy = toFloat(cell.energy);
         AlienImGui::InputFloat(

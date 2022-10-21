@@ -127,7 +127,7 @@ auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cl
             result.outputBlocked = cell.outputBlocked;
             result.executionOrderNumber = cell.executionOrderNumber;
             result.color = cell.color;
-            result.cellFunction = cell.cellFunction;
+            result.cellFunction = cell.getCellFunctionType();
 
             cellAnalysisDescById.insert_or_assign(cell.id, result);
         }
