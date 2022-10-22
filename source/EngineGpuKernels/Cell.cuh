@@ -31,13 +31,13 @@ struct Activity
 
 struct NeuronFunction
 {
-    struct NeurolNetState
+    struct NeuronState
     {
-        float weights[MAX_CHANNELS][MAX_CHANNELS];
+        float weights[MAX_CHANNELS * MAX_CHANNELS];
         float bias[MAX_CHANNELS];
     };
 
-    NeurolNetState* neuronState;
+    NeuronState* neuronState;
 };
 
 struct TransmitterFunction

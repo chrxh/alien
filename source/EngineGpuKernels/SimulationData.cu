@@ -30,11 +30,11 @@ __device__ void SimulationData::prepareForNextTimestep()
     processMemory.reset();
 
     auto maxStructureOperations = objects.cellPointers.getNumEntries() / 2;
-    structuralOperations.setMemory(processMemory.getArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
+    structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
     auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();
     for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
-        cellFunctionOperations[i].setMemory(processMemory.getArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
+        cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
     }
 
     objects.saveNumEntries();
@@ -49,13 +49,6 @@ bool SimulationData::shouldResize(ArraySizes const& additionals)
         || objects.particles.shouldResize_host(cellAndParticleArraySizeInc)
         || objects.particlePointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
         || objects.auxiliaryData.shouldResize_host(additionals.auxiliaryDataSize);
-}
-
-__device__ bool SimulationData::shouldResize()
-{
-    return objects.cells.shouldResize(0) || objects.cellPointers.shouldResize(0)
-        || objects.particles.shouldResize(0) || objects.particlePointers.shouldResize(0)
-        || objects.auxiliaryData.shouldResize(0);
 }
 
 void SimulationData::resizeTargetObjects(ArraySizes const& additionals)

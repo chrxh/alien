@@ -103,7 +103,7 @@ public:
 
         __shared__ int* entrySubarray;
         if (0 == threadIdx.x) {
-            entrySubarray = _mapEntries.getNewSubarray(numEntities);
+            entrySubarray = _mapEntries.getSubArray(numEntities);
         }
         __syncthreads();
 
@@ -227,7 +227,7 @@ public:
 
         __shared__ int* entrySubarray;
         if (0 == threadIdx.x) {
-            entrySubarray = _mapEntries.getNewSubarray(numEntities);
+            entrySubarray = _mapEntries.getSubArray(numEntities);
         }
         __syncthreads();
 

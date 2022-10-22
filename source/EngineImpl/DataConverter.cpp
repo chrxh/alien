@@ -10,6 +10,12 @@
 
 namespace
 {
+    union BytesAsFloat
+    {
+        float f;
+        uint8_t b[4];
+    };
+
     void convert(DataTO const& dataTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<uint8_t>& target)
     {
         target.resize(sourceSize);
@@ -18,18 +24,56 @@ namespace
         }
     }
 
-    template<typename Source>
-    void convert(DataTO const& dataTO, Source const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<float>& target)
+    {
+        BytesAsFloat bytesAsFloat;
+        target.resize(sourceSize / 4);
+        for (uint64_t i = 0; i < sourceSize / 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                bytesAsFloat.b[j] = dataTO.auxiliaryData[sourceIndex + i * 4 + j];
+            }
+            target[i] = bytesAsFloat.f;
+        }
+    }
+
+    template<typename Container>
+    void convert(DataTO const& dataTO, Container const& source, uint64_t& targetSize, uint64_t& targetIndex)
     {
         targetSize = source.size();
         if (targetSize > 0) {
             targetIndex = *dataTO.numAuxiliaryData;
             uint64_t size = source.size();
-            for (int i = 0; i < size; ++i) {
+            for (uint64_t i = 0; i < size; ++i) {
                 dataTO.auxiliaryData[targetIndex + i] = source.at(i);
             }
             (*dataTO.numAuxiliaryData) += size;
         }
+    }
+
+    template <>
+    void convert(DataTO const& dataTO, std::vector<float> const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    {
+        BytesAsFloat bytesAsFloat;
+        targetSize = source.size();
+        if (targetSize > 0) {
+            targetIndex = *dataTO.numAuxiliaryData;
+            uint64_t size = source.size();
+            for (uint64_t i = 0; i < size; ++i) {
+                bytesAsFloat.f = source.at(i);
+                for (int j = 0; j < 4; ++j) {
+                    dataTO.auxiliaryData[targetIndex + i * 4 + j] = bytesAsFloat.b[j];
+                }
+            }
+            (*dataTO.numAuxiliaryData) += size;
+        }
+    }
+
+    std::pair<std::vector<float>, std::vector<float>> split(std::vector<float> const& weigthsAndBias)
+    {
+        std::pair<std::vector<float>, std::vector<float>> result;
+        result.first = std::vector<float>(weigthsAndBias.begin(), weigthsAndBias.begin() + MAX_CHANNELS * MAX_CHANNELS);
+        result.second = std::vector<float>(weigthsAndBias.begin() + MAX_CHANNELS * MAX_CHANNELS, weigthsAndBias.end());
+        return result;
     }
 }
 
@@ -212,7 +256,8 @@ void DataConverter::addAdditionalDataSizeForCell(CellDescription const& cell, ui
     additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
     switch (cell.getCellFunctionType()) {
     case Enums::CellFunction_Neuron:
-        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).weigthsAndBias.size();
+        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).weigths.size() * sizeof(float);
+        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).bias.size() * sizeof(float);
         break;
     case Enums::CellFunction_Transmitter:
         break;
@@ -335,7 +380,10 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     switch (cellTO.cellFunction) {
     case Enums::CellFunction_Neuron: {
         NeuronDescription neuron;
-        convert(dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, neuron.weigthsAndBias);
+        std::vector<float> weigthsAndBias;
+        convert(
+            dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, weigthsAndBias);
+        std::tie(neuron.weigths, neuron.bias) = split(weigthsAndBias);
         result.cellFunction = neuron;
     } break;
     case Enums::CellFunction_Transmitter: {
@@ -411,7 +459,11 @@ void DataConverter::addCell(
     switch (cellDesc.getCellFunctionType()) {
     case Enums::CellFunction_Neuron: {
         NeuronTO neuronTO;
-        convert(dataTO, std::get<NeuronDescription>(*cellDesc.cellFunction).weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBiasDataIndex);
+        auto neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
+        std::vector<float> weigthsAndBias = neuronDesc.weigths;
+        weigthsAndBias.reserve(MAX_CHANNELS * MAX_CHANNELS + MAX_CHANNELS);
+        weigthsAndBias.insert(weigthsAndBias.end(), neuronDesc.weigths.begin(), neuronDesc.weigths.end());
+        convert(dataTO, weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBiasDataIndex);
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case Enums::CellFunction_Transmitter: {

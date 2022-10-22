@@ -130,7 +130,7 @@ public:
 
     __device__ __inline__ void reset() { *_numEntries = 0; }
 
-    __device__ __inline__ T* getNewSubarray(uint64_t size)
+    __device__ __inline__ T* getSubArray(uint64_t size)
     {
         uint64_t oldIndex = atomicAdd(_numEntries, static_cast<uint64_t>(size));
         if (oldIndex + size - 1 >= *_size) {
@@ -160,6 +160,30 @@ public:
     __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const
     {
         return getNumEntries() + arraySizeInc > getSize() * Const::ArrayFillLevelFactor;
+    }
+};
+
+class RawMemory : public Array<uint8_t>
+{
+public:
+    template <typename T>
+    __device__ __inline__ T* getTypedSubArray(uint64_t numElements)
+    {
+        if (0 == numElements) {
+            return nullptr;
+        }
+        uint64_t newBytesToOccupy = numElements * sizeof(T);
+        newBytesToOccupy = newBytesToOccupy + 16 - (newBytesToOccupy % 16);
+        return reinterpret_cast<T*>(getSubArray(newBytesToOccupy));
+    }
+
+    __device__ __inline__ uint8_t* getAlignedSubArray(uint64_t size)
+    {
+        if (0 == size) {
+            return nullptr;
+        }
+        size = size + 16 - (size % 16);
+        return getSubArray(size);
     }
 };
 

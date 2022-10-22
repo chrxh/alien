@@ -3,7 +3,7 @@
 namespace
 {
     __device__ void
-    copyAndAssignNewAuxiliaryData(uint64_t& targetSize, uint64_t& targetIndex, uint64_t sourceSize, uint8_t* source, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyAuxiliaryData(uint64_t sourceSize, uint8_t* source, uint64_t& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -34,13 +34,18 @@ namespace
         cellTO.color = cell->color;
         cellTO.age = cell->age;
 
-        copyAndAssignNewAuxiliaryData(
-            cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAuxiliaryData, dataTO.auxiliaryData);
-        copyAndAssignNewAuxiliaryData(
-            cellTO.metadata.descriptionSize,
-            cellTO.metadata.descriptionDataIndex,
+        copyAuxiliaryData(
+            cell->metadata.nameSize,
+            cell->metadata.name,
+            cellTO.metadata.nameSize,
+            cellTO.metadata.nameDataIndex,
+            *dataTO.numAuxiliaryData,
+            dataTO.auxiliaryData);
+        copyAuxiliaryData(
             cell->metadata.descriptionSize,
             cell->metadata.description,
+            cellTO.metadata.descriptionSize,
+            cellTO.metadata.descriptionDataIndex,
             *dataTO.numAuxiliaryData,
             dataTO.auxiliaryData);
 
@@ -50,6 +55,49 @@ namespace
             cellTO.connections[i].cellIndex = connectingCell - cellArrayStart;
             cellTO.connections[i].distance = cell->connections[i].distance;
             cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
+        }
+
+        switch (cell->cellFunction) {
+        case Enums::CellFunction_Neuron: {
+            copyAuxiliaryData(
+                sizeof(NeuronFunction::NeuronState),
+                reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
+                cellTO.cellFunctionData.neuron.weightsAndBiasSize,
+                cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex,
+                *dataTO.numAuxiliaryData,
+                dataTO.auxiliaryData);
+        } break;
+        case Enums::CellFunction_Transmitter: {
+        } break;
+        case Enums::CellFunction_Constructor: {
+            cellTO.cellFunctionData.constructor.mode = cell->cellFunctionData.constructor.mode;
+            copyAuxiliaryData(
+                cell->cellFunctionData.constructor.dnaSize,
+                cell->cellFunctionData.constructor.dna,
+                cellTO.cellFunctionData.constructor.dnaSize,
+                cellTO.cellFunctionData.constructor.dnaDataIndex,
+                *dataTO.numAuxiliaryData,
+                dataTO.auxiliaryData);
+        } break;
+        case Enums::CellFunction_Sensor: {
+            cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
+            cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
+        } break;
+        case Enums::CellFunction_Nerve: {
+        } break;
+        case Enums::CellFunction_Attacker: {
+        } break;
+        case Enums::CellFunction_Injector: {
+            copyAuxiliaryData(
+                cell->cellFunctionData.injector.dnaSize,
+                cell->cellFunctionData.injector.dna,
+                cellTO.cellFunctionData.injector.dnaSize,
+                cellTO.cellFunctionData.injector.dnaDataIndex,
+                *dataTO.numAuxiliaryData,
+                dataTO.auxiliaryData);
+        } break;
+        case Enums::CellFunction_Muscle: {
+        } break;
         }
     }
 

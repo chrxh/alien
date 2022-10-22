@@ -20,7 +20,7 @@ __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cel
 
     int numCellsToCopy = pointerBlock.numElements();
     if (numCellsToCopy > 0) {
-        auto newCells = cells.getNewSubarray(numCellsToCopy);
+        auto newCells = cells.getSubArray(numCellsToCopy);
 
         int newCellIndex = 0;
         for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
@@ -56,7 +56,7 @@ namespace
     __device__ void copyAndAssignNewAuxiliaryData(uint8_t*& source, uint64_t numBytes, Array<uint8_t>& target)
     {
         if (numBytes > 0) {
-            uint8_t* bytes = target.getNewSubarray(numBytes);
+            uint8_t* bytes = target.getSubArray(numBytes);
             for (uint64_t i = 0; i < numBytes; ++i) {
                 bytes[i] = source[i];
             }
@@ -123,7 +123,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Pa
 
     int numParticlesToCopy = pointerBlock.numElements();
     if (numParticlesToCopy > 0) {
-        auto newParticles = particles.getNewSubarray(numParticlesToCopy);
+        auto newParticles = particles.getSubArray(numParticlesToCopy);
 
         int newParticleIndex = 0;
         for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {

@@ -190,7 +190,7 @@ ObjectFactory::createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, ui
 __inline__ __device__ void ObjectFactory::createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target)
 {
     if (size > 0) {
-        target = _data->objects.auxiliaryData.getNewSubarray(size);
+        target = _data->objects.auxiliaryData.getAlignedSubArray(size);
         for (int i = 0; i < size; ++i) {
             target[i] = auxiliaryData[sourceIndex + i];
         }

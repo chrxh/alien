@@ -31,7 +31,7 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     __shared__ Entity* newEntities;
     if (0 == threadIdx.x) {
         if (numEntities > 0) {
-            newEntities = newEntityArray.getNewSubarray(numEntities);
+            newEntities = newEntityArray.getSubArray(numEntities);
         }
         numEntities = 0;
     }

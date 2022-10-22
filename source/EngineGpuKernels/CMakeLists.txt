@@ -59,7 +59,6 @@ add_library(alien_engine_gpu_kernels_lib
     Physics.cuh
     ProprocessedCellFunctionData.cuh
     QuantityConverter.cuh
-    RawMemory.cuh
     RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu
