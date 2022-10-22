@@ -1,6 +1,7 @@
 #pragma once
 
 #include <variant>
+#include <array>
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Constants.h"
@@ -36,20 +37,21 @@ struct ConnectionDescription
 
 struct ActivityDescription
 {
-    float channels[MAX_CHANNELS];
+    std::vector<float> channels;
 
-    ActivityDescription()
-    {
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            channels[i] = 0;
-        }
-    }
+    ActivityDescription() { channels.resize(MAX_CHANNELS, 0); }
 };
 
 
 struct NeuronDescription
 {
-    std::vector<uint8_t> weigthsAndBias;
+    std::vector<float> weigths;
+    std::vector<float> bias;
+    NeuronDescription()
+    {
+        weigths.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+        bias.resize(MAX_CHANNELS, 0);
+    }
 };
 
 struct TransmitterDescription

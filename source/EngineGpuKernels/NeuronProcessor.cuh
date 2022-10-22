@@ -49,9 +49,9 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     for (int c = matrixPartition.startIndex; c <= matrixPartition.endIndex; ++c) {
         auto& neuronsState = cell->cellFunctionData.neuron.neuronState;
 
-        auto i = c / MAX_CHANNELS;
-        auto j = c % MAX_CHANNELS;
-        atomicAdd_block(&sumInput[i], neuronsState->weights[i][j] * inputActivity.channels[j]);
+        auto row = c / MAX_CHANNELS;
+        auto col = c % MAX_CHANNELS;
+        atomicAdd_block(&sumInput[row], neuronsState->weights[col + row * MAX_CHANNELS] * inputActivity.channels[col]);
     }
     __syncthreads();
 

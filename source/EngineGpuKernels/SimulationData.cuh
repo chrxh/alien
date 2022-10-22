@@ -44,7 +44,6 @@ struct SimulationData
     void free();
 
     __device__ void prepareForNextTimestep();
-    __device__ bool shouldResize();
 
 private:
     template <typename Entity>

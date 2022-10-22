@@ -70,14 +70,14 @@ public:
 
     void clear();
 
-    void resizeArraysIfNecessary(ArraySizes const& additionals);
+    void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
 
 private:
     void syncAndCheck();
     void copyDataTOtoDevice(DataTO const& dataTO);
     void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
-    void resizeArrays(ArraySizes const& additionals);
+    void resizeArrays(ArraySizes const& additionals = ArraySizes());
 
     SimulationData getSimulationDataIntern() const;
 

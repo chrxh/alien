@@ -327,6 +327,8 @@ void _CudaSimulationFacade::changeInspectedSimulationData(DataTO const& changeDa
     copyDataTOtoDevice(changeDataTO);
     _editKernels->changeSimulationData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaAccessTO);
     syncAndCheck();
+
+    resizeArraysIfNecessary();
 }
 
 void _CudaSimulationFacade::applyForce(ApplyForceData const& applyData)
@@ -521,12 +523,14 @@ void _CudaSimulationFacade::copyDataTOtoHost(DataTO const& dataTO)
 
 void _CudaSimulationFacade::automaticResizeArrays()
 {
+    uint64_t timestep;
+    {
+        std::lock_guard lock(_mutex);
+        timestep = _cudaSimulationData->timestep;
+    }
     //make check after every 10th time step
-    std::lock_guard lock(_mutex);
-    if (_cudaSimulationData->timestep % 10 == 0) {
-        if (_cudaSimulationResult->isArrayResizeNeeded()) {
-            resizeArrays({0, 0});
-        }
+    if (timestep % 10 == 0) {
+        resizeArraysIfNecessary();
     }
 }
 

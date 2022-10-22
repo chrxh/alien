@@ -4,7 +4,7 @@
 
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "RawMemory.cuh"
+#include "Array.cuh"
 
 struct Objects
 {
@@ -14,7 +14,7 @@ struct Objects
     Array<Cell> cells;
     Array<Particle> particles;
 
-    Array<uint8_t> auxiliaryData;
+    RawMemory auxiliaryData;
 
     void init();
     void free();

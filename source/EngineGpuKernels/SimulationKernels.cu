@@ -8,7 +8,6 @@
 __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
 {
     data.prepareForNextTimestep();
-    result.setArrayResizeNeeded(data.shouldResize());
 }
 
 __global__ void cudaNextTimestep_substep1(SimulationData data)
