@@ -322,12 +322,12 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
     if (metadataTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.nameIndex]), metadataTO.nameSize);
+        auto const name = std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.nameDataIndex]), metadataTO.nameSize);
         metadata.setName(name);
     }
     if (metadataTO.descriptionSize > 0) {
         auto const description =
-            std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.descriptionIndex]), metadataTO.descriptionSize);
+            std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.descriptionDataIndex]), metadataTO.descriptionSize);
         metadata.setDescription(description);
     }
     result.metadata = metadata;
@@ -335,7 +335,7 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     switch (cellTO.cellFunction) {
     case Enums::CellFunction_Neuron: {
         NeuronDescription neuron;
-        convert(dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBias, neuron.weigthsAndBias);
+        convert(dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, neuron.weigthsAndBias);
         result.cellFunction = neuron;
     } break;
     case Enums::CellFunction_Transmitter: {
@@ -344,7 +344,8 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     } break;
     case Enums::CellFunction_Constructor: {
         ConstructorDescription constructor;
-        convert(dataTO, cellTO.cellFunctionData.constructor.dnaSize, cellTO.cellFunctionData.constructor.dna, constructor.dna);
+        constructor.mode = cellTO.cellFunctionData.constructor.mode;
+        convert(dataTO, cellTO.cellFunctionData.constructor.dnaSize, cellTO.cellFunctionData.constructor.dnaDataIndex, constructor.dna);
         result.cellFunction = constructor;
     } break;
     case Enums::CellFunction_Sensor: {
@@ -363,7 +364,7 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     } break;
     case Enums::CellFunction_Injector: {
         InjectorDescription injector;
-        convert(dataTO, cellTO.cellFunctionData.injector.dnaSize, cellTO.cellFunctionData.injector.dna, injector.dna);
+        convert(dataTO, cellTO.cellFunctionData.injector.dnaSize, cellTO.cellFunctionData.injector.dnaDataIndex, injector.dna);
         result.cellFunction = injector;
     } break;
     case Enums::CellFunction_Muscle: {
@@ -410,7 +411,7 @@ void DataConverter::addCell(
     switch (cellDesc.getCellFunctionType()) {
     case Enums::CellFunction_Neuron: {
         NeuronTO neuronTO;
-        convert(dataTO, std::get<NeuronDescription>(*cellDesc.cellFunction).weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBias);
+        convert(dataTO, std::get<NeuronDescription>(*cellDesc.cellFunction).weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBiasDataIndex);
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case Enums::CellFunction_Transmitter: {
@@ -418,8 +419,10 @@ void DataConverter::addCell(
         cellTO.cellFunctionData.transmitter = transmitterTO;
     } break;
     case Enums::CellFunction_Constructor: {
+        auto constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
         ConstructorTO constructorTO;
-        convert(dataTO, std::get<ConstructorDescription>(*cellDesc.cellFunction).dna, constructorTO.dnaSize, constructorTO.dna);
+        constructorTO.mode = constructorDesc.mode;
+        convert(dataTO, constructorDesc.dna, constructorTO.dnaSize, constructorTO.dnaDataIndex);
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
     case Enums::CellFunction_Sensor: {
@@ -438,7 +441,7 @@ void DataConverter::addCell(
     } break;
     case Enums::CellFunction_Injector: {
         InjectorTO injectorTO;
-        convert(dataTO, std::get<InjectorDescription>(*cellDesc.cellFunction).dna, injectorTO.dnaSize, injectorTO.dna);
+        convert(dataTO, std::get<InjectorDescription>(*cellDesc.cellFunction).dna, injectorTO.dnaSize, injectorTO.dnaDataIndex);
         cellTO.cellFunctionData.injector = injectorTO;
     } break;
     case Enums::CellFunction_Muscle: {
@@ -454,8 +457,8 @@ void DataConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
-    convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameIndex);
-    convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionIndex);
+    convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
+    convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 

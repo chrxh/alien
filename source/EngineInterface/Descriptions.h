@@ -57,6 +57,7 @@ struct TransmitterDescription
 
 struct ConstructorDescription
 {
+    Enums::ConstructorMode mode;
     std::vector<uint8_t> dna;
 };
 

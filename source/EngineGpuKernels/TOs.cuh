@@ -20,10 +20,10 @@ struct ParticleTO
 struct CellMetadataTO
 {
     uint64_t nameSize;
-    uint64_t nameIndex;
+    uint64_t nameDataIndex;
 
     uint64_t descriptionSize;
-    uint64_t descriptionIndex;
+    uint64_t descriptionDataIndex;
 };
 
 struct ConnectionTO
@@ -41,7 +41,7 @@ struct ActivityTO
 struct NeuronTO
 {
     uint64_t weightsAndBiasSize;
-    uint64_t weightsAndBias;
+    uint64_t weightsAndBiasDataIndex;
 };
 
 struct TransmitterTO
@@ -51,7 +51,7 @@ struct ConstructorTO
 {
     Enums::ConstructorMode mode;
     uint64_t dnaSize;
-    uint64_t dna;
+    uint64_t dnaDataIndex;
 };
 
 struct SensorTO
@@ -69,7 +69,7 @@ struct AttackerTO
 struct InjectorTO
 {
     uint64_t dnaSize;
-    uint64_t dna;
+    uint64_t dnaDataIndex;
 };
 
 struct MuscleTO

@@ -164,7 +164,7 @@ public:
 };
 
 template <typename T>
-class ChildArray
+class UnmanagedArray
 {
 private:
     int* _size;
@@ -174,7 +174,7 @@ private:
 public:
     T** _data;
 
-    ChildArray() {}
+    UnmanagedArray() {}
 
     //methods for host
     __host__ __inline__ void init()

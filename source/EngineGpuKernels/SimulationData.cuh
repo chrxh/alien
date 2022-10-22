@@ -29,8 +29,8 @@ struct SimulationData
     PreprocessedCellFunctionData preprocessedCellFunctionData;
 
     //scheduled operations
-    ChildArray<StructuralOperation> structuralOperations;
-    ChildArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_WithoutNoneCount];
+    UnmanagedArray<StructuralOperation> structuralOperations;
+    UnmanagedArray<CellFunctionOperation> cellFunctionOperations[Enums::CellFunction_WithoutNoneCount];
 
     //number generators
     CudaNumberGenerator numberGen1;
