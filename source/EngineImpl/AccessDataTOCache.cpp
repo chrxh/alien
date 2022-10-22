@@ -29,6 +29,9 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
         result.numCells = new uint64_t;
         result.numParticles = new uint64_t;
         result.numAuxiliaryData = new uint64_t;
+        *result.numCells = 0;
+        *result.numParticles = 0;
+        *result.numAuxiliaryData = 0;
         result.cells = new CellTO[arraySizes.cellArraySize];
         result.particles = new ParticleTO[arraySizes.particleArraySize];
         result.auxiliaryData = new uint8_t[arraySizes.auxiliaryDataSize];

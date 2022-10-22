@@ -68,6 +68,7 @@ void SimulationData::resizeObjects()
     objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());
     objects.particles.resize(tempObjects.particles.getSize_host());
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
+    objects.auxiliaryData.resize(tempObjects.auxiliaryData.getSize_host());
 
     auto cellArraySize = objects.cells.getSize_host();
     cellMap.resize(cellArraySize);

@@ -496,8 +496,7 @@ bool EngineWorker::isSimulationRunning() const
 
 DataTO EngineWorker::provideTO()
 {
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    return _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+    return _dataTOCache->getDataTO(_cudaSimulation->getArraySizes());
 }
 
 void EngineWorker::resetProcessMonitorData()
