@@ -25,17 +25,17 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_substep1, data);
     KERNEL_CALL(cudaNextTimestep_substep2, data);
     KERNEL_CALL(cudaNextTimestep_substep3, data);
-    KERNEL_CALL(cudaNextTimestep_substep4, data, considerForcesFromAngleMismatch);
-    KERNEL_CALL(cudaNextTimestep_substep5, data);
-    KERNEL_CALL(cudaNextTimestep_substep6, data, considerForcesFromAngleMismatch);
-    KERNEL_CALL(cudaNextTimestep_substep7, data);
-    KERNEL_CALL(cudaNextTimestep_substep8, data);
+    KERNEL_CALL(cudaNextTimestep_connectionForces, data, considerForcesFromAngleMismatch);
+    KERNEL_CALL(cudaNextTimestep_verletPositionUpdate, data);
+    KERNEL_CALL(cudaNextTimestep_connectionForces, data, considerForcesFromAngleMismatch);
+    KERNEL_CALL(cudaNextTimestep_verletVelocityUpdate, data);
+    KERNEL_CALL(cudaNextTimestep_collectCellFunctionOperation, data);
     KERNEL_CALL(cudaNextTimestep_nerveFunction, data, result);
     KERNEL_CALL(cudaNextTimestep_neuronFunction, data, result);
     if (considerInnerFriction) {
-        KERNEL_CALL(cudaNextTimestep_substep10, data);
+        KERNEL_CALL(cudaNextTimestep_innerFriction, data);
     }
-    KERNEL_CALL(cudaNextTimestep_substep11, data);
+    KERNEL_CALL(cudaNextTimestep_frictionAndDecay, data);
 
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);
@@ -47,8 +47,8 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
         KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
         KERNEL_CALL(cudaApplyClusterData, data);
     }
-    KERNEL_CALL_1_1(cudaNextTimestep_substep12, data);
-    KERNEL_CALL(cudaNextTimestep_substep13, data);
+    KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_step1, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_step2, data);
     KERNEL_CALL(cudaNextTimestep_substep14, data);
     KERNEL_CALL(cudaNextTimestep_substep14, data);
 

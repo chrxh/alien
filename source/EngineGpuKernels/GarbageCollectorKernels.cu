@@ -53,7 +53,7 @@ __global__ void cudaCleanupCellsStep2(Array<Cell> cells)
 
 namespace
 {
-    __device__ void copyBytes(uint8_t*& source, uint64_t numBytes, Array<uint8_t>& target)
+    __device__ void copyAndAssignNewAuxiliaryData(uint8_t*& source, uint64_t numBytes, Array<uint8_t>& target)
     {
         if (numBytes > 0) {
             uint8_t* bytes = target.getNewSubarray(numBytes);
@@ -65,14 +65,30 @@ namespace
     }
 }
 
-__global__ void cudaCleanupRawBytes(Array<Cell*> cellPointers, Array<uint8_t> auxiliaryData)
+__global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, Array<uint8_t> auxiliaryData)
 {
     auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cellPointers.at(index);
-        copyBytes(cell->metadata.name, cell->metadata.nameSize, auxiliaryData);
-        copyBytes(cell->metadata.description, cell->metadata.descriptionSize, auxiliaryData);
+        copyAndAssignNewAuxiliaryData(cell->metadata.name, cell->metadata.nameSize, auxiliaryData);
+        copyAndAssignNewAuxiliaryData(cell->metadata.description, cell->metadata.descriptionSize, auxiliaryData);
+        switch (cell->cellFunction) {
+        case Enums::CellFunction_Neuron:
+            copyAndAssignNewAuxiliaryData(
+                reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState),
+                sizeof(*cell->cellFunctionData.neuron.neuronState),
+                auxiliaryData);
+            break;
+        case Enums::CellFunction_Constructor:
+            copyAndAssignNewAuxiliaryData(
+                cell->cellFunctionData.constructor.dna, cell->cellFunctionData.constructor.dnaSize, auxiliaryData);
+            break;
+        case Enums::CellFunction_Injector:
+            copyAndAssignNewAuxiliaryData(
+                cell->cellFunctionData.injector.dna, cell->cellFunctionData.injector.dnaSize, auxiliaryData);
+            break;
+        }
     }
 }
 

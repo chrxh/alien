@@ -26,8 +26,8 @@ public:
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool considerAngles);
     __inline__ __device__ static void checkConnections(SimulationData& data);
-    __inline__ __device__ static void verletUpdatePositions(SimulationData& data);
-    __inline__ __device__ static void verletUpdateVelocities(SimulationData& data);
+    __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
+    __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
@@ -336,7 +336,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::verletUpdatePositions(SimulationData& data)
+__inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto const partition =
@@ -356,7 +356,7 @@ __inline__ __device__ void CellProcessor::verletUpdatePositions(SimulationData& 
     }
 }
 
-__inline__ __device__ void CellProcessor::verletUpdateVelocities(SimulationData& data)
+__inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumOrigEntries());

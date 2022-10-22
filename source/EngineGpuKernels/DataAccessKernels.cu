@@ -3,7 +3,7 @@
 namespace
 {
     __device__ void
-    copyBytes(uint64_t& targetSize, uint64_t& targetIndex, uint64_t sourceSize, uint8_t* source, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyAndAssignNewAuxiliaryData(uint64_t& targetSize, uint64_t& targetIndex, uint64_t sourceSize, uint8_t* source, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -34,11 +34,11 @@ namespace
         cellTO.color = cell->color;
         cellTO.age = cell->age;
 
-        copyBytes(
-            cellTO.metadata.nameSize, cellTO.metadata.nameIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAuxiliaryData, dataTO.auxiliaryData);
-        copyBytes(
+        copyAndAssignNewAuxiliaryData(
+            cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cell->metadata.nameSize, cell->metadata.name, *dataTO.numAuxiliaryData, dataTO.auxiliaryData);
+        copyAndAssignNewAuxiliaryData(
             cellTO.metadata.descriptionSize,
-            cellTO.metadata.descriptionIndex,
+            cellTO.metadata.descriptionDataIndex,
             cell->metadata.descriptionSize,
             cell->metadata.description,
             *dataTO.numAuxiliaryData,

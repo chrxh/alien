@@ -41,13 +41,13 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ float sumInput[MAX_CHANNELS];
     auto channelPartition = calcPartition(MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        sumInput[i] = cell->cellFunctionData.neuronFunction.neuronState->bias[i];
+        sumInput[i] = cell->cellFunctionData.neuron.neuronState->bias[i];
     }
     __syncthreads();
 
     auto matrixPartition = calcPartition(MAX_CHANNELS * MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int c = matrixPartition.startIndex; c <= matrixPartition.endIndex; ++c) {
-        auto& neuronsState = cell->cellFunctionData.neuronFunction.neuronState;
+        auto& neuronsState = cell->cellFunctionData.neuron.neuronState;
 
         auto i = c / MAX_CHANNELS;
         auto j = c % MAX_CHANNELS;

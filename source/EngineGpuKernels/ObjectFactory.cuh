@@ -26,7 +26,8 @@ public:
     __inline__ __device__ Cell* createCell();
 
 private:
-    __inline__ __device__ void copyBytes(uint64_t& targetLen, uint8_t*& target, uint64_t sourceLen, uint64_t sourceIndex, uint8_t* source);
+    __inline__ __device__ void createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, uint64_t& targetSize, uint8_t*& target);
+    __inline__ __device__ void createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target);
 
     BaseMap _map;
     SimulationData* _data;
@@ -83,25 +84,61 @@ ObjectFactory::createCellFromTO(int targetIndex, CellTO const& cellTO, Cell* cel
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
     cell->energy = cellTO.energy;
-    cell->cellFunction = cellTO.cellFunction;
     cell->color = cellTO.color;
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
 
-    copyBytes(
-        cell->metadata.nameSize,
-        cell->metadata.name,
-        cellTO.metadata.nameSize,
-        cellTO.metadata.nameIndex,
-        simulationTO->auxiliaryData);
-
-    copyBytes(
-        cell->metadata.descriptionSize,
-        cell->metadata.description,
+    createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, simulationTO->auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
+    createAuxiliaryData(
         cellTO.metadata.descriptionSize,
-        cellTO.metadata.descriptionIndex,
-        simulationTO->auxiliaryData);
+        cellTO.metadata.descriptionDataIndex,
+        simulationTO->auxiliaryData,
+        cell->metadata.descriptionSize,
+        cell->metadata.description);
 
+    cell->activityChanged = cellTO.activityChanged;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        cell->activity.channels[i] = cellTO.activity.channels[i];
+    }
+    cell->cellFunction = cellTO.cellFunction;
+    switch (cellTO.cellFunction) {
+    case Enums::CellFunction_Neuron: {
+        createAuxiliaryDataWithFixedSize(
+            cellTO.cellFunctionData.neuron.weightsAndBiasSize,
+            cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex,
+            simulationTO->auxiliaryData,
+            reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState));
+    } break;
+    case Enums::CellFunction_Transmitter: {
+    } break;
+    case Enums::CellFunction_Constructor: {
+        cell->cellFunctionData.constructor.mode = cellTO.cellFunctionData.constructor.mode;
+        createAuxiliaryData(
+            cellTO.cellFunctionData.constructor.dnaSize,
+            cellTO.cellFunctionData.constructor.dnaDataIndex,
+            simulationTO->auxiliaryData,
+            cell->cellFunctionData.constructor.dnaSize,
+            cell->cellFunctionData.constructor.dna);
+    } break;
+    case Enums::CellFunction_Sensor: {
+        cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
+        cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
+    } break;
+    case Enums::CellFunction_Nerve: {
+    } break;
+    case Enums::CellFunction_Attacker: {
+    } break;
+    case Enums::CellFunction_Injector: {
+        createAuxiliaryData(
+            cellTO.cellFunctionData.injector.dnaSize,
+            cellTO.cellFunctionData.injector.dnaDataIndex,
+            simulationTO->auxiliaryData,
+            cell->cellFunctionData.injector.dnaSize,
+            cell->cellFunctionData.injector.dna);
+    } break;
+    case Enums::CellFunction_Muscle: {
+    } break;
+    }
     cell->selected = 0;
     cell->locked = 0;
 
@@ -126,19 +163,14 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(
     cell->age = cellTO.age;
     cell->color = cellTO.color;
 
-    copyBytes(
-        cell->metadata.nameSize,
-        cell->metadata.name,
-        cellTO.metadata.nameSize,
-        cellTO.metadata.nameIndex,
-        dataTO.auxiliaryData);
+    createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
-    copyBytes(
-        cell->metadata.descriptionSize,
-        cell->metadata.description,
+    createAuxiliaryData(
         cellTO.metadata.descriptionSize,
-        cellTO.metadata.descriptionIndex,
-        dataTO.auxiliaryData);
+        cellTO.metadata.descriptionDataIndex,
+        dataTO.auxiliaryData,
+        cell->metadata.descriptionSize,
+        cell->metadata.description);
 }
 
 __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const& particleTO, Particle* particle)
@@ -148,13 +180,19 @@ __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const&
     particle->color = particleTO.color;
 }
 
-__inline__ __device__ void ObjectFactory::copyBytes(uint64_t& targetLen, uint8_t*& target, uint64_t sourceLen, uint64_t sourceIndex, uint8_t* source)
+__inline__ __device__ void
+ObjectFactory::createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, uint64_t& targetSize, uint8_t*& target)
 {
-    targetLen = sourceLen;
-    if (sourceLen > 0) {
-        target = _data->objects.auxiliaryData.getNewSubarray(sourceLen);
-        for (int i = 0; i < sourceLen; ++i) {
-            target[i] = source[sourceIndex + i];
+    targetSize = sourceSize;
+    createAuxiliaryDataWithFixedSize(sourceSize, sourceIndex, auxiliaryData, target);
+}
+
+__inline__ __device__ void ObjectFactory::createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target)
+{
+    if (size > 0) {
+        target = _data->objects.auxiliaryData.getNewSubarray(size);
+        for (int i = 0; i < size; ++i) {
+            target[i] = auxiliaryData[sourceIndex + i];
         }
     }
 }

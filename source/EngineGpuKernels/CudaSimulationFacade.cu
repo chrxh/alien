@@ -148,7 +148,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numAuxiliaryData);
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
-    resizeArrays({100000, 100000});
+    resizeArrays({100000, 100000, 100000});
 }
 
 _CudaSimulationFacade::~_CudaSimulationFacade()

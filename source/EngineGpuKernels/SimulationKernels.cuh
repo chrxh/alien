@@ -18,17 +18,16 @@ __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult re
 __global__ void cudaNextTimestep_substep1(SimulationData data);
 __global__ void cudaNextTimestep_substep2(SimulationData data);
 __global__ void cudaNextTimestep_substep3(SimulationData data);
-__global__ void cudaNextTimestep_substep4(SimulationData data, bool considerAngles);
-__global__ void cudaNextTimestep_substep5(SimulationData data);
-__global__ void cudaNextTimestep_substep6(SimulationData data, bool considerAngles);
-__global__ void cudaNextTimestep_substep7(SimulationData data);
-__global__ void cudaNextTimestep_substep8(SimulationData data);
+__global__ void cudaNextTimestep_verletPositionUpdate(SimulationData data);
+__global__ void cudaNextTimestep_connectionForces(SimulationData data, bool considerAngles);
+__global__ void cudaNextTimestep_verletVelocityUpdate(SimulationData data);
+__global__ void cudaNextTimestep_collectCellFunctionOperation(SimulationData data);
 __global__ void cudaNextTimestep_nerveFunction(SimulationData data, SimulationResult result);
 __global__ void cudaNextTimestep_neuronFunction(SimulationData data, SimulationResult result);
-__global__ void cudaNextTimestep_substep10(SimulationData data);
-__global__ void cudaNextTimestep_substep11(SimulationData data);
-__global__ void cudaNextTimestep_substep12(SimulationData data);
-__global__ void cudaNextTimestep_substep13(SimulationData data);
+__global__ void cudaNextTimestep_innerFriction(SimulationData data);
+__global__ void cudaNextTimestep_frictionAndDecay(SimulationData data);
+__global__ void cudaNextTimestep_structuralOperations_step1(SimulationData data);
+__global__ void cudaNextTimestep_structuralOperations_step2(SimulationData data);
 __global__ void cudaNextTimestep_substep14(SimulationData data);
 
 __global__ void cudaInitClusterData(SimulationData data);

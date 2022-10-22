@@ -47,8 +47,8 @@ struct TransmitterFunction
 struct ConstructorFunction
 {
     Enums::ConstructorMode mode;
-    uint64_t constructionDataSize;
-    uint8_t* constructionData;
+    uint64_t dnaSize;
+    uint8_t* dna;
 };
 
 struct SensorFunction
@@ -67,8 +67,8 @@ struct AttackerFunction
 
 struct InjectorFunction
 {
-    uint64_t constructionDataSize;
-    uint8_t* constructionData;
+    uint64_t dnaSize;
+    uint8_t* dna;
 };
 
 struct MuscleFunction
@@ -77,14 +77,14 @@ struct MuscleFunction
 
 union CellFunctionData
 {
-    NeuronFunction neuronFunction;
-    TransmitterFunction transmitterFunction;
-    ConstructorFunction constructorFunction;
-    SensorFunction sensorFunction;
-    NerveFunction nerveFunction;
-    AttackerFunction digestionFunction;
-    InjectorFunction injectorFunction;
-    MuscleFunction muscleFunction;
+    NeuronFunction neuron;
+    TransmitterFunction transmitter;
+    ConstructorFunction constructor;
+    SensorFunction sensor;
+    NerveFunction nerve;
+    AttackerFunction digestion;
+    InjectorFunction injector;
+    MuscleFunction muscle;
 };
 
 struct Cell
