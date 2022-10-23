@@ -92,8 +92,7 @@ struct RealVector2D
     RealVector2D() = default;
     RealVector2D(float x_, float y_);
     RealVector2D(std::initializer_list<float> l);
-    bool operator==(RealVector2D const& vec) const;
-    bool operator!=(RealVector2D const& vec) const { return !operator==(vec); }
+    auto operator<=>(RealVector2D const&) const = default;
     void operator+=(RealVector2D const& vec);
     void operator-=(RealVector2D const& vec);
     template <typename T>
