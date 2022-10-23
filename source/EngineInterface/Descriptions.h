@@ -34,6 +34,22 @@ struct ConnectionDescription
     float angleFromPrevious = 0;
 
     auto operator<=>(ConnectionDescription const&) const = default;
+
+    ConnectionDescription& setCellId(uint64_t const& value)
+    {
+        cellId = value;
+        return *this;
+    }
+    ConnectionDescription& setDistance(float const& value)
+    {
+        distance = value;
+        return *this;
+    }
+    ConnectionDescription& setAngleFromPrevious(float const& value)
+    {
+        angleFromPrevious = value;
+        return *this;
+    }
 };
 
 struct ActivityDescription

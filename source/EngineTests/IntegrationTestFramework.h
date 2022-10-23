@@ -13,8 +13,9 @@ public:
     virtual ~IntegrationTestFramework();
 
 protected:
-    std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
-    bool compare(DataDescription left, DataDescription right) const;
+    std::map<RealVector2D, std::vector<CellDescription>> getCellsByPosition(DataDescription const& data) const;
+    bool compare(CellDescription left, CellDescription right) const;
+    bool compare(ParticleDescription left, ParticleDescription right) const;
 
     SimulationController _simController;
 };

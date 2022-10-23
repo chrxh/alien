@@ -38,11 +38,6 @@ RealVector2D::RealVector2D(std::initializer_list<float> l)
     y = *it;
 }
 
-bool RealVector2D::operator==(RealVector2D const& vec) const
-{
-    return x == vec.x && y == vec.y;
-}
-
 void RealVector2D::operator+=(RealVector2D const& vec)
 {
     x += vec.x;
