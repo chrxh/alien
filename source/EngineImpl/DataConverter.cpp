@@ -54,7 +54,7 @@ namespace
     void convert(DataTO const& dataTO, std::vector<float> const& source, uint64_t& targetSize, uint64_t& targetIndex)
     {
         BytesAsFloat bytesAsFloat;
-        targetSize = source.size();
+        targetSize = source.size() * 4;
         if (targetSize > 0) {
             targetIndex = *dataTO.numAuxiliaryData;
             uint64_t size = source.size();
@@ -64,7 +64,7 @@ namespace
                     dataTO.auxiliaryData[targetIndex + i * 4 + j] = bytesAsFloat.b[j];
                 }
             }
-            (*dataTO.numAuxiliaryData) += size;
+            (*dataTO.numAuxiliaryData) += targetSize;
         }
     }
 
@@ -127,7 +127,7 @@ ArraySizes DataConverter::getArraySizes(ClusteredDataDescription const& data) co
     return result;
 }
 
-ClusteredDataDescription DataConverter::convertAccessTOtoClusteredDataDescription(DataTO const& dataTO) const
+ClusteredDataDescription DataConverter::convertTOtoClusteredDataDescription(DataTO const& dataTO) const
 {
 	ClusteredDataDescription result;
 
@@ -171,7 +171,7 @@ ClusteredDataDescription DataConverter::convertAccessTOtoClusteredDataDescriptio
     return result;
 }
 
-DataDescription DataConverter::convertAccessTOtoDataDescription(DataTO const& dataTO) const
+DataDescription DataConverter::convertTOtoDataDescription(DataTO const& dataTO) const
 {
     DataDescription result;
 
@@ -198,7 +198,7 @@ DataDescription DataConverter::convertAccessTOtoDataDescription(DataTO const& da
     return result;
 }
 
-OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataTO const& dataTO) const
+OverlayDescription DataConverter::convertTOtoOverlayDescription(DataTO const& dataTO) const
 {
     OverlayDescription result;
     result.elements.reserve(*dataTO.numCells + *dataTO.numParticles);
@@ -226,7 +226,7 @@ OverlayDescription DataConverter::convertAccessTOtoOverlayDescription(DataTO con
     return result;
 }
 
-void DataConverter::convertClusteredDataDescriptionToAccessTO(DataTO& result, ClusteredDataDescription const& description) const
+void DataConverter::convertDescriptionToTO(DataTO& result, ClusteredDataDescription const& description) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cluster: description.clusters) {
@@ -246,7 +246,7 @@ void DataConverter::convertClusteredDataDescriptionToAccessTO(DataTO& result, Cl
     }
 }
 
-void DataConverter::convertDataDescriptionToAccessTO(DataTO& result, DataDescription const& description) const
+void DataConverter::convertDescriptionToTO(DataTO& result, DataDescription const& description) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cell : description.cells) {
@@ -262,13 +262,13 @@ void DataConverter::convertDataDescriptionToAccessTO(DataTO& result, DataDescrip
     }
 }
 
-void DataConverter::convertCellDescriptionToAccessTO(DataTO& result, CellDescription const& cell) const
+void DataConverter::convertDescriptionToTO(DataTO& result, CellDescription const& cell) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     addCell(result, cell, cellIndexByIds);
 }
 
-void DataConverter::convertParticleDescriptionToAccessTO(DataTO& result, ParticleDescription const& particle) const
+void DataConverter::convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const
 {
     addParticle(result, particle);
 }

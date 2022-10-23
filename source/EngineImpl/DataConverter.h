@@ -19,13 +19,13 @@ public:
     ArraySizes getArraySizes(DataDescription const& data) const;
     ArraySizes getArraySizes(ClusteredDataDescription const& data) const;
 
-    ClusteredDataDescription convertAccessTOtoClusteredDataDescription(DataTO const& dataTO) const;
-    DataDescription convertAccessTOtoDataDescription(DataTO const& dataTO) const;
-    OverlayDescription convertAccessTOtoOverlayDescription(DataTO const& dataTO) const;
-    void convertClusteredDataDescriptionToAccessTO(DataTO& result, ClusteredDataDescription const& description) const;
-    void convertDataDescriptionToAccessTO(DataTO& result, DataDescription const& description) const;
-    void convertCellDescriptionToAccessTO(DataTO& result, CellDescription const& cell) const;
-    void convertParticleDescriptionToAccessTO(DataTO& result, ParticleDescription const& particle) const;
+    ClusteredDataDescription convertTOtoClusteredDataDescription(DataTO const& dataTO) const;
+    DataDescription convertTOtoDataDescription(DataTO const& dataTO) const;
+    OverlayDescription convertTOtoOverlayDescription(DataTO const& dataTO) const;
+    void convertDescriptionToTO(DataTO& result, ClusteredDataDescription const& description) const;
+    void convertDescriptionToTO(DataTO& result, DataDescription const& description) const;
+    void convertDescriptionToTO(DataTO& result, CellDescription const& cell) const;
+    void convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const;
 
 private:
     void addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize) const;

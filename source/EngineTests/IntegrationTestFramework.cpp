@@ -18,13 +18,20 @@ IntegrationTestFramework::~IntegrationTestFramework()
     _simController->closeSimulation();
 }
 
-std::map<RealVector2D, std::vector<CellDescription>> IntegrationTestFramework::getCellsByPosition(DataDescription const& data) const
+std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(DataDescription const& data) const
 {
-    std::map<RealVector2D, std::vector<CellDescription>> result;
+    std::unordered_map<uint64_t, CellDescription> result;
     for(auto const& cell : data.cells) {
-        result[cell.pos].emplace_back(cell);
+        result.emplace(cell.id, cell);
     }
     return result;
+}
+
+bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const
+{
+    std::sort(left.cells.begin(), left.cells.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    std::sort(right.cells.begin(), right.cells.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    return left == right;
 }
 
 bool IntegrationTestFramework::compare(CellDescription left, CellDescription right) const

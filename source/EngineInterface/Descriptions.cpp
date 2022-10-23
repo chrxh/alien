@@ -233,7 +233,7 @@ std::unordered_set<uint64_t> DataDescription::getCellIds() const
 }
 
 DataDescription&
-DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache)
+DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
@@ -318,16 +318,20 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
     return *this;
 }
 
-CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
+CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache)
 {
-    auto findResult = cache.find(cellId);
-    if (findResult != cache.end()) {
-        return cells.at(findResult->second);
+    if (cache) {
+        auto findResult = cache->find(cellId);
+        if (findResult != cache->end()) {
+            return cells.at(findResult->second);
+        }
     }
     for (int i = 0; i < cells.size(); ++i) {
         auto& cell = cells.at(i);
         if (cell.id == cellId) {
-            cache.emplace(cellId, i);
+            if (cache) {
+                cache->emplace(cellId, i);
+            }
             return cell;
         }
     }

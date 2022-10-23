@@ -314,7 +314,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, bool se
     auto cellPartition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     auto cellTargetArray = data.objects.cells.getArray() + data.objects.cells.getNumOrigEntries();
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(index, dataTO.cells[index], cellTargetArray, &dataTO, createIds);
+        auto cell = factory.createCellFromTO(dataTO, index, dataTO.cells[index], cellTargetArray, createIds);
         if (selectNewData) {
             cell->selected = 1;
         }

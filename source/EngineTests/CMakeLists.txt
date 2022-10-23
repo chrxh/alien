@@ -3,6 +3,7 @@ PUBLIC
     DataTransferTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    NerveTests.cpp
     SensorTests.cpp
     Testsuite.cpp)
 

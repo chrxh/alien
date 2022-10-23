@@ -88,8 +88,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
             {imageSize.x, imageSize.y},
             zoom);
 
-        auto arraySizes = _cudaSimulation->getArraySizes();
-        DataTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+        DataTO dataTO = provideTO();
 
         _cudaSimulation->getOverlayData(
             {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
@@ -97,7 +96,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
             dataTO);
 
         DataConverter converter(_settings.simulationParameters);
-        auto result = converter.convertAccessTOtoOverlayDescription(dataTO);
+        auto result = converter.convertTOtoOverlayDescription(dataTO);
 
         return result;
     }
@@ -108,15 +107,14 @@ ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D co
 {
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+    DataTO dataTO = provideTO();
+    
     _cudaSimulation->getSimulationData(
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
 
-    auto result = converter.convertAccessTOtoClusteredDataDescription(dataTO);
+    auto result = converter.convertTOtoClusteredDataDescription(dataTO);
     return result;
 }
 
@@ -124,13 +122,13 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
 {
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+    DataTO dataTO = provideTO();
+    
     _cudaSimulation->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
 
-    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    auto result = converter.convertTOtoDataDescription(dataTO);
     return result;
 }
 
@@ -138,13 +136,13 @@ ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool i
 {
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataTO dataTO = _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+    DataTO dataTO = provideTO();
+    
     _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
 
-    auto result = converter.convertAccessTOtoClusteredDataDescription(dataTO);
+    auto result = converter.convertTOtoClusteredDataDescription(dataTO);
     return result;
 }
 
@@ -152,14 +150,13 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+    DataTO dataTO = provideTO();
+    
     _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
 
-    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    auto result = converter.convertTOtoDataDescription(dataTO);
 
     return result;
 }
@@ -168,14 +165,13 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> e
 {
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _cudaSimulation->getArraySizes();
-    DataTO dataTO =
-        _dataTOCache->getDataTO({arraySizes.cellArraySize, arraySizes.particleArraySize});
+    DataTO dataTO = provideTO();
+    
     _cudaSimulation->getInspectedSimulationData(entityIds, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
 
-    auto result = converter.convertAccessTOtoDataDescription(dataTO);
+    auto result = converter.convertTOtoDataDescription(dataTO);
     return result;
 }
 
@@ -198,7 +194,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 
     DataTO dataTO = provideTO();
 
-    converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
+    converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->addAndSelectSimulationData(dataTO);
     updateMonitorDataIntern();
@@ -207,15 +203,14 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
 {
     DataConverter converter(_settings.simulationParameters);
-    auto arraySizes = converter.getArraySizes(dataToUpdate);
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(arraySizes);
+    _cudaSimulation->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
 
     DataTO dataTO = provideTO();
 
-    converter.convertClusteredDataDescriptionToAccessTO(dataTO, dataToUpdate);
+    converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->setSimulationData(dataTO);
     updateMonitorDataIntern();
@@ -224,14 +219,13 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 {
     DataConverter converter(_settings.simulationParameters);
-    auto arraySizes = converter.getArraySizes(dataToUpdate);
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(arraySizes);
+    _cudaSimulation->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
 
     DataTO dataTO = provideTO();
-    converter.convertDataDescriptionToAccessTO(dataTO, dataToUpdate);
+    converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->setSimulationData(dataTO);
     updateMonitorDataIntern();
@@ -287,7 +281,7 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
     auto dataTO = provideTO();
 
     DataConverter converter(_settings.simulationParameters);
-    converter.convertCellDescriptionToAccessTO(dataTO, changedCell);
+    converter.convertDescriptionToTO(dataTO, changedCell);
 
     _cudaSimulation->changeInspectedSimulationData(dataTO);
 }
@@ -299,7 +293,7 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     auto dataTO = provideTO();
 
     DataConverter converter(_settings.simulationParameters);
-    converter.convertParticleDescriptionToAccessTO(dataTO, changedParticle);
+    converter.convertDescriptionToTO(dataTO, changedParticle);
 
     _cudaSimulation->changeInspectedSimulationData(dataTO);
 }

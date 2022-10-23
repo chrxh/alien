@@ -216,7 +216,7 @@ void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
             auto const& nearbyCell = data.cells.at(nearbyCellIndex);
             if (cell.id != nearbyCell.id && cell.connections.size() < cell.maxConnections && nearbyCell.connections.size() < nearbyCell.maxConnections
                 && !cell.isConnectedTo(nearbyCell.id)) {
-                data.addConnection(cell.id, nearbyCell.id, cache);
+                data.addConnection(cell.id, nearbyCell.id, &cache);
             }
         }
     }
