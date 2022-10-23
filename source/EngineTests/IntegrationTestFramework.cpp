@@ -26,3 +26,20 @@ std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellB
     }
     return result;
 }
+
+bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const
+{
+    for (auto& cell : left.cells) {
+        cell.id = 0;
+    }
+    for (auto& particle : left.particles) {
+        particle.id = 0;
+    }
+    for (auto& cell : right.cells) {
+        cell.id = 0;
+    }
+    for (auto& particle : right.particles) {
+        particle.id = 0;
+    }
+    return left == right;
+}
