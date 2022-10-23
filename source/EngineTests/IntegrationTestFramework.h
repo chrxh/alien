@@ -14,6 +14,7 @@ public:
 
 protected:
     std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
+    bool compare(DataDescription left, DataDescription right) const;
 
     SimulationController _simController;
 };
