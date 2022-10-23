@@ -230,12 +230,26 @@ struct CellDescription
         cellFunction = value;
         return *this;
     }
-
     CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;
         return *this;
     }
+    CellDescription& setActivityChanged(bool const& value)
+    {
+        activityChanged = value;
+        return *this;
+    }
+    CellDescription& setActivity(std::vector<float> const& value)
+    {
+        CHECK(value.size() == MAX_CHANNELS);
+
+        ActivityDescription newActivity;
+        newActivity.channels = value;
+        activity = newActivity;
+        return *this;
+    }
+
     bool isConnectedTo(uint64_t id) const;
 
     Enums::CellFunction getCellFunctionType() const;
@@ -384,10 +398,10 @@ struct DataDescription
 
     std::unordered_set<uint64_t> getCellIds() const;
 
-    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
+    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
 
 private:
-    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
+    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache = nullptr);
 };
 
 using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;
