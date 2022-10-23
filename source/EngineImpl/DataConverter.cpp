@@ -68,12 +68,34 @@ namespace
         }
     }
 
-    std::pair<std::vector<float>, std::vector<float>> split(std::vector<float> const& weigthsAndBias)
+    std::vector<float> unitWeightsAndBias(std::vector<std::vector<float>> const& weights, std::vector<float> const& bias)
     {
-        std::pair<std::vector<float>, std::vector<float>> result;
-        result.first = std::vector<float>(weigthsAndBias.begin(), weigthsAndBias.begin() + MAX_CHANNELS * MAX_CHANNELS);
-        result.second = std::vector<float>(weigthsAndBias.begin() + MAX_CHANNELS * MAX_CHANNELS, weigthsAndBias.end());
+        std::vector<float> result(MAX_CHANNELS * MAX_CHANNELS + MAX_CHANNELS, 0);
+        for (int row = 0; row < MAX_CHANNELS; ++row) {
+            for (int col = 0; col < MAX_CHANNELS; ++col) {
+                result[col + row * MAX_CHANNELS] = weights[row][col];
+            }
+        }
+        for (int col = 0; col < MAX_CHANNELS; ++col) {
+            result[col + MAX_CHANNELS * MAX_CHANNELS] = bias[col];
+        }
+
         return result;
+    }
+
+    std::pair<std::vector<std::vector<float>>, std::vector<float>> splitWeightsAndBias(std::vector<float> const& weightsAndBias)
+    {
+        std::vector<std::vector<float>> weights(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
+        for (int row = 0; row < MAX_CHANNELS; ++row) {
+            for (int col = 0; col < MAX_CHANNELS; ++col) {
+                weights[row][col] = weightsAndBias[col + row * MAX_CHANNELS];
+            }
+        }
+
+        std::vector<float> bias;
+        bias = std::vector<float>(weightsAndBias.begin() + MAX_CHANNELS * MAX_CHANNELS, weightsAndBias.end());
+
+        return std::make_pair(weights, bias);
     }
 }
 
@@ -383,7 +405,7 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
         std::vector<float> weigthsAndBias;
         convert(
             dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, weigthsAndBias);
-        std::tie(neuron.weigths, neuron.bias) = split(weigthsAndBias);
+        std::tie(neuron.weigths, neuron.bias) = splitWeightsAndBias(weigthsAndBias);
         result.cellFunction = neuron;
     } break;
     case Enums::CellFunction_Transmitter: {
@@ -460,9 +482,7 @@ void DataConverter::addCell(
     case Enums::CellFunction_Neuron: {
         NeuronTO neuronTO;
         auto neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
-        std::vector<float> weigthsAndBias = neuronDesc.weigths;
-        weigthsAndBias.reserve(MAX_CHANNELS * MAX_CHANNELS + MAX_CHANNELS);
-        weigthsAndBias.insert(weigthsAndBias.end(), neuronDesc.weigths.begin(), neuronDesc.weigths.end());
+        std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weigths, neuronDesc.bias);
         convert(dataTO, weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBiasDataIndex);
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;

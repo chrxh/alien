@@ -47,11 +47,12 @@ struct ActivityDescription
 
 struct NeuronDescription
 {
-    std::vector<float> weigths;
+    std::vector<std::vector<float>> weigths;
     std::vector<float> bias;
+
     NeuronDescription()
     {
-        weigths.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+        weigths.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
         bias.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuronDescription const&) const = default;
@@ -183,17 +184,12 @@ struct CellDescription
         connections = value;
         return *this;
     }
-    CellDescription& setUnderConstruction(bool value)
-    {
-        underConstruction = value;
-        return *this;
-    }
     CellDescription& setExecutionOrderNumber(int value)
     {
         executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setUnderCOnstruction(bool value)
+    CellDescription& setUnderConstruction(bool value)
     {
         underConstruction = value;
         return *this;
@@ -208,6 +204,17 @@ struct CellDescription
         outputBlocked = value;
         return *this;
     }
+    CellDescription& setCellFunction(NeuronDescription const& value)
+    {
+        cellFunction = value;
+        return *this;
+    }
+    CellDescription& setCellFunction(TransmitterDescription const& value)
+    {
+        cellFunction = value;
+        return *this;
+    }
+
     CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;

@@ -18,6 +18,8 @@ public:
 TEST_F(DataTransferTests, singleCell)
 {
     DataDescription data;
+    NeuronDescription neuron;
+    neuron.weigths[2][1] = 1.0f;
     data.addCell(CellDescription()
                      .setPos({2.0f, 4.0f})
                      .setVel({0.5f, 1.0f})
@@ -26,9 +28,10 @@ TEST_F(DataTransferTests, singleCell)
                      .setAge(1)
                      .setColor(2)
                      .setBarrier(true)
-                     .setUnderCOnstruction(false)
+                     .setUnderConstruction(false)
                      .setInputBlocked(true)
-                     .setOutputBlocked(false));
+                     .setOutputBlocked(false)
+    );
 
     _simController->setSimulationData(data);
     auto newData = _simController->getSimulationData();
