@@ -40,7 +40,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, CellMetadataDescription& data)
     {
-        ar(data.name, data.description, data.color);
+        ar(data.name, data.description);
     }
     template <class Archive>
     inline void serialize(Archive& ar, ConnectionDescription& data)
@@ -289,7 +289,7 @@ namespace
         boost::split(versionParts, s, boost::is_any_of("."));
         try {
             for (auto const& versionPart : versionParts) {
-                std::stoi(versionPart);
+                int result = std::stoi(versionPart);
             }
         } catch (...) {
             return false;

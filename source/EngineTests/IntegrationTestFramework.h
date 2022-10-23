@@ -13,7 +13,6 @@ public:
     virtual ~IntegrationTestFramework();
 
 protected:
-    TokenDescription createSimpleToken() const;
     std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
 
     SimulationController _simController;

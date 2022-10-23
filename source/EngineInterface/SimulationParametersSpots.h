@@ -32,6 +32,7 @@ struct SimulationParametersSpot{
         return color == other.color && posX == other.posX && posY == other.posY && fadeoutRadius == other.fadeoutRadius && coreRadius == other.coreRadius
             && width == other.width && height == other.height && values == other.values;
     }
+    bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }
 };
 
 struct SimulationParametersSpots
@@ -41,7 +42,15 @@ struct SimulationParametersSpots
 
     bool operator==(SimulationParametersSpots const& other) const
     {
-        return numSpots == other.numSpots && spots == other.spots;
+        if (numSpots != other.numSpots) {
+            return false;
+        }
+        for (int i = 0; i < 2; ++i) {
+            if (spots[i] != other.spots[i]) {
+                return false;
+            }
+        }
+        return numSpots == other.numSpots;
     }
     bool operator!=(SimulationParametersSpots const& other) const { return !operator==(other); }
 };

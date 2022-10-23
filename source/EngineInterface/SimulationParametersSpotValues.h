@@ -28,10 +28,16 @@ struct SimulationParametersSpotValues
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
+        for (int i = 0; i < 7; ++i) {
+            for (int j = 0; j < 7; ++j) {
+                if (cellFunctionWeaponFoodChainColorMatrix[i][j] != other.cellFunctionWeaponFoodChainColorMatrix[i][j]) {
+                    return false;
+                }
+            }
+        }
         return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor && cellMaxForce == other.cellMaxForce
             && cellMinEnergy == other.cellMinEnergy && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
             && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
-            && cellFunctionWeaponFoodChainColorMatrix == other.cellFunctionWeaponFoodChainColorMatrix
             && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
             && cellFunctionWeaponConnectionsMismatchPenalty == other.cellFunctionWeaponConnectionsMismatchPenalty;
