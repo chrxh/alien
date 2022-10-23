@@ -1,6 +1,6 @@
 target_sources(tests
 PUBLIC
-    CellComputationTests.cpp
+    DataTransferTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     SensorTests.cpp

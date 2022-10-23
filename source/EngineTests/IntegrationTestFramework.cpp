@@ -10,20 +10,12 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
     Settings settings;
     settings.generalSettings.worldSizeX = universeSize.x;
     settings.generalSettings.worldSizeY = universeSize.y;
-    SymbolMap symbolMap;
-    _simController->newSimulation(0, settings, symbolMap);
+    _simController->newSimulation(0, settings);
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
     _simController->closeSimulation();
-}
-
-TokenDescription IntegrationTestFramework::createSimpleToken() const
-{
-    auto parameters = _simController->getSimulationParameters();
-    auto tokenEnergy = parameters.tokenMinEnergy * 2.0;
-    return TokenDescription().setEnergy(tokenEnergy).setData(std::string(parameters.tokenMemorySize, 0));
 }
 
 std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(DataDescription const& data) const

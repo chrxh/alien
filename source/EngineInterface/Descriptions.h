@@ -13,8 +13,7 @@ struct CellMetadataDescription
     std::string name;
     std::string description;
 
-    bool operator==(CellMetadataDescription const& other) const { return name == other.name && description == other.description; }
-    bool operator!=(CellMetadataDescription const& other) const { return !operator==(other); }
+    auto operator<=>(CellMetadataDescription const&) const = default;
 
     CellMetadataDescription& setName(std::string const& value)
     {
@@ -33,6 +32,8 @@ struct ConnectionDescription
     uint64_t cellId = 0;    //value of 0 means cell not present in DataDescription
     float distance = 0;
     float angleFromPrevious = 0;
+
+    auto operator<=>(ConnectionDescription const&) const = default;
 };
 
 struct ActivityDescription
@@ -40,6 +41,7 @@ struct ActivityDescription
     std::vector<float> channels;
 
     ActivityDescription() { channels.resize(MAX_CHANNELS, 0); }
+    auto operator<=>(ActivityDescription const&) const = default;
 };
 
 
@@ -52,36 +54,51 @@ struct NeuronDescription
         weigths.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         bias.resize(MAX_CHANNELS, 0);
     }
+    auto operator<=>(NeuronDescription const&) const = default;
 };
 
 struct TransmitterDescription
-{};
+{
+    auto operator<=>(TransmitterDescription const&) const = default;
+};
 
 struct ConstructorDescription
 {
     Enums::ConstructorMode mode;
     std::vector<uint8_t> dna;
+
+    auto operator<=>(ConstructorDescription const&) const = default;
 };
 
 struct SensorDescription
 {
     Enums::SensorMode mode;
     int color = 0;
+
+    auto operator<=>(SensorDescription const&) const = default;
 };
 
 struct NerveDescription
-{};
+{
+    auto operator<=>(NerveDescription const&) const = default;
+};
 
 struct AttackerDescription
-{};
+{
+    auto operator<=>(AttackerDescription const&) const = default;
+};
 
 struct InjectorDescription
 {
     std::vector<uint8_t> dna;
+
+    auto operator<=>(InjectorDescription const&) const = default;
 };
 
 struct MuscleDescription
-{};
+{
+    auto operator<=>(MuscleDescription const&) const = default;
+};
 
 using CellFunctionDescription = std::optional<std::variant<
     NeuronDescription,
@@ -118,6 +135,8 @@ struct CellDescription
     bool activityChanged = false;
 
     CellDescription() = default;
+    auto operator<=>(CellDescription const&) const = default;
+
     CellDescription& setId(uint64_t value)
     {
         id = value;
@@ -148,6 +167,12 @@ struct CellDescription
         barrier = value;
         return *this;
     }
+    CellDescription& setAge(int value)
+    {
+        age = value;
+        return *this;
+    }
+
     CellDescription& setMaxConnections(int value)
     {
         maxConnections = value;
@@ -168,6 +193,21 @@ struct CellDescription
         executionOrderNumber = value;
         return *this;
     }
+    CellDescription& setUnderCOnstruction(bool value)
+    {
+        underConstruction = value;
+        return *this;
+    }
+    CellDescription& setInputBlocked(bool value)
+    {
+        inputBlocked = value;
+        return *this;
+    }
+    CellDescription& setOutputBlocked(bool value)
+    {
+        outputBlocked = value;
+        return *this;
+    }
     CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;
@@ -185,6 +225,7 @@ struct ClusterDescription
     std::vector<CellDescription> cells;
 
     ClusterDescription() = default;
+    auto operator<=>(ClusterDescription const&) const = default;
 
     ClusterDescription& setId(uint64_t value)
     {
@@ -215,6 +256,7 @@ struct ParticleDescription
     int color = 0;
 
     ParticleDescription() = default;
+    auto operator<=>(ParticleDescription const&) const = default;
     ParticleDescription& setId(uint64_t value)
     {
         id = value;
@@ -248,6 +290,8 @@ struct ClusteredDataDescription
     std::vector<ParticleDescription> particles;
 
     ClusteredDataDescription() = default;
+    auto operator<=>(ClusteredDataDescription const&) const = default;
+
     ClusteredDataDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
         clusters.insert(clusters.end(), value.begin(), value.end());
@@ -297,8 +341,8 @@ struct DataDescription
     std::vector<ParticleDescription> particles;
 
     DataDescription() = default;
-
     explicit DataDescription(ClusteredDataDescription const& clusteredData);
+    auto operator<=>(DataDescription const&) const = default;
 
     DataDescription& add(DataDescription const& other);
     DataDescription& addCells(std::vector<CellDescription> const& value);

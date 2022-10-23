@@ -31,7 +31,15 @@ struct FlowFieldSettings
 
     bool operator==(FlowFieldSettings const& other) const
     {
-        return active == other.active && numCenters == other.numCenters && centers == other.centers;
+        if (numCenters != other.numCenters) {
+            return false;
+        }
+        for (int i = 0; i < 2; ++i) {
+            if (centers[i] != other.centers[i]) {
+                return false;
+            }
+        }
+        return active == other.active;
     }
     bool operator!=(FlowFieldSettings const& other) const { return !operator==(other); }
 };
