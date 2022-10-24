@@ -10,7 +10,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
     Settings settings;
     settings.generalSettings.worldSizeX = universeSize.x;
     settings.generalSettings.worldSizeY = universeSize.y;
-    settings.simulationParameters.radiationProb = 0;
+    settings.simulationParameters.spotValues.radiationFactor = 0;
     _simController->newSimulation(0, settings);
 }
 
