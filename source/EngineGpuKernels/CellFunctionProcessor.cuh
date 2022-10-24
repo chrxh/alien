@@ -67,7 +67,6 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
     if (inputExecutionOrderNumber == -cudaSimulationParameters.cellMaxExecutionOrderNumber) {
         return result;
     }
-
     if (inputExecutionOrderNumber < 0) {
         inputExecutionOrderNumber += cudaSimulationParameters.cellMaxExecutionOrderNumber;
     }
@@ -90,9 +89,8 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
     auto changes = 0.0f;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         changes += abs(newActivity.channels[i] - cell->activity.channels[i]);
+        cell->activity.channels[i] = newActivity.channels[i];
     }
-    if (changes > 0.1f) {
-        cell->activityChanged = true;
-    }
+    cell->activityChanged = (changes > 0.1f);
     cell->activity = newActivity;
 }

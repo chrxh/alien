@@ -134,7 +134,7 @@ struct CellDescription
 
     RealVector2D pos;
     RealVector2D vel;
-    double energy = 0;
+    float energy = 100.0f;
     int color = 0;
     int maxConnections = 0;
     int executionOrderNumber = 0;
@@ -169,7 +169,7 @@ struct CellDescription
         vel = value;
         return *this;
     }
-    CellDescription& setEnergy(double value)
+    CellDescription& setEnergy(float value)
     {
         energy = value;
         return *this;
@@ -220,12 +220,8 @@ struct CellDescription
         outputBlocked = value;
         return *this;
     }
-    CellDescription& setCellFunction(NeuronDescription const& value)
-    {
-        cellFunction = value;
-        return *this;
-    }
-    CellDescription& setCellFunction(TransmitterDescription const& value)
+    template<typename CellFunctionDesc>
+    CellDescription& setCellFunction(CellFunctionDesc const& value)
     {
         cellFunction = value;
         return *this;
@@ -238,6 +234,11 @@ struct CellDescription
     CellDescription& setActivityChanged(bool const& value)
     {
         activityChanged = value;
+        return *this;
+    }
+    CellDescription& setActivity(ActivityDescription const& value)
+    {
+        activity = value;
         return *this;
     }
     CellDescription& setActivity(std::vector<float> const& value)
@@ -289,7 +290,7 @@ struct ParticleDescription
 
     RealVector2D pos;
     RealVector2D vel;
-    double energy = 0;
+    float energy = 0;
     int color = 0;
 
     ParticleDescription() = default;
@@ -309,7 +310,7 @@ struct ParticleDescription
         vel = value;
         return *this;
     }
-    ParticleDescription& setEnergy(double value)
+    ParticleDescription& setEnergy(float value)
     {
         energy = value;
         return *this;

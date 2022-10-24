@@ -33,6 +33,10 @@ namespace
         cellTO.cellFunction = cell->cellFunction;
         cellTO.color = cell->color;
         cellTO.age = cell->age;
+        cellTO.activityChanged = cell->activityChanged;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cellTO.activity.channels[i] = cell->activity.channels[i];
+        }
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
