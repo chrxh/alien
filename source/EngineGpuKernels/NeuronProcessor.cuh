@@ -13,7 +13,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
 
-    __inline__ __device__ static float sigmoid(float z);
+    __inline__ __device__ static float scaledSigmoid(float z);
 };
 
 /************************************************************************/
@@ -56,7 +56,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        outputActivity.channels[i] = sigmoid(sumInput[i]);
+        outputActivity.channels[i] = scaledSigmoid(sumInput[i]);  
     }
     __syncthreads();
     
@@ -67,7 +67,8 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 }
 
-__inline__ __device__ float NeuronProcessor::sigmoid(float z)
+// maps to [-1, 1]
+__inline__ __device__ float NeuronProcessor::scaledSigmoid(float z)
 {
-    return 1.0f / (1.0f + __expf(-z));
+    return 2.0f / (1.0f + __expf(-z)) - 1.0f;
 }

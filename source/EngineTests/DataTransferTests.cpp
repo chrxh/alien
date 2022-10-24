@@ -20,7 +20,7 @@ TEST_F(DataTransferTests, singleCell)
 {
     DataDescription data;
     NeuronDescription neuron;
-    neuron.weigths[2][1] = 1.0f;
+    neuron.weights[2][1] = 1.0f;
     data.addCell(CellDescription()
                      .setId(1)
                      .setPos({2.0f, 4.0f})
@@ -49,7 +49,7 @@ TEST_F(DataTransferTests, singleParticle)
     DataDescription data;
 
     NeuronDescription neuron;
-    neuron.weigths[2][1] = 1.0f;
+    neuron.weights[2][1] = 1.0f;
     data.addParticle(ParticleDescription().setId(1).setPos({2.0f, 4.0f}).setVel({0.5f, 1.0f}).setEnergy(100.0f).setColor(2));
 
     _simController->setSimulationData(data);
@@ -61,9 +61,9 @@ TEST_F(DataTransferTests, singleParticle)
 TEST_F(DataTransferTests, cellCluster)
 {
     NeuronDescription neuron1;
-    neuron1.weigths[2][1] = 1.0f;
+    neuron1.weights[2][1] = 1.0f;
     NeuronDescription neuron2;
-    neuron2.weigths[5][3] = 1.0f;
+    neuron2.weights[5][3] = 1.0f;
 
     DataDescription data;
     data.addCells({
