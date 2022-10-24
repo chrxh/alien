@@ -102,15 +102,15 @@ TEST_F(DataTransferTests, cellCluster)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_F(DataTransferTests, massTransfer)
+TEST_F(DataTransferTests, largeData)
 {
     auto& numberGen = NumberGenerator::getInstance();
     auto addCellAndParticles = [&](DataDescription& data) {
         data.addCell(CellDescription()
                          .setId(numberGen.getId())
-                         .setPos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
+                .setPos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
                          .setVel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
-                         .setEnergy(numberGen.getRandomFloat(0.0f, 100.0f))
+                        .setEnergy(numberGen.getRandomFloat(0.0f, 100.0f))
                          .setMaxConnections(1)
                          .setExecutionOrderNumber(3)
                          .setAge(1)
@@ -127,17 +127,17 @@ TEST_F(DataTransferTests, massTransfer)
     };
 
     DataDescription data;
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 100000; ++i) {
         addCellAndParticles(data);
     }
     {
         _simController->setSimulationData(data);
         auto actualData = _simController->getSimulationData();
-        EXPECT_EQ(data, actualData);
+        EXPECT_TRUE(compare(data, actualData));
     }
 
     DataDescription newData;
-    for (int i = 0; i < 10000; ++i) {
+    for (int i = 0; i < 1000000; ++i) {
         addCellAndParticles(newData);
     }
     {

@@ -166,7 +166,7 @@ namespace ifd {
 							newPath += "/";
 #endif
 					}
-					path = std::filesystem::u8path(newPath);
+					path = std::filesystem::path(newPath);
 					ret = true;
 				}
 				anyOtherHC |= ImGui::IsItemHovered() | ImGui::IsItemClicked();
@@ -211,7 +211,7 @@ namespace ifd {
 			if (ImGui::InputTextEx("##pathbox_input", "", pathBuffer, 1024, size_arg, ImGuiInputTextFlags_EnterReturnsTrue)) {
 				std::string tempStr(pathBuffer);
 				if (std::filesystem::exists(tempStr))
-					path = std::filesystem::u8path(tempStr); 
+					path = std::filesystem::path(tempStr); 
 				ret = true;
 			}
 			if (!skipActiveCheck && !ImGui::IsItemActive())
@@ -461,7 +461,7 @@ namespace ifd {
 
 		m_parseFilter(filter);
 		if (!startingDir.empty())
-			m_setDirectory(std::filesystem::u8path(startingDir), false);
+			m_setDirectory(std::filesystem::path(startingDir), false);
 		else
 			m_setDirectory(m_currentDirectory, false); // refresh contents
 
@@ -485,7 +485,7 @@ namespace ifd {
 
 		m_parseFilter(filter);
 		if (!startingDir.empty())
-			m_setDirectory(std::filesystem::u8path(startingDir), false);
+			m_setDirectory(std::filesystem::path(startingDir), false);
 		else
 			m_setDirectory(m_currentDirectory, false); // refresh contents
 
@@ -555,7 +555,7 @@ namespace ifd {
 		if (std::count(m_favorites.begin(), m_favorites.end(), path) > 0)
 			return;
 
-		if (!std::filesystem::exists(std::filesystem::u8path(path)))
+		if (!std::filesystem::exists(std::filesystem::path(path)))
 			return;
 
 		m_favorites.push_back(path);
@@ -609,7 +609,7 @@ namespace ifd {
 		
 		if (hasResult) {
 			if (!m_isMultiselect || m_selections.size() <= 1) {
-				std::filesystem::path path = std::filesystem::u8path(filename);
+				std::filesystem::path path = std::filesystem::path(filename);
 				if (path.is_absolute()) m_result.push_back(path);
 				else m_result.push_back(m_currentDirectory / path);
 				if (m_type == IFD_DIALOG_DIRECTORY || m_type == IFD_DIALOG_FILE) {
@@ -921,7 +921,7 @@ namespace ifd {
 #ifdef _WIN32
 		// drives don't work well without the backslash symbol
 		if (p.string().size() == 2 && p.string()[1] == ':')
-			m_currentDirectory = std::filesystem::u8path(p.string() + "\\");
+			m_currentDirectory = std::filesystem::path(p.string() + "\\");
 #endif
 
 		m_clearIconPreview();
