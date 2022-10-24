@@ -105,7 +105,6 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         parserTask);
     JsonParser::encodeDecode(
         tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", parserTask);
-    JsonParser::encodeDecode(tree, simPar.radiationExponent, defaultPar.radiationExponent, "simulation parameters.radiation.exponent", parserTask);
     JsonParser::encodeDecode(
         tree, simPar.spotValues.radiationFactor, defaultPar.spotValues.radiationFactor, "simulation parameters.radiation.factor", parserTask);
     JsonParser::encodeDecode(tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", parserTask);

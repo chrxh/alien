@@ -439,7 +439,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
                 auto cellEnergy = cell->energy;
                 particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-                float radiationEnergy = powf(cellEnergy, cudaSimulationParameters.radiationExponent) * radiationFactor;
+                float radiationEnergy = cellEnergy * radiationFactor;
                 radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
                 radiationEnergy = 2 * radiationEnergy * data.numberGen1.random();
                 if (cellEnergy > 1) {
