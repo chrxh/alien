@@ -34,6 +34,8 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
         auto& cell = cells.at(index);
         if (cell->cellFunction != Enums::CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
             data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+        } else {
+            cell->activityChanged = false;
         }
     }
 }
@@ -46,13 +48,13 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         result.channels[i] = 0;
     }
 
-    if (cell->inputBlocked) {
+    if (cell->inputBlocked || cell->underConstruction) {
         return result;
     }
     int inputExecutionOrderNumber = -cudaSimulationParameters.cellMaxExecutionOrderNumber;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked) {
+        if (connectedCell->outputBlocked || connectedCell->underConstruction) {
             continue;
         }
         auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
@@ -72,7 +74,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
     }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked) {
+        if (connectedCell->outputBlocked || connectedCell->underConstruction) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
