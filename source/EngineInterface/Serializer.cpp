@@ -51,7 +51,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, NeuronDescription& data)
     {
-        ar(data.weigths, data.bias);
+        ar(data.weights, data.bias);
     }
     template <class Archive>
     inline void serialize(Archive& ar, TransmitterDescription& data)

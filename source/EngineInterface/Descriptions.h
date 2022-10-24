@@ -58,17 +58,24 @@ struct ActivityDescription
 
     ActivityDescription() { channels.resize(MAX_CHANNELS, 0); }
     auto operator<=>(ActivityDescription const&) const = default;
+
+    ActivityDescription& setChannels(std::vector<float> const& value)
+    {
+        CHECK(value.size() == MAX_CHANNELS);
+        channels = value;
+        return *this;
+    }
 };
 
 
 struct NeuronDescription
 {
-    std::vector<std::vector<float>> weigths;
+    std::vector<std::vector<float>> weights;
     std::vector<float> bias;
 
     NeuronDescription()
     {
-        weigths.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
+        weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
         bias.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuronDescription const&) const = default;
@@ -220,7 +227,7 @@ struct CellDescription
         outputBlocked = value;
         return *this;
     }
-    template<typename CellFunctionDesc>
+    template <typename CellFunctionDesc>
     CellDescription& setCellFunction(CellFunctionDesc const& value)
     {
         cellFunction = value;

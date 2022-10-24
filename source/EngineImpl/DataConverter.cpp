@@ -278,7 +278,7 @@ void DataConverter::addAdditionalDataSizeForCell(CellDescription const& cell, ui
     additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
     switch (cell.getCellFunctionType()) {
     case Enums::CellFunction_Neuron:
-        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).weigths.size() * sizeof(float);
+        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).weights.size() * sizeof(float);
         additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).bias.size() * sizeof(float);
         break;
     case Enums::CellFunction_Transmitter:
@@ -405,7 +405,7 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
         std::vector<float> weigthsAndBias;
         convert(
             dataTO, cellTO.cellFunctionData.neuron.weightsAndBiasSize, cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, weigthsAndBias);
-        std::tie(neuron.weigths, neuron.bias) = splitWeightsAndBias(weigthsAndBias);
+        std::tie(neuron.weights, neuron.bias) = splitWeightsAndBias(weigthsAndBias);
         result.cellFunction = neuron;
     } break;
     case Enums::CellFunction_Transmitter: {
@@ -482,7 +482,7 @@ void DataConverter::addCell(
     case Enums::CellFunction_Neuron: {
         NeuronTO neuronTO;
         auto neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
-        std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weigths, neuronDesc.bias);
+        std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.bias);
         convert(dataTO, weigthsAndBias, neuronTO.weightsAndBiasSize, neuronTO.weightsAndBiasDataIndex);
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
