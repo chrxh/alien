@@ -459,7 +459,7 @@ void DataConverter::addParticle(DataTO const& dataTO, ParticleDescription const&
 	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
     particleTO.pos = {particleDesc.pos.x, particleDesc.pos.y};
     particleTO.vel = {particleDesc.vel.x, particleDesc.vel.y};
-	particleTO.energy = toFloat(particleDesc.energy);
+	particleTO.energy = particleDesc.energy;
     particleTO.color = particleDesc.color;
 }
 
@@ -471,7 +471,7 @@ void DataConverter::addCell(
     cellTO.id = cellDesc.id == 0 ? NumberGenerator::getInstance().getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
-    cellTO.energy = toFloat(cellDesc.energy);
+    cellTO.energy = cellDesc.energy;
 	cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.underConstruction = cellDesc.underConstruction;
