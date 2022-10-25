@@ -14,6 +14,7 @@ class CellFunctionProcessor
 {
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
+    __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
 
     __inline__ __device__ static Activity calcInputActivity(Cell* cell);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
@@ -34,8 +35,21 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
         auto& cell = cells.at(index);
         if (cell->cellFunction != Enums::CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
             data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
-        } else {
-            cell->activityChanged = false;
+        }
+    }
+}
+
+__inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->activityFetched == 1) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell->activity.channels[i] = 0;
+            }
         }
     }
 }
@@ -80,6 +94,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 result.channels[i] += connectedCell->activity.channels[i];
+                atomicExch(&connectedCell->activityFetched, 1);
             }
         }
     }
@@ -93,6 +108,5 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
         changes += abs(newActivity.channels[i] - cell->activity.channels[i]);
         cell->activity.channels[i] = newActivity.channels[i];
     }
-    cell->activityChanged = (changes > 0.1f);
     cell->activity = newActivity;
 }

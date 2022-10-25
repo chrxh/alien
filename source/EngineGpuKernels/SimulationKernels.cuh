@@ -25,7 +25,7 @@ __global__ void cudaNextTimestep_collectCellFunctionOperation(SimulationData dat
 __global__ void cudaNextTimestep_nerveFunction(SimulationData data, SimulationResult result);
 __global__ void cudaNextTimestep_neuronFunction(SimulationData data, SimulationResult result);
 __global__ void cudaNextTimestep_innerFriction(SimulationData data);
-__global__ void cudaNextTimestep_frictionAndDecay(SimulationData data);
+__global__ void cudaNextTimestep_friction_decay_finishCellFunctions(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_step1(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_step2(SimulationData data);
 __global__ void cudaNextTimestep_substep14(SimulationData data);

@@ -156,8 +156,6 @@ struct CellDescription
 
     CellMetadataDescription metadata;
 
-    bool activityChanged = false;
-
     CellDescription() = default;
     auto operator<=>(CellDescription const&) const = default;
 
@@ -236,11 +234,6 @@ struct CellDescription
     CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;
-        return *this;
-    }
-    CellDescription& setActivityChanged(bool const& value)
-    {
-        activityChanged = value;
         return *this;
     }
     CellDescription& setActivity(ActivityDescription const& value)
