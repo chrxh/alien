@@ -50,9 +50,13 @@ struct TransmitterTO
 struct RibosomeTO
 {
     Enums::ConstructionMode mode;
+    bool singleConstruction;
+    bool separateConstruction;
     uint64_t genomeSize;
-    uint64_t currentGenomePos;
     uint64_t genomeDataIndex;
+
+    //process data
+    uint64_t currentGenomePos;
 };
 
 struct SensorTO

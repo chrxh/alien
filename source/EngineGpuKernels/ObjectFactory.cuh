@@ -121,13 +121,15 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case Enums::CellFunction_Ribosome: {
         cell->cellFunctionData.ribosome.mode = cellTO.cellFunctionData.ribosome.mode;
-        cell->cellFunctionData.ribosome.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
+        cell->cellFunctionData.ribosome.singleConstruction = cellTO.cellFunctionData.ribosome.singleConstruction;
+        cell->cellFunctionData.ribosome.separateConstruction = cellTO.cellFunctionData.ribosome.separateConstruction;
         createAuxiliaryData(
             cellTO.cellFunctionData.ribosome.genomeSize,
             cellTO.cellFunctionData.ribosome.genomeDataIndex,
             dataTO.auxiliaryData,
             cell->cellFunctionData.ribosome.genomeSize,
             cell->cellFunctionData.ribosome.genome);
+        cell->cellFunctionData.ribosome.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
     } break;
     case Enums::CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;

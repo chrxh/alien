@@ -47,9 +47,13 @@ struct TransmitterFunction
 struct RibosomeFunction
 {
     Enums::ConstructionMode mode;
+    bool singleConstruction;
+    bool separateConstruction;
     uint64_t genomeSize;
-    uint64_t currentGenomePos;
     uint8_t* genome;
+
+    //process data
+    uint64_t currentGenomePos;
 };
 
 struct SensorFunction

@@ -297,6 +297,10 @@ void DataConverter::addAdditionalDataSizeForCell(CellDescription const& cell, ui
         break;
     case Enums::CellFunction_Muscle:
         break;
+    case Enums::CellFunction_Placeholder1:
+        break;
+    case Enums::CellFunction_Placeholder2:
+        break;
     }
 }    
 
@@ -415,8 +419,10 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     case Enums::CellFunction_Ribosome: {
         RibosomeDescription constructor;
         constructor.mode = cellTO.cellFunctionData.ribosome.mode;
-        constructor.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
+        constructor.singleConstruction = cellTO.cellFunctionData.ribosome.singleConstruction;
+        constructor.separateConstruction = cellTO.cellFunctionData.ribosome.separateConstruction;
         convert(dataTO, cellTO.cellFunctionData.ribosome.genomeSize, cellTO.cellFunctionData.ribosome.genomeDataIndex, constructor.genome);
+        constructor.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
         result.cellFunction = constructor;
     } break;
     case Enums::CellFunction_Sensor: {
@@ -501,8 +507,10 @@ void DataConverter::addCell(
         auto constructorDesc = std::get<RibosomeDescription>(*cellDesc.cellFunction);
         RibosomeTO constructorTO;
         constructorTO.mode = constructorDesc.mode;
-        constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
+        constructorTO.singleConstruction = constructorDesc.singleConstruction;
+        constructorTO.separateConstruction = constructorDesc.separateConstruction;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
+        constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
         cellTO.cellFunctionData.ribosome = constructorTO;
     } break;
     case Enums::CellFunction_Sensor: {
