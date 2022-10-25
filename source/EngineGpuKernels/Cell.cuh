@@ -46,9 +46,13 @@ struct TransmitterFunction
 
 struct RibosomeFunction
 {
+    //settings
     Enums::ConstructionMode mode;
     bool singleConstruction;
     bool separateConstruction;
+    bool makeSticky;
+
+    //genome
     uint64_t genomeSize;
     uint8_t* genome;
 
