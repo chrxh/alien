@@ -47,8 +47,8 @@ struct TransmitterFunction
 struct ConstructorFunction
 {
     Enums::ConstructorMode mode;
-    uint64_t dnaSize;
-    uint8_t* dna;
+    uint64_t genomeSize;
+    uint8_t* genome;
 };
 
 struct SensorFunction
@@ -67,8 +67,8 @@ struct AttackerFunction
 
 struct InjectorFunction
 {
-    uint64_t dnaSize;
-    uint8_t* dna;
+    uint64_t genomeSize;
+    uint8_t* genome;
 };
 
 struct MuscleFunction

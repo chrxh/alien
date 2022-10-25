@@ -82,11 +82,11 @@ __global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, Array<uint8_
             break;
         case Enums::CellFunction_Constructor:
             copyAndAssignNewAuxiliaryData(
-                cell->cellFunctionData.constructor.dna, cell->cellFunctionData.constructor.dnaSize, auxiliaryData);
+                cell->cellFunctionData.constructor.genome, cell->cellFunctionData.constructor.genomeSize, auxiliaryData);
             break;
         case Enums::CellFunction_Injector:
             copyAndAssignNewAuxiliaryData(
-                cell->cellFunctionData.injector.dna, cell->cellFunctionData.injector.dnaSize, auxiliaryData);
+                cell->cellFunctionData.injector.genome, cell->cellFunctionData.injector.genomeSize, auxiliaryData);
             break;
         }
     }

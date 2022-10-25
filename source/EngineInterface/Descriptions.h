@@ -89,7 +89,7 @@ struct TransmitterDescription
 struct ConstructorDescription
 {
     Enums::ConstructorMode mode;
-    std::vector<uint8_t> dna;
+    std::vector<uint8_t> genome;
 
     auto operator<=>(ConstructorDescription const&) const = default;
 };
@@ -114,7 +114,7 @@ struct AttackerDescription
 
 struct InjectorDescription
 {
-    std::vector<uint8_t> dna;
+    std::vector<uint8_t> genome;
 
     auto operator<=>(InjectorDescription const&) const = default;
 };

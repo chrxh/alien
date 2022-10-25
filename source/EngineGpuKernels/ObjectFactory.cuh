@@ -122,11 +122,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     case Enums::CellFunction_Constructor: {
         cell->cellFunctionData.constructor.mode = cellTO.cellFunctionData.constructor.mode;
         createAuxiliaryData(
-            cellTO.cellFunctionData.constructor.dnaSize,
-            cellTO.cellFunctionData.constructor.dnaDataIndex,
+            cellTO.cellFunctionData.constructor.genomeSize,
+            cellTO.cellFunctionData.constructor.genomeDataIndex,
             dataTO.auxiliaryData,
-            cell->cellFunctionData.constructor.dnaSize,
-            cell->cellFunctionData.constructor.dna);
+            cell->cellFunctionData.constructor.genomeSize,
+            cell->cellFunctionData.constructor.genome);
     } break;
     case Enums::CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
@@ -138,11 +138,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case Enums::CellFunction_Injector: {
         createAuxiliaryData(
-            cellTO.cellFunctionData.injector.dnaSize,
-            cellTO.cellFunctionData.injector.dnaDataIndex,
+            cellTO.cellFunctionData.injector.genomeSize,
+            cellTO.cellFunctionData.injector.genomeDataIndex,
             dataTO.auxiliaryData,
-            cell->cellFunctionData.injector.dnaSize,
-            cell->cellFunctionData.injector.dna);
+            cell->cellFunctionData.injector.genomeSize,
+            cell->cellFunctionData.injector.genome);
     } break;
     case Enums::CellFunction_Muscle: {
     } break;
