@@ -51,6 +51,7 @@ struct RibosomeTO
 {
     Enums::ConstructionMode mode;
     uint64_t genomeSize;
+    uint64_t currentGenomePos;
     uint64_t genomeDataIndex;
 };
 
@@ -75,6 +76,12 @@ struct InjectorTO
 struct MuscleTO
 {};
 
+struct PlaceHolderTO1
+{};
+
+struct PlaceHolderTO2
+{};
+
 union CellFunctionTO
 {
     NeuronTO neuron;
@@ -85,6 +92,8 @@ union CellFunctionTO
     AttackerTO attacker;
     InjectorTO injector;
     MuscleTO muscle;
+    PlaceHolderTO1 placeHolder1;
+    PlaceHolderTO2 placeHolder2;
 };
 
 struct CellTO

@@ -74,6 +74,7 @@ namespace
         } break;
         case Enums::CellFunction_Ribosome: {
             cellTO.cellFunctionData.ribosome.mode = cell->cellFunctionData.ribosome.mode;
+            cellTO.cellFunctionData.ribosome.currentGenomePos = cell->cellFunctionData.ribosome.currentGenomePos;
             copyAuxiliaryData(
                 cell->cellFunctionData.ribosome.genomeSize,
                 cell->cellFunctionData.ribosome.genome,
@@ -100,6 +101,10 @@ namespace
                 dataTO.auxiliaryData);
         } break;
         case Enums::CellFunction_Muscle: {
+        } break;
+        case Enums::CellFunction_Placeholder1: {
+        } break;
+        case Enums::CellFunction_Placeholder2: {
         } break;
         }
     }

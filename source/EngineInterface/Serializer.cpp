@@ -84,6 +84,12 @@ namespace cereal
     inline void serialize(Archive& ar, MuscleDescription& data)
     {
     }
+    template <class Archive>
+    inline void serialize(Archive& ar, PlaceHolderDescription1& data)
+    {}
+    template <class Archive>
+    inline void serialize(Archive& ar, PlaceHolderDescription2& data)
+    {}
 
     template <class Archive>
     inline void serialize(Archive& ar, CellDescription& data)
@@ -119,10 +125,6 @@ namespace cereal
         ar(data.clusters, data.particles);
     }
 }
-
-/************************************************************************/
-/* Support for old file formats                                         */
-/************************************************************************/
 
 bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {

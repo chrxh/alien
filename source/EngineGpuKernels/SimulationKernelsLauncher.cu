@@ -29,9 +29,13 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_verletPositionUpdate, data);
     KERNEL_CALL(cudaNextTimestep_connectionForces, data, considerForcesFromAngleMismatch);
     KERNEL_CALL(cudaNextTimestep_verletVelocityUpdate, data);
+
+    //cell functions
     KERNEL_CALL(cudaNextTimestep_collectCellFunctionOperation, data);
     KERNEL_CALL(cudaNextTimestep_nerveFunction, data, result);
     KERNEL_CALL(cudaNextTimestep_neuronFunction, data, result);
+    KERNEL_CALL(cudaNextTimestep_ribosomeFunction, data, result);
+
     if (considerInnerFriction) {
         KERNEL_CALL(cudaNextTimestep_innerFriction, data);
     }

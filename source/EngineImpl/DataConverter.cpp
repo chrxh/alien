@@ -415,6 +415,7 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     case Enums::CellFunction_Ribosome: {
         RibosomeDescription constructor;
         constructor.mode = cellTO.cellFunctionData.ribosome.mode;
+        constructor.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
         convert(dataTO, cellTO.cellFunctionData.ribosome.genomeSize, cellTO.cellFunctionData.ribosome.genomeDataIndex, constructor.genome);
         result.cellFunction = constructor;
     } break;
@@ -440,6 +441,14 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     case Enums::CellFunction_Muscle: {
         MuscleDescription muscle;
         result.cellFunction = muscle;
+    } break;
+    case Enums::CellFunction_Placeholder1: {
+        PlaceHolderDescription1 placeHolder;
+        result.cellFunction = placeHolder;
+    } break;
+    case Enums::CellFunction_Placeholder2: {
+        PlaceHolderDescription2 placeHolder;
+        result.cellFunction = placeHolder;
     } break;
     }
 
@@ -492,6 +501,7 @@ void DataConverter::addCell(
         auto constructorDesc = std::get<RibosomeDescription>(*cellDesc.cellFunction);
         RibosomeTO constructorTO;
         constructorTO.mode = constructorDesc.mode;
+        constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         cellTO.cellFunctionData.ribosome = constructorTO;
     } break;
@@ -517,6 +527,14 @@ void DataConverter::addCell(
     case Enums::CellFunction_Muscle: {
         MuscleTO muscleTO;
         cellTO.cellFunctionData.muscle = muscleTO;
+    } break;
+    case Enums::CellFunction_Placeholder1: {
+        PlaceHolderTO1 placeHolderTO;
+        cellTO.cellFunctionData.placeHolder1 = placeHolderTO;
+    } break;
+    case Enums::CellFunction_Placeholder2: {
+        PlaceHolderTO2 placeHolderTO;
+        cellTO.cellFunctionData.placeHolder2 = placeHolderTO;
     } break;
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
