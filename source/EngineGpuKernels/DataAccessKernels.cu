@@ -75,10 +75,10 @@ namespace
         case Enums::CellFunction_Constructor: {
             cellTO.cellFunctionData.constructor.mode = cell->cellFunctionData.constructor.mode;
             copyAuxiliaryData(
-                cell->cellFunctionData.constructor.dnaSize,
-                cell->cellFunctionData.constructor.dna,
-                cellTO.cellFunctionData.constructor.dnaSize,
-                cellTO.cellFunctionData.constructor.dnaDataIndex,
+                cell->cellFunctionData.constructor.genomeSize,
+                cell->cellFunctionData.constructor.genome,
+                cellTO.cellFunctionData.constructor.genomeSize,
+                cellTO.cellFunctionData.constructor.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;
@@ -92,10 +92,10 @@ namespace
         } break;
         case Enums::CellFunction_Injector: {
             copyAuxiliaryData(
-                cell->cellFunctionData.injector.dnaSize,
-                cell->cellFunctionData.injector.dna,
-                cellTO.cellFunctionData.injector.dnaSize,
-                cellTO.cellFunctionData.injector.dnaDataIndex,
+                cell->cellFunctionData.injector.genomeSize,
+                cell->cellFunctionData.injector.genome,
+                cellTO.cellFunctionData.injector.genomeSize,
+                cellTO.cellFunctionData.injector.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;

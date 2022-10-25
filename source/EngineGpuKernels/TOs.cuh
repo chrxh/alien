@@ -50,8 +50,8 @@ struct TransmitterTO
 struct ConstructorTO
 {
     Enums::ConstructorMode mode;
-    uint64_t dnaSize;
-    uint64_t dnaDataIndex;
+    uint64_t genomeSize;
+    uint64_t genomeDataIndex;
 };
 
 struct SensorTO
@@ -68,8 +68,8 @@ struct AttackerTO
 
 struct InjectorTO
 {
-    uint64_t dnaSize;
-    uint64_t dnaDataIndex;
+    uint64_t genomeSize;
+    uint64_t genomeDataIndex;
 };
 
 struct MuscleTO

@@ -60,7 +60,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, ConstructorDescription& data)
     {
-        ar(data.mode, data.dna);
+        ar(data.mode, data.genome);
     }
     template <class Archive>
     inline void serialize(Archive& ar, SensorDescription& data)
@@ -78,7 +78,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, InjectorDescription& data)
     {
-        ar(data.dna);
+        ar(data.genome);
     }
     template <class Archive>
     inline void serialize(Archive& ar, MuscleDescription& data)
