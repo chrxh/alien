@@ -104,7 +104,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->metadata.descriptionSize,
         cell->metadata.description);
 
-    cell->activityChanged = cellTO.activityChanged;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = cellTO.activity.channels[i];
     }

@@ -35,7 +35,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     if (considerInnerFriction) {
         KERNEL_CALL(cudaNextTimestep_innerFriction, data);
     }
-    KERNEL_CALL(cudaNextTimestep_frictionAndDecay, data);
+    KERNEL_CALL(cudaNextTimestep_friction_decay_finishCellFunctions, data);
 
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);

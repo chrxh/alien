@@ -112,7 +112,6 @@ struct CellTO
 
     CellMetadataTO metadata;
 
-    bool activityChanged;
     int selected;
 };
 

@@ -48,9 +48,11 @@ TEST_F(NeuronTests, weight)
 {
     NeuronDescription neuron;
     neuron.weights[2][3] = 1;
+    neuron.weights[2][7] = 0.5f;
+    neuron.weights[5][3] = -0.5f;
 
     ActivityDescription activity;
-    activity.channels = {0, 0, 0, 1, 0, 0, 0, 0};
+    activity.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -70,5 +72,5 @@ TEST_F(NeuronTests, weight)
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    expectApproxEqual({0, 0, scaledSigmoid(1), 0, 0, 0, 0, 0}, actualCellById.at(2).activity.channels);
+    expectApproxEqual({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-0.5f), 0, 0}, actualCellById.at(2).activity.channels);
 }

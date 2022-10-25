@@ -446,8 +446,6 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         result.activity.channels[i] = cellTO.activity.channels[i];
     }
-    result.activityChanged = cellTO.activityChanged;
-
     return result;
 }
 
@@ -524,7 +522,6 @@ void DataConverter::addCell(
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cellTO.activity.channels[i] = cellDesc.activity.channels[i];
     }
-    cellTO.activityChanged = cellDesc.activityChanged;
 	cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;

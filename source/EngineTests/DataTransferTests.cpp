@@ -35,8 +35,7 @@ TEST_F(DataTransferTests, singleCell)
                      .setInputBlocked(true)
                      .setOutputBlocked(false)
                      .setCellFunction(neuron)
-                     .setActivity({1, 0, -1, 0, 0, 0, 0, 0})
-                     .setActivityChanged(true));
+                     .setActivity({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simController->setSimulationData(data);
     auto actualData = _simController->getSimulationData();

@@ -111,13 +111,11 @@ struct Cell
 
     CellMetadataDescription metadata;
 
-    //visualization
-    bool activityChanged;
-
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = cluster selected
 
     //temporary data for algorithms
+    int activityFetched; //0 = no, 1 = yes
     int locked;	//0 = unlocked, 1 = locked
     int tag;
     float2 temp1;
