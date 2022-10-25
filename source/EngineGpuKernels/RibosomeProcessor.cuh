@@ -7,7 +7,7 @@
 #include "CellConnectionProcessor.cuh"
 #include "SimulationResult.cuh"
 
-class ConstructionProcessor
+class RibosomeProcessor
 {
 public:
     __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
@@ -95,7 +95,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ConstructionProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
+__inline__ __device__ void RibosomeProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
     //    mutateToken(token, data);
 
@@ -122,7 +122,7 @@ __inline__ __device__ void ConstructionProcessor::process(Token* token, Simulati
     }
 }
 
-__inline__ __device__ void ConstructionProcessor::readConstructionData(Token* token, ConstructionData& data)
+__inline__ __device__ void RibosomeProcessor::readConstructionData(Token* token, ConstructionData& data)
 {
     auto const& memory = token->memory;
     data.constrIn = static_cast<unsigned char>(token->memory[Enums::Constr_Input]) % Enums::ConstrIn_Count;
@@ -153,7 +153,7 @@ __inline__ __device__ void ConstructionProcessor::readConstructionData(Token* to
     data.cellFunctionType = memory[Enums::Constr_InCellFunction];
 }
 
-__inline__ __device__ Cell* ConstructionProcessor::getFirstCellOfConstructionSite(Token* token)
+__inline__ __device__ Cell* RibosomeProcessor::getFirstCellOfConstructionSite(Token* token)
 {
     Cell* result = nullptr;
     auto const& cell = token->cell;
@@ -166,7 +166,7 @@ __inline__ __device__ Cell* ConstructionProcessor::getFirstCellOfConstructionSit
     return result;
 }
 
-__inline__ __device__ void ConstructionProcessor::startNewConstruction(
+__inline__ __device__ void RibosomeProcessor::startNewConstruction(
     Token* token,
     SimulationData& data,
     SimulationResult& result,
@@ -230,7 +230,7 @@ __inline__ __device__ void ConstructionProcessor::startNewConstruction(
     result.incCreatedCell();
 }
 
-__inline__ __device__ void ConstructionProcessor::continueConstruction(
+__inline__ __device__ void RibosomeProcessor::continueConstruction(
     Token* token,
     SimulationData& data,
     SimulationResult& result,
@@ -377,7 +377,7 @@ __inline__ __device__ void ConstructionProcessor::continueConstruction(
     result.incCreatedCell();
 }
 
-__inline__ __device__ void ConstructionProcessor::constructCell(
+__inline__ __device__ void RibosomeProcessor::constructCell(
     SimulationData& data,
     Token* token,
     float2 const& posOfNewCell,
@@ -421,19 +421,19 @@ __inline__ __device__ void ConstructionProcessor::constructCell(
     }
 }
 
-__inline__ __device__ auto ConstructionProcessor::isAdaptMaxConnections(ConstructionData const& data)
+__inline__ __device__ auto RibosomeProcessor::isAdaptMaxConnections(ConstructionData const& data)
     -> AdaptMaxConnections
 {
     return 0 == getMaxConnections(data) ? AdaptMaxConnections::Yes : AdaptMaxConnections::No;
 }
 
-__inline__ __device__ int ConstructionProcessor::getMaxConnections(ConstructionData const& data)
+__inline__ __device__ int RibosomeProcessor::getMaxConnections(ConstructionData const& data)
 {
     return static_cast<unsigned char>(data.maxConnections) % (cudaSimulationParameters.cellMaxBonds + 1);
 }
 
 __inline__ __device__ bool
-ConstructionProcessor::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
+RibosomeProcessor::isConnectable(int numConnections, int maxConnections, AdaptMaxConnections adaptMaxConnections)
 {
     if (AdaptMaxConnections::Yes == adaptMaxConnections) {
         if (numConnections >= cudaSimulationParameters.cellMaxBonds) {
@@ -448,7 +448,7 @@ ConstructionProcessor::isConnectable(int numConnections, int maxConnections, Ada
     return true;
 }
 
-__inline__ __device__ auto ConstructionProcessor::calcAnglesForNewConnection(
+__inline__ __device__ auto RibosomeProcessor::calcAnglesForNewConnection(
     SimulationData& data,
     Cell* cell,
     float angleDeviation)
@@ -483,7 +483,7 @@ __inline__ __device__ auto ConstructionProcessor::calcAnglesForNewConnection(
     return AnglesForNewConnection{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
-__inline__ __device__ auto ConstructionProcessor::adaptEnergies(Token* token, ConstructionData const& data)
+__inline__ __device__ auto RibosomeProcessor::adaptEnergies(Token* token, ConstructionData const& data)
     -> EnergyForNewEntities
 {
     auto const& cell = token->cell;
@@ -508,7 +508,7 @@ __inline__ __device__ auto ConstructionProcessor::adaptEnergies(Token* token, Co
     return result;
 }
 
-__inline__ __device__ Token* ConstructionProcessor::constructToken(
+__inline__ __device__ Token* RibosomeProcessor::constructToken(
     SimulationData& data,
     Cell* cell,
     Token* token,

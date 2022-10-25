@@ -7,7 +7,7 @@ namespace Enums
     {
         CellFunction_Neuron,
         CellFunction_Transmitter,
-        CellFunction_Constructor,
+        CellFunction_Ribosome,
         CellFunction_Sensor,
         CellFunction_Nerve,
         CellFunction_Attacker,
@@ -26,11 +26,11 @@ namespace Enums
         SensorMode_FixedAngle = 1
     };
 
-    using ConstructorMode = int;
-    enum ConstructorMode_
+    using ConstructionMode = int;
+    enum ConstructionMode_
     {
-        ConstructorMode_Automatic = 0,
-        ConstructorMode_Manual = 1
+        ConstructionMode_Automatic = 0,
+        ConstructionMode_Manual = 1
     };
 
     /*

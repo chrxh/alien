@@ -283,8 +283,8 @@ void DataConverter::addAdditionalDataSizeForCell(CellDescription const& cell, ui
         break;
     case Enums::CellFunction_Transmitter:
         break;
-    case Enums::CellFunction_Constructor:
-        additionalDataSize += std::get<ConstructorDescription>(*cell.cellFunction).genome.size();
+    case Enums::CellFunction_Ribosome:
+        additionalDataSize += std::get<RibosomeDescription>(*cell.cellFunction).genome.size();
         break;
     case Enums::CellFunction_Sensor:
         break;
@@ -412,10 +412,10 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
         TransmitterDescription transmitter;
         result.cellFunction = transmitter;
     } break;
-    case Enums::CellFunction_Constructor: {
-        ConstructorDescription constructor;
-        constructor.mode = cellTO.cellFunctionData.constructor.mode;
-        convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
+    case Enums::CellFunction_Ribosome: {
+        RibosomeDescription constructor;
+        constructor.mode = cellTO.cellFunctionData.ribosome.mode;
+        convert(dataTO, cellTO.cellFunctionData.ribosome.genomeSize, cellTO.cellFunctionData.ribosome.genomeDataIndex, constructor.genome);
         result.cellFunction = constructor;
     } break;
     case Enums::CellFunction_Sensor: {
@@ -488,12 +488,12 @@ void DataConverter::addCell(
         TransmitterTO transmitterTO;
         cellTO.cellFunctionData.transmitter = transmitterTO;
     } break;
-    case Enums::CellFunction_Constructor: {
-        auto constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
-        ConstructorTO constructorTO;
+    case Enums::CellFunction_Ribosome: {
+        auto constructorDesc = std::get<RibosomeDescription>(*cellDesc.cellFunction);
+        RibosomeTO constructorTO;
         constructorTO.mode = constructorDesc.mode;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        cellTO.cellFunctionData.constructor = constructorTO;
+        cellTO.cellFunctionData.ribosome = constructorTO;
     } break;
     case Enums::CellFunction_Sensor: {
         SensorTO sensorTO;

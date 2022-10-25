@@ -119,14 +119,14 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case Enums::CellFunction_Transmitter: {
     } break;
-    case Enums::CellFunction_Constructor: {
-        cell->cellFunctionData.constructor.mode = cellTO.cellFunctionData.constructor.mode;
+    case Enums::CellFunction_Ribosome: {
+        cell->cellFunctionData.ribosome.mode = cellTO.cellFunctionData.ribosome.mode;
         createAuxiliaryData(
-            cellTO.cellFunctionData.constructor.genomeSize,
-            cellTO.cellFunctionData.constructor.genomeDataIndex,
+            cellTO.cellFunctionData.ribosome.genomeSize,
+            cellTO.cellFunctionData.ribosome.genomeDataIndex,
             dataTO.auxiliaryData,
-            cell->cellFunctionData.constructor.genomeSize,
-            cell->cellFunctionData.constructor.genome);
+            cell->cellFunctionData.ribosome.genomeSize,
+            cell->cellFunctionData.ribosome.genome);
     } break;
     case Enums::CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;

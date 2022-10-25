@@ -72,13 +72,13 @@ namespace
         } break;
         case Enums::CellFunction_Transmitter: {
         } break;
-        case Enums::CellFunction_Constructor: {
-            cellTO.cellFunctionData.constructor.mode = cell->cellFunctionData.constructor.mode;
+        case Enums::CellFunction_Ribosome: {
+            cellTO.cellFunctionData.ribosome.mode = cell->cellFunctionData.ribosome.mode;
             copyAuxiliaryData(
-                cell->cellFunctionData.constructor.genomeSize,
-                cell->cellFunctionData.constructor.genome,
-                cellTO.cellFunctionData.constructor.genomeSize,
-                cellTO.cellFunctionData.constructor.genomeDataIndex,
+                cell->cellFunctionData.ribosome.genomeSize,
+                cell->cellFunctionData.ribosome.genome,
+                cellTO.cellFunctionData.ribosome.genomeSize,
+                cellTO.cellFunctionData.ribosome.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;

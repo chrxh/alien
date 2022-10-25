@@ -25,8 +25,8 @@ Enums::CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<TransmitterDescription>(*cellFunction)) {
         return Enums::CellFunction_Transmitter;
     }
-    if (std::holds_alternative<ConstructorDescription>(*cellFunction)) {
-        return Enums::CellFunction_Constructor;
+    if (std::holds_alternative<RibosomeDescription>(*cellFunction)) {
+        return Enums::CellFunction_Ribosome;
     }
     if (std::holds_alternative<SensorDescription>(*cellFunction)) {
         return Enums::CellFunction_Sensor;

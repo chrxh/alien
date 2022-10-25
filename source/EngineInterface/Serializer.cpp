@@ -58,7 +58,7 @@ namespace cereal
     {
     }
     template <class Archive>
-    inline void serialize(Archive& ar, ConstructorDescription& data)
+    inline void serialize(Archive& ar, RibosomeDescription& data)
     {
         ar(data.mode, data.genome);
     }
