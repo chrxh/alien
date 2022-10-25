@@ -89,8 +89,12 @@ struct TransmitterDescription
 struct RibosomeDescription
 {
     Enums::ConstructionMode mode;
-    uint64_t currentGenomePos;
+    bool singleConstruction;
+    bool separateConstruction;
     std::vector<uint8_t> genome;
+
+    //process data
+    uint64_t currentGenomePos;
 
     auto operator<=>(RibosomeDescription const&) const = default;
 };

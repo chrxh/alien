@@ -74,7 +74,8 @@ namespace
         } break;
         case Enums::CellFunction_Ribosome: {
             cellTO.cellFunctionData.ribosome.mode = cell->cellFunctionData.ribosome.mode;
-            cellTO.cellFunctionData.ribosome.currentGenomePos = cell->cellFunctionData.ribosome.currentGenomePos;
+            cellTO.cellFunctionData.ribosome.singleConstruction = cell->cellFunctionData.ribosome.singleConstruction;
+            cellTO.cellFunctionData.ribosome.separateConstruction = cell->cellFunctionData.ribosome.separateConstruction;
             copyAuxiliaryData(
                 cell->cellFunctionData.ribosome.genomeSize,
                 cell->cellFunctionData.ribosome.genome,
@@ -82,6 +83,7 @@ namespace
                 cellTO.cellFunctionData.ribosome.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
+            cellTO.cellFunctionData.ribosome.currentGenomePos = cell->cellFunctionData.ribosome.currentGenomePos;
         } break;
         case Enums::CellFunction_Sensor: {
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;

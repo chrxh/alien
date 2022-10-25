@@ -11,23 +11,35 @@ class RibosomeProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
 
+private:
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static bool isConstructionFinished(Cell* cell);
+    __inline__ __device__ static bool isConstructionPossible(Cell* cell, Activity const& activity);
+
     struct ConstructionData
     {
-        bool isFinishConstruction;
-        bool isSeparateConstruction;
-        int angleAlignment;
-        bool uniformDist;
+        bool finishConstruction;
         float angle;
         float distance;
         int maxConnections;
         int executionOrderNumber;
         int color;
-        Enums::CellFunction cellFunctionType;
+        Enums::CellFunction cellFunction;
     };
+    __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
-private:
-    __inline__ __device__ static void readConstructionData(Token* token, ConstructionData& data);
+    __inline__ __device__ static bool
+    tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
 
+    __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Cell* hostCell);
+    __inline__ __device__ static void startNewConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static void
+    continueConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, Cell* firstConstructedCell, ConstructionData const& constructionData);
+
+
+    __inline__ __device__ static bool readBool(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
+    __inline__ __device__ static int readByte(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
+    __inline__ __device__ static float readFloat(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
 };
 
 /************************************************************************/
@@ -40,9 +52,128 @@ __inline__ __device__ void RibosomeProcessor::process(SimulationData& data, Simu
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto operation = data.cellFunctionOperations[Enums::CellFunction_Nerve].at(i);
         auto cell = operation.cell;
-        auto inputActivity = CellFunctionProcessor::calcInputActivity(cell);
-        CellFunctionProcessor::setActivity(cell, inputActivity);
+        processCell(data, result, cell);
     }
+}
+
+__inline__ __device__ void RibosomeProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+{
+    auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    if (!isConstructionFinished(cell)) {
+        if (isConstructionPossible(cell, activity)) {
+            auto constructionData = readConstructionData(cell);
+            if (tryConstructCell(data, result, cell, constructionData)) {
+                activity.channels[0] = 1;
+            } else {
+                activity.channels[0] = 0;
+            }
+            if (constructionData.finishConstruction) {
+                auto& ribosome = cell->cellFunctionData.ribosome;
+                if (!ribosome.singleConstruction) {
+                    ribosome.currentGenomePos = 0;
+                }
+            }
+        } else {
+            activity.channels[0] = 0;
+        }
+    }
+    CellFunctionProcessor::setActivity(cell, activity);
+}
+
+__inline__ __device__ bool RibosomeProcessor::isConstructionFinished(Cell* cell)
+{
+    return cell->cellFunctionData.ribosome.currentGenomePos >= cell->cellFunctionData.ribosome.genomeSize;
+}
+
+__inline__ __device__ bool RibosomeProcessor::isConstructionPossible(Cell* cell, Activity const& activity)
+{
+    if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
+        return false;
+    }
+    if (cell->cellFunctionData.ribosome.mode == Enums::ConstructionMode_Manual && abs(activity.channels[0]) < 0.25f) {
+        return false;
+    }
+    return true;
+}
+
+__inline__ __device__ RibosomeProcessor::ConstructionData RibosomeProcessor::readConstructionData(Cell* cell)
+{
+    auto& ribosome = cell->cellFunctionData.ribosome;
+
+    ConstructionData result;
+
+    bool readingFinished = false;
+    result.finishConstruction = readBool(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished);
+    result.angle = readFloat(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished);
+    result.distance = readFloat(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished);
+    result.maxConnections = readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished) % 7;
+    result.executionOrderNumber =
+        readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    result.color = readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished) % 7;
+    result.cellFunction = readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, readingFinished) % Enums::CellFunction_Count;
+    if (readingFinished) {
+        result.finishConstruction = true;
+    }
+    return result;
+}
+
+__inline__ __device__ bool
+RibosomeProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData)
+{
+    Cell* underConstructionCell = getFirstCellOfConstructionSite(hostCell);
+
+    if (underConstructionCell) {
+        if (!underConstructionCell->tryLock()) {
+            return false;
+        }
+
+        continueConstruction(data, result, hostCell, underConstructionCell, constructionData);
+
+        underConstructionCell->releaseLock();
+    } else {
+        startNewConstruction(data, result, hostCell, constructionData);
+    }
+}
+
+__inline__ __device__ Cell* RibosomeProcessor::getFirstCellOfConstructionSite(Cell* hostCell)
+{
+    Cell* result = nullptr;
+    for (int i = 0; i < hostCell->numConnections; ++i) {
+        auto const& connectingCell = hostCell->connections[i].cell;
+        if (connectingCell->underConstruction) {
+            result = connectingCell;
+        }
+    }
+    return result;
+}
+
+__inline__ __device__ void
+RibosomeProcessor::startNewConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData)
+{
+}
+
+__inline__ __device__ void RibosomeProcessor::continueConstruction(
+    SimulationData& data,
+    SimulationResult& result,
+    Cell* hostCell,
+    Cell* underConstructionCell,
+    ConstructionData const& constructionData)
+{
+}
+
+__inline__ __device__ bool RibosomeProcessor::readBool(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+{
+    return true;
+}
+
+__inline__ __device__ int RibosomeProcessor::readByte(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+{
+    return 0;
+}
+
+__inline__ __device__ float RibosomeProcessor::readFloat(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+{
+    return false;
 }
 
 /*

@@ -11,6 +11,7 @@ struct SimulationParameters
     float cellMaxBindingDistance = 2.6f;
     float cellRepulsionStrength = 0.08f;  
 
+    float cellNormalEnergy = 100.0f;
     float cellMinDistance = 0.3f;         
     float cellMaxCollisionDistance = 1.3f;
     float cellMaxForceDecayProb = 0.2f;
