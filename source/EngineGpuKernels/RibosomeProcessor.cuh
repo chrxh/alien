@@ -2,11 +2,50 @@
 
 #include "EngineInterface/Enums.h"
 
-#include "Math.cuh"
 #include "QuantityConverter.cuh"
-#include "CellConnectionProcessor.cuh"
+#include "CellFunctionProcessor.cuh"
 #include "SimulationResult.cuh"
 
+class RibosomeProcessor
+{
+public:
+    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+
+    struct ConstructionData
+    {
+        bool isFinishConstruction;
+        bool isSeparateConstruction;
+        int angleAlignment;
+        bool uniformDist;
+        float angle;
+        float distance;
+        int maxConnections;
+        int executionOrderNumber;
+        int color;
+        Enums::CellFunction cellFunctionType;
+    };
+
+private:
+    __inline__ __device__ static void readConstructionData(Token* token, ConstructionData& data);
+
+};
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+
+__inline__ __device__ void RibosomeProcessor::process(SimulationData& data, SimulationResult& result)
+{
+    auto partition = calcAllThreadsPartition(data.cellFunctionOperations[Enums::CellFunction_Nerve].getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        auto operation = data.cellFunctionOperations[Enums::CellFunction_Nerve].at(i);
+        auto cell = operation.cell;
+        auto inputActivity = CellFunctionProcessor::calcInputActivity(cell);
+        CellFunctionProcessor::setActivity(cell, inputActivity);
+    }
+}
+
+/*
 class RibosomeProcessor
 {
 public:
@@ -91,11 +130,11 @@ private:
 
 //    __inline__ __device__ static void mutateToken(Token* token, SimulationData& data);
 };
-
+*/
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void RibosomeProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
+/* __inline__ __device__ void RibosomeProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
 {
     //    mutateToken(token, data);
 
@@ -185,9 +224,7 @@ __inline__ __device__ void RibosomeProcessor::startNewConstruction(
     auto const distance = QuantityConverter::convertDataToDistance(token->memory[Enums::Constr_InDist]);
     auto const relPosOfNewCellDelta = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell)
         * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
-    float2 posOfNewCell = /*separation
-        ? cell->relPos + relPosOfNewCellDelta + Math::unitVectorOfAngle(newCellAngle) * distance : */
-        cell->absPos + relPosOfNewCellDelta;
+    float2 posOfNewCell = cell->absPos + relPosOfNewCellDelta;
 
     constructionData.isConstructToken = false;  //not supported
     auto energyForNewEntities = adaptEnergies(token, constructionData);
@@ -310,8 +347,7 @@ __inline__ __device__ void RibosomeProcessor::continueConstruction(
         firstConstructedCell,
         angleFromPreviousForNewCell,
         angleFromPreviousForFirstConstructedCell,
-        desiredDistance/*,
-        constructionData.angleAlignment*/);
+        desiredDistance);
 
     if (constructionData.isFinishConstruction) {
         newCell->underConstruction = false;
@@ -528,7 +564,7 @@ __inline__ __device__ Token* RibosomeProcessor::constructToken(
     result->energy = energy;
     return result;
 }
-
+*/
 /*
 __inline__ __device__ void ConstructorFunction::mutateToken(Token* token, SimulationData& data)
 {

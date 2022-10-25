@@ -48,6 +48,7 @@ struct RibosomeFunction
 {
     Enums::ConstructionMode mode;
     uint64_t genomeSize;
+    uint64_t currentGenomePos;
     uint8_t* genome;
 };
 
@@ -75,6 +76,12 @@ struct MuscleFunction
 {
 };
 
+struct PlaceHolderFunction1
+{};
+
+struct PlaceHolderFunction2
+{};
+
 union CellFunctionData
 {
     NeuronFunction neuron;
@@ -85,6 +92,8 @@ union CellFunctionData
     AttackerFunction digestion;
     InjectorFunction injector;
     MuscleFunction muscle;
+    PlaceHolderFunction1 placeHolder1;
+    PlaceHolderFunction2 placeHolder2;
 };
 
 struct Cell

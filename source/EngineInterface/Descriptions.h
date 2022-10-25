@@ -89,6 +89,7 @@ struct TransmitterDescription
 struct RibosomeDescription
 {
     Enums::ConstructionMode mode;
+    uint64_t currentGenomePos;
     std::vector<uint8_t> genome;
 
     auto operator<=>(RibosomeDescription const&) const = default;
@@ -124,6 +125,16 @@ struct MuscleDescription
     auto operator<=>(MuscleDescription const&) const = default;
 };
 
+struct PlaceHolderDescription1
+{
+    auto operator<=>(PlaceHolderDescription1 const&) const = default;
+};
+
+struct PlaceHolderDescription2
+{
+    auto operator<=>(PlaceHolderDescription2 const&) const = default;
+};
+
 using CellFunctionDescription = std::optional<std::variant<
     NeuronDescription,
     TransmitterDescription,
@@ -132,7 +143,9 @@ using CellFunctionDescription = std::optional<std::variant<
     NerveDescription,
     AttackerDescription,
     InjectorDescription,
-    MuscleDescription>>;
+    MuscleDescription,
+    PlaceHolderDescription1,
+    PlaceHolderDescription2>>;
 
 struct CellDescription
 {
