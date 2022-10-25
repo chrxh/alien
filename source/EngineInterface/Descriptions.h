@@ -86,12 +86,12 @@ struct TransmitterDescription
     auto operator<=>(TransmitterDescription const&) const = default;
 };
 
-struct ConstructorDescription
+struct RibosomeDescription
 {
-    Enums::ConstructorMode mode;
+    Enums::ConstructionMode mode;
     std::vector<uint8_t> genome;
 
-    auto operator<=>(ConstructorDescription const&) const = default;
+    auto operator<=>(RibosomeDescription const&) const = default;
 };
 
 struct SensorDescription
@@ -127,7 +127,7 @@ struct MuscleDescription
 using CellFunctionDescription = std::optional<std::variant<
     NeuronDescription,
     TransmitterDescription,
-    ConstructorDescription,
+    RibosomeDescription,
     SensorDescription,
     NerveDescription,
     AttackerDescription,

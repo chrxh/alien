@@ -80,9 +80,9 @@ __global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, Array<uint8_
                 sizeof(*cell->cellFunctionData.neuron.neuronState),
                 auxiliaryData);
             break;
-        case Enums::CellFunction_Constructor:
+        case Enums::CellFunction_Ribosome:
             copyAndAssignNewAuxiliaryData(
-                cell->cellFunctionData.constructor.genome, cell->cellFunctionData.constructor.genomeSize, auxiliaryData);
+                cell->cellFunctionData.ribosome.genome, cell->cellFunctionData.ribosome.genomeSize, auxiliaryData);
             break;
         case Enums::CellFunction_Injector:
             copyAndAssignNewAuxiliaryData(

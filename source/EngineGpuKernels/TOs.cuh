@@ -47,9 +47,9 @@ struct NeuronTO
 struct TransmitterTO
 {};
 
-struct ConstructorTO
+struct RibosomeTO
 {
-    Enums::ConstructorMode mode;
+    Enums::ConstructionMode mode;
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
 };
@@ -79,7 +79,7 @@ union CellFunctionTO
 {
     NeuronTO neuron;
     TransmitterTO transmitter;
-    ConstructorTO constructor;
+    RibosomeTO ribosome;
     SensorTO sensor;
     NerveTO nerve;
     AttackerTO attacker;
