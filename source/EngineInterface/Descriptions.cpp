@@ -5,6 +5,14 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
+void RibosomeDescription::createGenome(std::vector<CellDescription> const& cells)
+{
+    genome.reserve(cells.size() * 6);
+    for (auto const& cell : cells) {
+        genome.emplace_back(static_cast<uint8_t>(cell.getCellFunctionType()));
+    }
+}
+
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(

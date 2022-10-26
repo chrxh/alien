@@ -5,6 +5,7 @@ PUBLIC
     IntegrationTestFramework.h
     NerveTests.cpp
     NeuronTests.cpp
+    RibosomeTests.cpp
     SensorTests.cpp
     Testsuite.cpp)
 
