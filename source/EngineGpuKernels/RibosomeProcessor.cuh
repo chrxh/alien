@@ -52,15 +52,18 @@ private:
 
     __inline__ __device__ static Cell* constructCellIntern(
         SimulationData& data,
+        Cell* hostCell,
         float2 const& posOfNewCell,
         float const energyOfNewCell,
         ConstructionData const& constructionData,
         bool& finished);
 
-    __inline__ __device__ static bool readBool(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
-    __inline__ __device__ static int readByte(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
-    __inline__ __device__ static int readWord(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
-    __inline__ __device__ static float readFloat(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish);
+    __inline__ __device__ static bool readBool(RibosomeFunction& ribosome, bool& finished);
+    __inline__ __device__ static uint8_t readByte(RibosomeFunction& ribosome, bool& finished);
+    __inline__ __device__ static int readWord(RibosomeFunction& ribosome, bool& finished);
+    __inline__ __device__ static float readFloat(RibosomeFunction& ribosome, bool& finished);   //return values from -1 to 1
+    template <typename GenomeHolderSource, typename GenomeHolderTarget>
+    __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished);
 };
 
 /************************************************************************/
@@ -128,14 +131,12 @@ __inline__ __device__ RibosomeProcessor::ConstructionData RibosomeProcessor::rea
     auto& ribosome = cell->cellFunctionData.ribosome;
 
     ConstructionData result;
-    result.angle = readFloat(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, finished);
-    result.distance = readFloat(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, finished);
-    result.maxConnections =
-        readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
-    result.executionOrderNumber = readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, finished)
-        % cudaSimulationParameters.cellMaxExecutionOrderNumber;
-    result.color = readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, finished) % 7;
-    result.cellFunction = readByte(ribosome.genomeSize, ribosome.genome, ribosome.currentGenomePos, finished) % Enums::CellFunction_Count;
+    result.angle = readFloat(ribosome, finished) * 180.0f;
+    result.distance = readFloat(ribosome, finished) + 1.0f;
+    result.maxConnections = readByte(ribosome, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
+    result.executionOrderNumber = readByte(ribosome, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    result.color = readByte(ribosome, finished) % 7;
+    result.cellFunction = readByte(ribosome, finished) % Enums::CellFunction_Count;
     return result;
 }
 
@@ -188,7 +189,7 @@ __inline__ __device__ bool RibosomeProcessor::startNewConstruction(
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * offspringCellDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
-    Cell* newCell = constructCellIntern(data, newCellPos, cudaSimulationParameters.cellNormalEnergy, constructionData, finished);
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, cudaSimulationParameters.cellNormalEnergy, constructionData, finished);
     hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
 
     if (!newCell->tryLock()) {
@@ -276,6 +277,7 @@ __inline__ __device__ auto RibosomeProcessor::calcAnglesForNewConnection(Simulat
 __inline__ __device__ Cell*
 RibosomeProcessor::constructCellIntern(
     SimulationData& data,
+    Cell* hostCell,
     float2 const& posOfNewCell,
     float const energyOfNewCell,
     ConstructionData const& constructionData,
@@ -295,29 +297,101 @@ RibosomeProcessor::constructCellIntern(
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
 
-    //#TODO cellFunctionData
+    auto& ribosome = hostCell->cellFunctionData.ribosome;
+
+    switch (constructionData.cellFunction) {
+    case Enums::CellFunction_Neuron: {
+        result->cellFunctionData.neuron.neuronState =
+            reinterpret_cast<NeuronFunction::NeuronState*>(data.objects.auxiliaryData.getAlignedSubArray(sizeof(NeuronFunction::NeuronState)));
+        for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
+            result->cellFunctionData.neuron.neuronState->weights[i] = readFloat(ribosome, finished) * 2;
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result->cellFunctionData.neuron.neuronState->bias[i] = readFloat(ribosome, finished) * 2;
+        }
+    } break;
+    case Enums::CellFunction_Transmitter: {
+    } break;
+    case Enums::CellFunction_Ribosome: {
+        auto& newRibosome = result->cellFunctionData.ribosome;
+        newRibosome.mode = readByte(ribosome, finished) % Enums::ConstructionMode_Count;
+        newRibosome.singleConstruction = readByte(ribosome, finished);
+        newRibosome.separateConstruction = readByte(ribosome, finished);
+        newRibosome.makeSticky = readByte(ribosome, finished);
+        newRibosome.currentGenomePos = 0;
+        copyGenome(data, ribosome, newRibosome, finished);
+    } break;
+    case Enums::CellFunction_Sensor: {
+        result->cellFunctionData.sensor.mode = readByte(ribosome, finished) % Enums::SensorMode_Count;
+        result->cellFunctionData.sensor.color = readByte(ribosome, finished) % MAX_COLORS;
+    } break;
+    case Enums::CellFunction_Nerve: {
+    } break;
+    case Enums::CellFunction_Attacker: {
+    } break;
+    case Enums::CellFunction_Injector: {
+        copyGenome(data, ribosome, result->cellFunctionData.injector, finished);
+    } break;
+    case Enums::CellFunction_Muscle: {
+    } break;
+    case Enums::CellFunction_Placeholder1: {
+    } break;
+    case Enums::CellFunction_Placeholder2: {
+    } break;
+    }
 
     return result;
 }
 
-__inline__ __device__ bool RibosomeProcessor::readBool(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+__inline__ __device__ bool RibosomeProcessor::readBool(RibosomeFunction& ribosome, bool& finished)
 {
-    return true;
+    return static_cast<int8_t>(readByte(ribosome, finished)) > 0;
 }
 
-__inline__ __device__ int RibosomeProcessor::readByte(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+__inline__ __device__ uint8_t RibosomeProcessor::readByte(RibosomeFunction& ribosome, bool& finished)
 {
-    return 0;
+    if (ribosome.currentGenomePos >= ribosome.genomeSize) {
+        finished = true;
+        return 0;
+    }
+    auto result = ribosome.genome[++ribosome.currentGenomePos];
+    if (ribosome.currentGenomePos >= ribosome.genomeSize) {
+        finished = true;
+    }
+    return result;
 }
 
-__inline__ __device__ int RibosomeProcessor::readWord(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+__inline__ __device__ int RibosomeProcessor::readWord(RibosomeFunction& ribosome, bool& finished)
 {
-    return 0;
+    return static_cast<int>(readByte(ribosome, finished)) | (static_cast<int>(readByte(ribosome, finished) << 8));
 }
 
-__inline__ __device__ float RibosomeProcessor::readFloat(uint64_t dataSize, uint8_t* data, uint64_t& index, bool& finish)
+__inline__ __device__ float RibosomeProcessor::readFloat(RibosomeFunction& ribosome, bool& finished)
 {
-    return false;
+    return static_cast<float>(static_cast<int8_t>(readByte(ribosome, finished))) / 128.0f;
+}
+
+template <typename GenomeHolderSource, typename GenomeHolderTarget>
+__inline__ __device__ void RibosomeProcessor::copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished)
+{
+    bool makeGenomeCopy = readBool(source, finished);
+    if (!makeGenomeCopy) {
+        auto size = min(readWord(source, finished), MAX_GENOME_BYTES);
+        target.genomeSize = size;
+        target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
+        //#TODO can be optimized
+        for (int i = 0; i < size; ++i) {
+            target.genome[i] = readByte(source, finished);
+        }
+    } else {
+        auto size = source.genomeSize;
+        target.genomeSize = size;
+        target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
+        //#TODO can be optimized
+        for (int i = 0; i < size; ++i) {
+            target.genome[i] = source.genome[i];
+        }
+    }
 }
 
 /*

@@ -54,7 +54,7 @@ TEST_F(DataTransferTests, singleParticle)
     _simController->setSimulationData(data);
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_TRUE(compare(data, actualData));
+    EXPECT_FALSE(compare(data, actualData));
 }
 
 TEST_F(DataTransferTests, cellCluster)

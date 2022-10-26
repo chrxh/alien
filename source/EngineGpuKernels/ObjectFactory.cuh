@@ -112,7 +112,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     switch (cellTO.cellFunction) {
     case Enums::CellFunction_Neuron: {
         createAuxiliaryDataWithFixedSize(
-            cellTO.cellFunctionData.neuron.weightsAndBiasSize,
+            sizeof(NeuronFunction::NeuronState),
             cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex,
             dataTO.auxiliaryData,
             reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState));

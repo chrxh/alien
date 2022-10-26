@@ -25,14 +25,16 @@ namespace Enums
     enum SensorMode_
     {
         SensorMode_AllAngles = 0,
-        SensorMode_FixedAngle = 1
+        SensorMode_FixedAngle = 1,
+        SensorMode_Count = 2
     };
 
     using ConstructionMode = int;
     enum ConstructionMode_
     {
         ConstructionMode_Automatic = 0,
-        ConstructionMode_Manual = 1
+        ConstructionMode_Manual = 1,
+        ConstructionMode_Count = 2
     };
 
     /*
