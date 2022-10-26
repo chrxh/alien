@@ -40,8 +40,7 @@ struct ActivityTO
 
 struct NeuronTO
 {
-    uint64_t weightsAndBiasSize;
-    uint64_t weightsAndBiasDataIndex;
+    uint64_t weightsAndBiasDataIndex;   //size is always: sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1)
 };
 
 struct TransmitterTO

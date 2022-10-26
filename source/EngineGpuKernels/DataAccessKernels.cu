@@ -62,10 +62,11 @@ namespace
 
         switch (cell->cellFunction) {
         case Enums::CellFunction_Neuron: {
+            uint64_t targetSize;    //not used
             copyAuxiliaryData(
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
-                cellTO.cellFunctionData.neuron.weightsAndBiasSize,
+                targetSize,
                 cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
