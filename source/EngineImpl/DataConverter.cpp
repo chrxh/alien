@@ -420,6 +420,8 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
         constructor.mode = cellTO.cellFunctionData.ribosome.mode;
         constructor.singleConstruction = cellTO.cellFunctionData.ribosome.singleConstruction;
         constructor.separateConstruction = cellTO.cellFunctionData.ribosome.separateConstruction;
+        constructor.makeSticky = cellTO.cellFunctionData.ribosome.makeSticky;
+        constructor.angleAlignment = cellTO.cellFunctionData.ribosome.angleAlignment;
         convert(dataTO, cellTO.cellFunctionData.ribosome.genomeSize, cellTO.cellFunctionData.ribosome.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
         result.cellFunction = constructor;
@@ -510,6 +512,8 @@ void DataConverter::addCell(
         constructorTO.mode = constructorDesc.mode;
         constructorTO.singleConstruction = constructorDesc.singleConstruction;
         constructorTO.separateConstruction = constructorDesc.separateConstruction;
+        constructorTO.makeSticky = constructorDesc.makeSticky;
+        constructorTO.angleAlignment = constructorDesc.angleAlignment;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
         cellTO.cellFunctionData.ribosome = constructorTO;

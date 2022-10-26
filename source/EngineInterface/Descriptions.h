@@ -88,9 +88,12 @@ struct TransmitterDescription
 
 struct RibosomeDescription
 {
-    Enums::ConstructionMode mode;
-    bool singleConstruction;
-    bool separateConstruction;
+    Enums::ConstructionMode mode = Enums::ConstructionMode_Automatic;
+    bool singleConstruction = false;
+    bool separateConstruction = true;
+    bool makeSticky = false;
+    int angleAlignment = 0;  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
+
     std::vector<uint8_t> genome;
 
     //process data

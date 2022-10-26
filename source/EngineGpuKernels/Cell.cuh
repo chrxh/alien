@@ -51,6 +51,7 @@ struct RibosomeFunction
     bool singleConstruction;
     bool separateConstruction;
     bool makeSticky;
+    int angleAlignment; //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
 
     //genome
     uint64_t genomeSize;

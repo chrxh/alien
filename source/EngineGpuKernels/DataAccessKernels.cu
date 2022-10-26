@@ -77,6 +77,8 @@ namespace
             cellTO.cellFunctionData.ribosome.mode = cell->cellFunctionData.ribosome.mode;
             cellTO.cellFunctionData.ribosome.singleConstruction = cell->cellFunctionData.ribosome.singleConstruction;
             cellTO.cellFunctionData.ribosome.separateConstruction = cell->cellFunctionData.ribosome.separateConstruction;
+            cellTO.cellFunctionData.ribosome.makeSticky = cell->cellFunctionData.ribosome.makeSticky;
+            cellTO.cellFunctionData.ribosome.angleAlignment = cell->cellFunctionData.ribosome.angleAlignment;
             copyAuxiliaryData(
                 cell->cellFunctionData.ribosome.genomeSize,
                 cell->cellFunctionData.ribosome.genome,
