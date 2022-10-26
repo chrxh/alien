@@ -100,6 +100,8 @@ struct RibosomeDescription
     uint64_t currentGenomePos;
 
     auto operator<=>(RibosomeDescription const&) const = default;
+
+    void createGenome(std::vector<CellDescription> const& cells);
 };
 
 struct SensorDescription

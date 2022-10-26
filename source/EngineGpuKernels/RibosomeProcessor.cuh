@@ -122,6 +122,9 @@ __inline__ __device__ bool RibosomeProcessor::isConstructionPossible(Cell* cell,
     if (cell->cellFunctionData.ribosome.mode == Enums::ConstructionMode_Manual && abs(activity.channels[0]) < 0.25f) {
         return false;
     }
+    if (cell->cellFunctionData.ribosome.currentGenomePos >= cell->cellFunctionData.ribosome.genomeSize) {
+        return false;
+    }
     return true;
 }
 
@@ -130,12 +133,12 @@ __inline__ __device__ RibosomeProcessor::ConstructionData RibosomeProcessor::rea
     auto& ribosome = cell->cellFunctionData.ribosome;
 
     ConstructionData result;
+    result.cellFunction = readByte(ribosome, finished) % Enums::CellFunction_Count;
     result.angle = readFloat(ribosome, finished) * 180.0f;
     result.distance = readFloat(ribosome, finished) + 1.0f;
     result.maxConnections = readByte(ribosome, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.executionOrderNumber = readByte(ribosome, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
     result.color = readByte(ribosome, finished) % 7;
-    result.cellFunction = readByte(ribosome, finished) % Enums::CellFunction_Count;
     return result;
 }
 
@@ -330,13 +333,12 @@ __inline__ __device__ bool RibosomeProcessor::continueConstruction(
 
 __inline__ __device__ bool RibosomeProcessor::isConnectable(int numConnections, int maxConnections, bool makeSticky)
 {
-    if (!makeSticky) {
-        if (numConnections >= cudaSimulationParameters.cellMaxBonds) {
-            return false;
-        }
-    }
     if (makeSticky) {
         if (numConnections >= maxConnections) {
+            return false;
+        }
+    } else {
+        if (numConnections >= cudaSimulationParameters.cellMaxBonds) {
             return false;
         }
     }
