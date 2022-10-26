@@ -123,6 +123,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.ribosome.mode = cellTO.cellFunctionData.ribosome.mode;
         cell->cellFunctionData.ribosome.singleConstruction = cellTO.cellFunctionData.ribosome.singleConstruction;
         cell->cellFunctionData.ribosome.separateConstruction = cellTO.cellFunctionData.ribosome.separateConstruction;
+        cell->cellFunctionData.ribosome.makeSticky = cellTO.cellFunctionData.ribosome.makeSticky;
+        cell->cellFunctionData.ribosome.angleAlignment = cellTO.cellFunctionData.ribosome.angleAlignment;
         createAuxiliaryData(
             cellTO.cellFunctionData.ribosome.genomeSize,
             cellTO.cellFunctionData.ribosome.genomeDataIndex,

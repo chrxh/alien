@@ -51,6 +51,8 @@ struct RibosomeTO
     Enums::ConstructionMode mode;
     bool singleConstruction;
     bool separateConstruction;
+    bool makeSticky;
+    int angleAlignment;  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
 
