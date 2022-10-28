@@ -1,5 +1,4 @@
 #include <cmath>
-#include <boost/range/combine.hpp>
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionHelper.h"
@@ -17,14 +16,6 @@ public:
     ~NeuronTests() = default;
 
 protected:
-    void expectApproxEqual(std::vector<float> const& expected, std::vector<float> const& actual) const
-    {
-        CHECK(expected.size() == actual.size())
-        for (auto const& [expectedElement, actualElement] : boost::combine(expected, actual)) {
-            EXPECT_TRUE(std::abs(expectedElement - actualElement) < 0.01f);
-        }
-    }
-
     float scaledSigmoid(float value) const { return 2.0f / (1.0f + std::expf(-value)) - 1.0f; }
 };
 
