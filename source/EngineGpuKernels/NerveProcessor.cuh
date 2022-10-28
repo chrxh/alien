@@ -20,7 +20,7 @@ public:
 
 __inline__ __device__ void NerveProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Neuron];
+    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Nerve];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto operation = operations.at(i);
