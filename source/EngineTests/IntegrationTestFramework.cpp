@@ -1,5 +1,7 @@
 #include "IntegrationTestFramework.h"
 
+#include <boost/range/combine.hpp>
+
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineImpl/SimulationControllerImpl.h"
@@ -26,6 +28,19 @@ std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellB
         result.emplace(cell.id, cell);
     }
     return result;
+}
+
+void IntegrationTestFramework::expectApproxEqual(float expected, float actual) const
+{
+    EXPECT_TRUE(std::abs(expected - actual) < 0.01f);
+}
+
+void IntegrationTestFramework::expectApproxEqual(std::vector<float> const& expected, std::vector<float> const& actual) const
+{
+    CHECK(expected.size() == actual.size())
+    for (auto const& [expectedElement, actualElement] : boost::combine(expected, actual)) {
+        expectApproxEqual(expectedElement, actualElement);
+    }
 }
 
 bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const

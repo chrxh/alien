@@ -5,12 +5,18 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-void RibosomeDescription::createGenome(std::vector<CellDescription> const& cells)
+RibosomeDescription& RibosomeDescription::setGenome(std::vector<CellDescription> const& cells)
 {
     genome.reserve(cells.size() * 6);
     for (auto const& cell : cells) {
         genome.emplace_back(static_cast<uint8_t>(cell.getCellFunctionType()));
+        genome.emplace_back(0);     //angle
+        genome.emplace_back(0);     //distance
+        genome.emplace_back(cell.maxConnections);
+        genome.emplace_back(cell.executionOrderNumber);
+        genome.emplace_back(cell.color);
     }
+    return *this;
 }
 
 bool CellDescription::isConnectedTo(uint64_t id) const

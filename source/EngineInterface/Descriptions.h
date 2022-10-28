@@ -101,7 +101,13 @@ struct RibosomeDescription
 
     auto operator<=>(RibosomeDescription const&) const = default;
 
-    void createGenome(std::vector<CellDescription> const& cells);
+    RibosomeDescription& setSeparateConstruction(bool value)
+    {
+        separateConstruction = value;
+        return *this;
+    }
+
+    RibosomeDescription& setGenome(std::vector<CellDescription> const& cells);
 };
 
 struct SensorDescription

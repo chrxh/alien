@@ -194,30 +194,30 @@ __inline__ __device__ bool RibosomeProcessor::startNewConstruction(
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData, finished);
-    //hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
+    hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
 
-    //if (!newCell->tryLock()) {
-    //    return false;
-    //}
+    if (!newCell->tryLock()) {
+        return false;
+    }
 
-    //if (!finished|| !hostCell->cellFunctionData.ribosome.separateConstruction) {
-    //    CellConnectionProcessor::addConnections(
-    //        data,
-    //        hostCell,
-    //        newCell,
-    //        anglesForNewConnection.angleFromPreviousConnection,
-    //        0,
-    //        offspringCellDistance);
-    //}
-    //if (finished) {
-    //    newCell->underConstruction = false;
-    //}
-    //if (!makeSticky) {
-    //    hostCell->maxConnections = hostCell->numConnections;
-    //    newCell->maxConnections = newCell->numConnections;
-    //}
+    if (!finished || !hostCell->cellFunctionData.ribosome.separateConstruction) {
+        CellConnectionProcessor::addConnections(
+            data,
+            hostCell,
+            newCell,
+            anglesForNewConnection.angleFromPreviousConnection,
+            0,
+            offspringCellDistance);
+    }
+    if (finished) {
+        newCell->underConstruction = false;
+    }
+    if (!makeSticky) {
+        hostCell->maxConnections = hostCell->numConnections;
+        newCell->maxConnections = newCell->numConnections;
+    }
 
-    //newCell->releaseLock();
+    newCell->releaseLock();
 
     result.incCreatedCell();
 }
@@ -443,7 +443,7 @@ RibosomeProcessor::constructCellIntern(
     } break;
     }
 
-    return nullptr;
+    return result;
 }
 
 __inline__ __device__ bool RibosomeProcessor::readBool(RibosomeFunction& ribosome, bool& finished)
