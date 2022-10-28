@@ -53,10 +53,10 @@ __global__ void cudaCleanupCellsStep2(Array<Cell> cells)
 
 namespace
 {
-    __device__ void copyAndAssignNewAuxiliaryData(uint8_t*& source, uint64_t numBytes, Array<uint8_t>& target)
+    __device__ void copyAndAssignNewAuxiliaryData(uint8_t*& source, uint64_t numBytes, RawMemory& target)
     {
         if (numBytes > 0) {
-            uint8_t* bytes = target.getSubArray(numBytes);
+            uint8_t* bytes = target.getAlignedSubArray(numBytes);
             for (uint64_t i = 0; i < numBytes; ++i) {
                 bytes[i] = source[i];
             }
@@ -65,7 +65,7 @@ namespace
     }
 }
 
-__global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, Array<uint8_t> auxiliaryData)
+__global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory auxiliaryData)
 {
     auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
