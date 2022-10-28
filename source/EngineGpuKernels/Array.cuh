@@ -15,7 +15,7 @@ namespace Const
 template <typename T>
 class Array
 {
-private:
+protected:
     uint64_t* _size;
     uint64_t* _numEntries;
     uint64_t* _numOrigEntries;
@@ -172,9 +172,9 @@ public:
         if (0 == numElements) {
             return nullptr;
         }
-        uint64_t newBytesToOccupy = numElements * sizeof(T);
-        newBytesToOccupy = newBytesToOccupy + 16 - (newBytesToOccupy % 16);
-        return reinterpret_cast<T*>(getSubArray(newBytesToOccupy));
+        uint64_t size = numElements * sizeof(T);
+        size = size + 16 - (size % 16);
+        return reinterpret_cast<T*>(getSubArray(size));
     }
 
     __device__ __inline__ uint8_t* getAlignedSubArray(uint64_t size)

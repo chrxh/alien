@@ -557,7 +557,7 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
 
     auto cellArraySize = _cudaSimulationData->objects.cells.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<CellTO>(cellArraySize, _cudaAccessTO->cells);
-    auto particleArraySize = _cudaSimulationData->objects.particlePointers.getSize_host();
+    auto particleArraySize = _cudaSimulationData->objects.particles.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<ParticleTO>(particleArraySize, _cudaAccessTO->particles);
     auto auxiliaryDataSize = _cudaSimulationData->objects.auxiliaryData.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<uint8_t>(auxiliaryDataSize, _cudaAccessTO->auxiliaryData);

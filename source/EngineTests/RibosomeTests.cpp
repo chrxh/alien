@@ -16,18 +16,19 @@ public:
     ~RibosomeTests() = default;
 };
 
-TEST_F(RibosomeTests, constructSingleCell)
+TEST_F(RibosomeTests, constructNeuronCell)
 {
     auto parameters = _simController->getSimulationParameters();
 
     RibosomeDescription ribosome;
-    ribosome.createGenome({CellDescription().setColor(2)});
+    ribosome.createGenome({CellDescription().setColor(2).setCellFunction(NeuronDescription())});
 
     DataDescription data;
     data.addCell(
         CellDescription().setId(1).setEnergy(parameters.cellNormalEnergy * 3).setMaxConnections(1).setExecutionOrderNumber(0).setCellFunction(ribosome));
 
     _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
     EXPECT_EQ(2, actualData.cells.size());

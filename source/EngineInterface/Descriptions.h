@@ -97,7 +97,7 @@ struct RibosomeDescription
     std::vector<uint8_t> genome;
 
     //process data
-    uint64_t currentGenomePos;
+    uint64_t currentGenomePos = 0;
 
     auto operator<=>(RibosomeDescription const&) const = default;
 
@@ -106,7 +106,7 @@ struct RibosomeDescription
 
 struct SensorDescription
 {
-    Enums::SensorMode mode;
+    Enums::SensorMode mode = Enums::SensorMode_AllAngles;
     int color = 0;
 
     auto operator<=>(SensorDescription const&) const = default;

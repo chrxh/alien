@@ -22,9 +22,10 @@ private:
 
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto partition = calcPartition(data.cellFunctionOperations[Enums::CellFunction_Neuron].getNumEntries(), blockIdx.x, gridDim.x);
+    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Neuron];
+    auto partition = calcPartition(operations.getNumEntries(), blockIdx.x, gridDim.x);
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto cell = data.cellFunctionOperations[Enums::CellFunction_Neuron].at(i).cell;
+        auto cell = operations.at(i).cell;
         processCell(data, result, cell);
     }
 }
