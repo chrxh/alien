@@ -14,6 +14,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
     settings.generalSettings.worldSizeY = universeSize.y;
     settings.simulationParameters.spotValues.radiationFactor = 0;
     _simController->newSimulation(0, settings);
+    _parameters = _simController->getSimulationParameters();
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()

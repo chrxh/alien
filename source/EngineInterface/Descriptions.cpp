@@ -19,15 +19,6 @@ RibosomeDescription& RibosomeDescription::setGenome(std::vector<CellDescription>
     return *this;
 }
 
-bool CellDescription::isConnectedTo(uint64_t id) const
-{
-    return std::find_if(
-               connections.begin(),
-               connections.end(),
-               [&id](auto const& connection) { return connection.cellId == id; })
-        != connections.end();
-}
-
 Enums::CellFunction CellDescription::getCellFunctionType() const
 {
     if (!cellFunction) {
@@ -58,6 +49,11 @@ Enums::CellFunction CellDescription::getCellFunctionType() const
         return Enums::CellFunction_Muscle;
     }
     return Enums::CellFunction_None;
+}
+
+bool CellDescription::isConnectedTo(uint64_t id) const
+{
+    return std::find_if(connections.begin(), connections.end(), [&id](auto const& connection) { return connection.cellId == id; }) != connections.end();
 }
 
 RealVector2D ClusterDescription::getClusterPosFromCells() const

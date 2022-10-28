@@ -220,6 +220,7 @@ __inline__ __device__ bool RibosomeProcessor::startNewConstruction(
     newCell->releaseLock();
 
     result.incCreatedCell();
+    return true;
 }
 
 __inline__ __device__ bool RibosomeProcessor::continueConstruction(

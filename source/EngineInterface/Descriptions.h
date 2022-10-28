@@ -101,12 +101,21 @@ struct RibosomeDescription
 
     auto operator<=>(RibosomeDescription const&) const = default;
 
+    RibosomeDescription& setSingleConstruction(bool value)
+    {
+        singleConstruction = value;
+        return *this;
+    }
     RibosomeDescription& setSeparateConstruction(bool value)
     {
         separateConstruction = value;
         return *this;
     }
-
+    RibosomeDescription& setMakeSticky(bool value)
+    {
+        makeSticky = value;
+        return *this;
+    }
     RibosomeDescription& setGenome(std::vector<CellDescription> const& cells);
 };
 
@@ -253,6 +262,7 @@ struct CellDescription
         outputBlocked = value;
         return *this;
     }
+    Enums::CellFunction getCellFunctionType() const;
     template <typename CellFunctionDesc>
     CellDescription& setCellFunction(CellFunctionDesc const& value)
     {
@@ -280,8 +290,6 @@ struct CellDescription
     }
 
     bool isConnectedTo(uint64_t id) const;
-
-    Enums::CellFunction getCellFunctionType() const;
 };
 
 struct ClusterDescription
