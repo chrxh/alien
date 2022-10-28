@@ -5,6 +5,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationParameters.h"
 
 class IntegrationTestFramework : public ::testing::Test
 {
@@ -22,4 +23,5 @@ protected:
     bool compare(ParticleDescription left, ParticleDescription right) const;
 
     SimulationController _simController;
+    SimulationParameters _parameters;
 };
