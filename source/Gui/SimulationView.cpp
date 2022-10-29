@@ -20,7 +20,7 @@ namespace
     auto const ZoomFactorForOverlay = 16.0f;
 
     std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
-        {Enums::CellFunction_Ribosome, "Ribosome"},
+        {Enums::CellFunction_Constructor, "Constructor"},
         {Enums::CellFunction_Attacker, "Digestion"},
         {Enums::CellFunction_Injector, "Injector"},
         {Enums::CellFunction_Muscle, "Muscle"},

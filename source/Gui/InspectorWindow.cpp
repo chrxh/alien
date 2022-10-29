@@ -22,7 +22,7 @@ namespace
 {
     auto const MaxCellContentTextWidth = 120.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
-    auto const CellFunctionStrings = std::vector{"Neuron"s, "Transmitter"s, "Ribosome"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s};
+    auto const CellFunctionStrings = std::vector{"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -205,8 +205,8 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
             ImGui::TableHeadersRow();
             ImGui::TableNextRow();
             switch(cell.getCellFunctionType()){
-            case Enums::CellFunction_Ribosome:
-                showRibosomeTableContent();
+            case Enums::CellFunction_Constructor:
+                showConstructorTableContent();
                 break;
             case Enums::CellFunction_Attacker:
                 showDigestionTableContent();
@@ -277,7 +277,7 @@ void _InspectorWindow::showDigestionTableContent()
     AlienImGui::Text("Input: target color (number from 0-6)");
 }
 
-void _InspectorWindow::showRibosomeTableContent()
+void _InspectorWindow::showConstructorTableContent()
 {
     ImGui::TableSetColumnIndex(0);
 

@@ -7,7 +7,7 @@ namespace Enums
     {
         CellFunction_Neuron,
         CellFunction_Transmitter,
-        CellFunction_Ribosome,
+        CellFunction_Constructor,
         CellFunction_Sensor,
         CellFunction_Nerve,
         CellFunction_Attacker,

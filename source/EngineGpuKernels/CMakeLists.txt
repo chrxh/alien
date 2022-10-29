@@ -11,6 +11,7 @@ add_library(alien_engine_gpu_kernels_lib
     ClusterProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
+    ConstructorProcessor.cuh
     CudaMemoryManager.cuh
     CudaMonitorData.cuh
     CudaSimulationFacade.cu
@@ -64,7 +65,6 @@ add_library(alien_engine_gpu_kernels_lib
     RenderingKernels.cuh
     RenderingKernelsLauncher.cu
     RenderingKernelsLauncher.cuh
-    RibosomeProcessor.cuh
     ScannerProcessor.cuh
     SelectionResult.cuh
     SensorProcessor.cuh

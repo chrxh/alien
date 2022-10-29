@@ -8,9 +8,14 @@
 namespace
 {
     uint8_t convertAngleToByte(float value) { return static_cast<uint8_t>(static_cast<int8_t>(value / 180 * 128)); }
+    uint8_t convertNeuronPropertyToByte(float value)
+    {
+        CHECK(std::abs(value) <= 2);
+        return static_cast<uint8_t>(static_cast<int8_t>(value / 2 * 128));
+    }
 }
 
-RibosomeDescription& RibosomeDescription::setGenome(std::vector<CellDescription> const& cells, float initialAngle)
+ConstructorDescription& ConstructorDescription::setGenome(std::vector<CellDescription> const& cells, float initialAngle)
 {
     genome.reserve(cells.size() * 6);
     for (auto const& [index, cell] : cells | boost::adaptors::indexed(0)) {
@@ -24,6 +29,37 @@ RibosomeDescription& RibosomeDescription::setGenome(std::vector<CellDescription>
         genome.emplace_back(cell.maxConnections);
         genome.emplace_back(cell.executionOrderNumber);
         genome.emplace_back(cell.color);
+        switch (cell.getCellFunctionType()) {
+        case Enums::CellFunction_Neuron: {
+            auto neuron = std::get<NeuronDescription>(*cell.cellFunction);
+            for (int row = 0; row < MAX_CHANNELS; ++row) {
+                for (int col = 0; col < MAX_CHANNELS; ++col) {
+                    genome.emplace_back(convertNeuronPropertyToByte(neuron.weights[row][col]));
+                }
+            }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                genome.emplace_back(convertNeuronPropertyToByte(neuron.bias[i]));
+            }
+        } break;
+        case Enums::CellFunction_Transmitter: {
+        } break;
+        case Enums::CellFunction_Constructor: {
+        } break;
+        case Enums::CellFunction_Sensor: {
+        } break;
+        case Enums::CellFunction_Nerve: {
+        } break;
+        case Enums::CellFunction_Attacker: {
+        } break;
+        case Enums::CellFunction_Injector: {
+        } break;
+        case Enums::CellFunction_Muscle: {
+        } break;
+        case Enums::CellFunction_Placeholder1: {
+        } break;
+        case Enums::CellFunction_Placeholder2: {
+        } break;
+        }
     }
     return *this;
 }
@@ -39,8 +75,8 @@ Enums::CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<TransmitterDescription>(*cellFunction)) {
         return Enums::CellFunction_Transmitter;
     }
-    if (std::holds_alternative<RibosomeDescription>(*cellFunction)) {
-        return Enums::CellFunction_Ribosome;
+    if (std::holds_alternative<ConstructorDescription>(*cellFunction)) {
+        return Enums::CellFunction_Constructor;
     }
     if (std::holds_alternative<SensorDescription>(*cellFunction)) {
         return Enums::CellFunction_Sensor;

@@ -44,7 +44,7 @@ struct TransmitterFunction
 {
 };
 
-struct RibosomeFunction
+struct ConstructorFunction
 {
     //settings
     Enums::ConstructionMode mode;
@@ -95,7 +95,7 @@ union CellFunctionData
 {
     NeuronFunction neuron;
     TransmitterFunction transmitter;
-    RibosomeFunction ribosome;
+    ConstructorFunction constructor;
     SensorFunction sensor;
     NerveFunction nerve;
     AttackerFunction digestion;

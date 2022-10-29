@@ -35,7 +35,7 @@ private:
 
     void showNeuralNetTableContent();
     void showDigestionTableContent();
-    void showRibosomeTableContent();
+    void showConstructorTableContent();
     void showMuscleTableContent();
     void showSensorTableContent();
 

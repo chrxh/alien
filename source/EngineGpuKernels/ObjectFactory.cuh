@@ -119,19 +119,19 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case Enums::CellFunction_Transmitter: {
     } break;
-    case Enums::CellFunction_Ribosome: {
-        cell->cellFunctionData.ribosome.mode = cellTO.cellFunctionData.ribosome.mode;
-        cell->cellFunctionData.ribosome.singleConstruction = cellTO.cellFunctionData.ribosome.singleConstruction;
-        cell->cellFunctionData.ribosome.separateConstruction = cellTO.cellFunctionData.ribosome.separateConstruction;
-        cell->cellFunctionData.ribosome.makeSticky = cellTO.cellFunctionData.ribosome.makeSticky;
-        cell->cellFunctionData.ribosome.angleAlignment = cellTO.cellFunctionData.ribosome.angleAlignment;
+    case Enums::CellFunction_Constructor: {
+        cell->cellFunctionData.constructor.mode = cellTO.cellFunctionData.constructor.mode;
+        cell->cellFunctionData.constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
+        cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
+        cell->cellFunctionData.constructor.makeSticky = cellTO.cellFunctionData.constructor.makeSticky;
+        cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
         createAuxiliaryData(
-            cellTO.cellFunctionData.ribosome.genomeSize,
-            cellTO.cellFunctionData.ribosome.genomeDataIndex,
+            cellTO.cellFunctionData.constructor.genomeSize,
+            cellTO.cellFunctionData.constructor.genomeDataIndex,
             dataTO.auxiliaryData,
-            cell->cellFunctionData.ribosome.genomeSize,
-            cell->cellFunctionData.ribosome.genome);
-        cell->cellFunctionData.ribosome.currentGenomePos = cellTO.cellFunctionData.ribosome.currentGenomePos;
+            cell->cellFunctionData.constructor.genomeSize,
+            cell->cellFunctionData.constructor.genome);
+        cell->cellFunctionData.constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
     } break;
     case Enums::CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;

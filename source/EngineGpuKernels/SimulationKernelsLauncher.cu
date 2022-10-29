@@ -34,7 +34,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_collectCellFunctionOperation, data);
     KERNEL_CALL(cudaNextTimestep_nerveFunction, data, result);
     KERNEL_CALL(cudaNextTimestep_neuronFunction, data, result);
-    KERNEL_CALL(cudaNextTimestep_ribosomeFunction, data, result);
+    KERNEL_CALL(cudaNextTimestep_constructorFunction, data, result);
 
     if (considerInnerFriction) {
         KERNEL_CALL(cudaNextTimestep_innerFriction, data);
