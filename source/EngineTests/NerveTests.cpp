@@ -9,7 +9,7 @@ class NerveTests : public IntegrationTestFramework
 {
 public:
     NerveTests()
-        : IntegrationTestFramework({1000, 1000})
+        : IntegrationTestFramework()
     {}
 
     ~NerveTests() = default;

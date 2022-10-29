@@ -101,6 +101,11 @@ struct RibosomeDescription
 
     auto operator<=>(RibosomeDescription const&) const = default;
 
+    RibosomeDescription& setMode(Enums::ConstructionMode value)
+    {
+        mode = value;
+        return *this;
+    }
     RibosomeDescription& setSingleConstruction(bool value)
     {
         singleConstruction = value;
@@ -117,6 +122,11 @@ struct RibosomeDescription
         return *this;
     }
     RibosomeDescription& setGenome(std::vector<CellDescription> const& cells);
+    RibosomeDescription& setCurrentGenomePos(uint64_t value)
+    {
+        currentGenomePos = value;
+        return *this;
+    }
 };
 
 struct SensorDescription

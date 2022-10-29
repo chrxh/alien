@@ -10,7 +10,7 @@ class DataTransferTests : public IntegrationTestFramework
 {
 public:
     DataTransferTests()
-        : IntegrationTestFramework({1000, 1000})
+        : IntegrationTestFramework()
     {}
 
     ~DataTransferTests() = default;

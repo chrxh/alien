@@ -10,7 +10,7 @@ class NeuronTests : public IntegrationTestFramework
 {
 public:
     NeuronTests()
-        : IntegrationTestFramework({1000, 1000})
+        : IntegrationTestFramework()
     {}
 
     ~NeuronTests() = default;
