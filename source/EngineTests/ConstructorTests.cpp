@@ -5,6 +5,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
+#include "Base/NumberGenerator.h"
 
 class ConstructorTests : public IntegrationTestFramework
 {
@@ -324,7 +325,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
     auto neuron = NeuronDescription();
     neuron.weights[1][7] = 1.0f;
     neuron.weights[7][1] = -1.0f;
-    neuron.bias[3] = 2.0f;
+    neuron.bias[3] = 1.8f;
 
     data.addCell(
         CellDescription()
@@ -352,4 +353,39 @@ TEST_F(ConstructorTests, constructNeuronCell)
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         expectLowPrecisionEqual(neuron.bias[i], actualNeuron.bias[i]);
     }
+}
+
+TEST_F(ConstructorTests, constructConstructorCell)
+{
+    DataDescription data;
+
+    auto constructor = ConstructorDescription();
+    constructor.mode = Enums::ConstructionMode_Manual;
+    constructor.singleConstruction = true;
+    constructor.separateConstruction = false;
+    constructor.makeSticky = true;
+    constructor.angleAlignment = 2;
+    constructor.genome.reserve(MAX_GENOME_BYTES / 2);
+    for (int i = 0; i < MAX_GENOME_BYTES / 2; ++i) {
+        constructor.genome.emplace_back(static_cast<uint8_t>(NumberGenerator::getInstance().getRandomInt(256)));
+    }
+
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome({CellDescription().setCellFunction(constructor)})));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(constructor, actualConstructor);
 }
