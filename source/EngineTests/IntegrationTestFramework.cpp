@@ -2,7 +2,7 @@
 
 #include <boost/range/combine.hpp>
 
-#include "Base/NumberGenerator.h"
+#include "Base/Math.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 
@@ -51,9 +51,24 @@ CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& da
     THROW_NOT_IMPLEMENTED();
 }
 
+CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const
+{
+    for (auto const& cell : data.cells) {
+        if (!ids.contains(cell.id)) {
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 void IntegrationTestFramework::expectApproxEqual(float expected, float actual) const
 {
     EXPECT_TRUE(std::abs(expected - actual) < 0.01f);
+}
+
+void IntegrationTestFramework::expectApproxEqual(RealVector2D const& expected, RealVector2D const& actual) const
+{
+    EXPECT_TRUE(Math::length(expected - actual) < 0.01f);
 }
 
 void IntegrationTestFramework::expectApproxEqual(std::vector<float> const& expected, std::vector<float> const& actual) const
