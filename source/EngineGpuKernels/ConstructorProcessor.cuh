@@ -418,9 +418,9 @@ ConstructorProcessor::constructCellIntern(
     case Enums::CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.mode = readByte(constructor, finished) % Enums::ConstructionMode_Count;
-        newConstructor.singleConstruction = readByte(constructor, finished);
-        newConstructor.separateConstruction = readByte(constructor, finished);
-        newConstructor.makeSticky = readByte(constructor, finished);
+        newConstructor.singleConstruction = readBool(constructor, finished);
+        newConstructor.separateConstruction = readBool(constructor, finished);
+        newConstructor.makeSticky = readBool(constructor, finished);
         newConstructor.angleAlignment = readByte(constructor, finished) % 7;
         newConstructor.currentGenomePos = 0;
         copyGenome(data, constructor, newConstructor, finished);
@@ -485,7 +485,7 @@ __inline__ __device__ void ConstructorProcessor::copyGenome(SimulationData& data
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
         for (int i = 0; i < size; ++i) {
-//            target.genome[i] = readByte(source, finished);
+            target.genome[i] = readByte(source, finished);
         }
     } else {
         auto size = source.genomeSize;
@@ -493,7 +493,7 @@ __inline__ __device__ void ConstructorProcessor::copyGenome(SimulationData& data
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
         for (int i = 0; i < size; ++i) {
-//            target.genome[i] = source.genome[i];
+            target.genome[i] = source.genome[i];
         }
     }
 }

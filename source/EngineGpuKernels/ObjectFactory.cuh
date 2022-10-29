@@ -126,7 +126,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.makeSticky = cellTO.cellFunctionData.constructor.makeSticky;
         cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
         createAuxiliaryData(
-            cellTO.cellFunctionData.constructor.genomeSize,
+            cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
             cellTO.cellFunctionData.constructor.genomeDataIndex,
             dataTO.auxiliaryData,
             cell->cellFunctionData.constructor.genomeSize,

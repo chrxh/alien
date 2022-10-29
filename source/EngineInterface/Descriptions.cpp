@@ -13,6 +13,8 @@ namespace
         CHECK(std::abs(value) <= 2);
         return static_cast<uint8_t>(static_cast<int8_t>(value / 2 * 128));
     }
+    uint8_t convertBoolToByte(bool value) { return value ? 1 : 0; }
+    std::vector<uint8_t> convertWordToBytes(int value) { return {static_cast<uint8_t>(value & 0xff), static_cast<uint8_t>((value >> 8) % 0xff)}; }
 }
 
 ConstructorDescription& ConstructorDescription::setGenome(std::vector<CellDescription> const& cells, float initialAngle)
@@ -44,6 +46,19 @@ ConstructorDescription& ConstructorDescription::setGenome(std::vector<CellDescri
         case Enums::CellFunction_Transmitter: {
         } break;
         case Enums::CellFunction_Constructor: {
+            auto constructor = std::get<ConstructorDescription>(*cell.cellFunction);
+            genome.emplace_back(static_cast<uint8_t>(constructor.mode));
+            genome.emplace_back(convertBoolToByte(constructor.singleConstruction));
+            genome.emplace_back(convertBoolToByte(constructor.separateConstruction));
+            genome.emplace_back(convertBoolToByte(constructor.makeSticky));
+            genome.emplace_back(static_cast<uint8_t>(constructor.angleAlignment));
+            auto makeGenomeCopy = constructor.genome.size() == 0;
+            genome.emplace_back(convertBoolToByte(makeGenomeCopy));
+            if (!makeGenomeCopy) {
+                auto lengthBytes = convertWordToBytes(static_cast<int>(constructor.genome.size()));
+                genome.insert(genome.end(), lengthBytes.begin(), lengthBytes.end());
+                genome.insert(genome.end(), constructor.genome.begin(), constructor.genome.end());
+            }
         } break;
         case Enums::CellFunction_Sensor: {
         } break;
