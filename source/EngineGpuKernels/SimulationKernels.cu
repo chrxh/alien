@@ -4,7 +4,7 @@
 #include "CellFunctionProcessor.cuh"
 #include "NerveProcessor.cuh"
 #include "NeuronProcessor.cuh"
-#include "RibosomeProcessor.cuh"
+#include "ConstructorProcessor.cuh"
 
 __global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
 {
@@ -68,9 +68,9 @@ __global__ void cudaNextTimestep_neuronFunction(SimulationData data, SimulationR
     NeuronProcessor::process(data, result);
 }
 
-__global__ void cudaNextTimestep_ribosomeFunction(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_constructorFunction(SimulationData data, SimulationResult result)
 {
-    RibosomeProcessor::process(data, result);
+    ConstructorProcessor::process(data, result);
 }
 
 __global__ void cudaNextTimestep_innerFriction(SimulationData data)

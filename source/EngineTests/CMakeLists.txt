@@ -1,11 +1,11 @@
 target_sources(tests
 PUBLIC
+    ConstructorTests.cpp
     DataTransferTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     NerveTests.cpp
     NeuronTests.cpp
-    RibosomeTests.cpp
     SensorTests.cpp
     Testsuite.cpp)
 

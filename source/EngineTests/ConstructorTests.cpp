@@ -6,17 +6,20 @@
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
 
-class RibosomeTests : public IntegrationTestFramework
+class ConstructorTests : public IntegrationTestFramework
 {
 public:
-    RibosomeTests()
+    ConstructorTests()
         : IntegrationTestFramework()
     {}
 
-    ~RibosomeTests() = default;
+    ~ConstructorTests() = default;
+
+protected:
+    void expectLowPrecisionEqual(float left, float right) const { EXPECT_TRUE(std::abs(left - right) < 0.05f); }
 };
 
-TEST_F(RibosomeTests, noEnergy)
+TEST_F(ConstructorTests, noEnergy)
 {
     DataDescription data;
     data.addCell(
@@ -25,7 +28,7 @@ TEST_F(RibosomeTests, noEnergy)
             .setEnergy(_parameters.cellNormalEnergy * 2 - 1.0f)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(RibosomeDescription().setGenome({CellDescription()}).setSeparateConstruction(false)));
+            .setCellFunction(ConstructorDescription().setGenome({CellDescription()}).setSeparateConstruction(false)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -35,17 +38,17 @@ TEST_F(RibosomeTests, noEnergy)
     auto actualHostCell = getCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<RibosomeDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
     expectApproxEqual(_parameters.cellNormalEnergy * 2 - 1.0f, actualHostCell.energy);
     expectApproxEqual(0.0f, actualHostCell.activity.channels[0]);
 }
 
-TEST_F(RibosomeTests, alreadyFinished)
+TEST_F(ConstructorTests, alreadyFinished)
 {
     DataDescription data;
 
-    auto ribosome = RibosomeDescription().setGenome({CellDescription()}).setSingleConstruction(true);
-    ribosome.setCurrentGenomePos(ribosome.genome.size());
+    auto constructor = ConstructorDescription().setGenome({CellDescription()}).setSingleConstruction(true);
+    constructor.setCurrentGenomePos(constructor.genome.size());
 
     data.addCell(
         CellDescription()
@@ -53,7 +56,7 @@ TEST_F(RibosomeTests, alreadyFinished)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ribosome));
+            .setCellFunction(constructor));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -61,13 +64,13 @@ TEST_F(RibosomeTests, alreadyFinished)
 
     EXPECT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
-    auto actualRibosome = std::get<RibosomeDescription>(*actualHostCell.cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(actualRibosome.genome.size(), actualRibosome.currentGenomePos);
+    EXPECT_EQ(actualConstructor.genome.size(), actualConstructor.currentGenomePos);
     expectApproxEqual(0.0f, actualHostCell.activity.channels[0]);
 }
 
-TEST_F(RibosomeTests, manualConstruction_noInputActivity)
+TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 {
     DataDescription data;
     data.addCell(
@@ -77,7 +80,7 @@ TEST_F(RibosomeTests, manualConstruction_noInputActivity)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(
-                         RibosomeDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()})));
+                         ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()})));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -87,13 +90,13 @@ TEST_F(RibosomeTests, manualConstruction_noInputActivity)
     auto actualHostCell = getCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<RibosomeDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
     expectApproxEqual(_parameters.cellNormalEnergy * 3, actualHostCell.energy);
     expectApproxEqual(0.0f, actualHostCell.activity.channels[0]);
 }
 
 
-TEST_F(RibosomeTests, constructSingleCell_noSeparation)
+TEST_F(ConstructorTests, constructSingleCell_noSeparation)
 {
     DataDescription data;
     data.addCell(CellDescription()
@@ -103,7 +106,7 @@ TEST_F(RibosomeTests, constructSingleCell_noSeparation)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(
-                         RibosomeDescription().setGenome({CellDescription().setColor(2).setExecutionOrderNumber(4)}).setSeparateConstruction(false)));
+                         ConstructorDescription().setGenome({CellDescription().setColor(2).setExecutionOrderNumber(4)}).setSeparateConstruction(false)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -114,7 +117,7 @@ TEST_F(RibosomeTests, constructSingleCell_noSeparation)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<RibosomeDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
     expectApproxEqual(_parameters.cellNormalEnergy * 2, actualHostCell.energy);
     expectApproxEqual(1.0f, actualHostCell.activity.channels[0]);
 
@@ -123,11 +126,12 @@ TEST_F(RibosomeTests, constructSingleCell_noSeparation)
     EXPECT_EQ(2, actualConstructedCell.color);
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
     EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_EQ(Enums::CellFunction_None, actualConstructedCell.getCellFunctionType());
     expectApproxEqual(_parameters.cellNormalEnergy, actualConstructedCell.energy);
     expectApproxEqual(1.6f, Math::length(actualHostCell.pos - actualConstructedCell.pos));
 }
 
-TEST_F(RibosomeTests, constructSingleCell_separation)
+TEST_F(ConstructorTests, constructSingleCell_separation)
 {
     DataDescription data;
     data.addCell(CellDescription()
@@ -135,7 +139,7 @@ TEST_F(RibosomeTests, constructSingleCell_separation)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(RibosomeDescription()
+                     .setCellFunction(ConstructorDescription()
                                           .setGenome({CellDescription()})
                                           .setSeparateConstruction(true)));
 
@@ -155,7 +159,7 @@ TEST_F(RibosomeTests, constructSingleCell_separation)
     EXPECT_FALSE(actualConstructedCell.underConstruction);
 }
 
-TEST_F(RibosomeTests, constructSingleCell_makeSticky)
+TEST_F(ConstructorTests, constructSingleCell_makeSticky)
 {
     DataDescription data;
     data.addCell(CellDescription()
@@ -163,7 +167,7 @@ TEST_F(RibosomeTests, constructSingleCell_makeSticky)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(RibosomeDescription().setGenome({CellDescription().setMaxConnections(3)}).setSeparateConstruction(true).setMakeSticky(true)));
+                     .setCellFunction(ConstructorDescription().setGenome({CellDescription().setMaxConnections(3)}).setSeparateConstruction(true).setMakeSticky(true)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -181,7 +185,7 @@ TEST_F(RibosomeTests, constructSingleCell_makeSticky)
     EXPECT_FALSE(actualConstructedCell.underConstruction);
 }
 
-TEST_F(RibosomeTests, constructSingleCell_singleConstruction)
+TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
 {
     DataDescription data;
     data.addCell(
@@ -190,7 +194,7 @@ TEST_F(RibosomeTests, constructSingleCell_singleConstruction)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(RibosomeDescription().setGenome({CellDescription()}).setSeparateConstruction(true).setSingleConstruction(true)));
+            .setCellFunction(ConstructorDescription().setGenome({CellDescription()}).setSeparateConstruction(true).setSingleConstruction(true)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -201,14 +205,14 @@ TEST_F(RibosomeTests, constructSingleCell_singleConstruction)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    auto const& ribosome = std::get<RibosomeDescription>(*actualHostCell.cellFunction);
-    EXPECT_EQ(ribosome.genome.size(), ribosome.currentGenomePos);
+    auto const& constructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(constructor.genome.size(), constructor.currentGenomePos);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_FALSE(actualConstructedCell.underConstruction);
 }
 
-TEST_F(RibosomeTests, constructSingleCell_manualConstruction)
+TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
 {
     DataDescription data;
     data.addCells({
@@ -218,7 +222,7 @@ TEST_F(RibosomeTests, constructSingleCell_manualConstruction)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(RibosomeDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()})),
+            .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()})),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -247,7 +251,7 @@ TEST_F(RibosomeTests, constructSingleCell_manualConstruction)
     expectApproxEqual(10.0f, actualConstructedCell.pos.y);
 }
 
-TEST_F(RibosomeTests, constructSingleCell_differentAngle1)
+TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
 {
     DataDescription data;
     data.addCells({
@@ -257,7 +261,7 @@ TEST_F(RibosomeTests, constructSingleCell_differentAngle1)
              .setEnergy(_parameters.cellNormalEnergy * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(RibosomeDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, 90.0f)),
+             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, 90.0f)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -280,7 +284,7 @@ TEST_F(RibosomeTests, constructSingleCell_differentAngle1)
     expectApproxEqual(10.0f - 1.6f, actualConstructedCell.pos.y);
 }
 
-TEST_F(RibosomeTests, constructSingleCell_differentAngle2)
+TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
 {
     DataDescription data;
     data.addCells(
@@ -290,7 +294,7 @@ TEST_F(RibosomeTests, constructSingleCell_differentAngle2)
              .setEnergy(_parameters.cellNormalEnergy * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(RibosomeDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, -90.0f)),
+             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, -90.0f)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -313,7 +317,7 @@ TEST_F(RibosomeTests, constructSingleCell_differentAngle2)
     expectApproxEqual(10.0f + 1.6f, actualConstructedCell.pos.y);
 }
 
-TEST_F(RibosomeTests, constructNeuronCell)
+TEST_F(ConstructorTests, constructNeuronCell)
 {
     DataDescription data;
 
@@ -328,7 +332,7 @@ TEST_F(RibosomeTests, constructNeuronCell)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-                     .setCellFunction(RibosomeDescription().setGenome({CellDescription().setCellFunction(neuron)})));
+                     .setCellFunction(ConstructorDescription().setGenome({CellDescription().setCellFunction(neuron)})));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -338,4 +342,14 @@ TEST_F(RibosomeTests, constructNeuronCell)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(Enums::CellFunction_Neuron, actualConstructedCell.getCellFunctionType());
+
+    auto actualNeuron = std::get<NeuronDescription>(*actualConstructedCell.cellFunction);
+    for (int row = 0; row < MAX_CHANNELS; ++row) {
+        for (int col = 0; col < MAX_CHANNELS; ++col) {
+            expectLowPrecisionEqual(neuron.weights[row][col], actualNeuron.weights[row][col]);
+        }
+    }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        expectLowPrecisionEqual(neuron.bias[i], actualNeuron.bias[i]);
+    }
 }

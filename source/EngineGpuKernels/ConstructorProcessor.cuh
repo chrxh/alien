@@ -6,7 +6,7 @@
 #include "CellFunctionProcessor.cuh"
 #include "SimulationResult.cuh"
 
-class RibosomeProcessor
+class ConstructorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
@@ -57,10 +57,10 @@ private:
         ConstructionData const& constructionData,
         bool& finished);
 
-    __inline__ __device__ static bool readBool(RibosomeFunction& ribosome, bool& finished);
-    __inline__ __device__ static uint8_t readByte(RibosomeFunction& ribosome, bool& finished);
-    __inline__ __device__ static int readWord(RibosomeFunction& ribosome, bool& finished);
-    __inline__ __device__ static float readFloat(RibosomeFunction& ribosome, bool& finished);   //return values from -1 to 1
+    __inline__ __device__ static bool readBool(ConstructorFunction& constructor, bool& finished);
+    __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor, bool& finished);
+    __inline__ __device__ static int readWord(ConstructorFunction& constructor, bool& finished);
+    __inline__ __device__ static float readFloat(ConstructorFunction& constructor, bool& finished);   //return values from -1 to 1
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished);
 };
@@ -74,9 +74,9 @@ namespace
     float constexpr offspringCellDistance = 1.6f;
 }
 
-__inline__ __device__ void RibosomeProcessor::process(SimulationData& data, SimulationResult& result)
+__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Ribosome];
+    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto operation = operations.at(i);
@@ -85,7 +85,7 @@ __inline__ __device__ void RibosomeProcessor::process(SimulationData& data, Simu
     }
 }
 
-__inline__ __device__ void RibosomeProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
@@ -98,9 +98,9 @@ __inline__ __device__ void RibosomeProcessor::processCell(SimulationData& data, 
                 activity.channels[0] = 0;
             }
             if (finished) {
-                auto& ribosome = cell->cellFunctionData.ribosome;
-                if (!ribosome.singleConstruction) {
-                    ribosome.currentGenomePos = 0;
+                auto& constructor = cell->cellFunctionData.constructor;
+                if (!constructor.singleConstruction) {
+                    constructor.currentGenomePos = 0;
                 }
             }
         } else {
@@ -110,41 +110,41 @@ __inline__ __device__ void RibosomeProcessor::processCell(SimulationData& data, 
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
-__inline__ __device__ bool RibosomeProcessor::isConstructionFinished(Cell* cell)
+__inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* cell)
 {
-    return cell->cellFunctionData.ribosome.currentGenomePos >= cell->cellFunctionData.ribosome.genomeSize;
+    return cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize;
 }
 
-__inline__ __device__ bool RibosomeProcessor::isConstructionPossible(Cell* cell, Activity const& activity)
+__inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Cell* cell, Activity const& activity)
 {
     if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
         return false;
     }
-    if (cell->cellFunctionData.ribosome.mode == Enums::ConstructionMode_Manual && abs(activity.channels[0]) < 0.25f) {
+    if (cell->cellFunctionData.constructor.mode == Enums::ConstructionMode_Manual && abs(activity.channels[0]) < 0.25f) {
         return false;
     }
-    if (cell->cellFunctionData.ribosome.currentGenomePos >= cell->cellFunctionData.ribosome.genomeSize) {
+    if (cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize) {
         return false;
     }
     return true;
 }
 
-__inline__ __device__ RibosomeProcessor::ConstructionData RibosomeProcessor::readConstructionData(Cell* cell, bool& finished)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell, bool& finished)
 {
-    auto& ribosome = cell->cellFunctionData.ribosome;
+    auto& constructor = cell->cellFunctionData.constructor;
 
     ConstructionData result;
-    result.cellFunction = readByte(ribosome, finished) % Enums::CellFunction_Count;
-    result.angle = readFloat(ribosome, finished) * 180;
-    result.distance = readFloat(ribosome, finished) + 1.0f;
-    result.maxConnections = readByte(ribosome, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
-    result.executionOrderNumber = readByte(ribosome, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
-    result.color = readByte(ribosome, finished) % 7;
+    result.cellFunction = readByte(constructor, finished) % Enums::CellFunction_Count;
+    result.angle = readFloat(constructor, finished) * 180;
+    result.distance = readFloat(constructor, finished) + 1.0f;
+    result.maxConnections = readByte(constructor, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
+    result.executionOrderNumber = readByte(constructor, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    result.color = readByte(constructor, finished) % 7;
     return result;
 }
 
 __inline__ __device__ bool
-RibosomeProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData, bool& finished)
+ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData, bool& finished)
 {
     Cell* underConstructionCell = getFirstCellOfConstructionSite(hostCell);
     if (underConstructionCell) {
@@ -163,7 +163,7 @@ RibosomeProcessor::tryConstructCell(SimulationData& data, SimulationResult& resu
     return true;
 }
 
-__inline__ __device__ Cell* RibosomeProcessor::getFirstCellOfConstructionSite(Cell* hostCell)
+__inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite(Cell* hostCell)
 {
     Cell* result = nullptr;
     for (int i = 0; i < hostCell->numConnections; ++i) {
@@ -175,14 +175,14 @@ __inline__ __device__ Cell* RibosomeProcessor::getFirstCellOfConstructionSite(Ce
     return result;
 }
 
-__inline__ __device__ bool RibosomeProcessor::startNewConstruction(
+__inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     SimulationData& data,
     SimulationResult& result,
     Cell* hostCell,
     ConstructionData const& constructionData,
     bool& finished)
 {
-    auto makeSticky = hostCell->cellFunctionData.ribosome.makeSticky;
+    auto makeSticky = hostCell->cellFunctionData.constructor.makeSticky;
 
     if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, makeSticky)) {
         return false;
@@ -200,7 +200,7 @@ __inline__ __device__ bool RibosomeProcessor::startNewConstruction(
         return false;
     }
 
-    if (!finished || !hostCell->cellFunctionData.ribosome.separateConstruction) {
+    if (!finished || !hostCell->cellFunctionData.constructor.separateConstruction) {
         CellConnectionProcessor::addConnections(
             data,
             hostCell,
@@ -223,7 +223,7 @@ __inline__ __device__ bool RibosomeProcessor::startNewConstruction(
     return true;
 }
 
-__inline__ __device__ bool RibosomeProcessor::continueConstruction(
+__inline__ __device__ bool ConstructorProcessor::continueConstruction(
     SimulationData& data,
     SimulationResult& result,
     Cell* hostCell,
@@ -240,7 +240,7 @@ __inline__ __device__ bool RibosomeProcessor::continueConstruction(
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance || offspringCellDistance - desiredDistance < 0) {
         return false;
     }
-    auto makeSticky = hostCell->cellFunctionData.ribosome.makeSticky;
+    auto makeSticky = hostCell->cellFunctionData.constructor.makeSticky;
     if (makeSticky && 1 == constructionData.maxConnections) {
         return false;
     }
@@ -270,7 +270,7 @@ __inline__ __device__ bool RibosomeProcessor::continueConstruction(
         }
     }
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
-    if (!finished || !hostCell->cellFunctionData.ribosome.separateConstruction) {
+    if (!finished || !hostCell->cellFunctionData.constructor.separateConstruction) {
         CellConnectionProcessor::addConnections(
             data, hostCell, newCell, angleFromPreviousForCell, 0, offspringCellDistance);
     }
@@ -318,7 +318,7 @@ __inline__ __device__ bool RibosomeProcessor::continueConstruction(
             if (isConnectable(newCell->numConnections, newCell->maxConnections, makeSticky)
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, makeSticky)) {
 
-                CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.ribosome.angleAlignment);
+                CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
             }
             otherCell->releaseLock();
         }
@@ -334,7 +334,7 @@ __inline__ __device__ bool RibosomeProcessor::continueConstruction(
     result.incCreatedCell();
 }
 
-__inline__ __device__ bool RibosomeProcessor::isConnectable(int numConnections, int maxConnections, bool makeSticky)
+__inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnections, int maxConnections, bool makeSticky)
 {
     if (makeSticky) {
         if (numConnections >= maxConnections) {
@@ -348,7 +348,7 @@ __inline__ __device__ bool RibosomeProcessor::isConnectable(int numConnections, 
     return true;
 }
 
-__inline__ __device__ auto RibosomeProcessor::calcAnglesForNewConnection(SimulationData& data, Cell* cell, float angleDeviation) -> AnglesForNewConnection
+__inline__ __device__ auto ConstructorProcessor::calcAnglesForNewConnection(SimulationData& data, Cell* cell, float angleDeviation) -> AnglesForNewConnection
 {
     if (0 == cell->numConnections) {
         return AnglesForNewConnection{0, 0};
@@ -380,7 +380,7 @@ __inline__ __device__ auto RibosomeProcessor::calcAnglesForNewConnection(Simulat
 }
 
 __inline__ __device__ Cell*
-RibosomeProcessor::constructCellIntern(
+ConstructorProcessor::constructCellIntern(
     SimulationData& data,
     Cell* hostCell,
     float2 const& posOfNewCell,
@@ -401,40 +401,40 @@ RibosomeProcessor::constructCellIntern(
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
 
-    auto& ribosome = hostCell->cellFunctionData.ribosome;
+    auto& constructor = hostCell->cellFunctionData.constructor;
 
     switch (constructionData.cellFunction) {
     case Enums::CellFunction_Neuron: {
         result->cellFunctionData.neuron.neuronState = data.objects.auxiliaryData.getTypedSubArray<NeuronFunction::NeuronState>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->weights[i] = readFloat(ribosome, finished) * 2;
+            result->cellFunctionData.neuron.neuronState->weights[i] = readFloat(constructor, finished) * 2;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->bias[i] = readFloat(ribosome, finished) * 2;
+            result->cellFunctionData.neuron.neuronState->bias[i] = readFloat(constructor, finished) * 2;
         }
     } break;
     case Enums::CellFunction_Transmitter: {
     } break;
-    case Enums::CellFunction_Ribosome: {
-        auto& newRibosome = result->cellFunctionData.ribosome;
-        newRibosome.mode = readByte(ribosome, finished) % Enums::ConstructionMode_Count;
-        newRibosome.singleConstruction = readByte(ribosome, finished);
-        newRibosome.separateConstruction = readByte(ribosome, finished);
-        newRibosome.makeSticky = readByte(ribosome, finished);
-        newRibosome.angleAlignment = readByte(ribosome, finished) % 7;
-        newRibosome.currentGenomePos = 0;
-        copyGenome(data, ribosome, newRibosome, finished);
+    case Enums::CellFunction_Constructor: {
+        auto& newConstructor = result->cellFunctionData.constructor;
+        newConstructor.mode = readByte(constructor, finished) % Enums::ConstructionMode_Count;
+        newConstructor.singleConstruction = readByte(constructor, finished);
+        newConstructor.separateConstruction = readByte(constructor, finished);
+        newConstructor.makeSticky = readByte(constructor, finished);
+        newConstructor.angleAlignment = readByte(constructor, finished) % 7;
+        newConstructor.currentGenomePos = 0;
+        copyGenome(data, constructor, newConstructor, finished);
     } break;
     case Enums::CellFunction_Sensor: {
-        result->cellFunctionData.sensor.mode = readByte(ribosome, finished) % Enums::SensorMode_Count;
-        result->cellFunctionData.sensor.color = readByte(ribosome, finished) % MAX_COLORS;
+        result->cellFunctionData.sensor.mode = readByte(constructor, finished) % Enums::SensorMode_Count;
+        result->cellFunctionData.sensor.color = readByte(constructor, finished) % MAX_COLORS;
     } break;
     case Enums::CellFunction_Nerve: {
     } break;
     case Enums::CellFunction_Attacker: {
     } break;
     case Enums::CellFunction_Injector: {
-        copyGenome(data, ribosome, result->cellFunctionData.injector, finished);
+        copyGenome(data, constructor, result->cellFunctionData.injector, finished);
     } break;
     case Enums::CellFunction_Muscle: {
     } break;
@@ -447,36 +447,36 @@ RibosomeProcessor::constructCellIntern(
     return result;
 }
 
-__inline__ __device__ bool RibosomeProcessor::readBool(RibosomeFunction& ribosome, bool& finished)
+__inline__ __device__ bool ConstructorProcessor::readBool(ConstructorFunction& constructor, bool& finished)
 {
-    return static_cast<int8_t>(readByte(ribosome, finished)) > 0;
+    return static_cast<int8_t>(readByte(constructor, finished)) > 0;
 }
 
-__inline__ __device__ uint8_t RibosomeProcessor::readByte(RibosomeFunction& ribosome, bool& finished)
+__inline__ __device__ uint8_t ConstructorProcessor::readByte(ConstructorFunction& constructor, bool& finished)
 {
-    if (ribosome.currentGenomePos >= ribosome.genomeSize) {
+    if (constructor.currentGenomePos >= constructor.genomeSize) {
         finished = true;
         return 0;
     }
-    uint8_t result = ribosome.genome[ribosome.currentGenomePos++];
-    if (ribosome.currentGenomePos >= ribosome.genomeSize) {
+    uint8_t result = constructor.genome[constructor.currentGenomePos++];
+    if (constructor.currentGenomePos >= constructor.genomeSize) {
         finished = true;
     }
     return result;
 }
 
-__inline__ __device__ int RibosomeProcessor::readWord(RibosomeFunction& ribosome, bool& finished)
+__inline__ __device__ int ConstructorProcessor::readWord(ConstructorFunction& constructor, bool& finished)
 {
-    return static_cast<int>(readByte(ribosome, finished)) | (static_cast<int>(readByte(ribosome, finished) << 8));
+    return static_cast<int>(readByte(constructor, finished)) | (static_cast<int>(readByte(constructor, finished) << 8));
 }
 
-__inline__ __device__ float RibosomeProcessor::readFloat(RibosomeFunction& ribosome, bool& finished)
+__inline__ __device__ float ConstructorProcessor::readFloat(ConstructorFunction& constructor, bool& finished)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(ribosome, finished))) / 128.0f;
+    return static_cast<float>(static_cast<int8_t>(readByte(constructor, finished))) / 128.0f;
 }
 
 template <typename GenomeHolderSource, typename GenomeHolderTarget>
-__inline__ __device__ void RibosomeProcessor::copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished)
+__inline__ __device__ void ConstructorProcessor::copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished)
 {
     bool makeGenomeCopy = readBool(source, finished);
     if (!makeGenomeCopy) {

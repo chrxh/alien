@@ -46,7 +46,7 @@ struct NeuronTO
 struct TransmitterTO
 {};
 
-struct RibosomeTO
+struct ConstructorTO
 {
     Enums::ConstructionMode mode;
     bool singleConstruction;
@@ -91,7 +91,7 @@ union CellFunctionTO
 {
     NeuronTO neuron;
     TransmitterTO transmitter;
-    RibosomeTO ribosome;
+    ConstructorTO constructor;
     SensorTO sensor;
     NerveTO nerve;
     AttackerTO attacker;

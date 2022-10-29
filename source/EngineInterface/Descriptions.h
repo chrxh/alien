@@ -86,7 +86,7 @@ struct TransmitterDescription
     auto operator<=>(TransmitterDescription const&) const = default;
 };
 
-struct RibosomeDescription
+struct ConstructorDescription
 {
     Enums::ConstructionMode mode = Enums::ConstructionMode_Automatic;
     bool singleConstruction = false;
@@ -99,30 +99,30 @@ struct RibosomeDescription
     //process data
     uint64_t currentGenomePos = 0;
 
-    auto operator<=>(RibosomeDescription const&) const = default;
+    auto operator<=>(ConstructorDescription const&) const = default;
 
-    RibosomeDescription& setMode(Enums::ConstructionMode value)
+    ConstructorDescription& setMode(Enums::ConstructionMode value)
     {
         mode = value;
         return *this;
     }
-    RibosomeDescription& setSingleConstruction(bool value)
+    ConstructorDescription& setSingleConstruction(bool value)
     {
         singleConstruction = value;
         return *this;
     }
-    RibosomeDescription& setSeparateConstruction(bool value)
+    ConstructorDescription& setSeparateConstruction(bool value)
     {
         separateConstruction = value;
         return *this;
     }
-    RibosomeDescription& setMakeSticky(bool value)
+    ConstructorDescription& setMakeSticky(bool value)
     {
         makeSticky = value;
         return *this;
     }
-    RibosomeDescription& setGenome(std::vector<CellDescription> const& cells, float initialAngle = 0);
-    RibosomeDescription& setCurrentGenomePos(uint64_t value)
+    ConstructorDescription& setGenome(std::vector<CellDescription> const& cells, float initialAngle = 0);
+    ConstructorDescription& setCurrentGenomePos(uint64_t value)
     {
         currentGenomePos = value;
         return *this;
@@ -172,7 +172,7 @@ struct PlaceHolderDescription2
 using CellFunctionDescription = std::optional<std::variant<
     NeuronDescription,
     TransmitterDescription,
-    RibosomeDescription,
+    ConstructorDescription,
     SensorDescription,
     NerveDescription,
     AttackerDescription,
