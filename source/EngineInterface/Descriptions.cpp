@@ -5,12 +5,21 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-RibosomeDescription& RibosomeDescription::setGenome(std::vector<CellDescription> const& cells)
+namespace
+{
+    uint8_t convertAngleToByte(float value) { return static_cast<uint8_t>(static_cast<int8_t>(value / 180 * 128)); }
+}
+
+RibosomeDescription& RibosomeDescription::setGenome(std::vector<CellDescription> const& cells, float initialAngle)
 {
     genome.reserve(cells.size() * 6);
-    for (auto const& cell : cells) {
+    for (auto const& [index, cell] : cells | boost::adaptors::indexed(0)) {
+        float angle;
+        if (index == 0) {
+            angle = initialAngle;
+        }
         genome.emplace_back(static_cast<uint8_t>(cell.getCellFunctionType()));
-        genome.emplace_back(0);     //angle
+        genome.emplace_back(convertAngleToByte(angle));  //angle
         genome.emplace_back(0);     //distance
         genome.emplace_back(cell.maxConnections);
         genome.emplace_back(cell.executionOrderNumber);

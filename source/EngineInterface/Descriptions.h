@@ -121,7 +121,7 @@ struct RibosomeDescription
         makeSticky = value;
         return *this;
     }
-    RibosomeDescription& setGenome(std::vector<CellDescription> const& cells);
+    RibosomeDescription& setGenome(std::vector<CellDescription> const& cells, float initialAngle = 0);
     RibosomeDescription& setCurrentGenomePos(uint64_t value)
     {
         currentGenomePos = value;
