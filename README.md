@@ -94,6 +94,8 @@ Contributions to the project are very welcome. The most convenient way is to com
 
 A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
 
+**IMPORTANT:** The current development is taking place on the branch `version4`.
+
 # Dependency list
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
 - [Dear ImGui](https://github.com/ocornut/imgui)
