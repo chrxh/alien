@@ -214,7 +214,7 @@ TEST_F(RibosomeTests, constructSingleCell_manualConstruction)
     data.addCells({
        CellDescription()
             .setId(1)
-             .setPos({10.0f, 10.0f})
+            .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
@@ -245,4 +245,97 @@ TEST_F(RibosomeTests, constructSingleCell_manualConstruction)
 
     expectApproxEqual(10.0f - 1.6f, actualConstructedCell.pos.x);
     expectApproxEqual(10.0f, actualConstructedCell.pos.y);
+}
+
+TEST_F(RibosomeTests, constructSingleCell_differentAngle1)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+             .setId(1)
+             .setPos({10.0f, 10.0f})
+             .setEnergy(_parameters.cellNormalEnergy * 3)
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setCellFunction(RibosomeDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, 90.0f)),
+        CellDescription()
+             .setId(2)
+             .setPos({11.0f, 10.0f})
+             .setEnergy(100)
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(3, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
+
+    expectApproxEqual(10.0f, actualConstructedCell.pos.x);
+    expectApproxEqual(10.0f - 1.6f, actualConstructedCell.pos.y);
+}
+
+TEST_F(RibosomeTests, constructSingleCell_differentAngle2)
+{
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setPos({10.0f, 10.0f})
+             .setEnergy(_parameters.cellNormalEnergy * 3)
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setCellFunction(RibosomeDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, -90.0f)),
+         CellDescription()
+             .setId(2)
+             .setPos({11.0f, 10.0f})
+             .setEnergy(100)
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(3, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
+
+    expectApproxEqual(10.0f, actualConstructedCell.pos.x);
+    expectApproxEqual(10.0f + 1.6f, actualConstructedCell.pos.y);
+}
+
+TEST_F(RibosomeTests, constructNeuronCell)
+{
+    DataDescription data;
+
+    auto neuron = NeuronDescription();
+    neuron.weights[1][7] = 1.0f;
+    neuron.weights[7][1] = -1.0f;
+    neuron.bias[3] = 2.0f;
+
+    data.addCell(
+        CellDescription()
+            .setId(1)
+            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+                     .setCellFunction(RibosomeDescription().setGenome({CellDescription().setCellFunction(neuron)})));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Neuron, actualConstructedCell.getCellFunctionType());
 }

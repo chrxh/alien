@@ -135,7 +135,7 @@ __inline__ __device__ RibosomeProcessor::ConstructionData RibosomeProcessor::rea
 
     ConstructionData result;
     result.cellFunction = readByte(ribosome, finished) % Enums::CellFunction_Count;
-    result.angle = readFloat(ribosome, finished) * 180.0f;
+    result.angle = readFloat(ribosome, finished) * 180;
     result.distance = readFloat(ribosome, finished) + 1.0f;
     result.maxConnections = readByte(ribosome, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.executionOrderNumber = readByte(ribosome, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
