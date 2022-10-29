@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "Base/NumberGenerator.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
@@ -32,28 +31,20 @@ TEST_F(RibosomeTests, constructSingleCell_noSeparation)
     auto actualData = _simController->getSimulationData();
 
     EXPECT_EQ(2, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, 1);
 
-    bool hostCellChecked = false;
-    bool constructedCellChecked = false;
-    for (auto const& cell : actualData.cells) {
-        if (cell.id == 1) {
-            hostCellChecked = true;
-            EXPECT_EQ(1, cell.connections.size());
-            EXPECT_EQ(0, std::get<RibosomeDescription>(*cell.cellFunction).currentGenomePos);
-            expectApproxEqual(_parameters.cellNormalEnergy * 2, cell.energy);
-            expectApproxEqual(1.0f, cell.activity.channels[0]);
-        } else {
-            constructedCellChecked = true;
-            EXPECT_EQ(1, cell.connections.size());
-            EXPECT_EQ(1, cell.maxConnections);
-            EXPECT_EQ(2, cell.color);
-            EXPECT_EQ(4, cell.executionOrderNumber);
-            EXPECT_FALSE(cell.underConstruction);
-            expectApproxEqual(_parameters.cellNormalEnergy, cell.energy);
-        }
-    }
-    EXPECT_TRUE(hostCellChecked);
-    EXPECT_TRUE(constructedCellChecked);
+    EXPECT_EQ(1, actualHostCell.connections.size());
+    EXPECT_EQ(0, std::get<RibosomeDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    expectApproxEqual(_parameters.cellNormalEnergy * 2, actualHostCell.energy);
+    expectApproxEqual(1.0f, actualHostCell.activity.channels[0]);
+
+    EXPECT_EQ(1, actualConstructedCell.connections.size());
+    EXPECT_EQ(1, actualConstructedCell.maxConnections);
+    EXPECT_EQ(2, actualConstructedCell.color);
+    EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
+    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    expectApproxEqual(_parameters.cellNormalEnergy, actualConstructedCell.energy);
 }
 
 TEST_F(RibosomeTests, constructSingleCell_separation)
@@ -73,23 +64,15 @@ TEST_F(RibosomeTests, constructSingleCell_separation)
     auto actualData = _simController->getSimulationData();
 
     EXPECT_EQ(2, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, 1);
 
-    bool hostCellChecked = false;
-    bool constructedCellChecked = false;
-    for (auto const& cell : actualData.cells) {
-        if (cell.id == 1) {
-            hostCellChecked = true;
-            EXPECT_EQ(0, cell.connections.size());
-            EXPECT_EQ(0, cell.maxConnections);
-        } else {
-            constructedCellChecked = true;
-            EXPECT_EQ(0, cell.connections.size());
-            EXPECT_EQ(0, cell.maxConnections);
-            EXPECT_FALSE(cell.underConstruction);
-        }
-    }
-    EXPECT_TRUE(hostCellChecked);
-    EXPECT_TRUE(constructedCellChecked);
+    EXPECT_EQ(0, actualHostCell.connections.size());
+    EXPECT_EQ(0, actualHostCell.maxConnections);
+
+    EXPECT_EQ(0, actualConstructedCell.connections.size());
+    EXPECT_EQ(0, actualConstructedCell.maxConnections);
+    EXPECT_FALSE(actualConstructedCell.underConstruction);
 }
 
 TEST_F(RibosomeTests, constructSingleCell_makeSticky)
@@ -107,23 +90,15 @@ TEST_F(RibosomeTests, constructSingleCell_makeSticky)
     auto actualData = _simController->getSimulationData();
 
     EXPECT_EQ(2, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, 1);
 
-    bool hostCellChecked = false;
-    bool constructedCellChecked = false;
-    for (auto const& cell : actualData.cells) {
-        if (cell.id == 1) {
-            hostCellChecked = true;
-            EXPECT_EQ(0, cell.connections.size());
-            EXPECT_EQ(1, cell.maxConnections);
-        } else {
-            constructedCellChecked = true;
-            EXPECT_EQ(0, cell.connections.size());
-            EXPECT_EQ(3, cell.maxConnections);
-            EXPECT_FALSE(cell.underConstruction);
-        }
-    }
-    EXPECT_TRUE(hostCellChecked);
-    EXPECT_TRUE(constructedCellChecked);
+    EXPECT_EQ(0, actualHostCell.connections.size());
+    EXPECT_EQ(1, actualHostCell.maxConnections);
+
+    EXPECT_EQ(0, actualConstructedCell.connections.size());
+    EXPECT_EQ(3, actualConstructedCell.maxConnections);
+    EXPECT_FALSE(actualConstructedCell.underConstruction);
 }
 
 TEST_F(RibosomeTests, constructSingleCell_singleConstruction)
@@ -142,21 +117,13 @@ TEST_F(RibosomeTests, constructSingleCell_singleConstruction)
     auto actualData = _simController->getSimulationData();
 
     EXPECT_EQ(2, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, 1);
 
-    bool hostCellChecked = false;
-    bool constructedCellChecked = false;
-    for (auto const& cell : actualData.cells) {
-        if (cell.id == 1) {
-            hostCellChecked = true;
-            EXPECT_EQ(0, cell.connections.size());
-            auto const& ribosome = std::get<RibosomeDescription>(*cell.cellFunction);
-            EXPECT_EQ(ribosome.genome.size(), ribosome.currentGenomePos);
-        } else {
-            constructedCellChecked = true;
-            EXPECT_EQ(0, cell.connections.size());
-            EXPECT_FALSE(cell.underConstruction);
-        }
-    }
-    EXPECT_TRUE(hostCellChecked);
-    EXPECT_TRUE(constructedCellChecked);
+    EXPECT_EQ(0, actualHostCell.connections.size());
+    auto const& ribosome = std::get<RibosomeDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(ribosome.genome.size(), ribosome.currentGenomePos);
+
+    EXPECT_EQ(0, actualConstructedCell.connections.size());
+    EXPECT_FALSE(actualConstructedCell.underConstruction);
 }

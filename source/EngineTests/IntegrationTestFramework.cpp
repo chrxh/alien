@@ -31,6 +31,26 @@ std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellB
     return result;
 }
 
+CellDescription IntegrationTestFramework::getCell(DataDescription const& data, uint64_t id) const
+{
+    for (auto const& cell : data.cells) {
+        if (cell.id == id) {
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, uint64_t id) const
+{
+    for (auto const& cell : data.cells) {
+        if (cell.id != id) {
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 void IntegrationTestFramework::expectApproxEqual(float expected, float actual) const
 {
     EXPECT_TRUE(std::abs(expected - actual) < 0.01f);
