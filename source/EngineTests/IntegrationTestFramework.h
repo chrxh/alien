@@ -15,6 +15,9 @@ public:
 
 protected:
     std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
+    CellDescription getCell(DataDescription const& data, uint64_t id) const;
+    CellDescription getOtherCell(DataDescription const& data, uint64_t id) const;
+
     void expectApproxEqual(float expected, float actual) const;
     void expectApproxEqual(std::vector<float> const& expected, std::vector<float> const& actual) const;
 
