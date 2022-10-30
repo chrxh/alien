@@ -234,7 +234,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto posDelta = underConstructionCell->absPos - hostCell->absPos;
     data.cellMap.correctDirection(posDelta);
 
-    auto desiredDistance = QuantityConverter::convertDataToDistance(constructionData.distance);
+    auto desiredDistance = constructionData.distance;
     posDelta = Math::normalized(posDelta) * (offspringCellDistance - desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance || offspringCellDistance - desiredDistance < 0) {
@@ -274,7 +274,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         CellConnectionProcessor::addConnections(
             data, hostCell, newCell, angleFromPreviousForCell, 0, offspringCellDistance);
     }
-    auto angleFromPreviousForNewCell = QuantityConverter::convertDataToAngle(constructionData.angle) + 180.0f;
+    auto angleFromPreviousForNewCell = constructionData.angle;
     CellConnectionProcessor::addConnections(
         data, newCell, underConstructionCell, angleFromPreviousForNewCell, angleFromPreviousForUnderConstructionCell, desiredDistance);
 

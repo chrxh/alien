@@ -61,22 +61,31 @@ CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& da
     THROW_NOT_IMPLEMENTED();
 }
 
-void IntegrationTestFramework::expectApproxEqual(float expected, float actual) const
+bool IntegrationTestFramework::approxCompare(float expected, float actual, float precision) const
 {
-    EXPECT_TRUE(std::abs(expected - actual) < 0.01f);
-}
-
-void IntegrationTestFramework::expectApproxEqual(RealVector2D const& expected, RealVector2D const& actual) const
-{
-    EXPECT_TRUE(Math::length(expected - actual) < 0.01f);
-}
-
-void IntegrationTestFramework::expectApproxEqual(std::vector<float> const& expected, std::vector<float> const& actual) const
-{
-    CHECK(expected.size() == actual.size())
-    for (auto const& [expectedElement, actualElement] : boost::combine(expected, actual)) {
-        expectApproxEqual(expectedElement, actualElement);
+    auto absNorm = std::abs(expected) + std::abs(actual);
+    if (absNorm < precision) {
+        return true;
     }
+    return std::abs(expected - actual) / absNorm < precision;
+}
+
+bool IntegrationTestFramework::approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
+{
+    return approxCompare(expected.x, expected.x) && approxCompare(expected.y, expected.y);
+}
+
+bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
+{
+    if (expected.size() != actual.size()) {
+        return false;
+    }
+    for (auto const& [expectedElement, actualElement] : boost::combine(expected, actual)) {
+        if (!approxCompare(expectedElement, actualElement)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const

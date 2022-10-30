@@ -32,7 +32,7 @@ TEST_F(NeuronTests, bias)
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    expectApproxEqual({0, 0, scaledSigmoid(1), 0, 0, 0, 0, scaledSigmoid(-1)}, actualCellById.at(1).activity.channels);
+    approxCompare({0, 0, scaledSigmoid(1), 0, 0, 0, 0, scaledSigmoid(-1)}, actualCellById.at(1).activity.channels);
 }
 
 TEST_F(NeuronTests, weight)
@@ -63,5 +63,5 @@ TEST_F(NeuronTests, weight)
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    expectApproxEqual({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-0.5f), 0, 0}, actualCellById.at(2).activity.channels);
+    approxCompare({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-0.5f), 0, 0}, actualCellById.at(2).activity.channels);
 }
