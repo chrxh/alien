@@ -218,7 +218,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
 
-    cell->cellFunction = _data->numberGen1.random(Enums::CellFunction_Count - 1);
+    cell->cellFunction = Enums::CellFunction_None/*_data->numberGen1.random(Enums::CellFunction_Count - 1)*/;
     return cell;
 }
 
