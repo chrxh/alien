@@ -740,11 +740,64 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_FALSE(actualHostCell.underConstruction);
 
     ASSERT_EQ(2, actualConstructedCell.connections.size());
-    EXPECT_TRUE(actualConstructedCell.underConstruction);
+    std::map<uint64_t, ConnectionDescription> connectionById;
+    for (auto const& connection : actualConstructedCell.connections) {
+        connectionById.emplace(connection.cellId, connection);
+    }
+    EXPECT_TRUE(lowPrecisionCompare(offspringDistance, connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(1).angleFromPrevious));
+    EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
+    EXPECT_TRUE(lowPrecisionCompare(90.0f, connectionById.at(2).angleFromPrevious));
 
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
-    EXPECT_FALSE(actualPrevConstructedCell.underConstruction);
+}
+
+TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
+{
+    auto genome = GenomeEncoder::encode({CellGenomeDescription().setReferenceAngle(-90.0f)});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
+        CellDescription()
+            .setId(2)
+            .setPos({9.0f, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setUnderConstruction(true),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(3, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
+
+    EXPECT_EQ(1, actualHostCell.connections.size());
+
+    ASSERT_EQ(2, actualConstructedCell.connections.size());
+    std::map<uint64_t, ConnectionDescription> connectionById;
+    for (auto const& connection : actualConstructedCell.connections) {
+        connectionById.emplace(connection.cellId, connection);
+    }
+    EXPECT_TRUE(lowPrecisionCompare(offspringDistance, connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(90.0f, connectionById.at(1).angleFromPrevious));
+    EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
+    EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(2).angleFromPrevious));
+
+    ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
 }
