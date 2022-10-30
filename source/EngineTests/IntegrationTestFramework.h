@@ -19,9 +19,9 @@ protected:
     CellDescription getOtherCell(DataDescription const& data, uint64_t id) const;
     CellDescription getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const;
 
-    void expectApproxEqual(float expected, float actual) const;
-    void expectApproxEqual(RealVector2D const& expected, RealVector2D const& actual) const;
-    void expectApproxEqual(std::vector<float> const& expected, std::vector<float> const& actual) const;
+    bool approxCompare(float expected, float actual, float precision = 0.001f) const;
+    bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const;
+    bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const;
 
     bool compare(DataDescription left, DataDescription right) const;
     bool compare(CellDescription left, CellDescription right) const;
