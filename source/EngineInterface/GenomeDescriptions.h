@@ -246,3 +246,5 @@ struct CellGenomeDescription
         return *this;
     }
 };
+
+using GenomeDescription = std::vector<CellGenomeDescription>;

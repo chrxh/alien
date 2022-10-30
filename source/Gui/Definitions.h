@@ -168,6 +168,9 @@ using NewPasswordDialog = std::shared_ptr<_NewPasswordDialog>;
 class _ImageToPatternDialog;
 using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
 
+class _GenomeEditorWindow;
+using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;

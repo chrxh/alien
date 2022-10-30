@@ -38,6 +38,8 @@ PUBLIC
     FpsController.h
     GenericOpenFileDialog.cpp
     GenericOpenFileDialog.h
+    GenomeEditorWindow.cpp
+    GenomeEditorWindow.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GlobalSettings.cpp

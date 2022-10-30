@@ -8,5 +8,5 @@
 class GenomeEncoder
 {
 public:
-    static std::vector<uint8_t> encode(std::vector<CellGenomeDescription> const& cells);
+    static std::vector<uint8_t> encode(GenomeDescription const& cells);
 };

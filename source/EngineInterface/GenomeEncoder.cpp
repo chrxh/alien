@@ -18,7 +18,7 @@ namespace
     std::vector<uint8_t> convertWordToBytes(int value) { return {static_cast<uint8_t>(value & 0xff), static_cast<uint8_t>((value >> 8) % 0xff)}; }
 }
 
-std::vector<uint8_t> GenomeEncoder::encode(std::vector<CellGenomeDescription> const& cells)
+std::vector<uint8_t> GenomeEncoder::encode(GenomeDescription const& cells)
 {
     std::vector<uint8_t> result;
     result.reserve(cells.size() * 6);

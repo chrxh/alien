@@ -6,7 +6,6 @@
 
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
-#include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "StyleRepository.h"

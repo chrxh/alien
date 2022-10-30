@@ -42,7 +42,6 @@
 #include "LogWindow.h"
 #include "SimpleLogger.h"
 #include "UiController.h"
-#include "GlobalSettings.h"
 #include "AutosaveController.h"
 #include "GettingStartedWindow.h"
 #include "OpenSimulationDialog.h"
@@ -70,6 +69,7 @@
 #include "ImageToPatternDialog.h"
 #include "GenericOpenFileDialog.h"
 #include "ShaderWindow.h"
+#include "GenomeEditorWindow.h"
 
 namespace
 {
@@ -361,6 +361,7 @@ void _MainWindow::processMenubar()
     auto patternEditorWindow = _editorController->getPatternEditorWindow();
     auto creatorWindow = _editorController->getCreatorWindow();
     auto multiplierWindow = _editorController->getMultiplierWindow();
+    auto genomeEditorWindow = _editorController->getGenomeEditorWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -466,6 +467,9 @@ void _MainWindow::processMenubar()
             }
             if (ImGui::MenuItem("Pattern editor", "ALT+M", patternEditorWindow->isOn())) {
                 patternEditorWindow->setOn(!patternEditorWindow->isOn());
+            }
+            if (ImGui::MenuItem("Genome editor", "ALT+B", genomeEditorWindow->isOn())) {
+                genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
             }
             if (ImGui::MenuItem("Multiplier", "ALT+A", multiplierWindow->isOn())) {
                 multiplierWindow->setOn(!multiplierWindow->isOn());
@@ -621,6 +625,9 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
             patternEditorWindow->setOn(!patternEditorWindow->isOn());
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
+            genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
             creatorWindow->setOn(!creatorWindow->isOn());
