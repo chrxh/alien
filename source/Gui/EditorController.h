@@ -19,6 +19,7 @@ public:
     PatternEditorWindow getPatternEditorWindow() const;
     CreatorWindow getCreatorWindow() const;
     MultiplierWindow getMultiplierWindow() const;
+    GenomeEditorWindow getGenomeEditorWindow() const;
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
@@ -52,7 +53,8 @@ private:
     SelectionWindow _selectionWindow;
     PatternEditorWindow _patternEditorWindow;
     CreatorWindow _creatorWindow; 
-    MultiplierWindow _multiplierWindow; 
+    MultiplierWindow _multiplierWindow;
+    GenomeEditorWindow _genomeEditorWindow;
 
     SimulationController _simController;
     Viewport _viewport;

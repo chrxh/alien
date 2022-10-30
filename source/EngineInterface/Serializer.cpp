@@ -47,6 +47,11 @@ namespace cereal
     {
         ar(data.cellId, data.distance, data.angleFromPrevious);
     }
+    template <class Archive>
+    inline void serialize(Archive& ar, ActivityDescription& data)
+    {
+        ar(data.channels);
+    }
 
     template <class Archive>
     inline void serialize(Archive& ar, NeuronDescription& data)
@@ -60,7 +65,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, ConstructorDescription& data)
     {
-        ar(data.mode, data.genome);
+        ar(data.mode, data.singleConstruction, data.separateConstruction, data.makeSticky, data.angleAlignment, data.genome, data.currentGenomePos);
     }
     template <class Archive>
     inline void serialize(Archive& ar, SensorDescription& data)
@@ -95,19 +100,21 @@ namespace cereal
     inline void serialize(Archive& ar, CellDescription& data)
     {
         ar(data.id,
+           data.connections,
            data.pos,
            data.vel,
            data.energy,
-           data.maxConnections,
-           data.connections,
-           data.executionOrderNumber,
            data.color,
+           data.maxConnections,
+           data.executionOrderNumber,
+           data.barrier,
+           data.age,
            data.underConstruction,
            data.inputBlocked,
            data.outputBlocked,
            data.cellFunction,
-           data.barrier,
-           data.age);
+           data.activity,
+           data.metadata);
     }
     template <class Archive>
     inline void serialize(Archive& ar, ClusterDescription& data)

@@ -2,9 +2,6 @@
 
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
-
-#include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"

@@ -4,14 +4,12 @@
 #include "EngineInterface/Enums.h"
 
 #include "Base.cuh"
+#include "ConstantMemory.cuh"
 #include "TOs.cuh"
 #include "Map.cuh"
-#include "Math.cuh"
 #include "Particle.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
-#include "cuda_runtime_api.h"
-#include "sm_60_atomic_functions.h"
 
 class ObjectFactory
 {

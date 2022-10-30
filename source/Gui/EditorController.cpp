@@ -13,6 +13,7 @@
 #include "PatternEditorWindow.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
+#include "GenomeEditorWindow.h"
 
 _EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
@@ -23,6 +24,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
+    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>();
 }
 
 bool _EditorController::isOn() const
@@ -46,6 +48,7 @@ void _EditorController::process()
         _patternEditorWindow->process();
         _creatorWindow->process();
         _multiplierWindow->process();
+        _genomeEditorWindow->process();
     }
     if (!_creatorWindow->isOn()) {
         _editorModel->setDrawMode(false);
@@ -128,6 +131,11 @@ CreatorWindow _EditorController::getCreatorWindow() const
 MultiplierWindow _EditorController::getMultiplierWindow() const
 {
     return _multiplierWindow;
+}
+
+GenomeEditorWindow _EditorController::getGenomeEditorWindow() const
+{
+    return _genomeEditorWindow;
 }
 
 bool _EditorController::areInspectionWindowsActive() const

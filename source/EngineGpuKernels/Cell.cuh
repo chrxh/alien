@@ -4,9 +4,6 @@
 #include "EngineInterface/Enums.h"
 
 #include "Base.cuh"
-#include "Definitions.cuh"
-#include "TOs.cuh"
-#include "ConstantMemory.cuh"
 
 struct CellMetadataDescription
 {
