@@ -6,12 +6,12 @@
 #include "NeuronProcessor.cuh"
 #include "ConstructorProcessor.cuh"
 
-__global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result)
 {
     data.prepareForNextTimestep();
 }
 
-__global__ void cudaNextTimestep_substep1(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep1(SimulationData data)
 {
     CellProcessor::init(data);
     CellProcessor::updateMap(data);
@@ -19,7 +19,7 @@ __global__ void cudaNextTimestep_substep1(SimulationData data)
     CellProcessor::clearDensityMap(data);
 }
 
-__global__ void cudaNextTimestep_substep2(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep2(SimulationData data)
 {
     CellProcessor::collisions(data);
     CellProcessor::fillDensityMap(data);
@@ -27,7 +27,7 @@ __global__ void cudaNextTimestep_substep2(SimulationData data)
     ParticleProcessor::updateMap(data);
 }
 
-__global__ void cudaNextTimestep_substep3(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep3(SimulationData data)
 {
     CellProcessor::checkForces(data);
     CellProcessor::updateVelocities(data);
@@ -37,65 +37,65 @@ __global__ void cudaNextTimestep_substep3(SimulationData data)
     ParticleProcessor::collision(data);
 }
 
-__global__ void cudaNextTimestep_verletPositionUpdate(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep4(SimulationData data)
 {
     CellProcessor::verletPositionUpdate(data);
     CellProcessor::checkConnections(data);
 }
 
-__global__ void cudaNextTimestep_connectionForces(SimulationData data, bool considerAngles)
+__global__ void cudaNextTimestep_physics_substep5(SimulationData data, bool considerAngles)
 {
     CellProcessor::calcConnectionForces(data, considerAngles);
 }
 
-__global__ void cudaNextTimestep_verletVelocityUpdate(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep6(SimulationData data)
 {
     CellProcessor::verletVelocityUpdate(data);
 }
 
-__global__ void cudaNextTimestep_collectCellFunctionOperation(SimulationData data)
+__global__ void cudaNextTimestep_cellFunction_collect(SimulationData data)
 {
     CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
-__global__ void cudaNextTimestep_nerveFunction(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationResult result)
 {
     NerveProcessor::process(data, result);
 }
 
-__global__ void cudaNextTimestep_neuronFunction(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationResult result)
 {
     NeuronProcessor::process(data, result);
 }
 
-__global__ void cudaNextTimestep_constructorFunction(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationResult result)
 {
     ConstructorProcessor::process(data, result);
 }
 
-__global__ void cudaNextTimestep_innerFriction(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)
 {
     CellProcessor::applyInnerFriction(data);
 }
 
-__global__ void cudaNextTimestep_friction_decay_finishCellFunctions(SimulationData data)
+__global__ void cudaNextTimestep_physics_substep8(SimulationData data)
 {
     CellFunctionProcessor::resetFetchedActivities(data);
     CellProcessor::applyFriction(data);
     CellProcessor::decay(data);
 }
 
-__global__ void cudaNextTimestep_structuralOperations_step1(SimulationData data)
+__global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data)
 {
     data.structuralOperations.saveNumEntries();
 }
 
-__global__ void cudaNextTimestep_structuralOperations_step2(SimulationData data)
+__global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData data)
 {
     CellConnectionProcessor::processConnectionsOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep14(SimulationData data)
+__global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data)
 {
     ParticleProcessor::transformation(data);
 

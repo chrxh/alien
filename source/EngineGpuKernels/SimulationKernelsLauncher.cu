@@ -12,34 +12,34 @@ _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationResult const& result)
 {
     auto const gpuSettings = settings.gpuSettings;
-    KERNEL_CALL_1_1(cudaPrepareNextTimestep, data, result);
+    KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, result);
     if (settings.flowFieldSettings.active) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
 
     //not all kernels need to be executed in each time step for performance reasons
-    bool considerForcesFromAngleMismatch = (data.timestep % 3 == 0);
+    bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
     bool considerInnerFriction = (data.timestep % 3 == 0);
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
-    KERNEL_CALL(cudaNextTimestep_substep1, data);
-    KERNEL_CALL(cudaNextTimestep_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_substep3, data);
-    KERNEL_CALL(cudaNextTimestep_connectionForces, data, considerForcesFromAngleMismatch);
-    KERNEL_CALL(cudaNextTimestep_verletPositionUpdate, data);
-    KERNEL_CALL(cudaNextTimestep_connectionForces, data, considerForcesFromAngleMismatch);
-    KERNEL_CALL(cudaNextTimestep_verletVelocityUpdate, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep2, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep3, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep5, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL(cudaNextTimestep_physics_substep4, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep5, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL(cudaNextTimestep_physics_substep6, data);
 
     //cell functions
-    KERNEL_CALL(cudaNextTimestep_collectCellFunctionOperation, data);
-    KERNEL_CALL(cudaNextTimestep_nerveFunction, data, result);
-    KERNEL_CALL(cudaNextTimestep_neuronFunction, data, result);
-    KERNEL_CALL(cudaNextTimestep_constructorFunction, data, result);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_collect, data);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, result);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, result);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, result);
 
     if (considerInnerFriction) {
-        KERNEL_CALL(cudaNextTimestep_innerFriction, data);
+        KERNEL_CALL(cudaNextTimestep_physics_substep7_innerFriction, data);
     }
-    KERNEL_CALL(cudaNextTimestep_friction_decay_finishCellFunctions, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep8, data);
 
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);
@@ -51,10 +51,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
         KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
         KERNEL_CALL(cudaApplyClusterData, data);
     }
-    KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_step1, data);
-    KERNEL_CALL(cudaNextTimestep_structuralOperations_step2, data);
-    KERNEL_CALL(cudaNextTimestep_substep14, data);
-    KERNEL_CALL(cudaNextTimestep_substep14, data);
+    KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
 }
