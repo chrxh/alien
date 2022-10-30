@@ -27,7 +27,7 @@ struct TransmitterGenomeDescription
 
 struct ConstructorGenomeDescription
 {
-    Enums::ConstructionMode mode = Enums::ConstructionMode_Automatic;
+    int mode = 1;
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool makeSticky = false;
@@ -36,7 +36,7 @@ struct ConstructorGenomeDescription
 
     auto operator<=>(ConstructorGenomeDescription const&) const = default;
 
-    ConstructorGenomeDescription& setMode(Enums::ConstructionMode value)
+    ConstructorGenomeDescription& setMode(int value)
     {
         mode = value;
         return *this;

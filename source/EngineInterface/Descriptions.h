@@ -88,7 +88,7 @@ struct TransmitterDescription
 
 struct ConstructorDescription
 {
-    Enums::ConstructionMode mode = Enums::ConstructionMode_Automatic;
+    int mode = 1;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool makeSticky = false;
@@ -100,7 +100,7 @@ struct ConstructorDescription
 
     auto operator<=>(ConstructorDescription const&) const = default;
 
-    ConstructorDescription& setMode(Enums::ConstructionMode value)
+    ConstructorDescription& setMode(int value)
     {
         mode = value;
         return *this;

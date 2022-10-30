@@ -29,14 +29,6 @@ namespace Enums
         SensorMode_Count = 2
     };
 
-    using ConstructionMode = int;
-    enum ConstructionMode_
-    {
-        ConstructionMode_Automatic = 0,
-        ConstructionMode_Manual = 1,
-        ConstructionMode_Count = 2
-    };
-
     /*
     using Constr = int;
     enum Constr_ {

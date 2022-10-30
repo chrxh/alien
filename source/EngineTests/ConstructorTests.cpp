@@ -53,7 +53,7 @@ TEST_F(ConstructorTests, noEnergy)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(1, actualData.cells.size());
+    ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
@@ -83,7 +83,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(1, actualData.cells.size());
+    ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(0, actualHostCell.connections.size());
@@ -103,13 +103,13 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(
-                         ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)));
+                         ConstructorDescription().setMode(0).setGenome(genome)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(1, actualData.cells.size());
+    ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
@@ -118,6 +118,51 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
+TEST_F(ConstructorTests, manualConstruction_correctCycle)
+{
+    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+
+    _simController->calcSingleTimestep();
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setMode(3).setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumber * 3; ++i) {
+        _simController->calcSingleTimestep();
+    }
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+}
+
+TEST_F(ConstructorTests, manualConstruction_wrongCycle)
+{
+    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+
+    _simController->calcSingleTimestep();
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setMode(3).setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumber * 3 - 1; ++i) {
+        _simController->calcSingleTimestep();
+    }
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(1, actualData.cells.size());
+}
 
 TEST_F(ConstructorTests, constructSingleCell_noSeparation)
 {
@@ -136,7 +181,7 @@ TEST_F(ConstructorTests, constructSingleCell_noSeparation)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
@@ -173,7 +218,7 @@ TEST_F(ConstructorTests, constructSingleCell_notFinished)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
@@ -202,7 +247,7 @@ TEST_F(ConstructorTests, constructSingleCell_separation)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
@@ -230,7 +275,7 @@ TEST_F(ConstructorTests, constructSingleCell_makeSticky)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
@@ -259,7 +304,7 @@ TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
@@ -283,7 +328,7 @@ TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)),
+             .setCellFunction(ConstructorDescription().setMode(0).setGenome(genome)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -299,7 +344,7 @@ TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
@@ -324,7 +369,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
              .setEnergy(_parameters.cellNormalEnergy * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)),
+             .setCellFunction(ConstructorDescription().setMode(0).setGenome(genome)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -339,7 +384,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
@@ -359,7 +404,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
              .setEnergy(_parameters.cellNormalEnergy * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)),
+             .setCellFunction(ConstructorDescription().setMode(0).setGenome(genome)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -374,7 +419,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
@@ -404,7 +449,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(Enums::CellFunction_Neuron, actualConstructedCell.getCellFunctionType());
@@ -423,7 +468,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
 TEST_F(ConstructorTests, constructConstructorCell)
 {
     auto constructedConstructor = ConstructorGenomeDescription()
-                           .setMode(Enums::ConstructionMode_Manual)
+                           .setMode(0)
                            .setSingleConstruction(true)
                            .setSeparateConstruction(false)
                            .setMakeSticky(true)
@@ -445,7 +490,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
@@ -462,7 +507,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 {
     auto constructedConstructor = ConstructorGenomeDescription()
-                           .setMode(Enums::ConstructionMode_Manual)
+                           .setMode(0)
                            .setSingleConstruction(true)
                            .setSeparateConstruction(false)
                            .setMakeSticky(true)
@@ -483,7 +528,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualCell = getOtherCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
@@ -498,7 +543,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
 {
     auto constructedConstructor = ConstructorGenomeDescription()
-                                      .setMode(Enums::ConstructionMode_Manual)
+                                      .setMode(0)
                                       .setSingleConstruction(true)
                                       .setSeparateConstruction(false)
                                       .setMakeSticky(true)
@@ -519,7 +564,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
@@ -556,7 +601,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
@@ -601,7 +646,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
@@ -654,7 +699,7 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(2, actualData.cells.size());
+    ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualPrevConstructedCell = getCell(actualData, 2);
 
@@ -691,7 +736,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
@@ -734,7 +779,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
@@ -782,7 +827,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
