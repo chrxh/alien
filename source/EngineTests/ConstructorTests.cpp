@@ -543,7 +543,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true)),
         CellDescription()
             .setId(2)
-            .setPos({9.0f, 10.0f})
+            .setPos({10.0f - offspringDistance, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -588,7 +588,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({9.0f, 10.0f})
+            .setPos({10.0f - offspringDistance, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -641,7 +641,7 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setMakeSticky(true)),
         CellDescription()
             .setId(2)
-            .setPos({9.0f, 10.0f})
+            .setPos({10.0f - offspringDistance, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -678,7 +678,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({9.0f, 10.0f})
+            .setPos({10.0f - offspringDistance, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -721,7 +721,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({9.0f, 10.0f})
+            .setPos({10.0f - offspringDistance, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -769,7 +769,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({9.0f, 10.0f})
+            .setPos({10.0f - offspringDistance, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -800,4 +800,102 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(2).angleFromPrevious));
 
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
+}
+
+TEST_F(ConstructorTests, constructThirdCell_multipleConnections)
+{
+    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f - offspringDistance, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setUnderConstruction(true),
+        CellDescription()
+            .setId(3)
+            .setPos({10.0f - offspringDistance, 9.0f})
+            .setEnergy(100)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setUnderConstruction(true),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(4, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualPrevPrevConstructedCell = getCell(actualData, 3);
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+
+    EXPECT_EQ(1, actualHostCell.connections.size());
+    ASSERT_EQ(3, actualConstructedCell.connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell.connections.size());
+    ASSERT_EQ(2, actualPrevConstructedCell.connections.size());
+}
+
+TEST_F(ConstructorTests, constructThirdCell_noMultipleConnections)
+{
+    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f - offspringDistance, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setUnderConstruction(true),
+        CellDescription()
+            .setId(3)
+            .setPos({10.0f - offspringDistance, 11.0f})
+            .setEnergy(100)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setUnderConstruction(true),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(4, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualPrevPrevConstructedCell = getCell(actualData, 3);
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+
+    EXPECT_EQ(1, actualHostCell.connections.size());
+    ASSERT_EQ(2, actualConstructedCell.connections.size());
+    ASSERT_EQ(1, actualPrevPrevConstructedCell.connections.size());
+    ASSERT_EQ(2, actualPrevConstructedCell.connections.size());
 }
