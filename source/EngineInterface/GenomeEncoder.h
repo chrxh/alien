@@ -2,10 +2,11 @@
 
 #include <vector>
 
-#include "EngineInterface/Descriptions.h"
+#include "GenomeDescriptions.h"
+
 
 class GenomeEncoder
 {
 public:
-    static std::vector<uint8_t> encode(std::vector<CellDescription> const& cells, float initialAngle = 0);
+    static std::vector<uint8_t> encode(std::vector<CellGenomeDescription> const& cells);
 };

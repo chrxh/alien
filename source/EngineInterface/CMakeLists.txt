@@ -10,6 +10,7 @@ add_library(alien_engine_interface_lib
     Descriptions.h
     Enums.h
     FlowFieldSettings.h
+    GenomeDescriptions.h
     GenomeEncoder.cpp
     GenomeEncoder.h
     GeneralSettings.h
