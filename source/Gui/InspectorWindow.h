@@ -33,11 +33,7 @@ private:
 
     void processParticle(ParticleDescription particle);
 
-    void showNeuralNetTableContent();
-    void showDigestionTableContent();
-    void showConstructorTableContent();
-    void showMuscleTableContent();
-    void showSensorTableContent();
+    void showConstructorContent();
 
     float calcWindowWidth() const;
 
