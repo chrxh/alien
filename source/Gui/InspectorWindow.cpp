@@ -23,7 +23,7 @@ namespace
     auto const MaxCellContentTextWidth = 140.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
     auto const CellFunctionStrings =
-        std::vector{"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s};
+        std::vector{"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s, "None"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -168,6 +168,9 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             case Enums::CellFunction_Placeholder2: {
                 cell.cellFunction = PlaceHolderDescription2();
             } break;
+            case Enums::CellFunction_None: {
+                cell.cellFunction.reset();
+            } break;
             }
         }
 
@@ -206,43 +209,33 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
 
 void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem(ICON_FA_EXCHANGE_ALT " In/out channels", nullptr, ImGuiTabItemFlags_None)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(Const::InfoTextColor));
-        AlienImGui::Text("This is a pure information tab.");
-        ImGui::SameLine();
-        AlienImGui::HelpMarker("");
-        ImGui::PopStyleColor();
-        
-        if (ImGui::BeginTable(
-                "##",
-                2,
-                ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter
-                    | ImGuiTableFlags_SizingStretchProp)) {
-            ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed);
-            ImGui::TableSetupColumn("Semantic", ImGuiTableColumnFlags_WidthStretch);
-            ImGui::TableHeadersRow();
-            ImGui::TableNextRow();
-            switch(cell.getCellFunctionType()){
-            case Enums::CellFunction_Constructor:
-                showConstructorTableContent();
-                break;
-            case Enums::CellFunction_Attacker:
-                showDigestionTableContent();
-                break;
-            case Enums::CellFunction_Injector:
-            case Enums::CellFunction_Nerve:
-            case Enums::CellFunction_Neuron:
-                showNeuralNetTableContent();
-                break;
-            case Enums::CellFunction_Sensor:
-                showSensorTableContent();
-                break;
-            case Enums::CellFunction_Transmitter:
-            case Enums::CellFunction_Muscle:
-                showMuscleTableContent();
-                break;
-            }
-            ImGui::EndTable();
+    if (cell.getCellFunctionType() == Enums::CellFunction_None) {
+        return;
+    }
+
+    if (ImGui::BeginTabItem(ICON_FA_EXCHANGE_ALT " Specialization", nullptr, ImGuiTabItemFlags_None)) {
+        switch (cell.getCellFunctionType()) {
+        case Enums::CellFunction_Neuron: {
+        } break;
+        case Enums::CellFunction_Transmitter: {
+        } break;
+        case Enums::CellFunction_Constructor: {
+            showConstructorContent();
+        } break;
+        case Enums::CellFunction_Sensor: {
+        } break;
+        case Enums::CellFunction_Nerve: {
+        } break;
+        case Enums::CellFunction_Attacker: {
+        } break;
+        case Enums::CellFunction_Injector: {
+        } break;
+        case Enums::CellFunction_Muscle: {
+        } break;
+        case Enums::CellFunction_Placeholder1: {
+        } break;
+        case Enums::CellFunction_Placeholder2: {
+        } break;
         }
 
         ImGui::EndTabItem();
@@ -265,188 +258,16 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
     }
 }
 
-namespace
+void _InspectorWindow::showConstructorContent()
 {
-    std::string formatHex(int value)
-    {
-        std::stringstream stream;
-        stream << "0x" << std::hex << static_cast<int>(value);
-        return stream.str();
-    }
-}
-
-void _InspectorWindow::showNeuralNetTableContent()
-{
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Not yet implemented");
-}
-
-void _InspectorWindow::showDigestionTableContent()
-{
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-    AlienImGui::Text("Input: target color (number from 0-6)");
-}
-
-void _InspectorWindow::showConstructorTableContent()
-{
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-}
-
-void _InspectorWindow::showMuscleTableContent()
-{
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-}
-
-void _InspectorWindow::showSensorTableContent()
-{
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
-
-    ImGui::Spacing();
-    ImGui::TableNextRow();
-
-    ImGui::TableSetColumnIndex(0);
-
-    ImGui::TableSetColumnIndex(1);
+    AlienImGui::Group("Actions");
+    AlienImGui::Button("Edit");
+    ImGui::SameLine();
+    ImGui::BeginDisabled();
+    AlienImGui::Button("Paste");
+    ImGui::EndDisabled();
+
+    AlienImGui::Group("Preview");
 }
 
 float _InspectorWindow::calcWindowWidth() const

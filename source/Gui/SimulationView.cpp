@@ -25,9 +25,11 @@ namespace
         {Enums::CellFunction_Injector, "Injector"},
         {Enums::CellFunction_Muscle, "Muscle"},
         {Enums::CellFunction_Nerve, "Nerve"},
-        {Enums::CellFunction_Neuron, "Neurons"},
+        {Enums::CellFunction_Neuron, "Neuron"},
         {Enums::CellFunction_Sensor, "Sensor"},
         {Enums::CellFunction_Transmitter, "Transmitter"},
+        {Enums::CellFunction_Placeholder1, "Placeholder1"},
+        {Enums::CellFunction_Placeholder2, "Placeholder2"},
     };
 }
 

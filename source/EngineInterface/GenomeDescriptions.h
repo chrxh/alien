@@ -231,6 +231,12 @@ struct CellGenomeDescription
         if (std::holds_alternative<MuscleGenomeDescription>(*cellFunction)) {
             return Enums::CellFunction_Muscle;
         }
+        if (std::holds_alternative<PlaceHolderGenomeDescription1>(*cellFunction)) {
+            return Enums::CellFunction_Placeholder1;
+        }
+        if (std::holds_alternative<PlaceHolderGenomeDescription2>(*cellFunction)) {
+            return Enums::CellFunction_Placeholder2;
+        }
         return Enums::CellFunction_None;
     }
     template <typename CellFunctionDesc>

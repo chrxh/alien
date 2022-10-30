@@ -34,6 +34,12 @@ Enums::CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<MuscleDescription>(*cellFunction)) {
         return Enums::CellFunction_Muscle;
     }
+    if (std::holds_alternative<PlaceHolderDescription1>(*cellFunction)) {
+        return Enums::CellFunction_Placeholder1;
+    }
+    if (std::holds_alternative<PlaceHolderDescription2>(*cellFunction)) {
+        return Enums::CellFunction_Placeholder2;
+    }
     return Enums::CellFunction_None;
 }
 
