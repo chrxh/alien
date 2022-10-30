@@ -121,7 +121,16 @@ struct ConstructorDescription
         makeSticky = value;
         return *this;
     }
-    ConstructorDescription& setGenome(std::vector<CellDescription> const& cells, float initialAngle = 0);
+    ConstructorDescription& setAngleAlignment(int value)
+    {
+        angleAlignment = value;
+        return *this;
+    }
+    ConstructorDescription& setGenome(std::vector<uint8_t> const& value)
+    {
+        genome = value;
+        return *this;
+    }
     ConstructorDescription& setCurrentGenomePos(uint64_t value)
     {
         currentGenomePos = value;
