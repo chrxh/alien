@@ -455,3 +455,36 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
     EXPECT_TRUE(actualConstructor.genome.size() <= MAX_GENOME_BYTES);
     EXPECT_TRUE(constructedConstructor.genome.size() <= MAX_GENOME_BYTES);
 }
+
+TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
+{
+    auto constructedConstructor = ConstructorDescription()
+                                      .setMode(Enums::ConstructionMode_Manual)
+                                      .setSingleConstruction(true)
+                                      .setSeparateConstruction(false)
+                                      .setMakeSticky(true)
+                                      .setAngleAlignment(2)
+                                      .setGenome(createRandomGenome(0));    // size= 0 means copy genome
+
+    auto genome = GenomeEncoder::encode({CellDescription().setCellFunction(constructedConstructor)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(genome, actualConstructor.genome);
+}
