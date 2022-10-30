@@ -3,6 +3,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/GenomeEncoder.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
 #include "Base/NumberGenerator.h"
@@ -18,10 +19,22 @@ public:
 
 protected:
     void expectLowPrecisionEqual(float left, float right) const { EXPECT_TRUE(std::abs(left - right) < 0.05f); }
+
+    std::vector<uint8_t> createRandomGenome(int size) const
+    {
+        std::vector<uint8_t> result;
+        result.reserve(size);
+        for (int i = 0; i < size; ++i) {
+            result.emplace_back(static_cast<uint8_t>(NumberGenerator::getInstance().getRandomInt(256)));
+        }
+        return result;
+    }
 };
 
 TEST_F(ConstructorTests, noEnergy)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()});
+
     DataDescription data;
     data.addCell(
         CellDescription()
@@ -29,7 +42,7 @@ TEST_F(ConstructorTests, noEnergy)
             .setEnergy(_parameters.cellNormalEnergy * 2 - 1.0f)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome({CellDescription()}).setSeparateConstruction(false)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -48,7 +61,9 @@ TEST_F(ConstructorTests, alreadyFinished)
 {
     DataDescription data;
 
-    auto constructor = ConstructorDescription().setGenome({CellDescription()}).setSingleConstruction(true);
+    auto genome = GenomeEncoder::encode({CellDescription()});
+
+    auto constructor = ConstructorDescription().setGenome(genome).setSingleConstruction(true);
     constructor.setCurrentGenomePos(constructor.genome.size());
 
     data.addCell(
@@ -73,6 +88,8 @@ TEST_F(ConstructorTests, alreadyFinished)
 
 TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()});
+
     DataDescription data;
     data.addCell(
         CellDescription()
@@ -81,7 +98,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(
-                         ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()})));
+                         ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -99,6 +116,8 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 
 TEST_F(ConstructorTests, constructSingleCell_noSeparation)
 {
+    auto genome = GenomeEncoder::encode({CellDescription().setColor(2).setExecutionOrderNumber(4)});
+
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
@@ -106,8 +125,7 @@ TEST_F(ConstructorTests, constructSingleCell_noSeparation)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(
-                         ConstructorDescription().setGenome({CellDescription().setColor(2).setExecutionOrderNumber(4)}).setSeparateConstruction(false)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -134,6 +152,8 @@ TEST_F(ConstructorTests, constructSingleCell_noSeparation)
 
 TEST_F(ConstructorTests, constructSingleCell_separation)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()});
+
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
@@ -141,7 +161,7 @@ TEST_F(ConstructorTests, constructSingleCell_separation)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription()
-                                          .setGenome({CellDescription()})
+                                          .setGenome(genome)
                                           .setSeparateConstruction(true)));
 
     _simController->setSimulationData(data);
@@ -162,13 +182,15 @@ TEST_F(ConstructorTests, constructSingleCell_separation)
 
 TEST_F(ConstructorTests, constructSingleCell_makeSticky)
 {
+    auto genome = GenomeEncoder::encode({CellDescription().setMaxConnections(3)});
+
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome({CellDescription().setMaxConnections(3)}).setSeparateConstruction(true).setMakeSticky(true)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setMakeSticky(true)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -188,6 +210,8 @@ TEST_F(ConstructorTests, constructSingleCell_makeSticky)
 
 TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()});
+
     DataDescription data;
     data.addCell(
         CellDescription()
@@ -195,7 +219,7 @@ TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome({CellDescription()}).setSeparateConstruction(true).setSingleConstruction(true)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setSingleConstruction(true)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -215,6 +239,8 @@ TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
 
 TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()});
+
     DataDescription data;
     data.addCells({
        CellDescription()
@@ -223,7 +249,7 @@ TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()})),
+             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -254,6 +280,8 @@ TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
 
 TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()}, 90.0f);
+
     DataDescription data;
     data.addCells({
         CellDescription()
@@ -262,7 +290,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
              .setEnergy(_parameters.cellNormalEnergy * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, 90.0f)),
+             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -287,6 +315,8 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
 
 TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
 {
+    auto genome = GenomeEncoder::encode({CellDescription()}, -90.0f);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -295,7 +325,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
              .setEnergy(_parameters.cellNormalEnergy * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome({CellDescription()}, -90.0f)),
+             .setCellFunction(ConstructorDescription().setMode(Enums::ConstructionMode_Manual).setGenome(genome)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -320,20 +350,21 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
 
 TEST_F(ConstructorTests, constructNeuronCell)
 {
-    DataDescription data;
-
     auto neuron = NeuronDescription();
     neuron.weights[1][7] = 1.0f;
     neuron.weights[7][1] = -1.0f;
     neuron.bias[3] = 1.8f;
 
+    auto genome = GenomeEncoder::encode({CellDescription().setCellFunction(neuron)});
+
+    DataDescription data;
     data.addCell(
         CellDescription()
             .setId(1)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome({CellDescription().setCellFunction(neuron)})));
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -357,25 +388,24 @@ TEST_F(ConstructorTests, constructNeuronCell)
 
 TEST_F(ConstructorTests, constructConstructorCell)
 {
-    DataDescription data;
+    auto constructedConstructor = ConstructorDescription()
+                           .setMode(Enums::ConstructionMode_Manual)
+                           .setSingleConstruction(true)
+                           .setSeparateConstruction(false)
+                           .setMakeSticky(true)
+                           .setAngleAlignment(2)
+                           .setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
 
-    auto constructor = ConstructorDescription();
-    constructor.mode = Enums::ConstructionMode_Manual;
-    constructor.singleConstruction = true;
-    constructor.separateConstruction = false;
-    constructor.makeSticky = true;
-    constructor.angleAlignment = 2;
-    constructor.genome.reserve(MAX_GENOME_BYTES / 2);
-    for (int i = 0; i < MAX_GENOME_BYTES / 2; ++i) {
-        constructor.genome.emplace_back(static_cast<uint8_t>(NumberGenerator::getInstance().getRandomInt(256)));
-    }
+    auto genome = GenomeEncoder::encode({CellDescription().setCellFunction(constructedConstructor)});
+
+    DataDescription data;
 
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome({CellDescription().setCellFunction(constructor)})));
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -387,5 +417,41 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(constructor, actualConstructor);
+    EXPECT_EQ(constructedConstructor, actualConstructor);
+}
+
+TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
+{
+    auto constructedConstructor = ConstructorDescription()
+                           .setMode(Enums::ConstructionMode_Manual)
+                           .setSingleConstruction(true)
+                           .setSeparateConstruction(false)
+                           .setMakeSticky(true)
+                           .setAngleAlignment(2)
+                           .setGenome(createRandomGenome(MAX_GENOME_BYTES));
+    auto genome = GenomeEncoder::encode({CellDescription().setCellFunction(constructedConstructor)});
+
+    DataDescription data;
+
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(2, actualData.cells.size());
+    auto actualCell = getOtherCell(actualData, 1);
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCell.cellFunction);
+    auto actualConstructedConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_TRUE(actualConstructor.genome.size() <= MAX_GENOME_BYTES);
+    EXPECT_TRUE(constructedConstructor.genome.size() <= MAX_GENOME_BYTES);
 }
