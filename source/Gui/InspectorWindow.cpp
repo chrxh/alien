@@ -20,9 +20,10 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const MaxCellContentTextWidth = 120.0f;
+    auto const MaxCellContentTextWidth = 140.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
-    auto const CellFunctionStrings = std::vector{"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s};
+    auto const CellFunctionStrings =
+        std::vector{"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -114,22 +115,6 @@ std::string _InspectorWindow::generateTitle() const
     return ss.str();
 }
 
-namespace
-{
-    bool hasChanges(CellDescription const& left, CellDescription const& right)
-    {
-        return left.energy != right.energy || left.maxConnections != right.maxConnections || left.underConstruction != right.underConstruction
-            || left.inputBlocked != right.inputBlocked || left.outputBlocked != right.outputBlocked
-            || left.executionOrderNumber != right.executionOrderNumber
-            || left.metadata.name != right.metadata.name || left.metadata.description != right.metadata.description
-            || left.barrier != right.barrier;
-    }
-    bool hasChanges(ParticleDescription const& left, ParticleDescription const& right)
-    {
-        return left.energy != right.energy;
-    }
-}
-
 void _InspectorWindow::processCell(CellDescription cell)
 {
     if (ImGui::BeginTabBar(
@@ -139,7 +124,7 @@ void _InspectorWindow::processCell(CellDescription cell)
         showCellInOutChannelTab(cell);
         ImGui::EndTabBar();
 
-        if (hasChanges(cell, origCell)) {
+        if (cell != origCell) {
             _simController->changeCell(cell);
         }
     }
@@ -151,7 +136,40 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
         AlienImGui::Group("Properties");
         auto const& parameters = _simController->getSimulationParameters();
         int type = cell.getCellFunctionType();
-        AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(CellFunctionStrings).textWidth(MaxCellContentTextWidth), type);
+        if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(CellFunctionStrings).textWidth(MaxCellContentTextWidth), type)) {
+            switch (type) {
+            case Enums::CellFunction_Neuron: {
+                cell.cellFunction = NeuronDescription();
+            } break;
+            case Enums::CellFunction_Transmitter: {
+                cell.cellFunction = TransmitterDescription();
+            } break;
+            case Enums::CellFunction_Constructor: {
+                cell.cellFunction = ConstructorDescription();
+            } break;
+            case Enums::CellFunction_Sensor: {
+                cell.cellFunction = SensorDescription();
+            } break;
+            case Enums::CellFunction_Nerve: {
+                cell.cellFunction = NerveDescription();
+            } break;
+            case Enums::CellFunction_Attacker: {
+                cell.cellFunction = AttackerDescription();
+            } break;
+            case Enums::CellFunction_Injector: {
+                cell.cellFunction = InjectorDescription();
+            } break;
+            case Enums::CellFunction_Muscle: {
+                cell.cellFunction = MuscleDescription();
+            } break;
+            case Enums::CellFunction_Placeholder1: {
+                cell.cellFunction = PlaceHolderDescription1();
+            } break;
+            case Enums::CellFunction_Placeholder2: {
+                cell.cellFunction = PlaceHolderDescription2();
+            } break;
+            }
+        }
 
         auto energy = toFloat(cell.energy);
         AlienImGui::InputFloat(
@@ -242,7 +260,7 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
         energy);
 
     particle.energy = energy;
-    if (hasChanges(particle, origParticle)) {
+    if (particle != origParticle) {
         _simController->changeParticle(particle);
     }
 }
