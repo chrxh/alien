@@ -3,9 +3,12 @@
 #include <variant>
 #include <boost/range/adaptors.hpp>
 
+#include "Base/Definitions.h"
+
 namespace
 {
     uint8_t convertAngleToByte(float value) { return static_cast<uint8_t>(static_cast<int8_t>(value / 180 * 128)); }
+    uint8_t convertDistanceToByte(float value) { return static_cast<uint8_t>(static_cast<int8_t>((value - 1.0f) * 128)); }
     uint8_t convertNeuronPropertyToByte(float value)
     {
         CHECK(std::abs(value) <= 2);
@@ -15,24 +18,20 @@ namespace
     std::vector<uint8_t> convertWordToBytes(int value) { return {static_cast<uint8_t>(value & 0xff), static_cast<uint8_t>((value >> 8) % 0xff)}; }
 }
 
-std::vector<uint8_t> GenomeEncoder::encode(std::vector<CellDescription> const& cells, float initialAngle)
+std::vector<uint8_t> GenomeEncoder::encode(std::vector<CellGenomeDescription> const& cells)
 {
     std::vector<uint8_t> result;
     result.reserve(cells.size() * 6);
     for (auto const& [index, cell] : cells | boost::adaptors::indexed(0)) {
-        float angle;
-        if (index == 0) {
-            angle = initialAngle;
-        }
         result.emplace_back(static_cast<uint8_t>(cell.getCellFunctionType()));
-        result.emplace_back(convertAngleToByte(angle));
-        result.emplace_back(0);                          //distance
+        result.emplace_back(convertAngleToByte(cell.referenceAngle));
+        result.emplace_back(convertDistanceToByte(cell.referenceDistance));
         result.emplace_back(cell.maxConnections);
         result.emplace_back(cell.executionOrderNumber);
         result.emplace_back(cell.color);
         switch (cell.getCellFunctionType()) {
         case Enums::CellFunction_Neuron: {
-            auto neuron = std::get<NeuronDescription>(*cell.cellFunction);
+            auto neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
                     result.emplace_back(convertNeuronPropertyToByte(neuron.weights[row][col]));
@@ -45,7 +44,7 @@ std::vector<uint8_t> GenomeEncoder::encode(std::vector<CellDescription> const& c
         case Enums::CellFunction_Transmitter: {
         } break;
         case Enums::CellFunction_Constructor: {
-            auto constructor = std::get<ConstructorDescription>(*cell.cellFunction);
+            auto constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             result.emplace_back(static_cast<uint8_t>(constructor.mode));
             result.emplace_back(convertBoolToByte(constructor.singleConstruction));
             result.emplace_back(convertBoolToByte(constructor.separateConstruction));

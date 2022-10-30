@@ -93,7 +93,6 @@ struct ConstructorDescription
     bool separateConstruction = true;
     bool makeSticky = false;
     int angleAlignment = 0;  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
-
     std::vector<uint8_t> genome;
 
     //process data
