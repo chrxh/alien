@@ -14,7 +14,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
     __inline__ __device__ static bool isConstructionFinished(Cell* cell);
-    __inline__ __device__ static bool isConstructionPossible(Cell* cell, Activity const& activity);
+    __inline__ __device__ static bool isConstructionPossible(SimulationData const& data, Cell* cell, Activity const& activity);
 
     struct ConstructionData
     {
@@ -72,6 +72,7 @@ private:
 namespace
 {
     float constexpr offspringCellDistance = 1.6f;
+    float constexpr activityThreshold = 0.25f;
 }
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
@@ -89,7 +90,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
-        if (isConstructionPossible(cell, activity)) {
+        if (isConstructionPossible(data, cell, activity)) {
             auto finished = false;
             auto constructionData = readConstructionData(cell, finished);
             if (tryConstructCell(data, result, cell, constructionData, finished)) {
@@ -115,12 +116,16 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* ce
     return cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize;
 }
 
-__inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Cell* cell, Activity const& activity)
+__inline__ __device__ bool ConstructorProcessor::isConstructionPossible(SimulationData const& data, Cell* cell, Activity const& activity)
 {
     if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.mode == Enums::ConstructionMode_Manual && abs(activity.channels[0]) < 0.25f) {
+    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < activityThreshold) {
+        return false;
+    }
+    if (cell->cellFunctionData.constructor.mode > 0
+        && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumber * cell->cellFunctionData.constructor.mode) != cell->executionOrderNumber)) {
         return false;
     }
     if (cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize) {
@@ -417,7 +422,7 @@ ConstructorProcessor::constructCellIntern(
     } break;
     case Enums::CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
-        newConstructor.mode = readByte(constructor, finished) % Enums::ConstructionMode_Count;
+        newConstructor.mode = readByte(constructor, finished);
         newConstructor.singleConstruction = readBool(constructor, finished);
         newConstructor.separateConstruction = readBool(constructor, finished);
         newConstructor.makeSticky = readBool(constructor, finished);

@@ -47,7 +47,7 @@ struct TransmitterFunction
 struct ConstructorFunction
 {
     //settings
-    Enums::ConstructionMode mode;
+    int mode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction;
     bool separateConstruction;
     bool makeSticky;
