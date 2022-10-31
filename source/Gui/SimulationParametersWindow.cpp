@@ -324,7 +324,7 @@ void _SimulationParametersWindow::processBase(
          * Cell color transition rules
          */
         AlienImGui::Group("Cell color transition rules");
-        for (int color = 0; color < 7; ++color) {
+        for (int color = 0; color < MAX_COLORS; ++color) {
             ImGui::PushID(color);
             auto parameters = AlienImGui::InputColorTransitionParameters()
                                   .textWidth(MaxContentTextWidth)
