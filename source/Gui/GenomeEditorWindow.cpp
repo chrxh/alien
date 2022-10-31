@@ -27,9 +27,10 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
 
 namespace
 {
-    std::string generateShortDescription(CellGenomeDescription const& cell)
+    std::string generateShortDescription(int index, CellGenomeDescription const& cell)
     {
-        return "Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType()) + ", Color: " + std::to_string(cell.color);
+        return "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
+            + ", Color: " + std::to_string(cell.color);
     }
 }
 
@@ -45,7 +46,7 @@ void _GenomeEditorWindow::processIntern()
         AlienImGui::Tooltip("New gene");
 
         for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
-            if (ImGui::BeginTabItem(("Gene " + std::to_string(index)).c_str(), NULL, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem(("Gene " + std::to_string(index + 1)).c_str(), NULL, ImGuiTabItemFlags_None)) {
                 showGenomeContent(tabData);
                 _currentTabIndex = toInt(index);
                 ImGui::EndTabItem();
@@ -74,96 +75,95 @@ void _GenomeEditorWindow::showGenomeContent(TabData& tabData)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
         AlienImGui::Group("Genotype");
-        int index = 0;
-        for (auto& cell : tabData.genome) {
-            ImGui::PushID(index);
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
+            int index = 0;
+            for (auto& cell : tabData.genome) {
+                ImGui::PushID(index);
 
-            float h, s, v;
-            AlienImGui::convertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
-            ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed | */ ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
-            if (tabData.selected && *tabData.selected == index) {
-                flags |= ImGuiTreeNodeFlags_Selected;
-            }
-            auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(cell) + "###").c_str(), flags);
-            ImGui::PopStyleColor();
-            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                float h, s, v;
+                AlienImGui::convertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
+                ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed | */ ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
                 if (tabData.selected && *tabData.selected == index) {
-                    tabData.selected.reset();
-                } else {
-                    tabData.selected = index;
+                    flags |= ImGuiTreeNodeFlags_Selected;
                 }
-            }
-            if (treeNodeOpen) {
-                auto type = cell.getCellFunctionType();
-
-                //cell type
-                if (AlienImGui::Combo(
-                        AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxContentTextWidth), type)) {
-                    switch (type) {
-                    case Enums::CellFunction_Neuron: {
-                        cell.cellFunction = NeuronGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Transmitter: {
-                        cell.cellFunction = TransmitterGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Constructor: {
-                        cell.cellFunction = ConstructorGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Sensor: {
-                        cell.cellFunction = SensorGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Nerve: {
-                        cell.cellFunction = NerveGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Attacker: {
-                        cell.cellFunction = AttackerGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Injector: {
-                        cell.cellFunction = InjectorGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Muscle: {
-                        cell.cellFunction = MuscleGenomeDescription();
-                    } break;
-                    case Enums::CellFunction_Placeholder1: {
-                        cell.cellFunction = PlaceHolderGenomeDescription1();
-                    } break;
-                    case Enums::CellFunction_Placeholder2: {
-                        cell.cellFunction = PlaceHolderGenomeDescription2();
-                    } break;
-                    case Enums::CellFunction_None: {
-                        cell.cellFunction.reset();
-                    } break;
+                auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell) + "###").c_str(), flags);
+                ImGui::PopStyleColor();
+                if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                    if (tabData.selected && *tabData.selected == index) {
+                        tabData.selected.reset();
+                    } else {
+                        tabData.selected = index;
                     }
                 }
+                if (treeNodeOpen) {
+                    auto type = cell.getCellFunctionType();
 
-                //color
-                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - MaxContentTextWidth);
-                AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(MaxContentTextWidth), cell.color);
-                ImGui::PopItemWidth();
-                ImGui::SameLine();
-                AlienImGui::Text("Color");
+                    //cell type
+                    if (AlienImGui::Combo(
+                            AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxContentTextWidth), type)) {
+                        switch (type) {
+                        case Enums::CellFunction_Neuron: {
+                            cell.cellFunction = NeuronGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Transmitter: {
+                            cell.cellFunction = TransmitterGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Constructor: {
+                            cell.cellFunction = ConstructorGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Sensor: {
+                            cell.cellFunction = SensorGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Nerve: {
+                            cell.cellFunction = NerveGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Attacker: {
+                            cell.cellFunction = AttackerGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Injector: {
+                            cell.cellFunction = InjectorGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Muscle: {
+                            cell.cellFunction = MuscleGenomeDescription();
+                        } break;
+                        case Enums::CellFunction_Placeholder1: {
+                            cell.cellFunction = PlaceHolderGenomeDescription1();
+                        } break;
+                        case Enums::CellFunction_Placeholder2: {
+                            cell.cellFunction = PlaceHolderGenomeDescription2();
+                        } break;
+                        case Enums::CellFunction_None: {
+                            cell.cellFunction.reset();
+                        } break;
+                        }
+                    }
 
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Distance").textWidth(MaxContentTextWidth), cell.referenceDistance);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(MaxContentTextWidth), cell.referenceAngle);
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxContentTextWidth), cell.maxConnections);
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxContentTextWidth), cell.maxConnections);
-                AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxContentTextWidth), cell.inputBlocked);
-                AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(MaxContentTextWidth), cell.outputBlocked);
+                    AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(MaxContentTextWidth), cell.color);
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Distance").textWidth(MaxContentTextWidth).format("%.2f"), cell.referenceDistance);
+                    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(MaxContentTextWidth).format("%.1f"), cell.referenceAngle);
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxContentTextWidth), cell.maxConnections);
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxContentTextWidth), cell.executionOrderNumber);
+                    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxContentTextWidth), cell.inputBlocked);
+                    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(MaxContentTextWidth), cell.outputBlocked);
 
-                ImGui::TreePop();
+                    ImGui::TreePop();
+                }
+                ImGui::PopID();
+                ++index;
             }
-            ImGui::PopID();
-            ++index;
         }
+        ImGui::EndChild();
     }
     ImGui::EndChild();
     ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
-    ImGui::BeginChild("##child3", ImVec2(0, 0), true);
-    AlienImGui::Group("Phenotype");
+    if (ImGui::BeginChild("##child3", ImVec2(0, 0), true)) {
+        AlienImGui::Group("Phenotype");
+    }
     ImGui::EndChild();
 }
 

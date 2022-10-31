@@ -8,6 +8,7 @@
 #include "EngineInterface/Colors.h"
 
 #include "StyleRepository.h"
+#include "EngineInterface/Constants.h"
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
@@ -190,8 +191,8 @@ void AlienImGui::InputColorMatrix(InputMatrixParameters const& parameters, float
         ImGui::SameLine();
         if (parameters._defaultValue) {
             bool changed = false;
-            for (int row = 0; row < 7; ++row) {
-                for (int col = 0; col < 7; ++col) {
+            for (int row = 0; row < MAX_COLORS; ++row) {
+                for (int col = 0; col < MAX_COLORS; ++col) {
                     if(value[row][col] != (*parameters._defaultValue)[row][col]) {
                         changed = true;
                     }
@@ -340,41 +341,44 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
     auto& styleRep = StyleRepository::getInstance();
     auto textWidth = styleRep.scaleContent(parameters._textWidth);
-    auto comboWidth = styleRep.scaleContent(30);
+    auto comboWidth = !parameters._name.empty() ? ImGui::GetContentRegionAvail().x - textWidth : styleRep.scaleContent(70);
+    auto colorFieldWidth1 = comboWidth - styleRep.scaleContent(40);
+    auto colorFieldWidth2 = comboWidth - styleRep.scaleContent(30);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
 
     ImVec2 comboPos = ImGui::GetCursorPos();
-    ImGui::SetNextItemWidth(styleRep.scaleContent(70));
+
+    ImGui::SetNextItemWidth(comboWidth);
     if (ImGui::BeginCombo(("##" + parameters._name).c_str(), "")) {
-        for (int n = 0; n < 7; ++n) {
-            bool isSelected = (value == n);  // You can store your selection however you want, outside or inside your objects
+        for (int n = 0; n < MAX_COLORS; ++n) {
+            bool isSelected = (value == n);
 
             if (ImGui::Selectable(items[n], isSelected)) {
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualCellColors[n], comboWidth);
+            ColorField(Const::IndividualCellColors[n], colorFieldWidth1);
             ImGui::SameLine();
             ImGui::TextUnformatted(" ");
             if (isSelected) {
-                ImGui::SetItemDefaultFocus();  // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                ImGui::SetItemDefaultFocus();
             }
         }
         ImGui::EndCombo();
     }
     ImGui::SameLine();
     ImVec2 backupPos = ImGui::GetCursorPos();
+
     ImGuiStyle& style = ImGui::GetStyle();
     ImGui::SetCursorPos(ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y));
-    ColorField(Const::IndividualCellColors[value], comboWidth);
-    ImGui::SetCursorPos(backupPos);
+    ColorField(Const::IndividualCellColors[value], colorFieldWidth2);
 
-    if (!parameters._name.empty()) {
-        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - textWidth, ImGui::GetTextLineHeight() + style.FramePadding.y * 2));
-    } else {
-        ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y * 2));
-    }
+    ImGui::SetCursorPos({backupPos.x, backupPos.y + style.FramePadding.y});
+
+    AlienImGui::Text(parameters._name);
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y));
 
     return true;
 }
@@ -402,6 +406,8 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
     ImGui::PopID();
 
     ImGui::SameLine();
+    ImVec2 pos = ImGui::GetCursorPos();
+    ImGui::SetCursorPos({pos.x, pos.y - ImGui::GetStyle().FramePadding.y});
 
     //slider for transition age
     ImGui::PushID(2);
