@@ -7,7 +7,7 @@ struct SimulationParameters
     SimulationParametersSpotValues spotValues;
 
     float timestepSize = 1.0f;            
-    float cellMaxVel = 2.0f;              
+    float cellMaxVelocity = 2.0f;              
     float cellMaxBindingDistance = 2.6f;
     float cellRepulsionStrength = 0.08f;  
 
@@ -16,7 +16,7 @@ struct SimulationParameters
     float cellMaxCollisionDistance = 1.3f;
     float cellMaxForceDecayProb = 0.2f;
     int cellMaxBonds = 6;
-    int cellMaxExecutionOrderNumber = 6;
+    int cellMaxExecutionOrderNumbers = 6;
     int cellCreationTokenAccessNumber = 0;
 
     float cellFunctionWeaponStrength = 0.1f;
@@ -28,10 +28,10 @@ struct SimulationParameters
 
     bool operator==(SimulationParameters const& other) const
     {
-        return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVel == other.cellMaxVel
+        return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
             && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
-            && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumber == other.cellMaxExecutionOrderNumber
+            && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumbers == other.cellMaxExecutionOrderNumbers
             && cellCreationTokenAccessNumber == other.cellCreationTokenAccessNumber && cellFunctionWeaponStrength == other.cellFunctionWeaponStrength
             && cellFunctionSensorRange == other.cellFunctionSensorRange && radiationProb == other.radiationProb
             && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation

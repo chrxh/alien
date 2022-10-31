@@ -66,7 +66,7 @@ public:
     };
     static void InputFloat(InputFloatParameters const& parameters, float& value);
 
-    static void ColorField(uint32_t cellColor, int width = 0);
+    static bool ColorField(uint32_t cellColor, int width = 0);
 
     struct InputMatrixParameters
     {
@@ -113,6 +113,7 @@ public:
     struct ComboColorParameters
     {
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
+        MEMBER_DECLARATION(ComboColorParameters, int, textWidth, 100);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
     };
     static bool ComboColor(ComboColorParameters const& parameters, int& value);

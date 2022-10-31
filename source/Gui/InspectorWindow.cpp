@@ -8,13 +8,13 @@
 #include "ImguiMemoryEditor/imgui_memory_editor.h"
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "Base/StringHelper.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "EditorModel.h"
 #include "AlienImGui.h"
+#include "CellFunctionStrings.h"
 
 using namespace std::string_literals;
 
@@ -22,8 +22,6 @@ namespace
 {
     auto const MaxCellContentTextWidth = 140.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
-    auto const CellFunctionStrings =
-        std::vector{"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s, "None"s};
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -136,7 +134,8 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
         AlienImGui::Group("Properties");
         auto const& parameters = _simController->getSimulationParameters();
         int type = cell.getCellFunctionType();
-        if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(CellFunctionStrings).textWidth(MaxCellContentTextWidth), type)) {
+        if (AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxCellContentTextWidth), type)) {
             switch (type) {
             case Enums::CellFunction_Neuron: {
                 cell.cellFunction = NeuronDescription();
@@ -190,7 +189,7 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::SliderIntParameters()
                 .name("Execution order")
                 .textWidth(MaxCellContentTextWidth)
-                .max(parameters.cellMaxExecutionOrderNumber - 1)
+                .max(parameters.cellMaxExecutionOrderNumbers - 1)
                 .min(0),
             cell.executionOrderNumber);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);

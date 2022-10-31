@@ -3,7 +3,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeEncoder.h"
+#include "EngineInterface/GenomeTranslator.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
 #include "Base/NumberGenerator.h"
@@ -38,7 +38,7 @@ namespace
 
 TEST_F(ConstructorTests, noEnergy)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCell(
@@ -66,7 +66,7 @@ TEST_F(ConstructorTests, alreadyFinished)
 {
     DataDescription data;
 
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     auto constructor = ConstructorDescription().setGenome(genome).setSingleConstruction(true);
     constructor.setCurrentGenomePos(constructor.genome.size());
@@ -93,7 +93,7 @@ TEST_F(ConstructorTests, alreadyFinished)
 
 TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCell(
@@ -120,7 +120,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 
 TEST_F(ConstructorTests, manualConstruction_correctCycle)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     _simController->calcSingleTimestep();
 
@@ -133,7 +133,7 @@ TEST_F(ConstructorTests, manualConstruction_correctCycle)
                      .setCellFunction(ConstructorDescription().setMode(3).setGenome(genome)));
 
     _simController->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumber * 3; ++i) {
+    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumbers * 3; ++i) {
         _simController->calcSingleTimestep();
     }
     auto actualData = _simController->getSimulationData();
@@ -143,7 +143,7 @@ TEST_F(ConstructorTests, manualConstruction_correctCycle)
 
 TEST_F(ConstructorTests, manualConstruction_wrongCycle)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     _simController->calcSingleTimestep();
 
@@ -156,7 +156,7 @@ TEST_F(ConstructorTests, manualConstruction_wrongCycle)
                      .setCellFunction(ConstructorDescription().setMode(3).setGenome(genome)));
 
     _simController->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumber * 3 - 1; ++i) {
+    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumbers * 3 - 1; ++i) {
         _simController->calcSingleTimestep();
     }
     auto actualData = _simController->getSimulationData();
@@ -166,7 +166,7 @@ TEST_F(ConstructorTests, manualConstruction_wrongCycle)
 
 TEST_F(ConstructorTests, constructSingleCell_noSeparation)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setColor(2).setExecutionOrderNumber(4)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setColor(2).setExecutionOrderNumber(4).setInputBlocked(true).setOutputBlocked(true)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -195,6 +195,8 @@ TEST_F(ConstructorTests, constructSingleCell_noSeparation)
     EXPECT_EQ(1, actualConstructedCell.maxConnections);
     EXPECT_EQ(2, actualConstructedCell.color);
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
+    EXPECT_TRUE(actualConstructedCell.inputBlocked);
+    EXPECT_TRUE(actualConstructedCell.outputBlocked);
     EXPECT_FALSE(actualConstructedCell.underConstruction);
     EXPECT_EQ(Enums::CellFunction_None, actualConstructedCell.getCellFunctionType());
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy, actualConstructedCell.energy));
@@ -203,7 +205,7 @@ TEST_F(ConstructorTests, constructSingleCell_noSeparation)
 
 TEST_F(ConstructorTests, constructSingleCell_notFinished)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription(), CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription(), CellGenomeDescription()});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -231,7 +233,7 @@ TEST_F(ConstructorTests, constructSingleCell_notFinished)
 
 TEST_F(ConstructorTests, constructSingleCell_separation)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -261,7 +263,7 @@ TEST_F(ConstructorTests, constructSingleCell_separation)
 
 TEST_F(ConstructorTests, constructSingleCell_makeSticky)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setMaxConnections(3)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setMaxConnections(3)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -289,7 +291,7 @@ TEST_F(ConstructorTests, constructSingleCell_makeSticky)
 
 TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCell(
@@ -318,7 +320,7 @@ TEST_F(ConstructorTests, constructSingleCell_singleConstruction)
 
 TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({
@@ -359,7 +361,7 @@ TEST_F(ConstructorTests, constructSingleCell_manualConstruction)
 
 TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setReferenceAngle(90.0f)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setReferenceAngle(90.0f)});
 
     DataDescription data;
     data.addCells({
@@ -394,7 +396,7 @@ TEST_F(ConstructorTests, constructSingleCell_differentAngle1)
 
 TEST_F(ConstructorTests, constructSingleCell_differentAngle2)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setReferenceAngle(-90.0f)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setReferenceAngle(-90.0f)});
 
     DataDescription data;
     data.addCells(
@@ -434,7 +436,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
     neuron.weights[7][1] = -1.0f;
     neuron.bias[3] = 1.8f;
 
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setCellFunction(neuron)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setCellFunction(neuron)});
 
     DataDescription data;
     data.addCell(
@@ -475,7 +477,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
                            .setAngleAlignment(2)
                            .setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
 
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
 
     DataDescription data;
 
@@ -513,7 +515,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
                            .setMakeSticky(true)
                            .setAngleAlignment(2)
                            .setGenome(createRandomGenome(MAX_GENOME_BYTES));
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
 
     DataDescription data;
 
@@ -550,7 +552,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
                                       .setAngleAlignment(2)
                                       .setGenome(createRandomGenome(0));    // size= 0 means copy genome
 
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -575,7 +577,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
 
 TEST_F(ConstructorTests, constructSecondCell_separation)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({
@@ -620,7 +622,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
 
 TEST_F(ConstructorTests, constructSecondCell_noSeparation)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({
@@ -673,7 +675,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
 
 TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setMaxConnections(1)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setMaxConnections(1)});
 
     DataDescription data;
     data.addCells({
@@ -710,7 +712,7 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
 
 TEST_F(ConstructorTests, constructSecondCell_notFinished)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription(), CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription(), CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({
@@ -753,7 +755,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
 
 TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setReferenceAngle(90.0f)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setReferenceAngle(90.0f)});
 
     DataDescription data;
     data.addCells({
@@ -801,7 +803,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 
 TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription().setReferenceAngle(-90.0f)});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription().setReferenceAngle(-90.0f)});
 
     DataDescription data;
     data.addCells({
@@ -849,7 +851,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
 
 TEST_F(ConstructorTests, constructThirdCell_multipleConnections)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({
@@ -898,7 +900,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections)
 
 TEST_F(ConstructorTests, constructThirdCell_noMultipleConnections)
 {
-    auto genome = GenomeEncoder::encode({CellGenomeDescription()});
+    auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({

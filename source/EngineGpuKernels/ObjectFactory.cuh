@@ -207,7 +207,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->vel = vel;
     cell->energy = energy;
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumber - 1);
+    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
     cell->numConnections = 0;
     cell->underConstruction = false;
     cell->locked = 0;

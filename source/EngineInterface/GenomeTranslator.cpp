@@ -1,4 +1,4 @@
-#include "GenomeEncoder.h"
+#include "GenomeTranslator.h"
 
 #include <variant>
 #include <boost/range/adaptors.hpp>
@@ -18,7 +18,7 @@ namespace
     std::vector<uint8_t> convertWordToBytes(int value) { return {static_cast<uint8_t>(value & 0xff), static_cast<uint8_t>((value >> 8) % 0xff)}; }
 }
 
-std::vector<uint8_t> GenomeEncoder::encode(GenomeDescription const& cells)
+std::vector<uint8_t> GenomeTranslator::encode(GenomeDescription const& cells)
 {
     std::vector<uint8_t> result;
     result.reserve(cells.size() * 6);
@@ -29,6 +29,8 @@ std::vector<uint8_t> GenomeEncoder::encode(GenomeDescription const& cells)
         result.emplace_back(cell.maxConnections);
         result.emplace_back(cell.executionOrderNumber);
         result.emplace_back(cell.color);
+        result.emplace_back(convertBoolToByte(cell.inputBlocked));
+        result.emplace_back(convertBoolToByte(cell.outputBlocked));
         switch (cell.getCellFunctionType()) {
         case Enums::CellFunction_Neuron: {
             auto neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);

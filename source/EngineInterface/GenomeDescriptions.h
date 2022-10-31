@@ -126,14 +126,10 @@ struct CellGenomeDescription
 
     float referenceDistance = 1.0f;
     float referenceAngle = 0.0f;
-    float energy = 100.0f;
     int color = 0;
     int maxConnections = 0;
     int executionOrderNumber = 0;
-    bool barrier = false;
-    int age = 0;
 
-    bool underConstruction = false;
     bool inputBlocked = false;
     bool outputBlocked = false;
     CellFunctionGenomeDescription cellFunction;
@@ -156,27 +152,11 @@ struct CellGenomeDescription
         referenceAngle = value;
         return *this;
     }
-    CellGenomeDescription& setEnergy(float value)
-    {
-        energy = value;
-        return *this;
-    }
     CellGenomeDescription& setColor(unsigned char value)
     {
         color = value;
         return *this;
     }
-    CellGenomeDescription& setBarrier(bool value)
-    {
-        barrier = value;
-        return *this;
-    }
-    CellGenomeDescription& setAge(int value)
-    {
-        age = value;
-        return *this;
-    }
-
     CellGenomeDescription& setMaxConnections(int value)
     {
         maxConnections = value;
@@ -185,11 +165,6 @@ struct CellGenomeDescription
     CellGenomeDescription& setExecutionOrderNumber(int value)
     {
         executionOrderNumber = value;
-        return *this;
-    }
-    CellGenomeDescription& setUnderConstruction(bool value)
-    {
-        underConstruction = value;
         return *this;
     }
     CellGenomeDescription& setInputBlocked(bool value)

@@ -139,7 +139,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     }
 }
 
-void AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
+bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
 {
     if (width == 0) {
         width = StyleRepository::getInstance().scaleContent(30);
@@ -153,8 +153,10 @@ void AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
 */
-    ImGui::Button("##", ImVec2(width, ImGui::GetTextLineHeight()));
+    auto result = ImGui::Button("##", ImVec2(width, ImGui::GetTextLineHeight()));
     ImGui::PopStyleColor(3);
+
+    return result;
 }
 
 void AlienImGui::InputColorMatrix(InputMatrixParameters const& parameters, float (&value)[7][7])
@@ -336,8 +338,11 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
+    auto& styleRep = StyleRepository::getInstance();
+    auto textWidth = styleRep.scaleContent(parameters._textWidth);
+    auto comboWidth = styleRep.scaleContent(30);
+
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
-    auto styleRep = StyleRepository::getInstance();
 
     ImVec2 comboPos = ImGui::GetCursorPos();
     ImGui::SetNextItemWidth(styleRep.scaleContent(70));
@@ -349,7 +354,7 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualCellColors[n], styleRep.scaleContent(30));
+            ColorField(Const::IndividualCellColors[n], comboWidth);
             ImGui::SameLine();
             ImGui::TextUnformatted(" ");
             if (isSelected) {
@@ -362,10 +367,14 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
     ImVec2 backupPos = ImGui::GetCursorPos();
     ImGuiStyle& style = ImGui::GetStyle();
     ImGui::SetCursorPos(ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y));
-    ColorField(Const::IndividualCellColors[value], styleRep.scaleContent(30));
+    ColorField(Const::IndividualCellColors[value], comboWidth);
     ImGui::SetCursorPos(backupPos);
 
-    ImGui::Dummy(ImVec2(0,0));
+    if (!parameters._name.empty()) {
+        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - textWidth, ImGui::GetTextLineHeight() + style.FramePadding.y * 2));
+    } else {
+        ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y * 2));
+    }
 
     return true;
 }

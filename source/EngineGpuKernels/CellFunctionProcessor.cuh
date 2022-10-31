@@ -29,7 +29,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    auto maxExecutionOrderNumber = cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    auto maxExecutionOrderNumber = cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     auto executionOrderNumber = data.timestep % maxExecutionOrderNumber;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -65,7 +65,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
     if (cell->inputBlocked || cell->underConstruction) {
         return result;
     }
-    int inputExecutionOrderNumber = -cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    int inputExecutionOrderNumber = -cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->outputBlocked || connectedCell->underConstruction) {
@@ -73,18 +73,18 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         }
         auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
         if (otherExecutionOrderNumber > cell->executionOrderNumber) {
-            otherExecutionOrderNumber -= cudaSimulationParameters.cellMaxExecutionOrderNumber;
+            otherExecutionOrderNumber -= cudaSimulationParameters.cellMaxExecutionOrderNumbers;
         }
         if (otherExecutionOrderNumber > inputExecutionOrderNumber) {
             inputExecutionOrderNumber = otherExecutionOrderNumber;
         }
     }
 
-    if (inputExecutionOrderNumber == -cudaSimulationParameters.cellMaxExecutionOrderNumber) {
+    if (inputExecutionOrderNumber == -cudaSimulationParameters.cellMaxExecutionOrderNumbers) {
         return result;
     }
     if (inputExecutionOrderNumber < 0) {
-        inputExecutionOrderNumber += cudaSimulationParameters.cellMaxExecutionOrderNumber;
+        inputExecutionOrderNumber += cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;

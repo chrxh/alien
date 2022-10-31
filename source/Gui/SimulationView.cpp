@@ -12,25 +12,13 @@
 #include "ModeController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "CellFunctionStrings.h"
 
 namespace
 {
     auto const MotionBlurStatic = 0.8f;
     auto const MotionBlurMoving = 0.5f;
     auto const ZoomFactorForOverlay = 16.0f;
-
-    std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
-        {Enums::CellFunction_Constructor, "Constructor"},
-        {Enums::CellFunction_Attacker, "Digestion"},
-        {Enums::CellFunction_Injector, "Injector"},
-        {Enums::CellFunction_Muscle, "Muscle"},
-        {Enums::CellFunction_Nerve, "Nerve"},
-        {Enums::CellFunction_Neuron, "Neuron"},
-        {Enums::CellFunction_Sensor, "Sensor"},
-        {Enums::CellFunction_Transmitter, "Transmitter"},
-        {Enums::CellFunction_Placeholder1, "Placeholder1"},
-        {Enums::CellFunction_Placeholder2, "Placeholder2"},
-    };
 }
 
 _SimulationView::_SimulationView(
@@ -332,7 +320,7 @@ void _SimulationView::updateImageFromSimulation()
                     auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
                     if (overlayElement.cellType != Enums::CellFunction_None) {
-                        auto text = cellFunctionToStringMap.at(overlayElement.cellType);
+                        auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
                         drawList->AddText(
                             StyleRepository::getInstance().getMediumFont(),
                             fontSize,
