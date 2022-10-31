@@ -13,9 +13,16 @@ public:
 private:
     void processIntern() override;
 
+    void showToolbar();
+
     struct TabData
     {
         GenomeDescription genome;
+        std::optional<int> selected;
     };
+    void showGenomeContent(TabData& tabData);
+
     std::vector<TabData> _tabDatas;
+    int _currentTabIndex = 0;
+    float _previewHeight = 200.0f;
 };

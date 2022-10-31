@@ -215,9 +215,9 @@ void _SimulationParametersWindow::processBase(
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(6.0f)
-                .defaultValue(origSimParameters.cellMaxVel)
+                .defaultValue(origSimParameters.cellMaxVelocity)
                 .tooltip(std::string("Maximum velocity that a cell can reach.")),
-            simParameters.cellMaxVel);
+            simParameters.cellMaxVelocity);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Maximum force")

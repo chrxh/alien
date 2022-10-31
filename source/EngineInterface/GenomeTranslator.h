@@ -5,7 +5,7 @@
 #include "GenomeDescriptions.h"
 
 
-class GenomeEncoder
+class GenomeTranslator
 {
 public:
     static std::vector<uint8_t> encode(GenomeDescription const& cells);

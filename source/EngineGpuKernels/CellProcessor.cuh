@@ -225,8 +225,8 @@ __inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
         }
 
         cell->vel = cell->vel + cell->temp1;
-        if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVel) {
-            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVel;
+        if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVelocity) {
+            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVelocity;
         }
         cell->temp1 = {0, 0};
     }

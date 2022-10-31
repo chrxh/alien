@@ -23,6 +23,8 @@ private:
         int maxConnections;
         int executionOrderNumber;
         int color;
+        bool inputBlocked;
+        bool outputBlocked;
         Enums::CellFunction cellFunction;
     };
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell, bool& finished);
@@ -125,7 +127,7 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Simulati
         return false;
     }
     if (cell->cellFunctionData.constructor.mode > 0
-        && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumber * cell->cellFunctionData.constructor.mode) != cell->executionOrderNumber)) {
+        && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * cell->cellFunctionData.constructor.mode) != cell->executionOrderNumber)) {
         return false;
     }
     if (cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize) {
@@ -143,8 +145,10 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.angle = readFloat(constructor, finished) * 180;
     result.distance = readFloat(constructor, finished) + 1.0f;
     result.maxConnections = readByte(constructor, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
-    result.executionOrderNumber = readByte(constructor, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumber;
+    result.executionOrderNumber = readByte(constructor, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.color = readByte(constructor, finished) % 7;
+    result.inputBlocked = readBool(constructor, finished);
+    result.outputBlocked = readBool(constructor, finished);
     return result;
 }
 
@@ -405,6 +409,8 @@ ConstructorProcessor::constructCellIntern(
     result->underConstruction = true;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
+    result->inputBlocked = constructionData.inputBlocked;
+    result->outputBlocked = constructionData.outputBlocked;
 
     auto& constructor = hostCell->cellFunctionData.constructor;
 

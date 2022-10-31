@@ -13,6 +13,7 @@ PUBLIC
     AutosaveController.h
     BrowserWindow.cpp
     BrowserWindow.h
+    CellFunctionStrings.h
     ColorizeDialog.cpp
     ColorizeDialog.h
     CreateUserDialog.cpp

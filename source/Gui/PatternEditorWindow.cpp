@@ -333,7 +333,7 @@ void _PatternEditorWindow::onGenerateBranchNumbers()
     std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
 
     auto parameters = _simController->getSimulationParameters();
-    DescriptionHelper::generateBranchNumbers(dataWithClusters, cellIds, parameters.cellMaxExecutionOrderNumber);
+    DescriptionHelper::generateBranchNumbers(dataWithClusters, cellIds, parameters.cellMaxExecutionOrderNumbers);
 
     _simController->removeSelectedEntities(true);
     _simController->addAndSelectSimulationData(dataWithClusters);
@@ -356,14 +356,9 @@ void _PatternEditorWindow::onSetBarrier(bool value)
 
 bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
 {
-    float h, s, v;
-    AlienImGui::convertRGBtoHSV(cellColor, h, s,v);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 1.0f));
-    auto result = ImGui::Button(id.c_str());
-    ImGui::PopStyleColor(3);
-
+    ImGui::PushID(id.c_str());
+    auto result = AlienImGui::ColorField(cellColor);
+    ImGui::PopID();
     return result;
 }
 

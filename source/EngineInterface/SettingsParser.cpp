@@ -41,7 +41,7 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     JsonParser::encodeDecode(tree, simPar.spotValues.rigidity, defaultPar.spotValues.rigidity, "simulation parameters.rigidity", parserTask);
     JsonParser::encodeDecode(
         tree, simPar.spotValues.cellBindingForce, defaultPar.spotValues.cellBindingForce, "simulation parameters.cell.binding force", parserTask);
-    JsonParser::encodeDecode(tree, simPar.cellMaxVel, defaultPar.cellMaxVel, "simulation parameters.cell.max velocity", parserTask);
+    JsonParser::encodeDecode(tree, simPar.cellMaxVelocity, defaultPar.cellMaxVelocity, "simulation parameters.cell.max velocity", parserTask);
     JsonParser::encodeDecode(
         tree, simPar.cellMaxBindingDistance, defaultPar.cellMaxBindingDistance, "simulation parameters.cell.max binding distance", parserTask);
     JsonParser::encodeDecode(tree, simPar.cellRepulsionStrength, defaultPar.cellRepulsionStrength, "simulation parameters.cell.repulsion strength", parserTask);
@@ -53,7 +53,7 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         tree, simPar.cellMaxForceDecayProb, defaultPar.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", parserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxBonds, defaultPar.cellMaxBonds, "simulation parameters.cell.max bonds", parserTask);
     JsonParser::encodeDecode(
-        tree, simPar.cellMaxExecutionOrderNumber, defaultPar.cellMaxExecutionOrderNumber, "simulation parameters.cell.max execution order number", parserTask);
+        tree, simPar.cellMaxExecutionOrderNumbers, defaultPar.cellMaxExecutionOrderNumbers, "simulation parameters.cell.max execution order number", parserTask);
     JsonParser::encodeDecode(tree, simPar.spotValues.cellMinEnergy, defaultPar.spotValues.cellMinEnergy, "simulation parameters.cell.min energy", parserTask);
     JsonParser::encodeDecode(
         tree, simPar.spotValues.cellFusionVelocity, defaultPar.spotValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", parserTask);
