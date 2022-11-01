@@ -61,6 +61,8 @@ struct ConstructorFunction
 struct SensorFunction
 {
     Enums::SensorMode mode;
+    float angle;
+    float minDensity;
     int color;
 };
 
