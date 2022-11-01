@@ -68,6 +68,7 @@ public:
     ImFont* getMonospaceFont() const;
 
     float scaleContent(float value) const;
+    float scaleBackContent(float value) const;
 
 private:
     StyleRepository() = default;

@@ -102,3 +102,8 @@ float StyleRepository::scaleContent(float value) const
 {
     return _contentScaleFactor * value;
 }
+
+float StyleRepository::scaleBackContent(float value) const
+{
+    return _contentScaleFactor / value;
+}

@@ -6,9 +6,9 @@
 
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/Constants.h"
 
 #include "StyleRepository.h"
-#include "EngineInterface/Constants.h"
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
