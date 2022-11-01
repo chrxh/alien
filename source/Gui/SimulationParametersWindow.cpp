@@ -357,7 +357,7 @@ void _SimulationParametersWindow::processBase(
          */
         AlienImGui::Group("Cell specialization: Digestion function");
         AlienImGui::InputColorMatrix(
-            AlienImGui::InputMatrixParameters()
+            AlienImGui::InputColorMatrixParameters()
                 .name("Food chain color matrix")
                 .textWidth(MaxContentTextWidth)
                 .tooltip("This matrix can be used to determine how well one cell can digest another cell. The color of the attacking cell is shown in the header "
@@ -628,7 +628,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          */
         AlienImGui::Group("Cell specialization: Digestion function");
         AlienImGui::InputColorMatrix(
-            AlienImGui::InputMatrixParameters()
+            AlienImGui::InputColorMatrixParameters()
                 .name("Food chain color matrix")
                 .textWidth(MaxContentTextWidth)
                 .defaultValue(toVector(origSpot.values.cellFunctionWeaponFoodChainColorMatrix)),

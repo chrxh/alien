@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "Base/Definitions.h"
+#include "EngineInterface/Constants.h"
 #include "Definitions.h"
 
 class AlienImGui
@@ -66,17 +67,35 @@ public:
     };
     static void InputFloat(InputFloatParameters const& parameters, float& value);
 
+    struct InputFloatVectorParameters
+    {
+        MEMBER_DECLARATION(InputFloatVectorParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloatVectorParameters, float, step, 1.0f);
+        MEMBER_DECLARATION(InputFloatVectorParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputFloatVectorParameters, int, textWidth, 100);
+    };
+    static void InputFloatVector(InputFloatVectorParameters const& parameters, std::vector<float>& value);
+
+    struct InputFloatMatrixParameters
+    {
+        MEMBER_DECLARATION(InputFloatMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloatMatrixParameters, float, step, 1.0f);
+        MEMBER_DECLARATION(InputFloatMatrixParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputFloatMatrixParameters, int, textWidth, 100);
+    };
+    static void InputFloatMatrix(InputFloatMatrixParameters const& parameters, std::vector<std::vector<float>>& value);
+
     static bool ColorField(uint32_t cellColor, int width = 0);
 
-    struct InputMatrixParameters
+    struct InputColorMatrixParameters
     {
-        MEMBER_DECLARATION(InputMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputMatrixParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputMatrixParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(InputMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(InputColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputColorMatrixParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputColorMatrix(InputMatrixParameters const& parameters, float (&value)[7][7]);
+    static void InputColorMatrix(InputColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct InputTextParameters
     {

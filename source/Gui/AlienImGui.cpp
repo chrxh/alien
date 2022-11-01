@@ -140,6 +140,39 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     }
 }
 
+void AlienImGui::InputFloatVector(InputFloatVectorParameters const& parameters, std::vector<float>& value)
+{
+    std::vector<std::vector<float>> wrappedValue{value};
+    InputFloatMatrix(
+        InputFloatMatrixParameters().name(parameters._name).textWidth(parameters._textWidth).step(parameters._step).format(parameters._format), wrappedValue);
+    value = wrappedValue.front();
+}
+
+void AlienImGui::InputFloatMatrix(InputFloatMatrixParameters const& parameters, std::vector<std::vector<float>>& value)
+{
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto rows = value.size();
+    auto cols = value.front().size();
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), cols, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+        for (int row = 0; row < rows; ++row) {
+            ImGui::PushID(row);
+            for (int col = 0; col < cols; ++col) {
+                ImGui::PushID(col);
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                ImGui::InputFloat(("##" + parameters._name).c_str(), &value.at(row).at(col), parameters._step, 0, parameters._format.c_str());
+                ImGui::PopID();
+            }
+            ImGui::TableNextRow();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+    }
+}
+
 bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
 {
     if (width == 0) {
@@ -160,15 +193,15 @@ bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
     return result;
 }
 
-void AlienImGui::InputColorMatrix(InputMatrixParameters const& parameters, float (&value)[7][7])
+void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
 
     if (ImGui::BeginTable(("##" + parameters._name).c_str(), 8, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-        for (int row = 0; row < 8; ++row) {
+        for (int row = 0; row < MAX_COLORS + 1; ++row) {
             ImGui::PushID(row);
-            for (int col = 0; col < 8; ++col) {
-                ImGui::PushID(std::to_string(col).c_str());
+            for (int col = 0; col < MAX_COLORS + 1; ++col) {
+                ImGui::PushID(col);
                 ImGui::TableNextColumn();
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
                 if (row == 0 && col > 0) {
