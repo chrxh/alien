@@ -61,8 +61,8 @@ void _GenomeEditorWindow::processIntern()
 
 void _GenomeEditorWindow::showToolbar()
 {
+    auto& tabData = _tabDatas.at(_currentTabIndex);
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
-        auto& tabData = _tabDatas.at(_currentTabIndex);
         if (tabData.selected) {
             tabData.genome.insert(tabData.genome.begin() + *tabData.selected, CellGenomeDescription());
         } else {
@@ -71,8 +71,20 @@ void _GenomeEditorWindow::showToolbar()
     }
     AlienImGui::Tooltip("Add cell to gene description");
     ImGui::SameLine();
+    ImGui::BeginDisabled(tabData.genome.empty());
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
+        if (tabData.selected) {
+            tabData.genome.erase(tabData.genome.begin() + *tabData.selected);
+            if (*tabData.selected == toInt(tabData.genome.size())) {
+                if (--(*tabData.selected) < 0) {
+                    tabData.selected.reset();
+                }
+            }
+        } else {
+            tabData.genome.pop_back();
+        }
     }
+    ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete cell from gene description");
     AlienImGui::Separator();
 }
@@ -280,10 +292,13 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
 
                     switch (type) {
                     case Enums::CellFunction_Neuron: {
+                        auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
                         if (ImGui::TreeNodeEx("Weights", flags)) {
+                            AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f), neuron.weights);
                             ImGui::TreePop();
                         }
                         if (ImGui::TreeNodeEx("Bias", flags)) {
+                            AlienImGui::InputFloatVector(AlienImGui::InputFloatVectorParameters().step(0.1f), neuron.bias);
                             ImGui::TreePop();
                         }
                     } break;
