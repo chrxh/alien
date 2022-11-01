@@ -335,8 +335,7 @@ void _SimulationParametersWindow::processBase(
             if (0 == color) {
                 parameters.name("Target color and duration")
                     .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "
-                             "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding colors are kept. "
-                             "The color of a cell can have significance in its digestion, depending on the configuration of the digestion function.");
+                             "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding color are kept.");
             }
             AlienImGui::InputColorTransition(
                 parameters, color, simParameters.spotValues.cellColorTransitionTargetColor[color], simParameters.spotValues.cellColorTransitionDuration[color]);

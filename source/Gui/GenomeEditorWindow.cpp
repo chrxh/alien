@@ -9,6 +9,7 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "EngineInterface/Colors.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -47,7 +48,7 @@ void _GenomeEditorWindow::processIntern()
 
         for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
             if (ImGui::BeginTabItem(("Gene " + std::to_string(index + 1)).c_str(), NULL, ImGuiTabItemFlags_None)) {
-                showGenomeContent(tabData);
+                showGenomeTab(tabData);
                 _currentTabIndex = toInt(index);
                 ImGui::EndTabItem();
             }
@@ -71,35 +72,88 @@ void _GenomeEditorWindow::showToolbar()
     AlienImGui::Separator();
 }
 
-void _GenomeEditorWindow::showGenomeContent(TabData& tabData)
+void _GenomeEditorWindow::showGenomeTab(TabData& tabData)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
         AlienImGui::Group("Genotype");
-        if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
-            int index = 0;
-            for (auto& cell : tabData.genome) {
-                ImGui::PushID(index);
+        showGenotype(tabData);
+    }
+    ImGui::EndChild();
+    ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().scaleContent(5.0f)));
+    if (ImGui::IsItemActive()) {
+        _previewHeight -= ImGui::GetIO().MouseDelta.y;
+    }
+    if (ImGui::BeginChild("##child3", ImVec2(0, 0), true)) {
+        AlienImGui::Group("Phenotype");
+        showPhenotype(tabData);
+    }
+    ImGui::EndChild();
+}
 
-                float h, s, v;
-                AlienImGui::convertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-                ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
-                ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed | */ ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
+namespace 
+{
+    class DynamicTableLayout
+    {
+    public:
+        bool begin()
+        {
+            auto width = StyleRepository::getInstance().scaleContent(ImGui::GetContentRegionAvail().x);
+            _columns = std::max(toInt(width / 260), 1);
+            auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
+            if (result) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+            }
+            return result;
+        }
+        void end() { ImGui::EndTable(); }
+
+        void next()
+        {
+            auto currentCol = (++_elementNumber) % _columns;
+            if (currentCol > 0) {
+                ImGui::TableSetColumnIndex(currentCol);
+            } else {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+            }
+        }
+
+    private:
+        int _columns = 0;
+        int _elementNumber = 0;
+    };
+}
+
+void _GenomeEditorWindow::showGenotype(TabData& tabData)
+{
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
+        int index = 0;
+        for (auto& cell : tabData.genome) {
+            ImGui::PushID(index);
+
+            float h, s, v;
+            AlienImGui::convertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
+            ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed | */ ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
+            if (tabData.selected && *tabData.selected == index) {
+                flags |= ImGuiTreeNodeFlags_Selected;
+            }
+            auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell) + "###").c_str(), flags);
+            ImGui::PopStyleColor();
+            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
                 if (tabData.selected && *tabData.selected == index) {
-                    flags |= ImGuiTreeNodeFlags_Selected;
+                    tabData.selected.reset();
+                } else {
+                    tabData.selected = index;
                 }
-                auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell) + "###").c_str(), flags);
-                ImGui::PopStyleColor();
-                if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-                    if (tabData.selected && *tabData.selected == index) {
-                        tabData.selected.reset();
-                    } else {
-                        tabData.selected = index;
-                    }
-                }
-                if (treeNodeOpen) {
-                    auto type = cell.getCellFunctionType();
+            }
+            if (treeNodeOpen) {
+                auto type = cell.getCellFunctionType();
 
-                    //cell type
+                //cell type
+                DynamicTableLayout table;
+                if (table.begin()) {
                     if (AlienImGui::Combo(
                             AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxContentTextWidth), type)) {
                         switch (type) {
@@ -138,33 +192,36 @@ void _GenomeEditorWindow::showGenomeContent(TabData& tabData)
                         } break;
                         }
                     }
+                    table.next();
 
                     AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(MaxContentTextWidth), cell.color);
+                    table.next();
                     AlienImGui::InputFloat(
                         AlienImGui::InputFloatParameters().name("Distance").textWidth(MaxContentTextWidth).format("%.2f"), cell.referenceDistance);
+                    table.next();
                     AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(MaxContentTextWidth).format("%.1f"), cell.referenceAngle);
+                    table.next();
                     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxContentTextWidth), cell.maxConnections);
+                    table.next();
                     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxContentTextWidth), cell.executionOrderNumber);
+                    table.next();
                     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxContentTextWidth), cell.inputBlocked);
+                    table.next();
                     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(MaxContentTextWidth), cell.outputBlocked);
 
-                    ImGui::TreePop();
+                    table.end();
                 }
-                ImGui::PopID();
-                ++index;
+                ImGui::TreePop();
             }
+            ImGui::PopID();
+            ++index;
         }
-        ImGui::EndChild();
     }
     ImGui::EndChild();
-    ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
-    if (ImGui::IsItemActive()) {
-        _previewHeight -= ImGui::GetIO().MouseDelta.y;
-    }
-    if (ImGui::BeginChild("##child3", ImVec2(0, 0), true)) {
-        AlienImGui::Group("Phenotype");
-    }
-    ImGui::EndChild();
+}
+
+void _GenomeEditorWindow::showPhenotype(TabData& tabData)
+{
 }
 
 

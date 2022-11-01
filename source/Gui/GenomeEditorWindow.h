@@ -20,7 +20,9 @@ private:
         GenomeDescription genome;
         std::optional<int> selected;
     };
-    void showGenomeContent(TabData& tabData);
+    void showGenomeTab(TabData& tabData);
+    void showGenotype(TabData& tabData);
+    void showPhenotype(TabData& tabData);
 
     std::vector<TabData> _tabDatas;
     int _currentTabIndex = 0;
