@@ -269,7 +269,7 @@ void _GenomeEditorWindow::processGenotype(TabData& tabData)
                         if (constructorMode == 1) {
                             table.next();
                             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Cycles").textWidth(MaxContentTextWidth), constructor.mode);
-                            if(constructor.mode < 0) {
+                            if (constructor.mode < 0) {
                                 constructor.mode = 0;
                             }
                         }
