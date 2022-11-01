@@ -194,6 +194,8 @@ void _PatternEditorWindow::processIntern()
             _simController->shallowUpdateSelectedEntities(updateData);
             _editorModel->update();
         }
+        ImGui::EndDisabled();
+
 
         AlienImGui::Group("Color");
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
@@ -231,6 +233,7 @@ void _PatternEditorWindow::processIntern()
             _editorModel->setDefaultColorCode(6);
         }
         AlienImGui::Group("Further actions");
+        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         if (ImGui::Button("Set uniform velocities")) {
             _simController->uniformVelocitiesForSelectedEntities(_editorModel->isRolloutToClusters());
         }

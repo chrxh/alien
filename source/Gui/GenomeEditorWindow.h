@@ -13,18 +13,20 @@ public:
 private:
     void processIntern() override;
 
-    void showToolbar();
+    void processToolbar();
 
     struct TabData
     {
         GenomeDescription genome;
         std::optional<int> selected;
     };
-    void showGenomeTab(TabData& tabData);
-    void showGenotype(TabData& tabData);
+    void processGenomeTab(TabData& tabData);
+    void processGenotype(TabData& tabData);
     void showPhenotype(TabData& tabData);
 
     std::vector<TabData> _tabDatas;
     int _currentTabIndex = 0;
     float _previewHeight = 200.0f;
+
+    std::optional<std::vector<uint8_t>> _copiedGenome;
 };
