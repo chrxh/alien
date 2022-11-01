@@ -56,7 +56,7 @@ void _FlowGeneratorWindow::processIntern()
             FlowCenter& origFlowCenter = origFlowFieldSettings.centers[tab];
             bool open = true;
             char name[18] = {};
-            bool* openPtr = flowFieldSettings.numCenters == 1 ? NULL : &open;
+            bool* openPtr = flowFieldSettings.numCenters == 1 ? nullptr : &open;
             snprintf(name, IM_ARRAYSIZE(name), "Center %01d", tab + 1);
             if (ImGui::BeginTabItem(name, openPtr, ImGuiTabItemFlags_None)) {
 

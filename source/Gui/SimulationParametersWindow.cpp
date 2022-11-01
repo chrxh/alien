@@ -71,7 +71,7 @@ void _SimulationParametersWindow::processIntern()
                 AlienImGui::Tooltip("Add spot");
             }
 
-            if (ImGui::BeginTabItem("Base", NULL, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
                 processBase(simParameters, origSimParameters);
                 ImGui::EndTabItem();
             }
