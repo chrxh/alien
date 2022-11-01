@@ -52,12 +52,13 @@ std::vector<uint8_t> GenomeTranslator::encode(GenomeDescription const& cells)
             result.emplace_back(convertBoolToByte(constructor.separateConstruction));
             result.emplace_back(convertBoolToByte(constructor.makeSticky));
             result.emplace_back(static_cast<uint8_t>(constructor.angleAlignment));
-            auto makeGenomeCopy = constructor.genome.size() == 0;
+            auto makeGenomeCopy = std::holds_alternative<ConstructorGenomeDescription::MakeGenomeCopy>(constructor.genome);
             result.emplace_back(convertBoolToByte(makeGenomeCopy));
             if (!makeGenomeCopy) {
-                auto lengthBytes = convertWordToBytes(static_cast<int>(constructor.genome.size()));
+                auto genome = std::get<std::vector<uint8_t>>(constructor.genome);
+                auto lengthBytes = convertWordToBytes(static_cast<int>(genome.size()));
                 result.insert(result.end(), lengthBytes.begin(), lengthBytes.end());
-                result.insert(result.end(), constructor.genome.begin(), constructor.genome.end());
+                result.insert(result.end(), genome.begin(), genome.end());
             }
         } break;
         case Enums::CellFunction_Sensor: {

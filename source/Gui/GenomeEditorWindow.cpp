@@ -64,9 +64,11 @@ void _GenomeEditorWindow::showToolbar()
     auto& tabData = _tabDatas.at(_currentTabIndex);
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
         if (tabData.selected) {
-            tabData.genome.insert(tabData.genome.begin() + *tabData.selected, CellGenomeDescription());
+            tabData.genome.insert(tabData.genome.begin() + *tabData.selected + 1, CellGenomeDescription());
+            ++(*tabData.selected);
         } else {
             tabData.genome.emplace_back(CellGenomeDescription());
+            tabData.selected = toInt(tabData.genome.size() - 1);
         }
     }
     AlienImGui::Tooltip("Add cell to gene description");
@@ -293,7 +295,7 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
                     switch (type) {
                     case Enums::CellFunction_Neuron: {
                         auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
-                        if (ImGui::TreeNodeEx("Weights", flags)) {
+                        if (ImGui::TreeNodeEx("Weight matrix", flags)) {
                             AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f), neuron.weights);
                             ImGui::TreePop();
                         }
@@ -303,6 +305,30 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
                         }
                     } break;
                     case Enums::CellFunction_Constructor: {
+                        auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
+                        std::string content;
+                        if (constructor.isMakeGenomeCopy()) {
+                            content = "Gene copy";
+                        } else {
+                            auto size = constructor.getGenomeData().size();
+                            if (size > 0) {
+                                content = std::to_string(size) + " bytes gene data";
+                            } else {
+                                content = "No gene data";
+                            }
+                        }
+                        auto width = ImGui::GetContentRegionAvail().x / 2;
+                        if (ImGui::BeginChild("##", ImVec2(width, ImGui::GetTextLineHeight() * 2 /*+ ImGui::GetStyle().FramePadding.y*2*/), true)) {
+                            AlienImGui::MonospaceText(content);
+                        }
+                        ImGui::EndChild();
+                        AlienImGui::Button("Clear");
+                        ImGui::SameLine();
+                        AlienImGui::Button("Copy");
+                        ImGui::SameLine();
+                        AlienImGui::Button("Paste");
+                        ImGui::SameLine();
+                        AlienImGui::Button("This");
                     } break;
                     }
 
@@ -318,6 +344,7 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
 
 void _GenomeEditorWindow::showPhenotype(TabData& tabData)
 {
+
 }
 
 

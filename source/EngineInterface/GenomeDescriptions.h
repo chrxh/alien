@@ -32,7 +32,9 @@ struct ConstructorGenomeDescription
     bool separateConstruction = true;
     bool makeSticky = false;
     int angleAlignment = 0;
-    std::vector<uint8_t> genome;
+
+    struct MakeGenomeCopy {};
+    std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
 
     auto operator<=>(ConstructorGenomeDescription const&) const = default;
 
@@ -64,6 +66,13 @@ struct ConstructorGenomeDescription
     ConstructorGenomeDescription& setGenome(std::vector<uint8_t> const& value)
     {
         genome = value;
+        return *this;
+    }
+    bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
+    std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
+    ConstructorGenomeDescription& setMakeGenomeCopy()
+    {
+        genome = MakeGenomeCopy();
         return *this;
     }
 };

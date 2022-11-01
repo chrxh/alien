@@ -499,6 +499,15 @@ void AlienImGui::Text(std::string const& text)
     ImGui::TextUnformatted(text.c_str());
 }
 
+void AlienImGui::MonospaceText(std::string const& text)
+{
+    ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+    Text(text);
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+}
+
 bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
