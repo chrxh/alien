@@ -14,6 +14,7 @@
 namespace
 {
     auto const MaxContentTextWidth = 150.0f;
+    auto const MaxContentWidth = 240.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow()
@@ -62,7 +63,11 @@ void _GenomeEditorWindow::showToolbar()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
         auto& tabData = _tabDatas.at(_currentTabIndex);
-        tabData.genome.emplace_back(CellGenomeDescription());
+        if (tabData.selected) {
+            tabData.genome.insert(tabData.genome.begin() + *tabData.selected, CellGenomeDescription());
+        } else {
+            tabData.genome.emplace_back(CellGenomeDescription());
+        }
     }
     AlienImGui::Tooltip("Add cell to gene description");
     ImGui::SameLine();
@@ -98,7 +103,7 @@ namespace
         bool begin()
         {
             auto width = StyleRepository::getInstance().scaleContent(ImGui::GetContentRegionAvail().x);
-            _columns = std::max(toInt(width / 260), 1);
+            _columns = std::max(toInt(width / MaxContentWidth), 1);
             auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
             if (result) {
                 ImGui::TableNextRow();
@@ -123,6 +128,45 @@ namespace
         int _columns = 0;
         int _elementNumber = 0;
     };
+
+    void applyNewCellFunction(CellGenomeDescription&cell, Enums::CellFunction type)
+    {
+        switch (type) {
+        case Enums::CellFunction_Neuron: {
+            cell.cellFunction = NeuronGenomeDescription();
+        } break;
+        case Enums::CellFunction_Transmitter: {
+            cell.cellFunction = TransmitterGenomeDescription();
+        } break;
+        case Enums::CellFunction_Constructor: {
+            cell.cellFunction = ConstructorGenomeDescription();
+        } break;
+        case Enums::CellFunction_Sensor: {
+            cell.cellFunction = SensorGenomeDescription();
+        } break;
+        case Enums::CellFunction_Nerve: {
+            cell.cellFunction = NerveGenomeDescription();
+        } break;
+        case Enums::CellFunction_Attacker: {
+            cell.cellFunction = AttackerGenomeDescription();
+        } break;
+        case Enums::CellFunction_Injector: {
+            cell.cellFunction = InjectorGenomeDescription();
+        } break;
+        case Enums::CellFunction_Muscle: {
+            cell.cellFunction = MuscleGenomeDescription();
+        } break;
+        case Enums::CellFunction_Placeholder1: {
+            cell.cellFunction = PlaceHolderGenomeDescription1();
+        } break;
+        case Enums::CellFunction_Placeholder2: {
+            cell.cellFunction = PlaceHolderGenomeDescription2();
+        } break;
+        case Enums::CellFunction_None: {
+            cell.cellFunction.reset();
+        } break;
+        }
+    }
 }
 
 void _GenomeEditorWindow::showGenotype(TabData& tabData)
@@ -156,48 +200,14 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
                 if (table.begin()) {
                     if (AlienImGui::Combo(
                             AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxContentTextWidth), type)) {
-                        switch (type) {
-                        case Enums::CellFunction_Neuron: {
-                            cell.cellFunction = NeuronGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Transmitter: {
-                            cell.cellFunction = TransmitterGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Constructor: {
-                            cell.cellFunction = ConstructorGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Sensor: {
-                            cell.cellFunction = SensorGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Nerve: {
-                            cell.cellFunction = NerveGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Attacker: {
-                            cell.cellFunction = AttackerGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Injector: {
-                            cell.cellFunction = InjectorGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Muscle: {
-                            cell.cellFunction = MuscleGenomeDescription();
-                        } break;
-                        case Enums::CellFunction_Placeholder1: {
-                            cell.cellFunction = PlaceHolderGenomeDescription1();
-                        } break;
-                        case Enums::CellFunction_Placeholder2: {
-                            cell.cellFunction = PlaceHolderGenomeDescription2();
-                        } break;
-                        case Enums::CellFunction_None: {
-                            cell.cellFunction.reset();
-                        } break;
-                        }
+                        applyNewCellFunction(cell, type);
                     }
                     table.next();
 
                     AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(MaxContentTextWidth), cell.color);
                     table.next();
                     AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Distance").textWidth(MaxContentTextWidth).format("%.2f"), cell.referenceDistance);
+                        AlienImGui::InputFloatParameters().name("Distance").textWidth(MaxContentTextWidth).format("%.2f").step(0.1f), cell.referenceDistance);
                     table.next();
                     AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(MaxContentTextWidth).format("%.1f"), cell.referenceAngle);
                     table.next();
@@ -208,6 +218,42 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
                     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxContentTextWidth), cell.inputBlocked);
                     table.next();
                     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(MaxContentTextWidth), cell.outputBlocked);
+
+                    switch (type) {
+                    case Enums::CellFunction_Neuron: {
+                    } break;
+                    case Enums::CellFunction_Transmitter: {
+                    } break;
+                    case Enums::CellFunction_Constructor: {
+                        auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
+                        table.next();
+                        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Mode").textWidth(MaxContentTextWidth), constructor.mode);
+                        table.next();
+                        AlienImGui::Checkbox(
+                            AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxContentTextWidth), constructor.singleConstruction);
+                        table.next();
+                        AlienImGui::Checkbox(
+                            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxContentTextWidth), constructor.separateConstruction);
+                        table.next();
+                        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxContentTextWidth), constructor.makeSticky);
+                    } break;
+                    case Enums::CellFunction_Sensor: {
+                    } break;
+                    case Enums::CellFunction_Nerve: {
+                    } break;
+                    case Enums::CellFunction_Attacker: {
+                    } break;
+                    case Enums::CellFunction_Injector: {
+                    } break;
+                    case Enums::CellFunction_Muscle: {
+                    } break;
+                    case Enums::CellFunction_Placeholder1: {
+                    } break;
+                    case Enums::CellFunction_Placeholder2: {
+                    } break;
+                    case Enums::CellFunction_None: {
+                    } break;
+                    }
 
                     table.end();
                 }
