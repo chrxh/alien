@@ -94,7 +94,7 @@ void _GenomeEditorWindow::processToolbar()
             tabData.selected = toInt(tabData.genome.size() - 1);
         }
     }
-    AlienImGui::Tooltip("Add cell node to gene description");
+    AlienImGui::Tooltip("Add node");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(tabData.genome.empty());
@@ -114,29 +114,29 @@ void _GenomeEditorWindow::processToolbar()
         }
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Delete cell node from gene description");
+    AlienImGui::Tooltip("Delete node");
 
     ImGui::SameLine();
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selected = selectedTab.selected;
     ImGui::BeginDisabled(!(selected && *selected > 0));
-    if (AlienImGui::ToolbarButton(ICON_FA_ARROW_UP)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_UP)) {
         std::swap(selectedTab.genome.at(*selected), selectedTab.genome.at(*selected - 1));
         --(*selected);
         _collapseAllNodes = true;
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Decrease sequence number of selected cell node");
+    AlienImGui::Tooltip("Decrease sequence number of selected node");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!(selected && *selected < selectedTab.genome.size() - 1));
-    if (AlienImGui::ToolbarButton(ICON_FA_ARROW_DOWN)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_DOWN)) {
         std::swap(selectedTab.genome.at(*selected), selectedTab.genome.at(*selected + 1));
         ++(*selected);
         _collapseAllNodes = true;
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Increase sequence number of selected cell node");
+    AlienImGui::Tooltip("Increase sequence number of selected node");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
