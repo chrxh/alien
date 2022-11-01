@@ -49,11 +49,28 @@ void _GenomeEditorWindow::processIntern()
         }
         AlienImGui::Tooltip("New gene");
 
+        std::optional<int> tabToDelete;
         for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
-            if (ImGui::BeginTabItem(("Gene " + std::to_string(index + 1)).c_str(), NULL, ImGuiTabItemFlags_None)) {
+
+            bool open = true;
+            bool* openPtr = nullptr;
+            if (_tabDatas.size() > 1) {
+                openPtr = &open;
+            }
+            if (ImGui::BeginTabItem(("Gene " + std::to_string(index + 1)).c_str(), openPtr, ImGuiTabItemFlags_None)) {
                 processGenomeTab(tabData);
                 _currentTabIndex = toInt(index);
                 ImGui::EndTabItem();
+            }
+            if (openPtr && *openPtr == false) {
+                tabToDelete = toInt(index);
+            }
+        }
+
+        if (tabToDelete.has_value()) {
+            _tabDatas.erase(_tabDatas.begin() + *tabToDelete);
+            if (_currentTabIndex == _tabDatas.size()) {
+                _currentTabIndex = toInt(_tabDatas.size() - 1);
             }
         }
 
