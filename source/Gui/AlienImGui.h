@@ -168,6 +168,7 @@ public:
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
     static void Text(std::string const& text);
+    static void MonospaceText(std::string const& text);
 
     static bool BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus = true);  //return toggle
     static void EndMenuButton();

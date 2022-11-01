@@ -23,7 +23,7 @@ namespace Const
     ImColor const ShutdownButtonHoveredColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
     ImColor const ShutdownButtonActiveColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
 
-    ImColor const LogMessageColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
+    ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
 
