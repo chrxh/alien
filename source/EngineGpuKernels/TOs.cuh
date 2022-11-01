@@ -63,6 +63,8 @@ struct ConstructorTO
 struct SensorTO
 {
     Enums::SensorMode mode;
+    float angle;
+    float minDensity;
     int color;
 };
 

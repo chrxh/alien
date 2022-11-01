@@ -70,7 +70,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, SensorDescription& data)
     {
-        ar(data.mode, data.color);
+        ar(data.fixedAngle, data.minDensity, data.color);
     }
     template <class Archive>
     inline void serialize(Archive& ar, NerveDescription& data)

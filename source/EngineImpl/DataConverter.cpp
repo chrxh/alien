@@ -428,7 +428,12 @@ CellDescription DataConverter::createCellDescription(DataTO const& dataTO, int c
     } break;
     case Enums::CellFunction_Sensor: {
         SensorDescription sensor;
-        sensor.mode = cellTO.cellFunctionData.sensor.mode;
+        if (cellTO.cellFunctionData.sensor.mode == Enums::SensorMode_FixedAngle) {
+            sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
+        } else {
+            sensor.fixedAngle.reset();
+        }
+        sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.color = cellTO.cellFunctionData.sensor.color;
         result.cellFunction = sensor;
     } break;
@@ -519,9 +524,12 @@ void DataConverter::addCell(
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
     case Enums::CellFunction_Sensor: {
+        auto sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
-        sensorTO.mode = cellTO.cellFunctionData.sensor.mode;
-        sensorTO.color = cellTO.cellFunctionData.sensor.color;
+        sensorTO.mode = sensorDesc.getSensorMode();
+        sensorTO.color = sensorDesc.color;
+        sensorTO.minDensity = sensorDesc.minDensity;
+        sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
     case Enums::CellFunction_Nerve: {

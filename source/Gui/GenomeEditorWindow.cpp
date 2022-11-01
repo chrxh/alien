@@ -238,6 +238,27 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
                         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxContentTextWidth), constructor.makeSticky);
                     } break;
                     case Enums::CellFunction_Sensor: {
+                        auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
+                        auto sensorMode = sensor.getSensorMode();
+
+                        table.next();
+                        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxContentTextWidth), sensor.color);
+
+                        table.next();
+                        if (AlienImGui::Combo(
+                                AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Neighborhood", "Fixed angle scan"}),
+                                sensorMode)) {
+                            if (sensorMode == Enums::SensorMode_Neighborhood) {
+                                sensor.fixedAngle.reset();
+                            } else {
+                                sensor.fixedAngle = 0.0f;
+                            }
+                        }
+                        if (sensorMode == Enums::SensorMode_FixedAngle) {
+                            table.next();
+                            AlienImGui::InputFloat(
+                                AlienImGui::InputFloatParameters().name("Scan angle").textWidth(MaxContentTextWidth).format("%.1f"), *sensor.fixedAngle);
+                        }
                     } break;
                     case Enums::CellFunction_Nerve: {
                     } break;
@@ -256,6 +277,20 @@ void _GenomeEditorWindow::showGenotype(TabData& tabData)
                     }
 
                     table.end();
+
+                    switch (type) {
+                    case Enums::CellFunction_Neuron: {
+                        if (ImGui::TreeNodeEx("Weights", flags)) {
+                            ImGui::TreePop();
+                        }
+                        if (ImGui::TreeNodeEx("Bias", flags)) {
+                            ImGui::TreePop();
+                        }
+                    } break;
+                    case Enums::CellFunction_Constructor: {
+                    } break;
+                    }
+
                 }
                 ImGui::TreePop();
             }

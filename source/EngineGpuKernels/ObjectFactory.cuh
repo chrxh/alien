@@ -133,6 +133,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case Enums::CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
+        cell->cellFunctionData.sensor.angle = cellTO.cellFunctionData.sensor.angle;
+        cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
     } break;
     case Enums::CellFunction_Nerve: {

@@ -24,7 +24,7 @@ namespace Enums
     using SensorMode = int;
     enum SensorMode_
     {
-        SensorMode_AllAngles = 0,
+        SensorMode_Neighborhood = 0,
         SensorMode_FixedAngle = 1,
         SensorMode_Count = 2
     };

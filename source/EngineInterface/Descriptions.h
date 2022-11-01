@@ -139,10 +139,13 @@ struct ConstructorDescription
 
 struct SensorDescription
 {
-    Enums::SensorMode mode = Enums::SensorMode_AllAngles;
+    std::optional<float> fixedAngle;  //nullotr = entire neighborhood
+    float minDensity = 0.3f;
     int color = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
+
+    Enums::SensorMode getSensorMode() const { return fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood; }
 };
 
 struct NerveDescription
