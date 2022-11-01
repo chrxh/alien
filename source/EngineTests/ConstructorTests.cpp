@@ -503,7 +503,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(constructedConstructor.separateConstruction, actualConstructor.separateConstruction);
     EXPECT_EQ(constructedConstructor.makeSticky, actualConstructor.makeSticky);
     EXPECT_EQ(constructedConstructor.angleAlignment, actualConstructor.angleAlignment);
-    EXPECT_EQ(constructedConstructor.genome, actualConstructor.genome);
+    EXPECT_EQ(constructedConstructor.getGenomeData(), actualConstructor.genome);
 }
 
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
@@ -539,7 +539,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
     auto actualConstructor = std::get<ConstructorDescription>(*actualCell.cellFunction);
     auto actualConstructedConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
     EXPECT_TRUE(actualConstructor.genome.size() <= MAX_GENOME_BYTES);
-    EXPECT_TRUE(constructedConstructor.genome.size() <= MAX_GENOME_BYTES);
+    EXPECT_TRUE(constructedConstructor.getGenomeData().size() <= MAX_GENOME_BYTES);
 }
 
 TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
@@ -550,7 +550,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
                                       .setSeparateConstruction(false)
                                       .setMakeSticky(true)
                                       .setAngleAlignment(2)
-                                      .setGenome(createRandomGenome(0));    // size= 0 means copy genome
+                                      .setMakeGenomeCopy();
 
     auto genome = GenomeTranslator::encode({CellGenomeDescription().setCellFunction(constructedConstructor)});
 
