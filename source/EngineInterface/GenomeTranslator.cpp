@@ -79,3 +79,8 @@ std::vector<uint8_t> GenomeTranslator::encode(GenomeDescription const& cells)
     }
     return result;
 }
+
+GenomeDescription GenomeTranslator::decode(std::vector<uint8_t> const& data)
+{
+    return GenomeDescription();
+}
