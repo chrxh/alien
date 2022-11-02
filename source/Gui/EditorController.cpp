@@ -24,7 +24,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
-    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>();
+    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel);
 }
 
 bool _EditorController::isOn() const

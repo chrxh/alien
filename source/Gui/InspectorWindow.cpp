@@ -20,7 +20,7 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const MaxCellContentTextWidth = 140.0f;
+    auto const MaxCellContentTextWidth = 150.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
 }
 
@@ -219,7 +219,7 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
         case Enums::CellFunction_Transmitter: {
         } break;
         case Enums::CellFunction_Constructor: {
-            showConstructorContent();
+            showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
         } break;
         case Enums::CellFunction_Sensor: {
         } break;
@@ -257,13 +257,36 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
     }
 }
 
-void _InspectorWindow::showConstructorContent()
+void _InspectorWindow::showConstructorContent(ConstructorDescription& constructor)
 {
-    AlienImGui::Group("Actions");
+    AlienImGui::Group("Properties");
+    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
+    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
+    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxCellContentTextWidth), constructor.makeSticky);
+    int constructorMode = constructor.mode == 0 ? 0 : 1;
+    if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").textWidth(MaxCellContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
+        constructor.mode = constructorMode;
+    }
+    if (constructorMode == 1) {
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Cycles").textWidth(MaxCellContentTextWidth), constructor.mode);
+        if (constructor.mode < 0) {
+            constructor.mode = 0;
+        }
+    }
+
+    AlienImGui::Group("Genome");
+    auto width = ImGui::GetContentRegionAvail().x;
+    if (ImGui::BeginChild("##", ImVec2(width, ImGui::GetTextLineHeight() * 2), true)) {
+        AlienImGui::MonospaceText(std::to_string(constructor.genome.size()) + " bytes of genetic information");
+    }
+    ImGui::EndChild();
+
     AlienImGui::Button("Edit");
     ImGui::SameLine();
-    ImGui::BeginDisabled();
-    AlienImGui::Button("Paste");
+    ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
+    if (AlienImGui::Button("Paste")) {
+        constructor.genome = *_editorModel->getCopiedGenome();
+    }
     ImGui::EndDisabled();
 
     AlienImGui::Group("Preview");
