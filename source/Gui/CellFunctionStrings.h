@@ -11,18 +11,8 @@ using namespace std::string_literals;
 
 namespace Const
 {
-    auto const CellFunctionStrings = std::vector{
-        "Neuron"s,
-        "Transmitter"s,
-        "Constructor"s,
-        "Sensor"s,
-        "Nerve"s,
-        "Attacker"s,
-        "Injector"s,
-        "Muscle"s,
-        "Placeholder1"s,
-        "Placeholder2"s,
-        "None"s};
+    std::vector const CellFunctionStrings =
+        {"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s, "None"s};
 
     std::map<Enums::CellFunction, std::string> const CellFunctionToStringMap = {
         {Enums::CellFunction_Constructor, "Constructor"},

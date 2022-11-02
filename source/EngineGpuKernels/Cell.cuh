@@ -147,6 +147,16 @@ struct Cell
     float clusterAngularMass;
     int numCellsInCluster;
 
+    __device__ __inline__ bool isActive()
+    {
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            if (activity.channels[i] != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     __device__ __inline__ bool isDeleted() const { return energy == 0; }
 
     __device__ __inline__ void setDeleted()

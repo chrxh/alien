@@ -11,6 +11,7 @@
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
+#include "EditorModel.h"
 #include "StyleRepository.h"
 
 namespace
@@ -19,8 +20,9 @@ namespace
     auto const MaxContentWidth = 240.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow()
+_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel)
     : _AlienWindow("Genome editor", "windows.genome editor", false)
+    , _editorModel(editorModel)
 {
     _tabDatas = {TabData()};
 }
@@ -140,7 +142,7 @@ void _GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _copiedGenome = GenomeTranslator::encode(selectedTab.genome);
+        _editorModel->setCopiedGenome(GenomeTranslator::encode(selectedTab.genome));
     }
     AlienImGui::Tooltip("Copy selected node");
 
@@ -292,7 +294,17 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
     //cell type
     DynamicTableLayout table;
     if (table.begin()) {
-        if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxContentTextWidth), type)) {
+        auto modCellFunctionStrings = Const::CellFunctionStrings;
+        auto noneString = modCellFunctionStrings.back();
+        modCellFunctionStrings.pop_back();
+        modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
+
+        type = (type + 1) % Enums::CellFunction_Count;
+        auto typeComboResult =
+            AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(modCellFunctionStrings).textWidth(MaxContentTextWidth), type);
+        type = (type + Enums::CellFunction_Count - 1) % Enums::CellFunction_Count;
+
+        if (typeComboResult) {
             applyNewCellFunction(cell, type);
         }
         table.next();
@@ -414,12 +426,12 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
             }
             ImGui::SameLine();
             if (AlienImGui::Button("Copy")) {
-                _copiedGenome = constructor.isMakeGenomeCopy() ? GenomeTranslator::encode(tab.genome) : constructor.getGenomeData();
+                _editorModel->setCopiedGenome(constructor.isMakeGenomeCopy() ? GenomeTranslator::encode(tab.genome) : constructor.getGenomeData());
             }
             ImGui::SameLine();
-            ImGui::BeginDisabled(!_copiedGenome.has_value());
+            ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
             if (AlienImGui::Button("Paste")) {
-                constructor.genome = *_copiedGenome;
+                constructor.genome = *_editorModel->getCopiedGenome();
             }
             ImGui::EndDisabled();
             ImGui::SameLine();

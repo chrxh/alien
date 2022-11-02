@@ -33,7 +33,7 @@ private:
 
     void processParticle(ParticleDescription particle);
 
-    void showConstructorContent();
+    void showConstructorContent(ConstructorDescription& constructor);
 
     float calcWindowWidth() const;
 
