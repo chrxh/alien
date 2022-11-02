@@ -7,6 +7,11 @@
 #include "Constants.h"
 #include "Enums.h"
 
+struct MakeGenomeCopy
+{
+    auto operator<=>(MakeGenomeCopy const&) const = default;
+};
+
 struct NeuronGenomeDescription
 {
     std::vector<std::vector<float>> weights;
@@ -33,7 +38,6 @@ struct ConstructorGenomeDescription
     bool makeSticky = false;
     int angleAlignment = 0;
 
-    struct MakeGenomeCopy {};
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
 
     auto operator<=>(ConstructorGenomeDescription const&) const = default;
@@ -100,9 +104,22 @@ struct AttackerGenomeDescription
 
 struct InjectorGenomeDescription
 {
-    std::vector<uint8_t> genome;
+    std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
 
     auto operator<=>(InjectorGenomeDescription const&) const = default;
+
+    InjectorGenomeDescription& setGenome(std::vector<uint8_t> const& value)
+    {
+        genome = value;
+        return *this;
+    }
+    bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
+    std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
+    InjectorGenomeDescription& setMakeGenomeCopy()
+    {
+        genome = MakeGenomeCopy();
+        return *this;
+    }
 };
 
 struct MuscleGenomeDescription
@@ -134,8 +151,6 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
 
 struct CellGenomeDescription
 {
-    uint64_t id = 0;
-
     float referenceDistance = 1.0f;
     float referenceAngle = 0.0f;
     int color = 0;
@@ -149,11 +164,6 @@ struct CellGenomeDescription
     CellGenomeDescription() = default;
     auto operator<=>(CellGenomeDescription const&) const = default;
 
-    CellGenomeDescription& setId(uint64_t value)
-    {
-        id = value;
-        return *this;
-    }
     CellGenomeDescription& setReferenceDistance(float value)
     {
         referenceDistance = value;
