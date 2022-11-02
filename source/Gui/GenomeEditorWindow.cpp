@@ -8,11 +8,13 @@
 
 #include "EngineInterface/GenomeTranslator.h"
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
 #include "StyleRepository.h"
+#include "EngineInterface/SimulationController.h"
 
 namespace
 {
@@ -20,15 +22,34 @@ namespace
     auto const MaxContentWidth = 240.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel)
+_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController)
     : _AlienWindow("Genome editor", "windows.genome editor", false)
     , _editorModel(editorModel)
+    , _simulationController(simulationController)
 {
     _tabDatas = {TabData()};
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
 {
+}
+
+void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
+{
+    std::optional<int> tabIndex;
+    for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
+        ;
+        if (tabData.genome == genome) {
+            tabIndex = toInt(index);
+        }
+    }
+    if (tabIndex) {
+        _tabIndexToSelect = *tabIndex;
+    } else {
+        TabData tabData;
+        tabData.genome = genome;
+        _tabToAdd = tabData;
+    }
 }
 
 namespace
@@ -78,6 +99,10 @@ void _GenomeEditorWindow::processIntern()
             if (_selectedTabIndex == _tabDatas.size()) {
                 _selectedTabIndex = toInt(_tabDatas.size() - 1);
             }
+        }
+        if (_tabToAdd.has_value()) {
+            _tabDatas.emplace_back(*_tabToAdd);
+            _tabToAdd.reset();
         }
 
         ImGui::EndTabBar();
@@ -144,7 +169,7 @@ void _GenomeEditorWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _editorModel->setCopiedGenome(GenomeTranslator::encode(selectedTab.genome));
     }
-    AlienImGui::Tooltip("Copy selected node");
+    AlienImGui::Tooltip("Copy all nodes from gene");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
@@ -439,15 +464,9 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
                 constructor.setMakeGenomeCopy();
             }
             ImGui::SameLine();
-            if (AlienImGui::Button("View")) {
-                auto copiedGenome = constructor.isMakeGenomeCopy() ? GenomeTranslator::encode(tab.genome) : constructor.getGenomeData();
-                if (auto index = findTabToGenomeData(copiedGenome)) {
-                    _tabIndexToSelect = *index;
-                } else {
-                    TabData tabData;
-                    tabData.genome = GenomeTranslator::decode(copiedGenome);
-                    _tabDatas.emplace_back(tabData);
-                }
+            if (AlienImGui::Button("Open")) {
+                auto genomeToOpen = constructor.isMakeGenomeCopy() ? tab.genome : GenomeTranslator::decode(constructor.getGenomeData(), _simulationController->getSimulationParameters());
+                openTab(genomeToOpen);
             }
         } break;
         }
@@ -458,16 +477,4 @@ void _GenomeEditorWindow::showPhenotype(TabData& tab)
 {
 
 }
-
-std::optional<int> _GenomeEditorWindow::findTabToGenomeData(std::vector<uint8_t> const& genome) const
-{
-    for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
-        auto genomeFromTab = GenomeTranslator::encode(tabData.genome);
-        if (genomeFromTab == genome) {
-            return toInt(index);
-        }
-    }
-    return std::nullopt;
-}
-
 

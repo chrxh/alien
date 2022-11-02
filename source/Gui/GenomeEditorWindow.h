@@ -7,8 +7,10 @@
 class _GenomeEditorWindow : public _AlienWindow
 {
 public:
-    _GenomeEditorWindow(EditorModel const& editorModel);
+    _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController);
     ~_GenomeEditorWindow() override;
+
+    void openTab(GenomeDescription const& genome);
 
 private:
     void processIntern() override;
@@ -26,9 +28,8 @@ private:
 
     void showPhenotype(TabData& tab);
 
-    std::optional<int> findTabToGenomeData(std::vector<uint8_t> const& genome) const;
-
     EditorModel _editorModel;
+    SimulationController _simulationController;
 
     float _previewHeight = 200.0f;
 
@@ -36,5 +37,6 @@ private:
     int _selectedTabIndex = 0;
 
     std::optional<int> _tabIndexToSelect;
+    std::optional<TabData> _tabToAdd;
     bool _collapseAllNodes = false;
 };

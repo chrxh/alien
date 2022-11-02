@@ -27,21 +27,20 @@ private:
         bool outputBlocked;
         Enums::CellFunction cellFunction;
     };
-    __inline__ __device__ static ConstructionData readConstructionData(Cell* cell, bool& finished);
+    __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
     __inline__ __device__ static bool
-    tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData, bool& finished);
+    tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Cell* hostCell);
     __inline__ __device__ static bool
-    startNewConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData, bool& finished);
+    startNewConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static bool continueConstruction(
         SimulationData& data,
         SimulationResult& result,
         Cell* hostCell,
         Cell* firstConstructedCell,
-        ConstructionData const& constructionData,
-        bool& finished);
+        ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool makeSticky);
 
@@ -56,15 +55,15 @@ private:
         SimulationData& data,
         Cell* hostCell,
         float2 const& newCellPos,
-        ConstructionData const& constructionData,
-        bool& finished);
+        ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool readBool(ConstructorFunction& constructor, bool& finished);
-    __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor, bool& finished);
-    __inline__ __device__ static int readWord(ConstructorFunction& constructor, bool& finished);
-    __inline__ __device__ static float readFloat(ConstructorFunction& constructor, bool& finished);   //return values from -1 to 1
+    __inline__ __device__ static bool isFinished(ConstructorFunction& constructor);
+    __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
+    __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
+    __inline__ __device__ static int readWord(ConstructorFunction& constructor);
+    __inline__ __device__ static float readFloat(ConstructorFunction& constructor);   //return values from -1 to 1
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
-    __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished);
+    __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
 };
 
 /************************************************************************/
@@ -93,14 +92,13 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
         if (isConstructionPossible(data, cell, activity)) {
-            auto finished = false;
-            auto constructionData = readConstructionData(cell, finished);
-            if (tryConstructCell(data, result, cell, constructionData, finished)) {
+            auto constructionData = readConstructionData(cell);
+            if (tryConstructCell(data, result, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
                 activity.channels[0] = 0;
             }
-            if (finished) {
+            if (isFinished(cell->cellFunctionData.constructor)) {
                 auto& constructor = cell->cellFunctionData.constructor;
                 if (!constructor.singleConstruction) {
                     constructor.currentGenomePos = 0;
@@ -136,24 +134,24 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Simulati
     return true;
 }
 
-__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell, bool& finished)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
 
     ConstructionData result;
-    result.cellFunction = readByte(constructor, finished) % Enums::CellFunction_Count;
-    result.angle = readFloat(constructor, finished) * 180;
-    result.distance = readFloat(constructor, finished) + 1.0f;
-    result.maxConnections = readByte(constructor, finished) % (cudaSimulationParameters.cellMaxBonds + 1);
-    result.executionOrderNumber = readByte(constructor, finished) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    result.color = readByte(constructor, finished) % 7;
-    result.inputBlocked = readBool(constructor, finished);
-    result.outputBlocked = readBool(constructor, finished);
+    result.cellFunction = readByte(constructor) % Enums::CellFunction_Count;
+    result.angle = readFloat(constructor) * 180;
+    result.distance = readFloat(constructor) + 1.0f;
+    result.maxConnections = readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
+    result.executionOrderNumber = readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+    result.color = readByte(constructor) % 7;
+    result.inputBlocked = readBool(constructor);
+    result.outputBlocked = readBool(constructor);
     return result;
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData, bool& finished)
+ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData)
 {
     Cell* underConstructionCell = getFirstCellOfConstructionSite(hostCell);
     if (underConstructionCell) {
@@ -161,13 +159,13 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& r
             return false;
         }
 
-        auto success = continueConstruction(data, result, hostCell, underConstructionCell, constructionData, finished);
+        auto success = continueConstruction(data, result, hostCell, underConstructionCell, constructionData);
         underConstructionCell->releaseLock();
 
         return success;
     } else {
 
-        return startNewConstruction(data, result, hostCell, constructionData, finished);
+        return startNewConstruction(data, result, hostCell, constructionData);
     }
     return true;
 }
@@ -188,8 +186,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     SimulationData& data,
     SimulationResult& result,
     Cell* hostCell,
-    ConstructionData const& constructionData,
-    bool& finished)
+    ConstructionData const& constructionData)
 {
     auto makeSticky = hostCell->cellFunctionData.constructor.makeSticky;
 
@@ -202,14 +199,14 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * offspringCellDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData, finished);
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
     hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
 
     if (!newCell->tryLock()) {
         return false;
     }
 
-    if (!finished || !hostCell->cellFunctionData.constructor.separateConstruction) {
+    if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         CellConnectionProcessor::addConnections(
             data,
             hostCell,
@@ -218,7 +215,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
             0,
             offspringCellDistance);
     }
-    if (finished) {
+    if (isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->underConstruction = false;
     }
     if (!makeSticky) {
@@ -237,8 +234,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     SimulationResult& result,
     Cell* hostCell,
     Cell* underConstructionCell,
-    ConstructionData const& constructionData,
-    bool& finished)
+    ConstructionData const& constructionData)
 {
     auto posDelta = underConstructionCell->absPos - hostCell->absPos;
     data.cellMap.correctDirection(posDelta);
@@ -256,7 +252,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     auto newCellPos = hostCell->absPos + posDelta;
 
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData, finished);
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
     underConstructionCell->underConstruction = false;
 
     if (!newCell->tryLock()) {
@@ -279,7 +275,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
-    if (!finished || !hostCell->cellFunctionData.constructor.separateConstruction) {
+    if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         CellConnectionProcessor::addConnections(
             data, hostCell, newCell, angleFromPreviousForCell, 0, offspringCellDistance);
     }
@@ -287,7 +283,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     CellConnectionProcessor::addConnections(
         data, newCell, underConstructionCell, angleFromPreviousForNewCell, angleFromPreviousForUnderConstructionCell, desiredDistance);
 
-    if (finished) {
+    if (isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->underConstruction = false;
     }
 
@@ -393,8 +389,7 @@ ConstructorProcessor::constructCellIntern(
     SimulationData& data,
     Cell* hostCell,
     float2 const& posOfNewCell,
-    ConstructionData const& constructionData,
-    bool& finished)
+    ConstructionData const& constructionData)
 {
     ObjectFactory factory;
     factory.init(&data);
@@ -418,34 +413,36 @@ ConstructorProcessor::constructCellIntern(
     case Enums::CellFunction_Neuron: {
         result->cellFunctionData.neuron.neuronState = data.objects.auxiliaryData.getTypedSubArray<NeuronFunction::NeuronState>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->weights[i] = readFloat(constructor, finished) * 2;
+            result->cellFunctionData.neuron.neuronState->weights[i] = readFloat(constructor) * 2;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->bias[i] = readFloat(constructor, finished) * 2;
+            result->cellFunctionData.neuron.neuronState->bias[i] = readFloat(constructor) * 2;
         }
     } break;
     case Enums::CellFunction_Transmitter: {
     } break;
     case Enums::CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
-        newConstructor.mode = readByte(constructor, finished);
-        newConstructor.singleConstruction = readBool(constructor, finished);
-        newConstructor.separateConstruction = readBool(constructor, finished);
-        newConstructor.makeSticky = readBool(constructor, finished);
-        newConstructor.angleAlignment = readByte(constructor, finished) % 7;
+        newConstructor.mode = readByte(constructor);
+        newConstructor.singleConstruction = readBool(constructor);
+        newConstructor.separateConstruction = readBool(constructor);
+        newConstructor.makeSticky = readBool(constructor);
+        newConstructor.angleAlignment = readByte(constructor) % 7;
         newConstructor.currentGenomePos = 0;
-        copyGenome(data, constructor, newConstructor, finished);
+        copyGenome(data, constructor, newConstructor);
     } break;
     case Enums::CellFunction_Sensor: {
-        result->cellFunctionData.sensor.mode = readByte(constructor, finished) % Enums::SensorMode_Count;
-        result->cellFunctionData.sensor.color = readByte(constructor, finished) % MAX_COLORS;
+        result->cellFunctionData.sensor.mode = readByte(constructor) % Enums::SensorMode_Count;
+        result->cellFunctionData.sensor.angle = readFloat(constructor) * 180;
+        result->cellFunctionData.sensor.minDensity = (readFloat(constructor) + 1.0f) / 2;
+        result->cellFunctionData.sensor.color = readByte(constructor) % MAX_COLORS;
     } break;
     case Enums::CellFunction_Nerve: {
     } break;
     case Enums::CellFunction_Attacker: {
     } break;
     case Enums::CellFunction_Injector: {
-        copyGenome(data, constructor, result->cellFunctionData.injector, finished);
+        copyGenome(data, constructor, result->cellFunctionData.injector);
     } break;
     case Enums::CellFunction_Muscle: {
     } break;
@@ -458,45 +455,45 @@ ConstructorProcessor::constructCellIntern(
     return result;
 }
 
-__inline__ __device__ bool ConstructorProcessor::readBool(ConstructorFunction& constructor, bool& finished)
-{
-    return static_cast<int8_t>(readByte(constructor, finished)) > 0;
+__inline__ __device__ bool ConstructorProcessor::isFinished(ConstructorFunction& constructor) {
+    return constructor.currentGenomePos >= constructor.genomeSize;
 }
 
-__inline__ __device__ uint8_t ConstructorProcessor::readByte(ConstructorFunction& constructor, bool& finished)
+__inline__ __device__ bool ConstructorProcessor::readBool(ConstructorFunction& constructor)
 {
-    if (constructor.currentGenomePos >= constructor.genomeSize) {
-        finished = true;
+    return static_cast<int8_t>(readByte(constructor)) > 0;
+}
+
+__inline__ __device__ uint8_t ConstructorProcessor::readByte(ConstructorFunction& constructor)
+{
+    if (isFinished(constructor)) {
         return 0;
     }
     uint8_t result = constructor.genome[constructor.currentGenomePos++];
-    if (constructor.currentGenomePos >= constructor.genomeSize) {
-        finished = true;
-    }
     return result;
 }
 
-__inline__ __device__ int ConstructorProcessor::readWord(ConstructorFunction& constructor, bool& finished)
+__inline__ __device__ int ConstructorProcessor::readWord(ConstructorFunction& constructor)
 {
-    return static_cast<int>(readByte(constructor, finished)) | (static_cast<int>(readByte(constructor, finished) << 8));
+    return static_cast<int>(readByte(constructor)) | (static_cast<int>(readByte(constructor) << 8));
 }
 
-__inline__ __device__ float ConstructorProcessor::readFloat(ConstructorFunction& constructor, bool& finished)
+__inline__ __device__ float ConstructorProcessor::readFloat(ConstructorFunction& constructor)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(constructor, finished))) / 128.0f;
+    return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 128.0f;
 }
 
 template <typename GenomeHolderSource, typename GenomeHolderTarget>
-__inline__ __device__ void ConstructorProcessor::copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target, bool& finished)
+__inline__ __device__ void ConstructorProcessor::copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target)
 {
-    bool makeGenomeCopy = readBool(source, finished);
+    bool makeGenomeCopy = readBool(source);
     if (!makeGenomeCopy) {
-        auto size = readWord(source, finished) % MAX_GENOME_BYTES;
+        auto size = readWord(source) % MAX_GENOME_BYTES;
         target.genomeSize = size;
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
         for (int i = 0; i < size; ++i) {
-            target.genome[i] = readByte(source, finished);
+            target.genome[i] = readByte(source);
         }
     } else {
         auto size = source.genomeSize;
