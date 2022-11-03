@@ -87,6 +87,7 @@ using EditorModel = std::shared_ptr<_EditorModel>;
 
 class _EditorController;
 using EditorController = std::shared_ptr<_EditorController>;
+using EditorControllerWeakPtr = _EditorController*;
 
 class _SelectionWindow;
 using SelectionWindow = std::shared_ptr<_SelectionWindow>;

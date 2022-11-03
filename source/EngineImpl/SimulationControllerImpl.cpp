@@ -70,9 +70,9 @@ DataDescription _SimulationControllerImpl::getSelectedSimulationData(bool includ
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-DataDescription _SimulationControllerImpl::getInspectedSimulationData(std::vector<uint64_t> entityIds)
+DataDescription _SimulationControllerImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
-    return _worker.getInspectedSimulationData(entityIds);
+    return _worker.getInspectedSimulationData(objectIds);
 }
 
 void _SimulationControllerImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
@@ -92,20 +92,20 @@ void _SimulationControllerImpl::setSimulationData(DataDescription const& dataToU
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::removeSelectedEntities(bool includeClusters)
+void _SimulationControllerImpl::removeSelectedObjects(bool includeClusters)
 {
-    _worker.removeSelectedEntities(includeClusters);
+    _worker.removeSelectedObjects(includeClusters);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::relaxSelectedEntities(bool includeClusters)
+void _SimulationControllerImpl::relaxSelectedObjects(bool includeClusters)
 {
-    _worker.relaxSelectedEntities(includeClusters);
+    _worker.relaxSelectedObjects(includeClusters);
 }
 
-void _SimulationControllerImpl::uniformVelocitiesForSelectedEntities(bool includeClusters)
+void _SimulationControllerImpl::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
-    _worker.uniformVelocitiesForSelectedEntities(includeClusters);
+    _worker.uniformVelocitiesForSelectedObjects(includeClusters);
 }
 
 void _SimulationControllerImpl::makeSticky(bool includeClusters)
@@ -123,14 +123,14 @@ void _SimulationControllerImpl::setBarrier(bool value, bool includeClusters)
     _worker.setBarrier(value, includeClusters);
 }
 
-void _SimulationControllerImpl::colorSelectedEntities(unsigned char color, bool includeClusters)
+void _SimulationControllerImpl::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
-    _worker.colorSelectedEntities(color, includeClusters);
+    _worker.colorSelectedObjects(color, includeClusters);
 }
 
-void _SimulationControllerImpl::reconnectSelectedEntities()
+void _SimulationControllerImpl::reconnectSelectedObjects()
 {
-    _worker.reconnectSelectedEntities();
+    _worker.reconnectSelectedObjects();
 }
 
 void _SimulationControllerImpl::changeCell(CellDescription const& changedCell)
@@ -283,9 +283,9 @@ SelectionShallowData _SimulationControllerImpl::getSelectionShallowData()
     return _worker.getSelectionShallowData();
 }
 
-void _SimulationControllerImpl::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData)
+void _SimulationControllerImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
 {
-    _worker.shallowUpdateSelectedEntities(updateData);
+    _worker.shallowUpdateSelectedObjects(updateData);
 }
 
 void _SimulationControllerImpl::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)

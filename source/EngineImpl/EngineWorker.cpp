@@ -161,13 +161,13 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
     return result;
 }
 
-DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> entityIds)
+DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
 
     DataTO dataTO = provideTO();
     
-    _cudaSimulation->getInspectedSimulationData(entityIds, dataTO);
+    _cudaSimulation->getInspectedSimulationData(objectsIds, dataTO);
 
     DataConverter converter(_settings.simulationParameters);
 
@@ -231,26 +231,26 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
     updateMonitorDataIntern();
 }
 
-void EngineWorker::removeSelectedEntities(bool includeClusters)
+void EngineWorker::removeSelectedObjects(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->removeSelectedEntities(includeClusters);
+    _cudaSimulation->removeSelectedObjects(includeClusters);
     updateMonitorDataIntern();
 }
 
-void EngineWorker::relaxSelectedEntities(bool includeClusters)
+void EngineWorker::relaxSelectedObjects(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->relaxSelectedEntities(includeClusters);
+    _cudaSimulation->relaxSelectedObjects(includeClusters);
 }
 
-void EngineWorker::uniformVelocitiesForSelectedEntities(bool includeClusters)
+void EngineWorker::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->uniformVelocitiesForSelectedEntities(includeClusters);
+    _cudaSimulation->uniformVelocitiesForSelectedObjects(includeClusters);
 }
 
 void EngineWorker::makeSticky(bool includeClusters)
@@ -418,26 +418,26 @@ void EngineWorker::updateSelection()
     _cudaSimulation->updateSelection();
 }
 
-void EngineWorker::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData)
+void EngineWorker::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->shallowUpdateSelectedEntities(updateData);
+    _cudaSimulation->shallowUpdateSelectedObjects(updateData);
 
     updateMonitorDataIntern();
 }
 
-void EngineWorker::colorSelectedEntities(unsigned char color, bool includeClusters)
+void EngineWorker::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->colorSelectedEntities(color, includeClusters);
+    _cudaSimulation->colorSelectedObjects(color, includeClusters);
 
     updateMonitorDataIntern();
 }
 
-void EngineWorker::reconnectSelectedEntities()
+void EngineWorker::reconnectSelectedObjects()
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->reconnectSelectedEntities();
+    _cudaSimulation->reconnectSelectedObjects();
 }
 
 void EngineWorker::runThreadLoop()

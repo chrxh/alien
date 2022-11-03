@@ -37,9 +37,9 @@ public:
     void getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
     void addAndSelectSimulationData(DataTO const& dataTO);
     void setSimulationData(DataTO const& dataTO);
-    void removeSelectedEntities(bool includeClusters);
-    void relaxSelectedEntities(bool includeClusters);
-    void uniformVelocitiesForSelectedEntities(bool includeClusters);
+    void removeSelectedObjects(bool includeClusters);
+    void relaxSelectedObjects(bool includeClusters);
+    void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
@@ -50,11 +50,11 @@ public:
     void swapSelection(PointSelectionData const& selectionData);
     void setSelection(AreaSelectionData const& selectionData);
     SelectionShallowData getSelectionShallowData();
-    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData);
+    void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData);
     void removeSelection();
     void updateSelection();
-    void colorSelectedEntities(unsigned char color, bool includeClusters);
-    void reconnectSelectedEntities();
+    void colorSelectedObjects(unsigned char color, bool includeClusters);
+    void reconnectSelectedObjects();
 
     void setGpuConstants(GpuSettings const& cudaConstants);
     void setSimulationParameters(SimulationParameters const& parameters);

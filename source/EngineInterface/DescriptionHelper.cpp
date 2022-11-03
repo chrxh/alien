@@ -419,7 +419,7 @@ RealVector2D DescriptionHelper::getPos(CellOrParticleDescription const& entity)
     return std::get<ParticleDescription>(entity).pos;
 }
 
-std::vector<CellOrParticleDescription> DescriptionHelper::getEntities(
+std::vector<CellOrParticleDescription> DescriptionHelper::getObjects(
     DataDescription const& data)
 {
     std::vector<CellOrParticleDescription> result;

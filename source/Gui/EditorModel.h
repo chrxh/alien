@@ -18,9 +18,6 @@ public:
     bool isCellSelectionEmpty() const;
     void clear();
 
-    std::vector<CellOrParticleDescription> fetchEntitiesToInspect();
-    void inspectEntities(std::vector<CellOrParticleDescription> const& entities);
-
     bool existsInspectedEntity(uint64_t id) const;
     CellOrParticleDescription getInspectedEntity(uint64_t id) const;
     void addInspectedEntity(CellOrParticleDescription const& entity);
@@ -45,7 +42,6 @@ private:
     SimulationController _simController;
     SelectionShallowData _selectionShallowData;
 
-    std::vector<CellOrParticleDescription> _entitiesToInspect;
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
 
     std::optional<std::vector<uint8_t>> _copiedGenome;

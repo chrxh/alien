@@ -28,19 +28,19 @@ public:
     virtual DataDescription getSimulationData() = 0;
     virtual ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) = 0;
     virtual DataDescription getSelectedSimulationData(bool includeClusters) = 0;
-    virtual DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds) = 0;
+    virtual DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
 
     virtual void addAndSelectSimulationData(DataDescription const& dataToAdd) = 0;
     virtual void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) = 0;
     virtual void setSimulationData(DataDescription const& dataToUpdate) = 0;
-    virtual void removeSelectedEntities(bool includeClusters) = 0;
-    virtual void relaxSelectedEntities(bool includeClusters) = 0;
-    virtual void uniformVelocitiesForSelectedEntities(bool includeClusters) = 0;
+    virtual void removeSelectedObjects(bool includeClusters) = 0;
+    virtual void relaxSelectedObjects(bool includeClusters) = 0;
+    virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
     virtual void makeSticky(bool includeClusters) = 0;
     virtual void removeStickiness(bool includeClusters) = 0;
     virtual void setBarrier(bool value, bool includeClusters) = 0;
-    virtual void colorSelectedEntities(unsigned char color, bool includeClusters) = 0;
-    virtual void reconnectSelectedEntities() = 0;
+    virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
+    virtual void reconnectSelectedObjects() = 0;
     virtual void changeCell(CellDescription const& changedCell) = 0;
     virtual void changeParticle(ParticleDescription const& changedParticle) = 0;
 
@@ -78,7 +78,7 @@ public:
     virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
     virtual void swapSelection(RealVector2D const& pos, float radius) = 0;
     virtual SelectionShallowData getSelectionShallowData() = 0;
-    virtual void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData) = 0;
+    virtual void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) = 0;
     virtual void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) = 0;
     virtual void removeSelection() = 0;
     virtual bool updateSelectionIfNecessary() = 0;

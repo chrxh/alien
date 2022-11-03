@@ -43,19 +43,19 @@ public:
     DataDescription getSimulationData() override;
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
     DataDescription getSelectedSimulationData(bool includeClusters) override;
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds) override;
+    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
     void addAndSelectSimulationData(DataDescription const& dataToAdd) override;
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) override;
     void setSimulationData(DataDescription const& dataToUpdate) override;
-    void removeSelectedEntities(bool includeClusters) override;
-    void relaxSelectedEntities(bool includeClusters) override;
-    void uniformVelocitiesForSelectedEntities(bool includeClusters) override;
+    void removeSelectedObjects(bool includeClusters) override;
+    void relaxSelectedObjects(bool includeClusters) override;
+    void uniformVelocitiesForSelectedObjects(bool includeClusters) override;
     void makeSticky(bool includeClusters) override;
     void removeStickiness(bool includeClusters) override;
     void setBarrier(bool value, bool includeClusters) override;
-    void colorSelectedEntities(unsigned char color, bool includeClusters) override;
-    void reconnectSelectedEntities() override;
+    void colorSelectedObjects(unsigned char color, bool includeClusters) override;
+    void reconnectSelectedObjects() override;
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
 
@@ -94,7 +94,7 @@ public:
     void switchSelection(RealVector2D const& pos, float radius) override;
     void swapSelection(RealVector2D const& pos, float radius) override;
     SelectionShallowData getSelectionShallowData() override;
-    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData) override;
+    void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) override;
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) override;
     void removeSelection() override;
     bool updateSelectionIfNecessary() override;

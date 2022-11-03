@@ -147,7 +147,7 @@ void _CreatorWindow::onDrawing()
     auto mousePos = ImGui::GetMousePos();
     auto pos = _viewport->mapViewToWorldPosition({mousePos.x, mousePos.y});
     if (!_drawing.isEmpty()) {
-        _simController->removeSelectedEntities(false);
+        _simController->removeSelectedObjects(false);
     }
 
     auto parameters = _simController->getSimulationParameters();
@@ -190,7 +190,7 @@ void _CreatorWindow::onDrawing()
         _simController->addAndSelectSimulationData(_drawing);
     }
 
-    _simController->reconnectSelectedEntities();
+    _simController->reconnectSelectedObjects();
     _editorModel->update();
 }
 

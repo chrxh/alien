@@ -14,6 +14,7 @@ public:
         SimulationController const& simController,
         Viewport const& viewport,
         EditorModel const& editorModel,
+        GenomeEditorWindow const& genomeEditorWindow,
         uint64_t entityId,
         RealVector2D const& initialPos);
     ~_InspectorWindow();
@@ -38,10 +39,11 @@ private:
     float calcWindowWidth() const;
 
 private:
-    std::shared_ptr<CompilationResult> _lastCompilationResult;
     SimulationController _simController;
     Viewport _viewport; 
     EditorModel _editorModel;
+    GenomeEditorWindow _genomeEditorWindow;
+
     RealVector2D _initialPos;
 
     bool _on = true;

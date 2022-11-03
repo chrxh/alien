@@ -25,7 +25,8 @@ public:
     void onCloseAllInspectorWindows();
 
     bool isInspectionPossible() const;
-    void onInspectEntities() const;
+    void onInspectSelectedObjects();
+    void onInspectObjects(std::vector<CellOrParticleDescription> const& entities);
 
     bool isCopyingPossible() const;
     void onCopy();
@@ -34,11 +35,11 @@ public:
     bool isDeletingPossible() const;
     void onDelete();
 
+
 private:
     void processSelectionRect();
     void processInspectorWindows();
 
-    void newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities);
 
     void selectEntities(RealVector2D const& viewPos, bool modifierKeyPressed);
     void moveSelectedEntities(RealVector2D const& viewPos, RealVector2D const& prevViewPos);

@@ -245,13 +245,13 @@ void _CudaSimulationFacade::getSelectedSimulationData(bool includeClusters, Data
 void _CudaSimulationFacade::getInspectedSimulationData(std::vector<uint64_t> entityIds, DataTO const& dataTO)
 {
     InspectedEntityIds ids;
-    if (entityIds.size() > Const::MaxInspectedEntities) {
+    if (entityIds.size() > Const::MaxInspectedObjects) {
         return;
     }
     for (int i = 0; i < entityIds.size(); ++i) {
         ids.values[i] = entityIds.at(i);
     }
-    if (entityIds.size() < Const::MaxInspectedEntities) {
+    if (entityIds.size() < Const::MaxInspectedObjects) {
         ids.values[entityIds.size()] = 0;
     }
     _dataAccessKernels->getInspectedData(_settings.gpuSettings, getSimulationDataIntern(), ids, *_cudaAccessTO);
@@ -286,19 +286,19 @@ void _CudaSimulationFacade::setSimulationData(DataTO const& dataTO)
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::removeSelectedEntities(bool includeClusters)
+void _CudaSimulationFacade::removeSelectedObjects(bool includeClusters)
 {
     _editKernels->removeSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::relaxSelectedEntities(bool includeClusters)
+void _CudaSimulationFacade::relaxSelectedObjects(bool includeClusters)
 {
     _editKernels->relaxSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::uniformVelocitiesForSelectedEntities(bool includeClusters)
+void _CudaSimulationFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
     _editKernels->uniformVelocitiesForSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
@@ -361,7 +361,7 @@ void _CudaSimulationFacade::setSelection(AreaSelectionData const& selectionData)
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
-void _CudaSimulationFacade::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& shallowUpdateData)
+void _CudaSimulationFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData)
 {
     _editKernels->shallowUpdateSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), shallowUpdateData);
     syncAndCheck();
@@ -379,13 +379,13 @@ void _CudaSimulationFacade::updateSelection()
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::colorSelectedEntities(unsigned char color, bool includeClusters)
+void _CudaSimulationFacade::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
     _editKernels->colorSelectedCells(_settings.gpuSettings, getSimulationDataIntern(), color, includeClusters);
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::reconnectSelectedEntities()
+void _CudaSimulationFacade::reconnectSelectedObjects()
 {
     _editKernels->reconnectSelectedEntities(_settings.gpuSettings, getSimulationDataIntern());
     syncAndCheck();

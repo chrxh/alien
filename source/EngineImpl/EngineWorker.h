@@ -52,15 +52,15 @@ public:
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds);
+    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     MonitorData getMonitorData() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
     void setSimulationData(DataDescription const& dataToUpdate);
-    void removeSelectedEntities(bool includeClusters);
-    void relaxSelectedEntities(bool includeClusters);
-    void uniformVelocitiesForSelectedEntities(bool includeClusters);
+    void removeSelectedObjects(bool includeClusters);
+    void relaxSelectedObjects(bool includeClusters);
+    void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
@@ -92,9 +92,9 @@ public:
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     void removeSelection();
     void updateSelection();
-    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData);
-    void colorSelectedEntities(unsigned char color, bool includeClusters);
-    void reconnectSelectedEntities();
+    void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData);
+    void colorSelectedObjects(unsigned char color, bool includeClusters);
+    void reconnectSelectedObjects();
 
     void runThreadLoop();
     void runSimulation();
