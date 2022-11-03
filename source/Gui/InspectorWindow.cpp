@@ -28,6 +28,7 @@ _InspectorWindow::_InspectorWindow(
     SimulationController const& simController,
     Viewport const& viewport,
     EditorModel const& editorModel,
+    GenomeEditorWindow const& genomeEditorWindow,
     uint64_t entityId,
     RealVector2D const& initialPos)
     : _entityId(entityId)
@@ -35,6 +36,7 @@ _InspectorWindow::_InspectorWindow(
     , _viewport(viewport)
     , _editorModel(editorModel)
     , _simController(simController)
+    , _genomeEditorWindow(genomeEditorWindow)
 {
 }
 

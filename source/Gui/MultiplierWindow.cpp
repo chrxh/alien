@@ -70,7 +70,7 @@ void _MultiplierWindow::processIntern()
                 }
                 return result;
             }();
-            _simController->removeSelectedEntities(true);
+            _simController->removeSelectedObjects(true);
             _simController->addAndSelectSimulationData(multiplicationResult);
 
             _editorModel->update();
@@ -83,7 +83,7 @@ void _MultiplierWindow::processIntern()
             _editorModel->isSelectionEmpty() || !_selectionDataAfterMultiplication
             || !_selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
         if (AlienImGui::Button("Undo")) {
-            _simController->removeSelectedEntities(true);
+            _simController->removeSelectedObjects(true);
             _simController->addAndSelectSimulationData(_origSelection);
             _selectionDataAfterMultiplication = std::nullopt;
         }

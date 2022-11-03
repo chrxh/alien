@@ -170,7 +170,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
         auto& cell = cells.at(index);
 
         bool found = false;
-        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == 0) {
                 break;
             }
@@ -194,7 +194,7 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = data.objects.particlePointers.at(particleIndex);
         bool found = false;
-        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == 0) {
                 break;
             }

@@ -478,7 +478,7 @@ void _MainWindow::processMenubar()
             ImGui::Separator();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
             if (ImGui::MenuItem("Inspect entities", "ALT+N")) {
-                _editorController->onInspectEntities();
+                _editorController->onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->areInspectionWindowsActive());
@@ -636,7 +636,7 @@ void _MainWindow::processMenubar()
             multiplierWindow->setOn(!multiplierWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
-            _editorController->onInspectEntities();
+            _editorController->onInspectSelectedObjects();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
             _editorController->onCloseAllInspectorWindows();

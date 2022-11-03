@@ -12,10 +12,11 @@ public:
     _PatternEditorWindow(
         EditorModel const& editorModel,
         SimulationController const& simController,
-        Viewport const& viewport);
+        Viewport const& viewport,
+        EditorControllerWeakPtr const& editorController);
 
     bool isInspectionPossible() const;
-    void onInspectEntities();
+    void onInspectSelectedObjects();
 
     bool isCopyingPossible() const;
     void onCopy();
@@ -39,6 +40,7 @@ private:
     Viewport _viewport;
     OpenPatternDialog _openPatternDialog;
     SavePatternDialog _savePatternDialog;
+    EditorControllerWeakPtr _editorController;
 
     float _angle = 0;
     float _angularVel = 0;

@@ -35,18 +35,6 @@ void _EditorModel::clear()
     _selectionShallowData = SelectionShallowData();
 }
 
-std::vector<CellOrParticleDescription> _EditorModel::fetchEntitiesToInspect()
-{
-    auto result = _entitiesToInspect;
-    _entitiesToInspect = {};
-    return result;
-}
-
-void _EditorModel::inspectEntities(std::vector<CellOrParticleDescription> const& entities)
-{
-    _entitiesToInspect = entities;
-}
-
 bool _EditorModel::existsInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.find(id) != _inspectedEntityById.end();

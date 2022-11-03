@@ -1,5 +1,6 @@
 #include "EditorController.h"
 
+#include <memory>
 #include <imgui.h>
 
 #include "Base/Math.h"
@@ -20,11 +21,11 @@ _EditorController::_EditorController(SimulationController const& simController, 
     , _viewport(viewport)
 {
     _editorModel = std::make_shared<_EditorModel>(_simController);
+    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simController);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
-    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport);
+    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport, this);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
-    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simController);
 }
 
 bool _EditorController::isOn() const
@@ -153,9 +154,68 @@ bool _EditorController::isInspectionPossible() const
     return _patternEditorWindow->isInspectionPossible();
 }
 
-void _EditorController::onInspectEntities() const
+void _EditorController::onInspectSelectedObjects()
 {
-    _patternEditorWindow->onInspectEntities();
+    DataDescription selectedData = _simController->getSelectedSimulationData(false);
+    onInspectObjects(DescriptionHelper::getObjects(selectedData));
+}
+
+void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities)
+{
+    if (entities.empty()) {
+        return;
+    }
+    std::set<uint64_t> inspectedIds;
+    for (auto const& inspectorWindow : _inspectorWindows) {
+        inspectedIds.insert(inspectorWindow->getId());
+    }
+    auto origInspectedIds = inspectedIds;
+    for (auto const& entity : entities) {
+        inspectedIds.insert(DescriptionHelper::getId(entity));
+    }
+
+    std::vector<CellOrParticleDescription> newEntities;
+    for (auto const& entity : entities) {
+        if (origInspectedIds.find(DescriptionHelper::getId(entity)) == origInspectedIds.end()) {
+            newEntities.emplace_back(entity);
+        }
+    }
+    if (newEntities.empty()) {
+        return;
+    }
+    if (inspectedIds.size() > Const::MaxInspectedObjects) {
+        return;
+    }
+    RealVector2D center;
+    int num = 0;
+    for (auto const& entity : entities) {
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        center += entityPos;
+        ++num;
+    }
+    center = center / num;
+
+    float maxDistanceFromCenter = 0;
+    for (auto const& entity : entities) {
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto distanceFromCenter = toFloat(Math::length(entityPos - center));
+        maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
+    }
+    auto viewSize = _viewport->getViewSize();
+    auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 3.8f;
+    auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
+
+    for (auto const& entity : newEntities) {
+        auto id = DescriptionHelper::getId(entity);
+        _editorModel->addInspectedEntity(entity);
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
+        auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
+        windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
+        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 300.0f) + 40.0f;
+        _inspectorWindows.emplace_back(
+            std::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}));
+    }
 }
 
 bool _EditorController::isCopyingPossible() const
@@ -201,9 +261,6 @@ void _EditorController::processSelectionRect()
 
 void _EditorController::processInspectorWindows()
 {
-    //new entities to inspect
-    newEntitiesToInspect(_editorModel->fetchEntitiesToInspect());
-
     //process inspector windows
     for (auto const& inspectorWindow : _inspectorWindows) {
         inspectorWindow->process();
@@ -232,7 +289,7 @@ void _EditorController::processInspectorWindows()
         entityIds.emplace_back(DescriptionHelper::getId(entity));
     }
     auto inspectedData = _simController->getInspectedSimulationData(entityIds);
-    auto newInspectedEntities = DescriptionHelper::getEntities(inspectedData);
+    auto newInspectedEntities = DescriptionHelper::getObjects(inspectedData);
     _editorModel->setInspectedEntities(newInspectedEntities);
 
     inspectorWindows.clear();
@@ -242,64 +299,6 @@ void _EditorController::processInspectorWindows()
         }
     }
     _inspectorWindows = inspectorWindows;
-}
-
-void _EditorController::newEntitiesToInspect(std::vector<CellOrParticleDescription> const& entities)
-{
-    if (entities.empty()) {
-        return;
-    }
-    std::set<uint64_t> inspectedIds;
-    for (auto const& inspectorWindow : _inspectorWindows) {
-        inspectedIds.insert(inspectorWindow->getId());
-    }
-    auto origInspectedIds = inspectedIds;
-    for (auto const& entity : entities) {
-        inspectedIds.insert(DescriptionHelper::getId(entity));
-    }
-
-    std::vector<CellOrParticleDescription> newEntities;
-    for (auto const& entity : entities) {
-        if (origInspectedIds.find(DescriptionHelper::getId(entity)) == origInspectedIds.end()) {
-            newEntities.emplace_back(entity);
-        }
-    }
-    if (newEntities.empty()) {
-        return;
-    }
-    if (inspectedIds.size() > Const::MaxInspectedEntities) {
-        return;
-    }
-    RealVector2D center;
-    int num = 0;
-    for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        center += entityPos;
-        ++num;
-    }
-    center = center / num;
-
-    float maxDistanceFromCenter = 0;
-    for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        auto distanceFromCenter = toFloat(Math::length(entityPos - center));
-        maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
-    }
-    auto viewSize = _viewport->getViewSize();
-    auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 3.8f;
-    auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
-
-    for (auto const& entity : newEntities) {
-        auto id = DescriptionHelper::getId(entity);
-        _editorModel->addInspectedEntity(entity);
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
-        auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
-        windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
-        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 300.0f) + 40.0f;
-        _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(
-            _simController, _viewport, _editorModel, id, RealVector2D{windowPosX, windowPosY}));
-    }
 }
 
 void _EditorController::selectEntities(RealVector2D const& viewPos, bool modifierKeyPressed)
@@ -328,7 +327,7 @@ void _EditorController::moveSelectedEntities(
     updateData.considerClusters = _editorModel->isRolloutToClusters();
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
-    _simController->shallowUpdateSelectedEntities(updateData);
+    _simController->shallowUpdateSelectedObjects(updateData);
     _editorModel->update();
 }
 
