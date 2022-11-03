@@ -316,14 +316,27 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         auto otherPosDelta = otherCell->absPos - newCell->absPos;
         data.cellMap.correctDirection(otherPosDelta);
         Math::normalize(otherPosDelta);
-        if (Math::dot(posDelta, otherPosDelta) < 0.1) {
-            continue;
-        }
+        //if (Math::dot(posDelta, otherPosDelta) < 0.1) {
+        //    continue;
+        //}
         if (otherCell->tryLock()) {
-            if (isConnectable(newCell->numConnections, newCell->maxConnections, makeSticky)
-                && isConnectable(otherCell->numConnections, otherCell->maxConnections, makeSticky)) {
+            bool connected = false;
+            for (int i = 0; i < hostCell->numConnections; ++i) {
+                auto const& connectedCell1 = hostCell->connections[i].cell;
+                for (int j = 0; j < otherCell->numConnections; ++j) {
+                    auto const& connectedCell2 = otherCell->connections[j].cell;
+                    if (connectedCell1 == connectedCell2) {
+                        connected = true;
+                    }
+                }
+            }
+            if (!connected) {
+                if (isConnectable(newCell->numConnections, newCell->maxConnections, makeSticky)
+                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, makeSticky)) {
 
-                CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
+                    CellConnectionProcessor::addConnections(
+                        data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
+                }
             }
             otherCell->releaseLock();
         }
