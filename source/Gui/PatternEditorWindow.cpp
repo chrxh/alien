@@ -247,8 +247,8 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Release stresses")) {
             _simController->relaxSelectedObjects(_editorModel->isRolloutToClusters());
         }
-        if (ImGui::Button("Generate token pathways")) {
-            onGenerateBranchNumbers();
+        if (ImGui::Button("Generate execution order")) {
+            onGenerateExecutionOrderNumbers();
         }
         if (ImGui::Button("Make sticky")) {
             onMakeSticky();
@@ -332,7 +332,7 @@ void _PatternEditorWindow::onDelete()
     _editorModel->update();
 }
 
-void _PatternEditorWindow::onGenerateBranchNumbers()
+void _PatternEditorWindow::onGenerateExecutionOrderNumbers()
 {
     auto dataWithClusters = _simController->getSelectedSimulationData(true);
     auto dataWithoutClusters = _simController->getSelectedSimulationData(false);

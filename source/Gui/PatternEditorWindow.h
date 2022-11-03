@@ -28,7 +28,7 @@ public:
 private:
     void processIntern() override;
 
-    void onGenerateBranchNumbers();
+    void onGenerateExecutionOrderNumbers();
     void onMakeSticky();
     void onRemoveStickiness();
     void onSetBarrier(bool value);

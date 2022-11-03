@@ -6,6 +6,9 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+
+#include "Base/StringHelper.h"
+#include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeTranslator.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -14,7 +17,6 @@
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
 #include "StyleRepository.h"
-#include "EngineInterface/SimulationController.h"
 
 namespace
 {
@@ -36,6 +38,7 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
 
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
 {
+    setOn(true);
     std::optional<int> tabIndex;
     for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
         ;
@@ -57,7 +60,7 @@ namespace
     std::string generateShortDescription(int index, CellGenomeDescription const& cell)
     {
         return "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
-            + ", Color: " + std::to_string(cell.color);
+            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
     }
 }
 
