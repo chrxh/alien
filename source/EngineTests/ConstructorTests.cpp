@@ -849,7 +849,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
 }
 
-TEST_F(ConstructorTests, constructThirdCell_multipleConnections)
+TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
 {
     auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
@@ -878,27 +878,35 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setUnderConstruction(true),
+        CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 4);
+    data.addConnection(4, 5);
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(4, actualData.cells.size());
+    EXPECT_EQ(6, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
+    auto uninvolvedCell1 = getCell(actualData, 4);
+    auto uninvolvedCell2 = getCell(actualData, 5);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualPrevPrevConstructedCell = getCell(actualData, 3);
-    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4, 5});
 
-    EXPECT_EQ(1, actualHostCell.connections.size());
+    EXPECT_EQ(2, uninvolvedCell1.connections.size());
+    EXPECT_EQ(1, uninvolvedCell2.connections.size());
+    EXPECT_EQ(2, actualHostCell.connections.size());
     ASSERT_EQ(3, actualConstructedCell.connections.size());
     ASSERT_EQ(2, actualPrevPrevConstructedCell.connections.size());
     ASSERT_EQ(2, actualPrevConstructedCell.connections.size());
 }
 
-TEST_F(ConstructorTests, constructThirdCell_noMultipleConnections)
+TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
 {
     auto genome = GenomeTranslator::encode({CellGenomeDescription()});
 
@@ -927,22 +935,30 @@ TEST_F(ConstructorTests, constructThirdCell_noMultipleConnections)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setUnderConstruction(true),
+        CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 4);
+    data.addConnection(4, 5);
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
-    EXPECT_EQ(4, actualData.cells.size());
+    EXPECT_EQ(6, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
+    auto uninvolvedCell1 = getCell(actualData, 4);
+    auto uninvolvedCell2 = getCell(actualData, 5);
     auto actualPrevConstructedCell = getCell(actualData, 2);
     auto actualPrevPrevConstructedCell = getCell(actualData, 3);
-    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4, 5});
 
-    EXPECT_EQ(1, actualHostCell.connections.size());
-    ASSERT_EQ(2, actualConstructedCell.connections.size());
-    ASSERT_EQ(1, actualPrevPrevConstructedCell.connections.size());
+    EXPECT_EQ(2, uninvolvedCell1.connections.size());
+    EXPECT_EQ(1, uninvolvedCell2.connections.size());
+    EXPECT_EQ(2, actualHostCell.connections.size());
+    ASSERT_EQ(3, actualConstructedCell.connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell.connections.size());
     ASSERT_EQ(2, actualPrevConstructedCell.connections.size());
 }
