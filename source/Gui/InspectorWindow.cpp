@@ -10,11 +10,14 @@
 
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/GenomeTranslator.h"
+
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "EditorModel.h"
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
+#include "GenomeEditorWindow.h"
 
 using namespace std::string_literals;
 
@@ -180,20 +183,18 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
         cell.energy = energy;
 
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
                 .name("Max connections")
-                .textWidth(MaxCellContentTextWidth)
-                .max(parameters.cellMaxBonds)
-                .min(0),
+                .textWidth(MaxCellContentTextWidth),
             cell.maxConnections);
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
+        cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
                 .name("Execution order")
-                .textWidth(MaxCellContentTextWidth)
-                .max(parameters.cellMaxExecutionOrderNumbers - 1)
-                .min(0),
+                .textWidth(MaxCellContentTextWidth),
             cell.executionOrderNumber);
+        cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
 
@@ -283,13 +284,16 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     ImGui::EndChild();
 
-    AlienImGui::Button("Edit");
-    ImGui::SameLine();
     ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
     if (AlienImGui::Button("Paste")) {
         constructor.genome = *_editorModel->getCopiedGenome();
     }
     ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Edit")) {
+        _genomeEditorWindow->openTab(GenomeTranslator::decode(constructor.genome, _simController->getSimulationParameters()));
+    }
 
     AlienImGui::Group("Preview");
 }
