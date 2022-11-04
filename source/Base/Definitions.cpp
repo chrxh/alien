@@ -60,6 +60,11 @@ RealVector2D RealVector2D::operator-(RealVector2D const& other) const
     return RealVector2D{x - other.x, y - other.y};
 }
 
+RealVector2D RealVector2D::operator-() const
+{
+    return RealVector2D{-x, -y};
+}
+
 RealVector2D RealVector2D::operator/(float divisor) const
 {
     return RealVector2D{x / divisor, y / divisor};

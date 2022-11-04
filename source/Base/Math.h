@@ -17,6 +17,8 @@ public:
     static RealVector2D rotateQuarterCounterClockwise(RealVector2D v);
     static RealVector2D unitVectorOfAngle(double angleInDeg);
     static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise
+    static RealVector2D rotateClockwise(RealVector2D const& v, float angle);
+    static void normalize(RealVector2D& v);
 };
 
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v);

@@ -9,13 +9,14 @@
 
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeTranslator.h"
+#include "EngineInterface/GenomeDescriptionConverter.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
+#include "PreviewDescriptionConverter.h"
 #include "StyleRepository.h"
 
 namespace
@@ -79,6 +80,7 @@ void _GenomeEditorWindow::processIntern()
         std::optional<int> tabToDelete;
         _tabIndexToSelect.reset();
 
+        //process tabs
         for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
 
             bool open = true;
@@ -88,8 +90,8 @@ void _GenomeEditorWindow::processIntern()
             }
             int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
             if (ImGui::BeginTabItem(("Gene " + std::to_string(index + 1)).c_str(), openPtr, flags)) {
-                processTab(tabData);
                 _selectedTabIndex = toInt(index);
+                processTab(tabData);
                 ImGui::EndTabItem();
             }
             if (openPtr && *openPtr == false) {
@@ -97,6 +99,7 @@ void _GenomeEditorWindow::processIntern()
             }
         }
 
+        //modify tabs
         if (tabToDelete.has_value()) {
             _tabDatas.erase(_tabDatas.begin() + *tabToDelete);
             if (_selectedTabIndex == _tabDatas.size()) {
@@ -170,7 +173,7 @@ void _GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _editorModel->setCopiedGenome(GenomeTranslator::encode(selectedTab.genome));
+        _editorModel->setCopiedGenome(GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome));
     }
     AlienImGui::Tooltip("Copy all nodes from gene");
 
@@ -195,8 +198,8 @@ void _GenomeEditorWindow::processTab(TabData& tab)
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
     if (ImGui::BeginChild("##child3", ImVec2(0, 0), true)) {
-        AlienImGui::Group("Phenotype");
-        showPhenotype(tab);
+        AlienImGui::Group("Preview");
+        showPreview(tab);
     }
     ImGui::EndChild();
 }
@@ -283,7 +286,7 @@ void _GenomeEditorWindow::processGenotype(TabData& tab)
             ImGui::PushID(index);
 
             float h, s, v;
-            AlienImGui::convertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
             if (tab.selected && *tab.selected == index) {
@@ -454,7 +457,7 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
             }
             ImGui::SameLine();
             if (AlienImGui::Button("Copy")) {
-                _editorModel->setCopiedGenome(constructor.isMakeGenomeCopy() ? GenomeTranslator::encode(tab.genome) : constructor.getGenomeData());
+                _editorModel->setCopiedGenome(constructor.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : constructor.getGenomeData());
             }
             ImGui::SameLine();
             ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
@@ -468,7 +471,7 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
             }
             ImGui::SameLine();
             if (AlienImGui::Button("Open")) {
-                auto genomeToOpen = constructor.isMakeGenomeCopy() ? tab.genome : GenomeTranslator::decode(constructor.getGenomeData(), _simulationController->getSimulationParameters());
+                auto genomeToOpen = constructor.isMakeGenomeCopy() ? tab.genome : GenomeDescriptionConverter::convertBytesToDescription(constructor.getGenomeData(), _simulationController->getSimulationParameters());
                 openTab(genomeToOpen);
             }
         } break;
@@ -476,8 +479,10 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
     }
 }
 
-void _GenomeEditorWindow::showPhenotype(TabData& tab)
+void _GenomeEditorWindow::showPreview(TabData& tab)
 {
-
+    auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
+    auto preview = PreviewDescriptionConverter::convert(genome);
+    AlienImGui::ShowPreviewDescription(preview);
 }
 

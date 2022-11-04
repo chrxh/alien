@@ -4,6 +4,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Constants.h"
+#include "PreviewDescriptions.h"
 #include "Definitions.h"
 
 class AlienImGui
@@ -189,5 +190,8 @@ public:
     static void Tooltip(std::string const& text);
     static void Tooltip(std::function<std::string()> const& textFunc);
 
-    static void convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
+    static void ShowPreviewDescription(PreviewDescription const& desc);
+
+    static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
+
 };

@@ -2,8 +2,8 @@
 add_library(alien_engine_impl_lib
     AccessDataTOCache.cpp
     AccessDataTOCache.h
-    DataConverter.cpp
-    DataConverter.h
+    DescriptionConverter.cpp
+    DescriptionConverter.h
     Definitions.h
     EngineWorker.cpp
     EngineWorker.h

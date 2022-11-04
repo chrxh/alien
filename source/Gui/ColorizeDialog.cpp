@@ -77,7 +77,7 @@ void _ColorizeDialog::show()
 void _ColorizeDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
     float h, s, v;
-    AlienImGui::convertRGBtoHSV(cellColor, h, s, v);
+    AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.3f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.5f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.8f));
