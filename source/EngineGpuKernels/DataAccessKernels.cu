@@ -77,7 +77,7 @@ namespace
             cellTO.cellFunctionData.constructor.mode = cell->cellFunctionData.constructor.mode;
             cellTO.cellFunctionData.constructor.singleConstruction = cell->cellFunctionData.constructor.singleConstruction;
             cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
-            cellTO.cellFunctionData.constructor.makeSticky = cell->cellFunctionData.constructor.makeSticky;
+            cellTO.cellFunctionData.constructor.adaptMaxConnections = cell->cellFunctionData.constructor.adaptMaxConnections;
             cellTO.cellFunctionData.constructor.angleAlignment = cell->cellFunctionData.constructor.angleAlignment;
             copyAuxiliaryData(
                 cell->cellFunctionData.constructor.genomeSize,

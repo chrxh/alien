@@ -420,7 +420,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.mode = cellTO.cellFunctionData.constructor.mode;
         constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
         constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        constructor.makeSticky = cellTO.cellFunctionData.constructor.makeSticky;
+        constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
         constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
@@ -517,7 +517,7 @@ void DescriptionConverter::addCell(
         constructorTO.mode = constructorDesc.mode;
         constructorTO.singleConstruction = constructorDesc.singleConstruction;
         constructorTO.separateConstruction = constructorDesc.separateConstruction;
-        constructorTO.makeSticky = constructorDesc.makeSticky;
+        constructorTO.adaptMaxConnections = constructorDesc.adaptMaxConnections;
         constructorTO.angleAlignment = constructorDesc.angleAlignment;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;

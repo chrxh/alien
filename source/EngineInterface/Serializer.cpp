@@ -65,7 +65,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, ConstructorDescription& data)
     {
-        ar(data.mode, data.singleConstruction, data.separateConstruction, data.makeSticky, data.angleAlignment, data.genome, data.currentGenomePos);
+        ar(data.mode, data.singleConstruction, data.separateConstruction, data.adaptMaxConnections, data.angleAlignment, data.genome, data.currentGenomePos);
     }
     template <class Archive>
     inline void serialize(Archive& ar, SensorDescription& data)

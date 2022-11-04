@@ -91,8 +91,8 @@ struct ConstructorDescription
     int mode = 1;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction = false;
     bool separateConstruction = true;
-    bool makeSticky = false;
-    int angleAlignment = 0;  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
+    bool adaptMaxConnections = true;
+    Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_60;
     std::vector<uint8_t> genome;
 
     //process data
@@ -117,7 +117,7 @@ struct ConstructorDescription
     }
     ConstructorDescription& setMakeSticky(bool value)
     {
-        makeSticky = value;
+        adaptMaxConnections = value;
         return *this;
     }
     ConstructorDescription& setAngleAlignment(int value)

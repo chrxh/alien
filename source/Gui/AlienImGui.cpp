@@ -2,12 +2,14 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/Constants.h"
 
+#include "CellFunctionStrings.h"
 #include "StyleRepository.h"
 
 void AlienImGui::HelpMarker(std::string const& text)
@@ -741,37 +743,6 @@ void AlienImGui::Tooltip(std::function<std::string()> const& textFunc)
     }
 }
 
-void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
-{
-    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
-        //auto windowPos = ImGui::GetCursorScreenPos();
-        auto windowPos = ImGui::GetWindowPos();
-        auto windowSize = ImGui::GetWindowSize();
-        RealVector2D windowCenter(windowPos.x + windowSize.x / 2, windowPos.y + windowSize.y / 2);
-
-        RealVector2D cellsCenter;
-        for (auto const& cell : desc.cells) {
-            cellsCenter += cell.pos;
-        }
-        cellsCenter /= desc.cells.size();
-
-        for (auto const& connection : desc.connections) {
-            auto startPos = (connection.cell1 - cellsCenter) * 20 + windowCenter;
-            auto endPos = (connection.cell2 - cellsCenter) * 20 + windowCenter;
-            drawList->AddLine({startPos.x, startPos.y}, {endPos.x, endPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-        }
-        for (auto const& cell : desc.cells) {
-            auto cellPos = (cell.pos - cellsCenter) * 20 + windowCenter;
-            float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, 5, ImColor::HSV(h, s * 0.7f, v * 0.7f));
-        }
-        //        ImGui::SetCursorPos({1500, 1500});
-    }
-    ImGui::EndChild();
-}
-
 void AlienImGui::ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(
@@ -822,4 +793,49 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     }
 
     return value != origValue;
+}
+
+void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
+{
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        //auto windowPos = ImGui::GetCursorScreenPos();
+        auto windowPos = ImGui::GetWindowPos();
+        auto windowSize = ImGui::GetWindowSize();
+        RealVector2D windowCenter(windowPos.x + windowSize.x / 2, windowPos.y + windowSize.y / 2);
+
+        RealVector2D cellsCenter;
+        for (auto const& cell : desc.cells) {
+            cellsCenter += cell.pos;
+        }
+        cellsCenter /= desc.cells.size();
+
+        for (auto const& connection : desc.connections) {
+            auto startPos = (connection.cell1 - cellsCenter) * 20 + windowCenter;
+            auto endPos = (connection.cell2 - cellsCenter) * 20 + windowCenter;
+            drawList->AddLine({startPos.x, startPos.y}, {endPos.x, endPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+        }
+        for (auto const& cell : desc.cells) {
+            auto cellPos = (cell.pos - cellsCenter) * 20 + windowCenter;
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, 5, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+        }
+        //        ImGui::SetCursorPos({1500, 1500});
+    }
+    ImGui::EndChild();
+}
+
+bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int& value)
+{
+    auto modCellFunctionStrings = Const::CellFunctionStrings;
+    auto noneString = modCellFunctionStrings.back();
+    modCellFunctionStrings.pop_back();
+    modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
+
+    value = (value + 1) % Enums::CellFunction_Count;
+    auto result =
+        AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth), value);
+    value = (value + Enums::CellFunction_Count - 1) % Enums::CellFunction_Count;
+    return result;
 }

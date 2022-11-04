@@ -501,7 +501,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(constructedConstructor.mode, actualConstructor.mode);
     EXPECT_EQ(constructedConstructor.singleConstruction, actualConstructor.singleConstruction);
     EXPECT_EQ(constructedConstructor.separateConstruction, actualConstructor.separateConstruction);
-    EXPECT_EQ(constructedConstructor.makeSticky, actualConstructor.makeSticky);
+    EXPECT_EQ(constructedConstructor.makeSticky, actualConstructor.adaptMaxConnections);
     EXPECT_EQ(constructedConstructor.angleAlignment, actualConstructor.angleAlignment);
     EXPECT_EQ(constructedConstructor.getGenomeData(), actualConstructor.genome);
 }

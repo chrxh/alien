@@ -61,7 +61,8 @@ namespace
     std::string generateShortDescription(int index, CellGenomeDescription const& cell)
     {
         return "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
-            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
+            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1)
+            + ", Distance: " + StringHelper::format(cell.referenceDistance, 2);
     }
 }
 
@@ -145,6 +146,7 @@ void _GenomeEditorWindow::processToolbar()
                 tabData.selected = toInt(tabData.genome.size() - 1);
             }
         }
+        _collapseAllNodes = true;
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete node");
@@ -190,7 +192,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
         AlienImGui::Group("Genotype");
-        processGenotype(tab);
+        processGeneEditTab(tab);
     }
     ImGui::EndChild();
     ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().scaleContent(5.0f)));
@@ -278,7 +280,7 @@ namespace
     }
 }
 
-void _GenomeEditorWindow::processGenotype(TabData& tab)
+void _GenomeEditorWindow::processGeneEditTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
         int index = 0;
@@ -307,7 +309,11 @@ void _GenomeEditorWindow::processGenotype(TabData& tab)
             }
 
             if (treeNodeOpen) {
-                processCell(tab, cell);
+                auto origCell = cell;
+                processNodeEdit(tab, cell);
+                if (origCell != cell) {
+                    tab.selected = index;
+                }
                 ImGui::TreePop();
             }
             ImGui::PopID();
@@ -318,24 +324,14 @@ void _GenomeEditorWindow::processGenotype(TabData& tab)
     _collapseAllNodes = false;
 }
 
-void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
+void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& cell)
 {
     auto type = cell.getCellFunctionType();
 
     //cell type
     DynamicTableLayout table;
     if (table.begin()) {
-        auto modCellFunctionStrings = Const::CellFunctionStrings;
-        auto noneString = modCellFunctionStrings.back();
-        modCellFunctionStrings.pop_back();
-        modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
-
-        type = (type + 1) % Enums::CellFunction_Count;
-        auto typeComboResult =
-            AlienImGui::Combo(AlienImGui::ComboParameters().name("Specialization").values(modCellFunctionStrings).textWidth(MaxContentTextWidth), type);
-        type = (type + Enums::CellFunction_Count - 1) % Enums::CellFunction_Count;
-
-        if (typeComboResult) {
+        if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(MaxContentTextWidth), type)) {
             applyNewCellFunction(cell, type);
         }
         table.next();
@@ -477,12 +473,32 @@ void _GenomeEditorWindow::processCell(TabData& tab, CellGenomeDescription& cell)
         } break;
         }
     }
+    validationAndCorrection(cell);
 }
 
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionConverter::convert(genome);
+    auto preview = PreviewDescriptionConverter::convert(genome, _simulationController->getSimulationParameters());
     AlienImGui::ShowPreviewDescription(preview);
+}
+
+void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
+{
+    auto numExecutionOrderNumbers = _simulationController->getSimulationParameters().cellMaxExecutionOrderNumbers;
+    auto maxBonds = _simulationController->getSimulationParameters().cellMaxBonds;
+    cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
+    cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
+    cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
+    cell.referenceDistance = std::max(0.0f, cell.referenceDistance);
+
+    switch (cell.getCellFunctionType()) {
+    case Enums::CellFunction_Constructor: {
+        auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
+        if (constructor.mode < 0) {
+            constructor.mode = 0;
+        }
+    } break;
+    }
 }
 

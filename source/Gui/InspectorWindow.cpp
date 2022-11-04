@@ -5,9 +5,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "ImguiMemoryEditor/imgui_memory_editor.h"
-#include "Fonts/IconsFontAwesome5.h"
-
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
@@ -23,7 +20,9 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const MaxCellContentTextWidth = 150.0f;
+    auto const CellWindowWidth = 350.0f;
+    auto const ParticleWindowWidth = 280.0f;
+    auto const MaxCellContentTextWidth = 160.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
 }
 
@@ -139,8 +138,8 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
         AlienImGui::Group("Properties");
         auto const& parameters = _simController->getSimulationParameters();
         int type = cell.getCellFunctionType();
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Specialization").values(Const::CellFunctionStrings).textWidth(MaxCellContentTextWidth), type)) {
+        if (AlienImGui::CellFunctionCombo(
+                AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(MaxCellContentTextWidth), type)) {
             switch (type) {
             case Enums::CellFunction_Neuron: {
                 cell.cellFunction = NeuronDescription();
@@ -266,7 +265,7 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     AlienImGui::Group("Properties");
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
-    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxCellContentTextWidth), constructor.makeSticky);
+    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxCellContentTextWidth), constructor.adaptMaxConnections);
     int constructorMode = constructor.mode == 0 ? 0 : 1;
     if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").textWidth(MaxCellContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
         constructor.mode = constructorMode;
@@ -302,8 +301,8 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
 float _InspectorWindow::calcWindowWidth() const
 {
     if (isCell()) {
-        auto cell = std::get<CellDescription>(_editorModel->getInspectedEntity(_entityId));
-        return StyleRepository::getInstance().scaleContent(280.0f);
+        return StyleRepository::getInstance().scaleContent(CellWindowWidth);
+    } else {
+        return StyleRepository::getInstance().scaleContent(ParticleWindowWidth);
     }
-    return StyleRepository::getInstance().scaleContent(280.0f);
 }
