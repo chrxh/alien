@@ -24,10 +24,12 @@ private:
         std::optional<int> selected;
     };
     void processTab(TabData& tab);
-    void processGenotype(TabData& tab);
-    void processCell(TabData& tab, CellGenomeDescription& cell);
+    void processGeneEditTab(TabData& tab);
+    void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
 
     void showPreview(TabData& tab);
+
+    void validationAndCorrection(CellGenomeDescription& cell) const;
 
     EditorModel _editorModel;
     SimulationController _simulationController;

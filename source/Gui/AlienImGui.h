@@ -190,8 +190,14 @@ public:
     static void Tooltip(std::string const& text);
     static void Tooltip(std::function<std::string()> const& textFunc);
 
-    static void ShowPreviewDescription(PreviewDescription const& desc);
-
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 
+    static void ShowPreviewDescription(PreviewDescription const& desc);
+    struct CellFunctionComboParameters
+    {
+        MEMBER_DECLARATION(CellFunctionComboParameters, std::string, name, "");
+        MEMBER_DECLARATION(CellFunctionComboParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(CellFunctionComboParameters, std::optional<int>, defaultValue, std::nullopt);
+    };
+    static bool CellFunctionCombo(CellFunctionComboParameters& parameters, int& value);
 };

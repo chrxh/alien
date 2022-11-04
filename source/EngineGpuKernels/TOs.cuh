@@ -51,8 +51,8 @@ struct ConstructorTO
     int mode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction;
     bool separateConstruction;
-    bool makeSticky;
-    int angleAlignment;  //0: no alignment, 2: alignment to 180 deg, 3: alignment to 120 deg, ... up to 6
+    bool adaptMaxConnections;
+    Enums::ConstructorAngleAlignment angleAlignment;
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
 

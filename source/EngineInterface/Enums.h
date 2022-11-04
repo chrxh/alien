@@ -29,6 +29,18 @@ namespace Enums
         SensorMode_Count = 2
     };
 
+    using ConstructorAngleAlignment = int;
+    enum ConstructorAlignment_
+    {
+        ConstructorAngleAlignment_None = 0,
+        ConstructorAngleAlignment_360 = 1,
+        ConstructorAngleAlignment_180 = 2,
+        ConstructorAngleAlignment_120 = 3,
+        ConstructorAngleAlignment_90 = 4,
+        ConstructorAngleAlignment_72 = 5,
+        ConstructorAngleAlignment_60 = 6,
+    };
+
     /*
     using Constr = int;
     enum Constr_ {

@@ -42,7 +42,7 @@ private:
         Cell* firstConstructedCell,
         ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool makeSticky);
+    __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
 
     struct AnglesForNewConnection
     {
@@ -72,8 +72,8 @@ private:
 
 namespace
 {
-    float constexpr offspringCellDistance = 1.6f;
-    float constexpr activityThreshold = 0.25f;
+    float constexpr OffspringCellDistance = 1.6f;
+    float constexpr ActivityThreshold = 0.25f;
 }
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
@@ -121,7 +121,7 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Simulati
     if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < activityThreshold) {
+    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < ActivityThreshold) {
         return false;
     }
     if (cell->cellFunctionData.constructor.mode > 0
@@ -188,15 +188,15 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     Cell* hostCell,
     ConstructionData const& constructionData)
 {
-    auto makeSticky = hostCell->cellFunctionData.constructor.makeSticky;
+    auto adaptMaxConnections = hostCell->cellFunctionData.constructor.adaptMaxConnections;
 
-    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, makeSticky)) {
+    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, adaptMaxConnections)) {
         return false;
     }
 
     auto anglesForNewConnection = calcAnglesForNewConnection(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * offspringCellDistance;
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * OffspringCellDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
@@ -213,12 +213,12 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
             newCell,
             anglesForNewConnection.angleFromPreviousConnection,
             0,
-            offspringCellDistance);
+            OffspringCellDistance);
     }
     if (isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->underConstruction = false;
     }
-    if (!makeSticky) {
+    if (adaptMaxConnections) {
         hostCell->maxConnections = hostCell->numConnections;
         newCell->maxConnections = newCell->numConnections;
     }
@@ -240,13 +240,13 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     data.cellMap.correctDirection(posDelta);
 
     auto desiredDistance = constructionData.distance;
-    posDelta = Math::normalized(posDelta) * (offspringCellDistance - desiredDistance);
+    posDelta = Math::normalized(posDelta) * (OffspringCellDistance - desiredDistance);
 
-    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance || offspringCellDistance - desiredDistance < 0) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance || OffspringCellDistance - desiredDistance < 0) {
         return false;
     }
-    auto makeSticky = hostCell->cellFunctionData.constructor.makeSticky;
-    if (makeSticky && 1 == constructionData.maxConnections) {
+    auto adaptMaxConnections = hostCell->cellFunctionData.constructor.adaptMaxConnections;
+    if (!adaptMaxConnections && 1 == constructionData.maxConnections) {
         return false;
     }
 
@@ -277,7 +277,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         CellConnectionProcessor::addConnections(
-            data, hostCell, newCell, angleFromPreviousForCell, 0, offspringCellDistance);
+            data, hostCell, newCell, angleFromPreviousForCell, 0, OffspringCellDistance);
     }
     auto angleFromPreviousForNewCell = constructionData.angle;
     CellConnectionProcessor::addConnections(
@@ -291,7 +291,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, offspringCellDistance);
+    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, OffspringCellDistance);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (otherCell == underConstructionCell) {
@@ -331,8 +331,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
                 }
             }
             if (!connected) {
-                if (isConnectable(newCell->numConnections, newCell->maxConnections, makeSticky)
-                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, makeSticky)) {
+                if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
+                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                     CellConnectionProcessor::addConnections(
                         data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
@@ -342,7 +342,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
 
-    if (!makeSticky) {
+    if (adaptMaxConnections) {
         hostCell->maxConnections = hostCell->numConnections;
         newCell->maxConnections = newCell->numConnections;
     }
@@ -352,9 +352,9 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     result.incCreatedCell();
 }
 
-__inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnections, int maxConnections, bool makeSticky)
+__inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections)
 {
-    if (makeSticky) {
+    if (!adaptMaxConnections) {
         if (numConnections >= maxConnections) {
             return false;
         }
@@ -439,7 +439,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.mode = readByte(constructor);
         newConstructor.singleConstruction = readBool(constructor);
         newConstructor.separateConstruction = readBool(constructor);
-        newConstructor.makeSticky = readBool(constructor);
+        newConstructor.adaptMaxConnections = readBool(constructor);
         newConstructor.angleAlignment = readByte(constructor) % 7;
         newConstructor.currentGenomePos = 0;
         copyGenome(data, constructor, newConstructor);
