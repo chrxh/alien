@@ -42,6 +42,21 @@ RealMatrix2D Math::calcRotationMatrix(float angle)
     return result;
 }
 
+RealVector2D Math::rotateClockwise(RealVector2D const& v, float angle)
+{
+    return calcRotationMatrix(angle) * v;
+}
+
+void Math::normalize(RealVector2D& v)
+{
+    float l = length(v);
+    if (l > 0.0001f) {
+        v = {v.x / l, v.y / l};
+    } else {
+        v = {1.0f, 0.0f};
+    }
+}
+
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v)
 {
     return {m[0][0] * v.x + m[0][1] * v.y, m[1][0] * v.x + m[1][1] * v.y};

@@ -175,7 +175,7 @@ __device__ __inline__ void Math::normalize(float2 &vec)
         vec = { vec.x / length, vec.y / length };
     }
     else {
-        vec = { 1.0, 0.0 };
+        vec = { 1.0f, 0.0f };
     }
 }
 

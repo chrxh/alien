@@ -114,6 +114,7 @@ struct RealVector2D
     }
     RealVector2D operator+(RealVector2D const& other) const;
     RealVector2D operator-(RealVector2D const& other) const;
+    RealVector2D operator-() const;
     RealVector2D operator/(float divisor) const;
 };
 

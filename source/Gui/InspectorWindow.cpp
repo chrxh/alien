@@ -10,7 +10,7 @@
 
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeTranslator.h"
+#include "EngineInterface/GenomeDescriptionConverter.h"
 
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -215,7 +215,8 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
         return;
     }
 
-    if (ImGui::BeginTabItem(ICON_FA_EXCHANGE_ALT " Specialization", nullptr, ImGuiTabItemFlags_None)) {
+    std::string title = Const::CellFunctionToStringMap.at(cell.getCellFunctionType()) + " function";
+    if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         switch (cell.getCellFunctionType()) {
         case Enums::CellFunction_Neuron: {
         } break;
@@ -292,7 +293,7 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
 
     ImGui::SameLine();
     if (AlienImGui::Button("Edit")) {
-        _genomeEditorWindow->openTab(GenomeTranslator::decode(constructor.genome, _simController->getSimulationParameters()));
+        _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, _simController->getSimulationParameters()));
     }
 
     AlienImGui::Group("Preview");

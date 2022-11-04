@@ -82,6 +82,9 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PreviewDescriptionConverter.cpp
+    PreviewDescriptionConverter.h
+    PreviewDescriptions.h
     RemoteSimulationData.cpp
     RemoteSimulationData.h
     RemoteSimulationDataParser.cpp

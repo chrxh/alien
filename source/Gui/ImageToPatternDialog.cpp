@@ -41,7 +41,7 @@ namespace
         static std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
-            AlienImGui::convertRGBtoHSV(color, h, s, v);
+            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             return Color{h, s, v}; 
         };
         if (cellColors.empty()) {

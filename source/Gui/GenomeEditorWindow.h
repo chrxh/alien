@@ -3,6 +3,7 @@
 #include "EngineInterface/GenomeDescriptions.h"
 
 #include "AlienWindow.h"
+#include "PreviewDescriptions.h"
 
 class _GenomeEditorWindow : public _AlienWindow
 {
@@ -26,7 +27,7 @@ private:
     void processGenotype(TabData& tab);
     void processCell(TabData& tab, CellGenomeDescription& cell);
 
-    void showPhenotype(TabData& tab);
+    void showPreview(TabData& tab);
 
     EditorModel _editorModel;
     SimulationController _simulationController;
@@ -36,7 +37,9 @@ private:
     std::vector<TabData> _tabDatas;
     int _selectedTabIndex = 0;
 
+    //actions
     std::optional<int> _tabIndexToSelect;
     std::optional<TabData> _tabToAdd;
     bool _collapseAllNodes = false;
+
 };

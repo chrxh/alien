@@ -1,4 +1,4 @@
-#include "GenomeTranslator.h"
+#include "GenomeDescriptionConverter.h"
 
 #include <variant>
 #include <boost/range/adaptors.hpp>
@@ -74,11 +74,11 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeTranslator::encode(GenomeDescription const& cells)
+std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
 {
     std::vector<uint8_t> result;
-    result.reserve(cells.size() * 6);
-    for (auto const& [index, cell] : cells | boost::adaptors::indexed(0)) {
+    result.reserve(genome.size() * 6);
+    for (auto const& [index, cell] : genome | boost::adaptors::indexed(0)) {
         writeInt(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
         writeDistance(result, cell.referenceDistance);
@@ -136,7 +136,7 @@ std::vector<uint8_t> GenomeTranslator::encode(GenomeDescription const& cells)
     return result;
 }
 
-GenomeDescription GenomeTranslator::decode(std::vector<uint8_t> const& data, SimulationParameters const& parameters)
+GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data, SimulationParameters const& parameters)
 {
     int pos = 0;
     GenomeDescription result;

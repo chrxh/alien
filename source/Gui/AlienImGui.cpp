@@ -179,7 +179,7 @@ bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
         width = StyleRepository::getInstance().scaleContent(30);
     }
     float h, s, v;
-    AlienImGui::convertRGBtoHSV(cellColor, h, s, v);
+    AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
@@ -741,7 +741,38 @@ void AlienImGui::Tooltip(std::function<std::string()> const& textFunc)
     }
 }
 
-void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
+void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
+{
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        //auto windowPos = ImGui::GetCursorScreenPos();
+        auto windowPos = ImGui::GetWindowPos();
+        auto windowSize = ImGui::GetWindowSize();
+        RealVector2D windowCenter(windowPos.x + windowSize.x / 2, windowPos.y + windowSize.y / 2);
+
+        RealVector2D cellsCenter;
+        for (auto const& cell : desc.cells) {
+            cellsCenter += cell.pos;
+        }
+        cellsCenter /= desc.cells.size();
+
+        for (auto const& connection : desc.connections) {
+            auto startPos = (connection.cell1 - cellsCenter) * 20 + windowCenter;
+            auto endPos = (connection.cell2 - cellsCenter) * 20 + windowCenter;
+            drawList->AddLine({startPos.x, startPos.y}, {endPos.x, endPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+        }
+        for (auto const& cell : desc.cells) {
+            auto cellPos = (cell.pos - cellsCenter) * 20 + windowCenter;
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, 5, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+        }
+        //        ImGui::SetCursorPos({1500, 1500});
+    }
+    ImGui::EndChild();
+}
+
+void AlienImGui::ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(
         toFloat((rgb >> 16) & 0xff) / 255, toFloat((rgb >> 8) & 0xff) / 255, toFloat((rgb & 0xff)) / 255, h, s, v);
