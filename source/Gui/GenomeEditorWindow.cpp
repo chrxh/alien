@@ -75,7 +75,7 @@ void _GenomeEditorWindow::processIntern()
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
             _tabDatas.emplace_back(TabData());
         }
-        AlienImGui::Tooltip("New gene");
+        AlienImGui::Tooltip("New genome");
 
         std::optional<int> tabIndexToSelect = _tabIndexToSelect;
         std::optional<int> tabToDelete;
@@ -90,7 +90,7 @@ void _GenomeEditorWindow::processIntern()
                 openPtr = &open;
             }
             int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
-            if (ImGui::BeginTabItem(("Gene " + std::to_string(index + 1)).c_str(), openPtr, flags)) {
+            if (ImGui::BeginTabItem(("Genome " + std::to_string(index + 1)).c_str(), openPtr, flags)) {
                 _selectedTabIndex = toInt(index);
                 processTab(tabData);
                 ImGui::EndTabItem();
@@ -177,7 +177,7 @@ void _GenomeEditorWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _editorModel->setCopiedGenome(GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome));
     }
-    AlienImGui::Tooltip("Copy all nodes from gene");
+    AlienImGui::Tooltip("Copy genome");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
@@ -192,7 +192,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
         AlienImGui::Group("Genotype");
-        processGeneEditTab(tab);
+        processGenomeEditTab(tab);
     }
     ImGui::EndChild();
     ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().scaleContent(5.0f)));
@@ -280,7 +280,7 @@ namespace
     }
 }
 
-void _GenomeEditorWindow::processGeneEditTab(TabData& tab)
+void _GenomeEditorWindow::processGenomeEditTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
         int index = 0;
@@ -437,7 +437,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             std::string content;
             if (constructor.isMakeGenomeCopy()) {
-                content = "Make copy of this gene";
+                content = "Make copy of this genome";
             } else {
                 auto size = constructor.getGenomeData().size();
                 if (size > 0) {
