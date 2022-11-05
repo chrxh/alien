@@ -307,6 +307,9 @@ void _GenomeEditorWindow::processGeneEditTab(TabData& tab)
                     tab.selected = index;
                 }
             }
+            if (ImGui::IsItemToggledOpen()) {
+                tab.selected = index;
+            }
 
             if (treeNodeOpen) {
                 auto origCell = cell;
