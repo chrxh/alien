@@ -24,7 +24,7 @@ private:
         std::optional<int> selectedNode;
     };
     void processTab(TabData& tab);
-    void processGeneEditTab(TabData& tab);
+    void processGenomeEditTab(TabData& tab);
     void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
 
     void showPreview(TabData& tab);
