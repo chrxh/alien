@@ -4,7 +4,8 @@
 struct CellPreviewDescription
 {
     RealVector2D pos;
-    int color;
+    int color = 0;
+    bool selected = false;
 };
 
 struct ConnectionPreviewDescription

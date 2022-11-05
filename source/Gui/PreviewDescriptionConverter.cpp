@@ -13,7 +13,8 @@ namespace
     };
 }
 
-PreviewDescription PreviewDescriptionConverter::convert(GenomeDescription const& genome, SimulationParameters const& parameters)
+PreviewDescription
+PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
     PreviewDescription result;
 
@@ -28,7 +29,8 @@ PreviewDescription PreviewDescriptionConverter::convert(GenomeDescription const&
         if (index > 0) {
             pos += direction * cell.referenceDistance;
         }
-        result.cells.emplace_back(pos, cell.color);
+        CellPreviewDescription cellDesc{.pos = pos, .color = cell.color, .selected = selectedNode ? (index == *selectedNode) : false};
+        result.cells.emplace_back(cellDesc);
         if (index > 0) {
             direction = Math::rotateClockwise(-direction, cell.referenceAngle);
             result.connections.emplace_back(prevPos, pos);
