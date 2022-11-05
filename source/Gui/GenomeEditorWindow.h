@@ -21,7 +21,7 @@ private:
     struct TabData
     {
         GenomeDescription genome;
-        std::optional<int> selected;
+        std::optional<int> selectedNode;
     };
     void processTab(TabData& tab);
     void processGeneEditTab(TabData& tab);

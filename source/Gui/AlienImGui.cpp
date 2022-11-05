@@ -820,6 +820,9 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, 5, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+            if (cell.selected) {
+                drawList->AddCircle({cellPos.x, cellPos.y}, 10, ImColor(1.0f, 1.0f, 1.0f));
+            }
         }
         //        ImGui::SetCursorPos({1500, 1500});
     }

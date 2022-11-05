@@ -120,12 +120,12 @@ void _GenomeEditorWindow::processToolbar()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
-        if (tabData.selected) {
-            tabData.genome.insert(tabData.genome.begin() + *tabData.selected + 1, CellGenomeDescription());
-            ++(*tabData.selected);
+        if (tabData.selectedNode) {
+            tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, CellGenomeDescription());
+            ++(*tabData.selectedNode);
         } else {
             tabData.genome.emplace_back(CellGenomeDescription());
-            tabData.selected = toInt(tabData.genome.size() - 1);
+            tabData.selectedNode = toInt(tabData.genome.size() - 1);
         }
     }
     AlienImGui::Tooltip("Add node");
@@ -133,17 +133,17 @@ void _GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(tabData.genome.empty());
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
-        if (tabData.selected) {
-            tabData.genome.erase(tabData.genome.begin() + *tabData.selected);
-            if (*tabData.selected == toInt(tabData.genome.size())) {
-                if (--(*tabData.selected) < 0) {
-                    tabData.selected.reset();
+        if (tabData.selectedNode) {
+            tabData.genome.erase(tabData.genome.begin() + *tabData.selectedNode);
+            if (*tabData.selectedNode == toInt(tabData.genome.size())) {
+                if (--(*tabData.selectedNode) < 0) {
+                    tabData.selectedNode.reset();
                 }
             }
         } else {
             tabData.genome.pop_back();
             if (!tabData.genome.empty()) {
-                tabData.selected = toInt(tabData.genome.size() - 1);
+                tabData.selectedNode = toInt(tabData.genome.size() - 1);
             }
         }
         _collapseAllNodes = true;
@@ -153,7 +153,7 @@ void _GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
-    auto& selected = selectedTab.selected;
+    auto& selected = selectedTab.selectedNode;
     ImGui::BeginDisabled(!(selected && *selected > 0));
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_UP)) {
         std::swap(selectedTab.genome.at(*selected), selectedTab.genome.at(*selected - 1));
@@ -291,7 +291,7 @@ void _GenomeEditorWindow::processGeneEditTab(TabData& tab)
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
-            if (tab.selected && *tab.selected == index) {
+            if (tab.selectedNode && *tab.selectedNode == index) {
                 flags |= ImGuiTreeNodeFlags_Selected;
             }
 
@@ -301,21 +301,21 @@ void _GenomeEditorWindow::processGeneEditTab(TabData& tab)
             auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell) + "###").c_str(), flags);
             ImGui::PopStyleColor();
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-                if (tab.selected && *tab.selected == index) {
-                    tab.selected.reset();
+                if (tab.selectedNode && *tab.selectedNode == index) {
+                    tab.selectedNode.reset();
                 } else {
-                    tab.selected = index;
+                    tab.selectedNode = index;
                 }
             }
             if (ImGui::IsItemToggledOpen()) {
-                tab.selected = index;
+                tab.selectedNode = index;
             }
 
             if (treeNodeOpen) {
                 auto origCell = cell;
                 processNodeEdit(tab, cell);
                 if (origCell != cell) {
-                    tab.selected = index;
+                    tab.selectedNode = index;
                 }
                 ImGui::TreePop();
             }
@@ -482,7 +482,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionConverter::convert(genome, _simulationController->getSimulationParameters());
+    auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simulationController->getSimulationParameters());
     AlienImGui::ShowPreviewDescription(preview);
 }
 
