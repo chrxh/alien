@@ -115,7 +115,7 @@ struct ConstructorDescription
         separateConstruction = value;
         return *this;
     }
-    ConstructorDescription& setMakeSticky(bool value)
+    ConstructorDescription& setAdaptConnections(bool value)
     {
         adaptMaxConnections = value;
         return *this;
