@@ -152,7 +152,7 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
 struct CellGenomeDescription
 {
     float referenceDistance = 1.0f;
-    float referenceAngle = 180.0f;
+    float referenceAngle = 0;
     int color = 0;
     int maxConnections = 0;
     int executionOrderNumber = 0;

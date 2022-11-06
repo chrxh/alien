@@ -120,11 +120,15 @@ void _GenomeEditorWindow::processToolbar()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+        CellGenomeDescription newNode;
         if (tabData.selectedNode) {
-            tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, CellGenomeDescription());
+            tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, newNode);
             ++(*tabData.selectedNode);
         } else {
-            tabData.genome.emplace_back(CellGenomeDescription());
+            if (!tabData.genome.empty()) {
+                newNode.referenceAngle = 180.0f;
+            }
+            tabData.genome.emplace_back(newNode);
             tabData.selectedNode = toInt(tabData.genome.size() - 1);
         }
     }

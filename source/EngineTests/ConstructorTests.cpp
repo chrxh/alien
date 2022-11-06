@@ -261,7 +261,7 @@ TEST_F(ConstructorTests, constructSingleCell_separation)
     EXPECT_FALSE(actualConstructedCell.underConstruction);
 }
 
-TEST_F(ConstructorTests, constructSingleCell_makeSticky)
+TEST_F(ConstructorTests, constructSingleCell_noAdaptConnections)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setMaxConnections(3)});
 
@@ -271,7 +271,7 @@ TEST_F(ConstructorTests, constructSingleCell_makeSticky)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setMakeSticky(true)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setAdaptConnections(false)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -685,7 +685,7 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setMakeSticky(true)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setAdaptConnections(false)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - offspringDistance, 10.0f})

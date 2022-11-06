@@ -501,7 +501,7 @@ __inline__ __device__ void ConstructorProcessor::copyGenome(SimulationData& data
 {
     bool makeGenomeCopy = readBool(source);
     if (!makeGenomeCopy) {
-        auto size = readWord(source) % MAX_GENOME_BYTES;
+        auto size = min(readWord(source), toInt(source.genomeSize));
         target.genomeSize = size;
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
