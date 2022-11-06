@@ -122,6 +122,7 @@ void _GenomeEditorWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
         CellGenomeDescription newNode;
         if (tabData.selectedNode) {
+            newNode.referenceAngle = 180.0f;
             tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, newNode);
             ++(*tabData.selectedNode);
         } else {
