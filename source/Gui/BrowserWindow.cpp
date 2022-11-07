@@ -269,7 +269,7 @@ void _BrowserWindow::processStatus()
     auto styleRepository = StyleRepository::getInstance();
 
     if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(33.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_remoteSimulationDatas.size()) + " simulations found";
