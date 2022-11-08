@@ -27,10 +27,11 @@ namespace
         GenomeDescription const& genome,
         SelectNode selectedNode,
         std::optional<RealVector2D> const& startPos,
+        std::optional<RealVector2D> const& startDirection,
         SimulationParameters const& parameters)
     {
         RealVector2D pos = startPos.value_or(RealVector2D(0, 0));
-        RealVector2D direction(0, 1);
+        RealVector2D direction = startDirection.value_or(RealVector2D(0, 1));
 
         std::unordered_map<IntVector2D, std::vector<CellPreviewDescriptionIntern>> cellsInternBySlot;
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
@@ -146,11 +147,13 @@ namespace
                     targetAngle = angles.front() + 180.0f;
                 }
 
+                auto direction = Math::unitVectorOfAngle(targetAngle);
                 convertIntern(
                     result,
                     subGenome,
                     cellIntern.selected ? SelectNode(SelectAllNodes()) : SelectNode(SelectNoNodes()),
-                    cellIntern.pos + Math::unitVectorOfAngle(targetAngle),
+                    cellIntern.pos + direction,
+                    direction,
                     parameters);
             }
 
@@ -163,6 +166,6 @@ PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
     PreviewDescription result;
-    convertIntern(result, genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, parameters);
+    convertIntern(result, genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
     return result;
 }
