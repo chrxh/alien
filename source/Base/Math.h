@@ -19,6 +19,8 @@ public:
     static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise
     static RealVector2D rotateClockwise(RealVector2D const& v, float angle);
     static void normalize(RealVector2D& v);
+    static float subtractAngle(float angleMinuend, float angleSubtrahend);
+    static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
 };
 
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v);

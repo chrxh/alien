@@ -2,13 +2,17 @@
 
 #include "Base.cuh"
 
-#define PI 3.1415926535897932384626433832795
-#define DEG_TO_RAD PI/180.0
-#define RAD_TO_DEG 180.0/PI
+namespace Const
+{
+    static float constexpr PI = 3.1415926535897932384626433832795f;
+    static float constexpr DEG_TO_RAD = PI / 180.0f;
+    static float constexpr RAD_TO_DEG = 180.0f / PI;
+}
 
 class Math
 {
 public:
+
     using Matrix = float[2][2];
 
     __inline__ __device__ static void rotationMatrix(float angle, Matrix& rotMatrix);
@@ -80,7 +84,7 @@ __inline__ __device__ __host__ bool operator==(int2 const& p, int2 const& q)
 
 __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 {
-    angle *= DEG_TO_RAD;
+    angle *= Const::DEG_TO_RAD;
     return{ sinf(angle), -cosf(angle) };
 }
 
@@ -92,7 +96,7 @@ __inline__ __device__ float Math::angleOfVector(float2 const & v)
 
     auto normalizedVy = -v.y / length(v);
     normalizedVy = max(-1.0f, min(1.0f, normalizedVy));
-    float angleSin = asinf(normalizedVy) * RAD_TO_DEG;
+    float angleSin = asinf(normalizedVy) * Const::RAD_TO_DEG;
     if (v.x >= 0.0f) {
         return 90.0f - angleSin;
     }
@@ -117,8 +121,8 @@ __device__ __inline__ void Math::rotateQuarterCounterClockwise(float2 &v)
 
 __inline__ __device__ void Math::rotationMatrix(float angle, Matrix& rotMatrix)
 {
-    float sinAngle = __sinf(angle*DEG_TO_RAD);
-    float cosAngle = __cosf(angle*DEG_TO_RAD);
+    float sinAngle = __sinf(angle*Const::DEG_TO_RAD);
+    float cosAngle = __cosf(angle*Const::DEG_TO_RAD);
     rotMatrix[0][0] = cosAngle;
     rotMatrix[0][1] = -sinAngle;
     rotMatrix[1][0] = sinAngle;
@@ -127,8 +131,8 @@ __inline__ __device__ void Math::rotationMatrix(float angle, Matrix& rotMatrix)
 
 __inline__ __device__ void Math::inverseRotationMatrix(float angle, Matrix& rotMatrix)
 {
-    float sinAngle = __sinf(angle*DEG_TO_RAD);
-    float cosAngle = __cosf(angle*DEG_TO_RAD);
+    float sinAngle = __sinf(angle*Const::DEG_TO_RAD);
+    float cosAngle = __cosf(angle*Const::DEG_TO_RAD);
     rotMatrix[0][0] = cosAngle;
     rotMatrix[0][1] = sinAngle;
     rotMatrix[1][0] = -sinAngle;
@@ -221,10 +225,10 @@ __inline__ __device__ float Math::subtractAngle(float angleMinuend, float angleS
 {
     auto angleDiff = angleMinuend - angleSubtrahend;
     if (angleDiff > 360.0f) {
-        angleDiff -= 360.0;
+        angleDiff -= 360.0f;
     }
     if (angleDiff < 0.0) {
-        angleDiff += 360.0;
+        angleDiff += 360.0f;
     }
     return angleDiff;
 }

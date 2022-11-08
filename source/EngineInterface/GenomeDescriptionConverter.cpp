@@ -140,7 +140,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
 {
     int pos = 0;
     GenomeDescription result;
-    do {
+    while (pos < data.size()) {
         Enums::CellFunction cellFunction = readByte(data, pos) % Enums::CellFunction_Count;
 
         CellGenomeDescription cell;
@@ -210,6 +210,6 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
         } break;
         }
         result.emplace_back(cell);
-    } while (pos < data.size());
+    };
     return result;
 }

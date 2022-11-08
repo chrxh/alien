@@ -57,6 +57,33 @@ void Math::normalize(RealVector2D& v)
     }
 }
 
+float Math::subtractAngle(float angleMinuend, float angleSubtrahend)
+{
+    auto angleDiff = angleMinuend - angleSubtrahend;
+    if (angleDiff > 360.0f) {
+        angleDiff -= 360.0f;
+    }
+    if (angleDiff < 0.0f) {
+        angleDiff += 360.0f;
+    }
+    return angleDiff;
+}
+
+bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate)
+{
+    if (angle1 == angle2 && angle1 != angleBetweenCandidate) {
+        return false;
+    }
+    if (angleBetweenCandidate < angle1) {
+        angleBetweenCandidate += 360.0f;
+        angle2 += 360.0f;
+    }
+    if (angle2 < angleBetweenCandidate) {
+        angle2 += 360.0f;
+    }
+    return angle2 - angle1 < 360.0f;
+}
+
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v)
 {
     return {m[0][0] * v.x + m[0][1] * v.y, m[1][0] * v.x + m[1][1] * v.y};
