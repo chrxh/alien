@@ -223,7 +223,7 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
                 if (updateData.angularVelDelta != 0) {
                     auto velDelta = relPos;
                     Math::rotateQuarterClockwise(velDelta);
-                    velDelta = velDelta * updateData.angularVelDelta * DEG_TO_RAD;
+                    velDelta = velDelta * updateData.angularVelDelta * Const::DEG_TO_RAD;
                     cell->vel = cell->vel + velDelta;
                 }
             }

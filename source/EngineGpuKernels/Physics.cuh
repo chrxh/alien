@@ -3,10 +3,6 @@
 #include <cuda_runtime.h>
 #include <vector_types.h>
 
-#include "TOs.cuh"
-#include "Base.cuh"
-#include "Map.cuh"
-#include "SimulationData.cuh"
 #include "Math.cuh"
 #include "Cell.cuh"
 
@@ -98,7 +94,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 	float2 const & rBPp, float angularVelA1, float angularVelB1, float2 const & n, float angularMassA, 
 	float angularMassB, float massA, float massB, float2 & vA2, float2 & vB2, float & angularVelA2, float & angularVelB2)
 {
-	float2 vAB = (vA1 - rAPp * angularVelA1 * DEG_TO_RAD) - (vB1 - rBPp* angularVelB1 * DEG_TO_RAD);
+    float2 vAB = (vA1 - rAPp * angularVelA1 * Const::DEG_TO_RAD) - (vB1 - rBPp * angularVelB1 * Const::DEG_TO_RAD);
 
 	float vAB_dot_n = Math::dot(vAB, n);
 	if (vAB_dot_n > 0.0) {
@@ -117,9 +113,9 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 			+ rAPp_dot_n * rAPp_dot_n / angularMassA + rBPp_dot_n * rBPp_dot_n / angularMassB);
 
 		vA2 = vA1 + n * j / massA;
-		angularVelA2 = angularVelA1 - (rAPp_dot_n * j / angularMassA) * RAD_TO_DEG;
+        angularVelA2 = angularVelA1 - (rAPp_dot_n * j / angularMassA) * Const::RAD_TO_DEG;
 		vB2 = vB1 - n * j / massB;
-		angularVelB2 = angularVelB1 + (rBPp_dot_n * j / angularMassB) * RAD_TO_DEG;
+        angularVelB2 = angularVelB1 + (rBPp_dot_n * j / angularMassB) * Const::RAD_TO_DEG;
 	}
 
 	if (angularMassA <= FP_PRECISION && angularMassB > FP_PRECISION) {
@@ -129,7 +125,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 		vA2 = vA1 + n * j / massA;
 		angularVelA2 = angularVelA1;
 		vB2 = vB1 - n * j / massB;
-		angularVelB2 = angularVelB1 + (rBPp_dot_n * j / angularMassB) * RAD_TO_DEG;
+        angularVelB2 = angularVelB1 + (rBPp_dot_n * j / angularMassB) * Const::RAD_TO_DEG;
 	}
 
 	if (angularMassA > FP_PRECISION && angularMassB <= FP_PRECISION) {
@@ -137,7 +133,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 			+ rAPp_dot_n * rAPp_dot_n / angularMassA);
 
 		vA2 = vA1 + n * j / massA;
-		angularVelA2 = angularVelA1 - (rAPp_dot_n * j / angularMassA) * RAD_TO_DEG;
+        angularVelA2 = angularVelA1 - (rAPp_dot_n * j / angularMassA) * Const::RAD_TO_DEG;
 		vB2 = vB1 - n * j / massB;
 		angularVelB2 = angularVelB1;
 	}
@@ -160,7 +156,7 @@ __device__ __inline__ float Physics::linearKineticEnergy(float mass, float2 cons
 
 __inline__ __device__ float Physics::rotationalKineticEnergy(float angularMass, float angularVel)
 {
-    angularVel *= DEG_TO_RAD;
+    angularVel *= Const::DEG_TO_RAD;
     return 0.5f * angularMass * angularVel * angularVel;
 }
 
@@ -173,7 +169,7 @@ __inline__ __device__ void Physics::calcImpulseIncrement(float2 const & impulse,
         angularVelInc = 0;
     }
     else {
-        angularVelInc = -Math::dot(relPos, impulse) / angularMass * RAD_TO_DEG;
+        angularVelInc = -Math::dot(relPos, impulse) / angularMass * Const::RAD_TO_DEG;
     }
 }
 
@@ -184,7 +180,7 @@ __inline__ __device__ float Physics::kineticEnergy(float mass, float2 const& vel
 
 __inline__ __device__ float2 Physics::tangentialVelocity(float2 const& r, float2 const& vel, float angularVel)
 {
-	return { vel.x - angularVel*r.y * static_cast<float>(DEG_TO_RAD), vel.y + angularVel*r.x * static_cast<float>(DEG_TO_RAD) };
+    return {vel.x - angularVel * r.y * static_cast<float>(Const::DEG_TO_RAD), vel.y + angularVel * r.x * static_cast<float>(Const::DEG_TO_RAD)};
 }
 
 __inline__ __device__ float Physics::angularMomentum(float2 const & positionFromCenter, float2 const & velocityAroundCenter)
@@ -197,7 +193,7 @@ __inline__ __device__ float Physics::angularVelocity(float angularMomentum, floa
 	if (std::abs(angularMass) < FP_PRECISION)
 		return 0;
 	else
-		return angularMomentum / angularMass * RAD_TO_DEG;
+		return angularMomentum / angularMass * Const::RAD_TO_DEG;
 }
 
 __inline__ __device__ float2 Physics::transformVelocity(float massOld, float massNew, float2 const& velOld)
@@ -207,7 +203,7 @@ __inline__ __device__ float2 Physics::transformVelocity(float massOld, float mas
 
 __inline__ __device__ float Physics::transformAngularVelocity(float angularMassOld, float angularMassNew, float angularVelOld)
 {
-    angularVelOld = angularVelOld*DEG_TO_RAD;
+    angularVelOld = angularVelOld * Const::DEG_TO_RAD;
     float angularVelNew = angularVelOld * sqrtf(angularMassOld / angularMassNew);
-    return angularVelNew*RAD_TO_DEG;
+    return angularVelNew * Const::RAD_TO_DEG;
 }
