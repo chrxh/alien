@@ -9,6 +9,37 @@ namespace
 {
     float constexpr OffspringCellDistance = 1.6f;
 
+    void rotate(PreviewDescription& preview, RealVector2D const& center, float angle)
+    {
+        auto rotMatrix = Math::calcRotationMatrix(angle);
+
+        for (auto& cell : preview.cells) {
+            
+            cell.pos = rotMatrix * (cell.pos - center) + center;
+        }
+        for (auto& connection : preview.connections) {
+            connection.cell1 = rotMatrix * (connection.cell1 - center) + center;
+            connection.cell2 = rotMatrix * (connection.cell2 - center) + center;
+        }
+    }
+
+    void translate(PreviewDescription& preview, RealVector2D const& delta)
+    {
+        for (auto& cell : preview.cells) {
+            cell.pos += delta;
+        }
+        for (auto& connection : preview.connections) {
+            connection.cell1 += delta;
+            connection.cell2 += delta;
+        }
+    }
+
+    void insert(PreviewDescription& target, PreviewDescription const& source)
+    {
+        target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
+        target.connections.insert(target.connections.begin(), source.connections.begin(), source.connections.end());
+    }
+
     struct CellPreviewDescriptionIntern
     {
         int nodeIndex = 0;
@@ -22,16 +53,21 @@ namespace
     struct SelectNoNodes
     {};
     using SelectNode = std::variant<SelectAllNodes, SelectNoNodes, int>;
-    void convertIntern(
-        PreviewDescription& result,
+    PreviewDescription convertIntern(
         GenomeDescription const& genome,
         SelectNode selectedNode,
-        std::optional<RealVector2D> const& startPos,
-        std::optional<RealVector2D> const& startDirection,
+        std::optional<RealVector2D> const& desiredEndPos,
+        std::optional<float> const& desiredEndAngle,
         SimulationParameters const& parameters)
     {
-        RealVector2D pos = startPos.value_or(RealVector2D(0, 0));
-        RealVector2D direction = startDirection.value_or(RealVector2D(0, 1));
+        if (genome.empty()) {
+            return PreviewDescription();
+        }
+
+        PreviewDescription result;
+
+        RealVector2D pos;
+        RealVector2D direction(0, -1);
 
         std::unordered_map<IntVector2D, std::vector<CellPreviewDescriptionIntern>> cellsInternBySlot;
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
@@ -95,7 +131,8 @@ namespace
         //process sub genomes
         for (auto const& [node, cellIntern] : boost::combine(genome, cellsIntern)) {
             if (node.getCellFunctionType() == Enums::CellFunction_Constructor) {
-                auto data = std::get<ConstructorGenomeDescription>(*node.cellFunction).getGenomeData();
+                auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
+                auto data = constructor.getGenomeData();
                 if (data.empty()) {
                     continue;
                 }
@@ -148,24 +185,31 @@ namespace
                 }
 
                 auto direction = Math::unitVectorOfAngle(targetAngle);
-                convertIntern(
-                    result,
+                auto previewPart = convertIntern(
                     subGenome,
                     cellIntern.selected ? SelectNode(SelectAllNodes()) : SelectNode(SelectNoNodes()),
                     cellIntern.pos + direction,
-                    direction,
+                    targetAngle,
                     parameters);
+                insert(result, previewPart);
             }
 
             ++index;
         }
+        if (desiredEndAngle) {
+            auto actualEndAngle = Math::angleOfVector(direction);
+            auto angleDiff = Math::subtractAngle(*desiredEndAngle, actualEndAngle);
+            rotate(result, result.cells.back().pos, angleDiff + 180.0f);
+        }
+        if (desiredEndPos) {
+            translate(result, *desiredEndPos - result.cells.back().pos);
+        }
+        return result;
     }
 }
 
 PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
-    PreviewDescription result;
-    convertIntern(result, genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
-    return result;
+    return convertIntern(genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
 }

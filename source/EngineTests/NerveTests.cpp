@@ -472,3 +472,32 @@ TEST_F(NerveTests, merge)
         EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
     }
 }
+
+TEST_F(NerveTests, sameExecutionOrderNumber)
+{
+    ActivityDescription activity;
+    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+
+    auto data = DataDescription().addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({1.0f, 1.0f})
+            .setCellFunction(NerveDescription())
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setActivity(activity),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(0),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    {
+        auto actualData = _simController->getSimulationData();
+        auto actualCellById = getCellById(actualData);
+
+        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
+        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
+    }
+}
