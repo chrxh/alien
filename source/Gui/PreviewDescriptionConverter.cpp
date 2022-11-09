@@ -14,7 +14,6 @@ namespace
         auto rotMatrix = Math::calcRotationMatrix(angle);
 
         for (auto& cell : preview.cells) {
-            
             cell.pos = rotMatrix * (cell.pos - center) + center;
         }
         for (auto& connection : preview.connections) {
@@ -163,10 +162,10 @@ namespace
                     } while (pos <= numAngles);
                 }
 
-                //3. find largest diff
-                std::optional<float> largestAngleDiff;
+                //find largest diff
                 float targetAngle = 0;
                 if (angles.size() > 1) {
+                    std::optional<float> largestAngleDiff;
                     int pos = 0;
                     int numAngles = toInt(angles.size());
                     do {
@@ -192,10 +191,15 @@ namespace
                     targetAngle,
                     parameters);
                 insert(result, previewPart);
+                if (!constructor.separateConstruction) {
+                    result.connections.emplace_back(previewPart.cells.back().pos, cellIntern.pos);
+                }
             }
 
             ++index;
         }
+
+        //transform to desired position and angle
         if (desiredEndAngle) {
             auto actualEndAngle = Math::angleOfVector(direction);
             auto angleDiff = Math::subtractAngle(*desiredEndAngle, actualEndAngle);
