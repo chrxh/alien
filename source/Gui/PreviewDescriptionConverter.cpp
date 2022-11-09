@@ -131,6 +131,9 @@ namespace
         for (auto const& [node, cellIntern] : boost::combine(genome, cellsIntern)) {
             if (node.getCellFunctionType() == Enums::CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
+                if (constructor.isMakeGenomeCopy()) {
+                    continue;
+                }
                 auto data = constructor.getGenomeData();
                 if (data.empty()) {
                     continue;
