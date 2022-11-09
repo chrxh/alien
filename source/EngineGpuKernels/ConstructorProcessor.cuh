@@ -253,6 +253,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto newCellPos = hostCell->absPos + posDelta;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
+    hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
     underConstructionCell->underConstruction = false;
 
     if (!newCell->tryLock()) {
