@@ -194,6 +194,8 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
                 .textWidth(MaxCellContentTextWidth),
             cell.executionOrderNumber);
         cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
 

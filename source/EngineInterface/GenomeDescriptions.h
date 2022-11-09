@@ -35,7 +35,7 @@ struct ConstructorGenomeDescription
     int mode = 1;
     bool singleConstruction = false;
     bool separateConstruction = true;
-    bool makeSticky = false;
+    bool adaptMaxConnections = true;
     int angleAlignment = 0;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
@@ -59,7 +59,7 @@ struct ConstructorGenomeDescription
     }
     ConstructorGenomeDescription& setMakeSticky(bool value)
     {
-        makeSticky = value;
+        adaptMaxConnections = value;
         return *this;
     }
     ConstructorGenomeDescription& setAngleAlignment(int value)

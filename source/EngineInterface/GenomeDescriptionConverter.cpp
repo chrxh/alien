@@ -106,7 +106,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeInt(result, constructor.mode);
             writeBool(result, constructor.singleConstruction);
             writeBool(result, constructor.separateConstruction);
-            writeBool(result, constructor.makeSticky);
+            writeBool(result, constructor.adaptMaxConnections);
             writeInt(result, constructor.angleAlignment);
             writeGenome(result, constructor.genome);
         } break;
@@ -173,7 +173,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             constructor.mode = readByte(data, pos);
             constructor.singleConstruction = readBool(data, pos);
             constructor.separateConstruction = readBool(data, pos);
-            constructor.makeSticky = readBool(data, pos);
+            constructor.adaptMaxConnections = readBool(data, pos);
             constructor.angleAlignment = readByte(data, pos) % 7;
             constructor.genome = readGenome(data, pos);
             cell.cellFunction = constructor;
