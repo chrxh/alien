@@ -237,5 +237,6 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     result->metadata.descriptionSize = 0;
     result->barrier = 0;
     result->age = 0;
+    result->vel = {0, 0};
     return result;
 }
