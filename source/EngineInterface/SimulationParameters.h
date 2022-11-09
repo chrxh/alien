@@ -19,6 +19,7 @@ struct SimulationParameters
     int cellMaxExecutionOrderNumbers = 6;
     int cellCreationTokenAccessNumber = 0;
 
+    int cellFunctionActivationAge = 100;
     float cellFunctionWeaponStrength = 0.1f;
     float cellFunctionSensorRange = 255.0f;
 
@@ -32,7 +33,8 @@ struct SimulationParameters
             && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumbers == other.cellMaxExecutionOrderNumbers
-            && cellCreationTokenAccessNumber == other.cellCreationTokenAccessNumber && cellFunctionWeaponStrength == other.cellFunctionWeaponStrength
+            && cellCreationTokenAccessNumber == other.cellCreationTokenAccessNumber
+            && cellFunctionActivationAge == other.cellFunctionActivationAge && cellFunctionWeaponStrength == other.cellFunctionWeaponStrength
             && cellFunctionSensorRange == other.cellFunctionSensorRange && radiationProb == other.radiationProb
             && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellRepulsionStrength == other.cellRepulsionStrength;

@@ -33,7 +33,8 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto executionOrderNumber = data.timestep % maxExecutionOrderNumber;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->cellFunction != Enums::CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
+        if (cell->cellFunction != Enums::CellFunction_None && cell->executionOrderNumber == executionOrderNumber
+            && cell->age >= cudaSimulationParameters.cellFunctionActivationAge) {
             data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
         }
     }
