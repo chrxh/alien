@@ -174,7 +174,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             constructor.singleConstruction = readBool(data, pos);
             constructor.separateConstruction = readBool(data, pos);
             constructor.adaptMaxConnections = readBool(data, pos);
-            constructor.angleAlignment = readByte(data, pos) % 7;
+            constructor.angleAlignment = readByte(data, pos) % Enums::ConstructorAngleAlignment_Count;
             constructor.genome = readGenome(data, pos);
             cell.cellFunction = constructor;
         } break;
