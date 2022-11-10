@@ -139,7 +139,7 @@ struct ConstructorDescription
 
 struct SensorDescription
 {
-    std::optional<float> fixedAngle;  //nullotr = entire neighborhood
+    std::optional<float> fixedAngle;  //nullptr = entire neighborhood
     float minDensity = 0.3f;
     int color = 0;
 
