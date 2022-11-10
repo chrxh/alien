@@ -277,10 +277,9 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
 {
     additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
     switch (cell.getCellFunctionType()) {
-    case Enums::CellFunction_Neuron:
-        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).weights.size() * sizeof(float);
-        additionalDataSize += std::get<NeuronDescription>(*cell.cellFunction).bias.size() * sizeof(float);
-        break;
+    case Enums::CellFunction_Neuron: {
+        additionalDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
+    } break;
     case Enums::CellFunction_Transmitter:
         break;
     case Enums::CellFunction_Constructor:
