@@ -39,6 +39,7 @@ namespace Enums
         ConstructorAngleAlignment_90 = 4,
         ConstructorAngleAlignment_72 = 5,
         ConstructorAngleAlignment_60 = 6,
+        ConstructorAngleAlignment_Count = 7
     };
 
     /*

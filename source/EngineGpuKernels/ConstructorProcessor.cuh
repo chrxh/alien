@@ -153,21 +153,27 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 __inline__ __device__ bool
 ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData)
 {
+    if (!hostCell->tryLock()) {
+        return false;
+    }
     Cell* underConstructionCell = getFirstCellOfConstructionSite(hostCell);
     if (underConstructionCell) {
         if (!underConstructionCell->tryLock()) {
+            hostCell->releaseLock();
             return false;
         }
 
         auto success = continueConstruction(data, result, hostCell, underConstructionCell, constructionData);
-        underConstructionCell->releaseLock();
 
+        underConstructionCell->releaseLock();
+        hostCell->releaseLock();
         return success;
     } else {
+        auto success = startNewConstruction(data, result, hostCell, constructionData);
 
-        return startNewConstruction(data, result, hostCell, constructionData);
+        hostCell->releaseLock();
+        return success;
     }
-    return true;
 }
 
 __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite(Cell* hostCell)
@@ -302,26 +308,21 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             continue;
         }
 
-        bool connected = false;
-        for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell == otherCell) {
-                connected = true;
-                break;
-            }
-        }
-        if (connected) {
-            continue;
-        }
-
-        auto otherPosDelta = otherCell->absPos - newCell->absPos;
-        data.cellMap.correctDirection(otherPosDelta);
-        Math::normalize(otherPosDelta);
-        //if (Math::dot(posDelta, otherPosDelta) < 0.1) {
-        //    continue;
-        //}
         if (otherCell->tryLock()) {
             bool connected = false;
+            for (int i = 0; i < hostCell->numConnections; ++i) {
+                auto const& connectedCell = hostCell->connections[i].cell;
+                if (connectedCell == otherCell) {
+                    connected = true;
+                    break;
+                }
+            }
+            if (connected) {
+                otherCell->releaseLock();
+                continue;
+            }
+
+            connected = false;
             for (int i = 0; i < hostCell->numConnections; ++i) {
                 auto const& connectedCell1 = hostCell->connections[i].cell;
                 for (int j = 0; j < otherCell->numConnections; ++j) {

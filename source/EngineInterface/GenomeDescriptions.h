@@ -36,7 +36,7 @@ struct ConstructorGenomeDescription
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool adaptMaxConnections = true;
-    int angleAlignment = 0;
+    Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_60;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
 
@@ -62,7 +62,7 @@ struct ConstructorGenomeDescription
         adaptMaxConnections = value;
         return *this;
     }
-    ConstructorGenomeDescription& setAngleAlignment(int value)
+    ConstructorGenomeDescription& setAngleAlignment(Enums::ConstructorAngleAlignment value)
     {
         angleAlignment = value;
         return *this;
