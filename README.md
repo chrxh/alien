@@ -14,6 +14,9 @@ The development is driven by the desire to better understand the conditions for 
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 </p>
 
+**IMPORTANT:** The current development is taking place on the branch `version4`.
+
+
 # Main features
 ### Physics and graphics engine
 - Particles for simulating soft body mechanics, heat dissipation, bondings, damages, phase transitions, etc.
@@ -93,8 +96,6 @@ Contributions to the project are very welcome. The most convenient way is to com
 - Extensions or corrections to the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
 
 A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
-
-**IMPORTANT:** The current development is taking place on the branch `version4`.
 
 # Dependency list
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
