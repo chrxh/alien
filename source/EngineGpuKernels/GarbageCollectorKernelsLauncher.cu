@@ -27,6 +27,7 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& g
         KERNEL_CALL(cudaCleanupParticles, data.objects.particlePointers, data.tempObjects.particles);
         KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cellPointers, data.tempObjects.cells);
         KERNEL_CALL(cudaCleanupCellsStep2, data.tempObjects.cells);
+        KERNEL_CALL(cudaCleanupAuxiliaryData, data.objects.cellPointers, data.tempObjects.auxiliaryData);
         KERNEL_CALL_1_1(cudaSwapArrays, data);
     }
 }
