@@ -246,9 +246,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     data.cellMap.correctDirection(posDelta);
 
     auto desiredDistance = constructionData.distance;
-    posDelta = Math::normalized(posDelta) * (OffspringCellDistance - desiredDistance);
+    auto constructionSiteDistance = data.cellMap.getDistance(hostCell->absPos, underConstructionCell->absPos);
+    posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
-    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance || OffspringCellDistance - desiredDistance < 0) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
+        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.cellMinDistance) {
         return false;
     }
     auto adaptMaxConnections = hostCell->cellFunctionData.constructor.adaptMaxConnections;
