@@ -842,3 +842,9 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
     value = (value + Enums::CellFunction_Count - 1) % Enums::CellFunction_Count;
     return result;
 }
+
+bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
+{
+    std::vector const AngleAlignmentStrings = {"None"s, "Align to 180 deg"s, "Align to 120 deg"s, "Align to 90 deg"s, "Align to 72 deg"s, "Align to 60 deg"s};
+    return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
+}

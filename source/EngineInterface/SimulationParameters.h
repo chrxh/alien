@@ -19,7 +19,7 @@ struct SimulationParameters
     int cellMaxExecutionOrderNumbers = 6;
     int cellCreationTokenAccessNumber = 0;
 
-    int cellFunctionActivationAge = 100;
+    int cellFunctionActivationAge = 0;
     float cellFunctionWeaponStrength = 0.1f;
     float cellFunctionSensorRange = 255.0f;
 

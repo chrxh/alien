@@ -123,7 +123,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
         showCellGeneralTab(cell);
-        showCellInOutChannelTab(cell);
+        showCellFunctionTab(cell);
         ImGui::EndTabBar();
 
         if (cell != origCell) {
@@ -135,82 +135,74 @@ void _InspectorWindow::processCell(CellDescription cell)
 void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
-        AlienImGui::Group("Properties");
-        auto const& parameters = _simController->getSimulationParameters();
-        int type = cell.getCellFunctionType();
-        if (AlienImGui::CellFunctionCombo(
-                AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(MaxCellContentTextWidth), type)) {
-            switch (type) {
-            case Enums::CellFunction_Neuron: {
-                cell.cellFunction = NeuronDescription();
-            } break;
-            case Enums::CellFunction_Transmitter: {
-                cell.cellFunction = TransmitterDescription();
-            } break;
-            case Enums::CellFunction_Constructor: {
-                cell.cellFunction = ConstructorDescription();
-            } break;
-            case Enums::CellFunction_Sensor: {
-                cell.cellFunction = SensorDescription();
-            } break;
-            case Enums::CellFunction_Nerve: {
-                cell.cellFunction = NerveDescription();
-            } break;
-            case Enums::CellFunction_Attacker: {
-                cell.cellFunction = AttackerDescription();
-            } break;
-            case Enums::CellFunction_Injector: {
-                cell.cellFunction = InjectorDescription();
-            } break;
-            case Enums::CellFunction_Muscle: {
-                cell.cellFunction = MuscleDescription();
-            } break;
-            case Enums::CellFunction_Placeholder1: {
-                cell.cellFunction = PlaceHolderDescription1();
-            } break;
-            case Enums::CellFunction_Placeholder2: {
-                cell.cellFunction = PlaceHolderDescription2();
-            } break;
-            case Enums::CellFunction_None: {
-                cell.cellFunction.reset();
-            } break;
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            AlienImGui::Group("Properties");
+            auto const& parameters = _simController->getSimulationParameters();
+            int type = cell.getCellFunctionType();
+            if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(MaxCellContentTextWidth), type)) {
+                switch (type) {
+                case Enums::CellFunction_Neuron: {
+                    cell.cellFunction = NeuronDescription();
+                } break;
+                case Enums::CellFunction_Transmitter: {
+                    cell.cellFunction = TransmitterDescription();
+                } break;
+                case Enums::CellFunction_Constructor: {
+                    cell.cellFunction = ConstructorDescription();
+                } break;
+                case Enums::CellFunction_Sensor: {
+                    cell.cellFunction = SensorDescription();
+                } break;
+                case Enums::CellFunction_Nerve: {
+                    cell.cellFunction = NerveDescription();
+                } break;
+                case Enums::CellFunction_Attacker: {
+                    cell.cellFunction = AttackerDescription();
+                } break;
+                case Enums::CellFunction_Injector: {
+                    cell.cellFunction = InjectorDescription();
+                } break;
+                case Enums::CellFunction_Muscle: {
+                    cell.cellFunction = MuscleDescription();
+                } break;
+                case Enums::CellFunction_Placeholder1: {
+                    cell.cellFunction = PlaceHolderDescription1();
+                } break;
+                case Enums::CellFunction_Placeholder2: {
+                    cell.cellFunction = PlaceHolderDescription2();
+                } break;
+                case Enums::CellFunction_None: {
+                    cell.cellFunction.reset();
+                } break;
+                }
             }
+
+            auto energy = toFloat(cell.energy);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
+            cell.energy = energy;
+
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
+            cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxCellContentTextWidth), cell.executionOrderNumber);
+            cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
+
+            AlienImGui::Group("Metadata");
+
+            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth), cell.metadata.name);
+
+            AlienImGui::InputTextMultiline(
+                AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(MaxCellContentTextWidth).height(0), cell.metadata.description);
         }
-
-        auto energy = toFloat(cell.energy);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
-        cell.energy = energy;
-
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters()
-                .name("Max connections")
-                .textWidth(MaxCellContentTextWidth),
-            cell.maxConnections);
-        cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters()
-                .name("Execution order")
-                .textWidth(MaxCellContentTextWidth),
-            cell.executionOrderNumber);
-        cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
-
-        AlienImGui::Group("Metadata");
-
-        AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth), cell.metadata.name);
-
-        AlienImGui::InputTextMultiline(
-            AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(MaxCellContentTextWidth).height(0), cell.metadata.description);
-
+        ImGui::EndChild();
         ImGui::EndTabItem();
     }
 }
 
-void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
+void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
 {
     if (cell.getCellFunctionType() == Enums::CellFunction_None) {
         return;
@@ -218,30 +210,32 @@ void _InspectorWindow::showCellInOutChannelTab(CellDescription& cell)
 
     std::string title = Const::CellFunctionToStringMap.at(cell.getCellFunctionType()) + " function";
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
-        switch (cell.getCellFunctionType()) {
-        case Enums::CellFunction_Neuron: {
-        } break;
-        case Enums::CellFunction_Transmitter: {
-        } break;
-        case Enums::CellFunction_Constructor: {
-            showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
-        } break;
-        case Enums::CellFunction_Sensor: {
-        } break;
-        case Enums::CellFunction_Nerve: {
-        } break;
-        case Enums::CellFunction_Attacker: {
-        } break;
-        case Enums::CellFunction_Injector: {
-        } break;
-        case Enums::CellFunction_Muscle: {
-        } break;
-        case Enums::CellFunction_Placeholder1: {
-        } break;
-        case Enums::CellFunction_Placeholder2: {
-        } break;
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            switch (cell.getCellFunctionType()) {
+            case Enums::CellFunction_Neuron: {
+            } break;
+            case Enums::CellFunction_Transmitter: {
+            } break;
+            case Enums::CellFunction_Constructor: {
+                showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
+            } break;
+            case Enums::CellFunction_Sensor: {
+            } break;
+            case Enums::CellFunction_Nerve: {
+            } break;
+            case Enums::CellFunction_Attacker: {
+            } break;
+            case Enums::CellFunction_Injector: {
+            } break;
+            case Enums::CellFunction_Muscle: {
+            } break;
+            case Enums::CellFunction_Placeholder1: {
+            } break;
+            case Enums::CellFunction_Placeholder2: {
+            } break;
+            }
         }
-
+        ImGui::EndChild();
         ImGui::EndTabItem();
     }
 }
@@ -278,6 +272,8 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
             constructor.mode = 0;
         }
     }
+    AlienImGui::AngleAlignmentCombo(
+        AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
 
     AlienImGui::Group("Genome");
     auto width = ImGui::GetContentRegionAvail().x;
