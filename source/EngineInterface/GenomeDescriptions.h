@@ -32,7 +32,7 @@ struct TransmitterGenomeDescription
 
 struct ConstructorGenomeDescription
 {
-    int mode = 1;
+    int mode = 1;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool adaptMaxConnections = true;

@@ -33,13 +33,12 @@ namespace Enums
     enum ConstructorAlignment_
     {
         ConstructorAngleAlignment_None = 0,
-        ConstructorAngleAlignment_360 = 1,
-        ConstructorAngleAlignment_180 = 2,
-        ConstructorAngleAlignment_120 = 3,
-        ConstructorAngleAlignment_90 = 4,
-        ConstructorAngleAlignment_72 = 5,
-        ConstructorAngleAlignment_60 = 6,
-        ConstructorAngleAlignment_Count = 7
+        ConstructorAngleAlignment_180 = 1,
+        ConstructorAngleAlignment_120 = 2,
+        ConstructorAngleAlignment_90 = 3,
+        ConstructorAngleAlignment_72 = 4,
+        ConstructorAngleAlignment_60 = 5,
+        ConstructorAngleAlignment_Count = 6
     };
 
     /*

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineInterface/Enums.h"
+
 #include "Base.cuh"
 
 namespace Const
@@ -35,7 +37,7 @@ public:
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
-    __inline__ __device__ static float alignAngle(float angle, int alignment);
+    __inline__ __device__ static float alignAngle(float angle, Enums::ConstructorAngleAlignment alignment);
 };
 
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
@@ -259,12 +261,12 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
     return abs(signedDistanceFromLine);
 }
 
-__inline__ __device__ float Math::alignAngle(float angle, int alignment)
+__inline__ __device__ float Math::alignAngle(float angle, Enums::ConstructorAngleAlignment alignment)
 {
-    if (0 == alignment) {
+    if (Enums::ConstructorAngleAlignment_None == alignment) {
         return angle;
     }
-    float unitAngle = 360.0f / alignment;
+    float unitAngle = 360.0f / (alignment + 1);
     float factor = angle / unitAngle + 0.5f;
     factor = floorf(factor);
     return factor * unitAngle;

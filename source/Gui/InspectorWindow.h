@@ -30,7 +30,7 @@ private:
 
     void processCell(CellDescription cell);
     void showCellGeneralTab(CellDescription& cell);
-    void showCellInOutChannelTab(CellDescription& cell);
+    void showCellFunctionTab(CellDescription& cell);
 
     void processParticle(ParticleDescription particle);
 

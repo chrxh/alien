@@ -386,6 +386,9 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                     constructor.mode = 0;
                 }
             }
+            table.next();
+            AlienImGui::AngleAlignmentCombo(
+                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxContentTextWidth), constructor.angleAlignment);
         } break;
         case Enums::CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);

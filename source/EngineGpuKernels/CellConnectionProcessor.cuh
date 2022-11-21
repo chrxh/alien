@@ -25,7 +25,7 @@ public:
         float desiredAngleOnCell1,
         float desiredAngleOnCell2,
         float desiredDistance,
-        int angleAlignment = 0);
+        Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_None);
     __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
@@ -38,7 +38,7 @@ private:
         float2 const& posDelta,
         float desiredDistance,
         float desiredAngleOnCell1 = 0,
-        int angleAlignment = 0);
+        Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_None);
 
     __inline__ __device__ static void delConnectionsIntern(Cell* cell);
     __inline__ __device__ static void delConnectionIntern(Cell* cell1, Cell* cell2);
@@ -145,7 +145,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(
     float desiredAngleOnCell1,
     float desiredAngleOnCell2,
     float desiredDistance,
-    int angleAlignment)
+    Enums::ConstructorAngleAlignment angleAlignment)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.correctDirection(posDelta);
@@ -200,7 +200,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
     float2 const& posDelta,
     float desiredDistance,
     float desiredAngleOnCell1,
-    int angleAlignment)
+    Enums::ConstructorAngleAlignment angleAlignment)
 {
     auto newAngle = Math::angleOfVector(posDelta);
 
@@ -223,7 +223,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
         }
-        angleDiff = Math::alignAngle(angleDiff, angleAlignment % 7);
+        angleDiff = Math::alignAngle(angleDiff, angleAlignment % Enums::ConstructorAngleAlignment_Count);
         if (angleDiff >= 0) {
             cell1->connections[1].angleFromPrevious = angleDiff;
             cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
