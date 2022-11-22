@@ -181,6 +181,8 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
             cell.energy = energy;
 
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(MaxCellContentTextWidth), cell.age);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(MaxCellContentTextWidth), cell.activationTime);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
             cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxCellContentTextWidth), cell.executionOrderNumber);
@@ -274,6 +276,8 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
+    AlienImGui::AngleAlignmentCombo(
+        AlienImGui::AngleAlignmentComboParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
 
     AlienImGui::Group("Genome");
     auto width = ImGui::GetContentRegionAvail().x;
