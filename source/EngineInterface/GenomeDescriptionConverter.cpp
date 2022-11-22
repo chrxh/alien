@@ -108,6 +108,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeBool(result, constructor.separateConstruction);
             writeBool(result, constructor.adaptMaxConnections);
             writeInt(result, constructor.angleAlignment);
+            writeWord(result, constructor.constructionActivationTime);
             writeGenome(result, constructor.genome);
         } break;
         case Enums::CellFunction_Sensor: {
@@ -175,6 +176,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             constructor.separateConstruction = readBool(data, pos);
             constructor.adaptMaxConnections = readBool(data, pos);
             constructor.angleAlignment = readByte(data, pos) % Enums::ConstructorAngleAlignment_Count;
+            constructor.constructionActivationTime = readWord(data, pos);
             constructor.genome = readGenome(data, pos);
             cell.cellFunction = constructor;
         } break;

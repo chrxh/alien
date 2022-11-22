@@ -425,6 +425,7 @@ ConstructorProcessor::constructCellIntern(
     result->outputBlocked = constructionData.outputBlocked;
 
     auto& constructor = hostCell->cellFunctionData.constructor;
+    result->activationTime = constructor.constructionActivationTime;
 
     switch (constructionData.cellFunction) {
     case Enums::CellFunction_Neuron: {
@@ -445,6 +446,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.separateConstruction = readBool(constructor);
         newConstructor.adaptMaxConnections = readBool(constructor);
         newConstructor.angleAlignment = readByte(constructor) % 7;
+        newConstructor.constructionActivationTime = readWord(constructor);
         newConstructor.currentGenomePos = 0;
         copyGenome(data, constructor, newConstructor);
     } break;
