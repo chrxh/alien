@@ -748,6 +748,8 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
     EXPECT_EQ(1, actualHostCell.connections.size());
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
+    auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(0, actualConstructor.currentGenomePos);
 }
 
 TEST_F(ConstructorTests, constructSecondCell_notFinished)
