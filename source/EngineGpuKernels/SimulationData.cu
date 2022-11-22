@@ -29,10 +29,11 @@ __device__ void SimulationData::prepareForNextTimestep()
     particleMap.reset();
     processMemory.reset();
 
-    auto maxStructureOperations = objects.cellPointers.getNumEntries() / 2;
+    auto maxStructureOperations = 2 + objects.cellPointers.getNumEntries() / 2; //heuristic
+    auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();  //heuristic
+
     structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
-    auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();
     for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
     }
@@ -74,8 +75,7 @@ void SimulationData::resizeObjects()
     cellMap.resize(cellArraySize);
     particleMap.resize(cellArraySize);
 
-    //heuristic
-    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * Enums::CellFunction_Count + 200) * (cellArraySize + 1000);
+    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * Enums::CellFunction_Count + 200) * (cellArraySize + 1000); //heuristic
     processMemory.resize(upperBoundDynamicMemory);
 }
 
