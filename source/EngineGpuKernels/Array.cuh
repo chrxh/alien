@@ -187,6 +187,7 @@ public:
     }
 };
 
+//data of UnmanagedArray is stored elsewhere
 template <typename T>
 class UnmanagedArray
 {

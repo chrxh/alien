@@ -65,7 +65,14 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, ConstructorDescription& data)
     {
-        ar(data.mode, data.singleConstruction, data.separateConstruction, data.adaptMaxConnections, data.angleAlignment, data.genome, data.currentGenomePos);
+        ar(data.mode,
+           data.singleConstruction,
+           data.separateConstruction,
+           data.adaptMaxConnections,
+           data.angleAlignment,
+           data.genome,
+           data.constructionActivationTime,
+           data.currentGenomePos);
     }
     template <class Archive>
     inline void serialize(Archive& ar, SensorDescription& data)
@@ -114,7 +121,8 @@ namespace cereal
            data.outputBlocked,
            data.cellFunction,
            data.activity,
-           data.metadata);
+           data.metadata,
+           data.activationTime);
     }
     template <class Archive>
     inline void serialize(Archive& ar, ClusterDescription& data)
