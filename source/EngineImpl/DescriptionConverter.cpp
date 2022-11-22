@@ -421,6 +421,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
         constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
         constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
+        constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
         result.cellFunction = constructor;
@@ -466,6 +467,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         result.activity.channels[i] = cellTO.activity.channels[i];
     }
+    result.activationTime = cellTO.activationTime;
     return result;
 }
 
@@ -518,6 +520,7 @@ void DescriptionConverter::addCell(
         constructorTO.separateConstruction = constructorDesc.separateConstruction;
         constructorTO.adaptMaxConnections = constructorDesc.adaptMaxConnections;
         constructorTO.angleAlignment = constructorDesc.angleAlignment;
+        constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
         cellTO.cellFunctionData.constructor = constructorTO;
@@ -560,7 +563,8 @@ void DescriptionConverter::addCell(
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cellTO.activity.channels[i] = cellDesc.activity.channels[i];
     }
-	cellTO.numConnections = 0;
+    cellTO.activationTime = cellDesc.activationTime;
+    cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;

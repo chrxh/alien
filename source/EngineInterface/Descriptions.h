@@ -93,6 +93,7 @@ struct ConstructorDescription
     bool separateConstruction = true;
     bool adaptMaxConnections = true;
     Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_60;
+    int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
 
     //process data
@@ -120,9 +121,14 @@ struct ConstructorDescription
         adaptMaxConnections = value;
         return *this;
     }
-    ConstructorDescription& setAngleAlignment(int value)
+    ConstructorDescription& setAngleAlignment(Enums::ConstructorAngleAlignment value)
     {
         angleAlignment = value;
+        return *this;
+    }
+    ConstructorDescription& setConstructionActivationTime(int value)
+    {
+        constructionActivationTime = value;
         return *this;
     }
     ConstructorDescription& setGenome(std::vector<uint8_t> const& value)
@@ -211,6 +217,7 @@ struct CellDescription
     bool outputBlocked = false;
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
+    int activationTime = 0;
 
     CellMetadataDescription metadata;
 

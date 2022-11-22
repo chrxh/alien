@@ -49,6 +49,7 @@ struct ConstructorFunction
     bool separateConstruction;
     bool adaptMaxConnections;
     Enums::ConstructorAngleAlignment angleAlignment;
+    int constructionActivationTime;
 
     //genome
     uint64_t genomeSize;
@@ -120,11 +121,14 @@ struct Cell
     int age;
 
     bool underConstruction;
+
+    //cell function data
     bool inputBlocked;
     bool outputBlocked;
     Enums::CellFunction cellFunction;
     CellFunctionData cellFunctionData;
-    Activity activity;      //not inside cellFunctionData for easier handling and performance
+    Activity activity;
+    int activationTime;
 
     CellMetadataDescription metadata;
 

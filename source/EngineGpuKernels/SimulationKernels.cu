@@ -31,7 +31,7 @@ __global__ void cudaNextTimestep_physics_substep3(SimulationData data)
 {
     CellProcessor::checkForces(data);
     CellProcessor::updateVelocities(data);
-    CellProcessor::applyMutation(data);
+    CellProcessor::aging(data);
 
     ParticleProcessor::movement(data);
     ParticleProcessor::collision(data);

@@ -36,6 +36,7 @@ namespace
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.activity.channels[i] = cell->activity.channels[i];
         }
+        cellTO.activationTime = cell->activationTime;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
@@ -79,6 +80,7 @@ namespace
             cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
             cellTO.cellFunctionData.constructor.adaptMaxConnections = cell->cellFunctionData.constructor.adaptMaxConnections;
             cellTO.cellFunctionData.constructor.angleAlignment = cell->cellFunctionData.constructor.angleAlignment;
+            cellTO.cellFunctionData.constructor.constructionActivationTime = cell->cellFunctionData.constructor.constructionActivationTime;
             copyAuxiliaryData(
                 cell->cellFunctionData.constructor.genomeSize,
                 cell->cellFunctionData.constructor.genome,

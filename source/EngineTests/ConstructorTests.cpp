@@ -175,7 +175,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setConstructionActivationTime(123)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -199,6 +199,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_TRUE(actualConstructedCell.outputBlocked);
     EXPECT_FALSE(actualConstructedCell.underConstruction);
     EXPECT_EQ(Enums::CellFunction_None, actualConstructedCell.getCellFunctionType());
+    EXPECT_EQ(123, actualConstructedCell.activationTime);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy, actualConstructedCell.energy));
     EXPECT_TRUE(approxCompare(offspringDistance, Math::length(actualHostCell.pos - actualConstructedCell.pos)));
 }
@@ -470,12 +471,13 @@ TEST_F(ConstructorTests, constructNeuronCell)
 TEST_F(ConstructorTests, constructConstructorCell)
 {
     auto constructedConstructor = ConstructorGenomeDescription()
-                           .setMode(0)
-                           .setSingleConstruction(true)
-                           .setSeparateConstruction(false)
-                           .setMakeSticky(true)
-                           .setAngleAlignment(2)
-                           .setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
+                                      .setMode(0)
+                                      .setSingleConstruction(true)
+                                      .setSeparateConstruction(false)
+                                      .setMakeSticky(true)
+                                      .setAngleAlignment(2)
+                                      .setConstructionActivationTime(123)
+                                      .setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
 
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedConstructor)});
 
@@ -503,6 +505,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(constructedConstructor.separateConstruction, actualConstructor.separateConstruction);
     EXPECT_EQ(constructedConstructor.adaptMaxConnections, actualConstructor.adaptMaxConnections);
     EXPECT_EQ(constructedConstructor.angleAlignment, actualConstructor.angleAlignment);
+    EXPECT_EQ(constructedConstructor.constructionActivationTime, actualConstructor.constructionActivationTime);
     EXPECT_EQ(constructedConstructor.getGenomeData(), actualConstructor.genome);
 }
 

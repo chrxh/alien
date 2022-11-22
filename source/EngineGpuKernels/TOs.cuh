@@ -53,6 +53,8 @@ struct ConstructorTO
     bool separateConstruction;
     bool adaptMaxConnections;
     Enums::ConstructorAngleAlignment angleAlignment;
+    int constructionActivationTime;
+
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
 
@@ -125,6 +127,7 @@ struct CellTO
     Enums::CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
+    int activationTime;
 
     CellMetadataTO metadata;
 

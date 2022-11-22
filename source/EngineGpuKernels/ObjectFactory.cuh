@@ -92,6 +92,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
     cell->color = cellTO.color;
+    cell->activationTime = cellTO.activationTime;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -123,6 +124,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
         cell->cellFunctionData.constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
         cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
+        cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
             cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
             cellTO.cellFunctionData.constructor.genomeDataIndex,
@@ -200,28 +202,29 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
 
 __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto cell = _data->objects.cells.getNewElement();
+    auto result = _data->objects.cells.getNewElement();
     auto cellPointers = _data->objects.cellPointers.getNewElement();
-    *cellPointers = cell;
+    *cellPointers = result;
 
-    cell->id = _data->numberGen1.createNewId_kernel();
-    cell->absPos = pos;
-    cell->vel = vel;
-    cell->energy = energy;
-    cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
-    cell->numConnections = 0;
-    cell->underConstruction = false;
-    cell->locked = 0;
-    cell->selected = 0;
-    cell->color = 0;
-    cell->metadata.nameSize = 0;
-    cell->metadata.descriptionSize = 0;
-    cell->barrier = false;
-    cell->age = 0;
+    result->id = _data->numberGen1.createNewId_kernel();
+    result->absPos = pos;
+    result->vel = vel;
+    result->energy = energy;
+    result->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
+    result->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
+    result->numConnections = 0;
+    result->underConstruction = false;
+    result->locked = 0;
+    result->selected = 0;
+    result->color = 0;
+    result->metadata.nameSize = 0;
+    result->metadata.descriptionSize = 0;
+    result->barrier = false;
+    result->age = 0;
+    result->activationTime = 0;
 
-    cell->cellFunction = Enums::CellFunction_None/*_data->numberGen1.random(Enums::CellFunction_Count - 1)*/;
-    return cell;
+    result->cellFunction = Enums::CellFunction_None/*_data->numberGen1.random(Enums::CellFunction_Count - 1)*/;
+    return result;
 }
 
 __inline__ __device__ Cell* ObjectFactory::createCell()
@@ -229,6 +232,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     auto result = _data->objects.cells.getNewElement();
     auto cellPointer = _data->objects.cellPointers.getNewElement();
     *cellPointer = result;
+
     result->id = _data->numberGen1.createNewId_kernel();
     result->selected = 0;
     result->locked = 0;
@@ -238,5 +242,6 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     result->barrier = 0;
     result->age = 0;
     result->vel = {0, 0};
+    result->activationTime = 0;
     return result;
 }
