@@ -21,7 +21,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 150.0f;
+    auto const MaxContentTextWidth = 165.0f;
     auto const MaxContentWidth = 240.0f;
 }
 
@@ -389,6 +389,8 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             table.next();
             AlienImGui::AngleAlignmentCombo(
                 AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxContentTextWidth), constructor.angleAlignment);
+            table.next();
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxContentTextWidth), constructor.constructionActivationTime);
         } break;
         case Enums::CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
