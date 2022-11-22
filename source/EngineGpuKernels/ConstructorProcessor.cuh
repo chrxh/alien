@@ -92,11 +92,13 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
         if (isConstructionPossible(data, cell, activity)) {
+            auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
             auto constructionData = readConstructionData(cell);
             if (tryConstructCell(data, result, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
                 activity.channels[0] = 0;
+                cell->cellFunctionData.constructor.currentGenomePos = origGenomePos;
             }
             if (isFinished(cell->cellFunctionData.constructor)) {
                 auto& constructor = cell->cellFunctionData.constructor;
