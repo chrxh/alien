@@ -4,7 +4,6 @@
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
-#include "SimulationKernels.cuh"
 
 class _SimulationKernelsLauncher
 {

@@ -81,8 +81,8 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto operation = operations.at(i);
-        auto cell = operation.cell;
+        auto const& operation = operations.at(i);
+        auto const& cell = operation.cell;
         processCell(data, result, cell);
     }
 }
