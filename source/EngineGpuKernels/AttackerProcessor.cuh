@@ -29,6 +29,7 @@ private:
 
 namespace
 {
+    float constexpr AttackerActivityThreshold = 0.25f;
     float constexpr AttackRadius = 1.6f;
     float constexpr OutputPoisoned = -1;
     float constexpr OutputNothingFound = 0;
@@ -48,6 +49,9 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
+    if (abs(cell->activity.channels[0]) < AttackerActivityThreshold) {
+        return;
+    }
     if (!cell->tryLock()) {
         return;
     }

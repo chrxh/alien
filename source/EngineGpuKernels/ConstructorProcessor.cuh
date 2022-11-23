@@ -73,7 +73,7 @@ private:
 namespace
 {
     float constexpr OffspringCellDistance = 1.6f;
-    float constexpr ActivityThreshold = 0.25f;
+    float constexpr ConstructorActivityThreshold = 0.25f;
 }
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
@@ -123,7 +123,7 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Simulati
     if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < ActivityThreshold) {
+    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < ConstructorActivityThreshold) {
         return false;
     }
     if (cell->cellFunctionData.constructor.mode > 0
