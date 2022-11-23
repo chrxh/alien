@@ -1,5 +1,6 @@
 target_sources(tests
 PUBLIC
+    AttackerTests.cpp
     ConstructorTests.cpp
     DataTransferTests.cpp
     IntegrationTestFramework.cpp

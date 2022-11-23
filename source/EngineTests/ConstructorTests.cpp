@@ -143,7 +143,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
-TEST_F(ConstructorTests, manualConstruction_correctCycle)
+TEST_F(ConstructorTests, constructFirstCell_correctCycle)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
 
@@ -166,7 +166,7 @@ TEST_F(ConstructorTests, manualConstruction_correctCycle)
     ASSERT_EQ(2, actualData.cells.size());
 }
 
-TEST_F(ConstructorTests, manualConstruction_wrongCycle)
+TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
 
