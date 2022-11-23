@@ -22,6 +22,18 @@ IntegrationTestFramework::~IntegrationTestFramework()
     _simController->closeSimulation();
 }
 
+double IntegrationTestFramework::getEnergy(DataDescription const& data) const
+{
+    double result = 0;
+    for (auto const& cell : data.cells) {
+        result += cell.energy;
+    }
+    for (auto const& particle : data.particles) {
+        result += particle.energy;
+    }
+    return result;
+}
+
 std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(DataDescription const& data) const
 {
     std::unordered_map<uint64_t, CellDescription> result;
@@ -59,6 +71,11 @@ CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& da
         }
     }
     THROW_NOT_IMPLEMENTED();
+}
+
+bool IntegrationTestFramework::approxCompare(double expected, double actual, float precision) const
+{
+    return approxCompare(toFloat(expected), toFloat(actual));
 }
 
 bool IntegrationTestFramework::approxCompare(float expected, float actual, float precision) const

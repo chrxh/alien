@@ -3,6 +3,7 @@
 #include "EngineInterface/Enums.h"
 
 #include "Cell.cuh"
+#include "CellFunctionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
 #include "SpotCalculator.cuh"
@@ -39,7 +40,7 @@ namespace
 
 __device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Neuron];
+    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Attacker];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& cell = operations.at(i).cell;
@@ -49,7 +50,8 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
-    if (abs(cell->activity.channels[0]) < AttackerActivityThreshold) {
+    auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    if (abs(activity.channels[0]) < AttackerActivityThreshold) {
         return;
     }
     if (!cell->tryLock()) {
@@ -121,6 +123,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     }
 
     cell->releaseLock();
+
+    CellFunctionProcessor::setActivity(cell, activity);
 }
 
 __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)
