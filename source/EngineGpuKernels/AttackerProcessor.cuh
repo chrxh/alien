@@ -1,20 +1,25 @@
 #pragma once
 
 #include "EngineInterface/Enums.h"
+
 #include "Cell.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
+#include "SpotCalculator.cuh"
+#include "SimulationResult.cuh"
+#include "ObjectFactory.cuh"
 
 class AttackerProcessor
 {
 public:
-    __inline__ __device__ static void process(Token* token, SimulationData& data, SimulationResult& result);
-    __inline__ __device__ static void process(Cell* cell, char color, char& output, float& tokenEnergy, SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
 
 private:
-    __inline__ __device__ static bool isHomogene(Cell* cell);
-    __inline__ __device__ static float calcOpenAngle(Cell* cell, float2 direction);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void distributeEnergy(SimulationData& data, Cell* cell, float energyDelta);
 
+    __inline__ __device__ static float calcOpenAngle(Cell* cell, float2 direction);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 };
 
@@ -22,155 +27,136 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void AttackerProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
+namespace
 {
-    process(token->cell, token->memory[Enums::Digestion_InColor], token->memory[Enums::Digestion_Output], token->energy, data, result);
+    float constexpr AttackRadius = 1.6f;
+    float constexpr OutputPoisoned = -1;
+    float constexpr OutputNothingFound = 0;
+    float constexpr OutputSuccess = 1;
+    float constexpr EnergyDistributionRadius = 3.0f;
 }
 
-__inline__ __device__ void
-AttackerProcessor::process(Cell* cell, char color_, char& output, float& tokenEnergy, SimulationData& data, SimulationResult& result)
+__device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    output = Enums::DigestionOut_NoTarget;
+    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Neuron];
+    auto partition = calcAllThreadsPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        auto const& cell = operations.at(i).cell;
+        processCell(data, result, cell);
+    }
+}
 
-    if (cell->tryLock()) {
+__device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+{
+    if (!cell->tryLock()) {
+        return;
+    }
+    float energyDelta = 0;
 
-        auto color = calcMod(color_, 7);
+    Cell* otherCells[18];
+    int numOtherCells;
+    data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, AttackRadius);
+    for (int i = 0; i < numOtherCells; ++i) {
+        Cell* otherCell = otherCells[i];
+        if (!otherCell->tryLock()) {
+            continue;
+        }
+        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier) {
+            auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+            auto cellFunctionWeaponGeometryDeviationExponent =
+                SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
 
-        Cell* otherCells[18];
-        int numOtherCells;
-        data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.6f);
-        for (int i = 0; i < numOtherCells; ++i) {
-            Cell* otherCell = otherCells[i];
-            if (otherCell->tryLock()) {
-                if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier) {
-                    auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+            if (abs(cellFunctionWeaponGeometryDeviationExponent) > 0) {
+                auto d = otherCell->absPos - cell->absPos;
+                auto angle1 = calcOpenAngle(cell, d);
+                auto angle2 = calcOpenAngle(otherCell, d * (-1));
+                auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
+                energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
+            }
 
-                    auto cellFunctionWeaponGeometryDeviationExponent =
-                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
+            auto color = calcMod(cell->color, MAX_COLORS);
+            auto otherColor = calcMod(otherCell->color, MAX_COLORS);
+            energyToTransfer *= SpotCalculator::calcColorMatrix(color, otherColor, data, cell->absPos);
 
-                    if (abs(cellFunctionWeaponGeometryDeviationExponent) > FP_PRECISION) {
-                        auto d = otherCell->absPos - cell->absPos;
-                        auto angle1 = calcOpenAngle(cell, d);
-                        auto angle2 = calcOpenAngle(otherCell, d * (-1));
-                        auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
-
-                        energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionWeaponGeometryDeviationExponent);
-                    }
-
-                    auto otherCellColor = calcMod(otherCell->metadata.color, 7);
-                    if (otherCellColor != color) {
-                        auto cellFunctionWeaponColorTargetMismatchPenalty =
-                            SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponColorTargetMismatchPenalty, data, cell->absPos);
-
-                        energyToTransfer *= (1.0f - cellFunctionWeaponColorTargetMismatchPenalty);
-                    }
-
-                    auto homogene = isHomogene(cell);
-                    auto otherHomogene = isHomogene(otherCell);
-
-                    auto color = calcMod(cell->metadata.color, 7);
-                    auto otherColor = calcMod(otherCell->metadata.color, 7);
-
-                    energyToTransfer *= SpotCalculator::calcColorMatrix(color, otherColor, data, cell->absPos);
-
-                    /*!isColorSuperior(cell->metadata.color, otherCell->metadata.color)*/
-                    //(color1 == 0 && color2 == 0) || (color1 == 0 && color2 == 1) || (color1 == 1 && color2 == 2) || (color1 == 1 && color2 > 2)
-                    /*
-                    if ( !(
-                        (color1 == 0 && color2 == 3) || (color1 == 2 && color2 == 3) || (color1 == 1 && color2 == 2) || (color1 == 3 && color2 == 2)
-                        || (color1 == 0 && color2 == 0)
-                        || (color1 == 1 && color2 == 1))) {
-                        energyToTransfer *= (1.0f - cellFunctionWeaponColorDominance);
-                    }
-                    if ((color1 == 0 && color2 == 0) || (color1 == 1 && color2 == 1)) {
-                        energyToTransfer *= 0.02f;
-                    }
-                    if ((color1 == 1 && color2 == 2) || (color1 == 3 && color2 == 2)) {
-                        energyToTransfer *= 0.4f;
-                    }
-*/
-
-                    auto cellFunctionWeaponConnectionsMismatchPenalty =
-                        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponConnectionsMismatchPenalty, data, cell->absPos);
-                    if (otherCell->numConnections > cell->numConnections + 1) {
-                        energyToTransfer *= (1 - cellFunctionWeaponConnectionsMismatchPenalty) * (1 - cellFunctionWeaponConnectionsMismatchPenalty);
-                    }
-                    if (otherCell->numConnections == cell->numConnections + 1) {
-                        energyToTransfer *= (1 - cellFunctionWeaponConnectionsMismatchPenalty);
-                    }
-                    //tag = number of tokens on cell
-                    if (otherCell->tag > 0) {
-                        auto cellFunctionWeaponTokenPenalty =
-                            SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponTokenPenalty, data, cell->absPos);
-                        energyToTransfer *= (1.0f - cellFunctionWeaponTokenPenalty);
-                    }
-
-                    if (energyToTransfer >= 0) {
-                        if (otherCell->energy > energyToTransfer) {
-                            otherCell->energy -= energyToTransfer;
-                            tokenEnergy += energyToTransfer / 2;
-                            cell->energy += energyToTransfer / 2;
-                            if (output != Enums::DigestionOut_Poisoned) {
-                                output = Enums::DigestionOut_Success;
-                            }
-                            result.incSuccessfulAttack();
-                        }
-                    } else {
-                        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
-
-                        if (tokenEnergy > -energyToTransfer / 2 + cudaSimulationParameters.tokenMinEnergy * 2
-                            && cell->energy > -energyToTransfer / 2 + cellMinEnergy) {
-                            otherCell->energy -= energyToTransfer;
-                            tokenEnergy += energyToTransfer / 2;
-                            cell->energy += energyToTransfer / 2;
-                            output = Enums::DigestionOut_Poisoned;
-                        }
-                    }
+            if (energyToTransfer >= 0) {
+                if (otherCell->energy > energyToTransfer) {
+                    otherCell->energy -= energyToTransfer;
+                    energyDelta += energyToTransfer;
                 }
-                otherCell->releaseLock();
-            }
+            } else {
+                otherCell->energy -= energyToTransfer;
+                energyDelta += energyToTransfer;
         }
-        if (Enums::DigestionOut_NoTarget == output) {
-            result.incFailedAttack();
-        }
-        auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
-        if (cellFunctionWeaponEnergyCost > 0) {
-            auto const cellEnergy = cell->energy;
-            auto& pos = cell->absPos;
-            float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
-                + float2{
-                    (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                    (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-            float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
-            data.cellMap.correctPosition(particlePos);
 
-            particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-            auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
-            cell->energy -= radiationEnergy;
-            ObjectFactory factory;
-            factory.init(&data);
-            auto particle = factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->metadata.color});
         }
-        cell->releaseLock();
+        otherCell->releaseLock();
+    }
+
+    if (energyDelta >= 0) {
+        distributeEnergy(data, cell, energyDelta);
+    } else {
+        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+        if (cell->energy > cellMinEnergy - energyDelta) {
+            cell->energy += energyDelta;
+        }
+    }
+
+    radiate(data, cell);
+
+    //output
+    if (energyDelta == 0) {
+        cell->activity.channels[0] = OutputNothingFound;
+        result.incFailedAttack();
+    }
+    if (energyDelta > 0) {
+        cell->activity.channels[0] = OutputSuccess;
+        result.incSuccessfulAttack();
+    }
+    if (energyDelta < 0) {
+        cell->activity.channels[0] = OutputPoisoned;
+    }
+
+    cell->releaseLock();
+}
+
+__device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)
+{
+    auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
+    if (cellFunctionWeaponEnergyCost > 0) {
+        auto const cellEnergy = cell->energy;
+        auto& pos = cell->absPos;
+        float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+            + float2{
+                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+        float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+        data.cellMap.correctPosition(particlePos);
+
+        particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
+        auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
+        cell->energy -= radiationEnergy;
+        ObjectFactory factory;
+        factory.init(&data);
+        factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->color});
     }
 }
 
-__inline__ __device__ bool AttackerProcessor::isHomogene(Cell* cell)
+__device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)
 {
-    int color = cell->metadata.color;
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto otherCell = cell->connections[i].cell;
-        if ((color % 7) != (otherCell->metadata.color % 7)) {
-            return false;
-        }
-        for (int j = 0; j < otherCell->numConnections; ++j) {
-            auto otherOtherCell = otherCell->connections[j].cell;
-            if ((color % 7) != (otherOtherCell->metadata.color % 7)) {
-                return false;
-            }
+    Cell* receiverCells[10];
+    int numReceivers;
+    data.cellMap.getConstructorsAndTransmitters(receiverCells, 10, numReceivers, cell->absPos, EnergyDistributionRadius);
+    float energyPerReceiver = numReceivers > 0 ? energyDelta / numReceivers : 0;
+
+    for (int i = 0; i < numReceivers; ++i) {
+        auto receiverCell = receiverCells[i];
+        if (receiverCell->tryLock()) {
+            receiverCell->energy += energyPerReceiver;
+            energyDelta -= energyPerReceiver;
+            receiverCell->releaseLock();
         }
     }
-    return true;
+    cell->energy += energyDelta;
 }
 
 __inline__ __device__ float AttackerProcessor::calcOpenAngle(Cell* cell, float2 direction)

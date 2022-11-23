@@ -172,6 +172,36 @@ public:
         }
     }
 
+    __device__ __inline__ void getConstructorsAndTransmitters(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        numCells = 0;
+        int radiusInt = ceilf(radius);
+        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                correctPosition(scanPos);
+
+                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
+                auto cell1 = _map[mapEntry];
+                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
+                    if (cell1->cellFunction == Enums::CellFunction_Constructor || cell1->cellFunction == Enums::CellFunction_Transmitter) {
+                        cells[numCells] = cell1;
+                        ++numCells;
+                    }
+
+                    auto cell2 = _map[mapEntry + 1];
+                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
+                        if (cell2->cellFunction == Enums::CellFunction_Constructor || cell2->cellFunction == Enums::CellFunction_Transmitter) {
+                            cells[numCells] = cell2;
+                            ++numCells;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     __device__ __inline__ Cell* getFirst(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};

@@ -23,8 +23,8 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Nerve];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto operation = operations.at(i);
-        auto cell = operation.cell;
+        auto const& operation = operations.at(i);
+        auto const& cell = operation.cell;
         auto inputActivity = CellFunctionProcessor::calcInputActivity(cell);
         CellFunctionProcessor::setActivity(cell, inputActivity);
     }
