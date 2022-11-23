@@ -316,6 +316,11 @@ struct CellDescription
         activity = newActivity;
         return *this;
     }
+    CellDescription& setActivationTime(int value)
+    {
+        activationTime = value;
+        return *this;
+    }
 
     bool isConnectedTo(uint64_t id) const;
 };

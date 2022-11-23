@@ -91,6 +91,31 @@ TEST_F(ConstructorTests, alreadyFinished)
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
+TEST_F(ConstructorTests, notActivated)
+{
+    DataDescription data;
+
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto constructor = ConstructorDescription().setGenome(genome).setSingleConstruction(true);
+
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(constructor)
+                     .setActivationTime(2));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(1, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
+}
+
 TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
