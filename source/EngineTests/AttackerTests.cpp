@@ -38,10 +38,10 @@ TEST_F(AttackerTests, nothingFound)
     _simController->calcSingleTimestep();
 
     auto actualData = _simController->getSimulationData();
-    auto origAttackCell = getCell(data, 1);
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(origAttackCell.energy, actualAttackCell.energy));
+    EXPECT_EQ(2, actualData.cells.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
 }
 
