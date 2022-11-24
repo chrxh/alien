@@ -158,7 +158,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
     Cell* receiverCells[10];
     int numReceivers;
     data.cellMap.getConstructorsAndTransmitters(receiverCells, 10, numReceivers, cell->absPos, EnergyDistributionRadius);
-    float energyPerReceiver = numReceivers > 0 ? energyDelta / numReceivers : 0;
+    float energyPerReceiver = energyDelta / (numReceivers + 1);
 
     for (int i = 0; i < numReceivers; ++i) {
         auto receiverCell = receiverCells[i];

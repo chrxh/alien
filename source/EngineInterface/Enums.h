@@ -29,6 +29,14 @@ namespace Enums
         SensorMode_Count = 2
     };
 
+    using EnergyDistributionMode = int;
+    enum EnergyDistributionMode_
+    {
+        EnergyDistributionMode_ConnectedCells = 0,
+        EnergyDistributionMode_TransmittersAndConstructors = 1,
+        EnergyDistributionMode_Count = 2
+    };
+
     using ConstructorAngleAlignment = int;
     enum ConstructorAlignment_
     {

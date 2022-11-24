@@ -226,6 +226,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
             case Enums::CellFunction_Nerve: {
             } break;
             case Enums::CellFunction_Attacker: {
+                showAttackerContent(std::get<AttackerDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Injector: {
             } break;
@@ -239,22 +240,6 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
-    }
-}
-
-void _InspectorWindow::processParticle(ParticleDescription particle)
-{
-    auto origParticle = particle;
-    auto energy = toFloat(particle.energy);
-    AlienImGui::InputFloat(
-        AlienImGui::InputFloatParameters()
-            .name("Energy")
-            .textWidth(MaxParticleContentTextWidth),
-        energy);
-
-    particle.energy = energy;
-    if (particle != origParticle) {
-        _simController->changeParticle(particle);
     }
 }
 
@@ -298,6 +283,29 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
 
     AlienImGui::Group("Preview");
+}
+
+void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
+{
+    AlienImGui::Group("Properties");
+    AlienImGui::Combo(
+        AlienImGui::ComboParameters()
+            .name("Energy distribution")
+            .values({"Connected cells", "Transmitters and Constructors"})
+            .textWidth(MaxCellContentTextWidth),
+        attacker.mode);
+}
+
+void _InspectorWindow::processParticle(ParticleDescription particle)
+{
+    auto origParticle = particle;
+    auto energy = toFloat(particle.energy);
+    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxParticleContentTextWidth), energy);
+
+    particle.energy = energy;
+    if (particle != origParticle) {
+        _simController->changeParticle(particle);
+    }
 }
 
 float _InspectorWindow::calcWindowWidth() const

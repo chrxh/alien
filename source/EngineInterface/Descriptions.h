@@ -161,7 +161,15 @@ struct NerveDescription
 
 struct AttackerDescription
 {
+    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
+
     auto operator<=>(AttackerDescription const&) const = default;
+
+    AttackerDescription& setMode(Enums::EnergyDistributionMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct InjectorDescription

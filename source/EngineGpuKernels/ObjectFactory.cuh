@@ -142,6 +142,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     case Enums::CellFunction_Nerve: {
     } break;
     case Enums::CellFunction_Attacker: {
+        cell->cellFunctionData.attacker.mode = cellTO.cellFunctionData.attacker.mode;
     } break;
     case Enums::CellFunction_Injector: {
         createAuxiliaryData(

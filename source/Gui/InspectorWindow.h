@@ -32,9 +32,10 @@ private:
     void showCellGeneralTab(CellDescription& cell);
     void showCellFunctionTab(CellDescription& cell);
 
-    void processParticle(ParticleDescription particle);
-
     void showConstructorContent(ConstructorDescription& constructor);
+    void showAttackerContent(AttackerDescription& attacker);
+
+    void processParticle(ParticleDescription particle);
 
     float calcWindowWidth() const;
 

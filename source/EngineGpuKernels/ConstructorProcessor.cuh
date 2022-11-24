@@ -461,6 +461,7 @@ ConstructorProcessor::constructCellIntern(
     case Enums::CellFunction_Nerve: {
     } break;
     case Enums::CellFunction_Attacker: {
+        result->cellFunctionData.attacker.mode = readByte(constructor) % Enums::EnergyDistributionMode_Count;
     } break;
     case Enums::CellFunction_Injector: {
         copyGenome(data, constructor, result->cellFunctionData.injector);
