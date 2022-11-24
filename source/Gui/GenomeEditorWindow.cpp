@@ -416,6 +416,15 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         case Enums::CellFunction_Nerve: {
         } break;
         case Enums::CellFunction_Attacker: {
+            auto& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
+
+            table.next();
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Energy distribution")
+                    .values({"Connected cells", "Transmitters and Constructors"})
+                    .textWidth(MaxContentTextWidth),
+                attacker.mode);
         } break;
         case Enums::CellFunction_Injector: {
         } break;

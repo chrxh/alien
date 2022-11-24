@@ -443,6 +443,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case Enums::CellFunction_Attacker: {
         AttackerDescription attacker;
+        attacker.mode = cellTO.cellFunctionData.attacker.mode;
         result.cellFunction = attacker;
     } break;
     case Enums::CellFunction_Injector: {
@@ -539,7 +540,9 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.nerve = nerveTO;
     } break;
     case Enums::CellFunction_Attacker: {
+        auto attackerDesc = std::get<AttackerDescription>(*cellDesc.cellFunction);
         AttackerTO attackerTO;
+        attackerTO.mode = attackerDesc.mode;
         cellTO.cellFunctionData.attacker = attackerTO;
     } break;
     case Enums::CellFunction_Injector: {

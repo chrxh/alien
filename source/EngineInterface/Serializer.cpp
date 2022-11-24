@@ -86,6 +86,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, AttackerDescription& data)
     {
+        ar(data.mode);
     }
     template <class Archive>
     inline void serialize(Archive& ar, InjectorDescription& data)

@@ -534,6 +534,55 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(constructedConstructor.getGenomeData(), actualConstructor.genome);
 }
 
+TEST_F(ConstructorTests, constructNerveCell)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(NerveGenomeDescription())});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Nerve, actualConstructedCell.getCellFunctionType());
+}
+
+TEST_F(ConstructorTests, constructAttackerCell)
+{
+    auto constructedAttacker = AttackerGenomeDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
+        {CellGenomeDescription().setCellFunction(constructedAttacker)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Attacker, actualConstructedCell.getCellFunctionType());
+
+    auto actualAttacker = std::get<AttackerDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(constructedAttacker.mode, actualAttacker.mode);
+}
+
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 {
     auto constructedConstructor = ConstructorGenomeDescription()

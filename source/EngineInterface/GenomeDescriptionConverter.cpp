@@ -121,6 +121,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         case Enums::CellFunction_Nerve: {
         } break;
         case Enums::CellFunction_Attacker: {
+            auto attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
+            writeInt(result, attacker.mode);
         } break;
         case Enums::CellFunction_Injector: {
             auto injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
@@ -189,12 +191,15 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             }
             sensor.minDensity = readDensity(data, pos);
             sensor.color = readByte(data, pos) % MAX_COLORS;
+            cell.cellFunction = sensor;
         } break;
         case Enums::CellFunction_Nerve: {
             cell.cellFunction = NerveGenomeDescription();
         } break;
         case Enums::CellFunction_Attacker: {
-            cell.cellFunction = AttackerGenomeDescription();
+            AttackerGenomeDescription attacker;
+            attacker.mode = readByte(data, pos) % Enums::EnergyDistributionMode_Count;
+            cell.cellFunction = attacker;
         } break;
         case Enums::CellFunction_Injector: {
             InjectorGenomeDescription injector;

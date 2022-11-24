@@ -97,6 +97,7 @@ namespace
         case Enums::CellFunction_Nerve: {
         } break;
         case Enums::CellFunction_Attacker: {
+            cellTO.cellFunctionData.attacker.mode = cell->cellFunctionData.attacker.mode;
         } break;
         case Enums::CellFunction_Injector: {
             copyAuxiliaryData(

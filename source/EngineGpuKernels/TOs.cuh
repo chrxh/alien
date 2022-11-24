@@ -74,7 +74,9 @@ struct NerveTO
 {};
 
 struct AttackerTO
-{};
+{
+    Enums::EnergyDistributionMode mode;
+};
 
 struct InjectorTO
 {

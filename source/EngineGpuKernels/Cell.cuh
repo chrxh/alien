@@ -73,6 +73,7 @@ struct NerveFunction
 
 struct AttackerFunction
 {
+    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
 };
 
 struct InjectorFunction
@@ -98,7 +99,7 @@ union CellFunctionData
     ConstructorFunction constructor;
     SensorFunction sensor;
     NerveFunction nerve;
-    AttackerFunction digestion;
+    AttackerFunction attacker;
     InjectorFunction injector;
     MuscleFunction muscle;
     PlaceHolderFunction1 placeHolder1;
