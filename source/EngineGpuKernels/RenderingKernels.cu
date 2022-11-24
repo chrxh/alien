@@ -107,7 +107,7 @@ namespace
 
     __device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
     {
-        if (radius > 1.5 - FP_PRECISION) {
+        if (radius > 1.5 - FLOATINGPOINT_PRECISION) {
             auto radiusSquared = radius * radius;
             for (float x = -radius; x <= radius; x += 1.0f) {
                 for (float y = -radius; y <= radius; y += 1.0f) {
@@ -200,7 +200,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                    if (Math::lengthSquared(topologyCorrection) < FP_PRECISION) {
+                    if (Math::lengthSquared(topologyCorrection) < FLOATINGPOINT_PRECISION) {
                         auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
                         drawLine(cellImagePos, otherCellImagePos, color, imageData, imageSize);
                     }
@@ -214,7 +214,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                    if (Math::lengthSquared(topologyCorrection) > FP_PRECISION) {
+                    if (Math::lengthSquared(topologyCorrection) > FLOATINGPOINT_PRECISION) {
                         continue;
                     }
                     if ((cell->branchNumber + 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {

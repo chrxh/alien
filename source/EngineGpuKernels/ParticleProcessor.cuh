@@ -58,7 +58,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             if (lock.tryLock()) {
                 __threadfence();
 
-                if (particle->energy > FP_PRECISION && otherParticle->energy > FP_PRECISION) {
+                if (particle->energy > FLOATINGPOINT_PRECISION && otherParticle->energy > FLOATINGPOINT_PRECISION) {
                     auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
                     otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
                     otherParticle->energy += particle->energy;

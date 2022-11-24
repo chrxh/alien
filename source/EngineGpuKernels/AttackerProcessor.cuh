@@ -58,6 +58,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         return;
     }
     float energyDelta = 0;
+    auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
 
     Cell* otherCells[18];
     int numOtherCells;
@@ -90,36 +91,34 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     energyDelta += energyToTransfer;
                 }
             } else {
-                otherCell->energy -= energyToTransfer;
-                energyDelta += energyToTransfer;
+                if (cell->energy >= cellMinEnergy - (energyDelta + energyToTransfer)) {
+                    otherCell->energy -= energyToTransfer;
+                    energyDelta += energyToTransfer;
+                }
         }
 
         }
         otherCell->releaseLock();
     }
 
-    if (energyDelta >= 0) {
+    if (energyDelta > FLOATINGPOINT_PRECISION) {
         distributeEnergy(data, cell, energyDelta);
     } else {
-        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
-        if (cell->energy > cellMinEnergy - energyDelta) {
-            cell->energy += energyDelta;
-        }
+        cell->energy += energyDelta;
     }
 
     radiate(data, cell);
 
     //output
-    if (energyDelta == 0) {
-        cell->activity.channels[0] = OutputNothingFound;
-        result.incFailedAttack();
-    }
-    if (energyDelta > 0) {
-        cell->activity.channels[0] = OutputSuccess;
+    if (energyDelta > FLOATINGPOINT_PRECISION) {
+        activity.channels[0] = OutputSuccess;
         result.incSuccessfulAttack();
-    }
-    if (energyDelta < 0) {
-        cell->activity.channels[0] = OutputPoisoned;
+    } else if (energyDelta < -FLOATINGPOINT_PRECISION) {
+        activity.channels[0] = OutputPoisoned;
+        result.incFailedAttack();
+    } else {
+        activity.channels[0] = OutputNothingFound;
+        result.incFailedAttack();
     }
 
     cell->releaseLock();
@@ -151,6 +150,11 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)
 {
+    if (cell->energy > cudaSimulationParameters.cellNormalEnergy) {
+        energyDelta += cell->energy - cudaSimulationParameters.cellNormalEnergy;
+        cell->energy = cudaSimulationParameters.cellNormalEnergy;
+    }
+    
     Cell* receiverCells[10];
     int numReceivers;
     data.cellMap.getConstructorsAndTransmitters(receiverCells, 10, numReceivers, cell->absPos, EnergyDistributionRadius);

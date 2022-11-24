@@ -92,7 +92,7 @@ __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 
 __inline__ __device__ float Math::angleOfVector(float2 const & v)
 {
-    if (length(v) < FP_PRECISION) {
+    if (length(v) < FLOATINGPOINT_PRECISION) {
         return 0;
     }
 
@@ -177,7 +177,7 @@ __inline__ __device__ void Math::angleCorrection(float &angle)
 __device__ __inline__ void Math::normalize(float2 &vec)
 {
     float length = sqrt(vec.x*vec.x + vec.y*vec.y);
-    if (length > FP_PRECISION) {
+    if (length > FLOATINGPOINT_PRECISION) {
         vec = { vec.x / length, vec.y / length };
     }
     else {
@@ -240,7 +240,7 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
 {
     auto const relPos = pos - startSegment;
     auto segmentDirection = endSegment - startSegment;
-    if (length(segmentDirection) < FP_PRECISION) {
+    if (length(segmentDirection) < FLOATINGPOINT_PRECISION) {
         return boundary + 1.0f;
     }
 
