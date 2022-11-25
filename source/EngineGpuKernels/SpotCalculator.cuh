@@ -33,9 +33,9 @@ public:
         return calcResultingValue(
             data.cellMap,
             worldPos,
-            cudaSimulationParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix[color][otherColor],
-            cudaSimulationParametersSpots.spots[0].values.cellFunctionWeaponFoodChainColorMatrix[color][otherColor],
-            cudaSimulationParametersSpots.spots[1].values.cellFunctionWeaponFoodChainColorMatrix[color][otherColor]);
+            cudaSimulationParameters.spotValues.cellFunctionAttackerFoodChainColorMatrix[color][otherColor],
+            cudaSimulationParametersSpots.spots[0].values.cellFunctionAttackerFoodChainColorMatrix[color][otherColor],
+            cudaSimulationParametersSpots.spots[1].values.cellFunctionAttackerFoodChainColorMatrix[color][otherColor]);
     }
 
     __device__ __inline__ static int calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)

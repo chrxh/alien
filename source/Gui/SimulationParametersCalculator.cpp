@@ -24,13 +24,13 @@ SimulationParametersCalculator _SimulationParametersCalculator::createWithRandom
     target.spotValues.cellMinEnergy = numberGenerator.getRandomFloat(25.0f, 80.0f);
     target.spotValues.cellBindingForce = numberGenerator.getRandomFloat(0.3f, 2.0f);
     target.spotValues.cellFusionVelocity = numberGenerator.getRandomFloat(0.0f, 1.0f);
-    target.spotValues.cellFunctionWeaponEnergyCost = numberGenerator.getRandomFloat(0.0f, 3.0f);
+    target.spotValues.cellFunctionAttackerEnergyCost = numberGenerator.getRandomFloat(0.0f, 3.0f);
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
-            target.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j] = numberGenerator.getRandomFloat(0.0f, 1.0f);
+            target.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j] = numberGenerator.getRandomFloat(0.0f, 1.0f);
         }
     }
-    target.spotValues.cellFunctionWeaponGeometryDeviationExponent = numberGenerator.getRandomFloat(0.0f, 4.0f);
+    target.spotValues.cellFunctionAttackerGeometryDeviationExponent = numberGenerator.getRandomFloat(0.0f, 4.0f);
 
     return std::shared_ptr<_SimulationParametersCalculator>(new _SimulationParametersCalculator(source, target));
 }
@@ -77,17 +77,17 @@ SimulationParameters _SimulationParametersCalculator::calcCurrentParameters() co
     result.spotValues.cellMinEnergy = calcCurrentParameter(_source.spotValues.cellMinEnergy, _target.spotValues.cellMinEnergy);
     result.spotValues.cellBindingForce = calcCurrentParameter(_source.spotValues.cellBindingForce, _target.spotValues.cellBindingForce);
     result.spotValues.cellFusionVelocity = calcCurrentParameter(_source.spotValues.cellFusionVelocity, _target.spotValues.cellFusionVelocity);
-    result.spotValues.cellFunctionWeaponEnergyCost =
-        calcCurrentParameter(_source.spotValues.cellFunctionWeaponEnergyCost, _target.spotValues.cellFunctionWeaponEnergyCost);
+    result.spotValues.cellFunctionAttackerEnergyCost =
+        calcCurrentParameter(_source.spotValues.cellFunctionAttackerEnergyCost, _target.spotValues.cellFunctionAttackerEnergyCost);
 
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
-            result.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j] =
-                calcCurrentParameter(_source.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j], _target.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j]);
+            result.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
+                calcCurrentParameter(_source.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j], _target.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j]);
         }
     }
-    result.spotValues.cellFunctionWeaponGeometryDeviationExponent =
-        calcCurrentParameter(_source.spotValues.cellFunctionWeaponGeometryDeviationExponent, _target.spotValues.cellFunctionWeaponGeometryDeviationExponent);
+    result.spotValues.cellFunctionAttackerGeometryDeviationExponent =
+        calcCurrentParameter(_source.spotValues.cellFunctionAttackerGeometryDeviationExponent, _target.spotValues.cellFunctionAttackerGeometryDeviationExponent);
     return result;
 }
 

@@ -16,8 +16,8 @@ struct SimulationParametersSpotValues
 
     int cellColorTransitionDuration[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
     int cellColorTransitionTargetColor[MAX_COLORS] = {0, 1, 2, 3, 4, 5, 6};
-    float cellFunctionWeaponEnergyCost = 0.2f;
-    float cellFunctionWeaponFoodChainColorMatrix[MAX_COLORS][MAX_COLORS] = {
+    float cellFunctionAttackerEnergyCost = 0.2f;
+    float cellFunctionAttackerFoodChainColorMatrix[MAX_COLORS][MAX_COLORS] = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -25,14 +25,14 @@ struct SimulationParametersSpotValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
-    float cellFunctionWeaponGeometryDeviationExponent = 0.0f;
-    float cellFunctionWeaponConnectionsMismatchPenalty = 0.33f;
+    float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
+    float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                if (cellFunctionWeaponFoodChainColorMatrix[i][j] != other.cellFunctionWeaponFoodChainColorMatrix[i][j]) {
+                if (cellFunctionAttackerFoodChainColorMatrix[i][j] != other.cellFunctionAttackerFoodChainColorMatrix[i][j]) {
                     return false;
                 }
             }
@@ -45,9 +45,9 @@ struct SimulationParametersSpotValues
         }
         return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor && cellMaxForce == other.cellMaxForce
             && cellMinEnergy == other.cellMinEnergy && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
-            && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost
-            && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
+            && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost
+            && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
-            && cellFunctionWeaponConnectionsMismatchPenalty == other.cellFunctionWeaponConnectionsMismatchPenalty;
+            && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty;
     }
 };

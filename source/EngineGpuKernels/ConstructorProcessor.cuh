@@ -146,7 +146,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.distance = readFloat(constructor) + 1.0f;
     result.maxConnections = readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.executionOrderNumber = readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    result.color = readByte(constructor) % 7;
+    result.color = readByte(constructor) % MAX_COLORS;
     result.inputBlocked = readBool(constructor);
     result.outputBlocked = readBool(constructor);
     return result;

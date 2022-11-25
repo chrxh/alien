@@ -22,6 +22,7 @@ private:
 
     __inline__ __device__ static float calcOpenAngle(Cell* cell, float2 direction);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
+    __inline__ __device__ static bool isHomogene(Cell* cell);
 };
 
 /************************************************************************/
@@ -69,9 +70,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             continue;
         }
         if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier) {
-            auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionWeaponStrength + 1.0f;
+            auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionAttackerStrength + 1.0f;
+
+            if (!isHomogene(otherCell)) {
+                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerInhomogeneityBonus;
+            }
             auto cellFunctionWeaponGeometryDeviationExponent =
-                SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponGeometryDeviationExponent, data, cell->absPos);
+                SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent, data, cell->absPos);
 
             if (abs(cellFunctionWeaponGeometryDeviationExponent) > 0) {
                 auto d = otherCell->absPos - cell->absPos;
@@ -128,7 +133,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
 __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)
 {
-    auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionWeaponEnergyCost, data, cell->absPos);
+    auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerEnergyCost, data, cell->absPos);
     if (cellFunctionWeaponEnergyCost > 0) {
         auto const cellEnergy = cell->energy;
         auto& pos = cell->absPos;
@@ -263,4 +268,22 @@ __inline__ __device__ bool AttackerProcessor::isConnectedConnected(Cell* cell, C
         }
     }
     return result;
+}
+
+__inline__ __device__ bool AttackerProcessor::isHomogene(Cell* cell)
+{
+    int color = cell->color;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto otherCell = cell->connections[i].cell;
+        if (color != otherCell->color) {
+            return false;
+        }
+        for (int j = 0; j < otherCell->numConnections; ++j) {
+            auto otherOtherCell = otherCell->connections[j].cell;
+            if (color != otherOtherCell->color ) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
