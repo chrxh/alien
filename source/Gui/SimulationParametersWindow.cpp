@@ -364,36 +364,36 @@ void _SimulationParametersWindow::processBase(
                          "column while the color of the attacked cell is shown in the header row. A value of 0 means that the attacked cell cannot be digested, "
                          "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: If a 0 is "
                          "entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
-                .defaultValue(toVector(origSimParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix)),
-            simParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix);
+                .defaultValue(toVector(origSimParameters.spotValues.cellFunctionAttackerFoodChainColorMatrix)),
+            simParameters.spotValues.cellFunctionAttackerFoodChainColorMatrix);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(4.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponEnergyCost)
+                .defaultValue(origSimParameters.spotValues.cellFunctionAttackerEnergyCost)
                 .tooltip(std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
-            simParameters.spotValues.cellFunctionWeaponEnergyCost);
+            simParameters.spotValues.cellFunctionAttackerEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent)
+                .defaultValue(origSimParameters.spotValues.cellFunctionAttackerGeometryDeviationExponent)
                 .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
                                      "geometry of the attacked cell does not match the attacking cell.")),
-            simParameters.spotValues.cellFunctionWeaponGeometryDeviationExponent);
+            simParameters.spotValues.cellFunctionAttackerGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Connections mismatch penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origSimParameters.spotValues.cellFunctionWeaponConnectionsMismatchPenalty)
+                .defaultValue(origSimParameters.spotValues.cellFunctionAttackerConnectionsMismatchPenalty)
                 .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contain more connections.")),
-            simParameters.spotValues.cellFunctionWeaponConnectionsMismatchPenalty);
+            simParameters.spotValues.cellFunctionAttackerConnectionsMismatchPenalty);
 
         /**
          * Cell specialization: Construction function
@@ -631,32 +631,32 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::InputColorMatrixParameters()
                 .name("Food chain color matrix")
                 .textWidth(MaxContentTextWidth)
-                .defaultValue(toVector(origSpot.values.cellFunctionWeaponFoodChainColorMatrix)),
-            spot.values.cellFunctionWeaponFoodChainColorMatrix);
+                .defaultValue(toVector(origSpot.values.cellFunctionAttackerFoodChainColorMatrix)),
+            spot.values.cellFunctionAttackerFoodChainColorMatrix);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(4.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponEnergyCost),
-            spot.values.cellFunctionWeaponEnergyCost);
+                .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost),
+            spot.values.cellFunctionAttackerEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponGeometryDeviationExponent),
-            spot.values.cellFunctionWeaponGeometryDeviationExponent);
+                .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent),
+            spot.values.cellFunctionAttackerGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Connections mismatch penalty")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origSpot.values.cellFunctionWeaponConnectionsMismatchPenalty),
-            spot.values.cellFunctionWeaponConnectionsMismatchPenalty);
+                .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty),
+            spot.values.cellFunctionAttackerConnectionsMismatchPenalty);
     }
     ImGui::EndChild();
 }

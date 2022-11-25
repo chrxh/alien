@@ -45,6 +45,7 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     JsonParser::encodeDecode(
         tree, simPar.cellMaxBindingDistance, defaultPar.cellMaxBindingDistance, "simulation parameters.cell.max binding distance", parserTask);
     JsonParser::encodeDecode(tree, simPar.cellRepulsionStrength, defaultPar.cellRepulsionStrength, "simulation parameters.cell.repulsion strength", parserTask);
+    JsonParser::encodeDecode(tree, simPar.cellNormalEnergy, defaultPar.cellNormalEnergy, "simulation parameters.cell.normal energy", parserTask);
 
     JsonParser::encodeDecode(tree, simPar.cellMinDistance, defaultPar.cellMinDistance, "simulation parameters.cell.min distance", parserTask);
     JsonParser::encodeDecode(tree, simPar.cellMaxCollisionDistance, defaultPar.cellMaxCollisionDistance, "simulation parameters.cell.max distance", parserTask);
@@ -74,34 +75,40 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             parserTask);
     }
     JsonParser::encodeDecode(
-        tree, simPar.cellFunctionWeaponStrength, defaultPar.cellFunctionWeaponStrength, "simulation parameters.cell.function.weapon.strength", parserTask);
+        tree, simPar.cellFunctionAttackerStrength, defaultPar.cellFunctionAttackerStrength, "simulation parameters.cell.function.attacker.strength", parserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.spotValues.cellFunctionWeaponEnergyCost,
-        defaultPar.spotValues.cellFunctionWeaponEnergyCost,
-        "simulation parameters.cell.function.weapon.energy cost",
+        simPar.cellFunctionAttackerInhomogeneityBonus,
+        defaultPar.cellFunctionAttackerInhomogeneityBonus,
+        "simulation parameters.cell.function.attacker.inhomogeneity bonus",
         parserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.spotValues.cellFunctionWeaponGeometryDeviationExponent,
-        defaultPar.spotValues.cellFunctionWeaponGeometryDeviationExponent,
-        "simulation parameters.cell.function.weapon.geometry deviation exponent",
+        simPar.spotValues.cellFunctionAttackerEnergyCost,
+        defaultPar.spotValues.cellFunctionAttackerEnergyCost,
+        "simulation parameters.cell.function.attacker.energy cost",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionAttackerGeometryDeviationExponent,
+        defaultPar.spotValues.cellFunctionAttackerGeometryDeviationExponent,
+        "simulation parameters.cell.function.attacker.geometry deviation exponent",
         parserTask);
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
             JsonParser::encodeDecode(
                 tree,
-                simPar.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j],
-                defaultPar.spotValues.cellFunctionWeaponFoodChainColorMatrix[i][j],
-                "simulation parameters.cell.function.weapon.food chain color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
+                simPar.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j],
+                defaultPar.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j],
+                "simulation parameters.cell.function.attacker.food chain color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
                 parserTask);
         }
     }
     JsonParser::encodeDecode(
         tree,
-        simPar.spotValues.cellFunctionWeaponConnectionsMismatchPenalty,
-        defaultPar.spotValues.cellFunctionWeaponConnectionsMismatchPenalty,
-        "simulation parameters.cell.function.weapon.connections mismatch penalty",
+        simPar.spotValues.cellFunctionAttackerConnectionsMismatchPenalty,
+        defaultPar.spotValues.cellFunctionAttackerConnectionsMismatchPenalty,
+        "simulation parameters.cell.function.attacker.connections mismatch penalty",
         parserTask);
     JsonParser::encodeDecode(
         tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", parserTask);
@@ -164,31 +171,31 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
 
         JsonParser::encodeDecode(
             tree,
-            spot.values.cellFunctionWeaponEnergyCost,
-            defaultSpot.values.cellFunctionWeaponEnergyCost,
-            base + "cell.function.weapon.energy cost",
+            spot.values.cellFunctionAttackerEnergyCost,
+            defaultSpot.values.cellFunctionAttackerEnergyCost,
+            base + "cell.function.attacker.energy cost",
             parserTask);
         for (int i = 0; i < 7; ++i) {
             for (int j = 0; j < 7; ++j) {
                 JsonParser::encodeDecode(
                     tree,
-                    spot.values.cellFunctionWeaponFoodChainColorMatrix[i][j],
-                    defaultSpot.values.cellFunctionWeaponFoodChainColorMatrix[i][j],
-                    base + "function.weapon.color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
+                    spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j],
+                    defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix[i][j],
+                    base + "function.attacker.color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
                     parserTask);
             }
         }
         JsonParser::encodeDecode(
             tree,
-            spot.values.cellFunctionWeaponGeometryDeviationExponent,
-            defaultSpot.values.cellFunctionWeaponGeometryDeviationExponent,
-            base + "cell.function.weapon.geometry deviation exponent",
+            spot.values.cellFunctionAttackerGeometryDeviationExponent,
+            defaultSpot.values.cellFunctionAttackerGeometryDeviationExponent,
+            base + "cell.function.attacker.geometry deviation exponent",
             parserTask);
         JsonParser::encodeDecode(
             tree,
-            spot.values.cellFunctionWeaponConnectionsMismatchPenalty,
-            defaultSpot.values.cellFunctionWeaponConnectionsMismatchPenalty,
-            base + "cell.function.weapon.connections mismatch penalty",
+            spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
+            defaultSpot.values.cellFunctionAttackerConnectionsMismatchPenalty,
+            base + "cell.function.attacker.connections mismatch penalty",
             parserTask);
     }
 
