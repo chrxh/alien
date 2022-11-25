@@ -54,7 +54,7 @@ TEST_F(AttackerTests, successNoTransmitter)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellFunction(AttackerDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -72,11 +72,16 @@ TEST_F(AttackerTests, successNoTransmitter)
     _simController->calcSingleTimestep();
 
     auto actualData = _simController->getSimulationData();
+
     auto origAttackCell = getCell(data, 1);
     auto actualAttackCell = getCell(actualData, 1);
 
+    auto origTargetCell = getCell(data, 3);
+    auto actualTargetCell = getCell(actualData, 3);
+
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTargetCell.energy < origTargetCell.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -200,5 +205,48 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualNerveCell1.energy > origNerveCell1.energy + NEAR_ZERO);
     EXPECT_TRUE(actualNerveCell2.energy > origNerveCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(AttackerTests, successTwoTargets)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(AttackerDescription()),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+        CellDescription().setId(4).setPos({9.0f, 11.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+
+    auto origAttackCell = getCell(data, 1);
+    auto actualAttackCell = getCell(actualData, 1);
+
+    auto origTargetCell1 = getCell(data, 3);
+    auto actualTargetCell1 = getCell(actualData, 3);
+
+    auto origTargetCell2 = getCell(data, 4);
+    auto actualTargetCell2 = getCell(actualData, 4);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTargetCell1.energy < origTargetCell1.energy - NEAR_ZERO);
+    EXPECT_TRUE(actualTargetCell2.energy < origTargetCell2.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
