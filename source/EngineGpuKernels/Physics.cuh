@@ -108,7 +108,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 	float rAPp_dot_n = Math::dot(rAPp, n);
 	float rBPp_dot_n = Math::dot(rBPp, n);
 
-	if (angularMassA > FLOATINGPOINT_PRECISION && angularMassB > FLOATINGPOINT_PRECISION) {
+	if (angularMassA > NEAR_ZERO && angularMassB > NEAR_ZERO) {
 		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angularMassA + rBPp_dot_n * rBPp_dot_n / angularMassB);
 
@@ -118,7 +118,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
         angularVelB2 = angularVelB1 + (rBPp_dot_n * j / angularMassB) * Const::RAD_TO_DEG;
 	}
 
-	if (angularMassA <= FLOATINGPOINT_PRECISION && angularMassB > FLOATINGPOINT_PRECISION) {
+	if (angularMassA <= NEAR_ZERO && angularMassB > NEAR_ZERO) {
 		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rBPp_dot_n * rBPp_dot_n / angularMassB);
 
@@ -128,7 +128,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
         angularVelB2 = angularVelB1 + (rBPp_dot_n * j / angularMassB) * Const::RAD_TO_DEG;
 	}
 
-	if (angularMassA > FLOATINGPOINT_PRECISION && angularMassB <= FLOATINGPOINT_PRECISION) {
+	if (angularMassA > NEAR_ZERO && angularMassB <= NEAR_ZERO) {
 		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB)
 			+ rAPp_dot_n * rAPp_dot_n / angularMassA);
 
@@ -138,7 +138,7 @@ __device__ __inline__ void Physics::calcCollision(float2 const & vA1, float2 con
 		angularVelB2 = angularVelB1;
 	}
 
-	if (angularMassA <= FLOATINGPOINT_PRECISION && angularMassB <= FLOATINGPOINT_PRECISION) {
+	if (angularMassA <= NEAR_ZERO && angularMassB <= NEAR_ZERO) {
 		float j = -2.0*vAB_dot_n / ((1.0 / massA + 1.0 / massB));
 
 		vA2 = vA1 + n * j / massA;
@@ -165,7 +165,7 @@ __inline__ __device__ void Physics::calcImpulseIncrement(float2 const & impulse,
 {
     Math::rotateQuarterCounterClockwise(relPos);
     velInc = impulse / mass;
-    if (abs(angularMass) < FLOATINGPOINT_PRECISION) {
+    if (abs(angularMass) < NEAR_ZERO) {
         angularVelInc = 0;
     }
     else {
@@ -190,7 +190,7 @@ __inline__ __device__ float Physics::angularMomentum(float2 const & positionFrom
 
 __inline__ __device__ float Physics::angularVelocity(float angularMomentum, float angularMass)
 {
-	if (std::abs(angularMass) < FLOATINGPOINT_PRECISION)
+	if (std::abs(angularMass) < NEAR_ZERO)
 		return 0;
 	else
 		return angularMomentum / angularMass * Const::RAD_TO_DEG;

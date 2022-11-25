@@ -18,9 +18,7 @@ using std::int64_t;
 using std::uint32_t;
 using std::uint64_t;
 
-const double FLOATINGPOINT_HIGH_PRECISION = 1.0e-7;
-const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
-const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1;
+constexpr double NEAR_ZERO = 1.0e-4;
 
 template <typename T>
 inline float toFloat(T const& value)
