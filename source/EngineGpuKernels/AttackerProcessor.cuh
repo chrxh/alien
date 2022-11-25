@@ -101,7 +101,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         otherCell->releaseLock();
     }
 
-    if (energyDelta > FLOATINGPOINT_PRECISION) {
+    if (energyDelta > NEAR_ZERO) {
         distributeEnergy(data, cell, energyDelta);
     } else {
         cell->energy += energyDelta;
@@ -110,10 +110,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     radiate(data, cell);
 
     //output
-    if (energyDelta > FLOATINGPOINT_PRECISION) {
+    if (energyDelta > NEAR_ZERO) {
         activity.channels[0] = OutputSuccess;
         result.incSuccessfulAttack();
-    } else if (energyDelta < -FLOATINGPOINT_PRECISION) {
+    } else if (energyDelta < -NEAR_ZERO) {
         activity.channels[0] = OutputPoisoned;
         result.incFailedAttack();
     } else {
@@ -154,18 +154,45 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
         energyDelta += cell->energy - cudaSimulationParameters.cellNormalEnergy;
         cell->energy = cudaSimulationParameters.cellNormalEnergy;
     }
-    
-    Cell* receiverCells[10];
-    int numReceivers;
-    data.cellMap.getConstructorsAndTransmitters(receiverCells, 10, numReceivers, cell->absPos, EnergyDistributionRadius);
-    float energyPerReceiver = energyDelta / (numReceivers + 1);
 
-    for (int i = 0; i < numReceivers; ++i) {
-        auto receiverCell = receiverCells[i];
-        if (receiverCell->tryLock()) {
-            receiverCell->energy += energyPerReceiver;
-            energyDelta -= energyPerReceiver;
-            receiverCell->releaseLock();
+    if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_ConnectedCells) {
+        int numReceivers = cell->numConnections;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            numReceivers += cell->connections[i].cell->numConnections;
+        }
+        float energyPerReceiver = energyDelta / (numReceivers + 1);
+
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectedCell = cell->connections[i].cell;
+            if (connectedCell->tryLock()) {
+                connectedCell->energy += energyPerReceiver;
+                energyDelta -= energyPerReceiver;
+                connectedCell->releaseLock();
+            }
+            for (int i = 0; i < connectedCell->numConnections; ++i) {
+                auto connectedConnectedCell = connectedCell->connections[i].cell;
+                if (connectedConnectedCell->tryLock()) {
+                    connectedConnectedCell->energy += energyPerReceiver;
+                    energyDelta -= energyPerReceiver;
+                    connectedConnectedCell->releaseLock();
+                }
+            }
+        }
+    }
+
+    if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_TransmittersAndConstructors) {
+        Cell* receiverCells[10];
+        int numReceivers;
+        data.cellMap.getConstructorsAndTransmitters(receiverCells, 10, numReceivers, cell->absPos, EnergyDistributionRadius);
+        float energyPerReceiver = energyDelta / (numReceivers + 1);
+
+        for (int i = 0; i < numReceivers; ++i) {
+            auto receiverCell = receiverCells[i];
+            if (receiverCell->tryLock()) {
+                receiverCell->energy += energyPerReceiver;
+                energyDelta -= energyPerReceiver;
+                receiverCell->releaseLock();
+            }
         }
     }
     cell->energy += energyDelta;

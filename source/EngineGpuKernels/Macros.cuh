@@ -40,7 +40,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define ABORT() *((int*)nullptr) = 1;
 
-#define FLOATINGPOINT_PRECISION 0.00001
+#define NEAR_ZERO 0.00001
 
 #define CUDA_THROW_NOT_IMPLEMENTED() \
     printf("not implemented"); \
