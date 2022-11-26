@@ -100,6 +100,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             }
         } break;
         case Enums::CellFunction_Transmitter: {
+            auto transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
+            writeInt(result, transmitter.mode);
         } break;
         case Enums::CellFunction_Constructor: {
             auto constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
@@ -169,7 +171,9 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             cell.cellFunction = neuron;
         } break;
         case Enums::CellFunction_Transmitter: {
-            cell.cellFunction = TransmitterGenomeDescription();
+            TransmitterGenomeDescription transmitter;
+            transmitter.mode = readByte(data, pos) % Enums::EnergyDistributionMode_Count;
+            cell.cellFunction = transmitter;
         } break;
         case Enums::CellFunction_Constructor: {
             ConstructorGenomeDescription constructor;

@@ -27,7 +27,15 @@ struct NeuronGenomeDescription
 
 struct TransmitterGenomeDescription
 {
+    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
+
     auto operator<=>(TransmitterGenomeDescription const&) const = default;
+
+    TransmitterGenomeDescription& setMode(Enums::EnergyDistributionMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct ConstructorGenomeDescription

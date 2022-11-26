@@ -73,6 +73,7 @@ namespace
                 dataTO.auxiliaryData);
         } break;
         case Enums::CellFunction_Transmitter: {
+            cellTO.cellFunctionData.transmitter.mode = cell->cellFunctionData.transmitter.mode;
         } break;
         case Enums::CellFunction_Constructor: {
             cellTO.cellFunctionData.constructor.mode = cell->cellFunctionData.constructor.mode;

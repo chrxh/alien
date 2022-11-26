@@ -363,6 +363,15 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         case Enums::CellFunction_Neuron: {
         } break;
         case Enums::CellFunction_Transmitter: {
+            auto& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
+
+            table.next();
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Energy distribution")
+                    .values({"Connected cells", "Transmitters and Constructors"})
+                    .textWidth(MaxContentTextWidth),
+                transmitter.mode);
         } break;
         case Enums::CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);

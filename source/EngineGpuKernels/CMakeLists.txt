@@ -77,6 +77,7 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationResult.cuh
     SpotCalculator.cuh
     Swap.cuh
+    TransmitterProcessor.cuh
     TOs.cuh)
 
 target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)

@@ -117,6 +117,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState));
     } break;
     case Enums::CellFunction_Transmitter: {
+        cell->cellFunctionData.transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
     } break;
     case Enums::CellFunction_Constructor: {
         cell->cellFunctionData.constructor.mode = cellTO.cellFunctionData.constructor.mode;

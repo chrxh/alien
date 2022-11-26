@@ -6,6 +6,7 @@
 #include "NeuronProcessor.cuh"
 #include "ConstructorProcessor.cuh"
 #include "AttackerProcessor.cuh"
+#include "TransmitterProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result)
 {
@@ -77,6 +78,11 @@ __global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, S
 __global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationResult result)
 {
     AttackerProcessor::process(data, result);
+}
+
+__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationResult result)
+{
+    TransmitterProcessor::process(data, result);
 }
 
 __global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)
