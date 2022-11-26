@@ -44,7 +44,9 @@ struct NeuronTO
 };
 
 struct TransmitterTO
-{};
+{
+    Enums::EnergyDistributionMode mode;
+};
 
 struct ConstructorTO
 {

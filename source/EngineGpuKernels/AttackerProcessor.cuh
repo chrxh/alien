@@ -32,11 +32,9 @@ private:
 namespace
 {
     float constexpr AttackerActivityThreshold = 0.25f;
-    float constexpr AttackRadius = 1.6f;
-    float constexpr OutputPoisoned = -1;
-    float constexpr OutputNothingFound = 0;
-    float constexpr OutputSuccess = 1;
-    float constexpr EnergyDistributionRadius = 3.0f;
+    float constexpr AttackerOutputPoisoned = -1;
+    float constexpr AttackerOutputNothingFound = 0;
+    float constexpr AttackerOutputSuccess = 1;
 }
 
 __device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationResult& result)
@@ -63,7 +61,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, AttackRadius);
+    data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (!otherCell->tryLock()) {
@@ -116,13 +114,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
     //output
     if (energyDelta > NEAR_ZERO) {
-        activity.channels[0] = OutputSuccess;
+        activity.channels[0] = AttackerOutputSuccess;
         result.incSuccessfulAttack();
     } else if (energyDelta < -NEAR_ZERO) {
-        activity.channels[0] = OutputPoisoned;
+        activity.channels[0] = AttackerOutputPoisoned;
         result.incFailedAttack();
     } else {
-        activity.channels[0] = OutputNothingFound;
+        activity.channels[0] = AttackerOutputNothingFound;
         result.incFailedAttack();
     }
 
@@ -188,7 +186,8 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
     if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_TransmittersAndConstructors) {
         Cell* receiverCells[10];
         int numReceivers;
-        data.cellMap.getConstructorsAndTransmitters(receiverCells, 10, numReceivers, cell->absPos, EnergyDistributionRadius);
+        data.cellMap.getConstructorsAndTransmitters(
+            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
         for (int i = 0; i < numReceivers; ++i) {

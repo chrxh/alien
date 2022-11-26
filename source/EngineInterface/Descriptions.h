@@ -83,7 +83,15 @@ struct NeuronDescription
 
 struct TransmitterDescription
 {
+    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
+
     auto operator<=>(TransmitterDescription const&) const = default;
+
+    TransmitterDescription& setMode(Enums::EnergyDistributionMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct ConstructorDescription
@@ -97,7 +105,7 @@ struct ConstructorDescription
     std::vector<uint8_t> genome;
 
     //process data
-    uint64_t currentGenomePos = 0;
+    int currentGenomePos = 0;
 
     auto operator<=>(ConstructorDescription const&) const = default;
 
@@ -136,7 +144,7 @@ struct ConstructorDescription
         genome = value;
         return *this;
     }
-    ConstructorDescription& setCurrentGenomePos(uint64_t value)
+    ConstructorDescription& setCurrentGenomePos(int value)
     {
         currentGenomePos = value;
         return *this;

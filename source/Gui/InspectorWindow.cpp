@@ -217,6 +217,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
             case Enums::CellFunction_Neuron: {
             } break;
             case Enums::CellFunction_Transmitter: {
+                showTransmitterContent(std::get<TransmitterDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Constructor: {
                 showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
@@ -271,6 +272,8 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     ImGui::EndChild();
 
+    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Genome read position").textWidth(MaxCellContentTextWidth), constructor.currentGenomePos);
+
     ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
     if (AlienImGui::Button("Paste")) {
         constructor.genome = *_editorModel->getCopiedGenome();
@@ -294,6 +297,17 @@ void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
             .values({"Connected cells", "Transmitters and Constructors"})
             .textWidth(MaxCellContentTextWidth),
         attacker.mode);
+}
+
+void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitter)
+{
+    AlienImGui::Group("Properties");
+    AlienImGui::Combo(
+        AlienImGui::ComboParameters()
+            .name("Energy distribution")
+            .values({"Connected cells", "Transmitters and Constructors"})
+            .textWidth(MaxCellContentTextWidth),
+        transmitter.mode);
 }
 
 void _InspectorWindow::processParticle(ParticleDescription particle)

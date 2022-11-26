@@ -39,6 +39,7 @@ struct NeuronFunction
 
 struct TransmitterFunction
 {
+    Enums::EnergyDistributionMode mode;
 };
 
 struct ConstructorFunction
@@ -73,7 +74,7 @@ struct NerveFunction
 
 struct AttackerFunction
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
+    Enums::EnergyDistributionMode mode;
 };
 
 struct InjectorFunction

@@ -8,7 +8,8 @@ PUBLIC
     NerveTests.cpp
     NeuronTests.cpp
     SensorTests.cpp
-    Testsuite.cpp)
+    Testsuite.cpp
+    TransmitterTests.cpp)
 
 target_link_libraries(tests alien_base_lib)
 target_link_libraries(tests alien_engine_gpu_kernels_lib)

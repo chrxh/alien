@@ -34,6 +34,7 @@ private:
 
     void showConstructorContent(ConstructorDescription& constructor);
     void showAttackerContent(AttackerDescription& attacker);
+    void showTransmitterContent(TransmitterDescription& transmitter);
 
     void processParticle(ParticleDescription particle);
 

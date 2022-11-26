@@ -440,6 +440,7 @@ ConstructorProcessor::constructCellIntern(
         }
     } break;
     case Enums::CellFunction_Transmitter: {
+        result->cellFunctionData.transmitter.mode = readByte(constructor) % Enums::EnergyDistributionMode_Count;
     } break;
     case Enums::CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;

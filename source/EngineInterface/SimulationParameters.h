@@ -19,8 +19,13 @@ struct SimulationParameters
     int cellMaxExecutionOrderNumbers = 6;
     int cellCreationTokenAccessNumber = 0;
 
+    float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
+    float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
     float cellFunctionAttackerInhomogeneityBonus = 2.0f;
+
+    float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
+
     float cellFunctionSensorRange = 255.0f;
 
     float radiationProb = 0.03f;
@@ -38,7 +43,9 @@ struct SimulationParameters
             && cellFunctionSensorRange == other.cellFunctionSensorRange && radiationProb == other.radiationProb
             && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellRepulsionStrength == other.cellRepulsionStrength && cellNormalEnergy == other.cellNormalEnergy
-            && cellFunctionAttackerInhomogeneityBonus == other.cellFunctionAttackerInhomogeneityBonus;
+            && cellFunctionAttackerInhomogeneityBonus == other.cellFunctionAttackerInhomogeneityBonus
+            && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
+            && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

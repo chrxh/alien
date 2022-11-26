@@ -412,6 +412,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case Enums::CellFunction_Transmitter: {
         TransmitterDescription transmitter;
+        transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
         result.cellFunction = transmitter;
     } break;
     case Enums::CellFunction_Constructor: {
@@ -423,7 +424,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
+        constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
         result.cellFunction = constructor;
     } break;
     case Enums::CellFunction_Sensor: {
@@ -510,7 +511,9 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case Enums::CellFunction_Transmitter: {
+        auto transmitterDesc = std::get<TransmitterDescription>(*cellDesc.cellFunction);
         TransmitterTO transmitterTO;
+        transmitterTO.mode = transmitterDesc.mode;
         cellTO.cellFunctionData.transmitter = transmitterTO;
     } break;
     case Enums::CellFunction_Constructor: {
