@@ -124,6 +124,8 @@ void _InspectorWindow::processCell(CellDescription cell)
         auto origCell = cell;
         showCellGeneralTab(cell);
         showCellFunctionTab(cell);
+        validationAndCorrection(cell);
+
         ImGui::EndTabBar();
 
         if (cell != origCell) {
@@ -184,9 +186,7 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(MaxCellContentTextWidth), cell.age);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(MaxCellContentTextWidth), cell.activationTime);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
-            cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxCellContentTextWidth), cell.executionOrderNumber);
-            cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
@@ -262,8 +262,8 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
-    AlienImGui::AngleAlignmentCombo(
-        AlienImGui::AngleAlignmentComboParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
+    AlienImGui::InputInt(
+        AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
 
     AlienImGui::Group("Genome");
     auto width = ImGui::GetContentRegionAvail().x;
@@ -328,5 +328,24 @@ float _InspectorWindow::calcWindowWidth() const
         return StyleRepository::getInstance().scaleContent(CellWindowWidth);
     } else {
         return StyleRepository::getInstance().scaleContent(ParticleWindowWidth);
+    }
+}
+
+void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
+{
+    auto const& parameters = _simController->getSimulationParameters();
+
+    cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
+    cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+    switch (cell.getCellFunctionType()) {
+    case Enums::CellFunction_Constructor: {
+        auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
+        if (constructor.currentGenomePos < 0) {
+            constructor.currentGenomePos = 0;
+        }
+        if (constructor.constructionActivationTime < 0) {
+            constructor.constructionActivationTime = 0;
+        }
+    } break;
     }
 }

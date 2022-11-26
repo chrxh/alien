@@ -40,6 +40,8 @@ private:
 
     float calcWindowWidth() const;
 
+    void validationAndCorrection(CellDescription& cell) const;
+
 private:
     SimulationController _simController;
     Viewport _viewport; 
