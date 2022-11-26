@@ -92,7 +92,7 @@ namespace
             unsigned int index = intPos.x + intPos.y * imageSize.x;
 
             float3 colorToAdd1 = colorToAdd * (1.0f - posFrac.x) * (1.0f - posFrac.y);
-            drawAddingPixel(imageData, index, colorToAdd1);
+            drawAddingPixel(imageData, index + 1, colorToAdd1);
 
             float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
             drawAddingPixel(imageData, index, colorToAdd2);

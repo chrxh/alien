@@ -342,7 +342,7 @@ void _MainWindow::renderSimulation()
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     if (_renderSimulation) {
-        _simulationView->processContent();
+        _simulationView->draw();
     } else {
         glClearColor(0, 0, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
