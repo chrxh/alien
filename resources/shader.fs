@@ -5,6 +5,7 @@ in vec2 texCoord;
 
 uniform sampler2D texture1;
 uniform sampler2D texture2;
+uniform sampler2D texture3;
 uniform int phase;
 uniform bool glowEffect;
 uniform bool motionEffect;
@@ -37,9 +38,7 @@ void main()
             result = vec3(texture(texture1, mirroredCoord).rgb);
         }
         result = mapColor(result);
-        if (motionEffect) {
-            result = result * motionBlurFactor + texture(texture2, texCoord).rgb * (1 - motionBlurFactor);
-        }
+
         FragColor = vec4(result, 1.0);
     }
 
@@ -63,6 +62,16 @@ void main()
         vec3 pix3 = texture(texture1, vec2(mirroredCoord.x, mirroredCoord.y + texelSize.y)).rgb;
         vec3 pix4 = texture(texture1, vec2(mirroredCoord.x + texelSize.x, mirroredCoord.y + texelSize.y)).rgb;
         vec3 rawPixel = mapColor((pix1 + pix2 + pix3 + pix4) / 4);
-        FragColor = vec4(rawPixel + result, 1.0);
+        result = result + rawPixel;
+
+        if (motionEffect) {
+            result = result * motionBlurFactor + texture(texture3, texCoord).rgb * (1 - motionBlurFactor);
+        }
+        FragColor = vec4(result, 1.0);
+    }
+
+    //draw
+    if (phase == 2) {
+        FragColor = texture(texture1, texCoord);
     }
 }

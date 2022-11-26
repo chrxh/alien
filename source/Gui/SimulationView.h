@@ -59,12 +59,13 @@ private:
     
     //shader data
     unsigned int _vao, _vbo, _ebo;
-    unsigned int _fbo;
+    unsigned int _fbo1, _fbo2;
     Shader _shader;
 
     bool _areTexturesInitialized = false;
-    unsigned int _textureId = 0;
-    unsigned int _textureFramebufferId = 0;
+    unsigned int _textureSimulationId = 0;
+    unsigned int _textureFramebufferId1 = 0;
+    unsigned int _textureFramebufferId2 = 0;
 
     //navigation
     std::optional<RealVector2D> _worldPosForMovement;
