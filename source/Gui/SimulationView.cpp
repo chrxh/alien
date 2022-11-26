@@ -97,7 +97,7 @@ void _SimulationView::resize(IntVector2D const& size)
     if (_areTexturesInitialized) {
         glDeleteFramebuffers(1, &_fbo);
         glDeleteTextures(1, &_textureId);
-        glDeleteTextures(1, &_textureFramebufferId);
+        glDeleteTextures(1, &_textureFramebufferId1);
         _areTexturesInitialized = true;
     }
     glGenTextures(1, &_textureId);
@@ -109,8 +109,8 @@ void _SimulationView::resize(IntVector2D const& size)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
     _simController->registerImageResource(reinterpret_cast<void*>(uintptr_t(_textureId)));
 
-    glGenTextures(1, &_textureFramebufferId);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glGenTextures(1, &_textureFramebufferId1);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -119,7 +119,7 @@ void _SimulationView::resize(IntVector2D const& size)
 
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);  
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId1, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 
     _viewport->setViewSize(size);
@@ -218,7 +218,7 @@ void _SimulationView::processEvents()
     }
 }
 
-void _SimulationView::processContent()
+void _SimulationView::draw()
 {
     processEvents();
 
@@ -235,13 +235,15 @@ void _SimulationView::processContent()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _textureId);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
     _shader->setInt("phase", 1);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glBindTexture(GL_TEXTURE_2D, _textureId);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
