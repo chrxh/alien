@@ -154,6 +154,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.injector.genome);
     } break;
     case Enums::CellFunction_Muscle: {
+        cell->cellFunctionData.muscle.mode = cellTO.cellFunctionData.muscle.mode;
     } break;
     case Enums::CellFunction_Placeholder1: {
     } break;

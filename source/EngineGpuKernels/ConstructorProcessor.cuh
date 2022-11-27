@@ -468,6 +468,7 @@ ConstructorProcessor::constructCellIntern(
         copyGenome(data, constructor, result->cellFunctionData.injector);
     } break;
     case Enums::CellFunction_Muscle: {
+        result->cellFunctionData.muscle.mode = readByte(constructor) % Enums::MuscleMode_Count;
     } break;
     case Enums::CellFunction_Placeholder1: {
     } break;

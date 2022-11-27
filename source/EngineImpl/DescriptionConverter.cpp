@@ -454,6 +454,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case Enums::CellFunction_Muscle: {
         MuscleDescription muscle;
+        muscle.mode = cellTO.cellFunctionData.muscle.mode;
         result.cellFunction = muscle;
     } break;
     case Enums::CellFunction_Placeholder1: {
@@ -554,7 +555,9 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.injector = injectorTO;
     } break;
     case Enums::CellFunction_Muscle: {
+        auto muscleDesc = std::get<MuscleDescription>(*cellDesc.cellFunction);
         MuscleTO muscleTO;
+        muscleTO.mode = muscleDesc.mode;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
     case Enums::CellFunction_Placeholder1: {

@@ -87,7 +87,9 @@ struct InjectorTO
 };
 
 struct MuscleTO
-{};
+{
+    Enums::MuscleMode mode;
+};
 
 struct PlaceHolderTO1
 {};

@@ -110,6 +110,7 @@ namespace
                 dataTO.auxiliaryData);
         } break;
         case Enums::CellFunction_Muscle: {
+            cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;
         } break;
         case Enums::CellFunction_Placeholder1: {
         } break;

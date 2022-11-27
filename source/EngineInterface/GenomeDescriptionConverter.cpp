@@ -131,6 +131,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeGenome(result, injector.genome);
         } break;
         case Enums::CellFunction_Muscle: {
+            auto muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
+            writeInt(result, muscle.mode);
         } break;
         case Enums::CellFunction_Placeholder1: {
         } break;
@@ -211,7 +213,9 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             cell.cellFunction = injector;
         } break;
         case Enums::CellFunction_Muscle: {
-            cell.cellFunction = MuscleGenomeDescription();
+            MuscleGenomeDescription muscle;
+            muscle.mode = readByte(data, pos) % Enums::MuscleMode_Count;
+            cell.cellFunction = muscle;
         } break;
         case Enums::CellFunction_Placeholder1: {
             cell.cellFunction = PlaceHolderGenomeDescription1();

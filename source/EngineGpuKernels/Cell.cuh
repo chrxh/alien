@@ -85,6 +85,7 @@ struct InjectorFunction
 
 struct MuscleFunction
 {
+    Enums::MuscleMode mode;
 };
 
 struct PlaceHolderFunction1

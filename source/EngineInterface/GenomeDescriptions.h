@@ -146,7 +146,15 @@ struct InjectorGenomeDescription
 
 struct MuscleGenomeDescription
 {
+    Enums::MuscleMode mode = Enums::MuscleMode_Movement;
+
     auto operator<=>(MuscleGenomeDescription const&) const = default;
+
+    MuscleGenomeDescription& setMode(Enums::MuscleMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct PlaceHolderGenomeDescription1
