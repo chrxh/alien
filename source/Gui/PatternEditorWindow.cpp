@@ -256,10 +256,10 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button("Make unsticky")) {
             onRemoveStickiness();
         }
-        if (ImGui::Button("Set barrier")) {
+        if (ImGui::Button("Attach to background")) {
             onSetBarrier(true);
         }
-        if (ImGui::Button("Unset barrier")) {
+        if (ImGui::Button("Detach from background")) {
             onSetBarrier(false);
         }
         ImGui::EndDisabled();
