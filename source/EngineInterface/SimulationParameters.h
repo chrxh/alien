@@ -23,9 +23,17 @@ struct SimulationParameters
     float cellFunctionAttackerStrength = 0.05f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
     float cellFunctionAttackerInhomogeneityBonus = 2.0f;
+    float cellFunctionAttackerActivityThreshold = 0.25f;
+    float cellFunctionAttackerOutputPoisoned = -1;
+    float cellFunctionAttackerOutputNothingFound = 0;
+    float cellFunctionAttackerOutputSuccess = 1;
 
     float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
 
+    float cellFunctionMuscleActivityThreshold = 0.25f;
+    float cellFunctionMuscleOppositeActivityThreshold = -0.25f;
+    float cellFunctionMuscleContractionExpansionFactor = 1.05f;
+    
     float cellFunctionSensorRange = 255.0f;
 
     float radiationProb = 0.03f;
@@ -45,7 +53,15 @@ struct SimulationParameters
             && cellRepulsionStrength == other.cellRepulsionStrength && cellNormalEnergy == other.cellNormalEnergy
             && cellFunctionAttackerInhomogeneityBonus == other.cellFunctionAttackerInhomogeneityBonus
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
-            && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius;
+            && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
+            && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
+            && cellFunctionAttackerOutputPoisoned == other.cellFunctionAttackerOutputPoisoned
+            && cellFunctionAttackerOutputNothingFound == other.cellFunctionAttackerOutputNothingFound
+            && cellFunctionAttackerOutputSuccess == other.cellFunctionAttackerOutputSuccess
+            && cellFunctionMuscleActivityThreshold == other.cellFunctionMuscleActivityThreshold
+            && cellFunctionMuscleOppositeActivityThreshold == other.cellFunctionMuscleOppositeActivityThreshold
+            && cellFunctionMuscleContractionExpansionFactor == other.cellFunctionMuscleContractionExpansionFactor
+        ;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

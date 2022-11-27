@@ -29,14 +29,6 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-namespace
-{
-    float constexpr AttackerActivityThreshold = 0.25f;
-    float constexpr AttackerOutputPoisoned = -1;
-    float constexpr AttackerOutputNothingFound = 0;
-    float constexpr AttackerOutputSuccess = 1;
-}
-
 __device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationResult& result)
 {
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Attacker];
@@ -49,8 +41,9 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    if (abs(activity.channels[0]) < AttackerActivityThreshold) {
+    int inputExecutionOrderNumber;
+    auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+    if (abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionAttackerActivityThreshold) {
         return;
     }
     if (!cell->tryLock()) {
@@ -114,13 +107,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
     //output
     if (energyDelta > NEAR_ZERO) {
-        activity.channels[0] = AttackerOutputSuccess;
+        activity.channels[0] = cudaSimulationParameters.cellFunctionAttackerOutputSuccess;
         result.incSuccessfulAttack();
     } else if (energyDelta < -NEAR_ZERO) {
-        activity.channels[0] = AttackerOutputPoisoned;
+        activity.channels[0] = cudaSimulationParameters.cellFunctionAttackerOutputPoisoned;
         result.incFailedAttack();
     } else {
-        activity.channels[0] = AttackerOutputNothingFound;
+        activity.channels[0] = cudaSimulationParameters.cellFunctionAttackerOutputNothingFound;
         result.incFailedAttack();
     }
 
