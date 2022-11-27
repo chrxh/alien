@@ -583,6 +583,58 @@ TEST_F(ConstructorTests, constructAttackerCell)
     EXPECT_EQ(constructedAttacker.mode, actualAttacker.mode);
 }
 
+TEST_F(ConstructorTests, constructTransmitterCell)
+{
+    auto constructedTransmitter = TransmitterGenomeDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedTransmitter)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Transmitter, actualConstructedCell.getCellFunctionType());
+
+    auto actualTransmitter = std::get<TransmitterDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(constructedTransmitter.mode, actualTransmitter.mode);
+}
+
+TEST_F(ConstructorTests, constructMuscleCell)
+{
+    auto constructedMuscle = MuscleGenomeDescription().setMode(Enums::MuscleMode_ContractionExpansion);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedMuscle)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Muscle, actualConstructedCell.getCellFunctionType());
+
+    auto actualMuscle = std::get<MuscleDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(constructedMuscle.mode, actualMuscle.mode);
+}
+
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 {
     auto constructedConstructor = ConstructorGenomeDescription()

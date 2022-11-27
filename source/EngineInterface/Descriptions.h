@@ -189,7 +189,15 @@ struct InjectorDescription
 
 struct MuscleDescription
 {
+    Enums::MuscleMode mode = Enums::MuscleMode_Movement;
+
     auto operator<=>(MuscleDescription const&) const = default;
+
+    MuscleDescription& setMode(Enums::MuscleMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct PlaceHolderDescription1

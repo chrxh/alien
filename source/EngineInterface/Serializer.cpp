@@ -97,6 +97,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, MuscleDescription& data)
     {
+        ar(data.mode);
     }
     template <class Archive>
     inline void serialize(Archive& ar, PlaceHolderDescription1& data)
