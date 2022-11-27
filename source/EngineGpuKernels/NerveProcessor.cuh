@@ -25,7 +25,8 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
-        auto inputActivity = CellFunctionProcessor::calcInputActivity(cell);
+        int inputExecutionOrderNumber;
+        auto inputActivity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
         CellFunctionProcessor::setActivity(cell, inputActivity);
     }
 }

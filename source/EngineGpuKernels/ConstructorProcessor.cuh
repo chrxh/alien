@@ -89,7 +89,8 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    int inputExecutionOrderNumber;
+    auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
     if (!isConstructionFinished(cell)) {
         if (isConstructionPossible(data, cell, activity)) {
             auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;

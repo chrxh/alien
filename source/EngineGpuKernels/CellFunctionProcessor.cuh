@@ -2,13 +2,8 @@
 
 #include "TOs.cuh"
 #include "Base.cuh"
-#include "CellConnectionProcessor.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
-#include "Physics.cuh"
-#include "SpotCalculator.cuh"
-#include "cuda_runtime_api.h"
-#include "sm_60_atomic_functions.h"
 
 class CellFunctionProcessor
 {
@@ -16,8 +11,11 @@ public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
 
-    __inline__ __device__ static Activity calcInputActivity(Cell* cell);
+    __inline__ __device__ static Activity calcInputActivity(Cell* cell, int& inputExecutionOrderNumber);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
+
+private:
+    __inline__ __device__ static int calcInputExecutionOrder(Cell* cell);   //returns -1 if no input has been found
 };
 
 /************************************************************************/
@@ -54,7 +52,7 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
     }
 }
 
-__inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell)
+__inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell, int& inputExecutionOrderNumber)
 {
     Activity result;
 
@@ -62,30 +60,11 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         result.channels[i] = 0;
     }
 
-    if (cell->inputBlocked || cell->underConstruction) {
+    inputExecutionOrderNumber = calcInputExecutionOrder(cell);
+    if (inputExecutionOrderNumber == -1) {
         return result;
-    }
-    int inputExecutionOrderNumber = -cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->underConstruction) {
-            continue;
-        }
-        auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
-        if (otherExecutionOrderNumber > cell->executionOrderNumber) {
-            otherExecutionOrderNumber -= cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-        }
-        if (otherExecutionOrderNumber > inputExecutionOrderNumber) {
-            inputExecutionOrderNumber = otherExecutionOrderNumber;
-        }
     }
 
-    if (inputExecutionOrderNumber == -cudaSimulationParameters.cellMaxExecutionOrderNumbers) {
-        return result;
-    }
-    if (inputExecutionOrderNumber < 0) {
-        inputExecutionOrderNumber += cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->outputBlocked || connectedCell->underConstruction) {
@@ -109,4 +88,33 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
         cell->activity.channels[i] = newActivity.channels[i];
     }
     cell->activity = newActivity;
+}
+
+__inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* cell)
+{
+    if (cell->inputBlocked || cell->underConstruction) {
+        return -1;
+    }
+    int result = -cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto connectedCell = cell->connections[i].cell;
+        if (connectedCell->outputBlocked || connectedCell->underConstruction) {
+            continue;
+        }
+        auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
+        if (otherExecutionOrderNumber > cell->executionOrderNumber) {
+            otherExecutionOrderNumber -= cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+        }
+        if (otherExecutionOrderNumber > result) {
+            result = otherExecutionOrderNumber;
+        }
+    }
+
+    if (result == -cudaSimulationParameters.cellMaxExecutionOrderNumbers) {
+        return -1;
+    }
+    if (result < 0) {
+        result += cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+    }
+    return result;
 }
