@@ -798,33 +798,63 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
 void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        float constexpr Scaling = 20.0f;
+
         ImDrawList* drawList = ImGui::GetWindowDrawList();
-        //auto windowPos = ImGui::GetCursorScreenPos();
         auto windowPos = ImGui::GetWindowPos();
         auto windowSize = ImGui::GetWindowSize();
-        RealVector2D windowCenter(windowPos.x + windowSize.x / 2, windowPos.y + windowSize.y / 2);
 
-        RealVector2D cellsCenter;
+        RealVector2D center;
+        RealVector2D upperLeft;
+        RealVector2D lowerRight;
         for (auto const& cell : desc.cells) {
-            cellsCenter += cell.pos;
+            center += cell.pos;
+            if (cell.pos.x < upperLeft.x) {
+                upperLeft.x = cell.pos.x;
+            }
+            if (cell.pos.y < upperLeft.y) {
+                upperLeft.y = cell.pos.y;
+            }
+            if (cell.pos.x > lowerRight.x) {
+                lowerRight.x = cell.pos.x;
+            }
+            if (cell.pos.y > lowerRight.y) {
+                lowerRight.y = cell.pos.y;
+            }
         }
-        cellsCenter /= desc.cells.size();
+        RealVector2D imageSize = (lowerRight - upperLeft) * Scaling + RealVector2D(Scaling, Scaling);
+        RealVector2D windowCenter(windowPos.x + windowSize.x / 2, windowPos.y + windowSize.y / 2);
+        ImGui::SetCursorPos({imageSize.x + Scaling * 2, imageSize.y + Scaling * 2});
 
+        center /= toInt(desc.cells.size());
+
+        RealVector2D correction(-ImGui::GetScrollX(), -ImGui::GetScrollY());
+        if (imageSize.x > windowSize.x) {
+            correction.x += (imageSize.x - windowSize.x) / 2;
+        }
+        if (imageSize.y > windowSize.y) {
+            correction.y += (imageSize.y - windowSize.y) / 2;
+        }
         for (auto const& connection : desc.connections) {
-            auto startPos = (connection.cell1 - cellsCenter) * 20 + windowCenter;
-            auto endPos = (connection.cell2 - cellsCenter) * 20 + windowCenter;
+            auto startPos = (connection.cell1 - center) * Scaling + windowCenter;
+            auto endPos = (connection.cell2 - center) * Scaling + windowCenter;
+            startPos.x += correction.x;
+            startPos.y += correction.y;
+            endPos.x += correction.x;
+            endPos.y += correction.y;
             drawList->AddLine({startPos.x, startPos.y}, {endPos.x, endPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
         }
         for (auto const& cell : desc.cells) {
-            auto cellPos = (cell.pos - cellsCenter) * 20 + windowCenter;
+            auto cellPos = (cell.pos - center) * Scaling + windowCenter;
+            cellPos.x += correction.x;
+            cellPos.y += correction.y;
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, 5, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, Scaling / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
             if (cell.selected) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, 10, ImColor(1.0f, 1.0f, 1.0f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, Scaling / 2, ImColor(1.0f, 1.0f, 1.0f));
             }
         }
-        //        ImGui::SetCursorPos({1500, 1500});
     }
     ImGui::EndChild();
 }

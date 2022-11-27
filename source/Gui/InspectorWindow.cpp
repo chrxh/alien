@@ -15,6 +15,7 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "GenomeEditorWindow.h"
+#include "PreviewDescriptionConverter.h"
 
 using namespace std::string_literals;
 
@@ -22,7 +23,7 @@ namespace
 {
     auto const CellWindowWidth = 350.0f;
     auto const ParticleWindowWidth = 280.0f;
-    auto const MaxCellContentTextWidth = 160.0f;
+    auto const MaxCellContentTextWidth = 180.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
 }
 
@@ -246,6 +247,8 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
 
 void _InspectorWindow::showConstructorContent(ConstructorDescription& constructor)
 {
+    auto parameters = _simController->getSimulationParameters();
+
     AlienImGui::Group("Properties");
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
@@ -256,9 +259,6 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     if (constructorMode == 1) {
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Cycles").textWidth(MaxCellContentTextWidth), constructor.mode);
-        if (constructor.mode < 0) {
-            constructor.mode = 0;
-        }
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
@@ -272,8 +272,6 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     ImGui::EndChild();
 
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Genome read position").textWidth(MaxCellContentTextWidth), constructor.currentGenomePos);
-
     ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
     if (AlienImGui::Button("Paste")) {
         constructor.genome = *_editorModel->getCopiedGenome();
@@ -282,10 +280,18 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
 
     ImGui::SameLine();
     if (AlienImGui::Button("Edit")) {
-        _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, _simController->getSimulationParameters()));
+        _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
     }
 
+    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Read position").textWidth(MaxCellContentTextWidth), constructor.currentGenomePos);
+
     AlienImGui::Group("Preview");
+    if (ImGui::BeginChild("##child", ImVec2(0, StyleRepository::getInstance().scaleContent(200)), true)) {
+        auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters);
+        auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
+        AlienImGui::ShowPreviewDescription(previewDesc);
+    }
+    ImGui::EndChild();
 }
 
 void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
@@ -345,6 +351,9 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         }
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
+        }
+        if (constructor.mode < 0) {
+            constructor.mode = 0;
         }
     } break;
     }
