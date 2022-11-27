@@ -13,11 +13,11 @@ uniform float motionBlurFactor;
 uniform float brightness;
 uniform float contrast;
 
-uniform float weights[10] = float[](0.22, 0.22, 0.12, 0.07, 0.05, 0.05, 0.04, 0.04, 0.03, 0.02);
+uniform float weights[14] = float[](0.15, 0.15, 0.09, 0.06, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02);
 
 vec3 mapColor(vec3 color)
 {
-    return (((sqrt(color * 256.0) - 0.2) - 0.5)* contrast + 0.5) * brightness;
+    return ((sqrt(color * 256.0 ) - 0.7) * contrast + 0.5) * brightness;
 }
 
 void main()
@@ -30,7 +30,7 @@ void main()
         vec3 result;
         if (glowEffect) {
             result = vec3(texture(texture1, mirroredCoord).rgb * weights[0]);
-            for (int i = 1; i < 10; ++i) {
+            for (int i = 1; i < 14; ++i) {
                 result += texture(texture1, mirroredCoord + vec2(texelSize.x * i, 0.0)).rgb * weights[i];
                 result += texture(texture1, mirroredCoord - vec2(texelSize.x * i, 0.0)).rgb * weights[i];
             }
@@ -48,7 +48,7 @@ void main()
         if (glowEffect) {
             result =
                 vec3(texture(texture2, texCoord).rgb * weights[0]);
-            for (int i = 1; i < 10; ++i) {
+            for (int i = 1; i < 14; ++i) {
                 result += texture(texture2, texCoord + vec2(0.0, texelSize.y * i)).rgb * weights[i];
                 result += texture(texture2, texCoord - vec2(0.0, texelSize.y * i)).rgb * weights[i];
             }
