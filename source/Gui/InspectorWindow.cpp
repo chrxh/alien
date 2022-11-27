@@ -191,7 +191,7 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxCellContentTextWidth), cell.barrier);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
 
             AlienImGui::Group("Metadata");
 
@@ -258,7 +258,7 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
         constructor.mode = constructorMode;
     }
     if (constructorMode == 1) {
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Cycles").textWidth(MaxCellContentTextWidth), constructor.mode);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Waiting cycles").textWidth(MaxCellContentTextWidth), constructor.mode);
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);

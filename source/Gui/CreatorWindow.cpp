@@ -76,7 +76,7 @@ void _CreatorWindow::processIntern()
 
         AlienImGui::Group(ModeText.at(_mode));
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Barrier").textWidth(MaxContentTextWidth), _barrier);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxContentTextWidth), _barrier);
         
         auto parameters = _simController->getSimulationParameters();
         if (_mode == CreationMode::CreateCell) {
