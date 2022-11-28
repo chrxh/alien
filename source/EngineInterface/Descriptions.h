@@ -225,18 +225,20 @@ using CellFunctionDescription = std::optional<std::variant<
 struct CellDescription
 {
     uint64_t id = 0;
-    std::vector<ConnectionDescription> connections;
 
+    //general
+    std::vector<ConnectionDescription> connections;
     RealVector2D pos;
     RealVector2D vel;
     float energy = 100.0f;
     int color = 0;
     int maxConnections = 0;
-    int executionOrderNumber = 0;
     bool barrier = false;
     int age = 0;
-
     bool underConstruction = false;
+
+    //cell function
+    int executionOrderNumber = 0;
     bool inputBlocked = false;
     bool outputBlocked = false;
     CellFunctionDescription cellFunction;

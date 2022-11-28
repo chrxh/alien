@@ -6,10 +6,11 @@ struct SimulationParameters
 {
     SimulationParametersSpotValues spotValues;
 
-    float timestepSize = 1.0f;            
+    float timestepSize = 1.0f;
+    float innerfriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
     float cellMaxBindingDistance = 2.6f;
-    float cellRepulsionStrength = 0.08f;  
+    float cellRepulsionStrength = 0.08f;
 
     float cellNormalEnergy = 100.0f;
     float cellMinDistance = 0.3f;         
@@ -32,7 +33,9 @@ struct SimulationParameters
 
     float cellFunctionMuscleActivityThreshold = 0.25f;
     float cellFunctionMuscleOppositeActivityThreshold = -0.25f;
-    float cellFunctionMuscleContractionExpansionFactor = 1.05f;
+    float cellFunctionMuscleContractionExpansionDelta = 0.05f;
+    float cellFunctionMuscleMovementDelta = 0.05f;
+    float cellFunctionMuscleBendingAngle = 5.0f;
     
     float cellFunctionSensorRange = 255.0f;
 
@@ -60,7 +63,9 @@ struct SimulationParameters
             && cellFunctionAttackerOutputSuccess == other.cellFunctionAttackerOutputSuccess
             && cellFunctionMuscleActivityThreshold == other.cellFunctionMuscleActivityThreshold
             && cellFunctionMuscleOppositeActivityThreshold == other.cellFunctionMuscleOppositeActivityThreshold
-            && cellFunctionMuscleContractionExpansionFactor == other.cellFunctionMuscleContractionExpansionFactor
+            && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
+            && cellFunctionMuscleMovementDelta == other.cellFunctionMuscleMovementDelta
+            && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerfriction == other.innerfriction
         ;
     }
 

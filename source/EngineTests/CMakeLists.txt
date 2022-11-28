@@ -5,6 +5,7 @@ PUBLIC
     DataTransferTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    MuscleTests.cpp
     NerveTests.cpp
     NeuronTests.cpp
     SensorTests.cpp
