@@ -111,21 +111,21 @@ union CellFunctionData
 struct Cell
 {
     uint64_t id;
-    CellConnection connections[MAX_CELL_BONDS];
 
+    //general
+    CellConnection connections[MAX_CELL_BONDS];
     float2 absPos;
     float2 vel;
-    int executionOrderNumber;
     int maxConnections;
     int numConnections;
     float energy;
     int color;
     bool barrier;
     int age;
-
     bool underConstruction;
 
-    //cell function data
+    //cell function
+    int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;
     Enums::CellFunction cellFunction;

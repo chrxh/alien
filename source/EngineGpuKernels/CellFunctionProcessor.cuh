@@ -67,7 +67,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
 
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->underConstruction) {
+        if (connectedCell->outputBlocked || connectedCell->underConstruction || connectedCell->cellFunction == Enums::CellFunction_None) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
@@ -105,7 +105,7 @@ __inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* c
         if (otherExecutionOrderNumber > cell->executionOrderNumber) {
             otherExecutionOrderNumber -= cudaSimulationParameters.cellMaxExecutionOrderNumbers;
         }
-        if (otherExecutionOrderNumber > result) {
+        if (otherExecutionOrderNumber > result && otherExecutionOrderNumber != cell->executionOrderNumber) {
             result = otherExecutionOrderNumber;
         }
     }

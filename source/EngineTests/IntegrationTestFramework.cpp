@@ -6,13 +6,17 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 
-IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
+IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters, IntVector2D const& universeSize)
 {
     _simController = std::make_shared<_SimulationControllerImpl>();
     Settings settings;
     settings.generalSettings.worldSizeX = universeSize.x;
     settings.generalSettings.worldSizeY = universeSize.y;
-    settings.simulationParameters.spotValues.radiationFactor = 0;
+    if (parameters) {
+        settings.simulationParameters = *parameters;
+    } else {
+        settings.simulationParameters.spotValues.radiationFactor = 0;
+    }
     _simController->newSimulation(0, settings);
     _parameters = _simController->getSimulationParameters();
 }
@@ -48,6 +52,17 @@ CellDescription IntegrationTestFramework::getCell(DataDescription const& data, u
     for (auto const& cell : data.cells) {
         if (cell.id == id) {
             return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+ConnectionDescription IntegrationTestFramework::getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
+{
+    auto cell = getCell(data, id);
+    for (auto const& connection : cell.connections) {
+        if (connection.cellId == otherId) {
+            return connection;
         }
     }
     THROW_NOT_IMPLEMENTED();

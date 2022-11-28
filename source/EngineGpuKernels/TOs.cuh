@@ -114,22 +114,23 @@ union CellFunctionTO
 struct CellTO
 {
 	uint64_t id;
-    ConnectionTO connections[MAX_CELL_BONDS];
 
+    //general
+    ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
 	float energy;
     int color;
     int maxConnections;
 	int numConnections;
-	int executionOrderNumber;
     bool barrier;
     int age;
-
     bool underConstruction;
+
+    //cell function
+	int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;
-
     Enums::CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
     ActivityTO activity;

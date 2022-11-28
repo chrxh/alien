@@ -14,9 +14,15 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
 
-    __inline__ __device__ static void contractionExpansion(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber);
+    __inline__ __device__ static void
+    movement(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity const& activity);
+    __inline__ __device__ static void
+    contractionExpansion(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity const& activity);
+    __inline__ __device__ static void
+    bending(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity const& activity);
 
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
+    __inline__ __device__ static float getIntensity(Activity const& activity);
 };
 
 /************************************************************************/
@@ -37,116 +43,116 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     int inputExecutionOrderNumber;
     auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
 
+    if (cell->cellFunctionData.muscle.mode == Enums::MuscleMode_Movement) {
+        movement(data, result, cell, inputExecutionOrderNumber, activity);
+    }
+
     if (cell->cellFunctionData.muscle.mode == Enums::MuscleMode_ContractionExpansion) {
-        contractionExpansion(data, result, cell, inputExecutionOrderNumber);
+        contractionExpansion(data, result, cell, inputExecutionOrderNumber, activity);
+    }
+
+    if (cell->cellFunctionData.muscle.mode == Enums::MuscleMode_Bending) {
+        bending(data, result, cell, inputExecutionOrderNumber, activity);
     }
 
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
 __device__ __inline__ void
-MuscleProcessor::contractionExpansion(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber)
+MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity const& activity)
 {
-    //expansion
-    if (cell->activity.channels[0] > cudaSimulationParameters.cellFunctionMuscleActivityThreshold) {
-        if (!cell->tryLock()) {
-            return;
-        }
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto& connection = cell->connections[i];
-            if (connection.cell->executionOrderNumber == inputExecutionOrderNumber) {
-                if (!connection.cell->tryLock()) {
-                    continue;
-                }
-                auto newDistance = connection.distance * cudaSimulationParameters.cellFunctionMuscleContractionExpansionFactor;
-                if (newDistance >= cudaSimulationParameters.cellMaxBindingDistance * 0.8f) {
-                    continue;
-                }
-                connection.distance = newDistance;
-
-                auto otherIndex = getConnectionIndex(connection.cell, cell);
-                connection.cell->connections[otherIndex].distance = newDistance;
-                connection.cell->releaseLock();
-            }
-        }
-        cell->releaseLock();
+    if (abs(activity.channels[0]) < NEAR_ZERO) {
+        return;
     }
-
-    //contraction
-    if (cell->activity.channels[0] < cudaSimulationParameters.cellFunctionMuscleOppositeActivityThreshold) {
-        if (!cell->tryLock()) {
-            return;
-        }
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto& connection = cell->connections[i];
-            if (connection.cell->executionOrderNumber == inputExecutionOrderNumber) {
-                if (!connection.cell->tryLock()) {
-                    continue;
-                }
-                auto newDistance = connection.distance / cudaSimulationParameters.cellFunctionMuscleContractionExpansionFactor;
-                if (newDistance <= cudaSimulationParameters.cellMinDistance * 1.2f) {
-                    continue;
-                }
-                connection.distance = newDistance;
-
-                auto otherIndex = getConnectionIndex(connection.cell, cell);
-                connection.cell->connections[otherIndex].distance = newDistance;
-                connection.cell->releaseLock();
-            }
-        }
-        cell->releaseLock();
+    if (!cell->tryLock()) {
+        return;
     }
+    float2 direction{0, 0};
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto& connectedCell = cell->connections[i].cell;
+        if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
+            if (!connectedCell->tryLock()) {
+                continue;
+            }
+            auto directionDelta = cell->absPos - connectedCell->absPos;
+            data.cellMap.correctDirection(directionDelta);
+            direction = direction + Math::normalized(directionDelta);
+            connectedCell->releaseLock();
+        }
+    }
+    if (direction.x != 0 || direction.y != 0) {
+        cell->vel = cell->vel + Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementDelta * getIntensity(activity);
+    }
+    cell->releaseLock();
 }
 
+__device__ __inline__ void MuscleProcessor::contractionExpansion(
+    SimulationData& data,
+    SimulationResult& result,
+    Cell* cell,
+    int const& inputExecutionOrderNumber,
+    Activity const& activity)
+{
+    if (abs(activity.channels[0]) < NEAR_ZERO) {
+        return;
+    }
+    if (!cell->tryLock()) {
+        return;
+    }
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto& connection = cell->connections[i];
+        if (connection.cell->executionOrderNumber == inputExecutionOrderNumber) {
+            if (!connection.cell->tryLock()) {
+                continue;
+            }
+            auto newDistance = connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta * getIntensity(activity);
+            if (activity.channels[0] > 0 && newDistance >= cudaSimulationParameters.cellMaxBindingDistance * 0.8f) {
+                continue;
+            }
+            if (activity.channels[0] < 0 && newDistance <= cudaSimulationParameters.cellMinDistance * 1.2f) {
+                continue;
+            }
+            connection.distance = newDistance;
 
-//__inline__ __device__ void MuscleProcessor::process(Token* token, SimulationData& data, SimulationResult& result)
-//{
-//    process(token->cell, token->sourceCell, token->memory[Enums::Muscle_Input], token->memory[Enums::Muscle_Output], data, result);
-//}
-//
-//__inline__ __device__ void MuscleProcessor::process(Cell* cell, Cell* sourceCell, char input, char& output, SimulationData& data, SimulationResult& result)
-//{
-//    auto command = static_cast<unsigned char>(input) % Enums::MuscleIn_Count;
-//
-//    if (Enums::MuscleIn_DoNothing == command) {
-//        output = Enums::MuscleOut_Success;
-//        return;
-//    }
-//
-//    auto index = getConnectionIndex(cell, sourceCell);
-//    auto& connection = cell->connections[index];
-//    auto factor = (Enums::MuscleIn_Contract == command || Enums::MuscleIn_ContractRelax == command) ? (1.0f / 1.2f) : 1.2f;
-//    auto origDistance = connection.distance;
-//    auto distance = origDistance * factor;
-//
-//    if (sourceCell->tryLock()) {
-//        if (distance > cudaSimulationParameters.cellMinDistance && distance < cudaSimulationParameters.cellMaxCollisionDistance) {
-//
-//            connection.distance = distance;
-//
-//            auto connectingCell = connection.cell;
-//            auto otherIndex = getConnectionIndex(connectingCell, cell);
-//            connectingCell->connections[otherIndex].distance *= factor;
-//        } else {
-//            output = Enums::MuscleOut_LimitReached;
-//            sourceCell->releaseLock();
-//            return;
-//        }
-//
-//        if (Enums::MuscleIn_Contract == command || Enums::MuscleIn_Expand == command) {
-//            auto velInc = cell->absPos - sourceCell->absPos;
-//            data.cellMap.correctDirection(velInc);
-//            Math::normalize(velInc);
-//            cell->vel = cell->vel + velInc * (origDistance - distance) * 0.5f;
-//        }
-//
-//        sourceCell->releaseLock();
-//    }
-//
-//    output = Enums::MuscleOut_Success;
-//    result.incMuscleActivity();
-//}
-//
+            auto otherIndex = getConnectionIndex(connection.cell, cell);
+            connection.cell->connections[otherIndex].distance = newDistance;
+            connection.cell->releaseLock();
+        }
+    }
+    cell->releaseLock();
+}
+
+__inline__ __device__ void
+MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity const& activity)
+{
+    if (abs(activity.channels[0]) < NEAR_ZERO) {
+        return;
+    }
+    if (cell->numConnections < 2) {
+        return;
+    }
+    if (!cell->tryLock()) {
+        return;
+    }
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto& connection = cell->connections[i];
+        if (connection.cell->executionOrderNumber == inputExecutionOrderNumber) {
+            auto intensity = cudaSimulationParameters.cellFunctionMuscleBendingAngle * getIntensity(activity);
+
+            if (intensity < 0 && connection.angleFromPrevious <= -intensity) {
+                continue;
+            }
+            auto& nextConnection = cell->connections[(i + 1) % cell->numConnections];
+            if (intensity > 0 && nextConnection.angleFromPrevious <= intensity) {
+                continue;
+            }
+            connection.angleFromPrevious += intensity;
+            nextConnection.angleFromPrevious -= intensity;
+        }
+    }
+    cell->releaseLock();
+}
+
 __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
 {
     for (int i = 0; i < cell->numConnections; ++i) {
@@ -155,4 +161,9 @@ __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* 
         }
     }
     return 0;
+}
+
+__inline__ __device__ float MuscleProcessor::getIntensity(Activity const& activity)
+{
+    return max(-1.0f, min(1.0f, activity.channels[0]));
 }
