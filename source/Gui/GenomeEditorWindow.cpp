@@ -426,7 +426,6 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         } break;
         case Enums::CellFunction_Attacker: {
             auto& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
-
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -438,6 +437,11 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         case Enums::CellFunction_Injector: {
         } break;
         case Enums::CellFunction_Muscle: {
+            auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
+            table.next();
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(MaxContentTextWidth),
+                muscle.mode);
         } break;
         case Enums::CellFunction_Placeholder1: {
         } break;
