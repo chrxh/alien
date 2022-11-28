@@ -233,6 +233,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
             case Enums::CellFunction_Injector: {
             } break;
             case Enums::CellFunction_Muscle: {
+                showMuscleContent(std::get<MuscleDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Placeholder1: {
             } break;
@@ -314,6 +315,16 @@ void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitte
             .values({"Connected cells", "Transmitters and Constructors"})
             .textWidth(MaxCellContentTextWidth),
         transmitter.mode);
+}
+
+void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
+{
+    AlienImGui::Group("Properties");
+    AlienImGui::Combo(
+        AlienImGui::ComboParameters()
+            .name("Mode").values({"Movement", "Contraction and expansion", "Bending"})
+            .textWidth(MaxCellContentTextWidth),
+        muscle.mode);
 }
 
 void _InspectorWindow::processParticle(ParticleDescription particle)
