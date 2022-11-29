@@ -40,7 +40,7 @@ private:
         float desiredAngleOnCell1 = 0,
         Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_None);
 
-    __inline__ __device__ static void delConnectionsIntern(Cell* cell);
+    __inline__ __device__ static void delConnectionsIntern(SimulationData& data, Cell* cell);
     __inline__ __device__ static void delConnectionIntern(Cell* cell1, Cell* cell2);
 
     __inline__ __device__ static void delCell(SimulationData& data, Cell* cell, int cellIndex);
@@ -107,10 +107,10 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
             delConnectionIntern(operation.data.delConnectionOperation.cell1, operation.data.delConnectionOperation.cell2);
         }
         if (StructuralOperation::Type::DelConnections == operation.type) {
-            delConnectionsIntern(operation.data.delConnectionsOperation.cell);
+            delConnectionsIntern(data, operation.data.delConnectionsOperation.cell);
         }
         if (StructuralOperation::Type::DelCellAndConnections == operation.type) {
-            delConnectionsIntern(operation.data.delConnectionsOperation.cell);
+            delConnectionsIntern(data, operation.data.delConnectionsOperation.cell);
 
             scheduleDelCell(
                 data,
@@ -291,20 +291,23 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
 
 }
 
-__inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* cell)
+__inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(SimulationData& data, Cell* cell)
 {
     for (int i = cell->numConnections - 1; i >= 0; --i) {
         auto connectedCell = cell->connections[0].cell;
-        SystemDoubleLock lock;
-        lock.init(&cell->locked, &connectedCell->locked);
-        if (lock.tryLock()) {
+        for (int j = 0; j < 10; ++j) {
+            SystemDoubleLock lock;
+            lock.init(&cell->locked, &connectedCell->locked, data.numberGen1.randomBool());
+            if (lock.tryLock()) {
 
-            if (cell->numConnections > 0) {
-                delConnectionOneWay(cell, connectedCell);
-                delConnectionOneWay(connectedCell, cell);
+                if (cell->numConnections > 0) {
+                    delConnectionOneWay(cell, connectedCell);
+                    delConnectionOneWay(connectedCell, cell);
+                }
+
+                lock.releaseLock();
+                break;
             }
-
-            lock.releaseLock();
         }
     }
 }

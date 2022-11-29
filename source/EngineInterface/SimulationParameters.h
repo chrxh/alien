@@ -44,7 +44,7 @@ struct SimulationParameters
     float radiationVelocityPerturbation = 0.5f;
 
     bool cellFunctinoAllowCreateRandom = true;
-    int cellFunctionRandomMaxGenomeSize = 1000;
+    int cellFunctionRandomMaxGenomeSize = 100;
 
     bool operator==(SimulationParameters const& other) const
     {

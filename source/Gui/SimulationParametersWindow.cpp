@@ -353,14 +353,14 @@ void _SimulationParametersWindow::processBase(
         AlienImGui::Group("Cell specialization: General");
 
         /**
-         * Cell specialization: Digestion function
+         * Cell specialization: attack function
          */
-        AlienImGui::Group("Cell specialization: Digestion function");
+        AlienImGui::Group("Cell specialization: Attack function");
         AlienImGui::InputColorMatrix(
             AlienImGui::InputColorMatrixParameters()
                 .name("Food chain color matrix")
                 .textWidth(MaxContentTextWidth)
-                .tooltip("This matrix can be used to determine how well one cell can digest another cell. The color of the attacking cell is shown in the header "
+                .tooltip("This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell is shown in the header "
                          "column while the color of the attacked cell is shown in the header row. A value of 0 means that the attacked cell cannot be digested, "
                          "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: If a 0 is "
                          "entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")

@@ -64,6 +64,8 @@ private:
     __inline__ __device__ static float readFloat(ConstructorFunction& constructor);   //return values from -1 to 1
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
+
+    __inline__ __device__ static void applyMutation(SimulationData& data, Cell* cell);
 };
 
 /************************************************************************/
@@ -89,6 +91,8 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
+    applyMutation(data, cell);
+
     int inputExecutionOrderNumber;
     auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
     if (!isConstructionFinished(cell)) {
@@ -506,6 +510,17 @@ __inline__ __device__ int ConstructorProcessor::readWord(ConstructorFunction& co
 __inline__ __device__ float ConstructorProcessor::readFloat(ConstructorFunction& constructor)
 {
     return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 128.0f;
+}
+
+__inline__ __device__ void ConstructorProcessor::applyMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    if (data.numberGen1.random() < 0.01f) {
+        if (constructor.genomeSize > 0) {
+            int index = data.numberGen1.random(toInt(constructor.genomeSize - 1));
+            constructor.genome[index] = data.numberGen1.randomByte();
+        }
+    }
 }
 
 template <typename GenomeHolderSource, typename GenomeHolderTarget>

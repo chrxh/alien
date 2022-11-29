@@ -245,6 +245,17 @@ public:
         }
     }
 
+    __device__ __inline__ void init(int* lock1, int* lock2, bool reverse)
+    {
+        if (!reverse) {
+            _lock1 = lock1;
+            _lock2 = lock2;
+        } else {
+            _lock1 = lock2;
+            _lock2 = lock1;
+        }
+    }
+
     __device__ __inline__ bool tryLock()
     {
         _lockState1 = atomicExch(_lock1, 1);
