@@ -225,8 +225,78 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     result->barrier = false;
     result->age = 0;
     result->activationTime = 0;
+    result->inputBlocked = _data->numberGen1.randomBool();
+    result->outputBlocked = _data->numberGen1.randomBool();
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        result->activity.channels[i] = 0;
+    }
 
-    result->cellFunction = Enums::CellFunction_None/*_data->numberGen1.random(Enums::CellFunction_Count - 1)*/;
+    if (cudaSimulationParameters.cellFunctinoAllowCreateRandom) {
+        result->cellFunction = _data->numberGen1.random(Enums::CellFunction_Count - 1);
+        switch (result->cellFunction) {
+        case Enums::CellFunction_Neuron: {
+            result->cellFunctionData.neuron.neuronState =
+                reinterpret_cast<NeuronFunction::NeuronState*>(_data->objects.auxiliaryData.getAlignedSubArray(sizeof(NeuronFunction::NeuronState)));
+            for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                result->cellFunctionData.neuron.neuronState->weights[i] = _data->numberGen1.random(2.0f) - 1.0f;
+            }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                result->cellFunctionData.neuron.neuronState->bias[i] = _data->numberGen1.random(2.0f) - 1.0f;
+            }
+        } break;
+        case Enums::CellFunction_Transmitter: {
+            result->cellFunctionData.transmitter.mode = _data->numberGen1.random(Enums::EnergyDistributionMode_Count - 1);
+        } break;
+        case Enums::CellFunction_Constructor: {
+            if (_data->numberGen1.randomBool()) {
+                result->cellFunctionData.constructor.mode = 0;
+            } else {
+                result->cellFunctionData.constructor.mode = _data->numberGen1.random(50);
+            }
+            result->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
+            result->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
+            result->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
+            result->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(Enums::ConstructorAngleAlignment_Count - 1);
+            result->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
+            result->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.cellFunctionRandomMaxGenomeSize);
+            result->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.constructor.genomeSize);
+            auto& genome = result->cellFunctionData.constructor.genome;
+            for (int i = 0; i < result->cellFunctionData.constructor.genomeSize; ++i) {
+                genome[i] = _data->numberGen1.randomByte();
+            }
+            result->cellFunctionData.constructor.currentGenomePos = 0;
+        } break;
+        case Enums::CellFunction_Sensor: {
+            result->cellFunctionData.sensor.mode = _data->numberGen1.random(Enums::SensorMode_Count - 1);
+            result->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
+            result->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
+            result->cellFunctionData.sensor.color = _data->numberGen1.random(MAX_COLORS - 1);
+        } break;
+        case Enums::CellFunction_Nerve: {
+        } break;
+        case Enums::CellFunction_Attacker: {
+            result->cellFunctionData.attacker.mode = _data->numberGen1.random(Enums::EnergyDistributionMode_Count - 1);
+        } break;
+        case Enums::CellFunction_Injector: {
+            result->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.cellFunctionRandomMaxGenomeSize);
+            result->cellFunctionData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.injector.genomeSize);
+            auto& genome = result->cellFunctionData.injector.genome;
+            for (int i = 0; i < result->cellFunctionData.injector.genomeSize; ++i) {
+                genome[i] = _data->numberGen1.randomByte();
+            }
+        } break;
+        case Enums::CellFunction_Muscle: {
+            result->cellFunctionData.muscle.mode = _data->numberGen1.random(Enums::MuscleMode_Count - 1);
+        } break;
+        case Enums::CellFunction_Placeholder1: {
+        } break;
+        case Enums::CellFunction_Placeholder2: {
+        } break;
+        }
+
+    } else {
+        result->cellFunction = Enums::CellFunction_None;
+    }
     return result;
 }
 
@@ -246,5 +316,8 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     result->age = 0;
     result->vel = {0, 0};
     result->activationTime = 0;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        result->activity.channels[i] = 0;
+    }
     return result;
 }

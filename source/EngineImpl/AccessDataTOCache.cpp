@@ -38,7 +38,7 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
         _dataTO = result;
         return result;
     } catch (std::bad_alloc const&) {
-        throw BugReportException("There is not sufficient CPU memory available.");
+        throw std::runtime_error("There is not sufficient CPU memory available.");
     }
 }
 
