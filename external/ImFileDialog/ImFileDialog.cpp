@@ -335,7 +335,7 @@ namespace ifd {
 		Size = std::filesystem::file_size(path, ec);
 
 		struct stat attr;
-		stat(path.string().c_str(), &attr);
+		stat(reinterpret_cast<char const*>(path.u8string().c_str()), &attr);
 		DateModified = attr.st_ctime;
 
 		HasIconPreview = false;
@@ -584,11 +584,12 @@ namespace ifd {
 		}
 
 		if (m_selections.size() == 1) {
-			std::string filename = m_selections[0].filename().string();
+			auto filename = m_selections[0].filename().u8string();
 			if (filename.size() == 0)
-				filename = m_selections[0].string(); // drive
+				filename = m_selections[0].u8string(); // drive
 
-			strcpy(m_inputTextbox, filename.c_str());
+			std::memcpy(m_inputTextbox, filename.c_str(), filename.size());
+			m_inputTextbox[filename.size()] = 0;
 		}
 		else {
 			std::string textboxVal = "";
@@ -599,11 +600,12 @@ namespace ifd {
 
 				textboxVal += "\"" + filename + "\", ";
 			}
-			strcpy(m_inputTextbox, textboxVal.substr(0, textboxVal.size() - 2).c_str());
+			std::memcpy(m_inputTextbox, textboxVal.substr(0, textboxVal.size() - 2).c_str(), textboxVal.size() - 2);
+			m_inputTextbox[textboxVal.size() - 2] = 0;
 		}
 	}
 
-	bool FileDialog::m_finalize(const std::string& filename)
+	bool FileDialog::m_finalize(const std::u8string& filename)
 	{
 		bool hasResult = (!filename.empty() && m_type != IFD_DIALOG_DIRECTORY) || m_type == IFD_DIALOG_DIRECTORY;
 		
@@ -702,10 +704,10 @@ namespace ifd {
 	void* FileDialog::m_getIcon(const std::filesystem::path& path)
 	{
 #ifdef _WIN32
-		if (m_icons.count(path.string()) > 0)
-			return m_icons[path.string()];
+		if (m_icons.count(path.u8string()) > 0)
+			return m_icons[path.u8string()];
 
-		std::string pathU8 = path.string();
+		auto pathU8 = path.u8string();
 
 		std::error_code ec;
 		m_icons[pathU8] = nullptr;
@@ -730,7 +732,7 @@ namespace ifd {
 		// check if icon is already loaded
 		auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), fileInfo.iIcon);
 		if (itr != m_iconIndices.end()) {
-			const std::string& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
+			auto const& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
 			m_icons[pathU8] = m_icons[existingIconFilepath];
 			return m_icons[pathU8];
 		}
@@ -1017,8 +1019,8 @@ namespace ifd {
 			auto compareFn = [column, sortDirection](const FileData& left, const FileData& right) -> bool {
 				// name
 				if (column == 0) {
-					std::string lName = left.Path.string();
-					std::string rName = right.Path.string();
+					auto lName = left.Path.u8string();
+					auto rName = right.Path.u8string();
 
 					std::transform(lName.begin(), lName.end(), lName.begin(), ::tolower);
 					std::transform(rName.begin(), rName.end(), rName.begin(), ::tolower);
@@ -1111,9 +1113,9 @@ namespace ifd {
 				// content
 				int fileId = 0;
 				for (auto& entry : m_content) {
-					std::string filename = entry.Path.filename().string();
+					auto filename = entry.Path.filename().u8string();
 					if (filename.size() == 0)
-						filename = entry.Path.string(); // drive
+						filename = entry.Path.u8string(); // drive
 					
 					bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
 
@@ -1123,7 +1125,7 @@ namespace ifd {
 					ImGui::TableSetColumnIndex(0);
 					ImGui::Image((ImTextureID)m_getIcon(entry.Path), ImVec2(ICON_SIZE, ICON_SIZE));
 					ImGui::SameLine();
-					if (ImGui::Selectable(filename.c_str(), isSelected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick)) {
+					if (ImGui::Selectable(reinterpret_cast<char const*>(filename.c_str()), isSelected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick)) {
 						std::error_code ec;
 						bool isDir = std::filesystem::is_directory(entry.Path, ec);
 
@@ -1168,13 +1170,13 @@ namespace ifd {
 					entry.IconPreviewData = nullptr;
 				}
 
-				std::string filename = entry.Path.filename().string();
+				auto filename = entry.Path.filename().u8string();
 				if (filename.size() == 0)
-					filename = entry.Path.string(); // drive
+					filename = entry.Path.u8string(); // drive
 
 				bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
 
-				if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path), ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
+				if (FileIcon(reinterpret_cast<char const*>(filename.c_str()), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path), ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
 					std::error_code ec;
 					bool isDir = std::filesystem::is_directory(entry.Path, ec);
 
@@ -1362,8 +1364,8 @@ namespace ifd {
 		/***** BOTTOM BAR *****/
 		ImGui::Text("File name:");
 		ImGui::SameLine();
-		if (ImGui::InputTextEx("##file_input", "Filename", m_inputTextbox, 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
-			bool success = m_finalize(std::string(m_inputTextbox));
+		if (ImGui::InputTextEx("##file_input", "Filename", reinterpret_cast<char*>(m_inputTextbox), 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
+			bool success = m_finalize(std::u8string(m_inputTextbox));
 #ifdef _WIN32
 			if (!success)
 				MessageBeep(MB_ICONERROR);
@@ -1379,7 +1381,7 @@ namespace ifd {
 		// buttons
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 250);
 		if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? "Save" : "Open", ImVec2(250 / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f))) {
-			std::string filename(m_inputTextbox);
+			std::u8string filename(m_inputTextbox);
 			bool success = false;
 			if (!filename.empty() || m_type == IFD_DIALOG_DIRECTORY)
 				success = m_finalize(filename);
