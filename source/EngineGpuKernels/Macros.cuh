@@ -28,7 +28,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
             std::stringstream stream;
             stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("
                    << _cudaGetErrorEnum(result) << ") \"" << func << "\"";
-            throw BugReportException(stream.str().c_str());
+            throw SpecificCudaException(stream.str().c_str());
         }
     }
 }

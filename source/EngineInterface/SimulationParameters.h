@@ -43,6 +43,9 @@ struct SimulationParameters
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
 
+    bool cellFunctinoAllowCreateRandom = true;
+    int cellFunctionRandomMaxGenomeSize = 1000;
+
     bool operator==(SimulationParameters const& other) const
     {
         return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
@@ -66,6 +69,7 @@ struct SimulationParameters
             && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
             && cellFunctionMuscleMovementDelta == other.cellFunctionMuscleMovementDelta
             && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerfriction == other.innerfriction
+            && cellFunctinoAllowCreateRandom == other.cellFunctinoAllowCreateRandom && cellFunctionRandomMaxGenomeSize == other.cellFunctionRandomMaxGenomeSize
         ;
     }
 

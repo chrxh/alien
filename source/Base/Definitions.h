@@ -36,7 +36,7 @@ inline int toInt(T const& value)
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throw BugReportException("check failed"); \
+        throw std::runtime_error("check failed"); \
     }
 
 #define MEMBER_DECLARATION(className, type, name, initialValue) \
