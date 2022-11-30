@@ -214,7 +214,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy * 2, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(1.0f, actualHostCell.activity.channels[0]));
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
 
     EXPECT_EQ(1, actualConstructedCell.connections.size());
     EXPECT_EQ(1, actualConstructedCell.maxConnections);
@@ -222,7 +222,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
     EXPECT_TRUE(actualConstructedCell.inputBlocked);
     EXPECT_TRUE(actualConstructedCell.outputBlocked);
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
     EXPECT_EQ(Enums::CellFunction_None, actualConstructedCell.getCellFunctionType());
     EXPECT_EQ(123, actualConstructedCell.activationTime);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy, actualConstructedCell.energy));
@@ -251,10 +251,10 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_FALSE(actualHostCell.underConstruction);
+    EXPECT_FALSE(actualHostCell.constructionState);
 
     EXPECT_EQ(1, actualConstructedCell.connections.size());
-    EXPECT_TRUE(actualConstructedCell.underConstruction);
+    EXPECT_TRUE(actualConstructedCell.constructionState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_separation)
@@ -284,7 +284,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(0, actualConstructedCell.maxConnections);
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_noAdaptConnections)
@@ -312,7 +312,7 @@ TEST_F(ConstructorTests, constructFirstCell_noAdaptConnections)
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(3, actualConstructedCell.maxConnections);
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
@@ -341,7 +341,7 @@ TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
     EXPECT_EQ(constructor.genome.size(), constructor.currentGenomePos);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
@@ -379,7 +379,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
     EXPECT_EQ(1, actualHostCell.connections.size());
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
 
     EXPECT_TRUE(approxCompare(10.0f - offspringDistance, actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
@@ -738,14 +738,14 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_FALSE(actualHostCell.underConstruction);
+    EXPECT_FALSE(actualHostCell.constructionState);
 
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
-    EXPECT_FALSE(actualPrevConstructedCell.underConstruction);
+    EXPECT_FALSE(actualPrevConstructedCell.constructionState);
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell.connections[0].distance));
 
     ASSERT_EQ(1, actualConstructedCell.connections.size());
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualConstructedCell.connections[0].distance));
 }
 
@@ -783,11 +783,11 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_FALSE(actualHostCell.underConstruction);
+    EXPECT_FALSE(actualHostCell.constructionState);
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell.connections[0].distance));
 
     ASSERT_EQ(2, actualConstructedCell.connections.size());
-    EXPECT_FALSE(actualConstructedCell.underConstruction);
+    EXPECT_FALSE(actualConstructedCell.constructionState);
     std::map<uint64_t, ConnectionDescription> connectionById;
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
@@ -798,7 +798,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     EXPECT_TRUE(approxCompare(180.0f, connectionById.at(2).angleFromPrevious));
 
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
-    EXPECT_FALSE(actualPrevConstructedCell.underConstruction);
+    EXPECT_FALSE(actualPrevConstructedCell.constructionState);
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell.connections[0].distance));
 }
 
@@ -912,13 +912,13 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_FALSE(actualHostCell.underConstruction);
+    EXPECT_FALSE(actualHostCell.constructionState);
 
     ASSERT_EQ(2, actualConstructedCell.connections.size());
-    EXPECT_TRUE(actualConstructedCell.underConstruction);
+    EXPECT_TRUE(actualConstructedCell.constructionState);
 
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
-    EXPECT_FALSE(actualPrevConstructedCell.underConstruction);
+    EXPECT_FALSE(actualPrevConstructedCell.constructionState);
 }
 
 TEST_F(ConstructorTests, constructSecondCell_differentAngle1)

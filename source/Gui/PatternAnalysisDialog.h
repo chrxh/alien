@@ -19,7 +19,7 @@ private:
     {
         int maxConnections;
         int numConnections;
-        bool underConstruction;
+        bool constructionState;
         bool inputBlocked;
         bool outputBlocked;
         int executionOrderNumber;
@@ -28,7 +28,7 @@ private:
 
         bool operator==(CellAnalysisDescription const& other) const
         {
-            return maxConnections == other.maxConnections && numConnections == other.numConnections && underConstruction == other.underConstruction
+            return maxConnections == other.maxConnections && numConnections == other.numConnections && constructionState == other.constructionState
                 && inputBlocked == other.inputBlocked && outputBlocked == other.outputBlocked && executionOrderNumber == other.executionOrderNumber
                 && cellFunction == other.cellFunction
                 && color == other.color;
@@ -44,14 +44,14 @@ private:
             if (numConnections != other.numConnections) {
                 return numConnections < other.numConnections;
             }
-            if (underConstruction != other.underConstruction) {
-                return underConstruction < other.underConstruction;
+            if (constructionState != other.constructionState) {
+                return constructionState < other.constructionState;
             }
             if (inputBlocked != other.inputBlocked) {
-                return underConstruction < other.underConstruction;
+                return inputBlocked < other.inputBlocked;
             }
             if (outputBlocked != other.outputBlocked) {
-                return underConstruction < other.underConstruction;
+                return outputBlocked < other.outputBlocked;
             }
             if (executionOrderNumber != other.executionOrderNumber) {
                 return executionOrderNumber < other.executionOrderNumber;

@@ -27,7 +27,7 @@ namespace
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
         cellTO.executionOrderNumber = cell->executionOrderNumber;
-        cellTO.underConstruction = cell->underConstruction;
+        cellTO.constructionState = cell->constructionState;
         cellTO.inputBlocked = cell->inputBlocked;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
