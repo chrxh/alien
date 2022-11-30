@@ -122,7 +122,7 @@ struct Cell
     int color;
     bool barrier;
     int age;
-    bool underConstruction;
+    Enums::ConstructionState constructionState;
 
     //cell function
     int executionOrderNumber;

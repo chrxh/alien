@@ -18,7 +18,6 @@ public:
     __inline__ __device__ static void updateMap(SimulationData& data);
     __inline__ __device__ static void clearDensityMap(SimulationData& data);
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
-    __inline__ __device__ static void aging(SimulationData& data);
 
     __inline__ __device__ static void collisions(SimulationData& data);  //prerequisite: clearTag
     __inline__ __device__ static void checkForces(SimulationData& data);
@@ -70,29 +69,6 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         data.preprocessedCellFunctionData.densityMap.addCell(data.objects.cellPointers.at(index));
-    }
-}
-
-__inline__ __device__ void CellProcessor::aging(SimulationData& data)
-{
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.objects.cellPointers.at(index);
-        if (cell->barrier) {
-            continue;
-        }
-
-        auto color = calcMod(cell->color, 7);
-        auto transitionDuration = SpotCalculator::calcColorTransitionDuration(color, data, cell->absPos);
-        ++cell->age;
-        if (transitionDuration > 0 && cell->age > transitionDuration) {
-            auto targetColor = SpotCalculator::calcColorTransitionTargetColor(color, data, cell->absPos);
-            cell->color = targetColor;
-            cell->age = 0;
-        }
-        if (cell->activationTime > 0) {
-            --cell->activationTime;
-        }
     }
 }
 

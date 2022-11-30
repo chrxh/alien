@@ -190,7 +190,9 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxCellContentTextWidth), cell.executionOrderNumber);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Under construction").textWidth(MaxCellContentTextWidth), cell.underConstruction);
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Construction state").textWidth(MaxCellContentTextWidth).values({"Finished", "Under construction", "Just finished"}),
+                cell.constructionState);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
 
             AlienImGui::Group("Metadata");

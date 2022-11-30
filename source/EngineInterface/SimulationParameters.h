@@ -23,7 +23,7 @@ struct SimulationParameters
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
-    float cellFunctionAttackerInhomogeneityBonus = 2.0f;
+    float cellFunctionAttackerInhomogeneityBonus = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.25f;
     float cellFunctionAttackerOutputPoisoned = -1;
     float cellFunctionAttackerOutputNothingFound = 0;
