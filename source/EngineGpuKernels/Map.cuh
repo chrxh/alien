@@ -172,7 +172,7 @@ public:
         }
     }
 
-    __device__ __inline__ void getConstructorsAndTransmitters(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    __device__ __inline__ void getCellsWithGivenFunction(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, Enums::CellFunction const& cellFunction) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -185,14 +185,14 @@ public:
                 auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
                 auto cell1 = _map[mapEntry];
                 if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
-                    if (cell1->cellFunction == Enums::CellFunction_Constructor || cell1->cellFunction == Enums::CellFunction_Transmitter) {
+                    if (cell1->cellFunction == cellFunction) {
                         cells[numCells] = cell1;
                         ++numCells;
                     }
 
                     auto cell2 = _map[mapEntry + 1];
                     if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
-                        if (cell2->cellFunction == Enums::CellFunction_Constructor || cell2->cellFunction == Enums::CellFunction_Transmitter) {
+                        if (cell2->cellFunction == cellFunction) {
                             cells[numCells] = cell2;
                             ++numCells;
                         }

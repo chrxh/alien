@@ -12,7 +12,7 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.innerfriction = 0;
+        result.innerFriction = 0;
         result.spotValues.friction = 0;
         result.spotValues.radiationFactor = 0;
         return result;
