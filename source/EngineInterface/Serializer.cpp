@@ -119,7 +119,7 @@ namespace cereal
            data.executionOrderNumber,
            data.barrier,
            data.age,
-           data.underConstruction,
+           data.constructionState,
            data.inputBlocked,
            data.outputBlocked,
            data.cellFunction,

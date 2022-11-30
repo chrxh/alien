@@ -381,7 +381,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         connections.emplace_back(connection);
     }
     result.connections = connections;
-    result.underConstruction = cellTO.underConstruction;
+    result.constructionState = cellTO.constructionState;
     result.inputBlocked = cellTO.inputBlocked;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
@@ -497,7 +497,7 @@ void DescriptionConverter::addCell(
     cellTO.energy = cellDesc.energy;
 	cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
-    cellTO.underConstruction = cellDesc.underConstruction;
+    cellTO.constructionState = cellDesc.constructionState;
     cellTO.inputBlocked = cellDesc.inputBlocked;
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
