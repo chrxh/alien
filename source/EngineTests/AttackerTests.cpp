@@ -203,7 +203,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     auto actualConstructorCell = getCell(actualData, 4);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
-    EXPECT_TRUE(actualTransmitterCell.energy > origTransmitterCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualTransmitterCell.energy, origTransmitterCell.energy));
     EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

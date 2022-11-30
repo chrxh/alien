@@ -7,7 +7,7 @@ struct SimulationParameters
     SimulationParametersSpotValues spotValues;
 
     float timestepSize = 1.0f;
-    float innerfriction = 0.3f;
+    float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
     float cellMaxBindingDistance = 3.3f;
     float cellRepulsionStrength = 0.08f;
@@ -19,6 +19,11 @@ struct SimulationParameters
     int cellMaxBonds = 6;
     int cellMaxExecutionOrderNumbers = 6;
     int cellCreationTokenAccessNumber = 0;
+
+    bool cellFunctionConstructionInheritColor = false;
+    float cellFunctionConstructorOffspringCellDistance = 2.0f;
+    float cellFunctionConstructorConnectingCellDistance = 1.6f;
+    float cellFunctionConstructorActivityThreshold = 0.25f;
 
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
@@ -43,8 +48,8 @@ struct SimulationParameters
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
 
-    bool cellFunctinoAllowCreateRandom = false;
-    int cellFunctionRandomMaxGenomeSize = 100;
+    bool createRandomCellFunction = false;
+    int randomMaxGenomeSize = 300;
 
     //inherit color
     bool operator==(SimulationParameters const& other) const
@@ -69,9 +74,12 @@ struct SimulationParameters
             && cellFunctionMuscleOppositeActivityThreshold == other.cellFunctionMuscleOppositeActivityThreshold
             && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
             && cellFunctionMuscleMovementDelta == other.cellFunctionMuscleMovementDelta
-            && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerfriction == other.innerfriction
-            && cellFunctinoAllowCreateRandom == other.cellFunctinoAllowCreateRandom && cellFunctionRandomMaxGenomeSize == other.cellFunctionRandomMaxGenomeSize
-        ;
+            && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerFriction == other.innerFriction
+            && createRandomCellFunction == other.createRandomCellFunction
+            && randomMaxGenomeSize == other.randomMaxGenomeSize
+            && cellFunctionConstructorOffspringCellDistance == other.cellFunctionConstructorOffspringCellDistance
+            && cellFunctionConstructorConnectingCellDistance == other.cellFunctionConstructorConnectingCellDistance
+            && cellFunctionConstructorActivityThreshold == other.cellFunctionConstructorActivityThreshold;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

@@ -358,7 +358,7 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
     auto const partition =
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    auto const innerFriction = cudaSimulationParameters.innerfriction;
+    auto const innerFriction = cudaSimulationParameters.innerFriction;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {

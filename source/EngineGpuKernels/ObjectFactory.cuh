@@ -231,7 +231,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         result->activity.channels[i] = 0;
     }
 
-    if (cudaSimulationParameters.cellFunctinoAllowCreateRandom) {
+    if (cudaSimulationParameters.createRandomCellFunction) {
         result->cellFunction = _data->numberGen1.random(Enums::CellFunction_Count - 1);
         switch (result->cellFunction) {
         case Enums::CellFunction_Neuron: {
@@ -258,7 +258,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             result->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
             result->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(Enums::ConstructorAngleAlignment_Count - 1);
             result->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
-            result->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.cellFunctionRandomMaxGenomeSize);
+            result->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.randomMaxGenomeSize);
             result->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.constructor.genomeSize);
             auto& genome = result->cellFunctionData.constructor.genome;
             for (int i = 0; i < result->cellFunctionData.constructor.genomeSize; ++i) {
@@ -278,7 +278,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             result->cellFunctionData.attacker.mode = _data->numberGen1.random(Enums::EnergyDistributionMode_Count - 1);
         } break;
         case Enums::CellFunction_Injector: {
-            result->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.cellFunctionRandomMaxGenomeSize);
+            result->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.randomMaxGenomeSize);
             result->cellFunctionData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.injector.genomeSize);
             auto& genome = result->cellFunctionData.injector.genome;
             for (int i = 0; i < result->cellFunctionData.injector.genomeSize; ++i) {

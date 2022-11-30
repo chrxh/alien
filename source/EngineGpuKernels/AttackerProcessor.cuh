@@ -179,8 +179,22 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
     if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_TransmittersAndConstructors) {
         Cell* receiverCells[10];
         int numReceivers;
-        data.cellMap.getConstructorsAndTransmitters(
-            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
+        data.cellMap.getCellsWithGivenFunction(
+            receiverCells,
+            10,
+            numReceivers,
+            cell->absPos,
+            cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
+            Enums::CellFunction_Constructor);
+        if (numReceivers == 0) {
+            data.cellMap.getCellsWithGivenFunction(
+                receiverCells,
+                10,
+                numReceivers,
+                cell->absPos,
+                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
+                Enums::CellFunction_Transmitter);
+        }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
         for (int i = 0; i < numReceivers; ++i) {

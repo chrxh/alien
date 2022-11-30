@@ -301,7 +301,7 @@ struct CellDescription
         executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setUnderConstruction(bool value)
+    CellDescription& setConstructionState(Enums::ConstructionState value)
     {
         constructionState = value;
         return *this;

@@ -73,13 +73,6 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-namespace
-{
-    float constexpr OffspringCellDistance = 2.0f;
-    float constexpr ConnectingCellDistance = 1.6f;
-    float constexpr ConstructorActivityThreshold = 0.25f;
-}
-
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
 {
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Constructor];
@@ -130,7 +123,7 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Simulati
     if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < ConstructorActivityThreshold) {
+    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold) {
         return false;
     }
     if (cell->cellFunctionData.constructor.mode > 0
@@ -211,7 +204,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
 
     auto anglesForNewConnection = calcAnglesForNewConnection(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * OffspringCellDistance;
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
@@ -226,9 +219,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
             data,
             hostCell,
             newCell,
-            anglesForNewConnection.angleFromPreviousConnection,
-            0,
-            OffspringCellDistance);
+            anglesForNewConnection.angleFromPreviousConnection, 0, cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
     }
     if (isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::ConstructionState_JustFinished;
@@ -294,7 +285,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         CellConnectionProcessor::addConnections(
-            data, hostCell, newCell, angleFromPreviousForCell, 0, OffspringCellDistance);
+            data, hostCell, newCell, angleFromPreviousForCell, 0, cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
     }
     auto angleFromPreviousForNewCell = constructionData.angle;
     CellConnectionProcessor::addConnections(
@@ -308,7 +299,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, ConnectingCellDistance);
+    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellDistance);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
@@ -426,7 +417,7 @@ ConstructorProcessor::constructCellIntern(
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->constructionState = true;
     result->cellFunction = constructionData.cellFunction;
-    result->color = constructionData.color;
+    result->color = cudaSimulationParameters.cellFunctionConstructionInheritColor ? hostCell->color : constructionData.color;
     result->inputBlocked = constructionData.inputBlocked;
     result->outputBlocked = constructionData.outputBlocked;
 
