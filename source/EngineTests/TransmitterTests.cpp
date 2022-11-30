@@ -158,7 +158,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_ConnectedCells))
+            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription()),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
@@ -182,6 +182,6 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 
     EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
     EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualOtherTransmitterCell.energy > origOtherTransmitterCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualOtherTransmitterCell.energy, origOtherTransmitterCell.energy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
