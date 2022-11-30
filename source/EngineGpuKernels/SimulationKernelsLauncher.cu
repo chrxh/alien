@@ -31,7 +31,8 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_physics_substep6, data);
 
     //cell functions
-    KERNEL_CALL(cudaNextTimestep_cellFunction_collect, data);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep2, data);
     KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, result);

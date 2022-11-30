@@ -190,7 +190,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
     Cell* result = nullptr;
     for (int i = 0; i < hostCell->numConnections; ++i) {
         auto const& connectingCell = hostCell->connections[i].cell;
-        if (connectingCell->underConstruction) {
+        if (connectingCell->constructionState == Enums::ConstructionState_UnderConstruction) {
             result = connectingCell;
         }
     }
@@ -231,7 +231,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
             OffspringCellDistance);
     }
     if (isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->underConstruction = false;
+        newCell->constructionState = Enums::ConstructionState_JustFinished;
     }
     if (adaptMaxConnections) {
         hostCell->maxConnections = hostCell->numConnections;
@@ -271,7 +271,6 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
     hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
-    underConstructionCell->underConstruction = false;
 
     if (!newCell->tryLock()) {
         return false;
@@ -302,7 +301,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         data, newCell, underConstructionCell, angleFromPreviousForNewCell, angleFromPreviousForUnderConstructionCell, desiredDistance);
 
     if (isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->underConstruction = false;
+        newCell->constructionState = Enums::ConstructionState_JustFinished;
     }
 
     Math::normalize(posDelta);
@@ -312,45 +311,42 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, ConnectingCellDistance);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (otherCell == underConstructionCell) {
-            continue;
-        }
-        if (otherCell == hostCell) {
+        if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
             continue;
         }
 
         if (otherCell->tryLock()) {
-            bool connected = false;
-            for (int i = 0; i < hostCell->numConnections; ++i) {
-                auto const& connectedCell = hostCell->connections[i].cell;
-                if (connectedCell == otherCell) {
-                    connected = true;
-                    break;
-                }
-            }
-            if (connected) {
-                otherCell->releaseLock();
-                continue;
-            }
+            //bool connected = false;
+            //for (int i = 0; i < hostCell->numConnections; ++i) {
+            //    auto const& connectedCell = hostCell->connections[i].cell;
+            //    if (connectedCell == otherCell) {
+            //        connected = true;
+            //        break;
+            //    }
+            //}
+            //if (connected) {
+            //    otherCell->releaseLock();
+            //    continue;
+            //}
 
-            connected = false;
-            for (int i = 0; i < hostCell->numConnections; ++i) {
-                auto const& connectedCell1 = hostCell->connections[i].cell;
-                for (int j = 0; j < otherCell->numConnections; ++j) {
-                    auto const& connectedCell2 = otherCell->connections[j].cell;
-                    if (connectedCell1 == connectedCell2) {
-                        connected = true;
-                    }
-                }
-            }
-            if (!connected) {
+            //connected = false;
+            //for (int i = 0; i < hostCell->numConnections; ++i) {
+            //    auto const& connectedCell1 = hostCell->connections[i].cell;
+            //    for (int j = 0; j < otherCell->numConnections; ++j) {
+            //        auto const& connectedCell2 = otherCell->connections[j].cell;
+            //        if (connectedCell1 == connectedCell2) {
+            //            connected = true;
+            //        }
+            //    }
+            //}
+            //if (!connected) {
                 if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
                     && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                     CellConnectionProcessor::addConnections(
                         data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
                 }
-            }
+//            }
             otherCell->releaseLock();
         }
     }
@@ -428,7 +424,7 @@ ConstructorProcessor::constructCellIntern(
     result->maxConnections = constructionData.maxConnections;
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
-    result->underConstruction = true;
+    result->constructionState = true;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputBlocked = constructionData.inputBlocked;

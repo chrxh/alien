@@ -21,20 +21,29 @@ namespace Enums
         CellFunction_Count,
     };
 
+    using ConstructionState = int;
+    enum ConstructionState_
+    {
+        ConstructionState_Finished,
+        ConstructionState_UnderConstruction,
+        ConstructionState_JustFinished,
+        ConstructionState_Count
+    };
+
     using SensorMode = int;
     enum SensorMode_
     {
-        SensorMode_Neighborhood = 0,
-        SensorMode_FixedAngle = 1,
-        SensorMode_Count = 2
+        SensorMode_Neighborhood,
+        SensorMode_FixedAngle,
+        SensorMode_Count
     };
 
     using EnergyDistributionMode = int;
     enum EnergyDistributionMode_
     {
-        EnergyDistributionMode_ConnectedCells = 0,
-        EnergyDistributionMode_TransmittersAndConstructors = 1,
-        EnergyDistributionMode_Count = 2
+        EnergyDistributionMode_ConnectedCells,
+        EnergyDistributionMode_TransmittersAndConstructors,
+        EnergyDistributionMode_Count
     };
 
     using MuscleMode = int;

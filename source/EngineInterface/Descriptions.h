@@ -235,7 +235,7 @@ struct CellDescription
     int maxConnections = 0;
     bool barrier = false;
     int age = 0;
-    bool underConstruction = false;
+    Enums::ConstructionState constructionState = Enums::ConstructionState_Finished;
 
     //cell function
     int executionOrderNumber = 0;
@@ -303,7 +303,7 @@ struct CellDescription
     }
     CellDescription& setUnderConstruction(bool value)
     {
-        underConstruction = value;
+        constructionState = value;
         return *this;
     }
     CellDescription& setInputBlocked(bool value)

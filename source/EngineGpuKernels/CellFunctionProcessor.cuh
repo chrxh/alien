@@ -10,6 +10,8 @@ class CellFunctionProcessor
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
+    __inline__ __device__ static void constructionStateTransition(SimulationData& data);
+    __inline__ __device__ static void aging(SimulationData& data);
 
     __inline__ __device__ static Activity calcInputActivity(Cell* cell, int& inputExecutionOrderNumber);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
@@ -52,6 +54,46 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
     }
 }
 
+__inline__ __device__ void CellFunctionProcessor::constructionStateTransition(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        auto underConstruction = atomicCAS(&cell->constructionState, Enums::ConstructionState_JustFinished, Enums::ConstructionState_Finished);
+        if (underConstruction == Enums::ConstructionState_JustFinished) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                atomicCAS(&connectedCell->constructionState, Enums::ConstructionState_UnderConstruction, Enums::ConstructionState_JustFinished);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void CellFunctionProcessor::aging(SimulationData& data)
+{
+    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.objects.cellPointers.at(index);
+        if (cell->barrier) {
+            continue;
+        }
+
+        auto color = calcMod(cell->color, 7);
+        auto transitionDuration = SpotCalculator::calcColorTransitionDuration(color, data, cell->absPos);
+        ++cell->age;
+        if (transitionDuration > 0 && cell->age > transitionDuration) {
+            auto targetColor = SpotCalculator::calcColorTransitionTargetColor(color, data, cell->absPos);
+            cell->color = targetColor;
+            cell->age = 0;
+        }
+        if (cell->constructionState == Enums::ConstructionState_Finished && cell->activationTime > 0) {
+            --cell->activationTime;
+        }
+    }
+}
+
 __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell, int& inputExecutionOrderNumber)
 {
     Activity result;
@@ -67,7 +109,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
 
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->underConstruction || connectedCell->cellFunction == Enums::CellFunction_None) {
+        if (connectedCell->outputBlocked || connectedCell->constructionState || connectedCell->cellFunction == Enums::CellFunction_None) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
@@ -92,13 +134,13 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
 
 __inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* cell)
 {
-    if (cell->inputBlocked || cell->underConstruction) {
+    if (cell->inputBlocked || cell->constructionState) {
         return -1;
     }
     int result = -cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->underConstruction) {
+        if (connectedCell->outputBlocked || connectedCell->constructionState) {
             continue;
         }
         auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;

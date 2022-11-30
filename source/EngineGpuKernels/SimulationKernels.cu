@@ -34,7 +34,6 @@ __global__ void cudaNextTimestep_physics_substep3(SimulationData data)
 {
     CellProcessor::checkForces(data);
     CellProcessor::updateVelocities(data);
-    CellProcessor::aging(data);
 
     ParticleProcessor::movement(data);
     ParticleProcessor::collision(data);
@@ -56,8 +55,14 @@ __global__ void cudaNextTimestep_physics_substep6(SimulationData data)
     CellProcessor::verletVelocityUpdate(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_collect(SimulationData data)
+__global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data)
 {
+    CellFunctionProcessor::aging(data);
+}
+
+__global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
+{
+    CellFunctionProcessor::constructionStateTransition(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
