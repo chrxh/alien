@@ -9,7 +9,7 @@
 
 namespace Const
 {
-    constexpr float ArrayFillLevelFactor = 2.0f / 3.0f;
+    constexpr float ArrayFillLevelFactor = 2.0f / 4.0f;
 }
 
 template <typename T>
@@ -135,7 +135,7 @@ public:
         uint64_t oldIndex = atomicAdd(_numEntries, static_cast<uint64_t>(size));
         if (oldIndex + size - 1 >= *_size) {
             atomicAdd(_numEntries, -size);
-            printf("Not enough fixed memory!\n");
+            printf("Not enough fixed memory! Acquired size: %llu, total size: %llu\n", size, oldIndex + size - 1);
             ABORT();
         }
         return &(*_data)[oldIndex];

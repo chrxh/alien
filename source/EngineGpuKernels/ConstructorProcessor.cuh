@@ -4,6 +4,7 @@
 
 #include "QuantityConverter.cuh"
 #include "CellFunctionProcessor.cuh"
+#include "CudaSimulationFacade.cuh"
 #include "SimulationResult.cuh"
 
 class ConstructorProcessor
@@ -74,7 +75,8 @@ private:
 
 namespace
 {
-    float constexpr OffspringCellDistance = 1.6f;
+    float constexpr OffspringCellDistance = 2.0f;
+    float constexpr ConnectingCellDistance = 1.6f;
     float constexpr ConstructorActivityThreshold = 0.25f;
 }
 
@@ -307,7 +309,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, OffspringCellDistance);
+    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, ConnectingCellDistance);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (otherCell == underConstructionCell) {
@@ -361,6 +363,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     newCell->releaseLock();
 
     result.incCreatedCell();
+    return true;
 }
 
 __inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections)
@@ -515,11 +518,29 @@ __inline__ __device__ float ConstructorProcessor::readFloat(ConstructorFunction&
 __inline__ __device__ void ConstructorProcessor::applyMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    if (data.numberGen1.random() < 0.01f) {
+    if (data.numberGen1.random() < 0.0002f) {
         if (constructor.genomeSize > 0) {
             int index = data.numberGen1.random(toInt(constructor.genomeSize - 1));
             constructor.genome[index] = data.numberGen1.randomByte();
         }
+    }
+    if (data.numberGen1.random() < 0.0005f && data.numberGen2.random() < 0.001) {
+
+        auto newGenomeSize = min(MAX_GENOME_BYTES, toInt(constructor.genomeSize) + data.numberGen1.random(100));
+        auto newGenome = data.objects.auxiliaryData.getAlignedSubArray(newGenomeSize);
+        for (int i = 0; i < constructor.genomeSize; ++i) {
+            newGenome[i] = constructor.genome[i];
+        }
+        for (int i = constructor.genomeSize; i < newGenomeSize; ++i) {
+            newGenome[i] = data.numberGen1.randomByte();
+        }
+        constructor.genome = newGenome;
+        constructor.genomeSize = newGenomeSize;
+    }
+    if (data.numberGen1.random() < 0.0005f && data.numberGen2.random() < 0.001) {
+
+        constructor.genomeSize = max(0, toInt(constructor.genomeSize) - data.numberGen1.random(100));
+        constructor.currentGenomePos = min(constructor.genomeSize, constructor.currentGenomePos);
     }
 }
 
