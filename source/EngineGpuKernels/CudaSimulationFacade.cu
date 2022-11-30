@@ -11,11 +11,12 @@
 #include <cuda/helper_cuda.h>
 
 #include "Base/Exceptions.h"
+#include "Base/LoggingService.h"
+
 #include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
 
-#include "Base/LoggingService.h"
 #include "DataAccessKernels.cuh"
 #include "TOs.cuh"
 #include "Base.cuh"

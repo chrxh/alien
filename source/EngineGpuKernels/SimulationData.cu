@@ -105,7 +105,7 @@ template <typename Entity>
 void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, int additionalEntities)
 {
     if (sourceArray.shouldResize_host(additionalEntities)) {
-        auto newSize = (sourceArray.getSize_host() + additionalEntities) * 2;
+        auto newSize = (sourceArray.getSize_host() + additionalEntities) * 3;
         targetArray.resize(newSize);
     }
 }

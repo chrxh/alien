@@ -184,7 +184,7 @@ struct CellGenomeDescription
     float referenceDistance = 1.0f;
     float referenceAngle = 0;
     int color = 0;
-    int maxConnections = 0;
+    int maxConnections = 2;
     int executionOrderNumber = 0;
 
     bool inputBlocked = false;

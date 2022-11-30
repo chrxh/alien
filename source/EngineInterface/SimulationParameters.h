@@ -9,7 +9,7 @@ struct SimulationParameters
     float timestepSize = 1.0f;
     float innerfriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
-    float cellMaxBindingDistance = 2.6f;
+    float cellMaxBindingDistance = 3.3f;
     float cellRepulsionStrength = 0.08f;
 
     float cellNormalEnergy = 100.0f;
@@ -34,7 +34,7 @@ struct SimulationParameters
     float cellFunctionMuscleActivityThreshold = 0.25f;
     float cellFunctionMuscleOppositeActivityThreshold = -0.25f;
     float cellFunctionMuscleContractionExpansionDelta = 0.05f;
-    float cellFunctionMuscleMovementDelta = 0.05f;
+    float cellFunctionMuscleMovementDelta = 0.01f;
     float cellFunctionMuscleBendingAngle = 5.0f;
     
     float cellFunctionSensorRange = 255.0f;
@@ -43,9 +43,10 @@ struct SimulationParameters
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
 
-    bool cellFunctinoAllowCreateRandom = true;
+    bool cellFunctinoAllowCreateRandom = false;
     int cellFunctionRandomMaxGenomeSize = 100;
 
+    //inherit color
     bool operator==(SimulationParameters const& other) const
     {
         return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
