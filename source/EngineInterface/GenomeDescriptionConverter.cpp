@@ -8,7 +8,16 @@
 namespace
 {
     void writeInt(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
-    void writeAngle(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value / 180 * 128))); }
+    void writeAngle(std::vector<uint8_t>& data, float value)
+    {
+        if (value > 180.0f) {
+            value -= 360.0f;
+        }
+        if (value < -180.0f) {
+            value += 360.0f;
+        }
+        data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value / 180 * 120)));
+    }
     void writeDistance(std::vector<uint8_t>& data, float value) {data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value - 1.0f) * 128))); }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
@@ -46,12 +55,8 @@ namespace
     {
         return static_cast<int>(readByte(data, pos)) | (static_cast<int>(readByte(data, pos) << 8));
     }
-    float readFloat(std::vector<uint8_t> const& data, int& pos)
-    {
-        return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 128.0f;
-    }
-
-    float readAngle(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 180; }
+    float readFloat(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 128.0f; }
+    float readAngle(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 120 * 180; }
     float readDensity(std::vector<uint8_t> const& data, int& pos) { return (readFloat(data, pos) + 1.0f) / 2; }
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> readGenome(std::vector<uint8_t> const& data, int& pos)
@@ -76,6 +81,7 @@ namespace
 
 std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
 {
+
     std::vector<uint8_t> result;
     result.reserve(genome.size() * 6);
     for (auto const& [index, cell] : genome | boost::adaptors::indexed(0)) {
@@ -151,7 +157,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
         Enums::CellFunction cellFunction = readByte(data, pos) % Enums::CellFunction_Count;
 
         CellGenomeDescription cell;
-        cell.referenceAngle = readFloat(data, pos) * 180;
+        cell.referenceAngle = readAngle(data, pos);
         cell.referenceDistance = readFloat(data, pos) + 1.0f;
         cell.maxConnections = readByte(data, pos) % (parameters.cellMaxBonds + 1);
         cell.executionOrderNumber = readByte(data, pos) % parameters.cellMaxExecutionOrderNumbers;
