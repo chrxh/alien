@@ -7,8 +7,6 @@
 
 namespace
 {
-    float constexpr OffspringCellDistance = 1.6f;
-
     void rotate(PreviewDescription& preview, RealVector2D const& center, float angle)
     {
         auto rotMatrix = Math::calcRotationMatrix(angle);
@@ -109,7 +107,7 @@ namespace
                     auto const& findResult = cellsInternBySlot.find({intPos.x + dx, intPos.y + dy});
                     if (findResult != cellsInternBySlot.end()) {
                         for (auto& otherCell : findResult->second) {
-                            if (Math::length(otherCell.pos - pos) < OffspringCellDistance) {
+                            if (Math::length(otherCell.pos - pos) < 1.6f) {
                                 if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
                                     && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
                                     result.connections.emplace_back(otherCell.pos, pos);
