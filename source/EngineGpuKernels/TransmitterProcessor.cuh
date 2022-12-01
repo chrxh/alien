@@ -79,21 +79,10 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_TransmittersAndConstructors) {
         Cell* receiverCells[10];
         int numReceivers;
-        data.cellMap.getCellsWithGivenFunction(
-            receiverCells,
-            10,
-            numReceivers,
-            cell->absPos,
-            cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
-            Enums::CellFunction_Constructor);
+        data.cellMap.getActiveConstructors(
+            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
         if (numReceivers == 0) {
-            data.cellMap.getCellsWithGivenFunction(
-                receiverCells,
-                10,
-                numReceivers,
-                cell->absPos,
-                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
-                Enums::CellFunction_Transmitter);
+            data.cellMap.getTransmitters(receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
