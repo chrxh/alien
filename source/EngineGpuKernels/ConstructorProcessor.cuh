@@ -58,7 +58,7 @@ private:
         float2 const& newCellPos,
         ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool isFinished(ConstructorFunction& constructor);
+    __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
     __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
     __inline__ __device__ static int readWord(ConstructorFunction& constructor);
@@ -216,11 +216,11 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     }
 
     if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
-        CellConnectionProcessor::addConnections(
-            data,
-            hostCell,
-            newCell,
-            anglesForNewConnection.angleFromPreviousConnection, 0, cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+        auto const& constructor = hostCell->cellFunctionData.constructor;
+        auto distance = isFinished(constructor) && !constructor.separateConstruction && !constructor.singleConstruction
+            ? constructionData.distance
+            : cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
+        CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.angleFromPreviousConnection, 0, distance);
     }
     if (isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::ConstructionState_JustFinished;
@@ -285,8 +285,12 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
+        auto const& constructor = hostCell->cellFunctionData.constructor;
+        auto distance = isFinished(constructor) && !constructor.separateConstruction && !constructor.singleConstruction
+            ? constructionData.distance
+            : cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
         CellConnectionProcessor::addConnections(
-            data, hostCell, newCell, angleFromPreviousForCell, 0, cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance);
+            data, hostCell, newCell, angleFromPreviousForCell, 0, distance);
     }
     auto angleFromPreviousForNewCell = constructionData.angle;
     CellConnectionProcessor::addConnections(
@@ -308,37 +312,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
 
         if (otherCell->tryLock()) {
-            //bool connected = false;
-            //for (int i = 0; i < hostCell->numConnections; ++i) {
-            //    auto const& connectedCell = hostCell->connections[i].cell;
-            //    if (connectedCell == otherCell) {
-            //        connected = true;
-            //        break;
-            //    }
-            //}
-            //if (connected) {
-            //    otherCell->releaseLock();
-            //    continue;
-            //}
+            if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
+                && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
-            //connected = false;
-            //for (int i = 0; i < hostCell->numConnections; ++i) {
-            //    auto const& connectedCell1 = hostCell->connections[i].cell;
-            //    for (int j = 0; j < otherCell->numConnections; ++j) {
-            //        auto const& connectedCell2 = otherCell->connections[j].cell;
-            //        if (connectedCell1 == connectedCell2) {
-            //            connected = true;
-            //        }
-            //    }
-            //}
-            //if (!connected) {
-                if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
-                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
-
-                    CellConnectionProcessor::addConnections(
-                        data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
-                }
-//            }
+                CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
+            }
             otherCell->releaseLock();
         }
     }
@@ -475,7 +453,7 @@ ConstructorProcessor::constructCellIntern(
     return result;
 }
 
-__inline__ __device__ bool ConstructorProcessor::isFinished(ConstructorFunction& constructor) {
+__inline__ __device__ bool ConstructorProcessor::isFinished(ConstructorFunction const& constructor) {
     return constructor.currentGenomePos >= constructor.genomeSize;
 }
 

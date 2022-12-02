@@ -86,7 +86,7 @@ namespace
 
             result.cells.emplace_back(cell);
             if (index > 0) {
-                direction = Math::rotateClockwise(-direction, node.referenceAngle);
+                direction = Math::rotateClockwise(-direction, -node.referenceAngle);
                 result.connections.emplace_back(prevPos, pos);
             }
 
@@ -107,7 +107,7 @@ namespace
                     auto const& findResult = cellsInternBySlot.find({intPos.x + dx, intPos.y + dy});
                     if (findResult != cellsInternBySlot.end()) {
                         for (auto& otherCell : findResult->second) {
-                            if (Math::length(otherCell.pos - pos) < 1.6f) {
+                            if (Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellDistance) {
                                 if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
                                     && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
                                     result.connections.emplace_back(otherCell.pos, pos);
