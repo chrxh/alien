@@ -47,6 +47,9 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     if (cell->energy <= cudaSimulationParameters.cellNormalEnergy) {
         return;
     }
+    if (!cell->tryLock()) {
+        return;
+    }
 
     float energyDelta = cell->energy - cudaSimulationParameters.cellNormalEnergy;
     cell->energy = cudaSimulationParameters.cellNormalEnergy;
@@ -96,4 +99,6 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         }
     }
     cell->energy += energyDelta;
+
+    cell->releaseLock();
 }
