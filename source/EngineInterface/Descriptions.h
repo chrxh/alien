@@ -83,7 +83,7 @@ struct NeuronDescription
 
 struct TransmitterDescription
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
+    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_TransmittersAndConstructors;
 
     auto operator<=>(TransmitterDescription const&) const = default;
 
@@ -169,7 +169,7 @@ struct NerveDescription
 
 struct AttackerDescription
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_ConnectedCells;
+    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_TransmittersAndConstructors;
 
     auto operator<=>(AttackerDescription const&) const = default;
 

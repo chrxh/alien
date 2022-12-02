@@ -371,7 +371,7 @@ void _SimulationParametersWindow::processBase(
                 .name("Energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(4.0f)
+                .max(1.0f)
                 .defaultValue(origSimParameters.spotValues.cellFunctionAttackerEnergyCost)
                 .tooltip(std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
             simParameters.spotValues.cellFunctionAttackerEnergyCost);
@@ -638,7 +638,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .name("Energy cost")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(4.0f)
+                .max(1.0f)
                 .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost),
             spot.values.cellFunctionAttackerEnergyCost);
         AlienImGui::SliderFloat(

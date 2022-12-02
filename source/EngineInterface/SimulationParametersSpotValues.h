@@ -16,7 +16,7 @@ struct SimulationParametersSpotValues
 
     int cellColorTransitionDuration[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
     int cellColorTransitionTargetColor[MAX_COLORS] = {0, 1, 2, 3, 4, 5, 6};
-    float cellFunctionAttackerEnergyCost = 0.2f;
+    float cellFunctionAttackerEnergyCost = 0.0f;
     float cellFunctionAttackerFoodChainColorMatrix[MAX_COLORS][MAX_COLORS] = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},

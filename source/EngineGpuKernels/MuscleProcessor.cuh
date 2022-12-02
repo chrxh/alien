@@ -84,6 +84,7 @@ MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* 
         cell->vel = cell->vel + Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementDelta * getIntensity(activity);
     }
     cell->releaseLock();
+    result.incMuscleActivity();
 }
 
 __device__ __inline__ void MuscleProcessor::contractionExpansion(
@@ -120,6 +121,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(
         }
     }
     cell->releaseLock();
+    result.incMuscleActivity();
 }
 
 __inline__ __device__ void
@@ -151,6 +153,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
         }
     }
     cell->releaseLock();
+    result.incMuscleActivity();
 }
 
 __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)

@@ -83,7 +83,7 @@ void _FlowGeneratorWindow::processIntern()
                         .name("Radius")
                         .textWidth(MaxContentTextWidth)
                         .min(0)
-                        .max(std::min(toFloat(worldSize.x), toFloat(worldSize.y)) / 2)
+                        .max(std::min(toFloat(worldSize.x), toFloat(worldSize.y)))
                         .format("%.0f")
                         .defaultValue(origFlowCenter.radius),
                     flowCenter.radius);

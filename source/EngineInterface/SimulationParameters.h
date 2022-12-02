@@ -9,7 +9,7 @@ struct SimulationParameters
     float timestepSize = 1.0f;
     float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
-    float cellMaxBindingDistance = 3.3f;
+    float cellMaxBindingDistance = 3.6f;
     float cellRepulsionStrength = 0.08f;
 
     float cellNormalEnergy = 100.0f;
@@ -21,8 +21,8 @@ struct SimulationParameters
     int cellCreationTokenAccessNumber = 0;
 
     bool cellFunctionConstructionInheritColor = false;
-    float cellFunctionConstructorOffspringCellDistance = 2.0f;
-    float cellFunctionConstructorConnectingCellDistance = 1.6f;
+    float cellFunctionConstructorOffspringCellDistance = 2.3f;
+    float cellFunctionConstructorConnectingCellDistance = 1.5f;
     float cellFunctionConstructorActivityThreshold = 0.25f;
 
     float cellFunctionAttackerRadius = 1.6f;

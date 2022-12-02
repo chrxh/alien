@@ -1178,3 +1178,35 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
     ASSERT_EQ(2, actualPrevPrevConstructedCell.connections.size());
     ASSERT_EQ(2, actualPrevConstructedCell.connections.size());
 }
+
+TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setSingleConstruction(true)),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringCellDistance, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setConstructionState(Enums::ConstructionState_UnderConstruction),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+    auto actualHostCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(lowPrecisionCompare(1.0f, actualHostCell.connections[0].distance));
+}
