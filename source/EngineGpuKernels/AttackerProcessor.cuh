@@ -46,9 +46,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     if (abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionAttackerActivityThreshold) {
         return;
     }
-    if (!cell->tryLock()) {
-        return;
-    }
     float energyDelta = 0;
     auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
 
@@ -57,11 +54,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (!otherCell->tryLock()) {
-            continue;
-        }
         if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier) {
-            auto energyToTransfer = otherCell->energy * cudaSimulationParameters.cellFunctionAttackerStrength + 1.0f;
+            auto energyToTransfer = atomicAdd(&otherCell->energy, 0) * cudaSimulationParameters.cellFunctionAttackerStrength + 1.0f;
 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerInhomogeneityBonus;
@@ -82,25 +76,30 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             energyToTransfer *= SpotCalculator::calcColorMatrix(color, otherColor, data, cell->absPos);
 
             if (energyToTransfer >= 0) {
-                if (otherCell->energy > energyToTransfer) {
-                    otherCell->energy -= energyToTransfer;
+                auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
+                if (origEnergy > energyToTransfer) {
                     energyDelta += energyToTransfer;
+                } else {
+                    atomicAdd(&otherCell->energy, energyToTransfer);    //revert
                 }
             } else {
-                if (cell->energy >= cellMinEnergy - (energyDelta + energyToTransfer)) {
-                    otherCell->energy -= energyToTransfer;
+                auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
+                if (origEnergy >= cellMinEnergy - (energyDelta + energyToTransfer)) {
                     energyDelta += energyToTransfer;
+                } else {
+                    atomicAdd(&otherCell->energy, energyToTransfer);    //revert
                 }
+            }
         }
-
-        }
-        otherCell->releaseLock();
     }
 
     if (energyDelta > NEAR_ZERO) {
         distributeEnergy(data, cell, energyDelta);
     } else {
-        cell->energy += energyDelta;
+        auto origEnergy = atomicAdd(&cell->energy, energyDelta);
+        if (origEnergy + energyDelta < 0) {
+            atomicAdd(&otherCells[0]->energy, -energyDelta);    //revert
+        }
     }
 
     radiate(data, cell);
@@ -117,8 +116,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         result.incFailedAttack();
     }
 
-    cell->releaseLock();
-
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
@@ -126,7 +123,15 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 {
     auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerEnergyCost, data, cell->absPos);
     if (cellFunctionWeaponEnergyCost > 0) {
-        auto const cellEnergy = cell->energy;
+        auto const cellEnergy = atomicAdd(&cell->energy, 0);
+
+        auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
+        auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
+        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+        if (origEnergy < cellMinEnergy + 1.0f) {
+            atomicAdd(&cell->energy, radiationEnergy);  //revert
+            return;
+        }
         auto& pos = cell->absPos;
         float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
             + float2{
@@ -136,8 +141,6 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
         data.cellMap.correctPosition(particlePos);
 
         particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-        auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
-        cell->energy -= radiationEnergy;
         ObjectFactory factory;
         factory.init(&data);
         factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->color});
@@ -146,9 +149,11 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)
 {
-    if (cell->energy > cudaSimulationParameters.cellNormalEnergy) {
-        energyDelta += cell->energy - cudaSimulationParameters.cellNormalEnergy;
-        cell->energy = cudaSimulationParameters.cellNormalEnergy;
+    auto origEnergy = atomicAdd(&cell->energy, -cudaSimulationParameters.cellFunctionAttackerDistributeEnergy);
+    if (origEnergy > cudaSimulationParameters.cellNormalEnergy) {
+        energyDelta += cudaSimulationParameters.cellFunctionAttackerDistributeEnergy;
+    } else {
+        atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionAttackerDistributeEnergy);    //revert
     }
 
     if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_ConnectedCells) {
@@ -160,18 +165,12 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->tryLock()) {
-                connectedCell->energy += energyPerReceiver;
-                energyDelta -= energyPerReceiver;
-                connectedCell->releaseLock();
-            }
+            atomicAdd(&connectedCell->energy, energyPerReceiver);
+            energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (connectedConnectedCell->tryLock()) {
-                    connectedConnectedCell->energy += energyPerReceiver;
-                    energyDelta -= energyPerReceiver;
-                    connectedConnectedCell->releaseLock();
-                }
+                atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
+                energyDelta -= energyPerReceiver;
             }
         }
     }
@@ -188,14 +187,11 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < numReceivers; ++i) {
             auto receiverCell = receiverCells[i];
-            if (receiverCell->tryLock()) {
-                receiverCell->energy += energyPerReceiver;
-                energyDelta -= energyPerReceiver;
-                receiverCell->releaseLock();
-            }
+            atomicAdd(&receiverCell->energy, energyPerReceiver);
+            energyDelta -= energyPerReceiver;
         }
     }
-    cell->energy += energyDelta;
+    atomicAdd(&cell->energy, energyDelta);
 }
 
 __inline__ __device__ float AttackerProcessor::calcOpenAngle(Cell* cell, float2 direction)

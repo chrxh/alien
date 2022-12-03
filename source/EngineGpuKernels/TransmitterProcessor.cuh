@@ -44,15 +44,16 @@ __device__ __inline__ void TransmitterProcessor::processCell(SimulationData& dat
 
 __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData& data, Cell* cell)
 {
-    if (cell->energy <= cudaSimulationParameters.cellNormalEnergy) {
-        return;
-    }
-    if (!cell->tryLock()) {
+
+    float energyDelta = 0;
+    auto origEnergy = atomicAdd(&cell->energy, -cudaSimulationParameters.cellFunctionTransmitterDistributeEnergy);
+    if (origEnergy > cudaSimulationParameters.cellNormalEnergy) {
+        energyDelta = cudaSimulationParameters.cellFunctionTransmitterDistributeEnergy;
+    } else {
+        atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionTransmitterDistributeEnergy);  //revert
         return;
     }
 
-    float energyDelta = cell->energy - cudaSimulationParameters.cellNormalEnergy;
-    cell->energy = cudaSimulationParameters.cellNormalEnergy;
 
     if (cell->cellFunctionData.transmitter.mode == Enums::EnergyDistributionMode_ConnectedCells) {
         int numReceivers = cell->numConnections;
@@ -63,18 +64,12 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->tryLock()) {
-                connectedCell->energy += energyPerReceiver;
-                energyDelta -= energyPerReceiver;
-                connectedCell->releaseLock();
-            }
+            atomicAdd(&connectedCell->energy, energyPerReceiver);
+            energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (connectedConnectedCell->tryLock()) {
-                    connectedConnectedCell->energy += energyPerReceiver;
-                    energyDelta -= energyPerReceiver;
-                    connectedConnectedCell->releaseLock();
-                }
+                atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
+                energyDelta -= energyPerReceiver;
             }
         }
     }
@@ -91,14 +86,9 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
 
         for (int i = 0; i < numReceivers; ++i) {
             auto receiverCell = receiverCells[i];
-            if (receiverCell->tryLock()) {
-                receiverCell->energy += energyPerReceiver;
-                energyDelta -= energyPerReceiver;
-                receiverCell->releaseLock();
-            }
+            atomicAdd(&receiverCell->energy, energyPerReceiver);
+            energyDelta -= energyPerReceiver;
         }
     }
-    cell->energy += energyDelta;
-
-    cell->releaseLock();
+    atomicAdd(&cell->energy, energyDelta);
 }
