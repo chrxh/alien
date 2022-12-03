@@ -28,6 +28,7 @@ struct SimulationParameters
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
+    float cellFunctionAttackerDistributeEnergy = 10.0f;
     float cellFunctionAttackerInhomogeneityBonus = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.25f;
     float cellFunctionAttackerOutputPoisoned = -1;
@@ -35,6 +36,7 @@ struct SimulationParameters
     float cellFunctionAttackerOutputSuccess = 1;
 
     float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
+    float cellFunctionTransmitterDistributeEnergy = 10.0f;
 
     float cellFunctionMuscleActivityThreshold = 0.25f;
     float cellFunctionMuscleOppositeActivityThreshold = -0.25f;
@@ -66,6 +68,7 @@ struct SimulationParameters
             && cellFunctionAttackerInhomogeneityBonus == other.cellFunctionAttackerInhomogeneityBonus
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
+            && cellFunctionAttackerDistributeEnergy == cellFunctionAttackerDistributeEnergy
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
             && cellFunctionAttackerOutputPoisoned == other.cellFunctionAttackerOutputPoisoned
             && cellFunctionAttackerOutputNothingFound == other.cellFunctionAttackerOutputNothingFound
@@ -79,7 +82,10 @@ struct SimulationParameters
             && randomMaxGenomeSize == other.randomMaxGenomeSize
             && cellFunctionConstructorOffspringCellDistance == other.cellFunctionConstructorOffspringCellDistance
             && cellFunctionConstructorConnectingCellDistance == other.cellFunctionConstructorConnectingCellDistance
-            && cellFunctionConstructorActivityThreshold == other.cellFunctionConstructorActivityThreshold;
+            && cellFunctionConstructorActivityThreshold == other.cellFunctionConstructorActivityThreshold
+            && cellFunctionTransmitterEnergyDistributionRadius == cellFunctionTransmitterEnergyDistributionRadius
+            && cellFunctionTransmitterDistributeEnergy == cellFunctionTransmitterDistributeEnergy
+        ;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
