@@ -150,14 +150,14 @@ namespace
                     int pos = 0;
                     int numAngles = toInt(angles.size());
                     do {
-                        auto angle0 = angles.at(pos % numAngles);
-                        auto angle1 = angles.at((pos + 1) % numAngles);
-                        auto angle2 = angles.at((pos + 2) % numAngles);
+                        auto angle0 = angles.at((pos + numAngles) % numAngles);
+                        auto angle1 = angles.at((pos + numAngles + 1) % numAngles);
+                        auto angle2 = angles.at((pos + numAngles + 2) % numAngles);
                         if (Math::isAngleInBetween(angle0, angle2, angle1)) {
                             ++pos;
                         } else {
-                            angles.at((pos + 1) % numAngles) = angle2;
-                            angles.at((pos + 2) % numAngles) = angle1;
+                            angles.at((pos + numAngles + 1) % numAngles) = angle2;
+                            angles.at((pos + numAngles + 2) % numAngles) = angle1;
                             --pos;
                         }
                     } while (pos <= numAngles);
