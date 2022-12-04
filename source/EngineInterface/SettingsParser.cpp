@@ -78,8 +78,8 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         tree, simPar.cellFunctionAttackerStrength, defaultPar.cellFunctionAttackerStrength, "simulation parameters.cell.function.attacker.strength", parserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.cellFunctionAttackerInhomogeneityBonus,
-        defaultPar.cellFunctionAttackerInhomogeneityBonus,
+        simPar.cellFunctionAttackerInhomogeneityBonusFactor,
+        defaultPar.cellFunctionAttackerInhomogeneityBonusFactor,
         "simulation parameters.cell.function.attacker.inhomogeneity bonus",
         parserTask);
     JsonParser::encodeDecode(
