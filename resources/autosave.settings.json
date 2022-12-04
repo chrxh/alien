@@ -2,8 +2,8 @@
     "general": {
         "time step": "0",
         "world size": {
-            "x": "2500",
-            "y": "1500"
+            "x": "1000",
+            "y": "500"
         }
     },
     "simulation parameters": {
@@ -13,19 +13,17 @@
         "cell": {
             "binding force": "1.00000000",
             "max velocity": "2.00000000",
-            "max binding distance": "2.59999990",
+            "max binding distance": "3.59999990",
             "repulsion strength": "0.08000000",
-            "mutation rate": "0.00000040",
-            "min distance": "0.20000000",
+            "normal energy": "100.00000000",
+            "min distance": "0.30000001",
             "max distance": "1.29999995",
-            "max force": "0.36700001",
+            "max force": "0.80000001",
             "max force decay probability": "0.20000000",
             "max bonds": "6",
-            "max token": "3",
-            "max token branch number": "6",
+            "max execution order number": "6",
             "min energy": "50.00000000",
-            "transformation probability": "0.20000000",
-            "fusion velocity": "0.20600000",
+            "fusion velocity": "0.40000001",
             "max binding energy": "500000.00000000",
             "color transition rules": {
                 "duration[0]": "0",
@@ -44,17 +42,11 @@
                 "target color[6]": "6"
             },
             "function": {
-                "min invocations": "40000",
-                "invocations decay probability": "0.00000000",
-                "computer": {
-                    "max instructions": "15",
-                    "memory size": "8"
-                },
-                "weapon": {
-                    "strength": "0.10000000",
-                    "energy cost": "0.15899999",
+                "attacker": {
+                    "strength": "2.00000000",
+                    "inhomogeneity bonus": "1.00000000",
+                    "energy cost": "0.00000000",
                     "geometry deviation exponent": "0.00000000",
-                    "target color mismatch penalty": "0.37500000",
                     "food chain color matrix[0, 0]": "1.00000000",
                     "food chain color matrix[0, 1]": "1.00000000",
                     "food chain color matrix[0, 2]": "1.00000000",
@@ -104,33 +96,14 @@
                     "food chain color matrix[6, 4]": "1.00000000",
                     "food chain color matrix[6, 5]": "1.00000000",
                     "food chain color matrix[6, 6]": "1.00000000",
-                    "connections mismatch penalty": "0.33000001",
-                    "token penalty": "0.00000000"
-                },
-                "constructor": {
-                    "offspring": {
-                        "cell energy": "100.00000000",
-                        "cell distance": "1.60000002",
-                        "token energy": "60.00000000",
-                        "token suppress memory copy": "0.00200000",
-                        "inherit color": "false"
-                    }
+                    "connections mismatch penalty": "0.33000001"
                 },
                 "sensor": {
-                    "range": "220.00000000"
-                },
-                "communicator": {
-                    "range": "250.00000000"
+                    "range": "255.00000000"
                 }
             }
         },
-        "token": {
-            "mutation rate": "0.00004200",
-            "memory size": "256",
-            "min energy": "3.00000000"
-        },
         "radiation": {
-            "exponent": "1.00000000",
             "factor": "0.00005000",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
@@ -160,7 +133,6 @@
                     "binding force": "1.00000000",
                     "fusion velocity": "0.40000001",
                     "max binding energy": "500000.00000000",
-                    "mutation rate": "0.00000000",
                     "color transition rules": {
                         "duration[0]": "0",
                         "target color[0]": "0",
@@ -178,22 +150,15 @@
                         "target color[6]": "6"
                     },
                     "function": {
-                        "min invocations": "40000",
-                        "invocations decay probability": "0.00000000",
-                        "weapon": {
+                        "attacker": {
                             "energy cost": "0.20000000",
-                            "target color mismatch penalty": "0.00000000",
                             "geometry deviation exponent": "0.00000000",
-                            "connections mismatch penalty": "0.33000001",
-                            "token penalty": "0.00000000"
+                            "connections mismatch penalty": "0.33000001"
                         }
                     }
                 },
-                "token": {
-                    "mutation rate": "0.00000000"
-                },
                 "function": {
-                    "weapon": {
+                    "attacker": {
                         "color matrix[0, 0]": "1.00000000",
                         "color matrix[0, 1]": "1.00000000",
                         "color matrix[0, 2]": "1.00000000",
@@ -268,7 +233,6 @@
                     "binding force": "1.00000000",
                     "fusion velocity": "0.40000001",
                     "max binding energy": "500000.00000000",
-                    "mutation rate": "0.00000000",
                     "color transition rules": {
                         "duration[0]": "0",
                         "target color[0]": "0",
@@ -286,22 +250,15 @@
                         "target color[6]": "6"
                     },
                     "function": {
-                        "min invocations": "40000",
-                        "invocations decay probability": "0.00000000",
-                        "weapon": {
+                        "attacker": {
                             "energy cost": "0.20000000",
-                            "target color mismatch penalty": "0.00000000",
                             "geometry deviation exponent": "0.00000000",
-                            "connections mismatch penalty": "0.33000001",
-                            "token penalty": "0.00000000"
+                            "connections mismatch penalty": "0.33000001"
                         }
                     }
                 },
-                "token": {
-                    "mutation rate": "0.00000000"
-                },
                 "function": {
-                    "weapon": {
+                    "attacker": {
                         "color matrix[0, 0]": "1.00000000",
                         "color matrix[0, 1]": "1.00000000",
                         "color matrix[0, 2]": "1.00000000",
@@ -361,8 +318,8 @@
         "num centers": "1",
         "center0": {
             "pos": {
-                "x": "700.00000000",
-                "y": "500.00000000"
+                "x": "0.00000000",
+                "y": "0.00000000"
             },
             "radius": "200.00000000",
             "strength": "0.01000000"

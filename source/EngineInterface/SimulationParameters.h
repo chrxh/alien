@@ -21,15 +21,15 @@ struct SimulationParameters
     int cellCreationTokenAccessNumber = 0;
 
     bool cellFunctionConstructionInheritColor = false;
-    float cellFunctionConstructorOffspringCellDistance = 2.3f;
+    float cellFunctionConstructorOffspringCellDistance = 2.0f;
     float cellFunctionConstructorConnectingCellDistance = 1.5f;
     float cellFunctionConstructorActivityThreshold = 0.25f;
 
     float cellFunctionAttackerRadius = 1.6f;
-    float cellFunctionAttackerStrength = 0.05f;
+    float cellFunctionAttackerStrength = 2.0f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
     float cellFunctionAttackerDistributeEnergy = 10.0f;
-    float cellFunctionAttackerInhomogeneityBonus = 1.0f;
+    float cellFunctionAttackerInhomogeneityBonusFactor = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.25f;
     float cellFunctionAttackerOutputPoisoned = -1;
     float cellFunctionAttackerOutputNothingFound = 0;
@@ -65,7 +65,7 @@ struct SimulationParameters
             && cellFunctionSensorRange == other.cellFunctionSensorRange && radiationProb == other.radiationProb
             && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellRepulsionStrength == other.cellRepulsionStrength && cellNormalEnergy == other.cellNormalEnergy
-            && cellFunctionAttackerInhomogeneityBonus == other.cellFunctionAttackerInhomogeneityBonus
+            && cellFunctionAttackerInhomogeneityBonusFactor == other.cellFunctionAttackerInhomogeneityBonusFactor
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
             && cellFunctionAttackerDistributeEnergy == cellFunctionAttackerDistributeEnergy

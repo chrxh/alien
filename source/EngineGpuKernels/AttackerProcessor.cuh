@@ -54,11 +54,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier) {
-            auto energyToTransfer = atomicAdd(&otherCell->energy, 0) * cudaSimulationParameters.cellFunctionAttackerStrength + 1.0f;
+        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
+            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
 
             if (!isHomogene(otherCell)) {
-                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerInhomogeneityBonus;
+                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerInhomogeneityBonusFactor;
             }
             auto cellFunctionWeaponGeometryDeviationExponent =
                 SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent, data, cell->absPos);
@@ -77,7 +77,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (energyToTransfer >= 0) {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
-                if (origEnergy > energyToTransfer) {
+                if (origEnergy > cellMinEnergy + energyToTransfer) {
                     energyDelta += energyToTransfer;
                 } else {
                     atomicAdd(&otherCell->energy, energyToTransfer);    //revert

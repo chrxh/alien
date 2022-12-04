@@ -67,7 +67,31 @@ private:
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
 
+    __inline__ __device__ static bool convertByteToBool(uint8_t b);
+    __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
+
     __inline__ __device__ static void applyMutation(SimulationData& data, Cell* cell);
+
+    //internal constants
+    static int constexpr CellFunctionMutationMaxSizeDelta = 100;
+    static int constexpr CellFunctionMutationMaxGenomeSize = 50;
+    static int constexpr CellBasicBytes = 8;
+    static int constexpr NeuronBytes = 72;
+    static int constexpr TransmitterBytes = 1;
+    static int constexpr ConstructorFixedBytes = 6;
+    static int constexpr SensorBytes = 4;
+    static int constexpr NerveBytes = 0;
+    static int constexpr AttackerBytes = 1;
+    static int constexpr InjectorFixedBytes = 0;
+    static int constexpr MuscleBytes = 1;
+    __inline__ __device__ static int getNumGenomeCells(ConstructorFunction const& constructor);
+    __inline__ __device__ static int getGenomeByteIndex(ConstructorFunction const& constructor, int cellIndex);
+    __inline__ __device__ static int getGenomeCellIndex(ConstructorFunction const& constructor, int byteIndex);
+    __inline__ __device__ static int readCellFunctionGenomeBytes(ConstructorFunction const& constructor, int genomePos);
+    __inline__ __device__ static int getCellFunctionDataSize(
+        Enums::CellFunction cellFunction,
+        bool makeSelfCopy,
+        int genomeSize);  //genomeSize only relevant for cellFunction = constructor or injector
 };
 
 /************************************************************************/
@@ -459,7 +483,7 @@ __inline__ __device__ bool ConstructorProcessor::isFinished(ConstructorFunction 
 
 __inline__ __device__ bool ConstructorProcessor::readBool(ConstructorFunction& constructor)
 {
-    return static_cast<int8_t>(readByte(constructor)) > 0;
+    return convertByteToBool(readByte(constructor));
 }
 
 __inline__ __device__ uint8_t ConstructorProcessor::readByte(ConstructorFunction& constructor)
@@ -473,7 +497,9 @@ __inline__ __device__ uint8_t ConstructorProcessor::readByte(ConstructorFunction
 
 __inline__ __device__ int ConstructorProcessor::readWord(ConstructorFunction& constructor)
 {
-    return static_cast<int>(readByte(constructor)) | (static_cast<int>(readByte(constructor) << 8));
+    auto b1 = readByte(constructor);
+    auto b2 = readByte(constructor);
+    return convertBytesToWord(b1, b2);
 }
 
 __inline__ __device__ float ConstructorProcessor::readFloat(ConstructorFunction& constructor)
@@ -486,32 +512,218 @@ __inline__ __device__ float ConstructorProcessor::readAngle(ConstructorFunction&
     return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 120 * 180;
 }
 
+__inline__ __device__ bool ConstructorProcessor::convertByteToBool(uint8_t b)
+{
+    return static_cast<int8_t>(b) > 0;
+}
+
+__inline__ __device__ int ConstructorProcessor::convertBytesToWord(uint8_t b1, uint8_t b2)
+{
+    return static_cast<int>(b1) | (static_cast<int>(b2 << 8));
+}
+
 __inline__ __device__ void ConstructorProcessor::applyMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    if (data.numberGen1.random() < 0.0002f) {
-        if (constructor.genomeSize > 0) {
-            int index = data.numberGen1.random(toInt(constructor.genomeSize - 1));
-            constructor.genome[index] = data.numberGen1.randomByte();
+
+    //property changing mutation
+    if (data.numberGen1.random() < 0.00002f) {
+        auto numCellIndices = getNumGenomeCells(constructor);
+        if (numCellIndices == 0) {
+            return;
+        }
+        auto cellIndex = data.numberGen1.random(numCellIndices - 1);
+        auto genomePos = getGenomeByteIndex(constructor, cellIndex);
+
+        //basic property mutation
+        if (data.numberGen1.randomBool()) {
+            auto delta = data.numberGen1.random(CellBasicBytes - 2) + 1;    //+1 since cell function should not be changed here
+            genomePos = (genomePos + delta) % constructor.genomeSize;
+            constructor.genome[genomePos] = data.numberGen1.randomByte();
+        }
+
+        //cell function specific mutation
+        else {
+            auto delta = data.numberGen1.random(readCellFunctionGenomeBytes(constructor, genomePos) - 1);
+            genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
+            constructor.genome[genomePos] = data.numberGen1.randomByte();
         }
     }
-    if (data.numberGen1.random() < 0.0005f && data.numberGen2.random() < 0.001) {
 
-        auto newGenomeSize = min(MAX_GENOME_BYTES, toInt(constructor.genomeSize) + data.numberGen1.random(100));
-        auto newGenome = data.objects.auxiliaryData.getAlignedSubArray(newGenomeSize);
-        for (int i = 0; i < constructor.genomeSize; ++i) {
-            newGenome[i] = constructor.genome[i];
+    //cell function changing mutation
+    //if (data.numberGen1.random() < 0.0002f) {
+    //    auto numCellIndices = getNumGenomeCells(constructor);
+    //    if (numCellIndices == 0) {
+    //        return;
+    //    }
+    //    auto mutationCellIndex = data.numberGen1.random(numCellIndices - 1);
+    //    auto sourceGenomePos = getGenomeByteIndex(constructor, mutationCellIndex);
+    //    auto sourceRemainingGenomePos = sourceGenomePos + CellBasicBytes + readCellFunctionGenomeBytes(constructor, sourceGenomePos);
+
+    //    auto targetGenomeSize = constructor.genomeSize + CellFunctionMutationMaxSizeDelta;
+    //    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
+
+    //    for (int pos = 0; pos < sourceGenomePos + CellBasicBytes; ++pos) {
+    //        targetGenome[pos] = constructor.genome[pos];
+    //    }
+
+    //    targetGenome[sourceGenomePos] = data.numberGen1.random(Enums::CellFunction_Count - 1);
+    //    auto cellFunctionDataSize =
+    //        getCellFunctionDataSize(targetGenome[sourceGenomePos], data.numberGen1.randomByte(), data.numberGen1.random(CellFunctionMutationMaxGenomeSize));
+    //    for (int pos = sourceGenomePos + CellBasicBytes; pos < sourceGenomePos + CellBasicBytes + cellFunctionDataSize; ++pos) {
+    //        targetGenome[pos] = data.numberGen1.randomByte();
+    //    }
+
+    //    auto targetPos = sourceGenomePos + CellBasicBytes + cellFunctionDataSize;
+    //    if (sourceRemainingGenomePos > sourceGenomePos) {
+    //        auto sourcePos = sourceRemainingGenomePos;
+    //        for (; sourcePos < constructor.genomeSize; ++sourcePos, ++targetPos) {
+    //            targetGenome[targetPos] = constructor.genome[sourcePos];
+    //        }
+    //    }
+    //    auto cellIndex = getGenomeCellIndex(constructor, mutationCellIndex);
+    //    constructor.genome = targetGenome;
+    //    constructor.genomeSize = targetPos;
+    //    constructor.currentGenomePos = getGenomeByteIndex(constructor, cellIndex);
+    //}
+
+    //insert mutation
+
+    //delete mutation
+
+    //if (data.numberGen1.random() < 0.0002f) {
+    //    if (constructor.genomeSize > 0) {
+    //        int index = data.numberGen1.random(toInt(constructor.genomeSize - 1));
+    //        constructor.genome[index] = data.numberGen1.randomByte();
+    //    }
+    //}
+    //if (data.numberGen1.random() < 0.0005f && data.numberGen2.random() < 0.001) {
+
+    //    auto newGenomeSize = min(MAX_GENOME_BYTES, toInt(constructor.genomeSize) + data.numberGen1.random(100));
+    //    auto newGenome = data.objects.auxiliaryData.getAlignedSubArray(newGenomeSize);
+    //    for (int i = 0; i < constructor.genomeSize; ++i) {
+    //        newGenome[i] = constructor.genome[i];
+    //    }
+    //    for (int i = constructor.genomeSize; i < newGenomeSize; ++i) {
+    //        newGenome[i] = data.numberGen1.randomByte();
+    //    }
+    //    constructor.genome = newGenome;
+    //    constructor.genomeSize = newGenomeSize;
+    //}
+    //if (data.numberGen1.random() < 0.0005f && data.numberGen2.random() < 0.001) {
+
+    //    constructor.genomeSize = max(0, toInt(constructor.genomeSize) - data.numberGen1.random(100));
+    //    constructor.currentGenomePos = min(constructor.genomeSize, constructor.currentGenomePos);
+    //}
+}
+
+__inline__ __device__ int ConstructorProcessor::getNumGenomeCells(ConstructorFunction const& constructor)
+{
+    int result = 0;
+    int genomePos = 0;
+    for (; result < constructor.genomeSize; ++result) {
+        if (genomePos >= constructor.genomeSize) {
+            break;
         }
-        for (int i = constructor.genomeSize; i < newGenomeSize; ++i) {
-            newGenome[i] = data.numberGen1.randomByte();
-        }
-        constructor.genome = newGenome;
-        constructor.genomeSize = newGenomeSize;
+        genomePos += CellBasicBytes + readCellFunctionGenomeBytes(constructor, genomePos);
     }
-    if (data.numberGen1.random() < 0.0005f && data.numberGen2.random() < 0.001) {
 
-        constructor.genomeSize = max(0, toInt(constructor.genomeSize) - data.numberGen1.random(100));
-        constructor.currentGenomePos = min(constructor.genomeSize, constructor.currentGenomePos);
+    return result;
+}
+
+__inline__ __device__ int ConstructorProcessor::getGenomeByteIndex(ConstructorFunction const& constructor, int cellIndex)
+{
+    int currentByteIndex = 0;
+    for (int currentCellIndex = 0; currentCellIndex < cellIndex; ++currentCellIndex) {
+        if (currentByteIndex >= constructor.genomeSize) {
+            break;
+        }
+        currentByteIndex += CellBasicBytes + readCellFunctionGenomeBytes(constructor, currentByteIndex);
+    }
+
+    return currentByteIndex % constructor.genomeSize;
+}
+
+__inline__ __device__ int ConstructorProcessor::getGenomeCellIndex(ConstructorFunction const& constructor, int byteIndex)
+{
+    int currentByteIndex = 0;
+    for (int currentCellIndex = 0; currentByteIndex <= byteIndex; ++currentCellIndex) {
+        if (currentByteIndex == byteIndex) {
+            return currentCellIndex;
+        }
+        currentByteIndex += CellBasicBytes + readCellFunctionGenomeBytes(constructor, currentByteIndex);
+    }
+    return 0;
+}
+
+__inline__ __device__ int ConstructorProcessor::readCellFunctionGenomeBytes(ConstructorFunction const& constructor, int genomePos)
+{
+    auto cellFunction = constructor.genome[genomePos] % Enums::CellFunction_Count;
+    switch (cellFunction) {
+    case Enums::CellFunction_Neuron:
+        return NeuronBytes;
+    case Enums::CellFunction_Transmitter:
+        return TransmitterBytes;
+    case Enums::CellFunction_Constructor: {
+        auto makeCopyIndex = genomePos + CellBasicBytes + ConstructorFixedBytes;
+        auto isMakeCopy = convertByteToBool(constructor.genome[makeCopyIndex % constructor.genomeSize]);
+        if (isMakeCopy) {
+            return ConstructorFixedBytes + 1;
+        } else {
+            auto genomeSizeIndex = genomePos + CellBasicBytes + ConstructorFixedBytes + 1;
+            auto genomeSize = convertBytesToWord(
+                constructor.genome[genomeSizeIndex % constructor.genomeSize], constructor.genome[(genomeSizeIndex + 1) % constructor.genomeSize]);
+            return ConstructorFixedBytes + 3 + genomeSize;
+        }
+    }
+    case Enums::CellFunction_Sensor:
+        return SensorBytes;
+    case Enums::CellFunction_Nerve:
+        return NerveBytes;
+    case Enums::CellFunction_Attacker:
+        return AttackerBytes;
+    case Enums::CellFunction_Injector: {
+        auto makeCopyIndex = genomePos + CellBasicBytes + InjectorFixedBytes;
+        auto isMakeCopy = convertByteToBool(constructor.genome[makeCopyIndex % constructor.genomeSize]);
+        if (isMakeCopy) {
+            return InjectorFixedBytes + 1;
+        } else {
+            auto genomeSizeIndex = genomePos + CellBasicBytes + InjectorFixedBytes + 1;
+            auto genomeSize = convertBytesToWord(
+                constructor.genome[genomeSizeIndex % constructor.genomeSize], constructor.genome[(genomeSizeIndex + 1) % constructor.genomeSize]);
+            return InjectorFixedBytes + 3 + genomeSize;
+        }
+    }
+    case Enums::CellFunction_Muscle:
+        return MuscleBytes;
+    default: 
+        return 0;
+    }
+}
+
+__inline__ __device__ int ConstructorProcessor::getCellFunctionDataSize(Enums::CellFunction cellFunction, bool makeSelfCopy, int genomeSize)
+{
+    switch (cellFunction) {
+    case Enums::CellFunction_Neuron:
+        return NeuronBytes;
+    case Enums::CellFunction_Transmitter:
+        return TransmitterBytes;
+    case Enums::CellFunction_Constructor: {
+        return makeSelfCopy ? ConstructorFixedBytes + 1 : ConstructorFixedBytes + 3 + genomeSize;
+    }
+    case Enums::CellFunction_Sensor:
+        return SensorBytes;
+    case Enums::CellFunction_Nerve:
+        return NerveBytes;
+    case Enums::CellFunction_Attacker:
+        return AttackerBytes;
+    case Enums::CellFunction_Injector: {
+        return makeSelfCopy ? InjectorFixedBytes + 1 : InjectorFixedBytes + 3 + genomeSize;
+    }
+    case Enums::CellFunction_Muscle:
+        return MuscleBytes;
+    default:
+        return 0;
     }
 }
 
