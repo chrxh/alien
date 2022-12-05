@@ -43,7 +43,7 @@
             },
             "function": {
                 "attacker": {
-                    "strength": "2.00000000",
+                    "strength": "0.05000000",
                     "inhomogeneity bonus": "1.00000000",
                     "energy cost": "0.00000000",
                     "geometry deviation exponent": "0.00000000",

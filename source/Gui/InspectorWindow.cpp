@@ -251,7 +251,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
 void _InspectorWindow::showConstructorContent(ConstructorDescription& constructor)
 {
     auto parameters = _simController->getSimulationParameters();
-
+    
     AlienImGui::Group("Properties");
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
