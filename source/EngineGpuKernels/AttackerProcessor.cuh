@@ -55,7 +55,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
-            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
+            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy + 15) * cudaSimulationParameters.cellFunctionAttackerStrength;
+            if (energyToTransfer < 0) {
+                continue;
+            }
 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerInhomogeneityBonusFactor;
@@ -74,6 +77,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto color = calcMod(cell->color, MAX_COLORS);
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
             energyToTransfer *= SpotCalculator::calcColorMatrix(color, otherColor, data, cell->absPos);
+
+            if (abs(energyToTransfer) < NEAR_ZERO) {
+                continue;
+            }
 
             if (energyToTransfer >= 0) {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
@@ -105,14 +112,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     radiate(data, cell);
 
     //output
+    activity.channels[0] = energyDelta / 10;
+
     if (energyDelta > NEAR_ZERO) {
-        activity.channels[0] = cudaSimulationParameters.cellFunctionAttackerOutputSuccess;
         result.incSuccessfulAttack();
     } else if (energyDelta < -NEAR_ZERO) {
-        activity.channels[0] = cudaSimulationParameters.cellFunctionAttackerOutputPoisoned;
         result.incFailedAttack();
     } else {
-        activity.channels[0] = cudaSimulationParameters.cellFunctionAttackerOutputNothingFound;
         result.incFailedAttack();
     }
 

@@ -20,20 +20,17 @@ struct SimulationParameters
     int cellMaxExecutionOrderNumbers = 6;
     int cellCreationTokenAccessNumber = 0;
 
-    bool cellFunctionConstructionInheritColor = false;
+    bool cellFunctionConstructionInheritColor = true;
     float cellFunctionConstructorOffspringCellDistance = 2.0f;
     float cellFunctionConstructorConnectingCellDistance = 1.5f;
     float cellFunctionConstructorActivityThreshold = 0.25f;
 
     float cellFunctionAttackerRadius = 1.6f;
-    float cellFunctionAttackerStrength = 2.0f;
+    float cellFunctionAttackerStrength = 0.05f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
     float cellFunctionAttackerDistributeEnergy = 10.0f;
     float cellFunctionAttackerInhomogeneityBonusFactor = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.25f;
-    float cellFunctionAttackerOutputPoisoned = -1;
-    float cellFunctionAttackerOutputNothingFound = 0;
-    float cellFunctionAttackerOutputSuccess = 1;
 
     float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
     float cellFunctionTransmitterDistributeEnergy = 10.0f;
@@ -70,9 +67,6 @@ struct SimulationParameters
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
             && cellFunctionAttackerDistributeEnergy == cellFunctionAttackerDistributeEnergy
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
-            && cellFunctionAttackerOutputPoisoned == other.cellFunctionAttackerOutputPoisoned
-            && cellFunctionAttackerOutputNothingFound == other.cellFunctionAttackerOutputNothingFound
-            && cellFunctionAttackerOutputSuccess == other.cellFunctionAttackerOutputSuccess
             && cellFunctionMuscleActivityThreshold == other.cellFunctionMuscleActivityThreshold
             && cellFunctionMuscleOppositeActivityThreshold == other.cellFunctionMuscleOppositeActivityThreshold
             && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta

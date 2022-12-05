@@ -241,7 +241,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
 
     if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         auto const& constructor = hostCell->cellFunctionData.constructor;
-        auto distance = isFinished(constructor) && !constructor.separateConstruction && !constructor.singleConstruction
+        auto distance = isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
             : cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
         CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.angleFromPreviousConnection, 0, distance);
@@ -310,7 +310,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         auto const& constructor = hostCell->cellFunctionData.constructor;
-        auto distance = isFinished(constructor) && !constructor.separateConstruction && !constructor.singleConstruction
+        auto distance = isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
             : cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
         CellConnectionProcessor::addConnections(
