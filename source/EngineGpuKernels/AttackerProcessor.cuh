@@ -55,7 +55,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
-            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy + 15) * cudaSimulationParameters.cellFunctionAttackerStrength;
+            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy + 25) * cudaSimulationParameters.cellFunctionAttackerStrength;
             if (energyToTransfer < 0) {
                 continue;
             }
@@ -171,10 +171,16 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
+            if (cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor && connectedCell->color != cell->color) {
+                continue;
+            }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
+                if (cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor && connectedConnectedCell->color != cell->color) {
+                    continue;
+                }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
                 energyDelta -= energyPerReceiver;
             }
@@ -193,6 +199,9 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < numReceivers; ++i) {
             auto receiverCell = receiverCells[i];
+            if (cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor && receiverCell->color != cell->color) {
+                continue;
+            }
             atomicAdd(&receiverCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
         }

@@ -64,10 +64,16 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
+            if (cudaSimulationParameters.cellFunctionTransmitterDistributeEnergySameColor && connectedCell->color != cell->color) {
+                continue;
+            }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
+                if (cudaSimulationParameters.cellFunctionTransmitterDistributeEnergySameColor && connectedConnectedCell->color != cell->color) {
+                    continue;
+                }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
                 energyDelta -= energyPerReceiver;
             }
@@ -86,6 +92,10 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
 
         for (int i = 0; i < numReceivers; ++i) {
             auto receiverCell = receiverCells[i];
+            if (cudaSimulationParameters.cellFunctionTransmitterDistributeEnergySameColor && receiverCell->color != cell->color) {
+                continue;
+            }
+
             atomicAdd(&receiverCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
         }
