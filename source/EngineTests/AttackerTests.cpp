@@ -8,8 +8,17 @@
 class AttackerTests : public IntegrationTestFramework
 {
 public:
+    static SimulationParameters getParameters()
+    {
+        SimulationParameters result;
+        result.cellFunctionAttackerDistributeEnergySameColor = true;
+        result.innerFriction = 0;
+        result.spotValues.friction = 0;
+        result.spotValues.radiationFactor = 0;
+        return result;
+    }
     AttackerTests()
-        : IntegrationTestFramework()
+        : IntegrationTestFramework(getParameters())
     {}
 
     ~AttackerTests() = default;
@@ -79,7 +88,7 @@ TEST_F(AttackerTests, successNoTransmitter)
     auto origTargetCell = getCell(data, 3);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTargetCell.energy < origTargetCell.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -120,7 +129,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     auto origTransmitterCell = getCell(data, 3);
     auto actualTransmitterCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(approxCompare(origNerveCell.energy, actualNerveCell.energy));
     EXPECT_TRUE(actualTransmitterCell.energy > origTransmitterCell.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -161,11 +170,53 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     auto origTransmitterCell2 = getCell(data, 4);
     auto actualTransmitterCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
+
+TEST_F(AttackerTests, successDistributeToOneTransmittersWithSameColor)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
+        CellDescription().setId(4).setPos({11.0f, 9.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()).setColor(1),
+        CellDescription().setId(5).setPos({9.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 4);
+    data.addConnection(2, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+    auto actualAttackCell = getCell(actualData, 1);
+    auto origTransmitterCell1 = getCell(data, 3);
+    auto actualTransmitterCell1 = getCell(actualData, 3);
+    auto origTransmitterCell2 = getCell(data, 4);
+    auto actualTransmitterCell2 = getCell(actualData, 4);
+
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualTransmitterCell2.energy, origTransmitterCell2.energy));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
 
 TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
@@ -202,7 +253,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     auto origConstructorCell = getCell(data, 4);
     auto actualConstructorCell = getCell(actualData, 4);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(approxCompare(actualTransmitterCell.energy, origTransmitterCell.energy));
     EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -243,7 +294,7 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     auto origNerveCell2 = getCell(data, 3);
     auto actualNerveCell2 = getCell(actualData, 3);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualNerveCell1.energy > origNerveCell1.energy + NEAR_ZERO);
     EXPECT_TRUE(actualNerveCell2.energy > origNerveCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -285,7 +336,7 @@ TEST_F(AttackerTests, successTwoTargets)
     auto origTargetCell2 = getCell(data, 4);
     auto actualTargetCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTargetCell1.energy < origTargetCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTargetCell2.energy < origTargetCell2.energy - NEAR_ZERO);

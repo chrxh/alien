@@ -92,4 +92,7 @@ public:
     virtual void setTpsRestriction(std::optional<int> const& value) = 0;
 
     virtual float getTps() const = 0;
+
+    //for tests
+    virtual void testOnly_mutateCellFunction(uint64_t cellId) const = 0;
 };

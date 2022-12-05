@@ -109,6 +109,9 @@ public:
 
     float getTps() const override;
 
+    //for tests
+    void testOnly_mutateCellFunction(uint64_t cellId) const override;
+
 private:
     bool _selectionNeedsUpdate = false;
 

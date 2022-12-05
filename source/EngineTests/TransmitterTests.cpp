@@ -8,8 +8,18 @@
 class TransmitterTests : public IntegrationTestFramework
 {
 public:
+    static SimulationParameters getParameters()
+    {
+        SimulationParameters result;
+        result.cellFunctionTransmitterDistributeEnergySameColor = true;
+        result.innerFriction = 0;
+        result.spotValues.friction = 0;
+        result.spotValues.radiationFactor = 0;
+        return result;
+    }
+
     TransmitterTests()
-        : IntegrationTestFramework()
+        : IntegrationTestFramework(getParameters())
     {}
 
     ~TransmitterTests() = default;
@@ -186,7 +196,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToOtherTransmitterAndNotToInactiveConstructor)
+TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 {
     DataDescription data;
     data.addCells({
@@ -220,5 +230,42 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndNotToInactiveConstructor
     EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(actualConstructorCell.energy, origConstructorCell.energy));
     EXPECT_TRUE(actualOtherTransmitterCell.energy > origOtherTransmitterCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(TransmitterTests, distributeOnlyToTransmittersWithSameColor)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
+            .setEnergy(_parameters.cellNormalEnergy * 2),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(TransmitterDescription()).setColor(1),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+
+    auto origTransmitterCell = getCell(data, 1);
+    auto actualTransmitterCell = getCell(actualData, 1);
+
+    auto origOtherTransmitterCell1 = getCell(data, 2);
+    auto actualOtherTransmitterCell1 = getCell(actualData, 2);
+
+    auto origOtherTransmitterCell2 = getCell(data, 3);
+    auto actualOtherTransmitterCell2 = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualOtherTransmitterCell1.energy, origOtherTransmitterCell1.energy));
+    EXPECT_TRUE(actualOtherTransmitterCell2.energy > origOtherTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

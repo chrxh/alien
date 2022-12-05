@@ -71,10 +71,13 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             }
         } else {
             if (auto cell = data.cellMap.getFirst(particle->absPos)) {
-                if (!cell->tryLock()) {
+                if (cell->barrier) {
                     continue;
                 }
-                if (cell->barrier) {
+                if (!cudaSimulationParameters.radiationAbsorptionByCellColor[cell->color]) {
+                    continue;
+                }
+                if (!cell->tryLock()) {
                     continue;
                 }
                 if (particle->tryLock()) {
@@ -99,8 +102,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
-            auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, particle->absPos);
-            if (particle->energy >= cellMinEnergy) {
+            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy) {
                 ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);

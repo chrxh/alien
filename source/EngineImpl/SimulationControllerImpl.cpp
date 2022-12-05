@@ -343,3 +343,7 @@ float _SimulationControllerImpl::getTps() const
 {
     return _worker.getTps();
 }
+
+void _SimulationControllerImpl::testOnly_mutateCellFunction(uint64_t cellId) const
+{
+}
