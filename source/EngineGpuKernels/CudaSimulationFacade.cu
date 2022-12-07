@@ -38,6 +38,7 @@
 #include "SimulationResult.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
+#include "TestKernelsLauncher.cuh"
 
 namespace
 {
@@ -492,6 +493,12 @@ void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additional
     if (_cudaSimulationData->shouldResize(additionals)) {
         resizeArrays(additionals);
     }
+}
+
+void _CudaSimulationFacade::testOnly_mutateCellFunction(uint64_t cellId)
+{
+    _testKernels->testOnly_mutateCellFunction(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
 }
 
 void _CudaSimulationFacade::syncAndCheck()

@@ -101,6 +101,9 @@ public:
     void pauseSimulation();
     bool isSimulationRunning() const;
 
+    //for tests
+    void testOnly_mutateCellFunction(uint64_t cellId);
+
 private:
     DataTO provideTO(); 
     void resetProcessMonitorData();

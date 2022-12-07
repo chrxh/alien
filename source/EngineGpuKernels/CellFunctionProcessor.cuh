@@ -68,6 +68,12 @@ __inline__ __device__ void CellFunctionProcessor::constructionStateTransition(Si
                 atomicCAS(&connectedCell->constructionState, Enums::ConstructionState_UnderConstruction, Enums::ConstructionState_JustFinished);
             }
         }
+        if (underConstruction == Enums::ConstructionState_Decay) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                atomicExch(&connectedCell->constructionState, Enums::ConstructionState_Decay);
+            }
+        }
     }
 }
 

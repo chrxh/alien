@@ -404,9 +404,12 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb && !cell->barrier) {
-            auto radiationFactor =
-                SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
+        if (cell->barrier) {
+            continue;
+        }
+        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb
+            && (cell->energy > cudaSimulationParameters.radiationMinEnergy || cell->age > cudaSimulationParameters.radiationMinAge)) {
+            auto radiationFactor = SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
 
                 auto& pos = cell->absPos;
@@ -452,8 +455,18 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
         auto cellMaxBindingEnergy =
             SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
+
+        if (cell->constructionState == Enums::ConstructionState_Decay) {
+            if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
+                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+            }
+        }
         if (cell->energy < cellMinEnergy) {
-            CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+            if (cudaSimulationParameters.clusterDecay) {
+                cell->constructionState = Enums::ConstructionState_Decay;
+            } else {
+                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+            }
         } else if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDelConnections(data, cell);
         }

@@ -38,6 +38,9 @@ using EditKernelsLauncher = std::shared_ptr<_EditKernelsLauncher>;
 class _MonitorKernelsLauncher;
 using MonitorKernelsLauncher = std::shared_ptr<_MonitorKernelsLauncher>;
 
+class _TestKernelsLauncher;
+using TestKernelsLauncher = std::shared_ptr<_TestKernelsLauncher>;
+
 struct ApplyForceData
 {
     float2 startPos;

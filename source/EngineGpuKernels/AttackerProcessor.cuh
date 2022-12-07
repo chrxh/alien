@@ -55,7 +55,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
-            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy + 25) * cudaSimulationParameters.cellFunctionAttackerStrength;
+            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
             if (energyToTransfer < 0) {
                 continue;
             }
@@ -191,17 +191,25 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
         Cell* receiverCells[10];
         int numReceivers;
         data.cellMap.getActiveConstructors(
-            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
+            receiverCells,
+            10,
+            numReceivers,
+            cell->absPos,
+            cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
+            cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor ? cell->color : -1);
         if (numReceivers == 0) {
-            data.cellMap.getTransmitters(receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
+            data.cellMap.getTransmitters(
+                receiverCells,
+                10,
+                numReceivers,
+                cell->absPos,
+                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
+                cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor ? cell->color : -1);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
         for (int i = 0; i < numReceivers; ++i) {
             auto receiverCell = receiverCells[i];
-            if (cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor && receiverCell->color != cell->color) {
-                continue;
-            }
             atomicAdd(&receiverCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
         }

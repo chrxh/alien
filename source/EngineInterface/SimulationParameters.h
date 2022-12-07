@@ -23,6 +23,10 @@ struct SimulationParameters
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
+    float radiationMinEnergy = 500;
+    int radiationMinAge = 500000;
+    bool clusterDecay = true;
+    float clusterDecayProb = 0.0001f;
     
     bool cellFunctionConstructionInheritColor = true;
     float cellFunctionConstructorOffspringCellDistance = 2.0f;
@@ -49,7 +53,8 @@ struct SimulationParameters
 
     float cellFunctionSensorRange = 255.0f;
 
-    bool createRandomCellFunction = false;
+    bool particleAllowTransformationToCell = false;
+    bool particleTransformationRandomCellFunction = false;
     int randomMaxGenomeSize = 300;
 
     //inherit color
@@ -78,7 +83,7 @@ struct SimulationParameters
             && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
             && cellFunctionMuscleMovementDelta == other.cellFunctionMuscleMovementDelta
             && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerFriction == other.innerFriction
-            && createRandomCellFunction == other.createRandomCellFunction
+            && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
             && randomMaxGenomeSize == other.randomMaxGenomeSize
             && cellFunctionConstructorOffspringCellDistance == other.cellFunctionConstructorOffspringCellDistance
             && cellFunctionConstructorConnectingCellDistance == other.cellFunctionConstructorConnectingCellDistance
