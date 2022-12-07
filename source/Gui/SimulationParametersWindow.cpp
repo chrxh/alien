@@ -205,7 +205,7 @@ void _SimulationParametersWindow::processBase(
                 .min(0)
                 .max(0.01f)
                 .logarithmic(true)
-                .format("%.5f")
+                .format("%.6f")
                 .defaultValue(origSimParameters.spotValues.radiationFactor)
                 .tooltip(std::string("Indicates how energetic the emitted particles of cells are.")),
             simParameters.spotValues.radiationFactor);
@@ -540,7 +540,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 .max(0.01f)
                 .logarithmic(true)
                 .defaultValue(origSpot.values.radiationFactor)
-                .format("%.5f"),
+                .format("%.6f"),
             spot.values.radiationFactor);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()

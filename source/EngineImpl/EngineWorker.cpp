@@ -488,6 +488,12 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
+void EngineWorker::testOnly_mutateCellFunction(uint64_t cellId)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->testOnly_mutateCellFunction(cellId);
+}
+
 DataTO EngineWorker::provideTO()
 {
     return _dataTOCache->getDataTO(_cudaSimulation->getArraySizes());

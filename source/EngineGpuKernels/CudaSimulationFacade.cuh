@@ -72,6 +72,9 @@ public:
 
     void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
 
+    //for tests
+    void testOnly_mutateCellFunction(uint64_t cellId);
+
 private:
     void syncAndCheck();
     void copyDataTOtoDevice(DataTO const& dataTO);
@@ -99,4 +102,5 @@ private:
     RenderingKernelsLauncher _renderingKernels;
     EditKernelsLauncher _editKernels;
     MonitorKernelsLauncher _monitorKernels;
+    TestKernelsLauncher _testKernels;
 };

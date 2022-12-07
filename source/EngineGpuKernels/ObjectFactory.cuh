@@ -231,7 +231,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         result->activity.channels[i] = 0;
     }
 
-    if (cudaSimulationParameters.createRandomCellFunction) {
+    if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         result->cellFunction = _data->numberGen1.random(Enums::CellFunction_Count - 1);
         switch (result->cellFunction) {
         case Enums::CellFunction_Neuron: {

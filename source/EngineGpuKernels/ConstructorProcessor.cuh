@@ -334,6 +334,9 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
             continue;
         }
+        if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
+            continue;
+        }
 
         if (otherCell->tryLock()) {
             if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
@@ -524,31 +527,31 @@ __inline__ __device__ int ConstructorProcessor::convertBytesToWord(uint8_t b1, u
 
 __inline__ __device__ void ConstructorProcessor::applyMutation(SimulationData& data, Cell* cell)
 {
-    auto& constructor = cell->cellFunctionData.constructor;
+    //auto& constructor = cell->cellFunctionData.constructor;
 
-    //property changing mutation
-    if (data.numberGen1.random() < 0.00002f) {
-        auto numCellIndices = getNumGenomeCells(constructor);
-        if (numCellIndices == 0) {
-            return;
-        }
-        auto cellIndex = data.numberGen1.random(numCellIndices - 1);
-        auto genomePos = getGenomeByteIndex(constructor, cellIndex);
+    ////property changing mutation
+    //if (data.numberGen1.random() < 0.00002f) {
+    //    auto numCellIndices = getNumGenomeCells(constructor);
+    //    if (numCellIndices == 0) {
+    //        return;
+    //    }
+    //    auto cellIndex = data.numberGen1.random(numCellIndices - 1);
+    //    auto genomePos = getGenomeByteIndex(constructor, cellIndex);
 
-        //basic property mutation
-        if (data.numberGen1.randomBool()) {
-            auto delta = data.numberGen1.random(CellBasicBytes - 2) + 1;    //+1 since cell function should not be changed here
-            genomePos = (genomePos + delta) % constructor.genomeSize;
-            constructor.genome[genomePos] = data.numberGen1.randomByte();
-        }
+    //    //basic property mutation
+    //    if (data.numberGen1.randomBool()) {
+    //        auto delta = data.numberGen1.random(CellBasicBytes - 2) + 1;    //+1 since cell function should not be changed here
+    //        genomePos = (genomePos + delta) % constructor.genomeSize;
+    //        constructor.genome[genomePos] = data.numberGen1.randomByte();
+    //    }
 
-        //cell function specific mutation
-        else {
-            auto delta = data.numberGen1.random(readCellFunctionGenomeBytes(constructor, genomePos) - 1);
-            genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
-            constructor.genome[genomePos] = data.numberGen1.randomByte();
-        }
-    }
+    //    //cell function specific mutation
+    //    else {
+    //        auto delta = data.numberGen1.random(readCellFunctionGenomeBytes(constructor, genomePos) - 1);
+    //        genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
+    //        constructor.genome[genomePos] = data.numberGen1.randomByte();
+    //    }
+    //}
 
     //cell function changing mutation
     //if (data.numberGen1.random() < 0.0002f) {

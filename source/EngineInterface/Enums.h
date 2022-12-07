@@ -27,6 +27,7 @@ namespace Enums
         ConstructionState_Finished,
         ConstructionState_UnderConstruction,
         ConstructionState_JustFinished,
+        ConstructionState_Decay,
         ConstructionState_Count
     };
 

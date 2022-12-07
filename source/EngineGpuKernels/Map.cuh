@@ -173,7 +173,7 @@ public:
     }
 
    __device__ __inline__ void
-    getActiveConstructors(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    getActiveConstructors(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int matchColor = -1) const   // -1 = no color matching
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -187,15 +187,19 @@ public:
                 auto cell1 = _map[mapEntry];
                 if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
                     if (cell1->cellFunction == Enums::CellFunction_Constructor && isActive(cell1->cellFunctionData.constructor)) {
-                        cells[numCells] = cell1;
-                        ++numCells;
+                        if (matchColor == -1 || cell1->color == matchColor) {
+                            cells[numCells] = cell1;
+                            ++numCells;
+                        }
                     }
 
                     auto cell2 = _map[mapEntry + 1];
                     if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
                         if (cell2->cellFunction == Enums::CellFunction_Constructor && isActive(cell2->cellFunctionData.constructor)) {
-                            cells[numCells] = cell2;
-                            ++numCells;
+                            if (matchColor == -1 || cell2->color == matchColor) {
+                                cells[numCells] = cell2;
+                                ++numCells;
+                            }
                         }
                     }
                 }
@@ -203,7 +207,7 @@ public:
         }
     }
 
-    __device__ __inline__ void getTransmitters(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    __device__ __inline__ void getTransmitters(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int matchColor = -1) const    // -1 = no color matching
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -217,15 +221,19 @@ public:
                 auto cell1 = _map[mapEntry];
                 if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
                     if (cell1->cellFunction == Enums::CellFunction_Transmitter) {
-                        cells[numCells] = cell1;
-                        ++numCells;
+                        if (matchColor == -1 || cell1->color == matchColor) {
+                            cells[numCells] = cell1;
+                            ++numCells;
+                        }
                     }
 
                     auto cell2 = _map[mapEntry + 1];
                     if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
                         if (cell2->cellFunction == Enums::CellFunction_Transmitter) {
-                            cells[numCells] = cell2;
-                            ++numCells;
+                            if (matchColor == -1 || cell2->color == matchColor) {
+                                cells[numCells] = cell2;
+                                ++numCells;
+                            }
                         }
                     }
                 }

@@ -84,17 +84,21 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         Cell* receiverCells[10];
         int numReceivers;
         data.cellMap.getActiveConstructors(
-            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
+            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
+            cudaSimulationParameters.cellFunctionTransmitterDistributeEnergySameColor ? cell->color : -1);
         if (numReceivers == 0) {
-            data.cellMap.getTransmitters(receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius);
+            data.cellMap.getTransmitters(
+                receiverCells,
+                10,
+                numReceivers,
+                cell->absPos,
+                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
+                cudaSimulationParameters.cellFunctionTransmitterDistributeEnergySameColor ? cell->color : -1);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
         for (int i = 0; i < numReceivers; ++i) {
             auto receiverCell = receiverCells[i];
-            if (cudaSimulationParameters.cellFunctionTransmitterDistributeEnergySameColor && receiverCell->color != cell->color) {
-                continue;
-            }
 
             atomicAdd(&receiverCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;

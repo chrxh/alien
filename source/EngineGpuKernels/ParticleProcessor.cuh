@@ -99,10 +99,13 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
 {
     auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
 
+    if (!cudaSimulationParameters.particleAllowTransformationToCell) {
+        return;
+    }
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
-            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy) {
+            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy && cudaSimulationParameters.radiationAbsorptionByCellColor[particle->color]) {
                 ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);
