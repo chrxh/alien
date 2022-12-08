@@ -94,5 +94,9 @@ public:
     virtual float getTps() const = 0;
 
     //for tests
-    virtual void testOnly_mutateCellFunction(uint64_t cellId) const = 0;
+    virtual void testOnly_mutateNeuron(uint64_t cellId) = 0;
+    virtual void testOnly_mutateCellFunctionData(uint64_t cellId) = 0;
+    virtual void testOnly_mutateCellFunction(uint64_t cellId) = 0;
+    virtual void testOnly_mutateInsert(uint64_t cellId) = 0;
+    virtual void testOnly_mutateDelete(uint64_t cellId) = 0;
 };

@@ -28,6 +28,8 @@ public:
     __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
+    __inline__ __device__ static void constructionStateTransition(SimulationData& data);
+
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
 
@@ -348,6 +350,29 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
         } else {
             auto acceleration = (cell->temp1 + cell->temp2) / 2;
             cell->vel = cell->vel + acceleration * cudaSimulationParameters.timestepSize;
+        }
+    }
+}
+
+__inline__ __device__ void CellProcessor::constructionStateTransition(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        auto underConstruction = atomicCAS(&cell->constructionState, Enums::ConstructionState_JustFinished, Enums::ConstructionState_Finished);
+        if (underConstruction == Enums::ConstructionState_JustFinished) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                atomicCAS(&connectedCell->constructionState, Enums::ConstructionState_UnderConstruction, Enums::ConstructionState_JustFinished);
+            }
+        }
+        if (underConstruction == Enums::ConstructionState_Decay) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                atomicExch(&connectedCell->constructionState, Enums::ConstructionState_Decay);
+            }
         }
     }
 }

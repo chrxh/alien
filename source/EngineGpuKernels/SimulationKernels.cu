@@ -62,7 +62,7 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
-    CellFunctionProcessor::constructionStateTransition(data);
+    CellProcessor::constructionStateTransition(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 

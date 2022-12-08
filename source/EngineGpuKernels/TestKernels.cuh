@@ -5,4 +5,4 @@
 
 #include "SimulationData.cuh"
 
-__global__ void cudaMutateCellFunction(SimulationData data, uint64_t cellId);
+__global__ void cudaMutateCellFunctionData(SimulationData data, uint64_t cellId);

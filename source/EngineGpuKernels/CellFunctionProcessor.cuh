@@ -4,13 +4,13 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
+#include "SpotCalculator.cuh"
 
 class CellFunctionProcessor
 {
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
-    __inline__ __device__ static void constructionStateTransition(SimulationData& data);
     __inline__ __device__ static void aging(SimulationData& data);
 
     __inline__ __device__ static Activity calcInputActivity(Cell* cell, int& inputExecutionOrderNumber);
@@ -49,29 +49,6 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
         if (cell->activityFetched == 1) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->activity.channels[i] = 0;
-            }
-        }
-    }
-}
-
-__inline__ __device__ void CellFunctionProcessor::constructionStateTransition(SimulationData& data)
-{
-    auto& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        auto underConstruction = atomicCAS(&cell->constructionState, Enums::ConstructionState_JustFinished, Enums::ConstructionState_Finished);
-        if (underConstruction == Enums::ConstructionState_JustFinished) {
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto connectedCell = cell->connections[i].cell;
-                atomicCAS(&connectedCell->constructionState, Enums::ConstructionState_UnderConstruction, Enums::ConstructionState_JustFinished);
-            }
-        }
-        if (underConstruction == Enums::ConstructionState_Decay) {
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto connectedCell = cell->connections[i].cell;
-                atomicExch(&connectedCell->constructionState, Enums::ConstructionState_Decay);
             }
         }
     }
