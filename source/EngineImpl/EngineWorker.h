@@ -102,7 +102,11 @@ public:
     bool isSimulationRunning() const;
 
     //for tests
+    void testOnly_mutateNeuron(uint64_t cellId);
+    void testOnly_mutateCellFunctionData(uint64_t cellId);
     void testOnly_mutateCellFunction(uint64_t cellId);
+    void testOnly_mutateInsert(uint64_t cellId);
+    void testOnly_mutateDelete(uint64_t cellId);
 
 private:
     DataTO provideTO(); 

@@ -488,10 +488,34 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
+void EngineWorker::testOnly_mutateNeuron(uint64_t cellId)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->testOnly_mutateNeuron(cellId);
+}
+
+void EngineWorker::testOnly_mutateCellFunctionData(uint64_t cellId)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->testOnly_mutateCellFunctionData(cellId);
+}
+
 void EngineWorker::testOnly_mutateCellFunction(uint64_t cellId)
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->testOnly_mutateCellFunction(cellId);
+}
+
+void EngineWorker::testOnly_mutateInsert(uint64_t cellId)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->testOnly_mutateInsert(cellId);
+}
+
+void EngineWorker::testOnly_mutateDelete(uint64_t cellId)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->testOnly_mutateDelete(cellId);
 }
 
 DataTO EngineWorker::provideTO()

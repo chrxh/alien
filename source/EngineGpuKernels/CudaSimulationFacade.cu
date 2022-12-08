@@ -495,9 +495,33 @@ void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additional
     }
 }
 
+void _CudaSimulationFacade::testOnly_mutateNeuron(uint64_t cellId)
+{
+    _testKernels->testOnly_mutateNeuron(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
+}
+
+void _CudaSimulationFacade::testOnly_mutateCellFunctionData(uint64_t cellId)
+{
+    _testKernels->testOnly_mutateCellFunctionData(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
+}
+
 void _CudaSimulationFacade::testOnly_mutateCellFunction(uint64_t cellId)
 {
     _testKernels->testOnly_mutateCellFunction(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
+}
+
+void _CudaSimulationFacade::testOnly_mutateInsert(uint64_t cellId)
+{
+    _testKernels->testOnly_mutateInsert(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
+}
+
+void _CudaSimulationFacade::testOnly_mutateDelete(uint64_t cellId)
+{
+    _testKernels->testOnly_mutateDelete(_settings.gpuSettings, getSimulationDataIntern(), cellId);
     syncAndCheck();
 }
 

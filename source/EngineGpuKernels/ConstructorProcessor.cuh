@@ -6,11 +6,14 @@
 #include "CellFunctionProcessor.cuh"
 #include "CudaSimulationFacade.cuh"
 #include "SimulationResult.cuh"
+#include "CellConnectionProcessor.cuh"
 
 class ConstructorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+
+    __inline__ __device__ static void mutateCellFunctionData(SimulationData& data, Cell* cell);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
@@ -106,6 +109,33 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
         processCell(data, result, cell);
+    }
+}
+
+__inline__ __device__ void ConstructorProcessor::mutateCellFunctionData(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    if (data.numberGen1.random() < 0.00002f) {
+        auto numCellIndices = getNumGenomeCells(constructor);
+        if (numCellIndices == 0) {
+            return;
+        }
+        auto cellIndex = data.numberGen1.random(numCellIndices - 1);
+        auto genomePos = getGenomeByteIndex(constructor, cellIndex);
+
+        //basic property mutation
+        if (data.numberGen1.randomBool()) {
+            auto delta = data.numberGen1.random(CellBasicBytes - 2) + 1;    //+1 since cell function should not be changed here
+            genomePos = (genomePos + delta) % constructor.genomeSize;
+            constructor.genome[genomePos] = data.numberGen1.randomByte();
+        }
+
+        //cell function specific mutation
+        else {
+            auto delta = data.numberGen1.random(readCellFunctionGenomeBytes(constructor, genomePos) - 1);
+            genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
+            constructor.genome[genomePos] = data.numberGen1.randomByte();
+        }
     }
 }
 
@@ -527,31 +557,9 @@ __inline__ __device__ int ConstructorProcessor::convertBytesToWord(uint8_t b1, u
 
 __inline__ __device__ void ConstructorProcessor::applyMutation(SimulationData& data, Cell* cell)
 {
-    //auto& constructor = cell->cellFunctionData.constructor;
-
-    ////property changing mutation
-    //if (data.numberGen1.random() < 0.00002f) {
-    //    auto numCellIndices = getNumGenomeCells(constructor);
-    //    if (numCellIndices == 0) {
-    //        return;
-    //    }
-    //    auto cellIndex = data.numberGen1.random(numCellIndices - 1);
-    //    auto genomePos = getGenomeByteIndex(constructor, cellIndex);
-
-    //    //basic property mutation
-    //    if (data.numberGen1.randomBool()) {
-    //        auto delta = data.numberGen1.random(CellBasicBytes - 2) + 1;    //+1 since cell function should not be changed here
-    //        genomePos = (genomePos + delta) % constructor.genomeSize;
-    //        constructor.genome[genomePos] = data.numberGen1.randomByte();
-    //    }
-
-    //    //cell function specific mutation
-    //    else {
-    //        auto delta = data.numberGen1.random(readCellFunctionGenomeBytes(constructor, genomePos) - 1);
-    //        genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
-    //        constructor.genome[genomePos] = data.numberGen1.randomByte();
-    //    }
-    //}
+    if (data.numberGen1.random() < 0.00002f) {
+        mutateCellFunctionData(data, cell);
+    }
 
     //cell function changing mutation
     //if (data.numberGen1.random() < 0.0002f) {
