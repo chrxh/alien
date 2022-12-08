@@ -408,7 +408,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             continue;
         }
         if (data.numberGen1.random() < cudaSimulationParameters.radiationProb
-            && (cell->energy > cudaSimulationParameters.radiationMinEnergy || cell->age > cudaSimulationParameters.radiationMinAge)) {
+            && (cell->energy > cudaSimulationParameters.radiationMinCellEnergy || cell->age > cudaSimulationParameters.radiationMinCellAge)) {
             auto radiationFactor = SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
 

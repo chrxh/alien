@@ -2,8 +2,8 @@
     "general": {
         "time step": "0",
         "world size": {
-            "x": "1000",
-            "y": "500"
+            "x": "500",
+            "y": "200"
         }
     },
     "simulation parameters": {
@@ -47,13 +47,13 @@
                     "inhomogeneity bonus": "1.00000000",
                     "energy cost": "0.00000000",
                     "geometry deviation exponent": "0.00000000",
-                    "food chain color matrix[0, 0]": "1.00000000",
-                    "food chain color matrix[0, 1]": "1.00000000",
+                    "food chain color matrix[0, 0]": "0.00000000",
+                    "food chain color matrix[0, 1]": "0.00000000",
                     "food chain color matrix[0, 2]": "1.00000000",
-                    "food chain color matrix[0, 3]": "1.00000000",
-                    "food chain color matrix[0, 4]": "1.00000000",
-                    "food chain color matrix[0, 5]": "1.00000000",
-                    "food chain color matrix[0, 6]": "1.00000000",
+                    "food chain color matrix[0, 3]": "0.00000000",
+                    "food chain color matrix[0, 4]": "0.00000000",
+                    "food chain color matrix[0, 5]": "0.00000000",
+                    "food chain color matrix[0, 6]": "0.00000000",
                     "food chain color matrix[1, 0]": "1.00000000",
                     "food chain color matrix[1, 1]": "1.00000000",
                     "food chain color matrix[1, 2]": "1.00000000",
@@ -61,13 +61,13 @@
                     "food chain color matrix[1, 4]": "1.00000000",
                     "food chain color matrix[1, 5]": "1.00000000",
                     "food chain color matrix[1, 6]": "1.00000000",
-                    "food chain color matrix[2, 0]": "1.00000000",
-                    "food chain color matrix[2, 1]": "1.00000000",
-                    "food chain color matrix[2, 2]": "1.00000000",
-                    "food chain color matrix[2, 3]": "1.00000000",
-                    "food chain color matrix[2, 4]": "1.00000000",
-                    "food chain color matrix[2, 5]": "1.00000000",
-                    "food chain color matrix[2, 6]": "1.00000000",
+                    "food chain color matrix[2, 0]": "0.00000000",
+                    "food chain color matrix[2, 1]": "0.00000000",
+                    "food chain color matrix[2, 2]": "0.00000000",
+                    "food chain color matrix[2, 3]": "0.00000000",
+                    "food chain color matrix[2, 4]": "0.00000000",
+                    "food chain color matrix[2, 5]": "0.00000000",
+                    "food chain color matrix[2, 6]": "0.00000000",
                     "food chain color matrix[3, 0]": "1.00000000",
                     "food chain color matrix[3, 1]": "1.00000000",
                     "food chain color matrix[3, 2]": "1.00000000",
@@ -104,7 +104,7 @@
             }
         },
         "radiation": {
-            "factor": "0.00005000",
+            "factor": "0.00000600",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000"
