@@ -99,7 +99,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
 {
     auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
 
-    if (!cudaSimulationParameters.particleAllowTransformationToCell) {
+    if (!cudaSimulationParameters.particleTransformationAllowed) {
         return;
     }
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {

@@ -107,7 +107,7 @@ namespace
                     auto const& findResult = cellsInternBySlot.find({intPos.x + dx, intPos.y + dy});
                     if (findResult != cellsInternBySlot.end()) {
                         for (auto& otherCell : findResult->second) {
-                            if (Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellDistance) {
+                            if (Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
                                 if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
                                     && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
                                     result.connections.emplace_back(otherCell.pos, pos);

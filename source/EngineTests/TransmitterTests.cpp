@@ -11,7 +11,7 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.cellFunctionTransmitterDistributeEnergySameColor = true;
+        result.cellFunctionTransmitterEnergyDistributionSameColor = true;
         result.innerFriction = 0;
         result.spotValues.friction = 0;
         result.spotValues.radiationFactor = 0;

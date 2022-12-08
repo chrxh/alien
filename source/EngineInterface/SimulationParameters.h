@@ -23,39 +23,37 @@ struct SimulationParameters
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
-    float radiationMinEnergy = 500;
-    int radiationMinAge = 500000;
+    float radiationMinCellEnergy = 500;
+    int radiationMinCellAge = 500000;
     bool clusterDecay = true;
     float clusterDecayProb = 0.0001f;
     
     bool cellFunctionConstructionInheritColor = true;
-    float cellFunctionConstructorOffspringCellDistance = 2.0f;
-    float cellFunctionConstructorConnectingCellDistance = 1.5f;
+    float cellFunctionConstructorOffspringDistance = 2.0f;
+    float cellFunctionConstructorConnectingCellMaxDistance = 1.5f;
     float cellFunctionConstructorActivityThreshold = 0.25f;
 
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
-    bool cellFunctionAttackerDistributeEnergySameColor = true;
-    float cellFunctionAttackerDistributeEnergy = 10.0f;
+    bool cellFunctionAttackerEnergyDistributionSameColor = true;
+    float cellFunctionAttackerEnergyDistributionValue = 10.0f;
     float cellFunctionAttackerInhomogeneityBonusFactor = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.25f;
 
-    bool cellFunctionTransmitterDistributeEnergySameColor = true;
+    bool cellFunctionTransmitterEnergyDistributionSameColor = true;
     float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
-    float cellFunctionTransmitterDistributeEnergy = 10.0f;
+    float cellFunctionTransmitterEnergyDistributionValue = 10.0f;
 
-    float cellFunctionMuscleActivityThreshold = 0.25f;
-    float cellFunctionMuscleOppositeActivityThreshold = -0.25f;
     float cellFunctionMuscleContractionExpansionDelta = 0.05f;
     float cellFunctionMuscleMovementDelta = 0.01f;
     float cellFunctionMuscleBendingAngle = 5.0f;
 
     float cellFunctionSensorRange = 255.0f;
 
-    bool particleAllowTransformationToCell = false;
+    bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
-    int randomMaxGenomeSize = 300;
+    int particleTransformationMaxGenomeSize = 300;
 
     //inherit color
     bool operator==(SimulationParameters const& other) const
@@ -76,22 +74,24 @@ struct SimulationParameters
             && cellFunctionAttackerInhomogeneityBonusFactor == other.cellFunctionAttackerInhomogeneityBonusFactor
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
-            && cellFunctionAttackerDistributeEnergy == cellFunctionAttackerDistributeEnergy
+            && cellFunctionAttackerEnergyDistributionValue == cellFunctionAttackerEnergyDistributionValue
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
-            && cellFunctionMuscleActivityThreshold == other.cellFunctionMuscleActivityThreshold
-            && cellFunctionMuscleOppositeActivityThreshold == other.cellFunctionMuscleOppositeActivityThreshold
             && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
             && cellFunctionMuscleMovementDelta == other.cellFunctionMuscleMovementDelta
             && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerFriction == other.innerFriction
-            && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
-            && randomMaxGenomeSize == other.randomMaxGenomeSize
-            && cellFunctionConstructorOffspringCellDistance == other.cellFunctionConstructorOffspringCellDistance
-            && cellFunctionConstructorConnectingCellDistance == other.cellFunctionConstructorConnectingCellDistance
+            && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
+            && cellFunctionConstructorOffspringDistance == other.cellFunctionConstructorOffspringDistance
+            && cellFunctionConstructorConnectingCellMaxDistance == other.cellFunctionConstructorConnectingCellMaxDistance
             && cellFunctionConstructorActivityThreshold == other.cellFunctionConstructorActivityThreshold
             && cellFunctionTransmitterEnergyDistributionRadius == other.cellFunctionTransmitterEnergyDistributionRadius
-            && cellFunctionTransmitterDistributeEnergy == other.cellFunctionTransmitterDistributeEnergy
-            && cellFunctionAttackerDistributeEnergySameColor == other.cellFunctionAttackerDistributeEnergySameColor
-            && cellFunctionTransmitterDistributeEnergySameColor == other.cellFunctionTransmitterDistributeEnergySameColor
+            && cellFunctionTransmitterEnergyDistributionValue == other.cellFunctionTransmitterEnergyDistributionValue
+            && cellFunctionAttackerEnergyDistributionSameColor == other.cellFunctionAttackerEnergyDistributionSameColor
+            && cellFunctionTransmitterEnergyDistributionSameColor == other.cellFunctionTransmitterEnergyDistributionSameColor
+            && particleTransformationAllowed == other.particleTransformationAllowed
+            && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
+            && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
+            && cellFunctionConstructionInheritColor == other.cellFunctionConstructionInheritColor && clusterDecayProb == other.clusterDecayProb
+            && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge && radiationMinCellEnergy == other.radiationMinCellEnergy
         ;
     }
 

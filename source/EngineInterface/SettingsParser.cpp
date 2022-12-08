@@ -75,12 +75,99 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             parserTask);
     }
     JsonParser::encodeDecode(
-        tree, simPar.cellFunctionAttackerStrength, defaultPar.cellFunctionAttackerStrength, "simulation parameters.cell.function.attacker.strength", parserTask);
+        tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", parserTask);
+    JsonParser::encodeDecode(
+        tree, simPar.spotValues.radiationFactor, defaultPar.spotValues.radiationFactor, "simulation parameters.radiation.factor", parserTask);
+    JsonParser::encodeDecode(tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", parserTask);
+    JsonParser::encodeDecode(
+        tree, simPar.radiationVelocityMultiplier, defaultPar.radiationVelocityMultiplier, "simulation parameters.radiation.velocity multiplier", parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.radiationVelocityPerturbation,
+        defaultPar.radiationVelocityPerturbation,
+        "simulation parameters.radiation.velocity perturbation",
+        parserTask);
+    for (int i = 0; i < 7; ++i) {
+        JsonParser::encodeDecode(
+            tree,
+            simPar.radiationAbsorptionByCellColor[i],
+            defaultPar.radiationAbsorptionByCellColor[i],
+            "simulation parameters.radiation.absorption by cell color[" + std::to_string(i) + "]",
+            parserTask);
+    }
+    JsonParser::encodeDecode(
+        tree, simPar.radiationMinCellEnergy, defaultPar.radiationMinCellEnergy,
+        "simulation parameters.radiation.min cell energy",
+        parserTask);
+    JsonParser::encodeDecode(tree, simPar.radiationMinCellAge, defaultPar.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
+
+    JsonParser::encodeDecode(tree, simPar.clusterDecay, defaultPar.clusterDecay, "simulation parameters.cluster.decay", parserTask);
+    JsonParser::encodeDecode(tree, simPar.clusterDecayProb, defaultPar.clusterDecayProb, "simulation parameters.cluster.decay probability", parserTask);
+
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionConstructionInheritColor,
+        defaultPar.cellFunctionConstructionInheritColor,
+        "simulation parameters.cell.function.constructor.inherit color",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorOffspringDistance,
+        defaultPar.cellFunctionConstructorOffspringDistance,
+        "simulation parameters.cell.function.constructor.offspring distance",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorConnectingCellMaxDistance,
+        defaultPar.cellFunctionConstructorConnectingCellMaxDistance,
+        "simulation parameters.cell.function.constructor.connecting cell max distance",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionConstructorActivityThreshold,
+        defaultPar.cellFunctionConstructorActivityThreshold,
+        "simulation parameters.cell.function.constructor.activity threshold",
+        parserTask);
+
+    JsonParser::encodeDecode(
+        tree, simPar.cellFunctionAttackerRadius, defaultPar.cellFunctionAttackerRadius,
+        "simulation parameters.cell.function.attacker.radius",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionAttackerStrength,
+        defaultPar.cellFunctionAttackerStrength,
+        "simulation parameters.cell.function.attacker.strength",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionAttackerEnergyDistributionRadius,
+        defaultPar.cellFunctionAttackerEnergyDistributionRadius,
+        "simulation parameters.cell.function.attacker.energy distribution radius",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionAttackerEnergyDistributionSameColor,
+        defaultPar.cellFunctionAttackerEnergyDistributionSameColor,
+        "simulation parameters.cell.function.attacker.energy distribution same color",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionAttackerEnergyDistributionValue,
+        defaultPar.cellFunctionAttackerEnergyDistributionValue,
+        "simulation parameters.cell.function.attacker.energy distribution value",
+        parserTask);
     JsonParser::encodeDecode(
         tree,
         simPar.cellFunctionAttackerInhomogeneityBonusFactor,
         defaultPar.cellFunctionAttackerInhomogeneityBonusFactor,
         "simulation parameters.cell.function.attacker.inhomogeneity bonus",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionAttackerActivityThreshold,
+        defaultPar.cellFunctionAttackerActivityThreshold,
+        "simulation parameters.cell.function.attacker.activity threshold",
         parserTask);
     JsonParser::encodeDecode(
         tree,
@@ -110,18 +197,62 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         defaultPar.spotValues.cellFunctionAttackerConnectionsMismatchPenalty,
         "simulation parameters.cell.function.attacker.connections mismatch penalty",
         parserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", parserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.spotValues.radiationFactor, defaultPar.spotValues.radiationFactor, "simulation parameters.radiation.factor", parserTask);
-    JsonParser::encodeDecode(tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", parserTask);
-    JsonParser::encodeDecode(
-        tree, simPar.radiationVelocityMultiplier, defaultPar.radiationVelocityMultiplier, "simulation parameters.radiation.velocity multiplier", parserTask);
+
     JsonParser::encodeDecode(
         tree,
-        simPar.radiationVelocityPerturbation,
-        defaultPar.radiationVelocityPerturbation,
-        "simulation parameters.radiation.velocity perturbation",
+        simPar.cellFunctionTransmitterEnergyDistributionSameColor,
+        defaultPar.cellFunctionTransmitterEnergyDistributionSameColor,
+        "simulation parameters.cell.function.transmitter.energy distribution same color",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionTransmitterEnergyDistributionRadius,
+        defaultPar.cellFunctionTransmitterEnergyDistributionRadius,
+        "simulation parameters.cell.function.transmitter.energy distribution radius",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionTransmitterEnergyDistributionValue,
+        defaultPar.cellFunctionTransmitterEnergyDistributionValue,
+        "simulation parameters.cell.function.transmitter.energy distribution value",
+        parserTask);
+
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionMuscleContractionExpansionDelta,
+        defaultPar.cellFunctionMuscleContractionExpansionDelta,
+        "simulation parameters.cell.function.muscle.contraction expansion delta",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionMuscleMovementDelta,
+        defaultPar.cellFunctionMuscleMovementDelta,
+        "simulation parameters.cell.function.muscle.movement delta",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionMuscleBendingAngle,
+        defaultPar.cellFunctionMuscleBendingAngle,
+        "simulation parameters.cell.function.muscle.bending angle",
+        parserTask);
+
+    JsonParser::encodeDecode(
+        tree,
+        simPar.particleTransformationAllowed,
+        defaultPar.particleTransformationAllowed,
+        "simulation parameters.particle.transformation allowed",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.particleTransformationRandomCellFunction,
+        defaultPar.particleTransformationRandomCellFunction,
+        "simulation parameters.particle.transformation.random cell function",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.particleTransformationMaxGenomeSize,
+        defaultPar.particleTransformationMaxGenomeSize,
+        "simulation parameters.particle.transformation.max genome size",
         parserTask);
 
     //spots

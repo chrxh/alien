@@ -229,7 +229,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
 
     auto anglesForNewConnection = calcAnglesForNewConnection(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
@@ -243,7 +243,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance = isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
-            : cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
+            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
         CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.angleFromPreviousConnection, 0, distance);
     }
     if (isFinished(hostCell->cellFunctionData.constructor)) {
@@ -312,7 +312,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance = isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
-            : cudaSimulationParameters.cellFunctionConstructorOffspringCellDistance;
+            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
         CellConnectionProcessor::addConnections(
             data, hostCell, newCell, angleFromPreviousForCell, 0, distance);
     }
@@ -328,7 +328,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellDistance);
+    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {

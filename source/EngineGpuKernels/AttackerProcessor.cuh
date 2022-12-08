@@ -155,11 +155,11 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)
 {
-    auto origEnergy = atomicAdd(&cell->energy, -cudaSimulationParameters.cellFunctionAttackerDistributeEnergy);
+    auto origEnergy = atomicAdd(&cell->energy, -cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue);
     if (origEnergy > cudaSimulationParameters.cellNormalEnergy) {
-        energyDelta += cudaSimulationParameters.cellFunctionAttackerDistributeEnergy;
+        energyDelta += cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue;
     } else {
-        atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionAttackerDistributeEnergy);    //revert
+        atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue);    //revert
     }
 
     if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_ConnectedCells) {
@@ -171,14 +171,14 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor && connectedCell->color != cell->color) {
+            if (cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor && connectedCell->color != cell->color) {
                 continue;
             }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor && connectedConnectedCell->color != cell->color) {
+                if (cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor && connectedConnectedCell->color != cell->color) {
                     continue;
                 }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
@@ -196,7 +196,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             numReceivers,
             cell->absPos,
             cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
-            cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor ? cell->color : -1);
+            cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor ? cell->color : -1);
         if (numReceivers == 0) {
             data.cellMap.getTransmitters(
                 receiverCells,
@@ -204,7 +204,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 numReceivers,
                 cell->absPos,
                 cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
-                cudaSimulationParameters.cellFunctionAttackerDistributeEnergySameColor ? cell->color : -1);
+                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor ? cell->color : -1);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
