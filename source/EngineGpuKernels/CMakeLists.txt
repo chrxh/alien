@@ -36,6 +36,7 @@ add_library(alien_engine_gpu_kernels_lib
     GarbageCollectorKernels.cuh
     GarbageCollectorKernelsLauncher.cu
     GarbageCollectorKernelsLauncher.cuh
+    GenomeDecoder.cuh
     HashMap.cuh
     HashSet.cuh
     List.cuh
@@ -48,6 +49,7 @@ add_library(alien_engine_gpu_kernels_lib
     MonitorKernels.cu
     MonitorKernels.cuh
     MuscleProcessor.cuh
+    MutationProcessor.cuh
     NerveProcessor.cuh
     NeuronProcessor.cuh
     Objects.cu

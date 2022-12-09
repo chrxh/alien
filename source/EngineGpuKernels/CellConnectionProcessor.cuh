@@ -5,6 +5,7 @@
 #include "SimulationData.cuh"
 #include "ConstantMemory.cuh"
 #include "SpotCalculator.cuh"
+#include "ObjectFactory.cuh"
 
 class CellConnectionProcessor
 {

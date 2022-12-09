@@ -1,6 +1,6 @@
 #include "TestKernels.cuh"
 
-#include "ConstructorProcessor.cuh"
+#include "MutationProcessor.cuh"
 
 __global__ void cudaMutateData(SimulationData data, uint64_t cellId)
 {
@@ -10,7 +10,7 @@ __global__ void cudaMutateData(SimulationData data, uint64_t cellId)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->id == cellId) {
-            ConstructorProcessor::mutateData(data, cell);
+            MutationProcessor::mutateData(data, cell);
         }
     }
 }
