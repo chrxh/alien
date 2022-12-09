@@ -344,14 +344,14 @@ float _SimulationControllerImpl::getTps() const
     return _worker.getTps();
 }
 
-void _SimulationControllerImpl::testOnly_mutateNeuron(uint64_t cellId)
+void _SimulationControllerImpl::testOnly_mutateNeuronData(uint64_t cellId)
 {
-    _worker.testOnly_mutateNeuron(cellId);
+    _worker.testOnly_mutateNeuronData(cellId);
 }
 
-void _SimulationControllerImpl::testOnly_mutateCellFunctionData(uint64_t cellId)
+void _SimulationControllerImpl::testOnly_mutateData(uint64_t cellId)
 {
-    _worker.testOnly_mutateCellFunctionData(cellId);
+    _worker.testOnly_mutateData(cellId);
 }
 
 void _SimulationControllerImpl::testOnly_mutateCellFunction(uint64_t cellId)

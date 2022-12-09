@@ -495,15 +495,15 @@ void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additional
     }
 }
 
-void _CudaSimulationFacade::testOnly_mutateNeuron(uint64_t cellId)
+void _CudaSimulationFacade::testOnly_mutateNeuronData(uint64_t cellId)
 {
-    _testKernels->testOnly_mutateNeuron(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    _testKernels->testOnly_mutateNeuronData(_settings.gpuSettings, getSimulationDataIntern(), cellId);
     syncAndCheck();
 }
 
-void _CudaSimulationFacade::testOnly_mutateCellFunctionData(uint64_t cellId)
+void _CudaSimulationFacade::testOnly_mutateData(uint64_t cellId)
 {
-    _testKernels->testOnly_mutateCellFunctionData(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    _testKernels->testOnly_mutateData(_settings.gpuSettings, getSimulationDataIntern(), cellId);
     syncAndCheck();
 }
 

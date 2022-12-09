@@ -6,6 +6,7 @@ PUBLIC
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     MuscleTests.cpp
+    MutationTests.cpp
     NerveTests.cpp
     NeuronTests.cpp
     SensorTests.cpp

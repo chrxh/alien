@@ -28,6 +28,12 @@ struct SimulationParametersSpotValues
     float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
     float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
 
+    float cellFunctionConstructorMutationNeuronProbability = 0;
+    float cellFunctionConstructorMutationDataProbability = 0;
+    float cellFunctionConstructorMutationCellFunctionProbability = 0;
+    float cellFunctionConstructorMutationInsertionProbability = 0;
+    float cellFunctionConstructorMutationDeletionProbability = 0;
+
     bool operator==(SimulationParametersSpotValues const& other) const
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -48,6 +54,11 @@ struct SimulationParametersSpotValues
             && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost
             && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
-            && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty;
+            && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
+            && cellFunctionConstructorMutationNeuronProbability == other.cellFunctionConstructorMutationNeuronProbability
+            && cellFunctionConstructorMutationDataProbability == other.cellFunctionConstructorMutationDataProbability
+            && cellFunctionConstructorMutationCellFunctionProbability == other.cellFunctionConstructorMutationCellFunctionProbability
+            && cellFunctionConstructorMutationInsertionProbability == other.cellFunctionConstructorMutationInsertionProbability
+            && cellFunctionConstructorMutationDeletionProbability == other.cellFunctionConstructorMutationDeletionProbability;
     }
 };

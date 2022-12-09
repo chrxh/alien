@@ -73,8 +73,8 @@ public:
     void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
 
     //for tests
-    void testOnly_mutateNeuron(uint64_t cellId);
-    void testOnly_mutateCellFunctionData(uint64_t cellId);
+    void testOnly_mutateNeuronData(uint64_t cellId);
+    void testOnly_mutateData(uint64_t cellId);
     void testOnly_mutateCellFunction(uint64_t cellId);
     void testOnly_mutateInsert(uint64_t cellId);
     void testOnly_mutateDelete(uint64_t cellId);
