@@ -11,6 +11,7 @@ public:
     __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void mutateData(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void mutateNeuronData(SimulationData& data, Cell* cell);
 
 private:
     
@@ -90,10 +91,34 @@ __inline__ __device__ void MutationProcessor::mutateData(SimulationData& data, C
     }
 }
 
+__inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto numGenomeCells = getNumGenomeCells(constructor);
+    if (numGenomeCells == 0) {
+        return;
+    }
+    auto cellIndex = data.numberGen1.random(numGenomeCells - 1);
+    auto genomePos = getGenomeByteIndex(constructor, cellIndex);
+
+    auto type = getNextCellFunctionType(constructor, genomePos);
+    if (type == Enums::CellFunction_Neuron) {
+        auto delta = data.numberGen1.random(NeuronBytes - 1);
+        genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
+        constructor.genome[genomePos] = data.numberGen1.randomByte();
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData& data, Cell* cell)
 {
+    auto cellFunctionConstructorMutationNeuronProbability =
+        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronProbability, data, cell->absPos);
     auto cellFunctionConstructorMutationDataProbability =
         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability, data, cell->absPos);
+
+    if (data.numberGen1.random() < cellFunctionConstructorMutationNeuronProbability) {
+        mutateNeuronData(data, cell);
+    }
 
     if (data.numberGen1.random() < cellFunctionConstructorMutationDataProbability) {
         mutateData(data, cell);

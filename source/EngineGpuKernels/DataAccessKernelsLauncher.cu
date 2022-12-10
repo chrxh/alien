@@ -3,6 +3,7 @@
 #include "DataAccessKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "EditKernelsLauncher.cuh"
+#include "DebugKernels.cuh"
 
 _DataAccessKernelsLauncher::_DataAccessKernelsLauncher()
 {

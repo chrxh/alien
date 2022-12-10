@@ -7,6 +7,8 @@
 #include "Base.cuh"
 #include "Physics.cuh"
 #include "Map.cuh"
+#include "ConstantMemory.cuh"
+#include "ObjectFactory.cuh"
 
 class ParticleProcessor
 {

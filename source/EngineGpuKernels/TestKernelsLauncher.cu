@@ -5,6 +5,7 @@
 
 void _TestKernelsLauncher::testOnly_mutateNeuronData(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId)
 {
+    KERNEL_CALL(cudaMutateNeuronData, data, cellId);
 }
 
 void _TestKernelsLauncher::testOnly_mutateData(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId)
