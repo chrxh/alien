@@ -231,7 +231,6 @@ void DescriptionHelper::removeStickiness(DataDescription& data)
 
 void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize)
 {
-//     SpaceCalculator spaceCalculator(worldSize);
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     std::unordered_map<uint64_t, CellDescription&> cellById;
     for (auto& cluster : data.clusters) {
@@ -252,6 +251,9 @@ void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVe
                     angleToAdd = 0;
                     newConnections.emplace_back(connection);
                 }
+            }
+            if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
+                newConnections.front().angleFromPrevious += angleToAdd;
             }
             cell.connections = newConnections;
         }

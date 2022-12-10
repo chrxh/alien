@@ -18,7 +18,7 @@ using std::int64_t;
 using std::uint32_t;
 using std::uint64_t;
 
-constexpr double NEAR_ZERO = 1.0e-4;
+constexpr float NEAR_ZERO = 1.0e-4f;
 
 template <typename T>
 inline float toFloat(T const& value)
