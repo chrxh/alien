@@ -3,6 +3,7 @@ PUBLIC
     AttackerTests.cpp
     ConstructorTests.cpp
     DataTransferTests.cpp
+    DescriptionHelperTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     MuscleTests.cpp
