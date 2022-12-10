@@ -28,7 +28,7 @@ struct SimulationParametersSpotValues
     float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
     float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
 
-    float cellFunctionConstructorMutationNeuronProbability = 0;
+    float cellFunctionConstructorMutationNeuronProbability = 0.005f;
     float cellFunctionConstructorMutationDataProbability = 0;
     float cellFunctionConstructorMutationCellFunctionProbability = 0;
     float cellFunctionConstructorMutationInsertionProbability = 0;
