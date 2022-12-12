@@ -71,7 +71,7 @@ __inline__ __device__ void CellFunctionProcessor::aging(SimulationData& data)
             cell->color = targetColor;
             cell->age = 0;
         }
-        if (cell->constructionState == Enums::ConstructionState_Finished && cell->activationTime > 0) {
+        if (cell->constructionState == Enums::LivingState_Ready && cell->activationTime > 0) {
             --cell->activationTime;
         }
     }

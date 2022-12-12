@@ -8,6 +8,7 @@
 #include "AttackerProcessor.cuh"
 #include "TransmitterProcessor.cuh"
 #include "MuscleProcessor.cuh"
+#include "SensorProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result)
 {
@@ -94,6 +95,11 @@ __global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, S
 __global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationResult result)
 {
     MuscleProcessor::process(data, result);
+}
+
+__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationResult result)
+{
+    SensorProcessor::process(data, result);
 }
 
 __global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)

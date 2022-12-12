@@ -235,7 +235,7 @@ struct CellDescription
     int maxConnections = 0;
     bool barrier = false;
     int age = 0;
-    Enums::ConstructionState constructionState = Enums::ConstructionState_Finished;
+    Enums::LivingState constructionState = Enums::LivingState_Ready;
 
     //cell function
     int executionOrderNumber = 0;
@@ -301,7 +301,7 @@ struct CellDescription
         executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setConstructionState(Enums::ConstructionState value)
+    CellDescription& setConstructionState(Enums::LivingState value)
     {
         constructionState = value;
         return *this;

@@ -33,8 +33,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Muscle];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto const& cell = operations.at(i).cell;
-        processCell(data, result, cell);
+        processCell(data, result, operations.at(i).cell);
     }
 }
 

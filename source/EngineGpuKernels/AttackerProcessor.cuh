@@ -34,8 +34,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Attacker];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto const& cell = operations.at(i).cell;
-        processCell(data, result, cell);
+        processCell(data, result, operations.at(i).cell);
     }
 }
 
@@ -54,7 +53,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
+        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::LivingState_UnderConstruction) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
             if (energyToTransfer < 0) {
                 continue;

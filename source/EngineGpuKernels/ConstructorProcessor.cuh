@@ -71,9 +71,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto const& operation = operations.at(i);
-        auto const& cell = operation.cell;
-        processCell(data, result, cell);
+        processCell(data, result, operations.at(i).cell);
     }
 }
 
@@ -176,7 +174,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
     Cell* result = nullptr;
     for (int i = 0; i < hostCell->numConnections; ++i) {
         auto const& connectingCell = hostCell->connections[i].cell;
-        if (connectingCell->constructionState == Enums::ConstructionState_UnderConstruction) {
+        if (connectingCell->constructionState == Enums::LivingState_UnderConstruction) {
             result = connectingCell;
         }
     }
@@ -215,7 +213,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.angleFromPreviousConnection, 0, distance);
     }
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->constructionState = Enums::ConstructionState_JustFinished;
+        newCell->constructionState = Enums::LivingState_JustReady;
     }
     if (adaptMaxConnections) {
         hostCell->maxConnections = hostCell->numConnections;
@@ -289,7 +287,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         data, newCell, underConstructionCell, angleFromPreviousForNewCell, angleFromPreviousForUnderConstructionCell, desiredDistance);
 
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->constructionState = Enums::ConstructionState_JustFinished;
+        newCell->constructionState = Enums::LivingState_JustReady;
     }
 
     Math::normalize(posDelta);
@@ -299,7 +297,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::ConstructionState_UnderConstruction) {
+        if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::LivingState_UnderConstruction) {
             continue;
         }
         if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
