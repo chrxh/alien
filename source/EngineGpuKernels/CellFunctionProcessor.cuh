@@ -16,6 +16,13 @@ public:
     __inline__ __device__ static Activity calcInputActivity(Cell* cell, int& inputExecutionOrderNumber);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
 
+    struct ReferenceAndActualAngle
+    {
+        float referenceAngle;
+        float actualAngle;
+    };
+    __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
+
 private:
     __inline__ __device__ static int calcInputExecutionOrder(Cell* cell);   //returns -1 if no input has been found
 };
@@ -113,6 +120,38 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
         cell->activity.channels[i] = newActivity.channels[i];
     }
     cell->activity = newActivity;
+}
+
+__inline__ __device__ CellFunctionProcessor::ReferenceAndActualAngle
+CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation)
+{
+    if (0 == cell->numConnections) {
+        return ReferenceAndActualAngle{0, 0};
+    }
+    auto displacement = cell->connections[0].cell->absPos - cell->absPos;
+    data.cellMap.correctDirection(displacement);
+    auto angle = Math::angleOfVector(displacement);
+    int index = 0;
+    float largestAngleGap = 0;
+    float angleOfLargestAngleGap = 0;
+    auto numConnections = cell->numConnections;
+    for (int i = 1; i <= numConnections; ++i) {
+        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
+        if (angleDiff > largestAngleGap) {
+            largestAngleGap = angleDiff;
+            index = i % numConnections;
+            angleOfLargestAngleGap = angle;
+        }
+        angle += angleDiff;
+    }
+    auto angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2 + angleDeviation;
+    if (angleFromPreviousConnection > 360.0f) {
+        angleFromPreviousConnection -= 360;
+    }
+
+    angleFromPreviousConnection = max(min(angleFromPreviousConnection, cell->connections[index].angleFromPrevious), 0.0f);
+
+    return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
 __inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* cell)
