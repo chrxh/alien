@@ -266,7 +266,8 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.cellMinDistance) * angleDeviation;
                     Math::rotateQuarterClockwise(force1);
 
-                    auto force2 = Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * angleDeviation;
+                    auto force2 =
+                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * angleDeviation;
                     Math::rotateQuarterCounterClockwise(force2);
 
                     if (abs(referenceAngleFromPrevious - actualAngleFromPrevious) < 180) {

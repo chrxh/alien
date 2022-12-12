@@ -54,9 +54,12 @@ __global__ void DEBUG_checkAngles(SimulationData data)
                 float sumAngles = 0;
                 for (int i = 0; i < cell->numConnections; ++i) {
                     sumAngles += cell->connections[i].angleFromPrevious;
-                    if (cell->connections[i].angleFromPrevious < - NEAR_ZERO) {
+                    if (cell->connections[i].angleFromPrevious < -NEAR_ZERO) {
                         printf("invalid angle: %f\n", cell->connections[i].angleFromPrevious);
                         CUDA_THROW_NOT_IMPLEMENTED();
+                    }
+                    if (cell->connections[i].angleFromPrevious < NEAR_ZERO) {
+                        printf("zero angle\n");
                     }
                 }
                 if (abs(360.0f - sumAngles) > 0.1f) {
