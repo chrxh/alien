@@ -42,9 +42,23 @@
                 "target color[6]": "6"
             },
             "function": {
+                "sensor": {
+                    "range": "255.00000000"
+                },
+                "constructor": {
+                    "inherit color": "true",
+                    "offspring distance": "2.00000000",
+                    "connecting cell max distance": "1.50000000",
+                    "activity threshold": "0.25000000"
+                },
                 "attacker": {
+                    "radius": "1.60000002",
                     "strength": "0.05000000",
+                    "energy distribution radius": "3.59999990",
+                    "energy distribution same color": "true",
+                    "energy distribution value": "10.00000000",
                     "inhomogeneity bonus": "1.00000000",
+                    "activity threshold": "0.25000000",
                     "energy cost": "0.00000000",
                     "geometry deviation exponent": "0.00000000",
                     "food chain color matrix[0, 0]": "0.00000000",
@@ -98,8 +112,15 @@
                     "food chain color matrix[6, 6]": "1.00000000",
                     "connections mismatch penalty": "0.33000001"
                 },
-                "sensor": {
-                    "range": "255.00000000"
+                "transmitter": {
+                    "energy distribution same color": "true",
+                    "energy distribution radius": "3.59999990",
+                    "energy distribution value": "10.00000000"
+                },
+                "muscle": {
+                    "contraction expansion delta": "0.05000000",
+                    "movement delta": "0.01000000",
+                    "bending angle": "5.00000000"
                 }
             }
         },
@@ -107,7 +128,27 @@
             "factor": "0.00000600",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
-            "velocity perturbation": "0.50000000"
+            "velocity perturbation": "0.50000000",
+            "absorption by cell color[0]": "false",
+            "absorption by cell color[1]": "false",
+            "absorption by cell color[2]": "true",
+            "absorption by cell color[3]": "false",
+            "absorption by cell color[4]": "false",
+            "absorption by cell color[5]": "false",
+            "absorption by cell color[6]": "false",
+            "min cell energy": "500.00000000",
+            "min cell age": "500000"
+        },
+        "cluster": {
+            "decay": "true",
+            "decay probability": "0.00010000"
+        },
+        "particle": {
+            "transformation allowed": "false",
+            "transformation": {
+                "random cell function": "false",
+                "max genome size": "300"
+            }
         },
         "spots": {
             "num spots": "0",
@@ -151,7 +192,7 @@
                     },
                     "function": {
                         "attacker": {
-                            "energy cost": "0.20000000",
+                            "energy cost": "0.00000000",
                             "geometry deviation exponent": "0.00000000",
                             "connections mismatch penalty": "0.33000001"
                         }
@@ -251,7 +292,7 @@
                     },
                     "function": {
                         "attacker": {
-                            "energy cost": "0.20000000",
+                            "energy cost": "0.00000000",
                             "geometry deviation exponent": "0.00000000",
                             "connections mismatch penalty": "0.33000001"
                         }
@@ -318,8 +359,8 @@
         "num centers": "1",
         "center0": {
             "pos": {
-                "x": "0.00000000",
-                "y": "0.00000000"
+                "x": "250.00000000",
+                "y": "100.00000000"
             },
             "radius": "200.00000000",
             "strength": "0.01000000"

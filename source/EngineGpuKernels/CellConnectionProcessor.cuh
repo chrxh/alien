@@ -30,9 +30,10 @@ public:
     __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
+
 private:
     __inline__ __device__ static void addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void addConnectionIntern(
+    __inline__ __device__ static void addConnectionOneWay(
         SimulationData& data,
         Cell* cell1,
         Cell* cell2,
@@ -40,9 +41,10 @@ private:
         float desiredDistance,
         float desiredAngleOnCell1 = 0,
         Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_None);
+    __inline__ __device__ static void checkAndCorrectZeroReferenceAngles(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void delConnectionsIntern(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void delConnectionIntern(Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void delConnectionsIntern(Cell* cell1, Cell* cell2);
 
     __inline__ __device__ static void delCell(SimulationData& data, Cell* cell, int cellIndex);
 };
@@ -105,7 +107,7 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::DelConnection == operation.type) {
-            delConnectionIntern(operation.data.delConnectionOperation.cell1, operation.data.delConnectionOperation.cell2);
+            delConnectionsIntern(operation.data.delConnectionOperation.cell1, operation.data.delConnectionOperation.cell2);
         }
         if (StructuralOperation::Type::DelConnections == operation.type) {
             delConnectionsIntern(data, operation.data.delConnectionsOperation.cell);
@@ -139,6 +141,7 @@ __inline__ __device__ void CellConnectionProcessor::processDelCellOperations(Sim
     }
 }
 
+
 __inline__ __device__ void CellConnectionProcessor::addConnections(
     SimulationData& data,
     Cell* cell1,
@@ -150,8 +153,10 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.correctDirection(posDelta);
-    addConnectionIntern(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment);
-    addConnectionIntern(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment);
+    addConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment);
+    addConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment);
+    checkAndCorrectZeroReferenceAngles(data, cell1);
+    checkAndCorrectZeroReferenceAngles(data, cell2);
 }
 
 __inline__ __device__ void
@@ -180,13 +185,15 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
             && cell2->numConnections < cell2->maxConnections) {
             auto posDelta = cell2->absPos - cell1->absPos;
             data.cellMap.correctDirection(posDelta);
-            addConnectionIntern(data, cell1, cell2, posDelta, Math::length(posDelta));
-            addConnectionIntern(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
+            addConnectionOneWay(data, cell1, cell2, posDelta, Math::length(posDelta));
+            addConnectionOneWay(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
+            checkAndCorrectZeroReferenceAngles(data, cell1);
+            checkAndCorrectZeroReferenceAngles(data, cell2);
 
-/*
+            /*
             //align connections
-            addConnectionIntern(data, cell1, cell2, posDelta, 1, 0, 6);
-            addConnectionIntern(data, cell2, cell1, posDelta * (-1), 1, 0, 6);
+            addConnectionOneWay(data, cell1, cell2, posDelta, 1, 0, 6);
+            addConnectionOneWay(data, cell2, cell1, posDelta * (-1), 1, 0, 6);
 */
         }
 
@@ -194,7 +201,7 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
+__inline__ __device__ void CellConnectionProcessor::addConnectionOneWay(
     SimulationData& data,
     Cell* cell1,
     Cell* cell2,
@@ -264,7 +271,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
             newConnection.angleFromPrevious = desiredAngleOnCell1;
         }
         newConnection.angleFromPrevious = min(newConnection.angleFromPrevious, refAngle);
-        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % 7);
+        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % Enums::ConstructorAngleAlignment_Count);
     }
 
     //add connection
@@ -277,7 +284,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
 
     //adjust reference angle of next connection
     auto nextAngleFromPrevious = refAngle - newConnection.angleFromPrevious;
-    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % 7);
+    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % Enums::ConstructorAngleAlignment_Count);
     auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
 
     auto nextIndex = (index + 1) % cell1->numConnections;
@@ -290,6 +297,61 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
         cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPrevious;
     }
 
+}
+
+__inline__ __device__ void CellConnectionProcessor::checkAndCorrectZeroReferenceAngles(SimulationData& data, Cell* cell)
+{
+    auto const n = cell->numConnections;
+
+    auto adaptRefAngles = false;
+    for (int i = 0; i < n; ++i) {
+        if (cell->connections[i].angleFromPrevious < NEAR_ZERO) {
+            adaptRefAngles = true;
+        }
+    }
+
+    if (!adaptRefAngles) {
+        return;
+    }
+
+    //calc absolute angles
+    float absAngles[MAX_CELL_BONDS];
+    for (int i = 0; i < n; ++i) {
+        auto& connection = cell->connections[i];
+        absAngles[i] = Math::angleOfVector(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
+    }
+
+    //bubble sort absolute angles
+    bool newRound = true;
+    for (int i = n - 1; i >= 1; --i) {
+        if (newRound) {
+            newRound = false;
+            for (int j = 0; j <= i - 1; ++j) {
+                if (absAngles[j] > absAngles[j + 1]) {
+                    {
+                        auto temp = cell->connections[j];
+                        cell->connections[j] = cell->connections[j + 1];
+                        cell->connections[j + 1] = temp;
+                    }
+                    {
+                        auto temp = absAngles[j];
+                        absAngles[j] = absAngles[j + 1];
+                        absAngles[j + 1] = temp;
+                    }
+                    newRound = true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+    //calc relative angles
+    for (int i = 0; i < n; ++i) {
+        auto const& angle = absAngles[i];
+        auto const& prevAngle = absAngles[(i + n - 1) % n];
+        cell->connections[i].angleFromPrevious = Math::subtractAngle(angle, prevAngle);
+    }
 }
 
 __inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(SimulationData& data, Cell* cell)
@@ -313,7 +375,7 @@ __inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Simulat
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::delConnectionIntern(Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* cell1, Cell* cell2)
 {
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
