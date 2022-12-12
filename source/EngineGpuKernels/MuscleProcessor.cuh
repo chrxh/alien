@@ -42,16 +42,16 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     int inputExecutionOrderNumber;
     auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
 
-    if (cell->cellFunctionData.muscle.mode == Enums::MuscleMode_Movement) {
+    switch (cell->cellFunctionData.muscle.mode) {
+    case Enums::MuscleMode_Movement: {
         movement(data, result, cell, inputExecutionOrderNumber, activity);
-    }
-
-    if (cell->cellFunctionData.muscle.mode == Enums::MuscleMode_ContractionExpansion) {
+    } break;
+    case Enums::MuscleMode_ContractionExpansion: {
         contractionExpansion(data, result, cell, inputExecutionOrderNumber, activity);
-    }
-
-    if (cell->cellFunctionData.muscle.mode == Enums::MuscleMode_Bending) {
+    } break;
+    case Enums::MuscleMode_Bending: {
         bending(data, result, cell, inputExecutionOrderNumber, activity);
+    } break;
     }
 
     CellFunctionProcessor::setActivity(cell, activity);

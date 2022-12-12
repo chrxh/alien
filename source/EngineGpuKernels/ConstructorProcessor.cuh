@@ -48,13 +48,6 @@ private:
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
 
-    struct AnglesForNewConnection
-    {
-        float angleFromPreviousConnection;
-        float angleForCell;
-    };
-    __inline__ __device__ static AnglesForNewConnection calcAnglesForNewConnection(SimulationData& data, Cell* cell, float angleDeviation);
-
     __inline__ __device__ static Cell* constructCellIntern(
         SimulationData& data,
         Cell* hostCell,
@@ -193,9 +186,9 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         return false;
     }
 
-    auto anglesForNewConnection = calcAnglesForNewConnection(data, hostCell, constructionData.angle);
+    auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.angleForCell) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
@@ -210,7 +203,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
-        CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.angleFromPreviousConnection, 0, distance);
+        CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::LivingState_JustReady;
@@ -337,37 +330,6 @@ __inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnection
         }
     }
     return true;
-}
-
-__inline__ __device__ auto ConstructorProcessor::calcAnglesForNewConnection(SimulationData& data, Cell* cell, float angleDeviation) -> AnglesForNewConnection
-{
-    if (0 == cell->numConnections) {
-        return AnglesForNewConnection{0, 0};
-    }
-    auto displacement = cell->connections[0].cell->absPos - cell->absPos;
-    data.cellMap.correctDirection(displacement);
-    auto angle = Math::angleOfVector(displacement);
-    int index = 0;
-    float largestAngleGap = 0;
-    float angleOfLargestAngleGap = 0;
-    auto numConnections = cell->numConnections;
-    for (int i = 1; i <= numConnections; ++i) {
-        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
-        if (angleDiff > largestAngleGap) {
-            largestAngleGap = angleDiff;
-            index = i % numConnections;
-            angleOfLargestAngleGap = angle;
-        }
-        angle += angleDiff;
-    }
-    auto angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2 + angleDeviation;
-    if (angleFromPreviousConnection > 360.0f) {
-        angleFromPreviousConnection -= 360;
-    }
-
-    angleFromPreviousConnection = max(min(angleFromPreviousConnection, cell->connections[index].angleFromPrevious), 0.0f);
-
-    return AnglesForNewConnection{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
 __inline__ __device__ Cell*
