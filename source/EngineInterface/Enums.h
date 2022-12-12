@@ -21,14 +21,14 @@ namespace Enums
         CellFunction_Count,
     };
 
-    using ConstructionState = int;
-    enum ConstructionState_
+    using LivingState = int;
+    enum LivingState_
     {
-        ConstructionState_Finished,
-        ConstructionState_UnderConstruction,
-        ConstructionState_JustFinished,
-        ConstructionState_Decay,
-        ConstructionState_Count
+        LivingState_Ready,
+        LivingState_UnderConstruction,
+        LivingState_JustReady,
+        LivingState_Dying,
+        LivingState_Count
     };
 
     using SensorMode = int;

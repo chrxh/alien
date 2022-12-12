@@ -25,8 +25,7 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
     auto& operations = data.cellFunctionOperations[Enums::CellFunction_Neuron];
     auto partition = calcPartition(operations.getNumEntries(), blockIdx.x, gridDim.x);
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto const& cell = operations.at(i).cell;
-        processCell(data, result, cell);
+        processCell(data, result, operations.at(i).cell);
     }
 }
 
