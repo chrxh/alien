@@ -160,6 +160,11 @@ struct SensorDescription
     auto operator<=>(SensorDescription const&) const = default;
 
     Enums::SensorMode getSensorMode() const { return fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood; }
+    SensorDescription& setColor(int value)
+    {
+        color = value;
+        return *this;
+    }
 };
 
 struct NerveDescription

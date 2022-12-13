@@ -27,10 +27,10 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
-             .setPos({11.0f, 10.0f})
+             .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
@@ -47,6 +47,115 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
 }
 
+TEST_F(SensorTests, scanNeighborhood_densityTooLow)
+{
+    DataDescription data;
+    data.addCells(
+        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+    auto actualAttackCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_wrongColor)
+{
+    DataDescription data;
+    data.addCells(
+        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription().setColor(1)),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+    auto actualAttackCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_foundInFront)
+{
+    DataDescription data;
+    data.addCells(
+        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+    auto actualAttackCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 85.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[3] > -15.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[3] < 15.0f / 256);
+}
+
+TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
+{
+    DataDescription data;
+    data.addCells(
+        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+
+    auto actualData = _simController->getSimulationData();
+    auto actualAttackCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
+    EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 85.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[3] > 70.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[3] < 105.0f / 256);
+}
 
 
 /*
