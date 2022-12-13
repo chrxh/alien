@@ -112,7 +112,7 @@ __inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& d
 __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData& data, Cell* cell)
 {
     auto cellFunctionConstructorMutationNeuronProbability =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronProbability, data, cell->absPos);
+        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability, data, cell->absPos);
     auto cellFunctionConstructorMutationDataProbability =
         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability, data, cell->absPos);
 

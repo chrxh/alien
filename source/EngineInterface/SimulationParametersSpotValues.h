@@ -28,7 +28,7 @@ struct SimulationParametersSpotValues
     float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
     float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
 
-    float cellFunctionConstructorMutationNeuronProbability = 0.001f;
+    float cellFunctionConstructorMutationNeuronDataProbability = 0.001f;
     float cellFunctionConstructorMutationDataProbability = 0;
     float cellFunctionConstructorMutationCellFunctionProbability = 0;
     float cellFunctionConstructorMutationInsertionProbability = 0;
@@ -55,7 +55,7 @@ struct SimulationParametersSpotValues
             && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
             && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
-            && cellFunctionConstructorMutationNeuronProbability == other.cellFunctionConstructorMutationNeuronProbability
+            && cellFunctionConstructorMutationNeuronDataProbability == other.cellFunctionConstructorMutationNeuronDataProbability
             && cellFunctionConstructorMutationDataProbability == other.cellFunctionConstructorMutationDataProbability
             && cellFunctionConstructorMutationCellFunctionProbability == other.cellFunctionConstructorMutationCellFunctionProbability
             && cellFunctionConstructorMutationInsertionProbability == other.cellFunctionConstructorMutationInsertionProbability

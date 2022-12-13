@@ -50,6 +50,7 @@ struct SimulationParameters
     float cellFunctionMuscleBendingAngle = 5.0f;
 
     float cellFunctionSensorRange = 255.0f;
+    float cellFunctionSensorActivityThreshold = 0.25f;
 
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
@@ -92,6 +93,7 @@ struct SimulationParameters
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
             && cellFunctionConstructionInheritColor == other.cellFunctionConstructionInheritColor && clusterDecayProb == other.clusterDecayProb
             && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge && radiationMinCellEnergy == other.radiationMinCellEnergy
+            && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
         ;
     }
 
