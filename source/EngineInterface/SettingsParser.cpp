@@ -75,8 +75,6 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             parserTask);
     }
     JsonParser::encodeDecode(
-        tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", parserTask);
-    JsonParser::encodeDecode(
         tree, simPar.spotValues.radiationFactor, defaultPar.spotValues.radiationFactor, "simulation parameters.radiation.factor", parserTask);
     JsonParser::encodeDecode(tree, simPar.radiationProb, defaultPar.radiationProb, "simulation parameters.radiation.probability", parserTask);
     JsonParser::encodeDecode(
@@ -128,6 +126,37 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         defaultPar.cellFunctionConstructorActivityThreshold,
         "simulation parameters.cell.function.constructor.activity threshold",
         parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionConstructorMutationNeuronDataProbability,
+        defaultPar.spotValues.cellFunctionConstructorMutationNeuronDataProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.neuron data",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionConstructorMutationDataProbability,
+        defaultPar.spotValues.cellFunctionConstructorMutationDataProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.data",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionConstructorMutationCellFunctionProbability,
+        defaultPar.spotValues.cellFunctionConstructorMutationCellFunctionProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.cell function",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionConstructorMutationInsertionProbability,
+        defaultPar.spotValues.cellFunctionConstructorMutationInsertionProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.insertion",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.spotValues.cellFunctionConstructorMutationDeletionProbability,
+        defaultPar.spotValues.cellFunctionConstructorMutationDeletionProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.deletion",
+        parserTask);
+
 
     JsonParser::encodeDecode(
         tree, simPar.cellFunctionAttackerRadius, defaultPar.cellFunctionAttackerRadius,
@@ -255,6 +284,15 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         "simulation parameters.particle.transformation.max genome size",
         parserTask);
 
+    JsonParser::encodeDecode(
+        tree, simPar.cellFunctionSensorRange, defaultPar.cellFunctionSensorRange, "simulation parameters.cell.function.sensor.range", parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        simPar.cellFunctionSensorActivityThreshold,
+        defaultPar.cellFunctionSensorActivityThreshold,
+        "simulation parameters.cell.function.sensor.activity threshold",
+        parserTask);
+
     //spots
     auto& spots = settings.simulationParametersSpots;
     auto& defaultSpots = defaultSettings.simulationParametersSpots;
@@ -327,6 +365,36 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
             defaultSpot.values.cellFunctionAttackerConnectionsMismatchPenalty,
             base + "cell.function.attacker.connections mismatch penalty",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationNeuronDataProbability,
+            defaultSpot.values.cellFunctionConstructorMutationNeuronDataProbability,
+            base + "cell.function.constructor.mutation probability.neuron data",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationDataProbability,
+            defaultSpot.values.cellFunctionConstructorMutationDataProbability,
+            base + " cell.function.constructor.mutation probability.data ",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationCellFunctionProbability,
+            defaultSpot.values.cellFunctionConstructorMutationCellFunctionProbability,
+            base + "cell.function.constructor.mutation probability.cell function",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationInsertionProbability,
+            defaultSpot.values.cellFunctionConstructorMutationInsertionProbability,
+            base + "cell.function.constructor.mutation probability.insertion",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationDeletionProbability,
+            defaultSpot.values.cellFunctionConstructorMutationDeletionProbability,
+            base + "cell.function.constructor.mutation probability.deletion",
             parserTask);
     }
 

@@ -42,12 +42,15 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     }
     __syncthreads();
 
-    switch (cell->cellFunctionData.sensor.mode) {
-    case Enums::SensorMode_Neighborhood: {
-        searchNeighborhood(data, result, cell, activity);
-    } break;
-    case Enums::SensorMode_FixedAngle: {
-    } break;
+    if (activity.channels[0] > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
+        switch (cell->cellFunctionData.sensor.mode) {
+        case Enums::SensorMode_Neighborhood: {
+            searchNeighborhood(data, result, cell, activity);
+        } break;
+        case Enums::SensorMode_FixedAngle: {
+            searchByAngle(data, result, cell, activity);
+        } break;
+        }
     }
     __syncthreads();
 
