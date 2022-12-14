@@ -275,7 +275,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         CellConnectionProcessor::addConnections(
             data, hostCell, newCell, angleFromPreviousForCell, 0, distance);
     }
-    auto angleFromPreviousForNewCell = 180.0f + constructionData.angle;
+    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
     CellConnectionProcessor::addConnections(
         data, newCell, underConstructionCell, angleFromPreviousForNewCell, angleFromPreviousForUnderConstructionCell, desiredDistance);
 

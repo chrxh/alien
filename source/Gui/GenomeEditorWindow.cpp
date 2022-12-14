@@ -396,7 +396,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxContentTextWidth), constructor.angleAlignment);
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(MaxContentTextWidth),
+                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(MaxContentTextWidth),
                 constructor.stiffness);
             table.next();
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxContentTextWidth), constructor.constructionActivationTime);
