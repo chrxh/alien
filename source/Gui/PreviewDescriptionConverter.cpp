@@ -86,7 +86,7 @@ namespace
 
             result.cells.emplace_back(cell);
             if (index > 0) {
-                direction = Math::rotateClockwise(-direction, -(180.0f + node.referenceAngle));
+                direction = Math::rotateClockwise(-direction, -(180.0f - node.referenceAngle));
                 result.connections.emplace_back(prevPos, pos);
             }
 

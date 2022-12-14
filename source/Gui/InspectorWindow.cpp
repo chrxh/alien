@@ -148,7 +148,7 @@ void _InspectorWindow::showCellPhysicsTab(CellDescription& cell)
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.y);
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.x);
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.y);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth), cell.stiffness);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), cell.stiffness);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
         }
@@ -427,6 +427,7 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
     cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
     cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
+    cell.energy = std::max(0.0f, cell.energy);
     switch (cell.getCellFunctionType()) {
     case Enums::CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
