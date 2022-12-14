@@ -410,7 +410,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
 
             table.next();
             if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Neighborhood", "Fixed angle scan"}), sensorMode)) {
+                    AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Scan vicinity", "Scan specific region"}), sensorMode)) {
                 if (sensorMode == Enums::SensorMode_Neighborhood) {
                     sensor.fixedAngle.reset();
                 } else {

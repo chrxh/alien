@@ -36,6 +36,7 @@ private:
     void showAttackerContent(AttackerDescription& attacker);
     void showTransmitterContent(TransmitterDescription& transmitter);
     void showMuscleContent(MuscleDescription& muscle);
+    void showSensorContent(SensorDescription& sensor);
 
     void processParticle(ParticleDescription particle);
 
