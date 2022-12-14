@@ -22,7 +22,6 @@ SimulationParametersCalculator _SimulationParametersCalculator::createWithRandom
     target.spotValues.radiationFactor = numberGenerator.getRandomFloat(0.0f, 0.7f) / 1000;
     target.spotValues.cellMaxForce = numberGenerator.getRandomFloat(0.1f, 1.0f);
     target.spotValues.cellMinEnergy = numberGenerator.getRandomFloat(25.0f, 80.0f);
-    target.spotValues.cellBindingForce = numberGenerator.getRandomFloat(0.3f, 2.0f);
     target.spotValues.cellFusionVelocity = numberGenerator.getRandomFloat(0.0f, 1.0f);
     target.spotValues.cellFunctionAttackerEnergyCost = numberGenerator.getRandomFloat(0.0f, 3.0f);
     for (int i = 0; i < 7; ++i) {
@@ -75,7 +74,6 @@ SimulationParameters _SimulationParametersCalculator::calcCurrentParameters() co
     result.spotValues.radiationFactor = calcCurrentParameter(_source.spotValues.radiationFactor, _target.spotValues.radiationFactor);
     result.spotValues.cellMaxForce = calcCurrentParameter(_source.spotValues.cellMaxForce, _target.spotValues.cellMaxForce);
     result.spotValues.cellMinEnergy = calcCurrentParameter(_source.spotValues.cellMinEnergy, _target.spotValues.cellMinEnergy);
-    result.spotValues.cellBindingForce = calcCurrentParameter(_source.spotValues.cellBindingForce, _target.spotValues.cellBindingForce);
     result.spotValues.cellFusionVelocity = calcCurrentParameter(_source.spotValues.cellFusionVelocity, _target.spotValues.cellFusionVelocity);
     result.spotValues.cellFunctionAttackerEnergyCost =
         calcCurrentParameter(_source.spotValues.cellFunctionAttackerEnergyCost, _target.spotValues.cellFunctionAttackerEnergyCost);
