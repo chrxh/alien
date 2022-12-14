@@ -55,6 +55,7 @@ struct ConstructorTO
     bool separateConstruction;
     bool adaptMaxConnections;
     Enums::ConstructorAngleAlignment angleAlignment;
+    float stiffness;
     int constructionActivationTime;
 
     uint64_t genomeSize;
@@ -120,15 +121,16 @@ struct CellTO
     float2 pos;
     float2 vel;
 	float energy;
+    float stiffness;
     int color;
     int maxConnections;
 	int numConnections;
     bool barrier;
     int age;
-    Enums::LivingState constructionState;
 
     //cell function
-	int executionOrderNumber;
+    Enums::LivingState constructionState;
+    int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;
     Enums::CellFunction cellFunction;

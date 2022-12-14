@@ -15,6 +15,7 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
                                .setId(NumberGenerator::getInstance().getId())
                                .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .setEnergy(parameters._energy)
+                               .setStiffness(parameters._stiffness)
                                .setMaxConnections(parameters._maxConnection)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier));

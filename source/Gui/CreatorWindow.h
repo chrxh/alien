@@ -39,6 +39,7 @@ private:
     void incBranchNumber();
 
     float _energy = 100.0f;
+    float _stiffness = 1.0f;
     bool _barrier = false;
     float _cellDistance = 1.0f;
     bool _makeSticky = false;

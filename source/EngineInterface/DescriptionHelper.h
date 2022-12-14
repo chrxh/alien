@@ -12,6 +12,7 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, int, height, 10);
         MEMBER_DECLARATION(CreateRectParameters, float, cellDistance, 1.0f);
         MEMBER_DECLARATION(CreateRectParameters, float, energy, 100.0f);
+        MEMBER_DECLARATION(CreateRectParameters, float, stiffness, 1.0f);
         MEMBER_DECLARATION(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER_DECLARATION(CreateRectParameters, bool, removeStickiness, false);
         MEMBER_DECLARATION(CreateRectParameters, int, maxConnection, 6);

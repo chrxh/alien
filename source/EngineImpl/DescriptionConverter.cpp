@@ -366,6 +366,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result.vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
     result.energy = cellTO.energy;
+    result.stiffness = cellTO.stiffness;
     result.maxConnections = cellTO.maxConnections;
     std::vector<ConnectionDescription> connections;
     for (int i = 0; i < cellTO.numConnections; ++i) {
@@ -422,6 +423,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
         constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
         constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
+        constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
@@ -495,7 +497,8 @@ void DescriptionConverter::addCell(
 	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
     cellTO.energy = cellDesc.energy;
-	cellTO.maxConnections = cellDesc.maxConnections;
+    cellTO.stiffness = cellDesc.stiffness;
+    cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.constructionState = cellDesc.constructionState;
     cellTO.inputBlocked = cellDesc.inputBlocked;
@@ -525,6 +528,7 @@ void DescriptionConverter::addCell(
         constructorTO.separateConstruction = constructorDesc.separateConstruction;
         constructorTO.adaptMaxConnections = constructorDesc.adaptMaxConnections;
         constructorTO.angleAlignment = constructorDesc.angleAlignment;
+        constructorTO.stiffness = constructorDesc.stiffness;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;

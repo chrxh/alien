@@ -238,7 +238,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation / 2 * cellBindingForce;
+            force = force + Math::normalized(displacement) * deviation * cellBindingForce * (cell->stiffness + connectedCell->stiffness) / 4;
 
             if (considerAngles && cell->numConnections >= 2) {
 
@@ -261,13 +261,13 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                     auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                    auto angleDeviation = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellBindingForce;
+                    auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellBindingForce * cell->stiffness;
 
-                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.cellMinDistance) * angleDeviation;
+                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.cellMinDistance) * strength;
                     Math::rotateQuarterClockwise(force1);
 
                     auto force2 =
-                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * angleDeviation;
+                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * strength;
                     Math::rotateQuarterCounterClockwise(force2);
 
                     if (abs(referenceAngleFromPrevious - actualAngleFromPrevious) < 180) {
