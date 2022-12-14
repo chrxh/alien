@@ -101,6 +101,7 @@ struct ConstructorDescription
     bool separateConstruction = true;
     bool adaptMaxConnections = true;
     Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_60;
+    float stiffness = 1.0f;
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
 
@@ -132,6 +133,11 @@ struct ConstructorDescription
     ConstructorDescription& setAngleAlignment(Enums::ConstructorAngleAlignment value)
     {
         angleAlignment = value;
+        return *this;
+    }
+    ConstructorDescription& setStiffness(float value)
+    {
+        stiffness = value;
         return *this;
     }
     ConstructorDescription& setConstructionActivationTime(int value)
@@ -241,13 +247,14 @@ struct CellDescription
     RealVector2D pos;
     RealVector2D vel;
     float energy = 100.0f;
+    float stiffness = 1.0f;
     int color = 0;
     int maxConnections = 0;
     bool barrier = false;
     int age = 0;
-    Enums::LivingState constructionState = Enums::LivingState_Ready;
 
     //cell function
+    Enums::LivingState constructionState = Enums::LivingState_Ready;
     int executionOrderNumber = 0;
     bool inputBlocked = false;
     bool outputBlocked = false;
@@ -278,6 +285,11 @@ struct CellDescription
     CellDescription& setEnergy(float value)
     {
         energy = value;
+        return *this;
+    }
+    CellDescription& setStiffness(float value)
+    {
+        stiffness = value;
         return *this;
     }
     CellDescription& setColor(unsigned char value)

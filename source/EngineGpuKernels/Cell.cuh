@@ -50,6 +50,7 @@ struct ConstructorFunction
     bool separateConstruction;
     bool adaptMaxConnections;
     Enums::ConstructorAngleAlignment angleAlignment;
+    float stiffness;
     int constructionActivationTime;
 
     //genome
@@ -119,12 +120,13 @@ struct Cell
     int maxConnections;
     int numConnections;
     float energy;
+    float stiffness;
     int color;
     bool barrier;
     int age;
-    Enums::LivingState constructionState;
 
     //cell function
+    Enums::LivingState constructionState;
     int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;

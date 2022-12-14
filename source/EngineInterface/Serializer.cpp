@@ -114,6 +114,7 @@ namespace cereal
            data.pos,
            data.vel,
            data.energy,
+           data.stiffness,
            data.color,
            data.maxConnections,
            data.executionOrderNumber,

@@ -24,6 +24,7 @@ namespace
         cellTO.vel = cell->vel;
         cellTO.barrier = cell->barrier;
         cellTO.energy = cell->energy;
+        cellTO.stiffness = cell->stiffness;
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
         cellTO.executionOrderNumber = cell->executionOrderNumber;
@@ -81,6 +82,7 @@ namespace
             cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
             cellTO.cellFunctionData.constructor.adaptMaxConnections = cell->cellFunctionData.constructor.adaptMaxConnections;
             cellTO.cellFunctionData.constructor.angleAlignment = cell->cellFunctionData.constructor.angleAlignment;
+            cellTO.cellFunctionData.constructor.stiffness = cell->cellFunctionData.constructor.stiffness;
             cellTO.cellFunctionData.constructor.constructionActivationTime = cell->cellFunctionData.constructor.constructionActivationTime;
             copyAuxiliaryData(
                 cell->cellFunctionData.constructor.genomeSize,

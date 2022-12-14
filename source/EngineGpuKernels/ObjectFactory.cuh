@@ -88,6 +88,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
+    cell->stiffness = cellTO.stiffness;
     cell->cellFunction = cellTO.cellFunction;
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
@@ -125,6 +126,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
         cell->cellFunctionData.constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
         cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
+        cell->cellFunctionData.constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
             cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
@@ -213,6 +215,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     result->absPos = pos;
     result->vel = vel;
     result->energy = energy;
+    result->stiffness = _data->numberGen1.random();
     result->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
     result->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
     result->numConnections = 0;
@@ -257,6 +260,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             result->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
             result->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
             result->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(Enums::ConstructorAngleAlignment_Count - 1);
+            result->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             result->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             result->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
             result->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.constructor.genomeSize);
@@ -307,6 +311,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     *cellPointer = result;
 
     result->id = _data->numberGen1.createNewId_kernel();
+    result->stiffness = 1.0f;
     result->selected = 0;
     result->locked = 0;
     result->color = 0;

@@ -73,12 +73,15 @@ void _CreatorWindow::processIntern()
     }
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        auto parameters = _simController->getSimulationParameters();
 
         AlienImGui::Group(ModeText.at(_mode));
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxContentTextWidth), _barrier);
+        if (_mode != CreationMode::CreateParticle) {
+            AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(MaxContentTextWidth), _stiffness);
+        }
         
-        auto parameters = _simController->getSimulationParameters();
         if (_mode == CreationMode::CreateCell) {
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
@@ -158,6 +161,7 @@ void _CreatorWindow::onDrawing()
                         .setId(NumberGenerator::getInstance().getId())
                         .setPos(pos)
                         .setEnergy(_energy)
+                        .setStiffness(_stiffness)
                         .setMaxConnections(maxConnections)
                         .setExecutionOrderNumber(_lastBranchNumber)
                         .setColor(_editorModel->getDefaultColorCode());
@@ -204,6 +208,7 @@ void _CreatorWindow::createCell()
     auto cell = CellDescription()
                     .setPos(getRandomPos())
                     .setEnergy(_energy)
+                    .setStiffness(_stiffness)
                     .setMaxConnections(_maxConnections)
                     .setExecutionOrderNumber(_lastBranchNumber)
                     .setColor(_editorModel->getDefaultColorCode())
@@ -232,6 +237,7 @@ void _CreatorWindow::createRectangle()
                                                   .height(_rectVerticalCells)
                                                   .cellDistance(_cellDistance)
                                                   .energy(_energy)
+                                                  .stiffness(_stiffness)
                                                   .removeStickiness(!_makeSticky)
                                                   .maxConnection(!_makeSticky ? parameters.cellMaxBonds : _maxConnections)
                                                   .color(_editorModel->getDefaultColorCode())
@@ -259,6 +265,7 @@ void _CreatorWindow::createHexagon()
             data.addCell(CellDescription()
                              .setId(NumberGenerator::getInstance().getId())
                              .setEnergy(_energy)
+                             .setStiffness(_stiffness)
                              .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(-j * incY)})
                              .setMaxConnections(maxConnections)
                              .setColor(_editorModel->getDefaultColorCode())
@@ -269,6 +276,7 @@ void _CreatorWindow::createHexagon()
                 data.addCell(CellDescription()
                                  .setId(NumberGenerator::getInstance().getId())
                                  .setEnergy(_energy)
+                                 .setStiffness(_stiffness)
                                  .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(j * incY)})
                                  .setMaxConnections(maxConnections)
                                  .setColor(_editorModel->getDefaultColorCode())
@@ -312,6 +320,7 @@ void _CreatorWindow::createDisc()
             data.addCell(CellDescription()
                              .setId(NumberGenerator::getInstance().getId())
                              .setEnergy(_energy)
+                             .setStiffness(_stiffness)
                              .setPos(relPos)
                              .setMaxConnections(maxConnections)
                              .setColor(_editorModel->getDefaultColorCode())

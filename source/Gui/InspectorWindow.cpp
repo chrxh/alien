@@ -148,6 +148,7 @@ void _InspectorWindow::showCellPhysicsTab(CellDescription& cell)
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.y);
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.x);
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.y);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth), cell.stiffness);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
         }
@@ -334,6 +335,8 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
+    AlienImGui::InputFloat(
+        AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth), constructor.stiffness);
     AlienImGui::InputInt(
         AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
 }
@@ -423,6 +426,7 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
 
     cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
     cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+    cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
     switch (cell.getCellFunctionType()) {
     case Enums::CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
@@ -435,6 +439,7 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
+        constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
     }
 }
