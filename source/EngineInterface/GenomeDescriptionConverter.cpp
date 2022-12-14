@@ -8,6 +8,13 @@
 namespace
 {
     void writeInt(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
+    void writeBool(std::vector<uint8_t>& data, bool value) { data.emplace_back(value ? 1 : 0); }
+    void writeFloat(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value * 128))); }
+    void writeWord(std::vector<uint8_t>& data, int value)
+    {
+        data.emplace_back(static_cast<uint8_t>(value & 0xff));
+        data.emplace_back(static_cast<uint8_t>((value >> 8) % 0xff));
+    }
     void writeAngle(std::vector<uint8_t>& data, float value)
     {
         if (value > 180.0f) {
@@ -21,16 +28,10 @@ namespace
     void writeDistance(std::vector<uint8_t>& data, float value) {data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value - 1.0f) * 128))); }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
-        CHECK(std::abs(value) <= 2);
-        data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value / 2 * 128)));
+        CHECK(std::abs(value) < 2 + NEAR_ZERO);
+        writeFloat(data, value / 2);
     }
-    void writeBool(std::vector<uint8_t>& data, bool value) {data.emplace_back(value ? 1 : 0); }
-    void writeFloat(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value * 128))); }
-    void writeWord(std::vector<uint8_t>& data, int value)
-    {
-        data.emplace_back(static_cast<uint8_t>(value & 0xff));
-        data.emplace_back(static_cast<uint8_t>((value >> 8) % 0xff));
-    }
+    void writeStiffness(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(value * 255)); }
     void writeGenome(std::vector<uint8_t>& data, std::variant<MakeGenomeCopy, std::vector<uint8_t>> const& value)
     {
         auto makeGenomeCopy = std::holds_alternative<MakeGenomeCopy>(value);
@@ -58,6 +59,11 @@ namespace
     float readFloat(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 128.0f; }
     float readAngle(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 120 * 180; }
     float readDensity(std::vector<uint8_t> const& data, int& pos) { return (readFloat(data, pos) + 1.0f) / 2; }
+    float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 2; }
+    float readStiffness(std::vector<uint8_t> const& data, int& pos)
+    {
+        return static_cast<float>(readByte(data, pos)) / 255;
+    }
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> readGenome(std::vector<uint8_t> const& data, int& pos)
     {
@@ -116,6 +122,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeBool(result, constructor.separateConstruction);
             writeBool(result, constructor.adaptMaxConnections);
             writeInt(result, constructor.angleAlignment);
+            writeStiffness(result, constructor.stiffness);
             writeWord(result, constructor.constructionActivationTime);
             writeGenome(result, constructor.genome);
         } break;
@@ -170,11 +177,11 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             NeuronGenomeDescription neuron;
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
-                    neuron.weights[row][col] = readFloat(data, pos) * 2;
+                    neuron.weights[row][col] = readNeuronProperty(data, pos);
                 }
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                neuron.bias[i] = readFloat(data, pos) * 2;
+                neuron.bias[i] = readNeuronProperty(data, pos);
             }
             cell.cellFunction = neuron;
         } break;
@@ -190,6 +197,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             constructor.separateConstruction = readBool(data, pos);
             constructor.adaptMaxConnections = readBool(data, pos);
             constructor.angleAlignment = readByte(data, pos) % Enums::ConstructorAngleAlignment_Count;
+            constructor.stiffness = readStiffness(data, pos);
             constructor.constructionActivationTime = readWord(data, pos);
             constructor.genome = readGenome(data, pos);
             cell.cellFunction = constructor;

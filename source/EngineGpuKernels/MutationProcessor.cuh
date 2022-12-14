@@ -21,7 +21,7 @@ private:
     static int constexpr CellBasicBytes = 8;
     static int constexpr NeuronBytes = 72;
     static int constexpr TransmitterBytes = 1;
-    static int constexpr ConstructorFixedBytes = 7;
+    static int constexpr ConstructorFixedBytes = 8;
     static int constexpr SensorBytes = 4;
     static int constexpr NerveBytes = 0;
     static int constexpr AttackerBytes = 1;

@@ -399,6 +399,10 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             AlienImGui::AngleAlignmentCombo(
                 AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxContentTextWidth), constructor.angleAlignment);
             table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(MaxContentTextWidth),
+                constructor.stiffness);
+            table.next();
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxContentTextWidth), constructor.constructionActivationTime);
         } break;
         case Enums::CellFunction_Sensor: {
@@ -535,6 +539,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
+        constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
     }
 }
