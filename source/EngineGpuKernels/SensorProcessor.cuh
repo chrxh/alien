@@ -62,7 +62,6 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
 {
     __shared__ int minDensity;
-    __shared__ int maxDensity;
     __shared__ int color;
     __shared__ float refScanAngle;
     __shared__ uint32_t lookupResult;
@@ -71,7 +70,6 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
         refScanAngle = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, cell, 0).actualAngle;
 
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
-        maxDensity = 255;
         color = cell->cellFunctionData.sensor.color;
 
         lookupResult = 0xffffffff;
@@ -87,7 +85,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
             auto scanPos = cell->absPos + delta;
             data.cellMap.correctPosition(scanPos);
             auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
-            if (density >= minDensity && density <= maxDensity) {
+            if (density >= minDensity) {
                 auto relAngle = Math::subtractAngle(angle, refScanAngle);
                 uint32_t angle = convertAngleToData(relAngle);
                 uint32_t combined = static_cast<uint32_t>(radius) << 16 | density << 8 | angle;
@@ -113,14 +111,12 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
 __inline__ __device__ void SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
 {
     __shared__ int minDensity;
-    __shared__ int maxDensity;
     __shared__ int color;
     __shared__ float2 searchDelta;
     __shared__ uint32_t lookupResult;
 
     if (threadIdx.x == 0) {
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
-        maxDensity = 255;
         color = cell->cellFunctionData.sensor.color;
 
         auto refScanAngle = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, cell, 0).actualAngle;
@@ -133,11 +129,11 @@ __inline__ __device__ void SensorProcessor::searchByAngle(SimulationData& data, 
 
     auto const partition = calcPartition(NumScanPoints, threadIdx.x, blockDim.x);
     for (int distanceIndex = partition.startIndex; distanceIndex <= partition.endIndex; ++distanceIndex) {
-        auto distance = 12.0f + cudaSimulationParameters.cellFunctionSensorRange / NumScanPoints * distanceIndex;
+        auto distance = 14.0f + cudaSimulationParameters.cellFunctionSensorRange / NumScanPoints * distanceIndex;
         auto scanPos = cell->absPos + searchDelta * distance;
         data.cellMap.correctPosition(scanPos);
         auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
-        if (density >= minDensity && density <= maxDensity) {
+        if (density >= minDensity) {
             uint32_t combined = static_cast<uint32_t>(distance) << 8 | static_cast<uint32_t>(density);
             atomicMin(&lookupResult, combined);
         }

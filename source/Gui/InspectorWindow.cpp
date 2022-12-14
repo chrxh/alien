@@ -229,6 +229,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
                 showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Sensor: {
+                showSensorContent(std::get<SensorDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Nerve: {
             } break;
@@ -330,6 +331,22 @@ void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
             .name("Mode").values({"Movement", "Contraction and expansion", "Bending"})
             .textWidth(MaxCellContentTextWidth),
         muscle.mode);
+}
+
+void _InspectorWindow::showSensorContent(SensorDescription& sensor)
+{
+    AlienImGui::Group("Properties");
+    int mode = sensor.getSensorMode();
+    if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific region"}).textWidth(MaxCellContentTextWidth), mode)) {
+        if (mode == Enums::SensorMode_Neighborhood) {
+            sensor.fixedAngle.reset();
+        } else {
+            sensor.fixedAngle = 0.0f;
+        }
+    }
+    if (sensor.fixedAngle) {
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").format("%.1f").textWidth(MaxCellContentTextWidth), *sensor.fixedAngle);
+    }
 }
 
 void _InspectorWindow::processParticle(ParticleDescription particle)
