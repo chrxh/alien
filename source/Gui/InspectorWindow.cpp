@@ -24,6 +24,7 @@ namespace
     auto const CellWindowWidth = 350.0f;
     auto const ParticleWindowWidth = 280.0f;
     auto const MaxCellContentTextWidth = 180.0f;
+    auto const MaxCellMetadataContentTextWidth = 80.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
 }
 
@@ -123,8 +124,11 @@ void _InspectorWindow::processCell(CellDescription cell)
     if (ImGui::BeginTabBar(
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
-        showCellGeneralTab(cell);
+        showCellPhysicsTab(cell);
         showCellFunctionTab(cell);
+        showCellFunctionPropertiesTab(cell);
+        showCellGenomeTab(cell);
+        showCellMetadataTab(cell);
         validationAndCorrection(cell);
 
         ImGui::EndTabBar();
@@ -135,14 +139,30 @@ void _InspectorWindow::processCell(CellDescription cell)
     }
 }
 
-void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
+void _InspectorWindow::showCellPhysicsTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
+    if (ImGui::BeginTabItem("Physics", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::Group("Properties");
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxCellContentTextWidth), cell.energy);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.x);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.y);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.x);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.y);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
+        }
+        ImGui::EndChild();
+        ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
+{
+    if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto const& parameters = _simController->getSimulationParameters();
             int type = cell.getCellFunctionType();
-            if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(MaxCellContentTextWidth), type)) {
+            if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Function").textWidth(MaxCellContentTextWidth), type)) {
                 switch (type) {
                 case Enums::CellFunction_Neuron: {
                     cell.cellFunction = NeuronDescription();
@@ -180,13 +200,9 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
                 }
             }
 
-            auto energy = toFloat(cell.energy);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(MaxCellContentTextWidth), energy);
-            cell.energy = energy;
-
+            AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(MaxCellContentTextWidth), cell.color);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(MaxCellContentTextWidth), cell.age);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(MaxCellContentTextWidth), cell.activationTime);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxCellContentTextWidth), cell.executionOrderNumber);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxCellContentTextWidth), cell.inputBlocked);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(MaxCellContentTextWidth), cell.outputBlocked);
@@ -196,27 +212,20 @@ void _InspectorWindow::showCellGeneralTab(CellDescription& cell)
                     .textWidth(MaxCellContentTextWidth)
                     .values({"Ready", "Under construction", "Just ready", "Dying"}),
                 cell.constructionState);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
 
-            AlienImGui::Group("Metadata");
-
-            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellContentTextWidth), cell.metadata.name);
-
-            AlienImGui::InputTextMultiline(
-                AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(MaxCellContentTextWidth).height(0), cell.metadata.description);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
     }
 }
 
-void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
+void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
 {
     if (cell.getCellFunctionType() == Enums::CellFunction_None) {
         return;
     }
 
-    std::string title = Const::CellFunctionToStringMap.at(cell.getCellFunctionType()) + " function";
+    std::string title = Const::CellFunctionToStringMap.at(cell.getCellFunctionType());
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             switch (cell.getCellFunctionType()) {
@@ -246,6 +255,63 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
             case Enums::CellFunction_Placeholder2: {
             } break;
             }
+            showActivityContent(cell);
+        }
+        ImGui::EndChild();
+        ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
+{
+    if (cell.getCellFunctionType() != Enums::CellFunction_Constructor) {
+        return;
+    }
+    auto constructor = std::get<ConstructorDescription>(*cell.cellFunction);
+    auto const& parameters = _simController->getSimulationParameters();
+
+    if (ImGui::BeginTabItem("Genome", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            auto width = ImGui::GetContentRegionAvail().x;
+            if (ImGui::BeginChild("##", ImVec2(width, ImGui::GetTextLineHeight() * 2), true)) {
+                AlienImGui::MonospaceText(std::to_string(constructor.genome.size()) + " bytes of genetic information");
+            }
+            ImGui::EndChild();
+
+            ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
+            if (AlienImGui::Button("Paste")) {
+                constructor.genome = *_editorModel->getCopiedGenome();
+            }
+            ImGui::EndDisabled();
+
+            ImGui::SameLine();
+            if (AlienImGui::Button("Edit")) {
+                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
+            }
+
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Read position").textWidth(MaxCellContentTextWidth), constructor.currentGenomePos);
+
+            AlienImGui::Group("Preview");
+            if (ImGui::BeginChild("##child", ImVec2(0, StyleRepository::getInstance().scaleContent(200)), true)) {
+                auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters);
+                auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
+                AlienImGui::ShowPreviewDescription(previewDesc);
+            }
+            ImGui::EndChild();
+        }
+        ImGui::EndChild();
+        ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::showCellMetadataTab(CellDescription& cell)
+{
+    if (ImGui::BeginTabItem("Metadata", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(MaxCellMetadataContentTextWidth), cell.metadata.name);
+
+            AlienImGui::InputTextMultiline(
+                AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(MaxCellMetadataContentTextWidth).height(100), cell.metadata.description);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
@@ -256,7 +322,6 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
 {
     auto parameters = _simController->getSimulationParameters();
     
-    AlienImGui::Group("Properties");
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxCellContentTextWidth), constructor.adaptMaxConnections);
@@ -271,39 +336,10 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
     AlienImGui::InputInt(
         AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
-
-    AlienImGui::Group("Genome");
-    auto width = ImGui::GetContentRegionAvail().x;
-    if (ImGui::BeginChild("##", ImVec2(width, ImGui::GetTextLineHeight() * 2), true)) {
-        AlienImGui::MonospaceText(std::to_string(constructor.genome.size()) + " bytes of genetic information");
-    }
-    ImGui::EndChild();
-
-    ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
-    if (AlienImGui::Button("Paste")) {
-        constructor.genome = *_editorModel->getCopiedGenome();
-    }
-    ImGui::EndDisabled();
-
-    ImGui::SameLine();
-    if (AlienImGui::Button("Edit")) {
-        _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
-    }
-
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Read position").textWidth(MaxCellContentTextWidth), constructor.currentGenomePos);
-
-    AlienImGui::Group("Preview");
-    if (ImGui::BeginChild("##child", ImVec2(0, StyleRepository::getInstance().scaleContent(200)), true)) {
-        auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters);
-        auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
-        AlienImGui::ShowPreviewDescription(previewDesc);
-    }
-    ImGui::EndChild();
 }
 
 void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
 {
-    AlienImGui::Group("Properties");
     AlienImGui::Combo(
         AlienImGui::ComboParameters()
             .name("Energy distribution")
@@ -314,7 +350,6 @@ void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
 
 void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitter)
 {
-    AlienImGui::Group("Properties");
     AlienImGui::Combo(
         AlienImGui::ComboParameters()
             .name("Energy distribution")
@@ -325,7 +360,6 @@ void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitte
 
 void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
 {
-    AlienImGui::Group("Properties");
     AlienImGui::Combo(
         AlienImGui::ComboParameters()
             .name("Mode").values({"Movement", "Contraction and expansion", "Bending"})
@@ -335,7 +369,6 @@ void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
 
 void _InspectorWindow::showSensorContent(SensorDescription& sensor)
 {
-    AlienImGui::Group("Properties");
     int mode = sensor.getSensorMode();
     if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific region"}).textWidth(MaxCellContentTextWidth), mode)) {
         if (mode == Enums::SensorMode_Neighborhood) {
@@ -346,6 +379,18 @@ void _InspectorWindow::showSensorContent(SensorDescription& sensor)
     }
     if (sensor.fixedAngle) {
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").format("%.1f").textWidth(MaxCellContentTextWidth), *sensor.fixedAngle);
+    }
+}
+
+void _InspectorWindow::showActivityContent(CellDescription& cell)
+{
+    AlienImGui::Group("Activity");
+    int index = 0;
+    for (auto& channel : cell.activity.channels) {
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Channel [" + std::to_string(index) + "]").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth),
+            channel);
+        ++index;
     }
 }
 

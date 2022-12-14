@@ -29,14 +29,19 @@ private:
     std::string generateTitle() const;
 
     void processCell(CellDescription cell);
-    void showCellGeneralTab(CellDescription& cell);
+    void showCellPhysicsTab(CellDescription& cell);
     void showCellFunctionTab(CellDescription& cell);
+    void showCellFunctionPropertiesTab(CellDescription& cell);
+    void showCellGenomeTab(CellDescription& cell);
+    void showCellMetadataTab(CellDescription& cell);
 
     void showConstructorContent(ConstructorDescription& constructor);
     void showAttackerContent(AttackerDescription& attacker);
     void showTransmitterContent(TransmitterDescription& transmitter);
     void showMuscleContent(MuscleDescription& muscle);
     void showSensorContent(SensorDescription& sensor);
+
+    void showActivityContent(CellDescription& cell);
 
     void processParticle(ParticleDescription particle);
 
