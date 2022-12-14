@@ -339,11 +339,14 @@ ConstructorProcessor::constructCellIntern(
     float2 const& posOfNewCell,
     ConstructionData const& constructionData)
 {
+    auto& constructor = hostCell->cellFunctionData.constructor;
+
     ObjectFactory factory;
     factory.init(&data);
 
     Cell * result = factory.createCell();
     result->energy = cudaSimulationParameters.cellNormalEnergy;
+    result->stiffness = constructor.stiffness;
     result->absPos = posOfNewCell;
     data.cellMap.correctPosition(result->absPos);
     result->maxConnections = constructionData.maxConnections;
@@ -355,7 +358,6 @@ ConstructorProcessor::constructCellIntern(
     result->inputBlocked = constructionData.inputBlocked;
     result->outputBlocked = constructionData.outputBlocked;
 
-    auto& constructor = hostCell->cellFunctionData.constructor;
     result->activationTime = constructor.constructionActivationTime;
 
     switch (constructionData.cellFunction) {
@@ -378,6 +380,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.separateConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.adaptMaxConnections = GenomeDecoder::readBool(constructor);
         newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % 7;
+        newConstructor.stiffness = toFloat(GenomeDecoder::readByte(constructor)) / 255;
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
         newConstructor.currentGenomePos = 0;
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
