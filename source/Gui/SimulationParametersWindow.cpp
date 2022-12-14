@@ -279,16 +279,6 @@ void _SimulationParametersWindow::processBase(
             simParameters.cellMaxBindingDistance);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Binding force strength")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(4.0f)
-                .defaultValue(origSimParameters.spotValues.cellBindingForce)
-                .tooltip(std::string("Strength of the force that holds two connected cells together. For larger binding forces, the "
-                                     "time step size should be selected smaller due to numerical instabilities.")),
-            simParameters.spotValues.cellBindingForce);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
                 .name("Binding creation velocity")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
@@ -563,14 +553,6 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          * Collision and binding
          */
         AlienImGui::Group("Physics: Collision and binding");
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Binding force strength")
-                .textWidth(MaxContentTextWidth)
-                .min(0)
-                .max(4.0f)
-                .defaultValue(origSpot.values.cellBindingForce),
-            spot.values.cellBindingForce);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Binding creation velocity")

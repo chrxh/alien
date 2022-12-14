@@ -268,7 +268,7 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
     if (cell.getCellFunctionType() != Enums::CellFunction_Constructor) {
         return;
     }
-    auto constructor = std::get<ConstructorDescription>(*cell.cellFunction);
+    auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
     auto const& parameters = _simController->getSimulationParameters();
 
     if (ImGui::BeginTabItem("Genome", nullptr, ImGuiTabItemFlags_None)) {

@@ -10,7 +10,6 @@ struct SimulationParametersSpotValues
     float cellMaxForce = 0.8f;
     float cellMinEnergy = 50.0f;
 
-    float cellBindingForce = 1.0f;
     float cellFusionVelocity = 0.4f;
     float cellMaxBindingEnergy = 500000.0f;
 
@@ -50,7 +49,7 @@ struct SimulationParametersSpotValues
             }
         }
         return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor && cellMaxForce == other.cellMaxForce
-            && cellMinEnergy == other.cellMinEnergy && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
+            && cellMinEnergy == other.cellMinEnergy && cellFusionVelocity == other.cellFusionVelocity
             && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost
             && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy

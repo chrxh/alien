@@ -507,7 +507,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 constructor.setMakeGenomeCopy();
             }
             ImGui::SameLine();
-            if (AlienImGui::Button("Open")) {
+            if (AlienImGui::Button("Edit")) {
                 auto genomeToOpen = constructor.isMakeGenomeCopy() ? tab.genome : GenomeDescriptionConverter::convertBytesToDescription(constructor.getGenomeData(), _simulationController->getSimulationParameters());
                 openTab(genomeToOpen);
             }
