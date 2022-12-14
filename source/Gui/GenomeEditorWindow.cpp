@@ -406,9 +406,6 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             auto sensorMode = sensor.getSensorMode();
 
             table.next();
-            AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxContentTextWidth), sensor.color);
-
-            table.next();
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Scan vicinity", "Scan specific region"}), sensorMode)) {
                 if (sensorMode == Enums::SensorMode_Neighborhood) {
@@ -421,6 +418,11 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 table.next();
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").textWidth(MaxContentTextWidth).format("%.1f"), *sensor.fixedAngle);
             }
+            table.next();
+            AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxContentTextWidth), sensor.color);
+
+            table.next();
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(MaxContentTextWidth), sensor.minDensity);
         } break;
         case Enums::CellFunction_Nerve: {
         } break;

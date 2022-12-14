@@ -380,6 +380,8 @@ void _InspectorWindow::showSensorContent(SensorDescription& sensor)
     if (sensor.fixedAngle) {
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").format("%.1f").textWidth(MaxCellContentTextWidth), *sensor.fixedAngle);
     }
+    AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxCellContentTextWidth), sensor.color);
+     AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(MaxCellContentTextWidth), sensor.minDensity);
 }
 
 void _InspectorWindow::showActivityContent(CellDescription& cell)

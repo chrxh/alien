@@ -157,14 +157,14 @@ struct Cell
     __device__ __inline__ bool isActive()
     {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            if (activity.channels[i] != 0) {
+            if (abs(activity.channels[i]) > NEAR_ZERO) {
                 return true;
             }
         }
         return false;
     }
 
-    __device__ __inline__ bool isDeleted() const { return energy == 0; }
+    __device__ __inline__ bool isDeleted() const { return abs(energy) < NEAR_ZERO; }
 
     __device__ __inline__ void setDeleted()
     {
