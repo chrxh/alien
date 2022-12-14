@@ -191,7 +191,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             drawCircle(imageData, imageSize, cellImagePos, color, radius, true);
             color = color * min((zoom - 1.0f) / 3, 1.0f);
             if (cell->isActive()) {
-                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius);
+                drawCircle(imageData, imageSize, cellImagePos, float3{0.2f, 0.2f, 0.2f}, radius);
             }
 
             //draw connection lines
