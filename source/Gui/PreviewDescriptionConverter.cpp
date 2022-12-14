@@ -86,7 +86,7 @@ namespace
 
             result.cells.emplace_back(cell);
             if (index > 0) {
-                direction = Math::rotateClockwise(-direction, -node.referenceAngle);
+                direction = Math::rotateClockwise(-direction, -(180.0f + node.referenceAngle));
                 result.connections.emplace_back(prevPos, pos);
             }
 
@@ -144,24 +144,7 @@ namespace
                     auto connectedCellIntern = cellsIntern.at(connectedCellIndex);
                     angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
                 }
-
-                //sort angles
-                if (angles.size() > 2) {
-                    int pos = 0;
-                    int numAngles = toInt(angles.size());
-                    do {
-                        auto angle0 = angles.at((pos + numAngles) % numAngles);
-                        auto angle1 = angles.at((pos + numAngles + 1) % numAngles);
-                        auto angle2 = angles.at((pos + numAngles + 2) % numAngles);
-                        if (Math::isAngleInBetween(angle0, angle2, angle1)) {
-                            ++pos;
-                        } else {
-                            angles.at((pos + numAngles + 1) % numAngles) = angle2;
-                            angles.at((pos + numAngles + 2) % numAngles) = angle1;
-                            --pos;
-                        }
-                    } while (pos <= numAngles);
-                }
+                std::ranges::sort(angles);
 
                 //find largest diff
                 float targetAngle = 0;
