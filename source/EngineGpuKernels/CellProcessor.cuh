@@ -51,6 +51,7 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
         cell->activityFetched = 0;
         cell->temp1 = {0, 0};
+        cell->nextCell = nullptr;
     }
 }
 

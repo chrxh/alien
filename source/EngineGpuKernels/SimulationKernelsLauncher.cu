@@ -23,6 +23,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     bool considerInnerFriction = (data.timestep % 3 == 0);
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
+    KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep1, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep2, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep3, data);

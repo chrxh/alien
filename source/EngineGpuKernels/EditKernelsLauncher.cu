@@ -118,7 +118,8 @@ void _EditKernelsLauncher::shallowUpdateSelectedEntities(
             KERNEL_CALL_1_1(cudaPrepareForUpdate, data);
 
             setValueToDevice(_cudaUpdateResult, 0);
-            KERNEL_CALL(cudaUpdateMapForConnection, data);
+            KERNEL_CALL(cudaPrepareMapForReconnection, data);
+            KERNEL_CALL(cudaUpdateMapForReconnection, data);
             KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
             KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
             KERNEL_CALL(cudaProcessConnectionChanges, data);
@@ -196,7 +197,8 @@ void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSetti
         KERNEL_CALL_1_1(cudaPrepareForUpdate, data);
 
         setValueToDevice(_cudaUpdateResult, 0);
-        KERNEL_CALL(cudaUpdateMapForConnection, data);
+        KERNEL_CALL(cudaPrepareMapForReconnection, data);
+        KERNEL_CALL(cudaUpdateMapForReconnection, data);
         KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
         KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
         KERNEL_CALL(cudaProcessConnectionChanges, data);
