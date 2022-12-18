@@ -187,23 +187,33 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
     }
 
     if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_TransmittersAndConstructors) {
+
+        auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
+            auto const& constructor = otherCell->cellFunctionData.constructor;
+            auto const isActive = !(constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize);
+            if (otherCell->cellFunction == Enums::CellFunction_Constructor && isActive) {
+                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+            if (otherCell->cellFunction == Enums::CellFunction_Transmitter) {
+                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         Cell* receiverCells[10];
         int numReceivers;
-        data.cellMap.getActiveConstructors(
-            receiverCells,
-            10,
-            numReceivers,
-            cell->absPos,
-            cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
-            cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor ? cell->color : -1);
+        data.cellMap.getMatchingCells(
+            receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getTransmitters(
-                receiverCells,
-                10,
-                numReceivers,
-                cell->absPos,
-                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius,
-                cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor ? cell->color : -1);
+            data.cellMap.getMatchingCells(
+                receiverCells, 10, numReceivers, cell->absPos, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius, matchTransmitterFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
