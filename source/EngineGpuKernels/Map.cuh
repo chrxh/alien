@@ -172,8 +172,8 @@ public:
         }
     }
 
-   __device__ __inline__ void
-    getActiveConstructors(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int matchColor = -1) const   // -1 = no color matching
+    template<typename MatchFunc>
+    __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, MatchFunc matchFunc) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -186,54 +186,16 @@ public:
                 auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
                 auto cell1 = _map[mapEntry];
                 if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
-                    if (cell1->cellFunction == Enums::CellFunction_Constructor && isActive(cell1->cellFunctionData.constructor)) {
-                        if (matchColor == -1 || cell1->color == matchColor) {
-                            cells[numCells] = cell1;
-                            ++numCells;
-                        }
+                    if (matchFunc(cell1)) {
+                        cells[numCells] = cell1;
+                        ++numCells;
                     }
 
                     auto cell2 = _map[mapEntry + 1];
                     if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
-                        if (cell2->cellFunction == Enums::CellFunction_Constructor && isActive(cell2->cellFunctionData.constructor)) {
-                            if (matchColor == -1 || cell2->color == matchColor) {
-                                cells[numCells] = cell2;
-                                ++numCells;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    __device__ __inline__ void getTransmitters(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int matchColor = -1) const    // -1 = no color matching
-    {
-        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        numCells = 0;
-        int radiusInt = ceilf(radius);
-        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
-            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
-                int2 scanPos{posInt.x + dx, posInt.y + dy};
-                correctPosition(scanPos);
-
-                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
-                auto cell1 = _map[mapEntry];
-                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
-                    if (cell1->cellFunction == Enums::CellFunction_Transmitter) {
-                        if (matchColor == -1 || cell1->color == matchColor) {
-                            cells[numCells] = cell1;
+                        if (matchFunc(cell2)) {
+                            cells[numCells] = cell2;
                             ++numCells;
-                        }
-                    }
-
-                    auto cell2 = _map[mapEntry + 1];
-                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
-                        if (cell2->cellFunction == Enums::CellFunction_Transmitter) {
-                            if (matchColor == -1 || cell2->color == matchColor) {
-                                cells[numCells] = cell2;
-                                ++numCells;
-                            }
                         }
                     }
                 }
