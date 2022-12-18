@@ -15,9 +15,13 @@ __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult r
     data.prepareForNextTimestep();
 }
 
-__global__ void cudaNextTimestep_physics_substep1(SimulationData data)
+__global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
     CellProcessor::init(data);
+}
+
+__global__ void cudaNextTimestep_physics_substep1(SimulationData data)
+{
     CellProcessor::updateMap(data);
     CellProcessor::radiation(data);  //do not use ParticleProcessor in this kernel
     CellProcessor::clearDensityMap(data);

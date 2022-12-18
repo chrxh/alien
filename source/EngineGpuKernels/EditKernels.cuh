@@ -26,7 +26,8 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
 __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters);
 __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerWithinSelection, int* result);
-__global__ void cudaUpdateMapForConnection(SimulationData data);
+__global__ void cudaPrepareMapForReconnection(SimulationData data);
+__global__ void cudaUpdateMapForReconnection(SimulationData data);
 __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center);
 __global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, float2* center, float2* velocity, int* numEntities, bool includeClusters);
 __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);

@@ -193,10 +193,14 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
     }
 }
 
-__global__ void cudaUpdateMapForConnection(SimulationData data)
+__global__ void cudaPrepareMapForReconnection(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.updateMap(data);
+    CellProcessor::init(data);
+}
+
+__global__ void cudaUpdateMapForReconnection(SimulationData data)
+{
+    CellProcessor::updateMap(data);
 }
 
 __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center)

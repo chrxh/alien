@@ -15,6 +15,7 @@
 #include "SimulationResult.cuh" 
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result);
+__global__ void cudaNextTimestep_physics_init(SimulationData data);
 __global__ void cudaNextTimestep_physics_substep1(SimulationData data);
 __global__ void cudaNextTimestep_physics_substep2(SimulationData data);
 __global__ void cudaNextTimestep_physics_substep3(SimulationData data);

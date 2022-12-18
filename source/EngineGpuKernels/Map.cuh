@@ -78,14 +78,15 @@ public:
     __host__ __inline__ void init(int2 const& size)
     {
         BaseMap::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y * 2, _map);
+        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, _map);
         _mapEntries.init();
 
-        std::vector<Cell*> hostMap(size.x * size.y * 2, 0);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y * 2, cudaMemcpyHostToDevice));
+        std::vector<Cell*> hostMap(size.x * size.y, 0);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y, cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
+
 
     __device__ __inline__ void reset() { _mapEntries.reset(); }
 
@@ -95,7 +96,7 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void set_block(int numEntities, Cell** entities)
+    __device__ __inline__ void set_block(int numEntities, Cell** cells)
     {
         if (0 == numEntities) {
             return;
@@ -109,18 +110,25 @@ public:
 
         auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& entity = entities[index];
-            int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
+            auto const& cell = cells[index];
+            int2 posInt = {floorInt(cell->absPos.x), floorInt(cell->absPos.y)};
             correctPosition(posInt);
-            auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
-            auto old = reinterpret_cast<Cell*>(atomicCAS(
-                reinterpret_cast<unsigned long long int*>(&_map[mapEntry]),
+            auto slot = posInt.x + posInt.y * _size.x;
+            Cell* slotCell = reinterpret_cast<Cell*>(atomicCAS(
+                reinterpret_cast<unsigned long long int*>(&_map[slot]),
                 reinterpret_cast<unsigned long long int>(nullptr),
-                reinterpret_cast<unsigned long long int>(entity)));
-            if (old != nullptr) {
-                alienAtomicExch(&_map[mapEntry + 1], entity);
+                reinterpret_cast<unsigned long long int>(cell)));
+            for (int level = 0; level < 10; ++level) {
+                if (!slotCell) {
+                    break;
+                }
+                slotCell = reinterpret_cast<Cell*>(atomicCAS(
+                    reinterpret_cast<unsigned long long int*>(&slotCell->nextCell),
+                    reinterpret_cast<unsigned long long int>(nullptr),
+                    reinterpret_cast<unsigned long long int>(cell)));
             }
-            entrySubarray[index] = mapEntry;
+
+            entrySubarray[index] = slot;
         }
         __syncthreads();
     }
@@ -134,13 +142,18 @@ public:
             for (int dy = -1; dy <= 1; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
-
-                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
-                if (cells[numCells] = _map[mapEntry]) {
-                    ++numCells;
-                    if (cells[numCells] = _map[mapEntry + 1]) {
-                        ++numCells;
+                int slot = scanPos.x + scanPos.y * _size.x;
+                auto slotCell = _map[slot];
+                for (int level = 0; level < 10; ++level) {
+                    if (!slotCell) {
+                        break;
                     }
+                    if (numCells == 18) {
+                        return;
+                    }
+                    cells[numCells] = slotCell;
+                    ++numCells;
+                    slotCell = slotCell->nextCell;
                 }
             }
         }
@@ -155,18 +168,20 @@ public:
             for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
-
-                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
-                auto cell1 = _map[mapEntry];
-                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
-                    cells[numCells] = cell1;
-                    ++numCells;
-
-                    auto cell2 = _map[mapEntry + 1];
-                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
-                        cells[numCells] = cell2;
+                int slot = scanPos.x + scanPos.y * _size.x;
+                auto slotCell = _map[slot];
+                for (int level = 0; level < 10; ++level) {
+                    if (numCells == arraySize) {
+                        return;
+                    }
+                    if (!slotCell) {
+                        break;
+                    }
+                    if (Math::length(slotCell->absPos - pos) <= radius) {
+                        cells[numCells] = slotCell;
                         ++numCells;
                     }
+                    slotCell = slotCell->nextCell;
                 }
             }
         }
@@ -178,26 +193,24 @@ public:
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
         int radiusInt = ceilf(radius);
-        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
-            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+        for (int dx = -radiusInt - 1; dx <= radiusInt + 1; ++dx) {
+            for (int dy = -radiusInt - 1; dy <= radiusInt + 1; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
-
-                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
-                auto cell1 = _map[mapEntry];
-                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
-                    if (matchFunc(cell1)) {
-                        cells[numCells] = cell1;
+                int slot = scanPos.x + scanPos.y * _size.x;
+                auto slotCell = _map[slot];
+                for (int level = 0; level < 10; ++level) {
+                    if (numCells == arraySize) {
+                        return;
+                    }
+                    if (!slotCell) {
+                        break;
+                    }
+                    if (Math::length(slotCell->absPos - pos) <= radius && matchFunc(slotCell)) {
+                        cells[numCells] = slotCell;
                         ++numCells;
                     }
-
-                    auto cell2 = _map[mapEntry + 1];
-                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
-                        if (matchFunc(cell2)) {
-                            cells[numCells] = cell2;
-                            ++numCells;
-                        }
-                    }
+                    slotCell = slotCell->nextCell;
                 }
             }
         }
@@ -207,8 +220,7 @@ public:
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         correctPosition(posInt);
-        auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
-        return _map[mapEntry];
+        return _map[posInt.x + posInt.y * _size.x];
     }
 
     __device__ __inline__ void cleanup_system()
@@ -218,16 +230,10 @@ public:
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
-            _map[mapEntry + 1] = nullptr;
         }
     }
 
 private:
-    __device__ __inline__ static bool isActive(ConstructorFunction const& constructor)
-    {
-        return !(constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize);
-    }
-
     Cell** _map;
     Array<int> _mapEntries;
 };
@@ -281,7 +287,7 @@ public:
 
     __device__ __inline__ Particle* get(float2 const& pos) const
     {
-        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         correctPosition(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
         return _map[mapEntry];
@@ -289,8 +295,7 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition =
-            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto partition = calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
