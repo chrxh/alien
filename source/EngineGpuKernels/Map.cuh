@@ -193,8 +193,8 @@ public:
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
         int radiusInt = ceilf(radius);
-        for (int dx = -radiusInt - 1; dx <= radiusInt + 1; ++dx) {
-            for (int dy = -radiusInt - 1; dy <= radiusInt + 1; ++dy) {
+        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
                 int slot = scanPos.x + scanPos.y * _size.x;
