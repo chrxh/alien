@@ -266,6 +266,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             break;
         }
     }
+    bool adaptReferenceAngle = false;
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         auto const& constructor = hostCell->cellFunctionData.constructor;
@@ -274,10 +275,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
         CellConnectionProcessor::addConnections(
             data, hostCell, newCell, angleFromPreviousForCell, 0, distance);
+        adaptReferenceAngle = true;
     }
     auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
     CellConnectionProcessor::addConnections(
-        data, newCell, underConstructionCell, angleFromPreviousForNewCell, angleFromPreviousForUnderConstructionCell, desiredDistance);
+        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance);
 
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::LivingState_JustReady;
@@ -307,6 +309,33 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
 
+    if (adaptReferenceAngle) {
+        auto n = newCell->numConnections;
+        int constructionIndex = 0;
+        for (; constructionIndex < n; ++constructionIndex) {
+            if (newCell->connections[constructionIndex].cell == underConstructionCell) {
+                break;
+            }
+        }
+        int hostIndex = 0;
+        for (; hostIndex < n; ++hostIndex) {
+            if (newCell->connections[hostIndex].cell == hostCell) {
+                break;
+            }
+        }
+
+        float consumedAngle1 = 0;
+        for (int i = constructionIndex; (i + n) % n != (hostIndex + 1) % n && (i + n) % n != hostIndex; --i) {
+            consumedAngle1 += newCell->connections[(i + n) % n].angleFromPrevious;
+        }
+
+        float consumedAngle2 = 0;
+        for (int i = constructionIndex + 1; i % n != hostIndex; ++i) {
+            consumedAngle2 += newCell->connections[i % n].angleFromPrevious;
+        }
+        newCell->connections[(hostIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewCell - consumedAngle1;
+        newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
+    }
     if (adaptMaxConnections) {
         hostCell->maxConnections = hostCell->numConnections;
         newCell->maxConnections = newCell->numConnections;

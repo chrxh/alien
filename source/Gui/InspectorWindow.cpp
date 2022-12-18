@@ -4,6 +4,7 @@
 #include <imgui.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/range/adaptor/indexed.hpp>
 
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
@@ -151,6 +152,18 @@ void _InspectorWindow::showCellPhysicsTab(CellDescription& cell)
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), cell.stiffness);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
+            AlienImGui::Group("Connections to other cells");
+            for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
+                if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Reference distance").format("%.2f").textWidth(MaxCellContentTextWidth).readOnly(true),
+                        connection.distance);
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Reference angle").format("%.2f").textWidth(MaxCellContentTextWidth).readOnly(true),
+                        connection.angleFromPrevious);
+                    ImGui::TreePop();
+                }
+            }
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
