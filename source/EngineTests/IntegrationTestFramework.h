@@ -19,6 +19,7 @@ protected:
     std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
     CellDescription getCell(DataDescription const& data, uint64_t id) const;
     ConnectionDescription getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const;
+    bool hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const;
     CellDescription getOtherCell(DataDescription const& data, uint64_t id) const;
     CellDescription getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const;
 

@@ -53,6 +53,8 @@ private:
         Cell* hostCell,
         float2 const& newCellPos,
         ConstructionData const& constructionData);
+
+    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell, Cell* otherCell);
 };
 
 /************************************************************************/
@@ -251,21 +253,21 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         return false;
     }
 
-    float angleFromPreviousForCell;
-    for (int i = 0; i < hostCell->numConnections; ++i) {
-        if (hostCell->connections[i].cell == underConstructionCell) {
-            angleFromPreviousForCell = hostCell->connections[i].angleFromPrevious;
-            break;
-        }
-    }
+    //float angleFromPreviousForCell;
+    //for (int i = 0; i < hostCell->numConnections; ++i) {
+    //    if (hostCell->connections[i].cell == underConstructionCell) {
+    //        angleFromPreviousForCell = hostCell->connections[i].angleFromPrevious;
+    //        break;
+    //    }
+    //}
 
-    float angleFromPreviousForUnderConstructionCell;
-    for (int i = 0; i < underConstructionCell->numConnections; ++i) {
-        if (underConstructionCell->connections[i].cell == hostCell) {
-            angleFromPreviousForUnderConstructionCell = underConstructionCell->connections[i].angleFromPrevious;
-            break;
-        }
-    }
+    //float angleFromPreviousForUnderConstructionCell;
+    //for (int i = 0; i < underConstructionCell->numConnections; ++i) {
+    //    if (underConstructionCell->connections[i].cell == hostCell) {
+    //        angleFromPreviousForUnderConstructionCell = underConstructionCell->connections[i].angleFromPrevious;
+    //        break;
+    //    }
+    //}
     bool adaptReferenceAngle = false;
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
@@ -274,12 +276,12 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             ? constructionData.distance
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
         CellConnectionProcessor::addConnections(
-            data, hostCell, newCell, angleFromPreviousForCell, 0, distance);
+            data, hostCell, newCell, /*angleFromPreviousForCell*/0, 0, distance);
         adaptReferenceAngle = true;
     }
     auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
     CellConnectionProcessor::addConnections(
-        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance);
+        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, /*angleFromPreviousForUnderConstructionCell*/0, desiredDistance);
 
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::LivingState_JustReady;
@@ -287,21 +289,37 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     Math::normalize(posDelta);
     Math::rotateQuarterClockwise(posDelta);
+
+    //get surrounding cells
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance);
+    data.cellMap.getMatchingCells(
+        otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance, [&](Cell* const& otherCell) {
+            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::LivingState_UnderConstruction) {
+                return false;
+            }
+            if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
+                return false;
+            }
+            return true;
+        });
+
+    //sort cells
+    bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
+        auto dist1 = data.cellMap.getDistance(cell1->absPos, newCellPos);
+        auto dist2 = data.cellMap.getDistance(cell2->absPos, newCellPos);
+        return dist1 < dist2;
+    });
+
+    //connect cells if possible
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::LivingState_UnderConstruction) {
-            continue;
-        }
-        if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
-            continue;
-        }
 
         if (otherCell->tryLock()) {
             if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
-                && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
+                && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)
+                && !wouldResultInOverlappingConnection(newCell, otherCell)
+                && !wouldResultInOverlappingConnection(otherCell, newCell)) {
 
                 CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
             }
@@ -440,4 +458,30 @@ ConstructorProcessor::constructCellIntern(
     }
 
     return result;
+}
+
+__inline__ __device__ bool ConstructorProcessor::wouldResultInOverlappingConnection(Cell* cell, Cell* otherCell)
+{
+    auto const& n = cell->numConnections;
+    if (n < 2) {
+        return false;
+    }
+    for (int i = 0; i < n; ++i) {
+        auto connectedCell = cell->connections[i].cell;
+        auto nextConnectedCell = cell->connections[(i + 1) % n].cell;
+        bool bothConnected = false;
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            if (connectedCell->connections[j].cell == nextConnectedCell) {
+                bothConnected = true;
+                break;
+            }
+        }
+        if (!bothConnected) {
+            continue;
+        }
+        if (Math::crossing(cell->absPos, otherCell->absPos, connectedCell->absPos, nextConnectedCell->absPos)) {
+            return true;
+        }
+    }
+    return false;
 }

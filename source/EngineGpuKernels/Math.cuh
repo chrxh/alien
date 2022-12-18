@@ -38,6 +38,8 @@ public:
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
     __inline__ __device__ static float alignAngle(float angle, Enums::ConstructorAngleAlignment alignment);
+    __inline__ __device__ static bool
+    crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
 };
 
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
@@ -270,4 +272,32 @@ __inline__ __device__ float Math::alignAngle(float angle, Enums::ConstructorAngl
     float factor = angle / unitAngle + 0.5f;
     factor = floorf(factor);
     return factor * unitAngle;
+}
+
+__inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd)
+{
+    auto const& p1 = segmentStart;
+    auto v1 = segmentEnd - segmentStart;
+    auto const& p2 = otherSegmentStart;
+    auto v2 = otherSegmentEnd - otherSegmentStart;
+
+    auto divisor = v2.x * v1.y - v2.y * v1.x;
+    if (abs(divisor) < NEAR_ZERO) {
+        return false;
+    }
+    auto mue = (v1.x * (p2.y - p1.y) - v1.y * (p2.x - p1.x)) / divisor;
+    if (mue < 0 || mue > 1) {
+        return false;
+    }
+
+    float lambda;
+    if (abs(v1.x) > NEAR_ZERO) {
+        lambda = (p2.x - p1.x + mue * v2.x) / v1.x;
+    } else if (abs(v1.y) > NEAR_ZERO) {
+        lambda = (p2.y - p1.y + mue * v2.y) / v1.y;
+    } else {
+        return false;
+    }
+
+    return lambda >= 0 && lambda <= 1;
 }

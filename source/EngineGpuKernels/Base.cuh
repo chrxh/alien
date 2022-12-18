@@ -323,3 +323,24 @@ __device__ __inline__ int calcMod(char value, int count)
 {
     return static_cast<unsigned char>(value) % count;
 }
+
+template<typename Container, typename LessFunc>
+__device__ __inline__ void bubbleSort(Container& container, int size, LessFunc lessFunc)
+{
+    bool newRound = true;
+    for (int i = size - 1; i >= 1; --i) {
+        if (newRound) {
+            newRound = false;
+            for (int j = 0; j <= i - 1; ++j) {
+                if (lessFunc(container[j + 1],container[j])) {
+                    auto temp = container[j];
+                    container[j] = container[j + 1];
+                    container[j + 1] = temp;
+                    newRound = true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+}
