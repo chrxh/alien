@@ -333,8 +333,10 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         for (int i = constructionIndex + 1; i % n != hostIndex; ++i) {
             consumedAngle2 += newCell->connections[i % n].angleFromPrevious;
         }
-        newCell->connections[(hostIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewCell - consumedAngle1;
-        newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
+        if (angleFromPreviousForNewCell - consumedAngle1 >= 0 && 360.0f - angleFromPreviousForNewCell - consumedAngle2 >= 0) {
+            newCell->connections[(hostIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewCell - consumedAngle1;
+            newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
+        }
     }
     if (adaptMaxConnections) {
         hostCell->maxConnections = hostCell->numConnections;
