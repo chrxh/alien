@@ -68,6 +68,17 @@ ConnectionDescription IntegrationTestFramework::getConnection(DataDescription co
     THROW_NOT_IMPLEMENTED();
 }
 
+bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
+{
+    auto cell = getCell(data, id);
+    for (auto const& connection : cell.connections) {
+        if (connection.cellId == otherId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, uint64_t id) const
 {
     for (auto const& cell : data.cells) {

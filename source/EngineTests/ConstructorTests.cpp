@@ -1224,3 +1224,65 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
 
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualHostCell.connections[0].distance));
 }
+
+TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(3)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setConstructionState(Enums::LivingState_UnderConstruction),
+        CellDescription()
+            .setId(3)
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 11.0f})
+            .setEnergy(100)
+            .setMaxConnections(3)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setConstructionState(Enums::LivingState_UnderConstruction),
+        CellDescription()
+            .setId(4)
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance + 1.0f, 11.0f})
+            .setMaxConnections(3)
+            .setExecutionOrderNumber(0)
+            .setConstructionState(Enums::LivingState_UnderConstruction),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+    data.addConnection(4, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    EXPECT_EQ(5, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualPrevPrevConstructedCell = getCell(actualData, 3);
+    auto actualPrevPrevPrevConstructedCell = getCell(actualData, 4);
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4});
+
+    EXPECT_EQ(1, actualHostCell.connections.size());
+    ASSERT_EQ(3, actualConstructedCell.connections.size());
+    ASSERT_EQ(3, actualPrevConstructedCell.connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell.connections.size());
+    ASSERT_EQ(3, actualPrevPrevPrevConstructedCell.connections.size());
+    EXPECT_TRUE(hasConnection(actualData, actualConstructedCell.id, 1));
+    EXPECT_TRUE(hasConnection(actualData, actualConstructedCell.id, 2));
+    EXPECT_TRUE(hasConnection(actualData, actualConstructedCell.id, 4));
+}
