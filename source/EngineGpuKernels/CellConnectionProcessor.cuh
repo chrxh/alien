@@ -32,7 +32,7 @@ public:
 
 
 private:
-    __inline__ __device__ static void addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void lockAndAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static void addConnectionOneWay(
         SimulationData& data,
         Cell* cell1,
@@ -121,7 +121,7 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
                 operation.data.delCellAndConnectionOperation.cellIndex);
         }
         if (StructuralOperation::Type::AddConnections == operation.type) {
-            addConnectionsIntern(
+            lockAndAddConnections(
                 data,
                 operation.data.addConnectionOperation.cell,
                 operation.data.addConnectionOperation.otherCell);
@@ -153,6 +153,7 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.correctDirection(posDelta);
+
     addConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment);
     addConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment);
     checkAndCorrectZeroReferenceAngles(data, cell1);
@@ -167,7 +168,7 @@ CellConnectionProcessor::delConnections(Cell* cell1, Cell* cell2)
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2)
+CellConnectionProcessor::lockAndAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
@@ -183,18 +184,8 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
 
         if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
             && cell2->numConnections < cell2->maxConnections) {
-            auto posDelta = cell2->absPos - cell1->absPos;
-            data.cellMap.correctDirection(posDelta);
-            addConnectionOneWay(data, cell1, cell2, posDelta, Math::length(posDelta));
-            addConnectionOneWay(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
-            checkAndCorrectZeroReferenceAngles(data, cell1);
-            checkAndCorrectZeroReferenceAngles(data, cell2);
 
-            /*
-            //align connections
-            addConnectionOneWay(data, cell1, cell2, posDelta, 1, 0, 6);
-            addConnectionOneWay(data, cell2, cell1, posDelta * (-1), 1, 0, 6);
-*/
+            addConnections(data, cell1, cell2, 0, 0, 0);
         }
 
         lock.releaseLock();
@@ -211,6 +202,9 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionOneWay(
     Enums::ConstructorAngleAlignment angleAlignment)
 {
     auto newAngle = Math::angleOfVector(posDelta);
+    if (desiredDistance == 0) {
+        desiredDistance = Math::length(posDelta);
+    }
 
     if (0 == cell1->numConnections) {
         cell1->numConnections++;
