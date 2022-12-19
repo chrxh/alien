@@ -209,8 +209,8 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         newCell->constructionState = Enums::LivingState_JustReady;
     }
     if (adaptMaxConnections) {
-        hostCell->maxConnections = hostCell->numConnections;
-        newCell->maxConnections = newCell->numConnections;
+        hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
+        newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
     }
 
     newCell->releaseLock();
@@ -259,13 +259,13 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     //    }
     //}
 
-    //float angleFromPreviousForUnderConstructionCell;
-    //for (int i = 0; i < underConstructionCell->numConnections; ++i) {
-    //    if (underConstructionCell->connections[i].cell == hostCell) {
-    //        angleFromPreviousForUnderConstructionCell = underConstructionCell->connections[i].angleFromPrevious;
-    //        break;
-    //    }
-    //}
+    float angleFromPreviousForUnderConstructionCell;
+    for (int i = 0; i < underConstructionCell->numConnections; ++i) {
+        if (underConstructionCell->connections[i].cell == hostCell) {
+            angleFromPreviousForUnderConstructionCell = underConstructionCell->connections[i].angleFromPrevious;
+            break;
+        }
+    }
     bool adaptReferenceAngle = false;
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
@@ -279,7 +279,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
     auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
     CellConnectionProcessor::addConnections(
-        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, /*angleFromPreviousForUnderConstructionCell*/0, desiredDistance);
+        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance);
 
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::LivingState_JustReady;
@@ -318,6 +318,9 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                 CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
+                if (adaptMaxConnections) {
+                    otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
+                }
             }
             otherCell->releaseLock();
         }
@@ -353,8 +356,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
     if (adaptMaxConnections) {
-        hostCell->maxConnections = hostCell->numConnections;
-        newCell->maxConnections = newCell->numConnections;
+        hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
+        newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
     }
 
     newCell->releaseLock();
