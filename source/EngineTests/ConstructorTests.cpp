@@ -1250,14 +1250,14 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setId(3)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 11.0f})
             .setEnergy(100)
-            .setMaxConnections(3)
+            .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setConstructionState(Enums::LivingState_UnderConstruction),
         CellDescription()
             .setId(4)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance + 1.0f, 11.0f})
-            .setMaxConnections(3)
+            .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setConstructionState(Enums::LivingState_UnderConstruction),
     });
@@ -1279,9 +1279,13 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
 
     EXPECT_EQ(1, actualHostCell.connections.size());
     ASSERT_EQ(3, actualConstructedCell.connections.size());
+    ASSERT_EQ(3, actualConstructedCell.maxConnections);
     ASSERT_EQ(3, actualPrevConstructedCell.connections.size());
+    ASSERT_EQ(3, actualPrevConstructedCell.maxConnections);
     ASSERT_EQ(2, actualPrevPrevConstructedCell.connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell.maxConnections);
     ASSERT_EQ(3, actualPrevPrevPrevConstructedCell.connections.size());
+    ASSERT_EQ(3, actualPrevPrevPrevConstructedCell.maxConnections);
     EXPECT_TRUE(hasConnection(actualData, actualConstructedCell.id, 1));
     EXPECT_TRUE(hasConnection(actualData, actualConstructedCell.id, 2));
     EXPECT_TRUE(hasConnection(actualData, actualConstructedCell.id, 4));
