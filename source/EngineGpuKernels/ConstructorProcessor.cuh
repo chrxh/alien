@@ -53,8 +53,6 @@ private:
         Cell* hostCell,
         float2 const& newCellPos,
         ConstructionData const& constructionData);
-
-    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell, Cell* otherCell);
 };
 
 /************************************************************************/
@@ -317,9 +315,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
         if (otherCell->tryLock()) {
             if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
-                && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)
-                && !wouldResultInOverlappingConnection(newCell, otherCell)
-                && !wouldResultInOverlappingConnection(otherCell, newCell)) {
+                && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
                 CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
             }
@@ -458,30 +454,4 @@ ConstructorProcessor::constructCellIntern(
     }
 
     return result;
-}
-
-__inline__ __device__ bool ConstructorProcessor::wouldResultInOverlappingConnection(Cell* cell, Cell* otherCell)
-{
-    auto const& n = cell->numConnections;
-    if (n < 2) {
-        return false;
-    }
-    for (int i = 0; i < n; ++i) {
-        auto connectedCell = cell->connections[i].cell;
-        auto nextConnectedCell = cell->connections[(i + 1) % n].cell;
-        bool bothConnected = false;
-        for (int j = 0; j < connectedCell->numConnections; ++j) {
-            if (connectedCell->connections[j].cell == nextConnectedCell) {
-                bothConnected = true;
-                break;
-            }
-        }
-        if (!bothConnected) {
-            continue;
-        }
-        if (Math::crossing(cell->absPos, otherCell->absPos, connectedCell->absPos, nextConnectedCell->absPos)) {
-            return true;
-        }
-    }
-    return false;
 }
