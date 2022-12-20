@@ -223,7 +223,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(Enums::LivingState_JustReady, actualConstructedCell.constructionState);
 
     EXPECT_EQ(1, actualConstructedCell.connections.size());
-    EXPECT_EQ(1, actualConstructedCell.maxConnections);
+    EXPECT_EQ(2, actualConstructedCell.maxConnections);
     EXPECT_EQ(2, actualConstructedCell.color);
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
     EXPECT_TRUE(actualConstructedCell.inputBlocked);
@@ -286,10 +286,10 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(0, actualHostCell.maxConnections);
+    EXPECT_EQ(1, actualHostCell.maxConnections);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
-    EXPECT_EQ(0, actualConstructedCell.maxConnections);
+    EXPECT_EQ(2, actualConstructedCell.maxConnections);
     EXPECT_EQ(Enums::LivingState_JustReady, actualConstructedCell.constructionState);
 }
 
@@ -641,6 +641,35 @@ TEST_F(ConstructorTests, constructMuscleCell)
 
     auto actualMuscle = std::get<MuscleDescription>(*actualConstructedCell.cellFunction);
     EXPECT_EQ(constructedMuscle.mode, actualMuscle.mode);
+}
+
+TEST_F(ConstructorTests, constructSensorCell)
+{
+    auto constructedSensor = SensorGenomeDescription().setFixedAngle(90.0f).setColor(2).setMinDensity(0.5f);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedSensor)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(Enums::CellFunction_Sensor, actualConstructedCell.getCellFunctionType());
+
+    auto actualSensor = std::get<SensorDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(constructedSensor.fixedAngle.has_value(), actualSensor.fixedAngle.has_value());
+    EXPECT_TRUE(lowPrecisionCompare(*constructedSensor.fixedAngle, *actualSensor.fixedAngle));
+    EXPECT_TRUE(lowPrecisionCompare(constructedSensor.minDensity, actualSensor.minDensity));
+    EXPECT_EQ(constructedSensor.color, actualSensor.color);
 }
 
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)

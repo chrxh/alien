@@ -95,6 +95,8 @@ namespace
         } break;
         case Enums::CellFunction_Sensor: {
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
+            cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
+            cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
         } break;
         case Enums::CellFunction_Nerve: {
