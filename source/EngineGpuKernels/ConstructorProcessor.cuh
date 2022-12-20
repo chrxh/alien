@@ -342,13 +342,17 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
 
         float consumedAngle1 = 0;
-        for (int i = constructionIndex; (i + n) % n != (hostIndex + 1) % n && (i + n) % n != hostIndex; --i) {
-            consumedAngle1 += newCell->connections[(i + n) % n].angleFromPrevious;
+        if (n > 2) {
+            for (int i = constructionIndex; (i + n) % n != (hostIndex + 1) % n && (i + n) % n != hostIndex; --i) {
+                consumedAngle1 += newCell->connections[(i + n) % n].angleFromPrevious;
+            }
         }
 
         float consumedAngle2 = 0;
-        for (int i = constructionIndex + 1; i % n != hostIndex; ++i) {
-            consumedAngle2 += newCell->connections[i % n].angleFromPrevious;
+        if (n > 2) {
+            for (int i = constructionIndex + 1; i % n != hostIndex; ++i) {
+                consumedAngle2 += newCell->connections[i % n].angleFromPrevious;
+            }
         }
         if (angleFromPreviousForNewCell - consumedAngle1 >= 0 && 360.0f - angleFromPreviousForNewCell - consumedAngle2 >= 0) {
             newCell->connections[(hostIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewCell - consumedAngle1;
