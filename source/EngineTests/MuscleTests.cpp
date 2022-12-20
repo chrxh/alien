@@ -87,7 +87,7 @@ TEST_F(MuscleTests, moveForward)
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.activity.channels[0]));
     EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementDelta, actualMuscleCell.vel.x));
+    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementAcceleration, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
 
@@ -121,7 +121,7 @@ TEST_F(MuscleTests, moveBackward)
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.activity.channels[0]));
     EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(_parameters.cellFunctionMuscleMovementDelta, actualMuscleCell.vel.x));
+    EXPECT_TRUE(approxCompare(_parameters.cellFunctionMuscleMovementAcceleration, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
 
@@ -160,8 +160,8 @@ TEST_F(MuscleTests, multipleMovementDirections)
     auto actualMuscleCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(2.0f, actualMuscleCell.activity.channels[0]));
-    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementDelta / std::sqrt(2.0f), actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementDelta / std::sqrt(2.0f), actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementAcceleration / std::sqrt(2.0f), actualMuscleCell.vel.x));
+    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementAcceleration / std::sqrt(2.0f), actualMuscleCell.vel.y));
 }
 
 TEST_F(MuscleTests, expansion)

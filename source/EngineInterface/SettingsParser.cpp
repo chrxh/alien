@@ -186,9 +186,9 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         parserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.cellFunctionAttackerInhomogeneityBonusFactor,
-        defaultPar.cellFunctionAttackerInhomogeneityBonusFactor,
-        "simulation parameters.cell.function.attacker.inhomogeneity bonus",
+        simPar.cellFunctionAttackerColorInhomogeneityFactor,
+        defaultPar.cellFunctionAttackerColorInhomogeneityFactor,
+        "simulation parameters.cell.function.attacker.color inhomogeneity factor",
         parserTask);
     JsonParser::encodeDecode(
         tree,
@@ -252,9 +252,9 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         parserTask);
     JsonParser::encodeDecode(
         tree,
-        simPar.cellFunctionMuscleMovementDelta,
-        defaultPar.cellFunctionMuscleMovementDelta,
-        "simulation parameters.cell.function.muscle.movement delta",
+        simPar.cellFunctionMuscleMovementAcceleration,
+        defaultPar.cellFunctionMuscleMovementAcceleration,
+        "simulation parameters.cell.function.muscle.movement acceleration",
         parserTask);
     JsonParser::encodeDecode(
         tree,

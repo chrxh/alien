@@ -19,7 +19,7 @@ struct SimulationParameters
     int cellMaxBonds = 6;
     int cellMaxExecutionOrderNumbers = 6;
 
-    bool radiationAbsorptionByCellColor[MAX_COLORS] = {false, false, true, false, false, false, false};
+    float radiationAbsorptionByCellColor[MAX_COLORS] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
@@ -38,7 +38,7 @@ struct SimulationParameters
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
     bool cellFunctionAttackerEnergyDistributionSameColor = true;
     float cellFunctionAttackerEnergyDistributionValue = 10.0f;
-    float cellFunctionAttackerInhomogeneityBonusFactor = 1.0f;
+    float cellFunctionAttackerColorInhomogeneityFactor = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.25f;
 
     bool cellFunctionTransmitterEnergyDistributionSameColor = true;
@@ -46,7 +46,7 @@ struct SimulationParameters
     float cellFunctionTransmitterEnergyDistributionValue = 10.0f;
 
     float cellFunctionMuscleContractionExpansionDelta = 0.05f;
-    float cellFunctionMuscleMovementDelta = 0.01f;
+    float cellFunctionMuscleMovementAcceleration = 0.01f;
     float cellFunctionMuscleBendingAngle = 5.0f;
 
     float cellFunctionSensorRange = 255.0f;
@@ -72,13 +72,13 @@ struct SimulationParameters
             && cellFunctionSensorRange == other.cellFunctionSensorRange && radiationProb == other.radiationProb
             && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellRepulsionStrength == other.cellRepulsionStrength && cellNormalEnergy == other.cellNormalEnergy
-            && cellFunctionAttackerInhomogeneityBonusFactor == other.cellFunctionAttackerInhomogeneityBonusFactor
+            && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
             && cellFunctionAttackerEnergyDistributionValue == cellFunctionAttackerEnergyDistributionValue
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
             && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
-            && cellFunctionMuscleMovementDelta == other.cellFunctionMuscleMovementDelta
+            && cellFunctionMuscleMovementAcceleration == other.cellFunctionMuscleMovementAcceleration
             && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerFriction == other.innerFriction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
             && cellFunctionConstructorOffspringDistance == other.cellFunctionConstructorOffspringDistance
