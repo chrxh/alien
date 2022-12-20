@@ -200,7 +200,7 @@ void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, 
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
 
-    if (ImGui::BeginTable(("##" + parameters._name).c_str(), 8, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
         for (int row = 0; row < MAX_COLORS + 1; ++row) {
             ImGui::PushID(row);
             for (int col = 0; col < MAX_COLORS + 1; ++col) {
@@ -258,7 +258,7 @@ void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, 
 {
     auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
 
-    if (ImGui::BeginTable(("##" + parameters._name).c_str(), 8, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
         for (int row = 0; row < 2; ++row) {
             ImGui::PushID(row);
             for (int col = 0; col < MAX_COLORS; ++col) {
@@ -269,10 +269,7 @@ void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, 
                     ImVec2 pos = ImGui::GetCursorScreenPos();
                     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
                     ColorField(Const::IndividualCellColors[col], -1);
-                } /*else if (row > 0 && col == 0) {
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));}*/
-                else {
+                } else {
                     ImGui::InputFloat(("##" + parameters._name).c_str(), &value[col], 0, 0, parameters._format.c_str());
                 }
                 ImGui::PopID();
