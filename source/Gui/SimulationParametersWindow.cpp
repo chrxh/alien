@@ -279,9 +279,9 @@ void _SimulationParametersWindow::processBase(
             simParameters.radiationAbsorptionByCellColor);
 
         /**
-         * Physics: Decay
+         * Physics: Particle transformation
          */
-        AlienImGui::Group("Physics: Decay");
+        AlienImGui::Group("Physics: Particle transformation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Minimum energy")
@@ -291,6 +291,14 @@ void _SimulationParametersWindow::processBase(
                 .defaultValue(origSimParameters.spotValues.cellMinEnergy)
                 .tooltip(std::string("Minimum energy a cell needs to exist.")),
             simParameters.spotValues.cellMinEnergy);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Normal energy")
+                .textWidth(MaxContentTextWidth)
+                .min(10.0f)
+                .max(200.0f)
+                .defaultValue(origSimParameters.cellNormalEnergy),
+            simParameters.cellNormalEnergy);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Cell cluster decay")
@@ -803,9 +811,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.radiationFactor);
 
         /**
-         * Physics: Decay
+         * Physics: Particle transformation
          */
-        AlienImGui::Group("Physics: Decay");
+        AlienImGui::Group("Physics: Particle transformation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Minimum energy")
