@@ -659,6 +659,7 @@ void _SimulationParametersWindow::processBase(
             simParameters.cellFunctionSensorActivityThreshold);
     }
     ImGui::EndChild();
+    validationAndCorrection(simParameters);
 }
 
 void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot)
@@ -844,7 +845,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          * Cell color transition rules
          */
         AlienImGui::Group("Cell color transition rules");
-        for (int color = 0; color < 7; ++color) {
+        for (int color = 0; color < MAX_COLORS; ++color) {
             ImGui::PushID(color);
             auto parameters = AlienImGui::InputColorTransitionParameters()
                                   .textWidth(MaxContentTextWidth)
@@ -951,4 +952,26 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             spot.values.cellFunctionAttackerConnectionsMismatchPenalty);
     }
     ImGui::EndChild();
+    validationAndCorrection(spot);
+}
+
+void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& parameters) const
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            parameters.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+        }
+        parameters.radiationAbsorptionByCellColor[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionByCellColor[i]));
+    }
+}
+
+void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot) const
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+        }
+    }
 }

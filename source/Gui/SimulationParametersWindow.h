@@ -20,6 +20,9 @@ private:
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
 
+    void validationAndCorrection(SimulationParameters& parameters) const;
+    void validationAndCorrection(SimulationParametersSpot& spot) const;
+
     SimulationController _simController;
     SimulationParametersChanger _simulationParametersChanger;
 
