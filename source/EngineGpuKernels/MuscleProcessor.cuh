@@ -80,7 +80,7 @@ MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* 
         }
     }
     if (direction.x != 0 || direction.y != 0) {
-        cell->vel = cell->vel + Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementDelta * getIntensity(activity);
+        cell->vel = cell->vel + Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration * getIntensity(activity);
     }
     cell->releaseLock();
     result.incMuscleActivity();

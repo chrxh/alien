@@ -236,10 +236,63 @@ void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, 
             }
             ImGui::BeginDisabled(!changed);
             if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-                for (int row = 0; row < 7; ++row) {
-                    for (int col = 0; col < 7; ++col) {
+                for (int row = 0; row < MAX_COLORS; ++row) {
+                    for (int col = 0; col < MAX_COLORS; ++col) {
                         value[row][col] = (*parameters._defaultValue)[row][col];
                     }
+                }
+            }
+            ImGui::EndDisabled();
+        }
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+
+        if (parameters._tooltip) {
+            AlienImGui::HelpMarker(*parameters._tooltip);
+        }
+    }
+}
+
+void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, float (&value)[MAX_COLORS])
+{
+    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), 8, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+        for (int row = 0; row < 2; ++row) {
+            ImGui::PushID(row);
+            for (int col = 0; col < MAX_COLORS; ++col) {
+                ImGui::PushID(col);
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (row == 0) {
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                    ColorField(Const::IndividualCellColors[col], -1);
+                } /*else if (row > 0 && col == 0) {
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));}*/
+                else {
+                    ImGui::InputFloat(("##" + parameters._name).c_str(), &value[col], 0, 0, parameters._format.c_str());
+                }
+                ImGui::PopID();
+            }
+            ImGui::TableNextRow();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+        ImGui::SameLine();
+        if (parameters._defaultValue) {
+            bool changed = false;
+            for (int col = 0; col < MAX_COLORS; ++col) {
+                if (value[col] != (*parameters._defaultValue)[col]) {
+                    changed = true;
+                }
+            }
+            ImGui::BeginDisabled(!changed);
+            if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+                for (int col = 0; col < MAX_COLORS; ++col) {
+                    value[col] = (*parameters._defaultValue)[col];
                 }
             }
             ImGui::EndDisabled();

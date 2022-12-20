@@ -99,6 +99,16 @@ public:
     };
     static void InputColorMatrix(InputColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
 
+    struct InputColorVectorParameters
+    {
+        MEMBER_DECLARATION(InputColorVectorParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputColorVectorParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputColorVectorParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputColorVectorParameters, std::optional<std::vector<float>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputColorVectorParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void InputColorVector(InputColorVectorParameters const& parameters, float (&value)[MAX_COLORS]);
+
     struct InputTextParameters
     {
         MEMBER_DECLARATION(InputTextParameters, std::string, name, "");

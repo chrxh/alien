@@ -60,7 +60,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             if (!isHomogene(otherCell)) {
-                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerInhomogeneityBonusFactor;
+                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor;
             }
             auto cellFunctionWeaponGeometryDeviationExponent =
                 SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent, data, cell->absPos);
