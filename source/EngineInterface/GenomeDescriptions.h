@@ -110,6 +110,24 @@ struct SensorGenomeDescription
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
     Enums::SensorMode getSensorMode() const { return fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood; }
+
+    SensorGenomeDescription& setFixedAngle(float const& value)
+    {
+        fixedAngle = value;
+        return *this;
+    }
+
+    SensorGenomeDescription& setMinDensity(float const& value)
+    {
+        minDensity = value;
+        return *this;
+    }
+
+    SensorGenomeDescription& setColor(int value)
+    {
+        color = value;
+        return *this;
+    }
 };
 
 struct NerveGenomeDescription

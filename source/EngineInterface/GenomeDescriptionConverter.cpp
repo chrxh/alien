@@ -25,7 +25,14 @@ namespace
         }
         data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value / 180 * 120)));
     }
-    void writeDistance(std::vector<uint8_t>& data, float value) {data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value - 1.0f) * 128))); }
+    void writeDensity(std::vector<uint8_t>& data, float value)
+    {
+        data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value * 2 - 1) * 128)));
+    }
+    void writeDistance(std::vector<uint8_t>& data, float value)
+    {
+        data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value - 1.0f) * 128)));
+    }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
         CHECK(std::abs(value) < 2 + NEAR_ZERO);
@@ -130,7 +137,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             auto sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
             writeInt(result, sensor.fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood);
             writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
-            writeFloat(result, sensor.minDensity * 2 - 1.0f);
+            writeDensity(result, sensor.minDensity);
             writeInt(result, sensor.color);
         } break;
         case Enums::CellFunction_Nerve: {

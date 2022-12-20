@@ -439,7 +439,7 @@ ConstructorProcessor::constructCellIntern(
     } break;
     case Enums::CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % Enums::SensorMode_Count;
-        result->cellFunctionData.sensor.angle = GenomeDecoder::readFloat(constructor) * 180;
+        result->cellFunctionData.sensor.angle = GenomeDecoder::readAngle(constructor);
         result->cellFunctionData.sensor.minDensity = (GenomeDecoder::readFloat(constructor) + 1.0f) / 2;
         result->cellFunctionData.sensor.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     } break;
