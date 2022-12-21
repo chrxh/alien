@@ -107,11 +107,11 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(Simulati
     if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.mode == 0 && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold) {
+    if (cell->cellFunctionData.constructor.activationMode == 0 && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.mode > 0
-        && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * cell->cellFunctionData.constructor.mode) != cell->executionOrderNumber)) {
+    if (cell->cellFunctionData.constructor.activationMode > 0
+        && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * cell->cellFunctionData.constructor.activationMode) != cell->executionOrderNumber)) {
         return false;
     }
     if (cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize) {
@@ -167,7 +167,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
     Cell* result = nullptr;
     for (int i = 0; i < hostCell->numConnections; ++i) {
         auto const& connectingCell = hostCell->connections[i].cell;
-        if (connectingCell->constructionState == Enums::LivingState_UnderConstruction) {
+        if (connectingCell->livingState == Enums::LivingState_UnderConstruction) {
             result = connectingCell;
         }
     }
@@ -206,7 +206,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->constructionState = Enums::LivingState_JustReady;
+        newCell->livingState = Enums::LivingState_JustReady;
     }
     if (adaptMaxConnections) {
         hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
@@ -253,7 +253,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     auto const& constructor = hostCell->cellFunctionData.constructor;
     if (GenomeDecoder::isFinished(constructor)) {
-        newCell->constructionState = Enums::LivingState_JustReady;
+        newCell->livingState = Enums::LivingState_JustReady;
     }
 
     float angleFromPreviousForUnderConstructionCell;
@@ -293,7 +293,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     int numOtherCells;
     data.cellMap.getMatchingCells(
         otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance, [&](Cell* const& otherCell) {
-            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->constructionState != Enums::LivingState_UnderConstruction) {
+            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != Enums::LivingState_UnderConstruction) {
                 return false;
             }
             if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
@@ -404,7 +404,7 @@ ConstructorProcessor::constructCellIntern(
     result->maxConnections = constructionData.maxConnections;
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
-    result->constructionState = true;
+    result->livingState = true;
     result->cellFunction = constructionData.cellFunction;
     result->color = cudaSimulationParameters.cellFunctionConstructionInheritColor ? hostCell->color : constructionData.color;
     result->inputBlocked = constructionData.inputBlocked;
@@ -427,7 +427,7 @@ ConstructorProcessor::constructCellIntern(
     } break;
     case Enums::CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
-        newConstructor.mode = GenomeDecoder::readByte(constructor);
+        newConstructor.activationMode = GenomeDecoder::readByte(constructor);
         newConstructor.singleConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.separateConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.adaptMaxConnections = GenomeDecoder::readBool(constructor);

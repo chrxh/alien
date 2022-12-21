@@ -83,7 +83,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     _map.correctPosition(cell->absPos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
-    cell->constructionState = cellTO.constructionState;
+    cell->livingState = cellTO.livingState;
     cell->inputBlocked = cellTO.inputBlocked;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -121,7 +121,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
     } break;
     case Enums::CellFunction_Constructor: {
-        cell->cellFunctionData.constructor.mode = cellTO.cellFunctionData.constructor.mode;
+        cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         cell->cellFunctionData.constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
         cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
         cell->cellFunctionData.constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
@@ -143,6 +143,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
     } break;
     case Enums::CellFunction_Nerve: {
+        cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
+        cell->cellFunctionData.nerve.alternationMode = cellTO.cellFunctionData.nerve.alternationMode;
     } break;
     case Enums::CellFunction_Attacker: {
         cell->cellFunctionData.attacker.mode = cellTO.cellFunctionData.attacker.mode;
@@ -219,7 +221,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     result->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
     result->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
     result->numConnections = 0;
-    result->constructionState = false;
+    result->livingState = false;
     result->locked = 0;
     result->selected = 0;
     result->color = 0;
@@ -252,9 +254,9 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         } break;
         case Enums::CellFunction_Constructor: {
             if (_data->numberGen1.randomBool()) {
-                result->cellFunctionData.constructor.mode = 0;
+                result->cellFunctionData.constructor.activationMode = 0;
             } else {
-                result->cellFunctionData.constructor.mode = _data->numberGen1.random(50);
+                result->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
             }
             result->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
             result->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();

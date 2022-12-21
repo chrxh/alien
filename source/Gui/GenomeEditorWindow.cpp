@@ -381,7 +381,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxContentTextWidth), constructor.adaptMaxConnections);
             int constructorMode = constructor.mode == 0 ? 0 : 1;
             table.next();
-            if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
+            if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(MaxContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
                 constructor.mode = constructorMode;
             }
             if (constructorMode == 1) {

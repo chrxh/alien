@@ -67,33 +67,4 @@ namespace Enums
         ConstructorAngleAlignment_60 = 5,
         ConstructorAngleAlignment_Count = 6
     };
-
-    /*
-    using Sensor = int;
-    enum Sensor_
-    {
-        Sensor_Output = 5,
-        Sensor_Input = 20,
-        Sensor_InOutAngle = 21,
-        Sensor_InMinDensity = 22,
-        Sensor_InMaxDensity = 23,
-        Sensor_InColor = 8,
-        Sensor_OutDensity = 24,
-        Sensor_OutDistance = 25
-    };
-    using SensorIn = int;
-    enum SensorIn_
-    {
-        SensorIn_DoNothing,
-        SensorIn_SearchVicinity,
-        SensorIn_SearchByAngle,
-        SensorIn_Count
-    };
-    using SensorOut = int;
-    enum SensorOut_
-    {
-        SensorOut_NothingFound,
-        SensorOut_ClusterFound
-    };
-*/
 }

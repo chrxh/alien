@@ -53,7 +53,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->constructionState != Enums::LivingState_UnderConstruction) {
+        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->livingState != Enums::LivingState_UnderConstruction) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
             if (energyToTransfer < 0) {
                 continue;

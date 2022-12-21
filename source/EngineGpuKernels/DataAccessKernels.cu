@@ -28,7 +28,7 @@ namespace
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
         cellTO.executionOrderNumber = cell->executionOrderNumber;
-        cellTO.constructionState = cell->constructionState;
+        cellTO.livingState = cell->livingState;
         cellTO.inputBlocked = cell->inputBlocked;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
@@ -77,7 +77,7 @@ namespace
             cellTO.cellFunctionData.transmitter.mode = cell->cellFunctionData.transmitter.mode;
         } break;
         case Enums::CellFunction_Constructor: {
-            cellTO.cellFunctionData.constructor.mode = cell->cellFunctionData.constructor.mode;
+            cellTO.cellFunctionData.constructor.activationMode = cell->cellFunctionData.constructor.activationMode;
             cellTO.cellFunctionData.constructor.singleConstruction = cell->cellFunctionData.constructor.singleConstruction;
             cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
             cellTO.cellFunctionData.constructor.adaptMaxConnections = cell->cellFunctionData.constructor.adaptMaxConnections;
@@ -100,6 +100,8 @@ namespace
             cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
         } break;
         case Enums::CellFunction_Nerve: {
+            cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
+            cellTO.cellFunctionData.nerve.alternationMode = cell->cellFunctionData.nerve.alternationMode;
         } break;
         case Enums::CellFunction_Attacker: {
             cellTO.cellFunctionData.attacker.mode = cell->cellFunctionData.attacker.mode;

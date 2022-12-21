@@ -78,7 +78,7 @@ __inline__ __device__ void CellFunctionProcessor::aging(SimulationData& data)
             cell->color = targetColor;
             cell->age = 0;
         }
-        if (cell->constructionState == Enums::LivingState_Ready && cell->activationTime > 0) {
+        if (cell->livingState == Enums::LivingState_Ready && cell->activationTime > 0) {
             --cell->activationTime;
         }
     }
@@ -99,7 +99,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
 
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->constructionState || connectedCell->cellFunction == Enums::CellFunction_None) {
+        if (connectedCell->outputBlocked || connectedCell->livingState || connectedCell->cellFunction == Enums::CellFunction_None) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
@@ -156,13 +156,13 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
 
 __inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* cell)
 {
-    if (cell->inputBlocked || cell->constructionState) {
+    if (cell->inputBlocked || cell->livingState) {
         return -1;
     }
     int result = -cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->constructionState) {
+        if (connectedCell->outputBlocked || connectedCell->livingState) {
             continue;
         }
         auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
