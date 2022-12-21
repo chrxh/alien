@@ -19,7 +19,7 @@ public:
     __inline__ __device__ static void processConnectionsOperations(SimulationData& data);
     __inline__ __device__ static void processDelCellOperations(SimulationData& data);
 
-    __inline__ __device__ static void addConnections(
+    __inline__ __device__ static bool tryAddConnections(
         SimulationData& data,
         Cell* cell1,
         Cell* cell2,
@@ -32,7 +32,7 @@ public:
 
 
 private:
-    __inline__ __device__ static void lockAndAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static bool tryAddConnectionOneWay(
         SimulationData& data,
         Cell* cell1,
@@ -121,7 +121,7 @@ __inline__ __device__ void CellConnectionProcessor::processConnectionsOperations
                 operation.data.delCellAndConnectionOperation.cellIndex);
         }
         if (StructuralOperation::Type::AddConnections == operation.type) {
-            lockAndAddConnections(
+            lockAndtryAddConnections(
                 data,
                 operation.data.addConnectionOperation.cell,
                 operation.data.addConnectionOperation.otherCell);
@@ -142,7 +142,7 @@ __inline__ __device__ void CellConnectionProcessor::processDelCellOperations(Sim
 }
 
 
-__inline__ __device__ void CellConnectionProcessor::addConnections(
+__inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     SimulationData& data,
     Cell* cell1,
     Cell* cell2,
@@ -160,14 +160,16 @@ __inline__ __device__ void CellConnectionProcessor::addConnections(
         origConnections[i] = cell1->connections[i];
     }
     if(!tryAddConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment)) {
-        return;
+        return false;
     }
     if(!tryAddConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment)) {
         cell1->numConnections = origNumConnection;
         for (int i = 0; i < origNumConnection; ++i) {
             cell1->connections[i] = origConnections[i];
         }
+        return false;
     }
+    return true;
 }
 
 __inline__ __device__ void
@@ -178,7 +180,7 @@ CellConnectionProcessor::delConnections(Cell* cell1, Cell* cell2)
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::lockAndAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
+CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
@@ -195,7 +197,7 @@ CellConnectionProcessor::lockAndAddConnections(SimulationData& data, Cell* cell1
         if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
             && cell2->numConnections < cell2->maxConnections) {
 
-            addConnections(data, cell1, cell2, 0, 0, 0);
+            tryAddConnections(data, cell1, cell2, 0, 0, 0);
         }
 
         lock.releaseLock();
