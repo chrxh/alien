@@ -464,9 +464,9 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
 TEST_F(ConstructorTests, constructNeuronCell)
 {
     auto neuron = NeuronGenomeDescription();
-    neuron.weights[1][7] = 1.0f;
-    neuron.weights[7][1] = -1.0f;
-    neuron.bias[3] = 1.8f;
+    neuron.weights[1][7] = 3.9f;
+    neuron.weights[7][1] = -1.9f;
+    neuron.bias[3] = 3.8f;
 
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(neuron)});
 

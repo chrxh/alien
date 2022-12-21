@@ -1,7 +1,6 @@
 #include "EngineWorker.h"
 
 #include <chrono>
-#include <thread>
 
 #include "EngineGpuKernels/TOs.cuh"
 #include "EngineGpuKernels/CudaSimulationFacade.cuh"

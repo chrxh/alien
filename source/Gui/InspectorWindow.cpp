@@ -244,6 +244,7 @@ void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             switch (cell.getCellFunctionType()) {
             case Enums::CellFunction_Neuron: {
+                showNeuronContent(std::get<NeuronDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Transmitter: {
                 showTransmitterContent(std::get<TransmitterDescription>(*cell.cellFunction));
@@ -332,6 +333,12 @@ void _InspectorWindow::showCellMetadataTab(CellDescription& cell)
     }
 }
 
+void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
+{
+    AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f).name("Weights").textWidth(MaxCellMetadataContentTextWidth), neuron.weights);
+    AlienImGui::InputFloatVector(AlienImGui::InputFloatVectorParameters().step(0.1f).name("Bias").textWidth(MaxCellMetadataContentTextWidth), neuron.bias);
+}
+
 void _InspectorWindow::showConstructorContent(ConstructorDescription& constructor)
 {
     auto parameters = _simController->getSimulationParameters();
@@ -397,7 +404,7 @@ void _InspectorWindow::showSensorContent(SensorDescription& sensor)
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").format("%.1f").textWidth(MaxCellContentTextWidth), *sensor.fixedAngle);
     }
     AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxCellContentTextWidth), sensor.color);
-     AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(MaxCellContentTextWidth), sensor.minDensity);
+    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), sensor.minDensity);
 }
 
 void _InspectorWindow::showActivityContent(CellDescription& cell)
@@ -455,5 +462,9 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
+    case Enums::CellFunction_Sensor: {
+        auto& sensor = std::get<SensorDescription>(*cell.cellFunction);
+        sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+    }
     }
 }

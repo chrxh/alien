@@ -416,10 +416,10 @@ ConstructorProcessor::constructCellIntern(
     case Enums::CellFunction_Neuron: {
         result->cellFunctionData.neuron.neuronState = data.objects.auxiliaryData.getTypedSubArray<NeuronFunction::NeuronState>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->weights[i] = GenomeDecoder::readFloat(constructor) * 2;
+            result->cellFunctionData.neuron.neuronState->weights[i] = GenomeDecoder::readFloat(constructor) * 4;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->bias[i] = GenomeDecoder::readFloat(constructor) * 2;
+            result->cellFunctionData.neuron.neuronState->bias[i] = GenomeDecoder::readFloat(constructor) * 4;
         }
     } break;
     case Enums::CellFunction_Transmitter: {
@@ -431,7 +431,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.singleConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.separateConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.adaptMaxConnections = GenomeDecoder::readBool(constructor);
-        newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % 7;
+        newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % Enums::ConstructorAngleAlignment_Count;
         newConstructor.stiffness = toFloat(GenomeDecoder::readByte(constructor)) / 255;
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
         newConstructor.currentGenomePos = 0;
