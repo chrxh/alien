@@ -83,6 +83,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, NerveDescription& data)
     {
+        ar(data.pulseMode, data.alternationMode);
     }
     template <class Archive>
     inline void serialize(Archive& ar, AttackerDescription& data)

@@ -35,6 +35,7 @@ private:
     void showCellGenomeTab(CellDescription& cell);
     void showCellMetadataTab(CellDescription& cell);
 
+    void showNerveContent(NerveDescription& nerve);
     void showNeuronContent(NeuronDescription& neuron);
     void showConstructorContent(ConstructorDescription& constructor);
     void showAttackerContent(AttackerDescription& attacker);

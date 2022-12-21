@@ -190,7 +190,6 @@ struct NerveDescription
         pulseMode = value;
         return *this;
     }
-
     NerveDescription& setAlternationMode(int value)
     {
         alternationMode = value;

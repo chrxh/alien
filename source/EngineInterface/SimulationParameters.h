@@ -46,7 +46,7 @@ struct SimulationParameters
     float cellFunctionTransmitterEnergyDistributionValue = 10.0f;
 
     float cellFunctionMuscleContractionExpansionDelta = 0.05f;
-    float cellFunctionMuscleMovementAcceleration = 0.01f;
+    float cellFunctionMuscleMovementAcceleration = 0.02f;
     float cellFunctionMuscleBendingAngle = 5.0f;
 
     float cellFunctionSensorRange = 255.0f;

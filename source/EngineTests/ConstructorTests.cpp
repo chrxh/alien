@@ -501,7 +501,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
 
 TEST_F(ConstructorTests, constructConstructorCell)
 {
-    auto constructedConstructor = ConstructorGenomeDescription()
+    auto constructorGenome = ConstructorGenomeDescription()
                                       .setMode(0)
                                       .setSingleConstruction(true)
                                       .setSeparateConstruction(false)
@@ -511,7 +511,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
                                       .setConstructionActivationTime(123)
                                       .setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
 
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedConstructor)});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructorGenome)});
 
     DataDescription data;
 
@@ -532,19 +532,20 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(Enums::CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(constructedConstructor.mode, actualConstructor.activationMode);
-    EXPECT_EQ(constructedConstructor.singleConstruction, actualConstructor.singleConstruction);
-    EXPECT_EQ(constructedConstructor.separateConstruction, actualConstructor.separateConstruction);
-    EXPECT_EQ(constructedConstructor.adaptMaxConnections, actualConstructor.adaptMaxConnections);
-    EXPECT_EQ(constructedConstructor.angleAlignment, actualConstructor.angleAlignment);
-    EXPECT_TRUE(approxCompare(constructedConstructor.stiffness, actualConstructor.stiffness, 0.05f));
-    EXPECT_EQ(constructedConstructor.constructionActivationTime, actualConstructor.constructionActivationTime);
-    EXPECT_EQ(constructedConstructor.getGenomeData(), actualConstructor.genome);
+    EXPECT_EQ(constructorGenome.mode, actualConstructor.activationMode);
+    EXPECT_EQ(constructorGenome.singleConstruction, actualConstructor.singleConstruction);
+    EXPECT_EQ(constructorGenome.separateConstruction, actualConstructor.separateConstruction);
+    EXPECT_EQ(constructorGenome.adaptMaxConnections, actualConstructor.adaptMaxConnections);
+    EXPECT_EQ(constructorGenome.angleAlignment, actualConstructor.angleAlignment);
+    EXPECT_TRUE(approxCompare(constructorGenome.stiffness, actualConstructor.stiffness, 0.05f));
+    EXPECT_EQ(constructorGenome.constructionActivationTime, actualConstructor.constructionActivationTime);
+    EXPECT_EQ(constructorGenome.getGenomeData(), actualConstructor.genome);
 }
 
 TEST_F(ConstructorTests, constructNerveCell)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(NerveGenomeDescription())});
+    auto nerveGenome = NerveGenomeDescription().setPulseMode(2).setAlternationMode(4);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(nerveGenome)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -560,8 +561,11 @@ TEST_F(ConstructorTests, constructNerveCell)
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
+    auto actualNerve = std::get<NerveDescription>(*actualConstructedCell.cellFunction);
 
     EXPECT_EQ(Enums::CellFunction_Nerve, actualConstructedCell.getCellFunctionType());
+    EXPECT_EQ(nerveGenome.pulseMode, actualNerve.pulseMode);
+    EXPECT_EQ(nerveGenome.alternationMode, actualNerve.alternationMode);
 }
 
 TEST_F(ConstructorTests, constructAttackerCell)
