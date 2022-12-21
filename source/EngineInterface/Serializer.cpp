@@ -66,7 +66,7 @@ namespace cereal
     template <class Archive>
     inline void serialize(Archive& ar, ConstructorDescription& data)
     {
-        ar(data.mode,
+        ar(data.activationMode,
            data.singleConstruction,
            data.separateConstruction,
            data.adaptMaxConnections,
@@ -120,7 +120,7 @@ namespace cereal
            data.executionOrderNumber,
            data.barrier,
            data.age,
-           data.constructionState,
+           data.livingState,
            data.inputBlocked,
            data.outputBlocked,
            data.cellFunction,

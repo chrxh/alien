@@ -96,7 +96,7 @@ struct TransmitterDescription
 
 struct ConstructorDescription
 {
-    int mode = 5;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int activationMode = 5;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool adaptMaxConnections = true;
@@ -110,9 +110,9 @@ struct ConstructorDescription
 
     auto operator<=>(ConstructorDescription const&) const = default;
 
-    ConstructorDescription& setMode(int value)
+    ConstructorDescription& setActivationMode(int value)
     {
-        mode = value;
+        activationMode = value;
         return *this;
     }
     ConstructorDescription& setSingleConstruction(bool value)
@@ -180,7 +180,22 @@ struct SensorDescription
 
 struct NerveDescription
 {
+    int pulseMode = 0;          //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int alternationMode = 0;    //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+
     auto operator<=>(NerveDescription const&) const = default;
+
+    NerveDescription& setPulseMode(int value)
+    {
+        pulseMode = value;
+        return *this;
+    }
+
+    NerveDescription& setAlternationMode(int value)
+    {
+        alternationMode = value;
+        return *this;
+    }
 };
 
 struct AttackerDescription
@@ -254,7 +269,7 @@ struct CellDescription
     int age = 0;
 
     //cell function
-    Enums::LivingState constructionState = Enums::LivingState_Ready;
+    Enums::LivingState livingState = Enums::LivingState_Ready;
     int executionOrderNumber = 0;
     bool inputBlocked = false;
     bool outputBlocked = false;
@@ -325,7 +340,7 @@ struct CellDescription
     }
     CellDescription& setConstructionState(Enums::LivingState value)
     {
-        constructionState = value;
+        livingState = value;
         return *this;
     }
     CellDescription& setInputBlocked(bool value)

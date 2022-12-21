@@ -25,8 +25,20 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
+
         int inputExecutionOrderNumber;
-        auto inputActivity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
-        CellFunctionProcessor::setActivity(cell, inputActivity);
+        auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+
+        auto const& nerve = cell->cellFunctionData.nerve;
+        if (nerve.pulseMode > 0 && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {
+            if (nerve.alternationMode == 0) {
+                activity.channels[0] = 1;
+            } else {
+                auto evenPulse = data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode * 2)
+                    < cell->executionOrderNumber + cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode;
+                activity.channels[0] = evenPulse ? 1 : -1;
+            }
+        }
+        CellFunctionProcessor::setActivity(cell, activity);
     }
 }

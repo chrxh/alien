@@ -225,7 +225,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
                     .name("Living state")
                     .textWidth(MaxCellContentTextWidth)
                     .values({"Ready", "Under construction", "Just ready", "Dying"}),
-                cell.constructionState);
+                cell.livingState);
 
         }
         ImGui::EndChild();
@@ -346,12 +346,12 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxCellContentTextWidth), constructor.adaptMaxConnections);
-    int constructorMode = constructor.mode == 0 ? 0 : 1;
-    if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").textWidth(MaxCellContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
-        constructor.mode = constructorMode;
+    int constructorMode = constructor.activationMode == 0 ? 0 : 1;
+    if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(MaxCellContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
+        constructor.activationMode = constructorMode;
     }
     if (constructorMode == 1) {
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Waiting cycles").textWidth(MaxCellContentTextWidth), constructor.mode);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Waiting cycles").textWidth(MaxCellContentTextWidth), constructor.activationMode);
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
@@ -457,8 +457,8 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
         }
-        if (constructor.mode < 0) {
-            constructor.mode = 0;
+        if (constructor.activationMode < 0) {
+            constructor.activationMode = 0;
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;

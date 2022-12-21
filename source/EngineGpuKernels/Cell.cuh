@@ -45,7 +45,7 @@ struct TransmitterFunction
 struct ConstructorFunction
 {
     //settings
-    int mode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction;
     bool separateConstruction;
     bool adaptMaxConnections;
@@ -71,6 +71,8 @@ struct SensorFunction
 
 struct NerveFunction
 {
+    int pulseMode;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 };
 
 struct AttackerFunction
@@ -126,7 +128,7 @@ struct Cell
     int age;
 
     //cell function
-    Enums::LivingState constructionState;
+    Enums::LivingState livingState;
     int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;

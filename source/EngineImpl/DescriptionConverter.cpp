@@ -382,7 +382,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         connections.emplace_back(connection);
     }
     result.connections = connections;
-    result.constructionState = cellTO.constructionState;
+    result.livingState = cellTO.livingState;
     result.inputBlocked = cellTO.inputBlocked;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
@@ -418,7 +418,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case Enums::CellFunction_Constructor: {
         ConstructorDescription constructor;
-        constructor.mode = cellTO.cellFunctionData.constructor.mode;
+        constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
         constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
         constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
@@ -442,6 +442,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case Enums::CellFunction_Nerve: {
         NerveDescription nerve;
+        nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
+        nerve.alternationMode = cellTO.cellFunctionData.nerve.alternationMode;
         result.cellFunction = nerve;
     } break;
     case Enums::CellFunction_Attacker: {
@@ -500,14 +502,14 @@ void DescriptionConverter::addCell(
     cellTO.stiffness = cellDesc.stiffness;
     cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
-    cellTO.constructionState = cellDesc.constructionState;
+    cellTO.livingState = cellDesc.livingState;
     cellTO.inputBlocked = cellDesc.inputBlocked;
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
     switch (cellDesc.getCellFunctionType()) {
     case Enums::CellFunction_Neuron: {
         NeuronTO neuronTO;
-        auto neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
+        auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
         std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.bias);
         uint64_t targetSize;
         convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasDataIndex);
@@ -515,15 +517,15 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case Enums::CellFunction_Transmitter: {
-        auto transmitterDesc = std::get<TransmitterDescription>(*cellDesc.cellFunction);
+        auto const& transmitterDesc = std::get<TransmitterDescription>(*cellDesc.cellFunction);
         TransmitterTO transmitterTO;
         transmitterTO.mode = transmitterDesc.mode;
         cellTO.cellFunctionData.transmitter = transmitterTO;
     } break;
     case Enums::CellFunction_Constructor: {
-        auto constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
+        auto const& constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
         ConstructorTO constructorTO;
-        constructorTO.mode = constructorDesc.mode;
+        constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.singleConstruction = constructorDesc.singleConstruction;
         constructorTO.separateConstruction = constructorDesc.separateConstruction;
         constructorTO.adaptMaxConnections = constructorDesc.adaptMaxConnections;
@@ -535,7 +537,7 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
     case Enums::CellFunction_Sensor: {
-        auto sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
+        auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
         sensorTO.mode = sensorDesc.getSensorMode();
         sensorTO.color = sensorDesc.color;
@@ -544,11 +546,14 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
     case Enums::CellFunction_Nerve: {
+        auto const& nerveDesc = std::get<NerveDescription>(*cellDesc.cellFunction);
         NerveTO nerveTO;
+        nerveTO.pulseMode = nerveDesc.pulseMode;
+        nerveTO.alternationMode = nerveDesc.alternationMode;
         cellTO.cellFunctionData.nerve = nerveTO;
     } break;
     case Enums::CellFunction_Attacker: {
-        auto attackerDesc = std::get<AttackerDescription>(*cellDesc.cellFunction);
+        auto const& attackerDesc = std::get<AttackerDescription>(*cellDesc.cellFunction);
         AttackerTO attackerTO;
         attackerTO.mode = attackerDesc.mode;
         cellTO.cellFunctionData.attacker = attackerTO;
@@ -559,7 +564,7 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.injector = injectorTO;
     } break;
     case Enums::CellFunction_Muscle: {
-        auto muscleDesc = std::get<MuscleDescription>(*cellDesc.cellFunction);
+        auto const& muscleDesc = std::get<MuscleDescription>(*cellDesc.cellFunction);
         MuscleTO muscleTO;
         muscleTO.mode = muscleDesc.mode;
         cellTO.cellFunctionData.muscle = muscleTO;
