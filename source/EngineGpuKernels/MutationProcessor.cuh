@@ -23,7 +23,7 @@ private:
     static int constexpr TransmitterBytes = 1;
     static int constexpr ConstructorFixedBytes = 8;
     static int constexpr SensorBytes = 4;
-    static int constexpr NerveBytes = 0;
+    static int constexpr NerveBytes = 2;
     static int constexpr AttackerBytes = 1;
     static int constexpr InjectorFixedBytes = 0;
     static int constexpr MuscleBytes = 1;

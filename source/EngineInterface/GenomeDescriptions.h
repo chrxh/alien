@@ -132,7 +132,21 @@ struct SensorGenomeDescription
 
 struct NerveGenomeDescription
 {
+    int pulseMode = 0;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int alternationMode = 0;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+
     auto operator<=>(NerveGenomeDescription const&) const = default;
+
+    NerveGenomeDescription& setPulseMode(int value)
+    {
+        pulseMode = value;
+        return *this;
+    }
+    NerveGenomeDescription& setAlternationMode(int value)
+    {
+        alternationMode = value;
+        return *this;
+    }
 };
 
 struct AttackerGenomeDescription

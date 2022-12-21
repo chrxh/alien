@@ -386,7 +386,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             }
             if (constructorMode == 1) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Cycles").textWidth(MaxContentTextWidth), constructor.mode);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxContentTextWidth), constructor.mode);
                 if (constructor.mode < 0) {
                     constructor.mode = 0;
                 }
@@ -426,6 +426,25 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxContentTextWidth), sensor.minDensity);
         } break;
         case Enums::CellFunction_Nerve: {
+            auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
+            bool pulseGeneration = nerve.pulseMode > 0;
+            table.next();
+            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(MaxContentTextWidth), pulseGeneration)) {
+                nerve.pulseMode = pulseGeneration ? 1 : 0;
+            }
+            if (pulseGeneration) {
+                table.next();
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxContentTextWidth), nerve.pulseMode);
+                bool alternation = nerve.alternationMode > 0;
+                table.next();
+                if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(MaxContentTextWidth), alternation)) {
+                    nerve.alternationMode = alternation ? 1 : 0;
+                }
+                if (alternation) {
+                    table.next();
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(MaxContentTextWidth), nerve.alternationMode);
+                }
+            }
         } break;
         case Enums::CellFunction_Attacker: {
             auto& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
@@ -541,6 +560,11 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     case Enums::CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+    }
+    case Enums::CellFunction_Nerve: {
+        auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
+        nerve.pulseMode = std::max(0, nerve.pulseMode);
+        nerve.alternationMode = std::max(0, nerve.alternationMode);
     }
     }
 }

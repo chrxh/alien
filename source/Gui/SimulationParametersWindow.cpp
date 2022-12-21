@@ -281,6 +281,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Physics: Particle transformation
          */
+        ImGui::PushID("Transformation");
         AlienImGui::Group("Physics: Particle transformation");
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -312,6 +313,7 @@ void _SimulationParametersWindow::processBase(
                 .max(1.0f)
                 .defaultValue(origSimParameters.clusterDecayProb),
             simParameters.clusterDecayProb);
+        ImGui::PopID();
 
         /**
          * Physics: Collision and binding
@@ -632,7 +634,7 @@ void _SimulationParametersWindow::processBase(
                 .name("Acceleration")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(0.1f)
+                .max(0.15f)
                 .logarithmic(true)
                 .defaultValue(origSimParameters.cellFunctionMuscleMovementAcceleration),
             simParameters.cellFunctionMuscleMovementAcceleration);

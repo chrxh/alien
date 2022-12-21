@@ -4,7 +4,7 @@
 
 namespace
 {
-    void writeInt(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
+    void writeByte(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
     void writeBool(std::vector<uint8_t>& data, bool value) { data.emplace_back(value ? 1 : 0); }
     void writeFloat(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value * 128))); }
     void writeWord(std::vector<uint8_t>& data, int value)
@@ -96,17 +96,17 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     result.reserve(genome.size() * 6);
     int index = 0;
     for (auto const& cell : genome) {
-        writeInt(result, cell.getCellFunctionType());
+        writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
         writeDistance(result, cell.referenceDistance);
-        writeInt(result, cell.maxConnections);
-        writeInt(result, cell.executionOrderNumber);
-        writeInt(result, cell.color);
+        writeByte(result, cell.maxConnections);
+        writeByte(result, cell.executionOrderNumber);
+        writeByte(result, cell.color);
         writeBool(result, cell.inputBlocked);
         writeBool(result, cell.outputBlocked);
         switch (cell.getCellFunctionType()) {
         case Enums::CellFunction_Neuron: {
-            auto neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
+            auto const& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
                     writeNeuronProperty(result, neuron.weights[row][col]);
@@ -117,40 +117,43 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             }
         } break;
         case Enums::CellFunction_Transmitter: {
-            auto transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
-            writeInt(result, transmitter.mode);
+            auto const& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
+            writeByte(result, transmitter.mode);
         } break;
         case Enums::CellFunction_Constructor: {
-            auto constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
-            writeInt(result, constructor.mode);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
+            writeByte(result, constructor.mode);
             writeBool(result, constructor.singleConstruction);
             writeBool(result, constructor.separateConstruction);
             writeBool(result, constructor.adaptMaxConnections);
-            writeInt(result, constructor.angleAlignment);
+            writeByte(result, constructor.angleAlignment);
             writeStiffness(result, constructor.stiffness);
             writeWord(result, constructor.constructionActivationTime);
             writeGenome(result, constructor.genome);
         } break;
         case Enums::CellFunction_Sensor: {
-            auto sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
-            writeInt(result, sensor.fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood);
+            auto const& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
+            writeByte(result, sensor.fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood);
             writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
             writeDensity(result, sensor.minDensity);
-            writeInt(result, sensor.color);
+            writeByte(result, sensor.color);
         } break;
         case Enums::CellFunction_Nerve: {
+            auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
+            writeByte(result, nerve.pulseMode);
+            writeByte(result, nerve.alternationMode);
         } break;
         case Enums::CellFunction_Attacker: {
-            auto attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
-            writeInt(result, attacker.mode);
+            auto const& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
+            writeByte(result, attacker.mode);
         } break;
         case Enums::CellFunction_Injector: {
-            auto injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
+            auto const& injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
             writeGenome(result, injector.genome);
         } break;
         case Enums::CellFunction_Muscle: {
-            auto muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
-            writeInt(result, muscle.mode);
+            auto const& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
+            writeByte(result, muscle.mode);
         } break;
         case Enums::CellFunction_Placeholder1: {
         } break;
@@ -220,7 +223,10 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             cell.cellFunction = sensor;
         } break;
         case Enums::CellFunction_Nerve: {
-            cell.cellFunction = NerveGenomeDescription();
+            NerveGenomeDescription nerve;
+            nerve.pulseMode = readByte(data, pos);
+            nerve.alternationMode = readByte(data, pos);
+            cell.cellFunction = nerve;
         } break;
         case Enums::CellFunction_Attacker: {
             AttackerGenomeDescription attacker;

@@ -444,6 +444,8 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.sensor.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     } break;
     case Enums::CellFunction_Nerve: {
+        result->cellFunctionData.nerve.pulseMode = GenomeDecoder::readByte(constructor);
+        result->cellFunctionData.nerve.alternationMode = GenomeDecoder::readByte(constructor);
     } break;
     case Enums::CellFunction_Attacker: {
         result->cellFunctionData.attacker.mode = GenomeDecoder::readByte(constructor) % Enums::EnergyDistributionMode_Count;

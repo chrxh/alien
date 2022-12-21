@@ -256,6 +256,7 @@ void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
                 showSensorContent(std::get<SensorDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Nerve: {
+                showNerveContent(std::get<NerveDescription>(*cell.cellFunction));
             } break;
             case Enums::CellFunction_Attacker: {
                 showAttackerContent(std::get<AttackerDescription>(*cell.cellFunction));
@@ -333,6 +334,25 @@ void _InspectorWindow::showCellMetadataTab(CellDescription& cell)
     }
 }
 
+void _InspectorWindow::showNerveContent(NerveDescription& nerve)
+{
+    bool pulseGeneration = nerve.pulseMode > 0;
+    if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(MaxCellContentTextWidth), pulseGeneration)) {
+        nerve.pulseMode = pulseGeneration ? 1 : 0; 
+    }
+    if (pulseGeneration) {
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxCellContentTextWidth), nerve.pulseMode);
+        bool alternation = nerve.alternationMode > 0;
+        if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(MaxCellContentTextWidth), alternation)) {
+            nerve.alternationMode = alternation ? 1 : 0;
+        }
+        if (alternation) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(MaxCellContentTextWidth), nerve.alternationMode);
+        }
+    }
+}
+
 void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
 {
     AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f).name("Weights").textWidth(MaxCellMetadataContentTextWidth), neuron.weights);
@@ -351,7 +371,7 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
         constructor.activationMode = constructorMode;
     }
     if (constructorMode == 1) {
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Waiting cycles").textWidth(MaxCellContentTextWidth), constructor.activationMode);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxCellContentTextWidth), constructor.activationMode);
     }
     AlienImGui::AngleAlignmentCombo(
         AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
@@ -465,6 +485,11 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     case Enums::CellFunction_Sensor: {
         auto& sensor = std::get<SensorDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+    }
+    case Enums::CellFunction_Nerve: {
+        auto& nerve = std::get<NerveDescription>(*cell.cellFunction);
+        nerve.pulseMode = std::max(0, nerve.pulseMode);
+        nerve.alternationMode = std::max(0, nerve.alternationMode);
     }
     }
 }
