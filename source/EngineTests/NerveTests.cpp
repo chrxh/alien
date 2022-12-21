@@ -511,40 +511,23 @@ TEST_F(NerveTests, constantPulse)
             .setCellFunction(NerveDescription().setPulseMode(3).setAlternationMode(0))
             .setMaxConnections(2)
             .setExecutionOrderNumber(0),
-         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(1)
+         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(1).setOutputBlocked(true)
     });
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
 
-    {
-        auto actualData = _simController->getSimulationData();
-        auto actualCellById = getCellById(actualData);
-
-        EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
-    }
-
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i <= 18; ++i) {
         _simController->calcSingleTimestep();
-    }
 
-    {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-    }
-
-    for (int i = 0; i < 19; ++i) {
-        _simController->calcSingleTimestep();
-    }
-
-    {
-        auto actualData = _simController->getSimulationData();
-        auto actualCellById = getCellById(actualData);
-
-        EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
+        ActivityDescription activity;
+        if (i % 18 == 0) {
+            activity.channels = {1, 0, 0, 0, 0, 0, 0, 0};
+        }
+        EXPECT_EQ(activity, actualCellById.at(1).activity);
     }
 }
 
@@ -557,7 +540,13 @@ TEST_F(NerveTests, alternatingPulse)
              .setCellFunction(NerveDescription().setPulseMode(3).setAlternationMode(4))
              .setMaxConnections(2)
              .setExecutionOrderNumber(0),
-         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(1)});
+         CellDescription()
+             .setId(2)
+             .setPos({2.0f, 1.0f})
+             .setCellFunction(NerveDescription())
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(1)
+             .setOutputBlocked(true)});
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
