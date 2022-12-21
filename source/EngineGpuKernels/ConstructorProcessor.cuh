@@ -203,7 +203,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
-        CellConnectionProcessor::addConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
+        CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->constructionState = Enums::LivingState_JustReady;
@@ -251,13 +251,10 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         return false;
     }
 
-    //float angleFromPreviousForCell;
-    //for (int i = 0; i < hostCell->numConnections; ++i) {
-    //    if (hostCell->connections[i].cell == underConstructionCell) {
-    //        angleFromPreviousForCell = hostCell->connections[i].angleFromPrevious;
-    //        break;
-    //    }
-    //}
+    auto const& constructor = hostCell->cellFunctionData.constructor;
+    if (GenomeDecoder::isFinished(constructor)) {
+        newCell->constructionState = Enums::LivingState_JustReady;
+    }
 
     float angleFromPreviousForUnderConstructionCell;
     for (int i = 0; i < underConstructionCell->numConnections; ++i) {
@@ -266,23 +263,26 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             break;
         }
     }
-    bool adaptReferenceAngle = false;
+
+    //cut connections
     CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
+
+    //possibly connect newCell to hostCell
+    bool adaptReferenceAngle = false;
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
-        auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? constructionData.distance
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
-        CellConnectionProcessor::addConnections(
-            data, hostCell, newCell, /*angleFromPreviousForCell*/0, 0, distance);
-        adaptReferenceAngle = true;
+        if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {
+            adaptReferenceAngle = true;
+        }
     }
-    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
-    CellConnectionProcessor::addConnections(
-        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance);
 
-    if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->constructionState = Enums::LivingState_JustReady;
+    //connect newCell to underConstructionCell
+    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
+    if (!CellConnectionProcessor::tryAddConnections(
+        data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance)) {
+        adaptReferenceAngle = false;
     }
 
     Math::normalize(posDelta);
@@ -302,14 +302,14 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             return true;
         });
 
-    //sort cells
+    //sort surrounding cells by distance from newCell
     bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
         auto dist1 = data.cellMap.getDistance(cell1->absPos, newCellPos);
         auto dist2 = data.cellMap.getDistance(cell2->absPos, newCellPos);
         return dist1 < dist2;
     });
 
-    //connect cells if possible
+    //connect surrounding cells if possible
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
 
@@ -317,7 +317,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             if (isConnectable(newCell->numConnections, newCell->maxConnections, adaptMaxConnections)
                 && isConnectable(otherCell->numConnections, otherCell->maxConnections, adaptMaxConnections)) {
 
-                CellConnectionProcessor::addConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
+                CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
                 if (adaptMaxConnections) {
                     otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
                 }
