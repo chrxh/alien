@@ -69,7 +69,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
     if (threadIdx.x == 0) {
         refScanAngle = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, cell, 0).actualAngle;
 
-        minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
+        minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
         color = cell->cellFunctionData.sensor.color;
 
         lookupResult = 0xffffffff;

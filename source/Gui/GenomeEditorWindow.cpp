@@ -422,7 +422,8 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxContentTextWidth), sensor.color);
 
             table.next();
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(MaxContentTextWidth), sensor.minDensity);
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxContentTextWidth), sensor.minDensity);
         } break;
         case Enums::CellFunction_Nerve: {
         } break;
@@ -537,6 +538,10 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
+    case Enums::CellFunction_Sensor: {
+        auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
+        sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+    }
     }
 }
 

@@ -629,10 +629,11 @@ void _SimulationParametersWindow::processBase(
             simParameters.cellFunctionMuscleContractionExpansionDelta);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Movement acceleration")
+                .name("Acceleration")
                 .textWidth(MaxContentTextWidth)
                 .min(0)
-                .max(0.03f)
+                .max(0.1f)
+                .logarithmic(true)
                 .defaultValue(origSimParameters.cellFunctionMuscleMovementAcceleration),
             simParameters.cellFunctionMuscleMovementAcceleration);
         AlienImGui::SliderFloat(

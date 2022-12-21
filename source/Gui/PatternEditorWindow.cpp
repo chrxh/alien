@@ -111,7 +111,7 @@ void _PatternEditorWindow::processIntern()
             AlienImGui::InputFloatParameters()
                 .name("Position X")
                 .textWidth(MaxContentTextWidth)
-                .format("%.2f"),
+                .format("%.3f"),
             centerPosX);
 
         auto centerPosY = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
@@ -120,7 +120,7 @@ void _PatternEditorWindow::processIntern()
             AlienImGui::InputFloatParameters()
                 .name("Position Y")
                 .textWidth(MaxContentTextWidth)
-                .format("%.2f"),
+                .format("%.3f"),
             centerPosY);
 
         auto centerVelX = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
@@ -130,7 +130,7 @@ void _PatternEditorWindow::processIntern()
                 .name("Velocity X")
                 .textWidth(MaxContentTextWidth)
                 .step(0.1f)
-                .format("%.2f"),
+                .format("%.3f"),
             centerVelX);
 
         auto centerVelY = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
@@ -140,7 +140,7 @@ void _PatternEditorWindow::processIntern()
                 .name("Velocity Y")
                 .textWidth(MaxContentTextWidth)
                 .step(0.1f)
-                .format("%.2f"),
+                .format("%.3f"),
             centerVelY);
 
         AlienImGui::Group("Center rotation");

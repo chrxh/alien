@@ -40,7 +40,7 @@ TEST_F(NeuronTests, weight)
     NeuronDescription neuron;
     neuron.weights[2][3] = 1;
     neuron.weights[2][7] = 0.5f;
-    neuron.weights[5][3] = -0.5f;
+    neuron.weights[5][3] = -3.5f;
 
     ActivityDescription activity;
     activity.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
@@ -63,5 +63,5 @@ TEST_F(NeuronTests, weight)
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-0.5f), 0, 0}, actualCellById.at(2).activity.channels));
+    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-3.5f), 0, 0}, actualCellById.at(2).activity.channels));
 }

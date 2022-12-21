@@ -1,9 +1,6 @@
 #include "GenomeDescriptionConverter.h"
 
 #include <variant>
-#include <boost/range/adaptors.hpp>
-
-#include "Base/Definitions.h"
 
 namespace
 {
@@ -35,8 +32,8 @@ namespace
     }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
-        CHECK(std::abs(value) < 2 + NEAR_ZERO);
-        writeFloat(data, value / 2);
+        value = std::max(-3.9f, std::min(3.9f, value));
+        writeFloat(data, value / 4);
     }
     void writeStiffness(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(value * 255)); }
     void writeGenome(std::vector<uint8_t>& data, std::variant<MakeGenomeCopy, std::vector<uint8_t>> const& value)
@@ -66,7 +63,7 @@ namespace
     float readFloat(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 128.0f; }
     float readAngle(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 120 * 180; }
     float readDensity(std::vector<uint8_t> const& data, int& pos) { return (readFloat(data, pos) + 1.0f) / 2; }
-    float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 2; }
+    float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 4; }
     float readStiffness(std::vector<uint8_t> const& data, int& pos)
     {
         return static_cast<float>(readByte(data, pos)) / 255;
@@ -97,7 +94,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
 
     std::vector<uint8_t> result;
     result.reserve(genome.size() * 6);
-    for (auto const& [index, cell] : genome | boost::adaptors::indexed(0)) {
+    int index = 0;
+    for (auto const& cell : genome) {
         writeInt(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
         writeDistance(result, cell.referenceDistance);
@@ -159,6 +157,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         case Enums::CellFunction_Placeholder2: {
         } break;
         }
+        ++index;
     }
     return result;
 }
