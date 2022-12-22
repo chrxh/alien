@@ -5,6 +5,7 @@
 #include "Cell.cuh"
 #include "SimulationData.cuh"
 #include "CellFunctionProcessor.cuh"
+#include "SimulationResult.cuh"
 
 class MuscleProcessor
 {
@@ -66,19 +67,7 @@ MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* 
     if (!cell->tryLock()) {
         return;
     }
-    float2 direction{0, 0};
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto& connectedCell = cell->connections[i].cell;
-        if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
-            if (!connectedCell->tryLock()) {
-                continue;
-            }
-            auto directionDelta = cell->absPos - connectedCell->absPos;
-            data.cellMap.correctDirection(directionDelta);
-            direction = direction + Math::normalized(directionDelta);
-            connectedCell->releaseLock();
-        }
-    }
+    float2 direction = CellFunctionProcessor::calcSignalDirection(data, cell, inputExecutionOrderNumber);
     if (direction.x != 0 || direction.y != 0) {
         cell->vel = cell->vel + Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration * getIntensity(activity);
     }

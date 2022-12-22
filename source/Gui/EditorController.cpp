@@ -212,7 +212,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
-        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 300.0f) + 40.0f;
+        windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
         _inspectorWindows.emplace_back(
             std::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}));
     }

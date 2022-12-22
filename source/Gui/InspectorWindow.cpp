@@ -485,11 +485,11 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     case Enums::CellFunction_Sensor: {
         auto& sensor = std::get<SensorDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
-    }
+    } break;
     case Enums::CellFunction_Nerve: {
         auto& nerve = std::get<NerveDescription>(*cell.cellFunction);
         nerve.pulseMode = std::max(0, nerve.pulseMode);
         nerve.alternationMode = std::max(0, nerve.alternationMode);
-    }
+    } break;
     }
 }
