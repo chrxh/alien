@@ -128,7 +128,7 @@ __inline__ __device__ CellFunctionProcessor::ReferenceAndActualAngle
 CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation)
 {
     if (0 == cell->numConnections) {
-        return ReferenceAndActualAngle{0, 0};
+        return ReferenceAndActualAngle{0, data.numberGen1.random()*360};
     }
     auto displacement = cell->connections[0].cell->absPos - cell->absPos;
     data.cellMap.correctDirection(displacement);
