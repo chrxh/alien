@@ -188,6 +188,9 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
+    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos)) {
+        return false;
+    }
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
     if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
         hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;

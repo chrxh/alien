@@ -30,6 +30,7 @@ public:
     __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2);
 
 private:
     __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
@@ -159,7 +160,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     for (int i = 0; i < origNumConnection; ++i) {
         origConnections[i] = cell1->connections[i];
     }
-    if(!tryAddConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment)) {
+    if (!tryAddConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment)) {
         return false;
     }
     if(!tryAddConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment)) {
@@ -399,6 +400,34 @@ __inline__ __device__ void CellConnectionProcessor::delConnectionOneWay(Cell* ce
             return;
         }
     }
+}
+
+__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2)
+{
+    auto distance = Math::length(pos1 - pos2);
+    if (distance > cudaSimulationParameters.cellMaxBindingDistance) {
+        return false;
+    }
+
+    Cell* otherCells[18];
+    int numOtherCells;
+    data.cellMap.get(otherCells, 18, numOtherCells, (pos1 + pos2) / 2, distance);
+    for (int i = 0; i < numOtherCells; ++i) {
+        Cell* otherCell = otherCells[i];
+        if ((otherCell->absPos.x == pos1.x && otherCell->absPos.y == pos1.y) || (otherCell->absPos.x == pos2.x && otherCell->absPos.y == pos2.y)) {
+            continue;
+        }
+        if (otherCell->tryLock()) {
+            for (int i = 0; i < otherCell->numConnections; ++i) {
+                if (Math::crossing(pos1, pos2, otherCell->absPos, otherCell->connections[i].cell->absPos)) {
+                    otherCell->releaseLock();
+                    return true;
+                }
+            }
+            otherCell->releaseLock();
+        }
+    }
+    return false;
 }
 
 __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data, Cell* cell, int cellIndex)
