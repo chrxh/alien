@@ -28,6 +28,7 @@ struct SimulationParameters
     bool clusterDecay = true;
     float clusterDecayProb = 0.0001f;
     
+    bool cellFunctionConstructionUnlimitedEnergy = false;
     bool cellFunctionConstructionInheritColor = true;
     float cellFunctionConstructorOffspringDistance = 2.0f;
     float cellFunctionConstructorConnectingCellMaxDistance = 1.5f;
@@ -94,6 +95,7 @@ struct SimulationParameters
             && cellFunctionConstructionInheritColor == other.cellFunctionConstructionInheritColor && clusterDecayProb == other.clusterDecayProb
             && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge && radiationMinCellEnergy == other.radiationMinCellEnergy
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
+            && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
         ;
     }
 
