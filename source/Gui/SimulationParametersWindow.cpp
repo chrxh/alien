@@ -670,6 +670,17 @@ void _SimulationParametersWindow::processBase(
                 .max(1.0f)
                 .defaultValue(origSimParameters.cellFunctionSensorActivityThreshold),
             simParameters.cellFunctionSensorActivityThreshold);
+
+        /**
+         * Danger zone
+         */
+        AlienImGui::Group("Danger zone");
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Unlimited energy for constructor")
+                .textWidth(MaxContentTextWidth)
+                .defaultValue(origSimParameters.cellFunctionConstructionUnlimitedEnergy),
+            simParameters.cellFunctionConstructionUnlimitedEnergy);
     }
     ImGui::EndChild();
     validationAndCorrection(simParameters);

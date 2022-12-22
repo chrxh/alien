@@ -104,7 +104,7 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* ce
 
 __inline__ __device__ bool ConstructorProcessor::isConstructionPossible(SimulationData const& data, Cell* cell, Activity const& activity)
 {
-    if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2) {
+    if (cell->energy < cudaSimulationParameters.cellNormalEnergy * 2 && !cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode == 0 && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold) {
@@ -192,7 +192,9 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
-    hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
+    if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
+        hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
+    }
 
     if (!newCell->tryLock()) {
         return false;
@@ -245,7 +247,9 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto newCellPos = hostCell->absPos + posDelta;
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
-    hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
+    if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
+        hostCell->energy -= cudaSimulationParameters.cellNormalEnergy;
+    }
 
     if (!newCell->tryLock()) {
         return false;
